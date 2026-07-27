@@ -25,7 +25,7 @@ function getStatus($data) {
     <div>
       <h1>Master No. Pol.</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add No. Pol.</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add No. Pol.</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">

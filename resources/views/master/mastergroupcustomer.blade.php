@@ -18,7 +18,7 @@
     <div>
       <h1>Master Group Customer</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Group Customer</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Group Customer</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">

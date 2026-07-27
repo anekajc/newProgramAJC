@@ -804,7 +804,8 @@
                 <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="deleteUser('${item.username}')"><i class="bi bi-trash"></i></button>
                 </div>
                 </td>
-          </tr>`
+          </tr>
+          `
         });
         document.getElementById("tabel_data").innerHTML = rowTable
         
@@ -1476,7 +1477,7 @@ function buttonNIK () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectKaryawan('${item.NIK}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectKaryawan('${item.NIK}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.NIK}</td>
       <td>${item.Nama}</td>
@@ -1537,7 +1538,7 @@ function buttonJabatan () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectJabatan('${item.KODEJAB}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectJabatan('${item.KODEJAB}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.KODEJAB}</td>
       <td>${item.NamaJab}</td>
@@ -1598,7 +1599,7 @@ function buttonDepartemen () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectDepartemen('${item.KDDEP}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectDepartemen('${item.KDDEP}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.KDDEP}</td>
       <td>${item.NMDEP}</td>
@@ -1764,9 +1765,7 @@ function submitAddUserData () {
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="namaModalOpen"></h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <table id="tabelModalOpen" class="table table-bordered table-striped">

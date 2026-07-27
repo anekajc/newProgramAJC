@@ -322,13 +322,14 @@
     .sp-badge::before{
       content:"";
       width:6px;
-      height:6px;
+      height:10px;
       border-radius:50%;
       background: currentColor;
     }
     .sp-badge.is-user        { background: var(--sp-blue-bg);  color: var(--sp-blue); }
     .sp-badge.is-supervisor  { background: var(--sp-amber-bg); color: var(--sp-amber); }
     .sp-badge.is-admin       { background: var(--sp-green-bg); color: var(--sp-green); }
+    
     .sp-badge.is-active      { background: var(--sp-green-bg); color: var(--sp-green); }
     .sp-badge.is-inactive    { background: var(--sp-red-bg); color: var(--sp-red); }
 

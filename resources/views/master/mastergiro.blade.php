@@ -18,8 +18,8 @@
     <h1>Master Giro</h1>
   </div>
   <div class="d-flex gap-2">
-    <button class="btn btn-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
-    <button class="btn btn-primary" onclick="buttonAddTerima()">+ Add Giro Terima</button>
+    <button class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
+    <button class="btn btn-action-primary" onclick="buttonAddTerima()">+ Add Giro Terima</button>
   </div>
 </div>
 
@@ -1150,7 +1150,8 @@ function loadAllTerima () {
   dataRefresh.forEach((item, i) => {
     let temp = ""
 
-    rowTable += `<tr>
+    rowTable += `
+    <tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
           <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
@@ -1167,10 +1168,10 @@ function loadAllTerima () {
     <td class='text-right'>${ parseFloat(item.KreditRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
     <td class='text-right'>${ parseFloat(item.Debet).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
     <td class='text-right'>${ parseFloat(item.Kredit).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td>${(new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
+    <td>${ (new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
     <td>${ item.BuktiBuka }</td>
     <td>${ item.Keterangan }</td>
-    <td>${(new Date(item.TglCair)).toLocaleDateString('en-CA')}</td>
+    <td>${ (new Date(item.TglCair)).toLocaleDateString('en-CA')}</td>
     <td>${ item.BuktiCair }</td>
     <td>${ item.KeteranganCair }</td>
     </tr>`

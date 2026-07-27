@@ -20,7 +20,7 @@
     <div>
       <h1>Master Biaya</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Biaya</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Biaya</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">
@@ -486,7 +486,7 @@ function buttonSelectPerkiraan (kode) {
       dataRefresh.forEach((item, i) => {
         rowTable += `<tr>
           <td class="text-center">
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelect('${item.perkiraan}')"><i class='bi bi-plus'></i></button>
+            <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelect('${item.perkiraan}')"><i class='bi bi-plus'></i></button>
           </td>
           <td>${item.perkiraan}</td>
           <td>${item.keterangan}</td>

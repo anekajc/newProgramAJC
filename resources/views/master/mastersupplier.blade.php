@@ -19,7 +19,7 @@
     <div>
       <h1>Master Supplier</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Supplier</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Supplier</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">
@@ -108,7 +108,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -121,7 +121,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -134,7 +134,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -152,7 +152,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">KodePos</label>
@@ -176,7 +176,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -189,7 +189,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
 
               <!-- <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -230,7 +230,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Email</label>
@@ -253,7 +253,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Status</label>
@@ -269,7 +269,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">PIC</label>
@@ -282,7 +282,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">PIC Phone</label>
@@ -305,7 +305,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Bank</label>
@@ -333,7 +333,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">a/n</label>
@@ -349,7 +349,7 @@
 
             <h5>Data Pajak</h5>
             <br/>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">NPWP</label>
@@ -363,7 +363,7 @@
                           {{-- NPWP HARUS DICEK APAKAH DATA DOUBLE --}}
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -376,7 +376,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -389,7 +389,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -478,7 +478,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -491,7 +491,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -504,7 +504,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -522,7 +522,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">KodePos</label>
@@ -545,7 +545,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -558,7 +558,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <!-- <div class="col-2 text-left">
 
                 <div class="form-group text-left">
@@ -599,7 +599,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Email</label>
@@ -622,7 +622,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Status</label>
@@ -638,7 +638,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">PIC</label>
@@ -651,7 +651,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">PIC Phone</label>
@@ -674,7 +674,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Bank</label>
@@ -697,7 +697,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">a/n</label>
@@ -713,7 +713,7 @@
 
             <h5>Data Pajak</h5>
             <br/>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">NPWP</label>
@@ -727,7 +727,7 @@
 
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -740,7 +740,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -753,7 +753,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>

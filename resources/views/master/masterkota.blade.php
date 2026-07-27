@@ -18,7 +18,7 @@
     <div>
       <h1>Master Kota</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Kota</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Kota</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">

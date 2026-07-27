@@ -18,7 +18,7 @@
     <div>
       <h1>Master Aktiva</h1>
     </div>
-    <button class="btn btn-primary" onclick="cleanFormAdd()">+ Add Aktiva</button>
+    <button class="btn btn-action-primary" onclick="cleanFormAdd()">+ Add Aktiva</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">
@@ -850,14 +850,10 @@
               <div class="row">
                 <div class="col-5">
                   <div class="form-group">
-                    <div class="input-group">
-                      <input type="text" class="form-control" id="input_add_SaldoValas" value="IDR">
-                      <div class="input-group-append">
-                        <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-primary btn-sm">
-                          <i class="bi bi-plus"></i>
-                        </button>
+                      <div class="input-group">
+                        <input type="text" class="form-control" id="input_add_SaldoValas" value="IDR">
+                        <button type="button" class="btn btn-primary btn-select" onclick="buttonAddListValas()">+</button>
                       </div>
-                    </div>
                   </div>
                 </div>
                 <div class="col-3">
@@ -1009,8 +1005,8 @@ dataRefresh.forEach((item, i) => {
     <td class='text-center'>
       <div class="action-buttons-wrap">
           <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
   <td>${item.KodeAktiva ?? ''}</td>
@@ -1099,7 +1095,7 @@ function buttonGroupAktiva () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -1154,7 +1150,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1169,7 +1165,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1185,7 +1181,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1252,7 +1248,7 @@ function loadAkumulasiPenyusutan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -1308,7 +1304,7 @@ function buttonAddListValas () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonAddPickValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonAddPickValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.KODEVLS}</td>
       <td>${item.KURS}</td>
@@ -1359,7 +1355,7 @@ function loadDevisi () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Devisi}</td>
       <td>${item.NamaDevisi}</td>

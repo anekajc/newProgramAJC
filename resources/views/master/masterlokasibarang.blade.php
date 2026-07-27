@@ -18,7 +18,7 @@
     <div>
       <h1>Master Lokasi Barang</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Lokasi Barang</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Lokasi Barang</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">

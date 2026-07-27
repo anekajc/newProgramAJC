@@ -18,7 +18,7 @@
     <div>
       <h1>Master Hutang</h1>
     </div>
-    {{-- <button class="btn btn-primary" onclick="buttonAdd()">+ Add Hutang</button> --}}
+    {{-- <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Hutang</button> --}}
   </div>
 
 <div id="contentContainer" class="container-fluid">
@@ -72,9 +72,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
+        
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="input_add_noUrut">
@@ -189,9 +188,8 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
+        
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="input_edit_noUrut">
@@ -210,7 +208,7 @@
           </div>
 
           <!-- Perkiraan -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Perkiraan</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="namaPerkiraanEdit" placeholder="Perkiraan" disabled>
@@ -218,7 +216,7 @@
           </div>
 
           <!-- No Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. Faktur</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_edit_noFaktur" placeholder="No. Faktur" disabled>
@@ -226,7 +224,7 @@
           </div>
 
           <!-- Tanggal Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Tanggal Faktur</label>
             <div class="col-sm-4">
               <input type="date" class="form-control" id="input_edit_tanggalFaktur">
@@ -237,7 +235,7 @@
             </div>
           </div>
 
-          <div class="form-group row">
+          <div class="form-group row mt-2">
 
             <div class="col-sm-3">
                 <label class="form-label">Valas</label>
@@ -270,7 +268,7 @@
           </div>
 
           <!-- Kredit -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Kredit</label>
             <div class="col-sm-4">
               <input type="number" class="form-control text-right" id="input_edit_kredit">
@@ -282,7 +280,7 @@
           </div>
 
           <!-- No PO -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. PO</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_edit_noPO" placeholder="No. PO">
@@ -671,7 +669,7 @@ function loadValas() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.KODEVLS}</td>
       <td>${item.NAMAVLS}</td>
@@ -679,11 +677,14 @@ function loadValas() {
     </tr>`;
   });
 
-  document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
+  document.getElementById("tabel_dataSelectValas").innerHTML = rowTable
   $("#tabelSelectValas").DataTable({
-    "lengthChange": false,
-    "paging": false,
+    "lengthChange": true,
+    "paging": true,
+    "searching": true,
+    "dom": 'tip'
   });
+  
 }
 
 function loadCustomer() {

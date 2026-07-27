@@ -13,6 +13,53 @@
   box-shadow: -2px 0 5px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease; /* enables the collapse slide */
+}
+
+.posting-sidebar.collapsed {
+  transform: translateX(100%); /* slides fully off-screen to the right */
+}
+
+/* Toggle tab — stays fixed to the screen edge regardless of collapsed state,
+   so there's always a way to bring the sidebar back. Its own position
+   shifts with the sidebar via the .collapsed rule below it. */
+.posting-sidebar-toggle {
+  position: fixed;
+  top: 50%;
+  right: 280px;
+  transform: translateY(-50%);
+  z-index: 1001;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  width: 22px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+}
+
+.posting-sidebar-toggle:hover {
+  background-color: #e9ecef;
+}
+
+.posting-sidebar-toggle.collapsed {
+  right: 0; /* tab sticks to the very edge once the sidebar is hidden */
+}
+
+.posting-sidebar-toggle svg {
+  width: 14px;
+  height: 14px;
+  color: #495057;
+  transition: transform 0.3s ease;
+}
+
+.posting-sidebar-toggle.collapsed svg {
+  transform: rotate(180deg); /* arrow flips to point the other way */
 }
 
 /* STICKY TITLE SECTION */
@@ -95,6 +142,18 @@
     transform: translateX(0);
   }
 
+  .posting-sidebar.active.collapsed {
+    transform: translateX(100%); /* collapsed always wins over active on mobile */
+  }
+
+  .posting-sidebar-toggle {
+    right: 250px;
+  }
+
+  .posting-sidebar-toggle.collapsed {
+    right: 0;
+  }
+
   .posting-main-content {
     margin-right: 0;
     margin-top: 60px;
@@ -114,6 +173,13 @@
   }
 }
 </style>
+
+<!-- Collapse Toggle Tab -->
+<div class="posting-sidebar-toggle" id="postingSidebarToggle" onclick="togglePostingSidebar()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+</div>
 
 <!-- Posting Sidebar Component -->
 <div class="posting-sidebar" id="postingSidebar">
@@ -262,6 +328,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   restoreScrollPosition();
   setTimeout(restoreScrollPosition, 100);
+
+  // Restore collapsed/expanded state
+  restorePostingSidebarCollapseState();
 });
 
 // Enhanced navigation functions that save scroll position before redirect
@@ -271,6 +340,29 @@ function navigateWithScrollSave(url) {
     sessionStorage.setItem('posting_sidebar_scroll_position', postingSidebarContent.scrollTop.toString());
   }
   window.location.href = url;
+}
+
+// ── Collapse / expand ────────────────────────────────────────────────
+const POSTING_SIDEBAR_COLLAPSE_KEY = 'posting_sidebar_collapsed';
+
+function togglePostingSidebar() {
+  const sidebar = document.getElementById('postingSidebar');
+  const toggle  = document.getElementById('postingSidebarToggle');
+  if (!sidebar || !toggle) return;
+
+  const collapsed = sidebar.classList.toggle('collapsed');
+  toggle.classList.toggle('collapsed', collapsed);
+  sessionStorage.setItem(POSTING_SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+}
+
+function restorePostingSidebarCollapseState() {
+  const sidebar = document.getElementById('postingSidebar');
+  const toggle  = document.getElementById('postingSidebarToggle');
+  if (!sidebar || !toggle) return;
+
+  const collapsed = sessionStorage.getItem(POSTING_SIDEBAR_COLLAPSE_KEY) === '1';
+  sidebar.classList.toggle('collapsed', collapsed);
+  toggle.classList.toggle('collapsed', collapsed);
 }
 
 function pagePostingKas() {

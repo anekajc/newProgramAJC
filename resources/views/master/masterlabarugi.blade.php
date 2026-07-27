@@ -20,23 +20,84 @@
     <div>
       <h1>Master Laba Rugi</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Laba Rugi</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Laba Rugi</button>
   </div>
-
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <style>
+    .sp-toolbar {
+      flex-wrap: wrap; /* lets filters drop to a new line on narrow screens instead of overflowing */
+      row-gap: 10px;
+    }
 
+    .sp-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sp-filter-group label {
+      margin: 0;
+      white-space: nowrap;
+      color: #495057;
+    }
+
+    .sp-filter-group select {
+      width: auto;
+      min-width: 180px;
+    }
+  </style>
+
+  <div class="sp-toolbar">
+    <div class="sp-search-wrap">
+      <i class="bi bi-search sp-search-icon"></i>
+      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
+    </div>
+
+    <div class="sp-filter-group">
+      <label for="jenisDevisi">Devisi :</label>
+      <select name="devisi" id="jenisDevisi" class="form-control" onChange='loadAll()'>
+        @foreach ($listDataDevisi as $Devisi)
+            <option value="{{ $Devisi->Devisi }}">{{ $Devisi->Devisi }} - {{ $Devisi->NamaDevisi }}</option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="sp-filter-group">
+      <label for="jenisLaporan">Laporan :</label>
+      <select name="perkiraanCustomer" id="jenisLaporan" class="form-control" onChange='loadAll()'>
+        <option value='0'> Laba Rugi</option>
+        <option value='1'> HPP </option>
+      </select>
+    </div>
+
+    <div class="sp-length-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="form-select form-select-sm">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
+  </div>
           <div class="table-outer">
             <div class="table-wrap">
               <table class="tb" id="tabel">
                 <thead>
                   <tr>
                     <th scope="col">Actions</th>
-                    <th scope="col">Kode Satuan</th>
-                    <th scope="col">Kode Sat Tax</th>
+                    <th scope="col">Nomor</th>
+                    <th scope="col">Perkiraan</th>
+                    <th scope="col">Keterangan</th>
+                    <th scope="col">Grup</th>
+                    <th scope="col">Tipe</th>
+                    <th scope="col">Tanda</th>
+                    <th scope="col">Persen</th>
+                    <th scope="col">Jumlah</th>
                   </tr>
                 </thead>
                 <tbody id="tabel_data" class="text-right">
@@ -47,117 +108,6 @@
 
 </div>
 
-<div class="row mt-4">
-      <div class="col-6 text-left">
-        <h2 style="margin-top:-85px;">Master Laba, Rugi & HPP</h2>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add Laba / Rugi
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
-    </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
-
-<div id="printContainer" style="display:none">
-
-</div>
-<div id="contentContainer" class="container-fluid" style="max-width: 1800px; margin-top:-95px;">
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
-  <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-          <div class="row mt-4">
-          </div>
-          <div class="row mt-3">
-              
-            <div class="row col-12">
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Devisi : </label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                <select name="devisi" id="jenisDevisi" class="form-control" onChange='loadAll()'>
-                  @foreach ($listDataDevisi as $Devisi)
-                      <option value="{{ $Devisi->Devisi }}">{{ $Devisi->Devisi }} - {{ $Devisi->NamaDevisi }}</option>
-                  @endforeach
-                </select>
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Laporan : </label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                <select name="perkiraanCustomer" id="jenisLaporan" class="form-control" onChange='loadAll()'>
-                  <option value='0'> Laba Rugi</option>
-                  <option value='1'> HPP </option>
-                </select>
-                </div>
-              </div>
-
-            </div>
-            <div class="col-12" style="overflow:auto;">
-              <div class="">
-
-                    <table id="tabel" class="table table-bordered table-striped"  >
-                      <thead id='theadCustom' class="text-center">
-                        <tr>
-                          <th scope="col">Actions</th>
-                          <th scope="col">Nomor</th>
-                          <th scope="col">Perkiraan</th>
-                          <th scope="col">Keterangan</th>
-                          <th scope="col">Grup</th>
-                          <th scope="col">Tipe</th>
-                          <th scope="col">Tanda</th>
-                          <th scope="col">Persen</th>
-                          <th scope="col">Jumlah</th>
-
-                        </tr>
-                      </thead>
-
-
-                      <tbody id="tabel_data" class="text-left">
-                      </tbody>
-
-
-                    </table>
-              </div>
-            </div>
-          </div>
-
-
-</div>
 
 <!-- start modal add -->
 <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -203,7 +153,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Keterangan</label>
@@ -217,7 +167,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
 
               <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -275,7 +225,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Persentasi</label>
@@ -544,9 +494,11 @@ function loadAll () {
 
   document.getElementById("tabel_data").innerHTML = rowTable
   $("#tabel").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-    });
+    "lengthChange": true,
+    "paging": true,
+    "searching": true,
+    "dom": 'tip'
+  });
 
 }
 
@@ -858,7 +810,7 @@ function buttonPerkiraan () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>

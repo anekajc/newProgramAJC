@@ -18,7 +18,7 @@
     <div>
       <h1>Master Satuan</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Satuan</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Satuan</button>
   </div>
 
 <div id="contentContainer" class="container-fluid">
