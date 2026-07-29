@@ -46,7 +46,6 @@ class MasterAktivaController extends Controller
   ORDER BY a.NoMuka, a.Perkiraan, a.Devisi;
   ');
 
-
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(2);
 
     return view('master.masteraktiva' , [
@@ -273,6 +272,7 @@ class MasterAktivaController extends Controller
         $edit = DB::connection('SML')->table('DBAKTIVA')
             ->where('Perkiraan', $noAktiva)
             ->update([
+                'GroupAktiva' => $req->groupAktiva,
                 'NoBelakang' => $req->noUrut,
                 'Keterangan' => $req->keterangan,
                 'Tanggal' => $req->tglPemakaian,

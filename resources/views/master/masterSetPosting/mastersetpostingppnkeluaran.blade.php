@@ -40,7 +40,7 @@
     <div>
       <h1>Master Posting PPN Keluaran</h1>
     </div>
-    <button id='divAdd' class="btn btn-primary" onclick="buttonAdd()">+ Add Posting PPN Keluaran</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting PPN Keluaran</button>
   </div>
 
   <div id="contentContainer" class="container-fluid">
@@ -71,128 +71,7 @@
 
 
 
-<!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 550px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="judulTipeModal">Title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_kode" disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg" style="height: 30px; " onclick="buttonSelectPerkiraan()">Select</button>
-                </div>
-              </div>
-
-            </div>
-
-      </div>
-      <div class="modal-footer" id='buttonTipeModal'>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- End modal add-->
-
-<!-- start modal aktiva select perkiraan -->
-<div class="modal fade"  id="formSelectPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Perkiraan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
-
-            </tr>
-          </thead>
-
-          <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-        </table>
-
-    </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        </div>
-  </div>
-</div>
-</div>
-<!-- End modal aktiva select perkiraan-->
-
-<!-- start modal edit aktiva select perkiraan -->
-<div class="modal fade"  id="formEditSelectPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Perkiraan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table id="tabelEdiAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
-
-            </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditAktivaSelectPerkiraan" class="text-left" >
-            <tr>
-            </tr>
-          </tbody>
-
-        </table>
-
-    </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        </div>
-  </div>
-</div>
-</div>
-{{-- End modal edit aktiva select perkiraan  --}}
-
+@include('master.masterSetPosting.mastersetpostingmastertable');
 @endsection
 
 @section('js')
@@ -438,7 +317,7 @@ function loadSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -488,7 +367,7 @@ function loadEditSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>

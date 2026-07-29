@@ -6,13 +6,13 @@
 
   <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-  <div class="sp-breadcrumb">
+  {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
     <span>Berkas</span>
     <span class="sp-sep">›</span>
     <span class="sp-crumb-active">Set Pemakai</span>
-  </div>
+  </div> --}}
 
   <div class="sp-page-head">
     <div>
@@ -54,12 +54,7 @@
     </div>
 
     <!-- Toolbar: search box (visual only — table search stays disabled per existing DataTables config) -->
-    <div class="sp-toolbar">
-      <div class="sp-search-wrap">
-        <i class="bi bi-search sp-search-icon"></i>
-        <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-      </div>
-    </div>
+      @include('master.partials.headerTableMaster')
 
             <div class="table-outer">
               <div class="table-wrap">
@@ -699,6 +694,7 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
 
@@ -711,11 +707,6 @@
   let listCOA = []
   let listAksesCOA = []
 
-  $("#tabel").DataTable({
-    "lengthChange": false,
-    "paging": true,
-    "searching":false,
-  });
 
   // Cosmetic search box wired to the existing DataTable instance.
   // Table searching itself stays governed by the DataTables config above;

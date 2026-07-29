@@ -181,8 +181,8 @@ function loadAll () {
     rowTable += `<tr>
     <td class="text-center">
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Devisi}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Devisi}')"><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Devisi}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Devisi}')"><i class="bi bi-trash"></i></button>
       </div> 
     </td>
     <td>${item.Devisi}</td>

@@ -793,13 +793,6 @@
 
             </div>
 
-
-
-
-
-
-
-
             <br/>
 
             <div class="row mt-2">
@@ -928,9 +921,6 @@
 
 
             </div>
-
-
-
 
     </div>
   </div>
@@ -1296,8 +1286,8 @@ function loadAll () {
         render: function(data, type, row) {
           return `
             <div class="action-buttons-wrap text-center" style="position: relative;">
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KODEBRG}')"><i class="bi bi-pen"></i></button>
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.KODEBRG}')"><i class="bi bi-trash"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KODEBRG}')"><i class="bi bi-pen"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.KODEBRG}')"><i class="bi bi-trash"></i></button>
             </div>
           `;
         },

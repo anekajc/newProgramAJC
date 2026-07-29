@@ -26,7 +26,7 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-@include('master.partials.headerTableMaster');
+@include('master.partials.headerTableMaster')
 
   <div class="table-outer">
     <div class="table-wrap">

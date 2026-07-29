@@ -25,18 +25,69 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
 
-  <div class="sp-filter-wrap">
-    <select id="perkiraanCustomer" class="form-select" onchange="loadAll()">
-      @foreach ($listDataCustomer as $customer)
-        <option value="{{ $customer->keterangan }} ({{ $customer->Perkiraan }})">
-          {{ $customer->keterangan }} ({{ $customer->Perkiraan }})
-        </option>
-      @endforeach
-    </select>
+  <style>
+    .sp-length-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .sp-length-wrap label {
+      margin: 0; /* stops default label margin from pushing the select down/over */
+    }
+
+    .sp-length-wrap select {
+      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+    }
+
+    .sp-toolbar {
+      display: flex;
+      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
+      align-items: center;
+      row-gap: 10px;
+      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
+    }
+
+    .sp-filter-wrap select {
+      width: auto;
+      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
+    }
+
+    .sp-length-wrap {
+      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
+    }
+  </style>
+
+  <div class="sp-toolbar">
+    <div class="sp-search-wrap">
+      <i class="bi bi-search sp-search-icon"></i>
+      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
+    </div>
+
+    <div class="sp-filter-wrap">
+      <select id="perkiraanCustomer" class="form-select" onchange="loadAll()">
+        @foreach ($listDataCustomer as $customer)
+          <option value="{{ $customer->keterangan }} ({{ $customer->Perkiraan }})">
+            {{ $customer->keterangan }} ({{ $customer->Perkiraan }})
+          </option>
+        @endforeach
+      </select>
+    </div>
+
+    <div class="sp-length-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="form-select form-select-sm">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
   </div>
-</div>
 
   <div class="table-outer">
     <div class="table-wrap">
@@ -387,6 +438,7 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -420,10 +472,10 @@ function loadAll () {
 
     <td class="text-center">
       <div class="action-buttons-wrap">
-      <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd'${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
+      <button data-toggle="tooltip" data-placement="top" title="Add Piutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd'${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
       ${item.NoFaktur != null ? `
-        <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
-        <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}')"><i class="bi bi-trash"></i></button>
+        <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
+        <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}')"><i class="bi bi-trash"></i></button>
       ` : ''}
       </div>
     </td>

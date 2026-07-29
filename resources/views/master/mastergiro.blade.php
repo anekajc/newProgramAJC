@@ -5,6 +5,24 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
+      <style>
+      .sp-length-wrap {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .sp-length-wrap label {
+        margin: 0; /* stops default label margin from pushing the select down/over */
+      }
+
+      .sp-length-wrap select {
+        width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+      }
+    </style>
+  
 {{-- <div class="sp-breadcrumb">
   <span>Beranda</span>
   <span class="sp-sep">›</span>
@@ -28,12 +46,93 @@
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+  
+  <style>
 
-  <div>
-      <div class="sp-toolbar">
+    .sp-filter-wrap .nav-tabs {
+      display: inline-flex;
+      background-color: #fff;
+      border: 1px solid #e9ecef; /* keeps the pill track visible now that it's white, not gray */
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .sp-filter-wrap .nav-tabs .nav-item {
+      display: flex;
+    }
+
+    .sp-filter-wrap .nav-tabs .nav-link {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6c757d;
+      background-color: transparent;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .sp-filter-wrap .nav-tabs .nav-link:hover {
+      color: #212529;
+      background-color: rgba(0,0,0,0.04);
+    }
+
+    .sp-filter-wrap .nav-tabs .nav-link.active {
+      color: #fff;
+      background-color: #007bff;
+      box-shadow: 0 2px 6px rgba(0,123,255,0.35);
+    }
+    .sp-length-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .sp-length-wrap label {
+      margin: 0; /* stops default label margin from pushing the select down/over */
+    }
+
+    .sp-length-wrap select {
+      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+    }
+
+    .sp-toolbar {
+      display: flex;
+      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
+      align-items: center;
+      row-gap: 10px;
+      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
+    }
+
+    .sp-filter-wrap select {
+      width: auto;
+      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
+    }
+
+    .sp-length-wrap {
+      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
+    }
+  </style>
+
+  <div class="sp-toolbar">
     <div class="sp-search-wrap">
       <i class="bi bi-search sp-search-icon"></i>
       <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
+    </div>
+
+    <div class="sp-filter-wrap">
+      <ul class="nav nav-tabs mb-0" id="giroTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
+        </li>
+      </ul>
     </div>
 
     <div class="sp-length-wrap">
@@ -47,17 +146,6 @@
       </select>
     </div>
   </div>
-
-  </div>
-
-  <ul class="nav nav-tabs mb-0" id="giroTab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
-    </li>
-  </ul>
 
   <div class="tab-content">
 
@@ -321,26 +409,18 @@
               </div>
 
             </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan Kas</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
-                </div>
-              </div>
-
-              <div class="col-2">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectPerkiraanKas()"  >Select</button>
-                </div>
-              </div>
-
+            
+          <div class="row mt-2 align-items-center">
+            <div class="col-4">
+              <label class="form-label">Perkiraan Kas</label>
             </div>
+            <div class="col-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+              </div>
+            </div>
+          </div>
 
     </div>
   </div>
@@ -366,25 +446,17 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-          <div class="row">
-            <div class="col-4 text-left">
-              <div class="form-group text-left">
-                <label class="text-left">Bank</label>
-              </div>
+          
+          <div class="row mt-2 align-items-center">
+            <div class="col-4">
+              <label class="form-label">Bank</label>
             </div>
-            <div class="col-6">
-              <div class="form-group">
+            <div class="col-8">
+              <div class="input-group">
                 <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectBank()">+</button>
               </div>
             </div>
-
-            <div class="col-2">
-              <div class="form-group">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectBank()"  ><i class='bi bi-plus'></i></button>
-              </div>
-            </div>
-
           </div>
 
             <div class="row mt-2">
@@ -746,24 +818,17 @@
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan Kas</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectPerkiraanKas()"  >Select</button>
-                </div>
+          <div class="row mt-2 align-items-center">
+            <div class="col-4">
+              <label class="form-label">Perkiraan Kas</label>
+            </div>
+            <div class="col-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
               </div>
             </div>
+          </div>
 
     </div>
   </div>
@@ -1094,8 +1159,8 @@ function loadAllBuka () {
     rowTable += `<tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
     <td>${ item.Bank }</td>
@@ -1129,7 +1194,7 @@ function loadAllBuka () {
 }
 
 function loadAllTerima () {
-  console.log('asd')
+
   let _token = $("#_token").val();
 
   $('#tabel_diterima').DataTable().destroy();
@@ -1154,8 +1219,8 @@ function loadAllTerima () {
     <tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
     <td>${ item.Bank }</td>
@@ -1186,6 +1251,18 @@ function loadAllTerima () {
   });
 
 }
+
+
+$("#tabel_filter_visual").on("keyup", function () {
+  $("#tabel_dibuka").DataTable().search(this.value).draw();
+  $("#tabel_diterima").DataTable().search(this.value).draw();
+});
+
+$("#tabel_length_visual").on("change", function () {
+  $("#tabel_dibuka").DataTable().page.len(Number(this.value)).draw();
+  $("#tabel_diterima").DataTable().page.len(Number(this.value)).draw();
+});
+
 
 function buttonAddBuka () {
   document.getElementById('input_add2_bank').value = ''
@@ -1288,7 +1365,6 @@ function buttonEditTerima (kode) {
       document.getElementById("input_edit_buktiCair").value = res[0].BuktiCair
       document.getElementById("input_edit_keteranganCair").value = res[0].KeteranganCair
       document.getElementById("input_edit_perkiraanKas").value = res[0].Kas
-      
       
       formatNumber(document.getElementById("input_edit_nilaiGiroRp"))
       formatNumber(document.getElementById("input_edit_nilaiGiro"))
@@ -1682,7 +1758,7 @@ function loadSelectKas() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraanKas('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihPerkiraanKas('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -1720,7 +1796,7 @@ function loadSelectBank() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraanBank('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihPerkiraanBank('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>

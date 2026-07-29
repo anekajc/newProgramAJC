@@ -191,7 +191,7 @@
                       <button type="button" class="btn btn-primary btn-select" onclick="spEditPerkiraan()">Submit</button>
                   </div>
                 </div>
-                <div class="col-1 text-left">
+                <div class="col-1 text-left ms-2">
                   <div class="form-group text-left rowPerkiraan">
                       <button type="button" class="btn btn-danger btn-select" onclick="buttonTutupAddPerkiraan()">Batal</button>
                   </div>
@@ -245,7 +245,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Tutup</button>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
   </div>
 </div>
 </div>
@@ -288,9 +288,9 @@ function loadAll () {
     rowTable += `<tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubCost('${item.KodeCost}')"><i class="bi bi-list"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeCost}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeCost}')"><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Sub Cost" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubCost('${item.KodeCost}')"><i class="bi bi-list"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeCost}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeCost}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
     <td>${item.KodeCost}</td>
@@ -491,10 +491,12 @@ function refreshTabelPerkiraan(kodeCost){
       res.forEach((item, i) => {
 
         rowTable += `<tr>
-        <td class="text-center">
-          <button class="btn btn-success btn-sm hover-tooltip" data-tooltip='Edit Costing' type="button" onclick="buttonEditPerkiraan('${item.KodeCost}', '${item.Urut}')"><i class="bi bi-pen"></i></button>
-          <button class="btn btn-danger btn-sm hover-tooltip" data-tooltip='Delete Costing' type="button" onclick="buttonDeletePerkiraan('${item.KodeCost}', '${item.Urut}')"><i class="bi bi-trash"></i></button>
-        </td>
+          <td style="white-space:nowrap;" class='text-center'>
+            <div class="action-buttons-wrap">
+                <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditPerkiraan('${item.KodeCost}', '${item.Urut}')"><i class="bi bi-pen"></i></button>
+                <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeletePerkiraan('${item.KodeCost}', '${item.Urut}')"><i class="bi bi-trash"></i></button>
+            </div>
+          </td>
         <td>${item.Perkiraan}</td>
         <td>${item.NamaPerkiraan}</td>
         </tr>`
@@ -694,7 +696,7 @@ function buttonPerkiraan () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>

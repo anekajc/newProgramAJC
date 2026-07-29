@@ -40,7 +40,7 @@
     <div>
       <h1>Master Posting Kas</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Posting Kas</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Kas</button>
   </div>
 
   <div id="contentContainer" class="container-fluid">
@@ -78,9 +78,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -88,24 +86,17 @@
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectPerkiraan()"  >Select</button>
-                </div>
-              </div>
-
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <label class="form-label">Perkiraan</label>
             </div>
+            <div class="col-md-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_kode" readonly>
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraan()">+</button>
+              </div>
+            </div>
+          </div>
 
             <div class="row">
               <div class="col-4 text-left">
@@ -143,7 +134,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+    {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
   </div>
 </div>
@@ -157,9 +148,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -167,24 +156,18 @@
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonEditSelectPerkiraan()"  >Select</button>
-                </div>
-              </div>
-
+            
+          <div class="row align-items-center">
+            <div class="col-md-4">
+              <label class="form-label">Perkiraan</label>
             </div>
+            <div class="col-md-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_kode" readonly>
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraan()">+</button>
+              </div>
+            </div>
+          </div>
 
             <div class="row">
               <div class="col-4 text-left">
@@ -214,7 +197,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+    {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
   </div>
 </div>
@@ -228,9 +211,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Perkiraan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
@@ -262,7 +243,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+          {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
         </div>
   </div>
 </div>
@@ -275,9 +256,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Select Perkiraan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <table id="tabelEditAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
@@ -309,7 +288,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+          {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
         </div>
   </div>
 </div>
@@ -589,7 +568,7 @@ function loadSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -640,7 +619,7 @@ function loadEditSelectPerkiraan() {
     rowTable += `<tr>
       <td class="text-center">
         
-        <button class="btn btn-primary btn-sm hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       
       </td>
       <td>${item.Perkiraan}</td>

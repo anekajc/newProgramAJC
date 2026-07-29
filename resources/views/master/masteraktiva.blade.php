@@ -258,7 +258,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 900px;">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalLabel">Form Add Aktiva</h5>
+        <h5 class="modal-title" id="modalLabel">Form Edit Aktiva</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
@@ -443,7 +443,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
       </div>
     </div>
   </div>
@@ -1004,7 +1004,7 @@ dataRefresh.forEach((item, i) => {
   rowTable += `<tr>
     <td class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Saldo Awal" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
           <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
           <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
       </div>
@@ -1462,7 +1462,7 @@ function buttonDelete (kode) {
 
 
 }
-//
+
 function submitEdit () {
 
   let _token = $("#_token").val();
@@ -1484,6 +1484,14 @@ function submitEdit () {
   let PersenBP2 = $("#input_edit_PersenBiayaPenyusutan2").val();
   let BP3 = $("#input_edit_BiayaPenyusutan3").val();
   let PersenBP3 = $("#input_edit_PersenBiayaPenyusutan3").val();
+
+  // BP1/BP2/BP3 must never be sent as a true empty string — the backend
+  // expects at least a single space when the field is blank.
+  const emptyToSpace = (val) => (val === null || val === undefined || val.trim() === '') ? '-' : val;
+
+  BP1 = emptyToSpace(BP1);
+  BP2 = emptyToSpace(BP2);
+  BP3 = emptyToSpace(BP3);
 
   $.ajax({
     url: "{!! url('masteraktivaspedit') !!}",
@@ -1526,7 +1534,7 @@ function submitEdit () {
     }})
 
 }
-//
+
 function submitAdd () {
 
   let _token = $("#_token").val();

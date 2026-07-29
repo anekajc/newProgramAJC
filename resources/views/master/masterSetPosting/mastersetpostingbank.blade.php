@@ -2,6 +2,7 @@
 @section('buttons')
 
 @endsection
+
 @section('content')
 @include('master/partials/sidebarPosting')
 
@@ -40,7 +41,7 @@
     <div>
       <h1>Master Posting Bank</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Posting Bank</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Bank</button>
   </div>
 
   <div id="contentContainer" class="container-fluid">
@@ -69,145 +70,7 @@
 
 </div>
 
-<!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 550px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectPerkiraan()"  >Select</button>
-                </div>
-              </div>
-
-            </div>
-
-
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
-  </div>
-</div>
-</div>
-</div>
-<!-- End modal add-->
-
-
-<!-- start modal add -->
-<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 550px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-lg " style="height: 30px; " onclick="buttonSelectPerkiraan()"  >Select</button>
-                </div>
-              </div>
-
-            </div>
-
-
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
-  </div>
-</div>
-</div>
-</div>
-<!-- End modal add-->
-
-<!-- start modal aktiva select perkiraan -->
-<div class="modal fade"  id="formSelectPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Perkiraan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
-
-            </tr>
-          </thead>
-
-          <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left" >
-            <tr>
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-        </table>
-
-    </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-        </div>
-  </div>
-
-</div>
-</div>
-<!-- End modal aktiva select perkiraan-->
+@include('master.masterSetPosting.mastersetpostingmastertable');
 
 @endsection
 
@@ -218,11 +81,12 @@
 let dataRefresh = []
 
 function loadAll () {
+  console.log('asd')
   let _token = $("#_token").val();
 
-  $('#tabel').DataTable().destroy();
+  document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
 
-document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
+  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastersetpostingbankloadall') !!}",
@@ -232,6 +96,7 @@ document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
       _token : _token,
     },
     success: function(res) {
+      console.log(res)
       dataRefresh = res
   }})
 
@@ -251,7 +116,6 @@ document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
     </tr>`
   });
 
-
   document.getElementById("tabel_data").innerHTML = rowTable
   $("#tabel").DataTable({
     "lengthChange": true,
@@ -263,16 +127,32 @@ document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
 }
 
 function buttonAdd () {
+  document.getElementById('judulTipeModal').innerHTML =  'Add'
+  document.getElementById('input_kode').value = ''
+  
+  isiButton = `
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
+        `
 
-  document.getElementById('input_add_kode').value = '';
+  document.getElementById('buttonTipeModal').innerHTML = isiButton;
 
   $("#form").modal('toggle')
 
 }
 
-let perkiraanTemp = ''
-
 function buttonEdit (kode) {
+
+  document.getElementById('judulTipeModal').innerHTML =  'Edit'
+
+  isiButton = `
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
+        `
+
+  document.getElementById('buttonTipeModal').innerHTML = isiButton;
+
+  console.log(kode)
   let _token = $("#_token").val();
   $.ajax({
     url: "{!! url('mastersetpostingbankspdetail') !!}",
@@ -285,17 +165,17 @@ function buttonEdit (kode) {
     success: function(res) {
 
       console.log(res)
-      document.getElementById("input_edit_kode").value = res[0].Perkiraan
-
+      document.getElementById("input_kode").value = res[0].Perkiraan
       perkiraanTemp = res[0].Perkiraan
 
     }})
-    $("#formEdit").modal('toggle')
+    $("#form").modal('toggle')
 }
 
 function buttonDelete (kode) {
   console.log(kode)
   let _token = $("#_token").val();
+
 
   alertify.confirm('Hapus Perkiraan', 'Apakah yakin ingin menghapus Perkiraan Posting Bank ' + kode + ' ?',
       function() {
@@ -324,15 +204,18 @@ function buttonDelete (kode) {
       console.log('no')
     });
 
+
 }
+
+let perkiraanTemp = ''
 
 function submitEdit () {
 
   let _token = $("#_token").val();
-  let kode = $("#input_edit_kode").val();
+  let kode = $("#input_kode").val();
 
   if (!kode) {
-    alertify.warning("Kode  harus diisi");
+    alertify.warning("Kode harus diisi");
     return
   }
 
@@ -343,34 +226,31 @@ function submitEdit () {
     data: {
       _token : _token,
       kode,
-      kodeLama : perkiraanTemp
+      kodeLama: perkiraanTemp
     },
     success: function(res) {
-
       if (res != 1) {
         alertify.warning(res);
-      }  else {
+      }  
+      else 
+      {
         console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
         alertify.success("Data Posting Bank telah diedit");
         loadAll()
-        $("#formEdit").modal('toggle')
+        $("#form").modal('toggle')
       }
-
     }})
-
 }
-//
+
 function submitAdd () {
 
   let _token = $("#_token").val();
-  let kode = $("#input_add_kode").val();
+  let kode = $("#input_kode").val();
 
   if (!kode) {
     alertify.warning("Kode harus diisi");
     return
   }
-
 
   $.ajax({
     url: "{!! url('mastersetpostingbankspadd') !!}",
@@ -397,16 +277,31 @@ function submitAdd () {
   // console.log(kodearea, namaarea)
 }
 
+function backToSetPosting() {
+  window.location.href = "{{ ('mastersetposting') }}";
+}
+
 function buttonSelectPerkiraan () {
   loadSelectPerkiraan()
   $("#formSelectPerkiraan").modal('toggle')
 }
 
-function loadSelectPerkiraan() {
+function buttonPilihPerkiraan(selectedPerkiraan) {
+  $("#input_kode").val(selectedPerkiraan);
+  $("#formSelectPerkiraan").modal("hide");
+
+}
+
+function buttonEditSelectPerkiraan () {
+  loadEditSelectPerkiraan()
+  $("#formEditSelectPerkiraan").modal('toggle')
+}
+
+function loadEditSelectPerkiraan() {
   console.log('asd');
   let _token = $("#_token").val();
 
-  $('#tabelAktivaSelectPerkiraan').DataTable().destroy();
+  $('#tabelEditAktivaSelectPerkiraan').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastersetpostingbankloadperkiraan') !!}",
@@ -427,30 +322,29 @@ function loadSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
   });
 
-  document.getElementById("tabel_dataAktivaSelectPerkiraan").innerHTML = rowTable;
-  $("#tabelAktivaSelectPerkiraan").DataTable({
+  document.getElementById("tabel_dataEditAktivaSelectPerkiraan").innerHTML = rowTable;
+  $("#tabelEditAktivaSelectPerkiraan").DataTable({
     "lengthChange": true,
     "paging": true,
   });
 }
 
-function buttonPilihPerkiraan(selectedPerkiraan) {
-  $("#input_add_kode").val(selectedPerkiraan);
+function buttonEditPilihPerkiraan(selectedPerkiraan) {
   $("#input_edit_kode").val(selectedPerkiraan);
-  $("#formSelectPerkiraan").modal("hide");
+  $("#formEditSelectPerkiraan").modal("hide");
 
 }
 
-window.onload = function(){
-  loadAll();
-};
+window.onload = function() {
+loadAll();
+}
 
 </script>
 

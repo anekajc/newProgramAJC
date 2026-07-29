@@ -330,6 +330,33 @@
   </div>
 </section>
 
+
+<!-- start modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data ) -->
+      <div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="namaModalOpen"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table id="tabelModalOpen" class="table table-bordered table-striped">
+                <thead id='theadOpen' class="text-center bg-primary text-white">
+                  <tr></tr>
+                </thead>
+                <tbody id="tabel_dataModalOpen" class="text-left">
+                  <tr></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data )-->
+
   </div>
 
   {{-- SCRIPTS — jQuery loaded once, then vendors --}}<!-- jQuery -->

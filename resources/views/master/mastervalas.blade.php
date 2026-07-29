@@ -246,8 +246,8 @@ function loadAll () {
     rowTable += `<tr class='theadCustom'>
       <td style="white-space:nowrap;" class='text-center'>
         <div class="action-buttons-wrap">
-            <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEVLS}')"><i class="bi bi-pen"></i></button>
-            <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODEVLS}')"><i class="bi bi-trash"></i></button>
+            <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEVLS}')"><i class="bi bi-pen"></i></button>
+            <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODEVLS}')"><i class="bi bi-trash"></i></button>
         </div>
       </td>
     <td>${item.KODEVLS}</td>

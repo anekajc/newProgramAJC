@@ -42,7 +42,7 @@
     <div>
       <h1>Master Posting Aktiva</h1>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Posting Aktiva</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Aktiva</button>
   </div>
 
   <div id="contentContainer" class="container-fluid">
@@ -79,229 +79,222 @@
 </div>
 
 <!-- start modal add posting aktiva-->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 900px">
+<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1000px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Posting Aktiva</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="form-row">
-                <div class="col-md-2">
-                    <label class="form-label">Perkiraan</label>
+          <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+              <label class="form-label">Perkiraan</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_perkiraan">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_perkiraan">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-2">
-                    <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
-                </div>
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_biayaPenyusutan1">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_persenBiaya1" placeholder='(%)'>
-                    </div>
-                </div>
-                
+              </div>
             </div>
 
-            <div class="form-row">
-              <div class="col-md-2">
-                    <label class="form-label">Akumulasi Penyusutan</label>
+            <div class="col-md-2">
+              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
+            </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_biayaPenyusutan1">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_akm">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
-                        </div>
-                    </div>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_persenBiaya1" placeholder='(%)'>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end mt-2">
+            <div class="col-md-2">
+              <label class="form-label">Akumulasi Penyusutan</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_akm">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
+            </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_biayaPenyusutan2">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
                 </div>
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_biayaPenyusutan2">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_persenBiaya2" placeholder='(%)'>
-                    </div>
-                </div>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_persenBiaya2" placeholder='(%)'>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end mt-2">
+            <div class="col-md-2">
+              <label class="form-label">Persen Susut</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_persenSusut" placeholder='(%)'>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Metode Penyusutan</label>
+            </div>
+            <div class="col-md-2">
+              <select name="MedPenyu" class='form-control' id="input_add_metodePenyusutan">
+                <option value="L">[L]urus</option>
+                <option value="M">[M]enurun</option>
+                <option value="P">[P]ajak</option>
+              </select>
             </div>
 
-            <div class="form-row">
-                <div class="col-md-2">
-                    <label class="form-label">Persen Susut</label>
-                </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_persenSusut" placeholder='(%)'>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Metode Penyusutan</label>
-                </div>
-                <div class="col-md-2">
-                      <select name="MedPenyu" class='form-control' id="input_add_metodePenyusutan">
-                        <option value="L">[L]urus</option>
-                        <option value="M">[M]enurun</option>
-                        <option value="P">[P]ajak</option>
-                      </select>
-                </div>
-                
-                <div class="col-2">
-                    <input type="checkbox" id="input_add_uangMuka" value="">
-                    <label for="uangMukaPostingAktiva">Uang Muka</label><br>
-                </div>
+            <div class="col-md-2 d-flex align-items-center gap-2">
+              <input type="checkbox" id="input_add_uangMuka" value="">
+              <label for="input_add_uangMuka" class="form-label mb-0">Uang Muka</label>
             </div>
+          </div>
 
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal add posting aktiva-->
 
 <!-- start modal add posting aktiva-->
-<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 900px">
+<div class="modal fade" id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1000px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Posting Aktiva</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
+          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="form-row">
-                <div class="col-md-2">
-                    <label class="form-label">Perkiraan</label>
+          <div class="row g-3 align-items-end">
+            <div class="col-md-2">
+              <label class="form-label">Perkiraan</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_perkiraan">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_perkiraan">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-2">
-                    <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
-                </div>
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_biayaPenyusutan1">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_persenBiaya1" placeholder='(%)'>
-                    </div>
-                </div>
+              </div>
             </div>
 
-            <div class="form-row">
-                <div class="col-md-2">
-                    <label class="form-label">Akumulasi Penyusutan</label>
+            <div class="col-md-2">
+              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
+            </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_biayaPenyusutan1">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
                 </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_akm">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
-                        </div>
-                    </div>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_persenBiaya1" placeholder='(%)'>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end mt-2">
+            <div class="col-md-2">
+              <label class="form-label">Akumulasi Penyusutan</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_akm">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
+            </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_biayaPenyusutan2">
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
                 </div>
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_biayaPenyusutan2">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_persenBiaya2" placeholder='(%)'>
-                    </div>
-                </div>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_persenBiaya2" placeholder='(%)'>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end mt-2">
+            <div class="col-md-2">
+              <label class="form-label">Persen Susut</label>
+            </div>
+            <div class="col-md-4">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_persenSusut" placeholder='(%)'>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Metode Penyusutan</label>
+            </div>
+            <div class="col-md-2">
+              <select name="MedPenyu" class='form-control' id="input_edit_metodePenyusutan">
+                <option value="L">[L]urus</option>
+                <option value="M">[M]enurun</option>
+                <option value="P">[P]ajak</option>
+              </select>
             </div>
 
-            <div class="form-row">
-                <div class="col-md-2">
-                    <label class="form-label">Persen Susut</label>
-                </div>
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_persenSusut" placeholder='(%)'>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Metode Penyusutan</label>
-                </div>
-                <div class="col-md-2">
-                      <select name="MedPenyu" class='form-control' id="input_edit_metodePenyusutan">
-                        <option value="1">[L]urus</option>
-                        <option value="2">[M]enurun</option>
-                        <option value="3">[P]ajak</option>
-                      </select>
-                </div>
-                
-                <div class="col-2">
-                    <input type="checkbox" id="input_edit_uangMuka" value="">
-                    <label for="uangMukaPostingAktiva">Uang Muka</label><br>
-                </div>
+            <div class="col-md-2 d-flex align-items-center gap-2">
+              <input type="checkbox" id="input_edit_uangMuka" value="">
+              <label for="input_edit_uangMuka" class="form-label mb-0">Uang Muka</label>
             </div>
+          </div>
 
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Add</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal add posting aktiva-->
 
@@ -567,7 +560,7 @@ function buttonPerkiraan () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -630,7 +623,7 @@ function buttonAkumulasi () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectAkumulasi('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectAkumulasi('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -692,7 +685,7 @@ function buttonPerkiraanBP1 () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectBP1('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectBP1('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -754,7 +747,7 @@ function buttonPerkiraanBP2 () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectBP2('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectBP2('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>

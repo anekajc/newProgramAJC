@@ -6,13 +6,13 @@
 
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-  <div class="sp-breadcrumb">
+  {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
     <span>Berkas</span>
     <span class="sp-sep">›</span>
     <span class="sp-crumb-active">Online/Offline</span>
-  </div>
+  </div> --}}
 
   <div class="sp-page-head">
     <div>

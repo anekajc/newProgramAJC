@@ -803,10 +803,10 @@ function loadAll () {
         data: "KODECUSTSUPP", 
         render: function(data, type, row) {
           return `
-            <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${data}')" data-tooltip="Edit Supplier">
+            <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${data}')" data-tooltip="Edit">
                 <i class="bi bi-pen"></i>
             </button>
-            <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${data}')" data-tooltip="Delete Supplier">
+            <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${data}')" data-tooltip="Delete">
                 <i class="bi bi-trash"></i>
             </button>
           `;
