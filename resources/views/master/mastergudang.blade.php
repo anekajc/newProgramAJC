@@ -314,7 +314,6 @@ function loadAll () {
   });
 
    let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
       document.getElementById("tabel_data").innerHTML = rowTable
       $("#tabel").DataTable({
         "lengthChange": false,
