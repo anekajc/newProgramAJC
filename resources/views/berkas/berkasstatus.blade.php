@@ -25,12 +25,7 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-<div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
-  </div>
+  @include('master.partials.headerTableMaster')
 
           <div class="table-outer">
             <div class="table-wrap">
@@ -107,6 +102,8 @@
 @endsection
 
 @section('js')
+
+<script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -152,13 +149,16 @@ function loadAll () {
 
   });
 
-  document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "dom": 'tip'
-  });
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+      document.getElementById("tabel_data").innerHTML = rowTable
+      $("#tabel").DataTable({
+        "lengthChange": false,
+        "paging": true,
+        "searching": true,
+        "dom": 'tip',
+        "pageLength": currentLength
+      });
 
 }
 

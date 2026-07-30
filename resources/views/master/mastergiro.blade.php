@@ -36,8 +36,8 @@
     <h1>Master Giro</h1>
   </div>
   <div class="d-flex gap-2">
-    <button class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
-    <button class="btn btn-action-primary" onclick="buttonAddTerima()">+ Add Giro Terima</button>
+    <button id='divAddBuka' class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
+    <button id='divAddTerima' class="btn btn-action-primary" onclick="buttonAddTerima()" hidden>+ Add Giro Terima</button>
   </div>
 </div>
 
@@ -46,106 +46,116 @@
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
-  
   <style>
+  .radioChoiceMaster {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
 
-    .sp-filter-wrap .nav-tabs {
-      display: inline-flex;
-      background-color: #fff;
-      border: 1px solid #e9ecef; /* keeps the pill track visible now that it's white, not gray */
-      border-radius: 999px;
-      padding: 4px;
-      gap: 4px;
-    }
+  .radioChoiceMaster-item {
+    display: flex;
+  }
 
-    .sp-filter-wrap .nav-tabs .nav-item {
-      display: flex;
-    }
+  .radioChoiceMaster-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+  }
 
-    .sp-filter-wrap .nav-tabs .nav-link {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 18px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #6c757d;
-      background-color: transparent;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
+  .radioChoiceMaster-btn:hover {
+    color: #212529;
+    background-color: rgba(0,0,0,0.04);
+  }
 
-    .sp-filter-wrap .nav-tabs .nav-link:hover {
-      color: #212529;
-      background-color: rgba(0,0,0,0.04);
-    }
+  .radioChoiceMaster-btn:focus,
+  .radioChoiceMaster-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 
-    .sp-filter-wrap .nav-tabs .nav-link.active {
-      color: #fff;
-      background-color: #007bff;
-      box-shadow: 0 2px 6px rgba(0,123,255,0.35);
-    }
-    .sp-length-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
+  .radioChoiceMaster-btn.active {
+    color: #fff;
+    background-color: #007bff;
+    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
+  }
 
-    .sp-length-wrap label {
-      margin: 0; /* stops default label margin from pushing the select down/over */
-    }
+  .sp-length-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
 
-    .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
-    }
+  .sp-length-wrap label {
+    margin: 0;
+  }
 
-    .sp-toolbar {
-      display: flex;
-      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
-      align-items: center;
-      row-gap: 10px;
-      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
-    }
+  .sp-length-wrap select {
+    width: auto;
+  }
 
-    .sp-filter-wrap select {
-      width: auto;
-      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
-    }
+  .sp-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 10px;
+    column-gap: 12px;
+  }
 
-    .sp-length-wrap {
-      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
-    }
-  </style>
+  .sp-filter-wrap select {
+    width: auto;
+    min-width: 220px;
+  }
 
-  <div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
+  .sp-length-wrap {
+    margin-left: auto;
+  }
+</style>
 
-    <div class="sp-filter-wrap">
-      <ul class="nav nav-tabs mb-0" id="giroTab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
-        </li>
-      </ul>
-    </div>
-
-    <div class="sp-length-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
+<div class="sp-toolbar">
+  <div class="sp-search-wrap">
+    <i class="bi bi-search sp-search-icon"></i>
+    <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
   </div>
+
+  <div class="sp-filter-wrap">
+    <ul class="radioChoiceMaster" id="giroTab" role="tablist">
+      <li class="radioChoiceMaster-item" role="presentation">
+        <button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
+      </li>
+      <li class="radioChoiceMaster-item" role="presentation">
+        <button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sp-length-wrap">
+    <label for="tabel_length_visual">Tampilkan</label>
+    <select id="tabel_length_visual" class="form-select form-select-sm">
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+      <option value="-1">Semua</option>
+    </select>
+  </div>
+</div>
 
   <div class="tab-content">
 
@@ -425,7 +435,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAddTerima()">Submit</button>
   </div>
 </div>
@@ -626,7 +636,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAddBuka()">Submit</button>
   </div>
 </div>
@@ -833,7 +843,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEditTerima()">Submit</button>
   </div>
 </div>
@@ -1031,7 +1041,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEditBuka()">Submit</button>
   </div>
 </div>
@@ -1076,7 +1086,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+           
         </div>
   </div>
 </div>
@@ -1120,7 +1130,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+           
         </div>
   </div>
 </div>
@@ -1130,9 +1140,20 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
+
+function hideButtonBuka(){
+  document.getElementById('divAddBuka').hidden = true;
+  document.getElementById('divAddTerima').hidden = false;
+}
+
+function hideButtonTerima(){
+  document.getElementById('divAddBuka').hidden = false;
+  document.getElementById('divAddTerima').hidden = true;
+}
 
 function loadAllBuka () {
   console.log('asd')
@@ -1182,12 +1203,15 @@ function loadAllBuka () {
     </tr>`
   });
 
+ let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+
   document.getElementById("tabel_dataDibuka").innerHTML = rowTable
   $("#tabel_dibuka").DataTable({
     "lengthChange": true,
     "paging": true,
     "paging": true,
     "searching": true,
+    "pageLength": currentLength,
     "dom": 'tip'
   });
 
@@ -1242,11 +1266,13 @@ function loadAllTerima () {
     </tr>`
   });
 
+  let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
   document.getElementById("tabel_dataDiterima").innerHTML = rowTable
   $("#tabel_diterima").DataTable({
     "lengthChange": true,
     "paging": true,
     "searching": true,
+    "pageLength": currentLength,
     "dom": 'tip'
   });
 
@@ -1825,6 +1851,7 @@ function buttonPilihPerkiraanBank(selectedPerkiraan) {
 window.onload = function(){
   loadAllBuka();
   loadAllTerima();
+  hideButtonTerima();
 }
 
 // Get the DOM elements (not their values)

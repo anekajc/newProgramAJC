@@ -19,7 +19,7 @@
       <h1>Set Pemakai</h1>
       <p>Master — manajemen pengguna &amp; akses sistem</p>
     </div>
-    <button class="btn btn-primary" onclick="buttonAdd()">+ Add User</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add User</button>
   </div>
 
 

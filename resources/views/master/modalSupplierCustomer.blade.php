@@ -37,7 +37,7 @@
 
       </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+             
           </div>
     </div>
   </div>
@@ -72,30 +72,23 @@
 
             </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Hutang/Piutang</label>
-                </div>
-              </div>
-              <div class="col-5">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_perkiraandetail" placeholder="Perkiraan">
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetailAkunSelect()">Select</i></button>
-                </div>
-              </div>
-
+          <div class="row mt-2 align-items-center">
+            <div class="col-md-5">
+              <label class="form-label">Hutang/Piutang</label>
             </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_perkiraandetail">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+              </div>
+            </div>
+          </div>
 
         </div>
 
         </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+                 
                 <button type="button" class="btn btn-primary" onclick="submitAddDetailAkun()">Submit</button>
             </div>
         </div>
@@ -131,29 +124,23 @@
 
             </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Hutang/Piutang</label>
-                </div>
-              </div>
-              <div class="col-5">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraandetail" placeholder="Perkiraan">
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetailAkunSelect()">Select</i></button>
-                </div>
-              </div>
-
+            
+          <div class="row mt-2 align-items-center">
+            <div class="col-md-5">
+              <label class="form-label">Hutang/Piutang</label>
             </div>
+            <div class="col-md-3">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_perkiraandetail">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+              </div>
+            </div>
+          </div>
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAddDetailAkunEdit()">Submit</button>
   </div>
 </div>
@@ -199,7 +186,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+           
         </div>
   </div>
 </div>
@@ -285,7 +272,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -311,7 +298,7 @@
 
             </div>
   
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -324,7 +311,7 @@
               </div>
             </div>
             
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -353,7 +340,7 @@
         
         </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+                 
                 <button type="button" class="btn btn-primary" onclick="submitAddAlamat()">Submit</button>
             </div>
         </div>
@@ -367,7 +354,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1000px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Detail Alamat</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Edit Detail Alamat</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -390,7 +377,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -416,7 +403,7 @@
 
             </div>
   
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -429,7 +416,7 @@
               </div>
             </div>
             
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -458,7 +445,7 @@
         
         </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" onclick="submitAddAlamatEdit()">Submit Edit</button>
             </div>
         </div>
@@ -509,7 +496,6 @@ function submitAddDetailAkunEdit () {
 
     }})
 
-  // console.log(kodearea, namaarea)
 }
 
 function buttonAlamatEdit (nomor, kode, nama, alamat, telp, fax, up){
@@ -600,10 +586,12 @@ function loadAlamat (kodeDetail) {
     let temp = "";
 
     rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonAlamatEdit('${item.Nomor}','${item.KodeCustSupp}','${item.Nama}','${item.Alamat}','${item.Telp}','${item.Fax}','${item.UP}')"><i class="bi bi-pen"></i></button>
-        <button class="btn btn-danger btn-sm" type="button" onclick="buttonAlamatDelete('${item.Nomor}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
-      </td>
+    <td style="white-space:nowrap;" class='text-center'>
+      <div class="action-buttons-wrap">
+        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonAlamatEdit('${item.Nomor}','${item.KodeCustSupp}','${item.Nama}','${item.Alamat}','${item.Telp}','${item.Fax}','${item.UP}')"><i class="bi bi-pen"></i></button>
+        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonAlamatDelete('${item.Nomor}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+      </div>
+    </td>
       <td>${item.Nama}</td>
       <td>${item.Alamat}</td>
       <td>${item.Telp}</td>

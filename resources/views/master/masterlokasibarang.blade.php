@@ -72,7 +72,7 @@
                 </div>
               </div>
 
-              <div class="row">
+              <div class="row mt-2">
                 <div class="col-4 text-left">
                   <div class="form-group text-left">
                     <label class="text-left">Keterangan</label>
@@ -124,7 +124,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Keterangan</label>
@@ -191,13 +191,16 @@ function loadAll () {
     </tr>`
   });
  
-  document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "dom": 'tip'
-  });
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+      document.getElementById("tabel_data").innerHTML = rowTable
+      $("#tabel").DataTable({
+        "lengthChange": false,
+        "paging": true,
+        "searching": true,
+        "dom": 'tip',
+        "pageLength": currentLength
+      });
 }
 
 function buttonAdd () {

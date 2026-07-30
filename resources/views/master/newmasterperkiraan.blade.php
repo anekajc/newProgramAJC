@@ -92,8 +92,6 @@
                 </div>
               </div>
 
-
-
             </div>
 
           <div class="row">
@@ -235,7 +233,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
   </div>
 </div>
@@ -426,7 +424,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -631,8 +629,13 @@ function onChangePerkiraan () {
       <td>${item.mtipe}</td>
       <td>${item.mDK}</td>
       <td>${item.Valas}</td>
-      <td>${item.Simbol}</td>` + temp +
-      `<td>${item.Status}</td>
+      <td>${item.Simbol}</td>
+      `+ temp +`
+      ${
+          item.Status == 'Tidak Aktif'
+              ? '<td><span class="sp-badge is-user">Tidak Aktif</span></td>'
+              : '<td><span class="sp-badge is-supervisor">Aktif</span></td>'
+      }
       </tr>`
     });
 

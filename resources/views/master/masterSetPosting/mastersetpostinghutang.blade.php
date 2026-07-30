@@ -38,9 +38,9 @@
 
   <div class="sp-page-head">
     <div>
-      <h1>Master Posting Kas</h1>
+      <h1>Master Posting Hutang</h1>
     </div>
-    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Kas</button>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Hutang</button>
   </div>
 
   <div id="contentContainer" class="container-fluid">
@@ -134,7 +134,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
+    {{--   --}}
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
   </div>
 </div>
@@ -197,7 +197,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
+    {{--   --}}
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
   </div>
 </div>
@@ -243,7 +243,7 @@
 
     </div>
         <div class="modal-footer">
-          {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
+          {{--   --}}
         </div>
   </div>
 </div>
@@ -288,7 +288,7 @@
 
     </div>
         <div class="modal-footer">
-          {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> --}}
+          {{--   --}}
         </div>
   </div>
 </div>
@@ -351,13 +351,16 @@ function loadAll () {
 
 
 
-    document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "dom": 'tip'
-  });
+     let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+      document.getElementById("tabel_data").innerHTML = rowTable
+      $("#tabel").DataTable({
+        "lengthChange": false,
+        "paging": true,
+        "searching": true,
+        "dom": 'tip',
+        "pageLength": currentLength
+      });
 
 }
 //

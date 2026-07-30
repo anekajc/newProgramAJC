@@ -128,7 +128,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
   </div>
 </div>
@@ -207,7 +207,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -263,13 +263,16 @@ function loadAll () {
 
   });
 
-  document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "dom": 'tip'
-  });
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+      document.getElementById("tabel_data").innerHTML = rowTable
+      $("#tabel").DataTable({
+        "lengthChange": false,
+        "paging": true,
+        "searching": true,
+        "dom": 'tip',
+        "pageLength": currentLength
+      });
 
 }
 

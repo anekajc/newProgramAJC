@@ -251,7 +251,7 @@ function getStatus($data) {
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
   </div>
 </div>
 </div>
@@ -265,7 +265,6 @@ function getStatus($data) {
 <script type="text/javascript">
 
 let dataRefresh = []
-
 function loadAll () {
   let _token = $("#_token").val();
 
@@ -283,8 +282,6 @@ function loadAll () {
 
       let rowTable = ""
       dataRefresh.forEach((item, i) => {
-        let temp = ""
-
         rowTable += `<tr>
       <td style="white-space:nowrap;" class='text-center'>
         <div class="action-buttons-wrap">
@@ -298,17 +295,22 @@ function loadAll () {
         </tr>`
       });
 
-      
+      let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+       let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
       document.getElementById("tabel_data").innerHTML = rowTable
       $("#tabel").DataTable({
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip'
+        "dom": 'tip',
+        "pageLength": currentLength
       });
+
     }
   });
+
 }
+
 
 function buttonAdd () {
 

@@ -6,13 +6,13 @@
 
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-  <div class="sp-breadcrumb">
+  {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
     <span>Master</span>
     <span class="sp-sep">›</span>
     <span class="sp-crumb-active">Barang Jasa</span>
-  </div>
+  </div> --}}
 
   <div class="sp-page-head">
     <div>
@@ -183,10 +183,7 @@
                 </div>
               </div>
 
-
             </div>
-
-
 
             <!-- <br/> -->
 
@@ -233,7 +230,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
   </div>
 </div>
@@ -427,7 +424,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -458,9 +455,18 @@ function buttonAdd () {
 function loadAll() {
   $('#tabel').DataTable().destroy();
 
+  let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
   $('#tabel').DataTable({
     processing: true,
     serverSide: true,
+
+    paging: true,
+    searching: true,
+    lengthChange: true,
+    pageLength: currentLength,
+
+    dom: 'tip',
+
     ajax: {
       url: "{!! url('masterbarangjasaloadall') !!}",
       type: "GET"

@@ -54,7 +54,7 @@
               </div>
         </div>
         <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+          <!--   -->
           <button type="button" class="btn btn-danger btn-lg" 
           style="
           margin-top:-10px;
@@ -109,7 +109,7 @@
               </div>
         </div>
         <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+          <!--   -->
           <button type="button" class="btn btn-danger btn-lg" 
           style="
           margin-top:-10px;
@@ -164,7 +164,7 @@
               </div>
         </div>
         <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+          <!--   -->
           <button type="button" class="btn btn-danger btn-lg" 
           style="
           margin-top:-10px;
@@ -219,7 +219,7 @@
               </div>
         </div>
         <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+          <!--   -->
           <button type="button" class="btn btn-danger btn-lg" 
           style="
           margin-top:-10px;
@@ -277,7 +277,7 @@
             </div>
       </div>
       <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+        <!--   -->
         <button type="button" class="btn btn-danger btn-lg" 
         style="
         margin-top:-10px;
@@ -447,7 +447,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+      <!--   -->
       <button type="button" class="btn btn-danger btn-lg" 
       style="
       margin-top:-10px;
@@ -566,7 +566,7 @@
           </div>
     </div>
     <div class="modal-footer">
-      <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+      <!--   -->
       <button type="button" class="btn btn-danger btn-lg" 
       style="
       margin-top:-10px;
@@ -617,7 +617,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+    <!--   -->
     <button type="button" class="btn btn-danger btn-lg" 
     style="
     margin-top:-10px;
@@ -722,7 +722,7 @@
           </div>
     </div>
     <div class="modal-footer">
-      <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+      <!--   -->
       <button type="button" class="btn btn-danger btn-lg" 
       style="
       margin-top:-10px;
@@ -777,7 +777,7 @@
             </div>
       </div>
       <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+        <!--   -->
         <button type="button" class="btn btn-danger btn-lg" 
         style="
         margin-top:-10px;
@@ -833,7 +833,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
+                    <!--   -->
                     <button type="button" class="btn btn-danger btn-lg" 
                     style="
                     margin-top:-10px;

@@ -6,13 +6,13 @@
 
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-  <div class="sp-breadcrumb">
+  {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
     <span>Master</span>
     <span class="sp-sep">›</span>
     <span class="sp-crumb-active">Barang</span>
-  </div>
+  </div> --}}
 
   <div class="sp-page-head">
     <div>
@@ -247,8 +247,6 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
-
-
 
               </div>
               <div class="col-3">
@@ -486,7 +484,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
   </div>
 </div>
@@ -925,7 +923,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -1235,15 +1233,13 @@
     </div>
   </div>
   <!-- <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="">Submit</button>
   </div> -->
 </div>
 </div>
 </div>
 <!-- End modal harga-->
-
-
 
 @endsection
 
@@ -1263,18 +1259,18 @@ function loadAll () {
   $('#tabel').DataTable().destroy();
 
   $('#tabel').DataTable({
-      processing: true,
-      serverSide: true,
+    processing: true,
+    serverSide: true,
 
-      paging: true,
-      searching: true,
-      lengthChange: true,
-      pageLength: 10,
+    paging: true,
+    searching: true,
+    lengthChange: true,
+    pageLength: 10,
 
-      dom: 'tip',
+    dom: 'tip',
 
-      autoWidth: false,
-      responsive: false,
+    autoWidth: false,
+    responsive: false,
 
     ajax: {
       url: "{!! url('masterbarangloadall') !!}",

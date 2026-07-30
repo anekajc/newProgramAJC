@@ -117,7 +117,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -130,7 +130,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -143,7 +143,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -161,7 +161,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">KodePos</label>
@@ -184,7 +184,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -197,7 +197,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
 
               <!-- <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -235,7 +235,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Email</label>
@@ -258,7 +258,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Status</label>
@@ -295,7 +295,7 @@
 
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Att</label>
@@ -308,7 +308,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Att Phone</label>
@@ -331,7 +331,7 @@
               </div>
 
             </div>
-            <!-- <div class="row">
+            <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Bank</label>
@@ -354,7 +354,7 @@
               </div>
 
             </div> -->
-            <!-- <div class="row">
+            <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">a/n</label>
@@ -366,7 +366,7 @@
                 </div>
               </div>
             </div> -->
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Jenis</label>
@@ -396,7 +396,7 @@
               </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Int.Comp</label>
@@ -428,7 +428,7 @@
                 </div>
               </div>
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Group</label>
@@ -449,7 +449,7 @@
 
             <h5 class='text-primary'>Data Pajak</h5>
             <br/>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">NPWP</label>
@@ -463,7 +463,7 @@
 
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -476,7 +476,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -489,7 +489,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -514,7 +514,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
   </div>
 </div>
@@ -590,7 +590,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -603,7 +603,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -616,7 +616,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -634,7 +634,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">KodePos</label>
@@ -657,7 +657,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Telp</label>
@@ -670,7 +670,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
 
               <!-- <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -709,7 +709,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Email</label>
@@ -732,7 +732,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Status</label>
@@ -769,7 +769,7 @@
 
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Att</label>
@@ -782,7 +782,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Att Phone</label>
@@ -805,7 +805,7 @@
               </div>
 
             </div>
-            <!-- <div class="row">
+            <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Bank</label>
@@ -828,7 +828,7 @@
               </div>
 
             </div> -->
-            <!-- <div class="row">
+            <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">a/n</label>
@@ -840,7 +840,7 @@
                 </div>
               </div>
             </div> -->
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Jenis</label>
@@ -870,7 +870,7 @@
               </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Int.Comp</label>
@@ -902,7 +902,7 @@
                 </div>
               </div>
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Group</label>
@@ -923,7 +923,7 @@
 
             <h5 class='text-primary'>Data Pajak</h5>
             <br/>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">NPWP</label>
@@ -937,7 +937,7 @@
 
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama</label>
@@ -950,7 +950,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Alamat</label>
@@ -963,7 +963,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Kota</label>
@@ -988,7 +988,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -1036,7 +1036,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+           
         </div>
   </div>
 </div>
@@ -1072,30 +1072,23 @@
 
             </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Hutang/Piutang</label>
-                </div>
-              </div>
-              <div class="col-5">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_perkiraandetail" placeholder="Perkiraan">
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetailAkunSelect()">Select</i></button>
-                </div>
-              </div>
-
+          <div class="row mt-2 align-items-center">
+            <div class="col-md-4">
+              <label class="form-label">Hutang/Piutang</label>
             </div>
+            <div class="col-md-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_perkiraandetail">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+              </div>
+            </div>
+          </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAddDetailAkun()">Submit</button>
   </div>
 </div>
@@ -1108,7 +1101,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Detail Akun</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Edit Detail Akun</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -1131,29 +1124,22 @@
 
             </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Hutang/Piutang</label>
-                </div>
-              </div>
-              <div class="col-5">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraandetail" placeholder="Perkiraan">
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetailAkunSelect()">Select</i></button>
-                </div>
-              </div>
-
+          <div class="row mt-2 align-items-center">
+            <div class="col-md-4">
+              <label class="form-label">Hutang/Piutang</label>
             </div>
+            <div class="col-md-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_edit_perkiraandetail">
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+              </div>
+            </div>
+          </div>
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+     
     <button type="button" class="btn btn-primary" onclick="submitAddDetailAkunEdit()">Submit</button>
   </div>
 </div>
@@ -1199,7 +1185,7 @@
 
     </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+           
         </div>
   </div>
 </div>
@@ -1223,6 +1209,7 @@ function loadAll() {
         $('#tabel').DataTable().destroy();
     }
 
+    let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
     $('#tabel').DataTable({
         processing: true,
         serverSide: true,
@@ -1230,7 +1217,7 @@ function loadAll() {
         paging: true,
         searching: true,
         lengthChange: true,
-        pageLength: 10,
+        pageLength: currentLength,
 
         dom: 'tip',
 
@@ -1946,8 +1933,8 @@ function loadDetailAkun (kodeDetail) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
-        <button class="btn btn-danger btn-sm" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
+        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
       </td>
       <td>${item.KodeCustSupp}</td>
       <td>${item.Perkiraan}</td>
