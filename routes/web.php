@@ -61,7 +61,7 @@ Route::post('/spnobuktisimbol', [GlobalController::class, 'getNoBuktiSimbol'])->
 Route::post('/spnobukti', [GlobalController::class, 'getNoBukti'])->middleware('auth');
 Route::get('/spgetstockakhir', [GlobalController::class, 'getStockAkhir'])->middleware('auth');
 
-// require __DIR__.'/accounting.php';
+require __DIR__.'/accounting.php';
 // require __DIR__.'/marketing.php';
 // require __DIR__.'/gudang.php';
 require __DIR__.'/purchasing.php';

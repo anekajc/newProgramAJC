@@ -303,7 +303,7 @@
   <div class="main">
 
     <header class="header">
-      <div class="breadcrumb mt-3" id="breadcrumb"></div>
+      <div class='titleText' id="breadcrumb"></div>
 
       <div class="header-right">
         <div class="period-badge" id="period-badge">

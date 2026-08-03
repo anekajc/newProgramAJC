@@ -1,334 +1,347 @@
 <?php
 
-// KAS
-Route::namespace('Accounting')->group(function () {
-Route::get('/kas', 'KasController@index')->middleware('auth');
-Route::get('/kaslistkasheader', 'KasController@listKasHeader')->middleware('auth');
-Route::post('/kaslistlawan', 'KasController@listLawan')->middleware('auth');
-Route::post('/kaslistbon', 'KasController@listBon')->middleware('auth');
-Route::post('/kaslistsubcosting', 'KasController@listSubCosting')->middleware('auth');
-Route::post('/kaslistcosting', 'KasController@listCosting')->middleware('auth');
-Route::post('/kaschangekembaliuang', 'KasController@changeKembaliUang')->middleware('auth');
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Accounting\BankController;
+use App\Http\Controllers\Accounting\BonSementaraController;
+use App\Http\Controllers\Accounting\CetakPengajuanDphController;
+use App\Http\Controllers\Accounting\GiroDibukaController;
+use App\Http\Controllers\Accounting\GiroDiterimaController;
+use App\Http\Controllers\Accounting\KasController;
+use App\Http\Controllers\Accounting\MemorialKoreksiController;
+use App\Http\Controllers\Accounting\PelunasanPiutangDPPController;
+use App\Http\Controllers\Accounting\PenerimaanDPPController;
+use App\Http\Controllers\Accounting\PengajuanDPHController;
+use App\Http\Controllers\Accounting\PengajuanDPHTunaiController;
+use App\Http\Controllers\Accounting\PengajuanDPPController;
 
-Route::post('/kaslistakumulasi', 'KasController@listAkumulasi')->middleware('auth');
+Route::middleware('auth')->group(function () {
+// Route::get('/kas', [KasController::class, 'index']);
+// Route::get('/kaslistkasheader', [KasController::class, 'listKasHeader']);
+// Route::post('/kaslistlawan', [KasController::class, 'listLawan']);
+// Route::post('/kaslistbon', [KasController::class, 'listBon']);
+// Route::post('/kaslistsubcosting', [KasController::class, 'listSubCosting']);
+// Route::post('/kaslistcosting', [KasController::class, 'listCosting']);
+// Route::post('/kaschangekembaliuang', [KasController::class, 'changeKembaliUang']);
 
-Route::get('/kaslistakumulasiinput', 'KasController@listAkumulasiInput')->middleware('auth');
-Route::get('/kaslistbiayainput', 'KasController@listBiayaInput')->middleware('auth');
+// Route::post('/kaslistakumulasi', [KasController::class, 'listAkumulasi']);
 
-Route::post('/kasgetnourutaktiva' , 'KasController@getNoUrutAktiva')->middleware('auth');
-Route::post('/kasspaddnewaktiva' , 'KasController@spAddNewAktiva')->middleware('auth');
+// Route::get('/kaslistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
+// Route::get('/kaslistbiayainput', [KasController::class, 'listBiayaInput']);
 
-Route::post('/kaslistaktiva', 'KasController@listAktiva')->middleware('auth');
-Route::post('/kaslistdetailaktiva', 'KasController@listDetailAktiva')->middleware('auth');
-Route::post('/kasupdatedbaktivadet', 'KasController@updateDBAktivaDet')->middleware('auth');
-Route::post('/kasspaddaktiva', 'KasController@spAddAktiva')->middleware('auth');
+// Route::post('/kasgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
+// Route::post('/kasspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
 
-Route::get('/kaslistdepartemen', 'KasController@listDepartemen')->middleware('auth');
-Route::get('/kaslistdevisi', 'KasController@listDevisi')->middleware('auth');
-Route::get('/kaslistvalas', 'KasController@listValas')->middleware('auth');
-Route::post('/kasspadd', 'KasController@spAdd')->middleware('auth');
-Route::post('/kasspdetail', 'KasController@getDetail')->middleware('auth');
-Route::get('/kasloadall', 'KasController@loadAll')->middleware('auth');
-Route::get('/kaslistdph', 'KasController@listDPH')->middleware('auth');
-Route::get('/kaslistdphuht', 'KasController@listDPHUHT')->middleware('auth');
-Route::get('/kaslistdpp', 'KasController@listDPP')->middleware('auth');
-Route::get('/kaslistcustsupp', 'KasController@listCustsupp')->middleware('auth');
-Route::get('/kaslistcustsuppx', 'KasController@listCustSuppX')->middleware('auth');
-Route::post('/kaslisttunai', 'KasController@listTunai')->middleware('auth');
-Route::get('/kaslisttunaix', 'KasController@listTunaiX')->middleware('auth');
-Route::post('/kaslistcustsupptunai', 'KasController@listCustSuppTunai')->middleware('auth');
+// Route::post('/kaslistaktiva', [KasController::class, 'listAktiva']);
+// Route::post('/kaslistdetailaktiva', [KasController::class, 'listDetailAktiva']);
+// Route::post('/kasupdatedbaktivadet', [KasController::class, 'updateDBAktivaDet']);
+// Route::post('/kasspaddaktiva', [KasController::class, 'spAddAktiva']);
 
-
-Route::post('/kassptemphutpiut', 'KasController@spTempHutPiut')->middleware('auth');
-
-Route::get('/kaslistcustsuppumb', 'KasController@listCustsuppUMB')->middleware('auth');
-Route::post('/kasprosesumb', 'KasController@prosesUMB')->middleware('auth');
-Route::post('/kaslistumb', 'KasController@listUMB')->middleware('auth');
-Route::post('/kasspadddppdph', 'KasController@spAddDPPDPH')->middleware('auth');
-Route::post('/kasspaddtemprumjual', 'KasController@spAddTempRUMJUAL')->middleware('auth');
-Route::post('/kasspdeletetemprumjual', 'KasController@spDeleteTempRUMJUAL')->middleware('auth');
-Route::post('/kasspupdatetemprumjual', 'KasController@spUpdateTempRUMJUAL')->middleware('auth');
-Route::post('/kasspotorisasi', 'KasController@spOtorisasi')->middleware('auth');
-Route::post('/kasspbatalotorisasi', 'KasController@spBatalOtorisasi')->middleware('auth');
-Route::post('/kasdetailCetak', 'KasController@getDetailCetak')->middleware('auth');
-
+// Route::get('/kaslistdepartemen', [KasController::class, 'listDepartemen']);
+// Route::get('/kaslistdevisi', [KasController::class, 'listDevisi']);
+// Route::get('/kaslistvalas', [KasController::class, 'listValas']);
+// Route::post('/kasspadd', [KasController::class, 'spAdd']);
+// Route::post('/kasspdetail', [KasController::class, 'getDetail']);
+// Route::get('/kasloadall', [KasController::class, 'loadAll']);
+// Route::get('/kaslistdph', [KasController::class, 'listDPH']);
+// Route::get('/kaslistdphuht', [KasController::class, 'listDPHUHT']);
+// Route::get('/kaslistdpp', [KasController::class, 'listDPP']);
+// Route::get('/kaslistcustsupp', [KasController::class, 'listCustsupp']);
+// Route::get('/kaslistcustsuppx', [KasController::class, 'listCustSuppX']);
+// Route::post('/kaslisttunai', [KasController::class, 'listTunai']);
+// Route::get('/kaslisttunaix', [KasController::class, 'listTunaiX']);
+// Route::post('/kaslistcustsupptunai', [KasController::class, 'listCustSuppTunai']);
 
 
-// Bank
-Route::get('/bank', 'BankController@index')->middleware('auth');
-Route::get('/banklistkasheader', 'BankController@listKasHeader')->middleware('auth');
-Route::post('/banklistlawan', 'BankController@listLawan')->middleware('auth');
-Route::post('/banklistsubcosting', 'BankController@listSubCosting')->middleware('auth');
-Route::post('/banklistcosting', 'BankController@listCosting')->middleware('auth');
+// Route::post('/kassptemphutpiut', [KasController::class, 'spTempHutPiut']);
 
-Route::post('/banklistakumulasi', 'BankController@listAkumulasi')->middleware('auth');
-
-Route::get('/banklistakumulasiinput', 'KasController@listAkumulasiInput')->middleware('auth');
-Route::get('/banklistbiayainput', 'KasController@listBiayaInput')->middleware('auth');
-
-Route::post('/bankgetnourutaktiva' , 'KasController@getNoUrutAktiva')->middleware('auth');
-Route::post('/bankspaddnewaktiva' , 'KasController@spAddNewAktiva')->middleware('auth');
-
-
-Route::post('/banklistaktiva', 'BankController@listAktiva')->middleware('auth');
-Route::post('/banklistdetailaktiva', 'BankController@listDetailAktiva')->middleware('auth');
-Route::post('/bankupdatedbaktivadet', 'BankController@updateDBAktivaDet')->middleware('auth');
-Route::post('/bankspaddaktiva', 'BankController@spAddAktiva')->middleware('auth');
+// Route::get('/kaslistcustsuppumb', [KasController::class, 'listCustsuppUMB']);
+// Route::post('/kasprosesumb', [KasController::class, 'prosesUMB']);
+// Route::post('/kaslistumb', [KasController::class, 'listUMB']);
+// Route::post('/kasspadddppdph', [KasController::class, 'spAddDPPDPH']);
+// Route::post('/kasspaddtemprumjual', [KasController::class, 'spAddTempRUMJUAL']);
+// Route::post('/kasspdeletetemprumjual', [KasController::class, 'spDeleteTempRUMJUAL']);
+// Route::post('/kasspupdatetemprumjual', [KasController::class, 'spUpdateTempRUMJUAL']);
+// Route::post('/kasspotorisasi', [KasController::class, 'spOtorisasi']);
+// Route::post('/kasspbatalotorisasi', [KasController::class, 'spBatalOtorisasi']);
+// Route::post('/kasdetailCetak', [KasController::class, 'getDetailCetak']);
 
 
 
-Route::post('/bankspnobukti', 'BankController@getNoBukti')->middleware('auth');
-Route::get('/banklistdepartemen', 'BankController@listDepartemen')->middleware('auth');
-Route::get('/banklistdevisi', 'BankController@listDevisi')->middleware('auth');
-Route::get('/banklistvalas', 'BankController@listValas')->middleware('auth');
-Route::post('/bankspadd', 'BankController@spAdd')->middleware('auth');
-Route::post('/bankspdetail', 'BankController@getDetail')->middleware('auth');
-Route::get('/bankloadall', 'BankController@loadAll')->middleware('auth');
-Route::get('/banklistdph', 'BankController@listDPH')->middleware('auth');
-Route::get('/banklistdphuht', 'BankController@listDPHUHT')->middleware('auth');
-Route::get('/banklistdpp', 'BankController@listDPP')->middleware('auth');
-Route::get('/banklistcustsupp', 'BankController@listCustsupp')->middleware('auth');
+// // Bank
+// Route::get('/bank', [BankController::class, 'index']);
+// Route::get('/banklistkasheader', [BankController::class, 'listKasHeader']);
+// Route::post('/banklistlawan', [BankController::class, 'listLawan']);
+// Route::post('/banklistsubcosting', [BankController::class, 'listSubCosting']);
+// Route::post('/banklistcosting', [BankController::class, 'listCosting']);
+
+// Route::post('/banklistakumulasi', [BankController::class, 'listAkumulasi']);
+
+// Route::get('/banklistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
+// Route::get('/banklistbiayainput', [KasController::class, 'listBiayaInput']);
+
+// Route::post('/bankgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
+// Route::post('/bankspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
 
 
-Route::get('/banklistcustsuppx', 'BankController@listCustSuppX')->middleware('auth');
-Route::post('/banklisttunai', 'BankController@listTunai')->middleware('auth');
-Route::get('/banklisttunaix', 'BankController@listTunaiX')->middleware('auth');
-Route::post('/banklistcustsupptunai', 'BankController@listCustSuppTunai')->middleware('auth');
-
-
-Route::post('/banksptemphutpiut', 'BankController@spTempHutPiut')->middleware('auth');
-
-
-
-Route::get('/banklistcustsuppumb', 'BankController@listCustsuppUMB')->middleware('auth');
+// Route::post('/banklistaktiva', [BankController::class, 'listAktiva']);
+// Route::post('/banklistdetailaktiva', [BankController::class, 'listDetailAktiva']);
+// Route::post('/bankupdatedbaktivadet', [BankController::class, 'updateDBAktivaDet']);
+// Route::post('/bankspaddaktiva', [BankController::class, 'spAddAktiva']);
 
 
 
+// Route::post('/bankspnobukti', [BankController::class, 'getNoBukti']);
+// Route::get('/banklistdepartemen', [BankController::class, 'listDepartemen']);
+// Route::get('/banklistdevisi', [BankController::class, 'listDevisi']);
+// Route::get('/banklistvalas', [BankController::class, 'listValas']);
+// Route::post('/bankspadd', [BankController::class, 'spAdd']);
+// Route::post('/bankspdetail', [BankController::class, 'getDetail']);
+// Route::get('/bankloadall', [BankController::class, 'loadAll']);
+// Route::get('/banklistdph', [BankController::class, 'listDPH']);
+// Route::get('/banklistdphuht', [BankController::class, 'listDPHUHT']);
+// Route::get('/banklistdpp', [BankController::class, 'listDPP']);
+// Route::get('/banklistcustsupp', [BankController::class, 'listCustsupp']);
 
 
-Route::post('/bankprosesumb', 'BankController@prosesUMB')->middleware('auth');
-Route::post('/banklistumb', 'BankController@listUMB')->middleware('auth');
-Route::post('/bankspadddppdph', 'BankController@spAddDPPDPH')->middleware('auth');
-Route::post('/bankspaddtemprumjual', 'BankController@spAddTempRUMJUAL')->middleware('auth');
-Route::post('/bankspdeletetemprumjual', 'BankController@spDeleteTempRUMJUAL')->middleware('auth');
-Route::post('/bankspupdatetemprumjual', 'BankController@spUpdateTempRUMJUAL')->middleware('auth');
-Route::post('/bankspotorisasi', 'BankController@spOtorisasi')->middleware('auth');
-Route::post('/bankspbatalotorisasi', 'BankController@spBatalOtorisasi')->middleware('auth');
-Route::post('/bankdetailCetak', 'BankController@getDetailCetak')->middleware('auth');
-
-// CETAK PENGAJUAN DPH
-Route::post('/cetakpengajuandphspnobukti', 'BankController@getNoBukti')->middleware('auth');
-Route::get('/cetakpengajuandph' , 'CetakPengajuanDphController@index')->middleware('auth');
-Route::post('/cetakpengajuandphdetailkoreksi' , 'CetakPengajuanDphController@detailKoreksi')->middleware('auth');
-Route::post('/cetakpengajuandphdetailoutstanding' , 'CetakPengajuanDphController@getDetailOutstanding')->middleware('auth');
-Route::post('/cetakpengajuandphlistproses' , 'CetakPengajuanDphController@listProses')->middleware('auth');
-
-Route::post('/cetakpengajuandphspadd' , 'CetakPengajuanDphController@spAdd')->middleware('auth');
-Route::post('/cetakpengajuandphspkoreksi' , 'CetakPengajuanDphController@spKoreksi')->middleware('auth');
-Route::post('/cetakpengajuandphspproses' , 'CetakPengajuanDphController@spProses')->middleware('auth');
-Route::get('/cetakpengajuandphloadall' , 'CetakPengajuanDphController@loadAll' )->middleware('auth');
-Route::post('/cetakpengajuandphdetailCetak', 'CetakPengajuanDphController@getDetailCetak')->middleware('auth');
+// Route::get('/banklistcustsuppx', [BankController::class, 'listCustSuppX']);
+// Route::post('/banklisttunai', [BankController::class, 'listTunai']);
+// Route::get('/banklisttunaix', [BankController::class, 'listTunaiX']);
+// Route::post('/banklistcustsupptunai', [BankController::class, 'listCustSuppTunai']);
 
 
-// Giro Diterima
-Route::get('/giroditerima', 'GiroDiterimaController@index')->middleware('auth');
-Route::get('/giroditerimalistperkiraanheader', 'GiroDiterimaController@listPerkiraanHeader')->middleware('auth');
-Route::post('/giroditerimalistlawan', 'GiroDiterimaController@listLawan')->middleware('auth');
-Route::post('/giroditerimalistlawanbgc', 'GiroDiterimaController@listLawanBGC')->middleware('auth');
-Route::post('/giroditerimalistgiro', 'GiroDiterimaController@listGiro')->middleware('auth');
-Route::post('/giroditerimaspnobukti', 'GiroDiterimaController@getNoBukti')->middleware('auth');
-Route::post('/giroditerimacekgiroexist', 'GiroDiterimaController@cekGiroExist')->middleware('auth');
-Route::post('/giroditerimalistpencairangiro', 'GiroDiterimaController@listPencairanGiro')->middleware('auth');
-Route::post('/giroditerimalistpencairangirokoreksi', 'GiroDiterimaController@listPencairanGiroKoreksi')->middleware('auth');
-Route::post('/giroditerimalistpencairangirobgt', 'GiroDiterimaController@listPencairanGiroKoreksiBGT')->middleware('auth');
-
-Route::post('/giroditerimaspaddgirobgt', 'GiroDiterimaController@spGiroBGT')->middleware('auth');
-// Route::post('/giroditerimaspdeletegirobgt', 'GiroDiterimaController@spDeleteGiroBGT')->middleware('auth');
+// Route::post('/banksptemphutpiut', [BankController::class, 'spTempHutPiut']);
 
 
 
-
-Route::get('/giroditerimalistdepartemen', 'GiroDiterimaController@listDepartemen')->middleware('auth');
-Route::get('/giroditerimalistdevisi', 'GiroDiterimaController@listDevisi')->middleware('auth');
-Route::get('/giroditerimalistvalas', 'GiroDiterimaController@listValas')->middleware('auth');
-Route::post('/giroditerimaspadd', 'GiroDiterimaController@spAdd')->middleware('auth');
-Route::post('/giroditerimaspaddbgc', 'GiroDiterimaController@spAddBGC')->middleware('auth');
-Route::post('/giroditerimaspaddgirokoreksi', 'GiroDiterimaController@spAddGiroKoreksi')->middleware('auth');
-Route::post('/giroditerimaspdeletegirokoreksi', 'GiroDiterimaController@spDeleteGiroKoreksi')->middleware('auth');
-Route::post('/giroditerimaspdelete', 'GiroDiterimaController@spDelete')->middleware('auth');
+// Route::get('/banklistcustsuppumb', [BankController::class, 'listCustsuppUMB']);
 
 
 
 
 
-Route::post('/giroditerimaspdetail', 'GiroDiterimaController@getDetail')->middleware('auth');
-Route::get('/giroditerimaloadall', 'GiroDiterimaController@loadAll')->middleware('auth');
-Route::get('/giroditerimalistdph', 'GiroDiterimaController@listDPH')->middleware('auth');
-Route::get('/giroditerimalistdphuht', 'GiroDiterimaController@listDPHUHT')->middleware('auth');
-Route::get('/giroditerimalistdpp', 'GiroDiterimaController@listDPP')->middleware('auth');
-Route::get('/giroditerimalistcustsupp', 'GiroDiterimaController@listCustsupp')->middleware('auth');
-Route::get('/giroditerimalistcustsuppumb', 'GiroDiterimaController@listCustsuppUMB')->middleware('auth');
-Route::post('/giroditerimaprosesumb', 'GiroDiterimaController@prosesUMB')->middleware('auth');
-Route::post('/giroditerimalistumb', 'GiroDiterimaController@listUMB')->middleware('auth');
-Route::post('/giroditerimaspadddppdph', 'GiroDiterimaController@spAddDPPDPH')->middleware('auth');
-Route::post('/giroditerimaspaddtemprumjual', 'GiroDiterimaController@spAddTempRUMJUAL')->middleware('auth');
-Route::post('/giroditerimaspdeletetemprumjual', 'GiroDiterimaController@spDeleteTempRUMJUAL')->middleware('auth');
-Route::post('/giroditerimaspupdatetemprumjual', 'GiroDiterimaController@spUpdateTempRUMJUAL')->middleware('auth');
-Route::post('/giroditerimaspotorisasi', 'GiroDiterimaController@spOtorisasi')->middleware('auth');
-Route::post('/giroditerimaspbatalotorisasi', 'GiroDiterimaController@spBatalOtorisasi')->middleware('auth');
-Route::post('/giroditerimadetailCetak', 'GiroDiterimaController@getDetailCetak')->middleware('auth');
+// Route::post('/bankprosesumb', [BankController::class, 'prosesUMB']);
+// Route::post('/banklistumb', [BankController::class, 'listUMB']);
+// Route::post('/bankspadddppdph', [BankController::class, 'spAddDPPDPH']);
+// Route::post('/bankspaddtemprumjual', [BankController::class, 'spAddTempRUMJUAL']);
+// Route::post('/bankspdeletetemprumjual', [BankController::class, 'spDeleteTempRUMJUAL']);
+// Route::post('/bankspupdatetemprumjual', [BankController::class, 'spUpdateTempRUMJUAL']);
+// Route::post('/bankspotorisasi', [BankController::class, 'spOtorisasi']);
+// Route::post('/bankspbatalotorisasi', [BankController::class, 'spBatalOtorisasi']);
+// Route::post('/bankdetailCetak', [BankController::class, 'getDetailCetak']);
+
+// // CETAK PENGAJUAN DPH
+// Route::post('/cetakpengajuandphspnobukti', [BankController::class, 'getNoBukti']);
+// Route::get('/cetakpengajuandph' , [CetakPengajuanDphController::class, 'index']);
+// Route::post('/cetakpengajuandphdetailkoreksi' , [CetakPengajuanDphController::class, 'detailKoreksi']);
+// Route::post('/cetakpengajuandphdetailoutstanding' , [CetakPengajuanDphController::class, 'getDetailOutstanding']);
+// Route::post('/cetakpengajuandphlistproses' , [CetakPengajuanDphController::class, 'listProses']);
+
+// Route::post('/cetakpengajuandphspadd' , [CetakPengajuanDphController::class, 'spAdd']);
+// Route::post('/cetakpengajuandphspkoreksi' , [CetakPengajuanDphController::class, 'spKoreksi']);
+// Route::post('/cetakpengajuandphspproses' , [CetakPengajuanDphController::class, 'spProses']);
+// Route::get('/cetakpengajuandphloadall' , [CetakPengajuanDphController::class, 'loadAll'] );
+// Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
+
+
+// // Giro Diterima
+// Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
+// Route::get('/giroditerimalistperkiraanheader', [GiroDiterimaController::class, 'listPerkiraanHeader']);
+// Route::post('/giroditerimalistlawan', [GiroDiterimaController::class, 'listLawan']);
+// Route::post('/giroditerimalistlawanbgc', [GiroDiterimaController::class, 'listLawanBGC']);
+// Route::post('/giroditerimalistgiro', [GiroDiterimaController::class, 'listGiro']);
+// Route::post('/giroditerimaspnobukti', [GiroDiterimaController::class, 'getNoBukti']);
+// Route::post('/giroditerimacekgiroexist', [GiroDiterimaController::class, 'cekGiroExist']);
+// Route::post('/giroditerimalistpencairangiro', [GiroDiterimaController::class, 'listPencairanGiro']);
+// Route::post('/giroditerimalistpencairangirokoreksi', [GiroDiterimaController::class, 'listPencairanGiroKoreksi']);
+// Route::post('/giroditerimalistpencairangirobgt', [GiroDiterimaController::class, 'listPencairanGiroKoreksiBGT']);
+
+// Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiroBGT']);
+// // Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
 
 
 
 
-// Giro Dibuka
-Route::get('/girodibuka', 'GiroDibukaController@index')->middleware('auth');
-Route::get('/girodibukalistperkiraanheader', 'GiroDibukaController@listPerkiraanHeader')->middleware('auth');
-Route::post('/girodibukalistlawan', 'GiroDibukaController@listLawan')->middleware('auth');
-Route::post('/girodibukalistlawanbgc', 'GiroDibukaController@listLawanBGC')->middleware('auth');
-Route::post('/girodibukalistgiro', 'GiroDibukaController@listGiro')->middleware('auth');
-Route::post('/girodibukaspnobukti', 'GiroDibukaController@getNoBukti')->middleware('auth');
-Route::post('/girodibukacekgiroexist', 'GiroDibukaController@cekGiroExist')->middleware('auth');
-Route::post('/girodibukalistpencairangiro', 'GiroDibukaController@listPencairanGiro')->middleware('auth');
-Route::post('/girodibukalistpencairangirokoreksi', 'GiroDibukaController@listPencairanGiroKoreksi')->middleware('auth');
-Route::post('/girodibukalistpencairangirobgt', 'GiroDibukaController@listPencairanGiroKoreksiBGT')->middleware('auth');
-
-Route::post('/girodibukaspaddgirobgt', 'GiroDibukaController@spGiroBGT')->middleware('auth');
-// Route::post('/girodibukaspdeletegirobgt', 'GiroDibukaController@spDeleteGiroBGT')->middleware('auth');
-
-
-
-
-Route::get('/girodibukalistdepartemen', 'GiroDibukaController@listDepartemen')->middleware('auth');
-Route::get('/girodibukalistdevisi', 'GiroDibukaController@listDevisi')->middleware('auth');
-Route::get('/girodibukalistvalas', 'GiroDibukaController@listValas')->middleware('auth');
-Route::post('/girodibukaspadd', 'GiroDibukaController@spAdd')->middleware('auth');
-Route::post('/girodibukaspaddbgc', 'GiroDibukaController@spAddBGC')->middleware('auth');
-Route::post('/girodibukaspaddgirokoreksi', 'GiroDibukaController@spAddGiroKoreksi')->middleware('auth');
-Route::post('/girodibukaspdeletegirokoreksi', 'GiroDibukaController@spDeleteGiroKoreksi')->middleware('auth');
-Route::post('/girodibukaspdelete', 'GiroDibukaController@spDelete')->middleware('auth');
+// Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
+// Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
+// Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
+// Route::post('/giroditerimaspadd', [GiroDiterimaController::class, 'spAdd']);
+// Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']);
+// Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
+// Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
+// Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
 
 
 
 
 
-Route::post('/girodibukaspdetail', 'GiroDibukaController@getDetail')->middleware('auth');
-Route::get('/girodibukaloadall', 'GiroDibukaController@loadAll')->middleware('auth');
-Route::get('/girodibukalistdph', 'GiroDibukaController@listDPH')->middleware('auth');
-Route::get('/girodibukalistdphbbg', 'GiroDibukaController@listDPHBBG')->middleware('auth');
+// Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
+// Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
+// Route::get('/giroditerimalistdph', [GiroDiterimaController::class, 'listDPH']);
+// Route::get('/giroditerimalistdphuht', [GiroDiterimaController::class, 'listDPHUHT']);
+// Route::get('/giroditerimalistdpp', [GiroDiterimaController::class, 'listDPP']);
+// Route::get('/giroditerimalistcustsupp', [GiroDiterimaController::class, 'listCustsupp']);
+// Route::get('/giroditerimalistcustsuppumb', [GiroDiterimaController::class, 'listCustsuppUMB']);
+// Route::post('/giroditerimaprosesumb', [GiroDiterimaController::class, 'prosesUMB']);
+// Route::post('/giroditerimalistumb', [GiroDiterimaController::class, 'listUMB']);
+// Route::post('/giroditerimaspadddppdph', [GiroDiterimaController::class, 'spAddDPPDPH']);
+// Route::post('/giroditerimaspaddtemprumjual', [GiroDiterimaController::class, 'spAddTempRUMJUAL']);
+// Route::post('/giroditerimaspdeletetemprumjual', [GiroDiterimaController::class, 'spDeleteTempRUMJUAL']);
+// Route::post('/giroditerimaspupdatetemprumjual', [GiroDiterimaController::class, 'spUpdateTempRUMJUAL']);
+// Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtorisasi']);
+// Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
+// Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
 
-Route::get('/girodibukalistdphuht', 'GiroDibukaController@listDPHUHT')->middleware('auth');
-Route::get('/girodibukalistdpp', 'GiroDibukaController@listDPP')->middleware('auth');
-Route::get('/girodibukalistcustsupp', 'GiroDibukaController@listCustsupp')->middleware('auth');
-Route::get('/girodibukalistcustsuppumb', 'GiroDibukaController@listCustsuppUMB')->middleware('auth');
-Route::post('/girodibukaprosesumb', 'GiroDibukaController@prosesUMB')->middleware('auth');
-Route::post('/girodibukalistumb', 'GiroDibukaController@listUMB')->middleware('auth');
-Route::post('/girodibukaspadddppdph', 'GiroDibukaController@spAddDPPDPH')->middleware('auth');
-Route::post('/girodibukaspaddtemprumjual', 'GiroDibukaController@spAddTempRUMJUAL')->middleware('auth');
-Route::post('/girodibukaspdeletetemprumjual', 'GiroDibukaController@spDeleteTempRUMJUAL')->middleware('auth');
-Route::post('/girodibukaspupdatetemprumjual', 'GiroDibukaController@spUpdateTempRUMJUAL')->middleware('auth');
-Route::post('/girodibukaspotorisasi', 'GiroDibukaController@spOtorisasi')->middleware('auth');
-Route::post('/girodibukaspbatalotorisasi', 'GiroDibukaController@spBatalOtorisasi')->middleware('auth');
-Route::post('/girodibukadetailCetak', 'GiroDibukaController@getDetailCetak')->middleware('auth');
+
+
+
+// // Giro Dibuka
+// Route::get('/girodibuka', [GiroDibukaController::class, 'index']);
+// Route::get('/girodibukalistperkiraanheader', [GiroDibukaController::class, 'listPerkiraanHeader']);
+// Route::post('/girodibukalistlawan', [GiroDibukaController::class, 'listLawan']);
+// Route::post('/girodibukalistlawanbgc', [GiroDibukaController::class, 'listLawanBGC']);
+// Route::post('/girodibukalistgiro', [GiroDibukaController::class, 'listGiro']);
+// Route::post('/girodibukaspnobukti', [GiroDibukaController::class, 'getNoBukti']);
+// Route::post('/girodibukacekgiroexist', [GiroDibukaController::class, 'cekGiroExist']);
+// Route::post('/girodibukalistpencairangiro', [GiroDibukaController::class, 'listPencairanGiro']);
+// Route::post('/girodibukalistpencairangirokoreksi', [GiroDibukaController::class, 'listPencairanGiroKoreksi']);
+// Route::post('/girodibukalistpencairangirobgt', [GiroDibukaController::class, 'listPencairanGiroKoreksiBGT']);
+
+// Route::post('/girodibukaspaddgirobgt', [GiroDibukaController::class, 'spGiroBGT']);
+// // Route::post('/girodibukaspdeletegirobgt', [GiroDibukaController::class, 'spDeleteGiroBGT']);
+
+
+
+
+// Route::get('/girodibukalistdepartemen', [GiroDibukaController::class, 'listDepartemen']);
+// Route::get('/girodibukalistdevisi', [GiroDibukaController::class, 'listDevisi']);
+// Route::get('/girodibukalistvalas', [GiroDibukaController::class, 'listValas']);
+// Route::post('/girodibukaspadd', [GiroDibukaController::class, 'spAdd']);
+// Route::post('/girodibukaspaddbgc', [GiroDibukaController::class, 'spAddBGC']);
+// Route::post('/girodibukaspaddgirokoreksi', [GiroDibukaController::class, 'spAddGiroKoreksi']);
+// Route::post('/girodibukaspdeletegirokoreksi', [GiroDibukaController::class, 'spDeleteGiroKoreksi']);
+// Route::post('/girodibukaspdelete', [GiroDibukaController::class, 'spDelete']);
+
+
+
+
+
+// Route::post('/girodibukaspdetail', [GiroDibukaController::class, 'getDetail']);
+// Route::get('/girodibukaloadall', [GiroDibukaController::class, 'loadAll']);
+// Route::get('/girodibukalistdph', [GiroDibukaController::class, 'listDPH']);
+// Route::get('/girodibukalistdphbbg', [GiroDibukaController::class, 'listDPHBBG']);
+
+// Route::get('/girodibukalistdphuht', [GiroDibukaController::class, 'listDPHUHT']);
+// Route::get('/girodibukalistdpp', [GiroDibukaController::class, 'listDPP']);
+// Route::get('/girodibukalistcustsupp', [GiroDibukaController::class, 'listCustsupp']);
+// Route::get('/girodibukalistcustsuppumb', [GiroDibukaController::class, 'listCustsuppUMB']);
+// Route::post('/girodibukaprosesumb', [GiroDibukaController::class, 'prosesUMB']);
+// Route::post('/girodibukalistumb', [GiroDibukaController::class, 'listUMB']);
+// Route::post('/girodibukaspadddppdph', [GiroDibukaController::class, 'spAddDPPDPH']);
+// Route::post('/girodibukaspaddtemprumjual', [GiroDibukaController::class, 'spAddTempRUMJUAL']);
+// Route::post('/girodibukaspdeletetemprumjual', [GiroDibukaController::class, 'spDeleteTempRUMJUAL']);
+// Route::post('/girodibukaspupdatetemprumjual', [GiroDibukaController::class, 'spUpdateTempRUMJUAL']);
+// Route::post('/girodibukaspotorisasi', [GiroDibukaController::class, 'spOtorisasi']);
+// Route::post('/girodibukaspbatalotorisasi', [GiroDibukaController::class, 'spBatalOtorisasi']);
+// Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCetak']);
 
  
+// // PENGAJUAN DPH
+// Route::get('/pengajuandph', [PengajuanDPHController::class, 'index']);
+// Route::post('/pengajuandphspdetail', [PengajuanDPHController::class, 'getDetail']);
+// Route::post('/pengajuandphspdetailkledit', [PengajuanDPHController::class, 'getDetailKLEdit']);
+
+// Route::post('/pengajuandphsplistpengajuan', [PengajuanDPHController::class, 'getListPengajuan']);
+// Route::post('/pengajuandphspaddkledit' , [PengajuanDPHController::class, 'spAddKLEdit']);
+// Route::post('/pengajuandphspdeletekledit' , [PengajuanDPHController::class, 'spDeleteKLEdit']);
+// Route::post('/pengajuandphspupdatedphdet' , [PengajuanDPHController::class, 'spUpdateDPHDet']);
+
+// Route::post('/pengajuandphspadd' , [PengajuanDPHController::class, 'spAdd']);
+// Route::post('/pengajuandphspkoreksi' , [PengajuanDPHController::class, 'spKoreksi']);
+// Route::get('/pengajuandphloadall' , [PengajuanDPHController::class, 'loadAll']);
+// Route::post('/pengajuandphspotorisasi' , [PengajuanDPHController::class, 'spOtorisasi']);
+// Route::post('/pengajuandphspbatalotorisasi' , [PengajuanDPHController::class, 'spBatalOtorisasi']);
+// Route::post('/pengajuandphdetailCetak', [PengajuanDPHController::class, 'getDetailCetak']);
+
+
 // PENGAJUAN DPH
-Route::get('/pengajuandph', 'PengajuanDPHController@index')->middleware('auth');
-Route::post('/pengajuandphspdetail', 'PengajuanDPHController@getDetail')->middleware('auth');
-Route::post('/pengajuandphspdetailkledit', 'PengajuanDPHController@getDetailKLEdit')->middleware('auth');
+Route::get('/pengajuandphtunai', [PengajuanDPHTunaiController::class, 'index']);
+Route::post('/pengajuandphtunaispdetail', [PengajuanDPHTunaiController::class, 'getDetail']);
+// Route::post('/pengajuandphtunaispdetailkl', [PengajuanDPHTunaiController::class, 'getDetailKL']);
+Route::post('/pengajuandphtunaispdetailkledit', [PengajuanDPHTunaiController::class, 'getDetailKLEdit']);
+Route::post('/pengajuandphtunaisplistpengajuan', [PengajuanDPHTunaiController::class, 'getListPengajuan']);
+Route::post('/pengajuandphtunaispaddkledit' , [PengajuanDPHTunaiController::class, 'spAddKLEdit']);
+Route::post('/pengajuandphtunaispdeletekledit' , [PengajuanDPHTunaiController::class, 'spDeleteKLEdit']);
+Route::post('/pengajuandphtunaispupdatedphdet' , [PengajuanDPHTunaiController::class, 'spUpdateDPHDet']);
 
-Route::post('/pengajuandphsplistpengajuan', 'PengajuanDPHController@getListPengajuan')->middleware('auth');
-Route::post('/pengajuandphspaddkledit' , 'PengajuanDPHController@spAddKLEdit')->middleware('auth');
-Route::post('/pengajuandphspdeletekledit' , 'PengajuanDPHController@spDeleteKLEdit')->middleware('auth');
-Route::post('/pengajuandphspupdatedphdet' , 'PengajuanDPHController@spUpdateDPHDet')->middleware('auth');
-
-Route::post('/pengajuandphspadd' , 'PengajuanDPHController@spAdd')->middleware('auth');
-Route::post('/pengajuandphspkoreksi' , 'PengajuanDPHController@spKoreksi')->middleware('auth');
-Route::get('/pengajuandphloadall' , 'PengajuanDPHController@loadAll')->middleware('auth');
-Route::post('/pengajuandphspotorisasi' , 'PengajuanDPHController@spOtorisasi')->middleware('auth');
-Route::post('/pengajuandphspbatalotorisasi' , 'PengajuanDPHController@spBatalOtorisasi')->middleware('auth');
-Route::post('/pengajuandphdetailCetak', 'PengajuanDPHController@getDetailCetak')->middleware('auth');
-
-
-// PENGAJUAN DPH
-Route::get('/pengajuandphtunai', 'PengajuanDPHTunaiController@index')->middleware('auth');
-Route::post('/pengajuandphtunaispdetail', 'PengajuanDPHTunaiController@getDetail')->middleware('auth');
-// Route::post('/pengajuandphtunaispdetailkl', 'PengajuanDPHTunaiController@getDetailKL')->middleware('auth');
-Route::post('/pengajuandphtunaispdetailkledit', 'PengajuanDPHTunaiController@getDetailKLEdit')->middleware('auth');
-Route::post('/pengajuandphtunaisplistpengajuan', 'PengajuanDPHTunaiController@getListPengajuan')->middleware('auth');
-Route::post('/pengajuandphtunaispaddkledit' , 'PengajuanDPHTunaiController@spAddKLEdit')->middleware('auth');
-Route::post('/pengajuandphtunaispdeletekledit' , 'PengajuanDPHTunaiController@spDeleteKLEdit')->middleware('auth');
-Route::post('/pengajuandphtunaispupdatedphdet' , 'PengajuanDPHTunaiController@spUpdateDPHDet')->middleware('auth');
-
-Route::post('/pengajuandphtunaispadd' , 'PengajuanDPHTunaiController@spAdd')->middleware('auth');
-Route::post('/pengajuandphtunaispkoreksi' , 'PengajuanDPHTunaiController@spKoreksi')->middleware('auth');
-Route::get('/pengajuandphtunailoadall' , 'PengajuanDPHTunaiController@loadAll')->middleware('auth');
-Route::post('/pengajuandphtunaispotorisasi' , 'PengajuanDPHTunaiController@spOtorisasi')->middleware('auth');
-Route::post('/pengajuandphtunaispbatalotorisasi' , 'PengajuanDPHTunaiController@spBatalOtorisasi')->middleware('auth');
-Route::post('/pengajuandphtunaidetailCetak', 'PengajuanDPHTunaiController@getDetailCetak')->middleware('auth');
+Route::post('/pengajuandphtunaispadd' , [PengajuanDPHTunaiController::class, 'spAdd']);
+Route::post('/pengajuandphtunaispkoreksi' , [PengajuanDPHTunaiController::class, 'spKoreksi']);
+Route::get('/pengajuandphtunailoadall' , [PengajuanDPHTunaiController::class, 'loadAll']);
+Route::post('/pengajuandphtunaispotorisasi' , [PengajuanDPHTunaiController::class, 'spOtorisasi']);
+Route::post('/pengajuandphtunaispbatalotorisasi' , [PengajuanDPHTunaiController::class, 'spBatalOtorisasi']);
+Route::post('/pengajuandphtunaidetailCetak', [PengajuanDPHTunaiController::class, 'getDetailCetak']);
 
 
-// PENGAJUAN DPP
-Route::get('/pengajuandpp', 'PengajuanDPPController@index')->middleware('auth');
-Route::post('/pengajuandppspdetail', 'PengajuanDPPController@getDetail')->middleware('auth');
-Route::post('/pengajuandppsplistpengajuan', 'PengajuanDPPController@getListPengajuan')->middleware('auth');
-Route::post('/pengajuandppspadd' , 'PengajuanDPPController@spAdd')->middleware('auth');
-Route::post('/pengajuandppspkoreksi' , 'PengajuanDPPController@spKoreksi')->middleware('auth');
-Route::get('/pengajuandpploadall' , 'PengajuanDPPController@loadAll')->middleware('auth');
-Route::post('/pengajuandppspotorisasi' , 'PengajuanDPPController@spOtorisasi')->middleware('auth');
-Route::post('/pengajuandppspbatalotorisasi' , 'PengajuanDPPController@spBatalOtorisasi')->middleware('auth');
-Route::post('/pengajuandppdetailCetak', 'PengajuanDPPController@getDetailCetak')->middleware('auth');
+// // PENGAJUAN DPP
+// Route::get('/pengajuandpp', [PengajuanDPPController::class, 'index']);
+// Route::post('/pengajuandppspdetail', [PengajuanDPPController::class, 'getDetail']);
+// Route::post('/pengajuandppsplistpengajuan', [PengajuanDPPController::class, 'getListPengajuan']);
+// Route::post('/pengajuandppspadd' , [PengajuanDPPController::class, 'spAdd']);
+// Route::post('/pengajuandppspkoreksi' , [PengajuanDPPController::class, 'spKoreksi']);
+// Route::get('/pengajuandpploadall' , [PengajuanDPPController::class, 'loadAll']);
+// Route::post('/pengajuandppspotorisasi' , [PengajuanDPPController::class, 'spOtorisasi']);
+// Route::post('/pengajuandppspbatalotorisasi' , [PengajuanDPPController::class, 'spBatalOtorisasi']);
+// Route::post('/pengajuandppdetailCetak', [PengajuanDPPController::class, 'getDetailCetak']);
 
 
 
-// PENERIMAAN DPP
-Route::get('/penerimaandpp' , 'PenerimaanDPPController@index')->middleware('auth');
-Route::get('/penerimaandpplistperkiraanadd' , 'PenerimaanDPPController@listPerkiraanAdd')->middleware('auth');
-Route::get('/penerimaandpplistperkiraanlbkl' , 'PenerimaanDPPController@listPerkiraanLBKL')->middleware('auth');
-Route::post('/penerimaandppdetailkoreksi' , 'PenerimaanDPPController@detailKoreksi')->middleware('auth');
-Route::post('/penerimaandppdetailoutstanding' , 'PenerimaanDPPController@detailOutstanding')->middleware('auth');
-Route::post('/penerimaandpplistproses' , 'PenerimaanDPPController@listProses')->middleware('auth');
-Route::post('/penerimaandppcheckgiro' , 'PenerimaanDPPController@checkGiro')->middleware('auth');
-Route::post('/penerimaandppspgiro' , 'PenerimaanDPPController@spGiro')->middleware('auth');
-Route::post('/penerimaandppspadd' , 'PenerimaanDPPController@spAdd')->middleware('auth');
-Route::post('/penerimaandppspkoreksi' , 'PenerimaanDPPController@spKoreksi')->middleware('auth');
-Route::post('/penerimaandppspproses' , 'PenerimaanDPPController@spProses')->middleware('auth');
-Route::get('/penerimaandpploadall' , 'PenerimaanDPPController@loadAll' )->middleware('auth');
-Route::post('/penerimaandppdetailCetak', 'PenerimaanDPPController@getDetailCetak')->middleware('auth');
+// // PENERIMAAN DPP
+// Route::get('/penerimaandpp' , [PenerimaanDPPController::class, 'index']);
+// Route::get('/penerimaandpplistperkiraanadd' , [PenerimaanDPPController::class, 'listPerkiraanAdd']);
+// Route::get('/penerimaandpplistperkiraanlbkl' , [PenerimaanDPPController::class, 'listPerkiraanLBKL']);
+// Route::post('/penerimaandppdetailkoreksi' , [PenerimaanDPPController::class, 'detailKoreksi']);
+// Route::post('/penerimaandppdetailoutstanding' , [PenerimaanDPPController::class, 'detailOutstanding']);
+// Route::post('/penerimaandpplistproses' , [PenerimaanDPPController::class, 'listProses']);
+// Route::post('/penerimaandppcheckgiro' , [PenerimaanDPPController::class, 'checkGiro']);
+// Route::post('/penerimaandppspgiro' , [PenerimaanDPPController::class, 'spGiro']);
+// Route::post('/penerimaandppspadd' , [PenerimaanDPPController::class, 'spAdd']);
+// Route::post('/penerimaandppspkoreksi' , [PenerimaanDPPController::class, 'spKoreksi']);
+// Route::post('/penerimaandppspproses' , [PenerimaanDPPController::class, 'spProses']);
+// Route::get('/penerimaandpploadall' , [PenerimaanDPPController::class, 'loadAll'] );
+// Route::post('/penerimaandppdetailCetak', [PenerimaanDPPController::class, 'getDetailCetak']);
 
 
-// PELUNASAN PIUTANG DPP
-Route::get('/pelunasanpiutangdpp', 'PelunasanPiutangDPPController@index')->middleware('auth');
-Route::post('/pelunasanpiutangdppspdetail', 'PelunasanPiutangDPPController@getDetail')->middleware('auth');
-Route::post('/pelunasanpiutangdppspdetailoutstanding', 'PelunasanPiutangDPPController@getDetailOutstanding')->middleware('auth');
-Route::post('/pelunasanpiutangdppgetlistterimadpp', 'PelunasanPiutangDPPController@getListTerimaDPP')->middleware('auth');
-Route::post('/pelunasanpiutangdppspdetailpenerimaan' , 'PelunasanPiutangDPPController@getdetailPenerimaan' )->middleware('auth');
-Route::post('/pelunasanpiutangdppspadd' , 'PelunasanPiutangDPPController@spAdd' )->middleware('auth');
-Route::get('/pelunasanpiutangdpploadall' , 'PelunasanPiutangDPPController@loadAll' )->middleware('auth');
-Route::post('/pelunasanpiutangdppspkoreksi' , 'PelunasanPiutangDPPController@spKoreksi' )->middleware('auth');
-Route::post('/pelunasanpiutangdppspotorisasi' , 'PelunasanPiutangDPPController@spOtorisasi' )->middleware('auth');
-Route::post('/pelunasanpiutangdppspbatalotorisasi' , 'PelunasanPiutangDPPController@spBatalOtorisasi' )->middleware('auth');
-Route::post('/pelunasanpiutangdppdetailCetak', 'PelunasanPiutangDPPController@getDetailCetak')->middleware('auth');
+// // PELUNASAN PIUTANG DPP
+// Route::get('/pelunasanpiutangdpp', [PelunasanPiutangDPPController::class, 'index']);
+// Route::post('/pelunasanpiutangdppspdetail', [PelunasanPiutangDPPController::class, 'getDetail']);
+// Route::post('/pelunasanpiutangdppspdetailoutstanding', [PelunasanPiutangDPPController::class, 'getDetailOutstanding']);
+// Route::post('/pelunasanpiutangdppgetlistterimadpp', [PelunasanPiutangDPPController::class, 'getListTerimaDPP']);
+// Route::post('/pelunasanpiutangdppspdetailpenerimaan' , [PelunasanPiutangDPPController::class, 'getdetailPenerimaan'] );
+// Route::post('/pelunasanpiutangdppspadd' , [PelunasanPiutangDPPController::class, 'spAdd'] );
+// Route::get('/pelunasanpiutangdpploadall' , [PelunasanPiutangDPPController::class, 'loadAll'] );
+// Route::post('/pelunasanpiutangdppspkoreksi' , [PelunasanPiutangDPPController::class, 'spKoreksi'] );
+// Route::post('/pelunasanpiutangdppspotorisasi' , [PelunasanPiutangDPPController::class, 'spOtorisasi'] );
+// Route::post('/pelunasanpiutangdppspbatalotorisasi' , [PelunasanPiutangDPPController::class, 'spBatalOtorisasi'] );
+// Route::post('/pelunasanpiutangdppdetailCetak', [PelunasanPiutangDPPController::class, 'getDetailCetak']);
 
 
-// MEMORIAL KOREKSI
-Route::get('/memorialkoreksi', 'MemorialKoreksiController@index')->middleware('auth');
-Route::post('/memorialkoreksispdetail', 'MemorialKoreksiController@getDetail')->middleware('auth');
-Route::post('/memorialkoreksilistperkiraan', 'MemorialKoreksiController@listPerkiraan')->middleware('auth');
-Route::get('/memorialkoreksilistvalas', 'MemorialKoreksiController@listValas')->middleware('auth');
-Route::post('/memorialkoreksispadd', 'MemorialKoreksiController@spAdd')->middleware('auth');
-Route::get('/memorialkoreksiloadall', 'MemorialKoreksiController@loadAll')->middleware('auth');
-Route::post('/memorialkoreksispotorisasi', 'MemorialKoreksiController@spOtorisasi')->middleware('auth');
-Route::post('/memorialkoreksispbatalotorisasi', 'MemorialKoreksiController@spBatalOtorisasi')->middleware('auth');
-Route::post('/memorialkoreksidetailCetak', 'MemorialKoreksiController@getDetailCetak')->middleware('auth');
+// // MEMORIAL KOREKSI
+// Route::get('/memorialkoreksi', [MemorialKoreksiController::class, 'index']);
+// Route::post('/memorialkoreksispdetail', [MemorialKoreksiController::class, 'getDetail']);
+// Route::post('/memorialkoreksilistperkiraan', [MemorialKoreksiController::class, 'listPerkiraan']);
+// Route::get('/memorialkoreksilistvalas', [MemorialKoreksiController::class, 'listValas']);
+// Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']);
+// Route::get('/memorialkoreksiloadall', [MemorialKoreksiController::class, 'loadAll']);
+// Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
+// Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
+// Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
 
 
-// BON SEMENTARA
-Route::get('/bonsementara' , 'BonSementaraController@index')->middleware('auth');
-Route::post('/bonsementaraloadall' , 'BonSementaraController@loadAll')->middleware('auth');
-Route::post('/bonsementaraspnobukti' , 'BonSementaraController@getNoBukti')->middleware('auth');
-Route::post('/bonsementaraspdetail' , 'BonSementaraController@getDetailOutstanding')->middleware('auth');
-Route::post('/bonsementaraspadd' , 'BonSementaraController@spAdd')->middleware('auth');
+// // BON SEMENTARA
+// Route::get('/bonsementara' , [BonSementaraController::class, 'index']);
+// Route::post('/bonsementaraloadall' , [BonSementaraController::class, 'loadAll']);
+// Route::post('/bonsementaraspnobukti' , [BonSementaraController::class, 'getNoBukti']);
+// Route::post('/bonsementaraspdetail' , [BonSementaraController::class, 'getDetailOutstanding']);
+// Route::post('/bonsementaraspadd' , [BonSementaraController::class, 'spAdd']);
 
 
 });

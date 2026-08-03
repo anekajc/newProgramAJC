@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Perkiraan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Perkiraan</h1>
     </div>
     <button class="btn btn-primary" onclick="buttonAdd()">+ Add Perkiraan</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -593,6 +593,9 @@ function onChangePerkiraan () {
   function loadAll () {
     console.log('asd')
     let _token = $("#_token").val();
+
+     document.getElementById('breadcrumb').innerHTML = "Master Perkiraan"
+
     $('#tabel').DataTable().destroy();
 
     $.ajax({

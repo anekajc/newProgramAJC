@@ -58,6 +58,7 @@ class MasterHutangController extends Controller
   }
 
   public function loadAll (Request $req) {
+    // dd($req->filter);
     $listData = DB::connection('SML')->select("SELECT d.Perkiraan,
         (b.Keterangan + ' (' + b.Perkiraan + ')') AS kodePerk,
         a.NoFaktur, a.NoRetur, a.TipeTrans, c.KodeCustSupp,
@@ -67,14 +68,14 @@ class MasterHutangController extends Controller
         b.Keterangan, c.NamaCustSupp AS NAMACUST, A.POcust
         FROM dbcustsupp c
         LEFT OUTER JOIN dbperkcustsupp d ON d.KodecustSupp = c.KODECUSTSUPP
-        LEFT OUTER JOIN vwhutpiut a ON c.kodecustsupp = a.kodecustsupp
+        LEFT OUTER JOIN vwhutpiut a ON c.kodecustsupp = a.kodecustsupp and a.TipeTrans = 'AWL'
         LEFT OUTER JOIN (
             SELECT a.Perkiraan, a.Kode, b.Keterangan
             FROM dbperkiraan b
             INNER JOIN DBPOSTHUTPIUT a ON a.Perkiraan = b.Perkiraan
             WHERE a.Kode = 'HT'
         ) b ON b.perkiraan = d.perkiraan
-        WHERE (b.Keterangan + ' (' + b.Perkiraan + ')') = :filter and a.TipeTrans = 'AWL'
+        WHERE (b.Keterangan + ' (' + b.Perkiraan + ')') = :filter 
         ORDER BY c.kodecustsupp", ['filter' => $req->filter]);
     return $listData;
   }

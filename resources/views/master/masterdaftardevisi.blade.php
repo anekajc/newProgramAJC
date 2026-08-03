@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Daftar Devisi</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Devisi</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Devisi</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
   
@@ -158,6 +158,8 @@ let dataRefresh = []
 function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Devisi"
 
 
   $('#tabel').DataTable().destroy();

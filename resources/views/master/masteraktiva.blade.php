@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Aktiva</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Aktiva</h1>
     </div>
     <button class="btn btn-action-primary" onclick="cleanFormAdd()">+ Add Aktiva</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -972,6 +972,8 @@ let dataRefresh = []
 
 function loadAll () {
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Aktiva"
 
   $('#tabel').DataTable().destroy();
 

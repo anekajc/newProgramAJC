@@ -82,20 +82,14 @@
 
 <div id="page1">
 
-  <div class="sp-breadcrumb">
+  {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
     <span>Purchasing</span>
     <span class="sp-sep">›</span>
     <span class="sp-crumb-active">Permintaan Pembelian (Non-Agen)</span>
-  </div>
+  </div> --}}
 
-  <div class="sp-page-head">
-    <div>
-      <h1>Permintaan Pembelian (Non-Agen)</h1>
-    </div>
-    {{-- <button class="btn btn-primary" onclick="buttonAdd()">+ Tambah PR</button> --}}
-  </div>
   
 <div id="contentContainer" class="container-fluid">
 
@@ -224,78 +218,6 @@
 
 </div>
 
-  {{-- <div class="data-table-wrap">
-    <table id="tabel2" class="data-table">
-      <thead id="tabel_header" class="text-center">
-        <tr>
-          <th style="padding: 4px 12px;" scope="col">Actions</th>
-          @for ($i = 0; $i < count($headertableheader); $i++)
-          @if ($isshown[$i] == 1)
-            <th style="padding: 4px 12px;" scope="col">{{ $headertableheader[$i] }}</th>
-            @endif
-        @endfor
-          <th style="padding: 4px 12px;" scope="col">Authorized</th>
-          <th style="padding: 4px 12px;" scope="col">User Oto</th>
-          <th style="padding: 4px 12px;" scope="col">Tanggal Oto</th>
-        </tr>
-      </thead>
-      <tbody id="tabel_data" class="text-left">
-        @foreach ($listData2 as $item)
-          <tr>
-            <td class="text-center">
-      <div class="action-buttons-wrap">
-              <button class="btn-action-sm btn-action-warning" title="Details" onclick="buttonDetail('{{ $item[0]->NoBukti }}')">
-                <i class="bi bi-info"></i>
-              </button>
-
-              @if ($item[0]->IsOtorisasi1 == 1)
-              <button class="btn-action-sm btn-action-danger" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('{{ $item[0]->NoBukti }}', '{{ $item[0]->IsOtorisasi1 }}')"><i class="bi bi-key"></i></button>
-              <button class="btn-action-sm btn-action-primary" title="Print" onclick="submitPrint('{{ $item[0]->NoBukti }}')">
-                <i class="bi bi-printer"></i>
-              </button>
-              @else
-              <button class="btn-action-sm btn-action-info" title="Otorisasi" onclick="buttonOtorisasi('{{ $item[0]->NoBukti }}', '{{ $item[0]->IsOtorisasi1 }}')"><i class="bi bi-key"></i></button>
-
-              <button class="btn-action-sm btn-action-success" title="Edit" onclick="buttonEdit('{{ $item[0]->NoBukti }}')">
-                            <i class="bi bi-pen"></i>
-                          </button>
-
-              @endif
-
-                        </div>
-            </td>
-
-            @for ($i = 0; $i < count($headertableheader); $i++)
-            @if ($isshown[$i] == 1)
-            @if ($isnumeric[$i] == 0)
-    <td>{{ $item[0]->{$headertablevalue[$i]} }}</td>
-@elseif ($isnumeric[$i] == 1)
-<td style="text-align: right;">{{ number_format($item[0]->{$headertablevalue[$i]}->QNT, 2, '.', ',') }}</td>
-@elseif ($isnumeric[$i] == 2)
-    <td>{{ $item[0]->{$headertablevalue[$i]} ? date("Y/m/d", strtotime($item[0]->{$headertablevalue[$i]})) : '' }}</td>
-@endif
-
-@endif
-  @endfor
-
-
-
-
-            <td class="text-center">
-              @if ($item[0]->IsOtorisasi1 == 0)
-                <span class="text-danger"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></span>
-              @else
-                <span class="text-success"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></span>
-              @endif
-            </td>
-            <td>{{ $item[0]->OtoUser1 }}</td>
-            <td>{{ $item[0]->TglOto1 ? date("Y/m/d", strtotime($item[0]->TglOto1)) : '' }}</td>
-          </tr>
-            @endforeach
-
-      </tbody>
-    </table>
-  </div> --}}
 </div>
 
 <!-- start modal add -->
