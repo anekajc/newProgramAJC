@@ -4805,7 +4805,7 @@ jQuery(function($) {
 
 $(document).ready(function(){
 
-  document.getElementById('breadcrumb').innerHTML = "Sales Order";
+  document.getElementById('breadcrumb').innerHTML = "Sales Order Test";
 
   $('#input_add_kodepelanggan').on('keyup', function () {
     let keyword = $(this).val()
