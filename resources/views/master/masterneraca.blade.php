@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Neraca</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Neraca</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Neraca</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -157,6 +157,10 @@
 <script type="text/javascript">
 
 $(document).ready(function () {
+  
+  document.getElementById('breadcrumb').innerHTML = "Master Neraca"
+  document.getElementById('AddVisibility').hidden = true;
+
   $("#tabel").DataTable({
     "lengthChange": true,
     "paging": true,
@@ -175,6 +179,7 @@ let dataRefresh = []
 function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
+  
 
   $('#tabel').DataTable().destroy();
 
@@ -237,9 +242,7 @@ function buttonEdit (kode) {
 
 
 function onChangeNeraca (Perkiraan) {
-  console.log(Perkiraan)
-  console.log(tempNeraca)
-
+  
 // Or more explicitly:
 if (!tempNeraca) {
     tempNeraca = '-';

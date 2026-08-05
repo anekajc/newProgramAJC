@@ -3,26 +3,9 @@
 
 @endsection
 @section('content')
+
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-      <style>
-      .sp-length-wrap {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-      }
-
-      .sp-length-wrap label {
-        margin: 0; /* stops default label margin from pushing the select down/over */
-      }
-
-      .sp-length-wrap select {
-        width: auto; /* stops form-select from stretching full-width and forcing a wrap */
-      }
-    </style>
-  
 {{-- <div class="sp-breadcrumb">
   <span>Beranda</span>
   <span class="sp-sep">›</span>
@@ -31,7 +14,7 @@
   <span class="sp-crumb-active">Giro</span>
 </div> --}}
 
-<div class="sp-page-head">
+{{-- <div class="sp-page-head">
   <div>
     <h1>Master Giro</h1>
   </div>
@@ -39,7 +22,7 @@
     <button id='divAddBuka' class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
     <button id='divAddTerima' class="btn btn-action-primary" onclick="buttonAddTerima()" hidden>+ Add Giro Terima</button>
   </div>
-</div>
+</div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -47,6 +30,47 @@
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
   <style>
+    .sp-length-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }    
+    
+    .sp-filter-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .sp-length-wrap label {
+      margin: 0; /* stops default label margin from pushing the select down/over */
+    }
+
+    .sp-length-wrap select {
+      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+    }
+
+    .sp-toolbar {
+      display: flex;
+      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
+      align-items: center;
+      row-gap: 10px;
+      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
+    }
+
+    .sp-filter-wrap select {
+      width: auto;
+      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
+    }
+
+    .sp-length-wrap {
+      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
+    }
+    
   .radioChoiceMaster {
     display: inline-flex;
     list-style: none;
@@ -94,46 +118,25 @@
     box-shadow: 0 2px 6px rgba(0,123,255,0.35);
   }
 
-  .sp-length-wrap {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-  }
+  </style>
 
-  .sp-length-wrap label {
-    margin: 0;
-  }
+  <div class="sp-toolbar">
+    <div class="sp-search-wrap">
+      <i class="bi bi-search sp-search-icon"></i>
+      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
+    </div>
 
-  .sp-length-wrap select {
-    width: auto;
-  }
-
-  .sp-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    row-gap: 10px;
-    column-gap: 12px;
-  }
-
-  .sp-filter-wrap select {
-    width: auto;
-    min-width: 220px;
-  }
-
-  .sp-length-wrap {
-    margin-left: auto;
-  }
-</style>
-
-<div class="sp-toolbar">
-  <div class="sp-search-wrap">
-    <i class="bi bi-search sp-search-icon"></i>
-    <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-  </div>
-
+    <div class="sp-filter-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="form-select form-select-sm">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
+    
   <div class="sp-filter-wrap">
     <ul class="radioChoiceMaster" id="giroTab" role="tablist">
       <li class="radioChoiceMaster-item" role="presentation">
@@ -145,17 +148,11 @@
     </ul>
   </div>
 
-  <div class="sp-length-wrap">
-    <label for="tabel_length_visual">Tampilkan</label>
-    <select id="tabel_length_visual" class="form-select form-select-sm">
-      <option value="10">10</option>
-      <option value="25">25</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-      <option value="-1">Semua</option>
-    </select>
+    <div class="sp-length-wrap">
+    <button id='divAddBuka' class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
+    <button id='divAddTerima' class="btn btn-action-primary" onclick="buttonAddTerima()" hidden>+ Add Giro Terima</button>
+    </div>
   </div>
-</div>
 
   <div class="tab-content">
 
@@ -1156,8 +1153,10 @@ function hideButtonTerima(){
 }
 
 function loadAllBuka () {
-  console.log('asd')
+
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Giro"
 
   $('#tabel_dibuka').DataTable().destroy();
 

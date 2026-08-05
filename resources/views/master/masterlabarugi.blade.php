@@ -16,37 +16,57 @@
     <span class="sp-crumb-active">Laba Rugi</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Laba Rugi</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Laba Rugi</button>
-  </div>
+  </div> --}}
+
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  <style>
-    .sp-toolbar {
-      flex-wrap: wrap; /* lets filters drop to a new line on narrow screens instead of overflowing */
-      row-gap: 10px;
-    }
-
-    .sp-filter-group {
+    <style>
+    .sp-length-wrap {
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: 8px;
-    }
-
-    .sp-filter-group label {
-      margin: 0;
       white-space: nowrap;
-      color: #495057;
+    }    
+    
+    .sp-filter-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
     }
 
-    .sp-filter-group select {
+    .sp-length-wrap label {
+      margin: 0; /* stops default label margin from pushing the select down/over */
+    }
+
+    .sp-length-wrap select {
+      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+    }
+
+    .sp-toolbar {
+      display: flex;
+      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
+      align-items: center;
+      row-gap: 10px;
+      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
+    }
+
+    .sp-filter-wrap select {
       width: auto;
-      min-width: 180px;
+      min-width: 150px; /* keeps "Hutang Usaha (21201)" from getting clipped */
+    }
+
+    .sp-length-wrap {
+      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
     }
   </style>
 
@@ -56,7 +76,18 @@
       <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
     </div>
 
-    <div class="sp-filter-group">
+    <div class="sp-filter-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="form-select form-select-sm" style='width:40px;'>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
+
+    <div class="sp-filter-wrap">
       <label for="jenisDevisi">Devisi :</label>
       <select name="devisi" id="jenisDevisi" class="form-control" onChange='loadAll()'>
         @foreach ($listDataDevisi as $Devisi)
@@ -64,8 +95,7 @@
         @endforeach
       </select>
     </div>
-
-    <div class="sp-filter-group">
+    <div class="sp-filter-wrap">
       <label for="jenisLaporan">Laporan :</label>
       <select name="perkiraanCustomer" id="jenisLaporan" class="form-control" onChange='loadAll()'>
         <option value='0'> Laba Rugi</option>
@@ -74,16 +104,10 @@
     </div>
 
     <div class="sp-length-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
+      <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
     </div>
   </div>
+
           <div class="table-outer">
             <div class="table-wrap">
               <table class="tb" id="tabel">
@@ -452,6 +476,8 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Laba Rugi"
+  
   let filterDevisi = $("#jenisDevisi").val();
   let filterLaporan = $("#jenisLaporan").val();
 

@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Barang</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Barang</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Barang</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -1258,6 +1258,7 @@ let listSelectSubKategori = []
 function loadAll () {
   $('#tabel').DataTable().destroy();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Barang"
   $('#tabel').DataTable({
     processing: true,
     serverSide: true,

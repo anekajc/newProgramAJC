@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Group Customer</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Group Customer</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Group Customer</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -129,7 +129,7 @@
 
             <div class="row mt-2">
               <div class="col-4 text-left">
-                <div class="form-group text-left">
+               <div class="form-group text-left">
                   <label class="text-left">Nama Group</label>
                 </div>
               </div>
@@ -165,6 +165,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Group Customer"
 
   $('#tabel').DataTable().destroy();
 

@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Online/Offline</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Online/Offline</h1>
     </div>
-    {{-- <button class="btn btn-primary" onclick="buttonAdd()">+ Online/Offline</button> --}}
-  </div>
+    <button class="btn btn-primary" onclick="buttonAdd()">+ Online/Offline</button>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -110,6 +110,10 @@ let dataRefresh = []
 
 function loadAll () {
   let _token = $("#_token").val();
+  
+  document.getElementById('breadcrumb').innerHTML = "Online / Offline"
+  document.getElementById('AddVisibility').hidden = true;
+
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
   }

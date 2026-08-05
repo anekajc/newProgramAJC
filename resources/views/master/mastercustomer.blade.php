@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Customer</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Customer</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Customer</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -1208,6 +1208,8 @@ function loadAll() {
     if ($.fn.DataTable.isDataTable('#tabel')) {
         $('#tabel').DataTable().destroy();
     }
+
+  document.getElementById('breadcrumb').innerHTML = "Master Customer";
 
     let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
     $('#tabel').DataTable({

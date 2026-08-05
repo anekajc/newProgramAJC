@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Lokasi Barang</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Lokasi Barang</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Lokasi Barang</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -160,6 +160,8 @@ let dataRefresh = []
 function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Lokasi Barang"
 
   $('#tabel').DataTable().destroy();
 

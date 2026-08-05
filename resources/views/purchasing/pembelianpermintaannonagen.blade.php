@@ -90,7 +90,6 @@
     <span class="sp-crumb-active">Permintaan Pembelian (Non-Agen)</span>
   </div> --}}
 
-  
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
@@ -98,7 +97,10 @@
       <div class="sp-toolbar">
         <div class="row" style="width: 100%; margin: 0;">
           <div class="col-2">
-            <button class="btn btn-primary" onclick="buttonAdd()">+ Tambah PR</button>
+            <div class="sp-search-wrap">
+              <i class="bi bi-search sp-search-icon"></i>
+              <input type="text" id="tabel_filter_visual">
+            </div>
           </div>
 
           <div class="col-2">
@@ -134,11 +136,8 @@
             </div>
           </div>
 
-          <div class="col-2">
-            <div class="sp-search-wrap">
-              <i class="bi bi-search sp-search-icon"></i>
-              <input type="text" id="tabel_filter_visual">
-            </div>
+          <div class="col-2 text-end">
+            <button class="btn btn-primary" onclick="buttonAdd()">+ Tambah PR</button>
           </div>
         </div>
       </div>
@@ -146,7 +145,7 @@
         <div class="table-outer">
             <div class="table-wrap">
               <table class="tb" id="tabel">
-                <thead>
+                <thead id="tabel_header">
                   <tr>
                     <th style="padding: 4px 12px;" scope="col">Actions</th>
                     @for ($i = 0; $i < count($headertableheader); $i++)
@@ -1348,10 +1347,12 @@ function buttonFilter() {
     `;
   });
 
-  document.getElementById("tabel_header").innerHTML = headerTable;
-  document.getElementById("tabel_data").innerHTML = rowTable2;
-
-  $("#tabel").DataTable({ "lengthChange": false, "paging": false });
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+  $('#tabel').DataTable().destroy();
+}
+document.getElementById("tabel_header").innerHTML = headerTable;
+document.getElementById("tabel_data").innerHTML = rowTable2;
+$("#tabel").DataTable({ "lengthChange": false, "paging": false });
 }
 
 function formatDate(date) {
@@ -1591,7 +1592,7 @@ function loadAll () {
   document.getElementById("tabel_header").innerHTML = headerTable;
 
   document.getElementById("tabel_data").innerHTML = rowTable2;
-  $("#tabel").DataTable({ "lengthChange": false, "paging": false });
+  $("#tabel").DataTable({ "lengthChange": false, "paging": false, dom:"tip" });
 }
 
 function buttonOtorisasi (nobukti, isOtorisasi) {

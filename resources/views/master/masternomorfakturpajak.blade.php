@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Nomor Faktur Pajak</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Nomor Faktur Pajak</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Nomor Faktur Pajak</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -268,6 +268,8 @@ let dataRefresh = []
 function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Nomor Faktur Pajak"
 
   $('#tabel').DataTable().destroy();
 

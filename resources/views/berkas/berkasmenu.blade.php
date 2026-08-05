@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Menu</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Menu</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Menu</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -27,24 +27,24 @@
 
   @include('master.partials.headerTableMaster')
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode</th>
-                    <th scope="col">Keterangan</th>
-                    <th scope="col">L0</th>
-                    <th scope="col">Kode Akses</th>
-                    <th scope="col">Level Otorisasi</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
-        </div>
+  <div class="table-outer">
+    <div class="table-wrap">
+      <table class="tb" id="tabel">
+        <thead>
+          <tr>
+            <th scope="col">Actions</th>
+            <th scope="col">Kode</th>
+            <th scope="col">Keterangan</th>
+            <th scope="col">L0</th>
+            <th scope="col">Kode Akses</th>
+            <th scope="col">Level Otorisasi</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-right">
+      </tbody>
+      </table>
+    </div>
+  </div>
 
 </div>
 
@@ -156,6 +156,9 @@
 let dataRefresh = []
 
 function loadAll () {
+
+  document.getElementById('breadcrumb').innerHTML = "Menu"
+
   let _token = $("#_token").val();
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();

@@ -14,11 +14,11 @@
     <span class="sp-crumb-active">Setup Periode Kerja</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Setup Periode Kerja</h1>
     </div>
-  </div>
+  </div> --}}
 
 <div id="printContainer" style="display:none">
 
@@ -214,6 +214,8 @@ $(document).ready(function () {
 
   document.getElementById("input_periodekerja_tahun").value = tahun;
   document.getElementById("input_periodekerja_bulan").value = bulan;
+
+  document.getElementById('breadcrumb').innerHTML = "Setup Periode Kerja"
 });
 
 function submitPeriodeKerja () {

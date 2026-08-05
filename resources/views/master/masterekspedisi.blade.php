@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Ekspedisi</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Ekspedisi</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Ekspedisi</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -1203,6 +1203,8 @@ let dataRefresh = []
 
 function loadAll () {
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Ekspedisi"
 
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();

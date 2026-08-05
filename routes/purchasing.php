@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelianpermintaannonagenlistbarang',         [PembelianPermintaanNonAgenController::class, 'listBarang']);
     Route::post('/pembelianpermintaannonagenspadd',             [PembelianPermintaanNonAgenController::class, 'spAdd']);
     Route::get('/pembelianpermintaannonagenspdetail',           [PembelianPermintaanNonAgenController::class, 'spDetail']);
-    Route::get('/pembelianpermintaannonagenloadall',            [PembelianPermintaanNonAgenController::class, 'loadAll']);
+    Route::post('/pembelianpermintaannonagenloadall',            [PembelianPermintaanNonAgenController::class, 'loadAll']);
     Route::post('/pembelianpermintaannonagenspdelete',          [PembelianPermintaanNonAgenController::class, 'spDelete']);
     Route::get('/pembelianpermintaannonagenlistdepartemen',     [PembelianPermintaanNonAgenController::class, 'listDepartemen']);
     Route::post('/pembelianpermintaannonagenupdateotorisasi',   [PembelianPermintaanNonAgenController::class, 'updateOtorisasi']);

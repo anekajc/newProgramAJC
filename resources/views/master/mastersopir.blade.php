@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Sopir</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Sopir</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Sopir</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -268,6 +268,7 @@ let dataRefresh = []
 function loadAll () {
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Sopir"
   $('#tabel').DataTable().destroy();
 
   $.ajax({

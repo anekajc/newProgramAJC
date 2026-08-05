@@ -59,6 +59,6 @@
     </div>
 
     <div class="sp-length-wrap">
-      <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
+      <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
     </div>
   </div>

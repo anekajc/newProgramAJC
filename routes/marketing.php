@@ -1,340 +1,355 @@
 <?php
 
+use App\Http\Controllers\Marketing\BankController;
+use App\Http\Controllers\Marketing\CetakTandaTerimaController;
+use App\Http\Controllers\Marketing\ClosingSOController;
+use App\Http\Controllers\Marketing\FakturPajakController;
+use App\Http\Controllers\Marketing\InvoiceJasaController;
+use App\Http\Controllers\Marketing\InvoicePenjualanController;
+use App\Http\Controllers\Marketing\KreditNoteController;
+use App\Http\Controllers\Marketing\NotaReturPenjualanController;
+use App\Http\Controllers\Marketing\PembelianPermintaanNonAgenController;
+use App\Http\Controllers\Marketing\PenawaranSOController;
+use App\Http\Controllers\Marketing\PerformanceController;
+use App\Http\Controllers\Marketing\PerintahReturJualController;
+use App\Http\Controllers\Marketing\PerintahReturJualMinusController;
+use App\Http\Controllers\Marketing\ReturPenjualanGudangController;
+use App\Http\Controllers\Marketing\ReturSuratJalanController;
+use App\Http\Controllers\Marketing\SOController;
+use App\Http\Controllers\Marketing\SuratJalanController;
+use App\Http\Controllers\Marketing\TerimaPoCustomerController;
+use App\Http\Controllers\Marketing\UangMukaJualController;
+use App\Http\Controllers\Marketing\UbahPOCustomerController;
+use App\Http\Controllers\Marketing\VerifikasiBarangController;
+use App\Http\Controllers\Marketing\VerifikasiPenawaranController;
+
+use Illuminate\Support\Facades\Route;
+
+
+
 // KAS
-Route::namespace('Marketing')->group(function () {
+Route::middleware('auth')->group(function () {
 
 
 
-  //PENAWARAN SO
-Route::get('/penawaranso', 'PenawaranSOController@index')->middleware('auth');
-Route::post('/penawaransocekhargaoto', 'PenawaranSOController@cekHargaOto')->middleware('auth');
-Route::get('/penawaransoprint', 'PenawaranSOController@spCetak')->middleware('auth');
-Route::get('/penawaransoloadall', 'PenawaranSOController@loadAll')->middleware('auth');
+//   //PENAWARAN SO
+// Route::get('/penawaranso', [PenawaranSOController::class, 'index']);
+// Route::post('/penawaransocekhargaoto', [PenawaranSOController::class, 'cekHargaOto']);
+// Route::get('/penawaransoprint', [PenawaranSOController::class, 'spCetak']);
+// Route::get('/penawaransoloadall', [PenawaranSOController::class, 'loadAll']);
 
-Route::get('/penawaransolistpelanggan' , 'PenawaranSOController@listPelanggan')->middleware('auth'); //
-Route::get('/penawaransolistttd' , 'PenawaranSOController@listttd')->middleware('auth');  //
+// Route::get('/penawaransolistpelanggan', [PenawaranSOController::class, 'listPelanggan']); //
+// Route::get('/penawaransolistttd', [PenawaranSOController::class, 'listttd']);  //
 
-Route::get('/penawaransolistbarangfoc' , 'PenawaranSOController@listBarangFOC')->middleware('auth');
-Route::post('/penawaransolistbarangnosominus' , 'PenawaranSOController@listBarangNonFOC1')->middleware('auth'); //
-Route::get('/penawaransolistbarangnosoplus' , 'PenawaranSOController@listBarangNonFOC2')->middleware('auth');
-Route::post('/penawaransolistpwo' , 'PenawaranSOController@listPWO')->middleware('auth');
-Route::post('/penawaransolistgudang' , 'PenawaranSOController@listGudang')->middleware('auth');
-Route::post('/penawaransolistnoso' , 'PenawaranSOController@listNoSo')->middleware('auth');
-Route::post('/penawaransolistlokasipenerima' , 'PenawaranSOController@listLokasiPenerima')->middleware('auth');
-Route::post('/penawaransospadd' , 'PenawaranSOController@spAdd')->middleware('auth');
-Route::post('/penawaransocekharga' , 'PenawaranSOController@spCekHarga')->middleware('auth');
-Route::post('/penawaransogetdetail' , 'PenawaranSOController@getDetail')->middleware('auth');
-Route::post('/cekpenawaransoDet' , 'PenawaranSOController@cekPoDet')->middleware('auth');
-Route::post('/penawaransoceksatuanbarang' , 'PenawaranSOController@cekSatuanBarang')->middleware('auth');
-Route::post('/penawaransocekotorisasi', 'PenawaranSOController@cekOtorisasi')->middleware('auth');
-Route::post('/penawaransoupdateotorisasi', 'PenawaranSOController@updateOtorisasi')->middleware('auth');
-Route::post('/penawaransoupdatebatalotorisasi', 'PenawaranSOController@updateBatalOtorisasi')->middleware('auth');
-Route::post('/penawaransospupdatepo' , 'PenawaranSOController@spUpdatePO')->middleware('auth');
-Route::post('/penawaransoonchangeheader' , 'PenawaranSOController@onChangeHeader')->middleware('auth');
-Route::post('/penawaransolistbarangnosominusallso' , 'PenawaranSOController@listBarangNonFOC1AllSO')->middleware('auth');
-Route::get('/penawaransolistvalas' , 'PenawaranSOController@listValas')->middleware('auth');
-Route::get('/penawaransocheckhargaddd' , 'PenawaranSOController@CheckHargaAdd')->middleware('auth');
-// Route::get('/penawaransoprint' , 'PenawaranSOController@CheckHargaAdd')->middleware('auth');
+// Route::get('/penawaransolistbarangfoc', [PenawaranSOController::class, 'listBarangFOC']);
+// Route::post('/penawaransolistbarangnosominus', [PenawaranSOController::class, 'listBarangNonFOC1']); //
+// Route::get('/penawaransolistbarangnosoplus', [PenawaranSOController::class, 'listBarangNonFOC2']);
+// Route::post('/penawaransolistpwo', [PenawaranSOController::class, 'listPWO']);
+// Route::post('/penawaransolistgudang', [PenawaranSOController::class, 'listGudang']);
+// Route::post('/penawaransolistnoso', [PenawaranSOController::class, 'listNoSo']);
+// Route::post('/penawaransolistlokasipenerima', [PenawaranSOController::class, 'listLokasiPenerima']);
+// Route::post('/penawaransospadd', [PenawaranSOController::class, 'spAdd']);
+// Route::post('/penawaransocekharga', [PenawaranSOController::class, 'spCekHarga']);
+// Route::post('/penawaransogetdetail', [PenawaranSOController::class, 'getDetail']);
+// Route::post('/cekpenawaransoDet', [PenawaranSOController::class, 'cekPoDet']);
+// Route::post('/penawaransoceksatuanbarang', [PenawaranSOController::class, 'cekSatuanBarang']);
+// Route::post('/penawaransocekotorisasi', [PenawaranSOController::class, 'cekOtorisasi']);
+// Route::post('/penawaransoupdateotorisasi', [PenawaranSOController::class, 'updateOtorisasi']);
+// Route::post('/penawaransoupdatebatalotorisasi', [PenawaranSOController::class, 'updateBatalOtorisasi']);
+// Route::post('/penawaransospupdatepo', [PenawaranSOController::class, 'spUpdatePO']);
+// Route::post('/penawaransoonchangeheader', [PenawaranSOController::class, 'onChangeHeader']);
+// Route::post('/penawaransolistbarangnosominusallso', [PenawaranSOController::class, 'listBarangNonFOC1AllSO']);
+// Route::get('/penawaransolistvalas', [PenawaranSOController::class, 'listValas']);
+// Route::get('/penawaransocheckhargaddd', [PenawaranSOController::class, 'CheckHargaAdd']);
+// // Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']);
 
 
-  // VERIF PENAWARAN
-  Route::get('/verifikasipenawaran', 'VerifikasiPenawaranController@index')->middleware('auth');
-  Route::post('/verifikasipenawaranotorisasi', 'VerifikasiPenawaranController@spOtorisasi')->middleware('auth');
-  Route::post('/verifikasipenawaranbatalotorisasi', 'VerifikasiPenawaranController@spBatalOtorisasi')->middleware('auth');
-  Route::get('/verifikasipenawaranloadall', 'VerifikasiPenawaranController@loadAll')->middleware('auth');
-  Route::get('/verifikasipenawaranloadallinfo', 'VerifikasiPenawaranController@loadAllInfo')->middleware('auth');
-  Route::post('/verifikasipenawarandetailbarang', 'VerifikasiPenawaranController@detailBarang')->middleware('auth');
-  Route::post('/get-barang', 'VerifikasiPenawaranController@getBarang')->middleware('auth');
-  Route::post('/get-customer', 'VerifikasiPenawaranController@getCustomer')->middleware('auth');
+//   // VERIF PENAWARAN
+//   Route::get('/verifikasipenawaran', [VerifikasiPenawaranController::class, 'index']);
+//   Route::post('/verifikasipenawaranotorisasi', [VerifikasiPenawaranController::class, 'spOtorisasi']);
+//   Route::post('/verifikasipenawaranbatalotorisasi', [VerifikasiPenawaranController::class, 'spBatalOtorisasi']);
+//   Route::get('/verifikasipenawaranloadall', [VerifikasiPenawaranController::class, 'loadAll']);
+//   Route::get('/verifikasipenawaranloadallinfo', [VerifikasiPenawaranController::class, 'loadAllInfo']);
+//   Route::post('/verifikasipenawarandetailbarang', [VerifikasiPenawaranController::class, 'detailBarang']);
+//   Route::post('/get-barang', [VerifikasiPenawaranController::class, 'getBarang']);
+//   Route::post('/get-customer', [VerifikasiPenawaranController::class, 'getCustomer']);
 
-  // VERIF BARANG
-  Route::get('/verifikasibarang', 'VerifikasiBarangController@index')->middleware('auth');
-  Route::post('/verifikasibarangotorisasi', 'VerifikasiBarangController@spOtorisasi')->middleware('auth');
-  Route::post('/verifikasibarangbatalotorisasi', 'VerifikasiBarangController@spBatalOtorisasi')->middleware('auth');
-  Route::get('/verifikasibarangloadall', 'VerifikasiBarangController@loadAll')->middleware('auth');
-  Route::get('/verifikasibarangloadallinfo', 'VerifikasiBarangController@loadAllInfo')->middleware('auth');
-  Route::post('/verifikasibarangdetailbarang', 'VerifikasiBarangController@detailBarang')->middleware('auth');
-  Route::post('/verifikasibarangdetailbarangx', 'VerifikasiBarangController@detailBarangx')->middleware('auth');
-  Route::get('/verifikasibaranglistbarang', 'VerifikasiBarangController@listBarang')->middleware('auth');
-  Route::post('/verifikasibarangspadd', 'VerifikasiBarangController@spOtorisasi')->middleware('auth');
+//   // VERIF BARANG
+//   Route::get('/verifikasibarang', [VerifikasiBarangController::class, 'index']);
+//   Route::post('/verifikasibarangotorisasi', [VerifikasiBarangController::class, 'spOtorisasi']);
+//   Route::post('/verifikasibarangbatalotorisasi', [VerifikasiBarangController::class, 'spBatalOtorisasi']);
+//   Route::get('/verifikasibarangloadall', [VerifikasiBarangController::class, 'loadAll']);
+//   Route::get('/verifikasibarangloadallinfo', [VerifikasiBarangController::class, 'loadAllInfo']);
+//   Route::post('/verifikasibarangdetailbarang', [VerifikasiBarangController::class, 'detailBarang']);
+//   Route::post('/verifikasibarangdetailbarangx', [VerifikasiBarangController::class, 'detailBarangx']);
+//   Route::get('/verifikasibaranglistbarang', [VerifikasiBarangController::class, 'listBarang']);
+//   Route::post('/verifikasibarangspadd', [VerifikasiBarangController::class, 'spOtorisasi']);
 
-  // Terima PO Cust
-  Route::get('/terimapocustomer', 'TerimaPoCustomerController@index')->middleware('auth');
-  Route::post('/terimapocustomerspadd', 'TerimaPoCustomerController@spAdd')->middleware('auth');
-  Route::get('/terimapocustomerloadall', 'TerimaPoCustomerController@loadAll')->middleware('auth');
-  Route::get('/terimapocustomerpelanggan', 'TerimaPoCustomerController@getCustomer')->middleware('auth');
-  Route::post('/terimapocustomerspclose', 'TerimaPoCustomerController@spClose')->middleware('auth');
+//   // Terima PO Cust
+//   Route::get('/terimapocustomer', [TerimaPoCustomerController::class, 'index']);
+//   Route::post('/terimapocustomerspadd', [TerimaPoCustomerController::class, 'spAdd']);
+//   Route::get('/terimapocustomerloadall', [TerimaPoCustomerController::class, 'loadAll']);
+//   Route::get('/terimapocustomerpelanggan', [TerimaPoCustomerController::class, 'getCustomer']);
+//   Route::post('/terimapocustomerspclose', [TerimaPoCustomerController::class, 'spClose']);
 
-  // Ubah PO Cust
-  Route::get('/ubahpocust', 'UbahPOCustomerController@index')->middleware('auth');
-  Route::get('/ubahPoCustomerListData', 'UbahPOCustomerController@listData')->middleware('auth');
+//   // Ubah PO Cust
+//   Route::get('/ubahpocust', [UbahPOCustomerController::class, 'index']);
+//   Route::get('/ubahPoCustomerListData', [UbahPOCustomerController::class, 'listData']);
 
   // SO
-  Route::get('/so', 'SOController@index')->middleware('auth');
-  Route::post('/soloadall', 'SOController@loadAll')->middleware('auth');
-  Route::post('/socekhargaoto', 'SOController@cekHargaOto')->middleware('auth');
-Route::get('/socheckhargaddd' , 'SOController@SOCheckHargaAdd')->middleware('auth');
+  Route::get('/so', [SOController::class, 'index']);
+  Route::post('/soloadall', [SOController::class, 'loadAll']);
+  Route::post('/socekhargaoto', [SOController::class, 'cekHargaOto']);
+Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
 
-  Route::get('/sospnobukti', 'SOController@getNoBukti')->middleware('auth');
-  Route::get('/solistpelanggan' , 'SOController@listPelanggan')->middleware('auth');
-  Route::get('/solistsales' , 'SOController@listSales')->middleware('auth');
-  Route::get('/solistvalas' , 'SOController@listValas')->middleware('auth');
-  Route::get('/solistbackoffice' , 'SOController@listBackOffice')->middleware('auth');
-  Route::get('/solistbarang' , 'SOController@listBarang')->middleware('auth');
-  Route::post('/solistnopo' , 'SOController@listNoPo')->middleware('auth');
+  Route::get('/sospnobukti', [SOController::class, 'getNoBukti']);
+  Route::get('/solistpelanggan', [SOController::class, 'listPelanggan']);
+  Route::get('/solistsales', [SOController::class, 'listSales']);
+  Route::get('/solistvalas', [SOController::class, 'listValas']);
+  Route::get('/solistbackoffice', [SOController::class, 'listBackOffice']);
+  Route::get('/solistbarang', [SOController::class, 'listBarang']);
+  Route::post('/solistnopo', [SOController::class, 'listNoPo']);
 
-  Route::post('/solistnopotambahso' , 'SOController@listNoPoTambahSO')->middleware('auth');
-
-
-  Route::post('/solistalamatkirim' , 'SOController@listAlamatKirim')->middleware('auth');
-  Route::post('/solistpic' , 'SOController@listPIC')->middleware('auth');
-  Route::post('/solistrefpr' , 'SOController@listRefPR')->middleware('auth');
-  Route::post('/solistnopenyerahan' , 'SOController@listNoPenyerahan')->middleware('auth');
-  Route::post('/solistbarangrefpr' , 'SOController@listBarangRefPR')->middleware('auth');
-Route::post('/sospaddtambahsoall' , 'SOController@spAddTambahSOAll')->middleware('auth');
-  Route::post('/sogetdetailtambahsoall' , 'SOController@getDetailTambahSOAll')->middleware('auth');
-
-  Route::post('/solistlokasipenerima' , 'SOController@listLokasiPenerima')->middleware('auth');
-  Route::post('/socekkredithari' , 'SOController@cekKreditHari')->middleware('auth');
-  Route::post('/sospadd' , 'SOController@spAdd')->middleware('auth');
-
-  Route::post('/sospaddtambahso' , 'SOController@spAddTambahSO')->middleware('auth');
+  Route::post('/solistnopotambahso', [SOController::class, 'listNoPoTambahSO']);
 
 
-  Route::post('/socekharga' , 'SOController@spCekHarga')->middleware('auth');
-  Route::get('/socheckhargaddd' , 'SOController@SOCheckHargaAdd')->middleware('auth');
-  Route::post('/sogetdetail' , 'SOController@getDetail')->middleware('auth');
+  Route::post('/solistalamatkirim', [SOController::class, 'listAlamatKirim']);
+  Route::post('/solistpic', [SOController::class, 'listPIC']);
+  Route::post('/solistrefpr', [SOController::class, 'listRefPR']);
+  Route::post('/solistnopenyerahan', [SOController::class, 'listNoPenyerahan']);
+  Route::post('/solistbarangrefpr', [SOController::class, 'listBarangRefPR']);
+  Route::post('/sospaddtambahsoall', [SOController::class, 'spAddTambahSOAll']);
+  Route::post('/sogetdetailtambahsoall', [SOController::class, 'getDetailTambahSOAll']);
 
-  Route::post('/sogetdetailtambahso' , 'SOController@getDetailTambahSO')->middleware('auth');
+  Route::post('/solistlokasipenerima', [SOController::class, 'listLokasiPenerima']);
+  Route::post('/socekkredithari', [SOController::class, 'cekKreditHari']);
+  Route::post('/sospadd', [SOController::class, 'spAdd']);
 
-
-  Route::post('/sogetsatuanbarang' , 'SOController@getSatuanBarang')->middleware('auth');
-  Route::post('/soonchangeheader' , 'SOController@onChangeHeader')->middleware('auth');
-  Route::post('/sospupdateso' , 'SOController@spUpdateSO')->middleware('auth');
-  Route::post('/soupdateotorisasi', 'SOController@updateOtorisasi')->middleware('auth');
-  Route::post('/soupdatebatalotorisasi', 'SOController@updateBatalOtorisasi')->middleware('auth');
-  Route::post('/socekotorisasi', 'SOController@cekOtorisasi')->middleware('auth');
-  Route::post('/sodetailbarangall' , 'SOController@detailBarangAll')->middleware('auth');
-  Route::post('/sodetailCetak', 'SOController@getDetailCetak')->middleware('auth');
-  Route::post('/soupdatecbd', 'SOController@updateCBD')->middleware('auth');
-Route::post('/soloadsofilter', 'SOController@loadSOFilter')->middleware('auth');
+  Route::post('/sospaddtambahso', [SOController::class, 'spAddTambahSO']);
 
 
+  Route::post('/socekharga', [SOController::class, 'spCekHarga']);
+  Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
+  Route::post('/sogetdetail', [SOController::class, 'getDetail']);
+
+  Route::post('/sogetdetailtambahso', [SOController::class, 'getDetailTambahSO']);
 
 
-
-  // closing so
-  Route::get('/closingso', 'ClosingSOController@index')->middleware('auth');
-  Route::post('/closingsospclosingso', 'ClosingSOController@spClosingSO')->middleware('auth');
-  Route::post('/closingsospopenso', 'ClosingSOController@spOpenSO')->middleware('auth');
-  Route::get('/closingsoloadall', 'ClosingSOController@loadAll')->middleware('auth');
-
-  // performance
-  Route::get('/performance', 'PerformanceController@index')->middleware('auth');
-  Route::post('/performancegetdetail', 'PerformanceController@getDetail')->middleware('auth');
-  Route::get('/performanceloadall', 'PerformanceController@loadAll')->middleware('auth');
-  Route::post('/performancespotoperf', 'PerformanceController@spOtoPerf')->middleware('auth');
-  Route::post('/performancespbatalotoperf', 'PerformanceController@spBatalOtoPerf')->middleware('auth');
-  Route::post('/performancedetailCetak', 'PerformanceController@getDetailCetak')->middleware('auth');
+  Route::post('/sogetsatuanbarang', [SOController::class, 'getSatuanBarang']);
+  Route::post('/soonchangeheader', [SOController::class, 'onChangeHeader']);
+  Route::post('/sospupdateso', [SOController::class, 'spUpdateSO']);
+  Route::post('/soupdateotorisasi', [SOController::class, 'updateOtorisasi']);
+  Route::post('/soupdatebatalotorisasi', [SOController::class, 'updateBatalOtorisasi']);
+  Route::post('/socekotorisasi', [SOController::class, 'cekOtorisasi']);
+  Route::post('/sodetailbarangall', [SOController::class, 'detailBarangAll']);
+  Route::post('/sodetailCetak', [SOController::class, 'getDetailCetak']);
+  Route::post('/soupdatecbd', [SOController::class, 'updateCBD']);
+  Route::post('/soloadsofilter', [SOController::class, 'loadSOFilter']);
 
 
+//   // closing so
+//   Route::get('/closingso', [ClosingSOController::class, 'index']);
+//   Route::post('/closingsospclosingso', [ClosingSOController::class, 'spClosingSO']);
+//   Route::post('/closingsospopenso', [ClosingSOController::class, 'spOpenSO']);
+//   Route::get('/closingsoloadall', [ClosingSOController::class, 'loadAll']);
 
-  // UANG MUKA JUAL
-  Route::get('/uangmukajualprint', 'UangMukaJualController@spCetak')->middleware('auth');
-  Route::get('/uangmukajual', 'UangMukaJualController@index')->middleware('auth');
-  Route::post('/uangmukajualgetdetail', 'UangMukaJualController@getDetail')->middleware('auth');
-  Route::post('/uangmukajualspnobukti', 'UangMukaJualController@getNoBukti')->middleware('auth');
-  Route::post('/uangmukajualspadd' , 'UangMukaJualController@spAdd')->middleware('auth');
-  Route::post('/uangmukajualgetdetailumj', 'UangMukaJualController@getDetailUMJ')->middleware('auth');
-  Route::get('/uangmukajualloadall', 'UangMukaJualController@loadAll')->middleware('auth');
-  Route::post('/uangmukajualspoto', 'UangMukaJualController@spOto')->middleware('auth');
-  Route::post('/uangmukajualspbataloto', 'UangMukaJualController@spBatalOto')->middleware('auth');
-
-
-  // suratjalan
-  Route::get('/suratjalan', 'SuratJalanController@index')->middleware('auth');
-  Route::post('/suratjalangetdetail', 'SuratJalanController@getDetail')->middleware('auth');
-  Route::get('/suratjalanspnobukti', 'SuratJalanController@getNoBukti')->middleware('auth');
-  Route::get('/suratjalanlistgudang' , 'SuratJalanController@listGudang')->middleware('auth');
-  Route::get('/suratjalanlistekspedisi' , 'SuratJalanController@listEkspedisi')->middleware('auth');
-  Route::post('/suratjalanspadd' , 'SuratJalanController@spAdd')->middleware('auth');
-  Route::get('/suratjalanloadall', 'SuratJalanController@loadAll')->middleware('auth');
-  Route::post('/suratjalanspotorisasi' , 'SuratJalanController@spOtorisasi')->middleware('auth');
-  Route::post('/suratjalanspbatalotorisasi' , 'SuratJalanController@spBatalOtorisasi')->middleware('auth');
-  Route::post('/suratjalangetdetailkoreksi', 'SuratJalanController@getDetailKoreksi')->middleware('auth');
-  Route::post('/suratjalanspkoreksi' , 'SuratJalanController@spKoreksi')->middleware('auth');
-  Route::post('/suratjalanlistbarang' , 'SuratJalanController@listBarang')->middleware('auth');
-  Route::post('/suratJalanAddKirimTerima' , 'SuratJalanController@spAddKirimTerima')->middleware('auth');
-  Route::post('/suratJalanAddKirimTerimaAcc' , 'SuratJalanController@spAddKirimTerimaAcc')->middleware('auth');
+//   // performance
+//   Route::get('/performance', [PerformanceController::class, 'index']);
+//   Route::post('/performancegetdetail', [PerformanceController::class, 'getDetail']);
+//   Route::get('/performanceloadall', [PerformanceController::class, 'loadAll']);
+//   Route::post('/performancespotoperf', [PerformanceController::class, 'spOtoPerf']);
+//   Route::post('/performancespbatalotoperf', [PerformanceController::class, 'spBatalOtoPerf']);
+//   Route::post('/performancedetailCetak', [PerformanceController::class, 'getDetailCetak']);
 
 
-
-  // retursuratjalan
-  Route::get('/retursuratjalan', 'ReturSuratJalanController@index')->middleware('auth');
-  Route::get('/retursuratjalanspnobukti', 'ReturSuratJalanController@getNoBukti')->middleware('auth');
-  Route::post('/retursuratjalanlistsj' , 'ReturSuratJalanController@listSJ')->middleware('auth');
-  Route::get('/retursuratjalanlistcustsuppbaru' , 'ReturSuratJalanController@listCustSuppBaru')->middleware('auth');
-  Route::post('/retursuratjalanlistbarang' , 'ReturSuratJalanController@listBarang')->middleware('auth');
-  Route::post('/retursuratjalanspadd' , 'ReturSuratJalanController@spAdd')->middleware('auth');
-  Route::post('/retursuratjalanspdetail' , 'ReturSuratJalanController@getDetail')->middleware('auth');
-  Route::get('/retursuratjalanloadall', 'ReturSuratJalanController@loadAll')->middleware('auth');
-  Route::post('/retursuratjalanspoto', 'ReturSuratJalanController@spOtorisasi')->middleware('auth');
-  Route::post('/retursuratjalanspbataloto', 'ReturSuratJalanController@spBatalOtorisasi')->middleware('auth');
+//   // UANG MUKA JUAL
+//   Route::get('/uangmukajualprint', [UangMukaJualController::class, 'spCetak']);
+//   Route::get('/uangmukajual', [UangMukaJualController::class, 'index']);
+//   Route::post('/uangmukajualgetdetail', [UangMukaJualController::class, 'getDetail']);
+//   Route::post('/uangmukajualspnobukti', [UangMukaJualController::class, 'getNoBukti']);
+//   Route::post('/uangmukajualspadd', [UangMukaJualController::class, 'spAdd']);
+//   Route::post('/uangmukajualgetdetailumj', [UangMukaJualController::class, 'getDetailUMJ']);
+//   Route::get('/uangmukajualloadall', [UangMukaJualController::class, 'loadAll']);
+//   Route::post('/uangmukajualspoto', [UangMukaJualController::class, 'spOto']);
+//   Route::post('/uangmukajualspbataloto', [UangMukaJualController::class, 'spBatalOto']);
 
 
-  // Invoice Penjualan
-  Route::get('/invoicepenjualan', 'InvoicePenjualanController@index')->middleware('auth');
-  Route::post('/invoicepenjualanlistso', 'InvoicePenjualanController@getListSO')->middleware('auth');
-  Route::post('/invoicepenjualanspadd', 'InvoicePenjualanController@spAdd')->middleware('auth');
-  Route::post('/invoicepenjualanspdetailkoreksi', 'InvoicePenjualanController@spDetailKoreksi')->middleware('auth');
-  Route::post('/invoicepenjualanspdelete', 'InvoicePenjualanController@spDelete')->middleware('auth');
-  Route::get('/invoicepenjualanloadall', 'InvoicePenjualanController@loadAll')->middleware('auth');
-  Route::post('/invoicepenjualanspotorisasi', 'InvoicePenjualanController@spOtorisasi')->middleware('auth');
-  Route::post('/invoicepenjualanspbatalotorisasi', 'InvoicePenjualanController@spBatalOtorisasi')->middleware('auth');
-  Route::post('/invoicepenjualanonchangeheader' , 'InvoicePenjualanController@onChangeHeader')->middleware('auth');
-  Route::post('/invoicepenjualanonchangedetail' , 'InvoicePenjualanController@onChangeDetail')->middleware('auth');
-  Route::post('/invoicepenjualandetailCetak', 'InvoicePenjualanController@getDetailCetak')->middleware('auth');
-  Route::post('/invoicepenjualandetailCetakJBG', 'InvoicePenjualanController@getDetailCetak')->middleware('auth');
-  Route::post('/invoicepenjualandetailCetak3', 'InvoicePenjualanController@getDetailCetak')->middleware('auth');
-  Route::post('/ambilNomorSPB', 'InvoicePenjualanController@getDetailCetakSPB')->middleware('auth');
-  Route::post('/invoicePenjualanPrintSPB', 'InvoicePenjualanController@getDetailPenerimaancetak')->middleware('auth');
-  Route::post('/invoicepenjualangetdetail', 'InvoicePenjualanController@spDetailKoreksi')->middleware('auth');
-  Route::get('/invoicepenjualangetlistinvoicecetak', 'InvoicePenjualanController@getListInvoiceCetak')->middleware('auth');
-  Route::post('/invoicepenjualandetailcetakall', 'InvoicePenjualanController@getDetailCetakAll')->middleware('auth');
+//   // suratjalan
+//   Route::get('/suratjalan', [SuratJalanController::class, 'index']);
+//   Route::post('/suratjalangetdetail', [SuratJalanController::class, 'getDetail']);
+//   Route::get('/suratjalanspnobukti', [SuratJalanController::class, 'getNoBukti']);
+//   Route::get('/suratjalanlistgudang', [SuratJalanController::class, 'listGudang']);
+//   Route::get('/suratjalanlistekspedisi', [SuratJalanController::class, 'listEkspedisi']);
+//   Route::post('/suratjalanspadd', [SuratJalanController::class, 'spAdd']);
+//   Route::get('/suratjalanloadall', [SuratJalanController::class, 'loadAll']);
+//   Route::post('/suratjalanspotorisasi', [SuratJalanController::class, 'spOtorisasi']);
+//   Route::post('/suratjalanspbatalotorisasi', [SuratJalanController::class, 'spBatalOtorisasi']);
+//   Route::post('/suratjalangetdetailkoreksi', [SuratJalanController::class, 'getDetailKoreksi']);
+//   Route::post('/suratjalanspkoreksi', [SuratJalanController::class, 'spKoreksi']);
+//   Route::post('/suratjalanlistbarang', [SuratJalanController::class, 'listBarang']);
+//   Route::post('/suratJalanAddKirimTerima', [SuratJalanController::class, 'spAddKirimTerima']);
+//   Route::post('/suratJalanAddKirimTerimaAcc', [SuratJalanController::class, 'spAddKirimTerimaAcc']);
 
+//   // retursuratjalan
+//   Route::get('/retursuratjalan', [ReturSuratJalanController::class, 'index']);
+//   Route::get('/retursuratjalanspnobukti', [ReturSuratJalanController::class, 'getNoBukti']);
+//   Route::post('/retursuratjalanlistsj', [ReturSuratJalanController::class, 'listSJ']);
+//   Route::get('/retursuratjalanlistcustsuppbaru', [ReturSuratJalanController::class, 'listCustSuppBaru']);
+//   Route::post('/retursuratjalanlistbarang', [ReturSuratJalanController::class, 'listBarang']);
+//   Route::post('/retursuratjalanspadd', [ReturSuratJalanController::class, 'spAdd']);
+//   Route::post('/retursuratjalanspdetail', [ReturSuratJalanController::class, 'getDetail']);
+//   Route::get('/retursuratjalanloadall', [ReturSuratJalanController::class, 'loadAll']);
+//   Route::post('/retursuratjalanspoto', [ReturSuratJalanController::class, 'spOtorisasi']);
+//   Route::post('/retursuratjalanspbataloto', [ReturSuratJalanController::class, 'spBatalOtorisasi']);
 
+//   // Invoice Penjualan
+//   Route::get('/invoicepenjualan', [InvoicePenjualanController::class, 'index']);
+//   Route::post('/invoicepenjualanlistso', [InvoicePenjualanController::class, 'getListSO']);
+//   Route::post('/invoicepenjualanspadd', [InvoicePenjualanController::class, 'spAdd']);
+//   Route::post('/invoicepenjualanspdetailkoreksi', [InvoicePenjualanController::class, 'spDetailKoreksi']);
+//   Route::post('/invoicepenjualanspdelete', [InvoicePenjualanController::class, 'spDelete']);
+//   Route::get('/invoicepenjualanloadall', [InvoicePenjualanController::class, 'loadAll']);
+//   Route::post('/invoicepenjualanspotorisasi', [InvoicePenjualanController::class, 'spOtorisasi']);
+//   Route::post('/invoicepenjualanspbatalotorisasi', [InvoicePenjualanController::class, 'spBatalOtorisasi']);
+//   Route::post('/invoicepenjualanonchangeheader', [InvoicePenjualanController::class, 'onChangeHeader']);
+//   Route::post('/invoicepenjualanonchangedetail', [InvoicePenjualanController::class, 'onChangeDetail']);
+//   Route::post('/invoicepenjualandetailCetak', [InvoicePenjualanController::class, 'getDetailCetak']);
+//   Route::post('/invoicepenjualandetailCetakJBG', [InvoicePenjualanController::class, 'getDetailCetak']);
+//   Route::post('/invoicepenjualandetailCetak3', [InvoicePenjualanController::class, 'getDetailCetak']);
+//   Route::post('/ambilNomorSPB', [InvoicePenjualanController::class, 'getDetailCetakSPB']);
+//   Route::post('/invoicePenjualanPrintSPB', [InvoicePenjualanController::class, 'getDetailPenerimaancetak']);
+//   Route::post('/invoicepenjualangetdetail', [InvoicePenjualanController::class, 'spDetailKoreksi']);
+//   Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
+//   Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
 
+//   // Invoice Jasa
+//   Route::get('/invoicejasa', [InvoiceJasaController::class, 'index']);
+//   Route::get('/invoicejasaspnobukti', [InvoiceJasaController::class, 'getNoBukti']);
+//   Route::get('/invoicejasalistcustomer', [InvoiceJasaController::class, 'listCustomer']);
+//   Route::get('/invoicejasalistsales', [InvoiceJasaController::class, 'listSales']);
+//   Route::post('/invoicejasalistlokasipenerima', [InvoiceJasaController::class, 'listLokasiPenerima']);
+//   Route::post('/invoicejasaspadd', [InvoiceJasaController::class, 'spAdd']);
+//   Route::post('/invoicejasaspdetail', [InvoiceJasaController::class, 'spDetail']);
+//   Route::post('/invoicejasaonchangeheader', [InvoiceJasaController::class, 'onChangeHeader']);
+//   Route::post('/invoicejasaonchangedetail', [InvoiceJasaController::class, 'onChangeDetail']);
 
-
-
-  // Invoice Jasa
-  Route::get('/invoicejasa' , 'InvoiceJasaController@index')->middleware('auth');
-  Route::get('/invoicejasaspnobukti' , 'InvoiceJasaController@getNoBukti')->middleware('auth');
-  Route::get('/invoicejasalistcustomer' , 'InvoiceJasaController@listCustomer')->middleware('auth');
-  Route::get('/invoicejasalistsales' , 'InvoiceJasaController@listSales')->middleware('auth');
-  Route::post('/invoicejasalistlokasipenerima' , 'InvoiceJasaController@listLokasiPenerima')->middleware('auth');
-  Route::post('/invoicejasaspadd' , 'InvoiceJasaController@spAdd')->middleware('auth');
-  Route::post('/invoicejasaspdetail' , 'InvoiceJasaController@spDetail')->middleware('auth');
-  Route::post('/invoicejasaonchangeheader' , 'InvoiceJasaController@onChangeHeader')->middleware('auth');
-  Route::post('/invoicejasaonchangedetail' , 'InvoiceJasaController@onChangeDetail')->middleware('auth');
-
-  Route::get('/invoicejasaloadall', 'InvoiceJasaController@loadAll')->middleware('auth');
+//   Route::get('/invoicejasaloadall', [InvoiceJasaController::class, 'loadAll']);
 
 
 
-  // Faktur Pajak
+//   // Faktur Pajak
 
-  Route::get('/fakturpajak' , 'FakturPajakController@index')->middleware('auth');
-  Route::post('/fakturpajakspadd' , 'FakturPajakController@spAdd')->middleware('auth');
-  Route::post('/fakturpajakspdelete' , 'FakturPajakController@spDelete')->middleware('auth');
-  Route::post('/fakturpajakloadall' , 'FakturPajakController@loadAll')->middleware('auth');
-  Route::post('/fakturpajakimportexcel' , 'FakturPajakController@importExcel')->middleware('auth');
-  Route::get('/fakturpajakexportexcel' , 'FakturPajakController@spExport')->middleware('auth');
+//   Route::get('/fakturpajak', [FakturPajakController::class, 'index']);
+//   Route::post('/fakturpajakspadd', [FakturPajakController::class, 'spAdd']);
+//   Route::post('/fakturpajakspdelete', [FakturPajakController::class, 'spDelete']);
+//   Route::post('/fakturpajakloadall', [FakturPajakController::class, 'loadAll']);
+//   Route::post('/fakturpajakimportexcel', [FakturPajakController::class, 'importExcel']);
+//   Route::get('/fakturpajakexportexcel', [FakturPajakController::class, 'spExport']);
 
-  // Perintah Retur Jual
-  Route::get('/perintahreturjualcetak', 'PerintahReturJualController@spCetak')->middleware('auth');
-  Route::get('/perintahreturjual' ,'PerintahReturJualController@index')->middleware('auth');
-  Route::get('/perintahreturjualspnobukti' , 'PerintahReturJualController@getNoBukti')->middleware('auth');
-  // Route::post('/newsetupperiodekerjaupdate' ,'PerintahReturJualMinusController@updatePeriodeKerja')->middleware('auth');
-  Route::get('/perintahreturjuallistcustomer' , 'PerintahReturJualController@listCustomer')->middleware('auth');
-  Route::post('/perintahreturjuallistnoinvoice' , 'PerintahReturJualController@listNoInvoice')->middleware('auth');
-  Route::post('/perintahreturjuallistbarang' , 'PerintahReturJualController@listBarang')->middleware('auth');
-  Route::post('/perintahreturjuallistnobeli' , 'PerintahReturJualController@listNoBeli')->middleware('auth');
-  Route::post('/perintahreturjualgetdetail' , 'PerintahReturJualController@getDetail')->middleware('auth');
-  Route::post('/perintahreturjualspadd' , 'PerintahReturJualController@spAdd')->middleware('auth');
-  Route::get('/perintahreturjualloadall' ,'PerintahReturJualController@loadAll')->middleware('auth');
-  Route::post('/perintahreturjualspotorisasi', 'PerintahReturJualController@spOtorisasi')->middleware('auth');
-  Route::post('/perintahreturjualspbatalotorisasi', 'PerintahReturJualController@spBatalOtorisasi')->middleware('auth');
-
-
-
-  // Perintah Retur Jual
-  Route::get('/perintahreturjualminus' ,'PerintahReturJualMinusController@index')->middleware('auth');
-  Route::get('/perintahreturjualminusspnobukti' , 'PerintahReturJualMinusController@getNoBukti')->middleware('auth');
-  // Route::post('/newsetupperiodekerjaupdate' ,'PerintahReturJualMinusController@updatePeriodeKerja')->middleware('auth');
-  Route::get('/perintahreturjualminuslistcustomer' , 'PerintahReturJualMinusController@listCustomer')->middleware('auth');
-  Route::get('/perintahreturjualminuslistgudang' , 'PerintahReturJualMinusController@listGudang')->middleware('auth');
-  Route::post('/perintahreturjualminuslistnoinvoice' , 'PerintahReturJualMinusController@listNoInvoice')->middleware('auth');
-  Route::get('/perintahreturjualminuslistbarang' , 'PerintahReturJualMinusController@listBarang')->middleware('auth');
-  Route::post('/perintahreturjualminuslistnobeli' , 'PerintahReturJualMinusController@listNoBeli')->middleware('auth');
-  Route::post('/perintahreturjualminusgetdetail' , 'PerintahReturJualMinusController@getDetail')->middleware('auth');
-  Route::post('/perintahreturjualminusspadd' , 'PerintahReturJualMinusController@spAdd')->middleware('auth');
-  Route::get('/perintahreturjualminusloadall' ,'PerintahReturJualMinusController@loadAll')->middleware('auth');
-  Route::post('/perintahreturjualminusspotorisasi', 'PerintahReturJualMinusController@spOtorisasi')->middleware('auth');
-  Route::post('/perintahreturjualminusspbatalotorisasi', 'PerintahReturJualMinusController@spBatalOtorisasi')->middleware('auth');
-
-  // Retur Penjualan Gudang
-  Route::get('/returpenjualangudang' ,'ReturPenjualanGudangController@index')->middleware('auth');
-  Route::get('/returpenjualangudangspnobukti' , 'ReturPenjualanGudangController@getNoBukti')->middleware('auth');
-  Route::post('/returpenjualangudanggetdetail' , 'ReturPenjualanGudangController@getDetail')->middleware('auth');
-  Route::post('/returpenjualangudangspadd' , 'ReturPenjualanGudangController@spAdd')->middleware('auth');
-  Route::post('/returpenjualangudanggetdetailpenerimaan' , 'ReturPenjualanGudangController@getDetailPenerimaan')->middleware('auth');
-  Route::post('/returpenjualangudangspkoreksi' , 'ReturPenjualanGudangController@spKoreksi')->middleware('auth');
-  Route::get('/returpenjualangudangloadall' ,'ReturPenjualanGudangController@loadAll')->middleware('auth');
-  Route::post('/returpenjualangudangspotorisasi' , 'ReturPenjualanGudangController@spOtorisasi')->middleware('auth');
-  Route::post('/returpenjualangudangspbatalotorisasi' , 'ReturPenjualanGudangController@spBatalOtorisasi')->middleware('auth');
-  Route::post('/returpenjualangudangonchangeheader' , 'ReturPenjualanGudangController@onChangeHeader')->middleware('auth');
+//   // Perintah Retur Jual
+//   Route::get('/perintahreturjualcetak', [PerintahReturJualController::class, 'spCetak']);
+//   Route::get('/perintahreturjual', [PerintahReturJualController::class, 'index']);
+//   Route::get('/perintahreturjualspnobukti', [PerintahReturJualController::class, 'getNoBukti']);
+//   // Route::post('/newsetupperiodekerjaupdate', [PerintahReturJualMinusController::class, 'updatePeriodeKerja']);
+//   Route::get('/perintahreturjuallistcustomer', [PerintahReturJualController::class, 'listCustomer']);
+//   Route::post('/perintahreturjuallistnoinvoice', [PerintahReturJualController::class, 'listNoInvoice']);
+//   Route::post('/perintahreturjuallistbarang', [PerintahReturJualController::class, 'listBarang']);
+//   Route::post('/perintahreturjuallistnobeli', [PerintahReturJualController::class, 'listNoBeli']);
+//   Route::post('/perintahreturjualgetdetail', [PerintahReturJualController::class, 'getDetail']);
+//   Route::post('/perintahreturjualspadd', [PerintahReturJualController::class, 'spAdd']);
+//   Route::get('/perintahreturjualloadall', [PerintahReturJualController::class, 'loadAll']);
+//   Route::post('/perintahreturjualspotorisasi', [PerintahReturJualController::class, 'spOtorisasi']);
+//   Route::post('/perintahreturjualspbatalotorisasi', [PerintahReturJualController::class, 'spBatalOtorisasi']);
 
 
-  // NOTA RETUR Penjualan
-  Route::get('/notareturpenjualan', 'NotaReturPenjualanController@index')->middleware('auth');
-  Route::post('/notareturpenjualangetdetail', 'NotaReturPenjualanController@getDetail')->middleware('auth');
-  Route::post('/notareturpenjualangetdetailnew', 'NotaReturPenjualanController@getDetailNew')->middleware('auth');
-  Route::get('/notareturpenjualanspnobukti', 'NotaReturPenjualanController@getNoBukti')->middleware('auth');
-  Route::post('/notareturpenjualanlistbarang', 'NotaReturPenjualanController@listBarang')->middleware('auth');
-  Route::get('/notareturpenjualanlistvalas', 'NotaReturPenjualanController@listValas')->middleware('auth');
-  Route::post('/notareturpenjualanspadd', 'NotaReturPenjualanController@spAdd')->middleware('auth');
-  Route::post('/notareturpenjualanspaddall', 'NotaReturPenjualanController@spAddAll')->middleware('auth');
-  Route::post('/notareturpenjualanspaddallnew', 'NotaReturPenjualanController@spAddAllNew')->middleware('auth');
-  Route::post('/notareturpenjualancekkredithari', 'NotaReturPenjualanController@cekKreditHari')->middleware('auth');
-  Route::post('/notareturpenjualanspdeleteall', 'NotaReturPenjualanController@spDeleteAll')->middleware('auth');
-  Route::post('/notareturpenjualangetdetailpenerimaan', 'NotaReturPenjualanController@getDetailPenerimaan')->middleware('auth');
-  Route::get('/notareturpenjualanloadall', 'NotaReturPenjualanController@loadAll')->middleware('auth');
-  Route::post('/notareturpenjualanspotorisasi', 'NotaReturPenjualanController@spOtorisasi')->middleware('auth');
-  Route::post('/notareturpenjualanspbatalotorisasi', 'NotaReturPenjualanController@spBatalOtorisasi')->middleware('auth');
 
-  // KREDITNOTE
-  Route::get('/kreditnote', 'KreditNoteController@index')->middleware('auth');
-  Route::get('/kreditnotespnobukti', 'KreditNoteController@getNoBukti')->middleware('auth');
-  Route::get('/kreditnotelistcustomer' , 'KreditNoteController@listCustomer')->middleware('auth');
-  Route::post('/kreditnotelistinvoice' , 'KreditNoteController@listInvoice')->middleware('auth');
-  Route::post('/kreditnotespadd' , 'KreditNoteController@spAdd')->middleware('auth');
-  Route::post('/kreditnotespdetail' , 'KreditNoteController@getDetail')->middleware('auth');
-  Route::post('/kreditnotespkoreksi' , 'KreditNoteController@spKoreksi')->middleware('auth');
-  Route::get('/kreditnoteloadall', 'KreditNoteController@loadAll')->middleware('auth');
-  Route::post('/kreditnotespotorisasi', 'KreditNoteController@spOtorisasi')->middleware('auth');
-  Route::post('/kreditnotespbatalotorisasi', 'KreditNoteController@spBatalOtorisasi')->middleware('auth');
+//   // Perintah Retur Jual
+//   Route::get('/perintahreturjualminus', [PerintahReturJualMinusController::class, 'index']);
+//   Route::get('/perintahreturjualminusspnobukti', [PerintahReturJualMinusController::class, 'getNoBukti']);
+//   // Route::post('/newsetupperiodekerjaupdate', [PerintahReturJualMinusController::class, 'updatePeriodeKerja']);
+//   Route::get('/perintahreturjualminuslistcustomer', [PerintahReturJualMinusController::class, 'listCustomer']);
+//   Route::get('/perintahreturjualminuslistgudang', [PerintahReturJualMinusController::class, 'listGudang']);
+//   Route::post('/perintahreturjualminuslistnoinvoice', [PerintahReturJualMinusController::class, 'listNoInvoice']);
+//   Route::get('/perintahreturjualminuslistbarang', [PerintahReturJualMinusController::class, 'listBarang']);
+//   Route::post('/perintahreturjualminuslistnobeli', [PerintahReturJualMinusController::class, 'listNoBeli']);
+//   Route::post('/perintahreturjualminusgetdetail', [PerintahReturJualMinusController::class, 'getDetail']);
+//   Route::post('/perintahreturjualminusspadd', [PerintahReturJualMinusController::class, 'spAdd']);
+//   Route::get('/perintahreturjualminusloadall', [PerintahReturJualMinusController::class, 'loadAll']);
+//   Route::post('/perintahreturjualminusspotorisasi', [PerintahReturJualMinusController::class, 'spOtorisasi']);
+//   Route::post('/perintahreturjualminusspbatalotorisasi', [PerintahReturJualMinusController::class, 'spBatalOtorisasi']);
+
+//   // Retur Penjualan Gudang
+//   Route::get('/returpenjualangudang', [ReturPenjualanGudangController::class, 'index']);
+//   Route::get('/returpenjualangudangspnobukti', [ReturPenjualanGudangController::class, 'getNoBukti']);
+//   Route::post('/returpenjualangudanggetdetail', [ReturPenjualanGudangController::class, 'getDetail']);
+//   Route::post('/returpenjualangudangspadd', [ReturPenjualanGudangController::class, 'spAdd']);
+//   Route::post('/returpenjualangudanggetdetailpenerimaan', [ReturPenjualanGudangController::class, 'getDetailPenerimaan']);
+//   Route::post('/returpenjualangudangspkoreksi', [ReturPenjualanGudangController::class, 'spKoreksi']);
+//   Route::get('/returpenjualangudangloadall', [ReturPenjualanGudangController::class, 'loadAll']);
+//   Route::post('/returpenjualangudangspotorisasi', [ReturPenjualanGudangController::class, 'spOtorisasi']);
+//   Route::post('/returpenjualangudangspbatalotorisasi', [ReturPenjualanGudangController::class, 'spBatalOtorisasi']);
+//   Route::post('/returpenjualangudangonchangeheader', [ReturPenjualanGudangController::class, 'onChangeHeader']);
+
+
+//   // NOTA RETUR Penjualan
+//   Route::get('/notareturpenjualan', [NotaReturPenjualanController::class, 'index']);
+//   Route::post('/notareturpenjualangetdetail', [NotaReturPenjualanController::class, 'getDetail']);
+//   Route::post('/notareturpenjualangetdetailnew', [NotaReturPenjualanController::class, 'getDetailNew']);
+//   Route::get('/notareturpenjualanspnobukti', [NotaReturPenjualanController::class, 'getNoBukti']);
+//   Route::post('/notareturpenjualanlistbarang', [NotaReturPenjualanController::class, 'listBarang']);
+//   Route::get('/notareturpenjualanlistvalas', [NotaReturPenjualanController::class, 'listValas']);
+//   Route::post('/notareturpenjualanspadd', [NotaReturPenjualanController::class, 'spAdd']);
+//   Route::post('/notareturpenjualanspaddall', [NotaReturPenjualanController::class, 'spAddAll']);
+//   Route::post('/notareturpenjualanspaddallnew', [NotaReturPenjualanController::class, 'spAddAllNew']);
+//   Route::post('/notareturpenjualancekkredithari', [NotaReturPenjualanController::class, 'cekKreditHari']);
+//   Route::post('/notareturpenjualanspdeleteall', [NotaReturPenjualanController::class, 'spDeleteAll']);
+//   Route::post('/notareturpenjualangetdetailpenerimaan', [NotaReturPenjualanController::class, 'getDetailPenerimaan']);
+//   Route::get('/notareturpenjualanloadall', [NotaReturPenjualanController::class, 'loadAll']);
+//   Route::post('/notareturpenjualanspotorisasi', [NotaReturPenjualanController::class, 'spOtorisasi']);
+//   Route::post('/notareturpenjualanspbatalotorisasi', [NotaReturPenjualanController::class, 'spBatalOtorisasi']);
+
+//   // KREDITNOTE
+//   Route::get('/kreditnote', [KreditNoteController::class, 'index']);
+//   Route::get('/kreditnotespnobukti', [KreditNoteController::class, 'getNoBukti']);
+//   Route::get('/kreditnotelistcustomer', [KreditNoteController::class, 'listCustomer']);
+//   Route::post('/kreditnotelistinvoice', [KreditNoteController::class, 'listInvoice']);
+//   Route::post('/kreditnotespadd', [KreditNoteController::class, 'spAdd']);
+//   Route::post('/kreditnotespdetail', [KreditNoteController::class, 'getDetail']);
+//   Route::post('/kreditnotespkoreksi', [KreditNoteController::class, 'spKoreksi']);
+//   Route::get('/kreditnoteloadall', [KreditNoteController::class, 'loadAll']);
+//   Route::post('/kreditnotespotorisasi', [KreditNoteController::class, 'spOtorisasi']);
+//   Route::post('/kreditnotespbatalotorisasi', [KreditNoteController::class, 'spBatalOtorisasi']);
 
 
 
 
-  // // PEMBELIAN PERMINTAAN NON AGEN
-  // Route::get('/pembelianpermintaannonagen', 'PembelianPermintaanNonAgenController@index')->middleware('auth');
-  // Route::get('/pembelianpermintaannonagenspnobukti' , 'PembelianPermintaanNonAgenController@getNoBukti')->middleware('auth');
-  // Route::get('/pembelianpermintaannonagenlistbarang' , 'PembelianPermintaanNonAgenController@listBarang')->middleware('auth');
-  // Route::post('/pembelianpermintaannonagenspadd', 'PembelianPermintaanNonAgenController@spAdd')->middleware('auth');
-  // Route::get('/pembelianpermintaannonagenspdetail' , 'PembelianPermintaanNonAgenController@spDetail')->middleware('auth');
-  // Route::get('/pembelianpermintaannonagenloadall' , 'PembelianPermintaanNonAgenController@loadAll')->middleware('auth');
-  // Route::post('/pembelianpermintaannonagenspdelete' , 'PembelianPermintaanNonAgenController@spDelete')->middleware('auth');
-  // Route::get('/pembelianpermintaannonagenlistdepartemen' , 'PembelianPermintaanNonAgenController@listDepartemen')->middleware('auth');
-  // Route::post('/pembelianpermintaannonagenupdateotorisasi' , 'PembelianPermintaanNonAgenController@updateOtorisasi')->middleware('auth');
+//   // // PEMBELIAN PERMINTAAN NON AGEN
+//   // Route::get('/pembelianpermintaannonagen', [PembelianPermintaanNonAgenController::class, 'index']);
+//   // Route::get('/pembelianpermintaannonagenspnobukti', [PembelianPermintaanNonAgenController::class, 'getNoBukti']);
+//   // Route::get('/pembelianpermintaannonagenlistbarang', [PembelianPermintaanNonAgenController::class, 'listBarang']);
+//   // Route::post('/pembelianpermintaannonagenspadd', [PembelianPermintaanNonAgenController::class, 'spAdd']);
+//   // Route::get('/pembelianpermintaannonagenspdetail', [PembelianPermintaanNonAgenController::class, 'spDetail']);
+//   // Route::get('/pembelianpermintaannonagenloadall', [PembelianPermintaanNonAgenController::class, 'loadAll']);
+//   // Route::post('/pembelianpermintaannonagenspdelete', [PembelianPermintaanNonAgenController::class, 'spDelete']);
+//   // Route::get('/pembelianpermintaannonagenlistdepartemen', [PembelianPermintaanNonAgenController::class, 'listDepartemen']);
+//   // Route::post('/pembelianpermintaannonagenupdateotorisasi', [PembelianPermintaanNonAgenController::class, 'updateOtorisasi']);
 
 
 
 
-// cetak tanda terima
+// // cetak tanda terima
 
-// Route::post('/cetakpengajuandphspnobukti', 'BankController@getNoBukti')->middleware('auth');
-Route::get('/cetaktandaterima' , 'CetakTandaTerimaController@index')->middleware('auth');
-Route::post('/cetaktandaterimadetailkoreksi' , 'CetakTandaTerimaController@detailKoreksi')->middleware('auth');
-Route::post('/cetaktandaterimadetailoutstanding' , 'CetakTandaTerimaController@getDetailOutstanding')->middleware('auth');
-Route::post('/cetaktandaterimalistproses' , 'CetakTandaTerimaController@listProses')->middleware('auth');
+// // Route::post('/cetakpengajuandphspnobukti', [BankController::class, 'getNoBukti']);
+// Route::get('/cetaktandaterima', [CetakTandaTerimaController::class, 'index']);
+// Route::post('/cetaktandaterimadetailkoreksi', [CetakTandaTerimaController::class, 'detailKoreksi']);
+// Route::post('/cetaktandaterimadetailoutstanding', [CetakTandaTerimaController::class, 'getDetailOutstanding']);
+// Route::post('/cetaktandaterimalistproses', [CetakTandaTerimaController::class, 'listProses']);
 
-Route::post('/cetaktandaterimaspadd' , 'CetakTandaTerimaController@spAdd')->middleware('auth');
-Route::post('/cetaktandaterimaspkoreksi' , 'CetakTandaTerimaController@spKoreksi')->middleware('auth');
-Route::post('/cetaktandaterimaspproses' , 'CetakTandaTerimaController@spProses')->middleware('auth');
-Route::get('/cetaktandaterimaloadall' , 'CetakTandaTerimaController@loadAll' )->middleware('auth');
-Route::post('/cetaktandaterimadetailCetak', 'CetakTandaTerimaController@getDetailCetak')->middleware('auth');
+// Route::post('/cetaktandaterimaspadd', [CetakTandaTerimaController::class, 'spAdd']);
+// Route::post('/cetaktandaterimaspkoreksi', [CetakTandaTerimaController::class, 'spKoreksi']);
+// Route::post('/cetaktandaterimaspproses', [CetakTandaTerimaController::class, 'spProses']);
+// Route::get('/cetaktandaterimaloadall' , 'CetakTandaTerimaController@loadAll' )->middleware('auth');
+// Route::post('/cetaktandaterimadetailCetak', [CetakTandaTerimaController::class, 'getDetailCetak']);
 
 
 });

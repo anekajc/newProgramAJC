@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Karyawan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Karyawan</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Karyawan</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -638,6 +638,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Karyawan"
 
   $('#tabel').DataTable().destroy();
 

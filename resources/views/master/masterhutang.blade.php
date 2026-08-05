@@ -14,20 +14,28 @@
     <span class="sp-crumb-active">Hutang</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Hutang</h1>
     </div>
-    {{-- <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Hutang</button> --}}
-  </div>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Hutang</button>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
 
-  <style>
+    <style>
     .sp-length-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }    
+    
+    .sp-filter-wrap {
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -68,6 +76,17 @@
     </div>
 
     <div class="sp-filter-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="form-select form-select-sm">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
+
+    <div class="sp-filter-wrap">
       <select id="perkiraanCustomer" class="form-select" onchange="loadAll()">
         @foreach ($listDataCustomer as $customer)
           <option value="{{ $customer->keterangan }} ({{ $customer->Perkiraan }})">
@@ -78,14 +97,7 @@
     </div>
 
     <div class="sp-length-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
+      <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
     </div>
   </div>
 
@@ -409,7 +421,10 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
   let filter = $("#perkiraanCustomer").val();
-  console.log(filter);
+
+  
+  document.getElementById('breadcrumb').innerHTML = "Master Hutang"
+  document.getElementById('AddVisibility').hidden = true;
 
   $('#tabel').DataTable().destroy();
 

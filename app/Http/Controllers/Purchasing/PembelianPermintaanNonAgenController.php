@@ -19,9 +19,6 @@ class PembelianPermintaanNonAgenController extends Controller
 
   public function index(Request $req) {
 
-
-
-
     $kodemenu = '030101';
     // $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu , $req->path());

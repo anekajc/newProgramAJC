@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Sales</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Sales</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Sales</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -531,6 +531,8 @@ let listSelectSubKategori = []
 
 function loadAll () {
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Sales"
 
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();

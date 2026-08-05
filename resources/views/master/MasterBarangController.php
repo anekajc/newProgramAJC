@@ -22,11 +22,11 @@ class MasterBarangController extends Controller
     // $users = DB::connection("SML")->select('select * from new_users');
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
     $listData = DB::connection('SML')->select("select  b.NAMA nNAMAGROUP, c.NAMAHDGRP nNAMAHDGROUP , d.NamaSubGrp nNAMASUBGROUP, e.Keterangan nNAMASUBKATEGORI, f.NAMAMERK nNAMAMERK , a.*  from DBBARANG a
-join DBGROUP b on a.KODEGRP = b.KODEGRP
-join DBHDGROUP c on a.KODEGRP = c.KODEGRP and a.KodeHdGrp = c.KODEHDGRP
-join dbsubgroup d on a.KODEGRP = d.KodeGrp and a.KodeHdGrp = d.KodeHDGrp and a.KODESUBGRP = d.KodeSubGrp
-join DBSubGroupJnsTambah e on a.KODEGRP = e.KodeGrp and a.KodeHdGrp = e.HDGROUP and a.KODESUBGRP = e.KodeSubGrp and a.KODESUBKATEGORI = e.Urut
-join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
+    join DBGROUP b on a.KODEGRP = b.KODEGRP
+    join DBHDGROUP c on a.KODEGRP = c.KODEGRP and a.KodeHdGrp = c.KODEHDGRP
+    join dbsubgroup d on a.KODEGRP = d.KodeGrp and a.KodeHdGrp = d.KodeHDGrp and a.KODESUBGRP = d.KodeSubGrp
+    join DBSubGroupJnsTambah e on a.KODEGRP = e.KodeGrp and a.KodeHdGrp = e.HDGROUP and a.KODESUBGRP = e.KodeSubGrp and a.KODESUBKATEGORI = e.Urut
+    join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
 
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(2);

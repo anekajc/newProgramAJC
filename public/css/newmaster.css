@@ -141,7 +141,7 @@
     .bc-sep { opacity: 0.4; }
 
     .titleText{
-      font-size:30px;
+      font-size:20px;
     }
 
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }

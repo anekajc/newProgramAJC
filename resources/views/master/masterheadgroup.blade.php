@@ -16,12 +16,12 @@
     <span class="sp-crumb-active">Head Group</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Head Group</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Head Group</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -1323,6 +1323,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Head Group"
 
   $('#tabel').DataTable().destroy();  
 

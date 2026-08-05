@@ -15,12 +15,12 @@
     <span class="sp-crumb-active">Supplier Bank Account</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Supplier Bank Account</h1>
     </div>
-    {{-- <button class="btn btn-primary" onclick="buttonAdd()">+ Add Supplier Bank Account</button> --}}
-  </div>
+    <button class="btn btn-primary" onclick="buttonAdd()">+ Add Supplier Bank Account</button>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -225,6 +225,10 @@ let dataRefresh = []
 
 function loadAll () {
   let _token = $("#_token").val();
+  
+  document.getElementById('breadcrumb').innerHTML = "Master Supplier Bank"
+  document.getElementById('AddVisibility').hidden = true;
+
   $('#tabel').DataTable().destroy();
 
   $.ajax({

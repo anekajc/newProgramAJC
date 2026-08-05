@@ -14,11 +14,11 @@
     <span class="sp-crumb-active">Seting Perusahaan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Atur Nomor Transaksi dan Perusahaan</h1>
     </div>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -706,6 +706,10 @@
 
 @section('js')
 <script type="text/javascript">
+
+$(document).ready(function () {
+  document.getElementById('breadcrumb').innerHTML = "Atur Nomor Transaksi dan Perusahaan"
+});
 
 function previewUploadImage(inputEl, targetBoxId) {
   let file = inputEl.files && inputEl.files[0];

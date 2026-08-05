@@ -14,13 +14,13 @@
     <span class="sp-crumb-active">Set Pemakai</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Set Pemakai</h1>
       <p>Master — manajemen pengguna &amp; akses sistem</p>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add User</button>
-  </div>
+  </div> --}}
 
 
   <div id="contentContainer" class="container-fluid">
@@ -697,6 +697,10 @@
 <script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
+$(document).ready(function () {
+  document.getElementById('breadcrumb').innerHTML = "Set Pemakai"
+});
+
 
 // addEventListener("beforeunload", (event) => {
 //   window.location.href = "{{ url('logout')}}";
@@ -752,6 +756,7 @@
   }
 
   function loadAll () {
+
 
     $.ajax({
       url: "{!! url('newsetpemakailoadall') !!}",

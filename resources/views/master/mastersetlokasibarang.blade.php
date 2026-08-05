@@ -4,7 +4,6 @@
 @endsection
 @section('content')
 
-
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
@@ -15,12 +14,12 @@
     <span class="sp-crumb-active">Set Lokasi Barang</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Set Lokasi Barang</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Set Lokasi Barang</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -81,7 +80,7 @@
                 </div>
               </div>
 
-              <div class="row">
+              <div class="row mt-2">
                 <div class="col-4 text-left">
                   <div class="form-group text-left">
                     <label class="text-left">Keterangan</label>
@@ -97,7 +96,6 @@
           </div>
         </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
       </div>
     </div>
@@ -119,7 +117,7 @@
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Lokasi Barang</label>
@@ -140,7 +138,6 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
     <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
   </div>
 </div>
@@ -159,6 +156,8 @@ let dataRefresh = []
 function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
+
+  document.getElementById('breadcrumb').innerHTML = "Master Set Lokasi Barang"
 
   $('#tabel').DataTable().destroy();
 
@@ -182,7 +181,7 @@ function loadAll () {
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
           <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEBRG}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-primary" type="button" onclick="buttonHistory('${item.KODEBRG}')"><i class="bi bi-clock-history"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Deletel" class="btn-action-sm btn-action-primary" type="button" onclick="buttonHistory('${item.KODEBRG}')"><i class="bi bi-clock-history"></i></button>
       </div>
     </td>
     <td>${item.KODEBRG}</td>

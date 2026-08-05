@@ -14,12 +14,12 @@
     <span class="sp-crumb-active">Satuan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Satuan</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Satuan</button>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -27,21 +27,21 @@
 
   @include('master.partials.headerTableMaster')
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode Satuan</th>
-                    <th scope="col">Kode Sat Tax</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
-        </div>
+  <div class="table-outer">
+    <div class="table-wrap">
+      <table class="tb" id="tabel">
+        <thead>
+          <tr>
+            <th scope="col">Actions</th>
+            <th scope="col">Kode Satuan</th>
+            <th scope="col">Kode Sat Tax</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-right">
+      </tbody>
+      </table>
+    </div>
+</div>
 
 </div>
 
@@ -169,6 +169,8 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Satuan"
+  
   $('#tabel').DataTable().destroy();
 
   $.ajax({
