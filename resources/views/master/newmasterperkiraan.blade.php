@@ -645,11 +645,13 @@ function onChangePerkiraan () {
 
     document.getElementById("tabel_data").innerHTML = rowTable
 
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
     $("#tabel").DataTable({
       "lengthChange": true,
       "paging": true,
       "searching": true,
-      "dom": 'tip'
+      "dom": 'tip',
+      "pageLength": currentLength
     });
 
   }

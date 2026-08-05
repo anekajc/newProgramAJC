@@ -1258,6 +1258,7 @@ let listSelectSubKategori = []
 function loadAll () {
   $('#tabel').DataTable().destroy();
 
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
   document.getElementById('breadcrumb').innerHTML = "Master Barang"
   $('#tabel').DataTable({
     processing: true,
@@ -1266,7 +1267,7 @@ function loadAll () {
     paging: true,
     searching: true,
     lengthChange: true,
-    pageLength: 10,
+    pageLength: currentLength,
 
     dom: 'tip',
 

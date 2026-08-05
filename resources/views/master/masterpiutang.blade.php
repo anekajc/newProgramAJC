@@ -135,9 +135,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Piutang Awal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="input_add_noUrut">
@@ -255,7 +253,6 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
       </div>
     </div>
@@ -269,9 +266,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Edit Piutang Awal</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="input_add_noUrut">
@@ -389,14 +384,12 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
       </div>
     </div>
   </div>
 </div>
 <!-- End Modal Edit -->
-
 
 <!-- start modal valas select -->
 <div class="modal fade"  id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -487,7 +480,7 @@ function loadAll () {
 
     <td class="text-center">
       <div class="action-buttons-wrap">
-      <button data-toggle="tooltip" data-placement="top" title="Add Piutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd'${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
+      <button data-toggle="tooltip" data-placement="top" title="Add Piutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
       ${item.NoFaktur != null ? `
         <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
         <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}')"><i class="bi bi-trash"></i></button>
@@ -497,15 +490,15 @@ function loadAll () {
 
     <td>${item.KodeCustSupp}</td>
     <td>${item.NAMACUST}</td>
-    <td>${item.NoFaktur}</td>
-    <td>${(new Date(item.Tanggal)).toLocaleDateString('en-CA')}</td>
-    <td>${(new Date(item.JatuhTempo)).toLocaleDateString('en-CA')}</td>
-    <td>${item.Valas}</td>
-    <td>${item.Kurs}</td>
+    <td>${item.NoFaktur == null ? '' : item.NoFaktur}</td>
+    <td>${formatTanggal(item.Tanggal)}</td>
+    <td>${formatTanggal(item.JatuhTempo)}</td>
+    <td>${item.Valas == null ? '' : item.Valas}</td>
+    <td>${item.Kurs == null ? '' : item.Kurs}</td>
     <td>${item.Debet == null ? '' : item.Debet}</td>
     <td>${item.DebetD == null ? '' : item.DebetD}</td>
-    <td>${item.Kredit}</td>
-    <td>${item.KreditD}</td>
+    <td>${item.Kredit== null ? '' : item.Kredit}</td>
+    <td>${item.KreditD== null ? '' : item.KreditD}</td>
     </tr>`
   });
 

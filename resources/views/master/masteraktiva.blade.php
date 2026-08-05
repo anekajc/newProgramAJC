@@ -952,7 +952,7 @@
 
     </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+         
       </div>
   </div>
 </div>
@@ -1410,7 +1410,7 @@ function buttonEdit (kode) {
     $("#formEdit").modal('toggle')
 }
 
-function cleanFormAdd () {
+function buttonAdd () {
       document.getElementById("input_add_GroupAktiva").value = ''
       document.getElementById("input_add_DaftarDevisi").value =''
       document.getElementById("input_add_NoUrut").value = ''
@@ -1489,6 +1489,66 @@ function submitEdit () {
   let BP3 = $("#input_edit_BiayaPenyusutan3").val();
   let PersenBP3 = $("#input_edit_PersenBiayaPenyusutan3").val();
 
+  if (!groupAktiva) {
+    alertify.warning("Group Aktiva harus diisi");
+    return;
+  }
+
+  if (!daftarDevisi) {
+    alertify.warning("Daftar Devisi harus diisi");
+    return;
+  }
+
+  if (!noUrut) {
+    alertify.warning("No Urut harus diisi");
+    return;
+  }
+
+  if (!noAktiva) {
+    alertify.warning("No Aktiva harus diisi");
+    return;
+  }
+
+  if (!tglPerolehan) {
+    alertify.warning("Tanggal Perolehan harus diisi");
+    return;
+  }
+
+  if (!tglPemakaian) {
+    alertify.warning("Tanggal Pemakaian harus diisi");
+    return;
+  }
+
+  if (!tipeAktiva) {
+    alertify.warning("Tipe Aktiva harus diisi");
+    return;
+  }
+
+  if (!keterangan) {
+    alertify.warning("Keterangan harus diisi");
+    return;
+  }
+
+  if (!kuantum) {
+    alertify.warning("Kuantum harus diisi");
+    return;
+  }
+
+  if (!susut) {
+    alertify.warning("Susut harus diisi");
+    return;
+  }
+
+  if (!metodePenyusutan) {
+    alertify.warning("Metode Penyusutan harus diisi");
+    return;
+  }
+
+  if (!akumulasiPenyusutan) {
+    alertify.warning("Akumulasi Penyusutan harus diisi");
+    return;
+  }
+
   // BP1/BP2/BP3 must never be sent as a true empty string — the backend
   // expects at least a single space when the field is blank.
   const emptyToSpace = (val) => (val === null || val === undefined || val.trim() === '') ? '-' : val;
@@ -1560,6 +1620,66 @@ function submitAdd () {
   let PersenBP2 = $("#input_add_PersenBiayaPenyusutan2").val() || 0;
   let BP3 = $("#input_add_BiayaPenyusutan3").val() || '-';
   let PersenBP3 = $("#input_add_PersenBiayaPenyusutan3").val() || 0;
+
+  if (!groupAktiva) {
+    alertify.warning("Group Aktiva harus diisi");
+    return;
+  }
+
+  if (!daftarDevisi) {
+    alertify.warning("Daftar Devisi harus diisi");
+    return;
+  }
+
+  if (!noUrut) {
+    alertify.warning("No Urut harus diisi");
+    return;
+  }
+
+  if (!noAktiva) {
+    alertify.warning("No Aktiva harus diisi");
+    return;
+  }
+
+  if (!tglPerolehan) {
+    alertify.warning("Tanggal Perolehan harus diisi");
+    return;
+  }
+
+  if (!tglPemakaian) {
+    alertify.warning("Tanggal Pemakaian harus diisi");
+    return;
+  }
+
+  if (!tipeAktiva) {
+    alertify.warning("Tipe Aktiva harus diisi");
+    return;
+  }
+
+  if (!keterangan) {
+    alertify.warning("Keterangan harus diisi");
+    return;
+  }
+
+  if (!kuantum) {
+    alertify.warning("Kuantum harus diisi");
+    return;
+  }
+
+  if (!susut) {
+    alertify.warning("Susut harus diisi");
+    return;
+  }
+
+  if (!metodePenyusutan) {
+    alertify.warning("Metode Penyusutan harus diisi");
+    return;
+  }
+
+  if (!akumulasiPenyusutan) {
+    alertify.warning("Akumulasi Penyusutan harus diisi");
+    return;
+  }
 
   $.ajax({
     url: "{!! url('masteraktivaspadd') !!}",

@@ -494,7 +494,7 @@
 
       <div class="sp-search-wrap">
         <i class="bi bi-search sp-search-icon"></i>
-        <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
+        <input type="text" id="tabel_filter_visual" placeholder="...">
       </div>
 
       <div class="sp-filter-wrap">

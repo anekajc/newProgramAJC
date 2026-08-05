@@ -2247,7 +2247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+         
       </div>
     </div>
   </div>

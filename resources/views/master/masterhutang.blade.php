@@ -134,7 +134,6 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -153,7 +152,7 @@
           </div>
 
           <!-- Perkiraan -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Perkiraan</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="namaPerkiraan" placeholder="Perkiraan" disabled>
@@ -161,7 +160,7 @@
           </div>
 
           <!-- No Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. Faktur</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_add_noFaktur" placeholder="No. Faktur">
@@ -169,7 +168,7 @@
           </div>
 
           <!-- Tanggal Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Tanggal Faktur</label>
             <div class="col-sm-4">
               <input type="date" class="form-control" id="input_add_tanggalFaktur">
@@ -180,7 +179,7 @@
             </div>
           </div>
 
-          <div class="form-group row">
+          <div class="form-group row mt-2">
 
             <div class="col-sm-3">
                 <label class="form-label">Valas</label>
@@ -213,7 +212,7 @@
           </div>
 
           <!-- Kredit -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Kredit</label>
             <div class="col-sm-4">
               <input type="number" class="form-control text-right" id="input_add_kredit">
@@ -225,7 +224,7 @@
           </div>
 
           <!-- No PO -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. PO</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_add_noPO" placeholder="No. PO">
@@ -236,7 +235,6 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
       </div>
     </div>
@@ -250,7 +248,6 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -353,7 +350,6 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
       </div>
     </div>
@@ -445,10 +441,14 @@ function loadAll () {
   dataRefresh.forEach((item, i) => {
     let temp = ""
 
+  function formatTanggal(date) {
+    return date == null ? '' : (new Date(date)).toLocaleDateString('en-CA');
+  }
+
     rowTable += `<tr>
     <td class="text-center">
       <div class="action-buttons-wrap">
-      <button data-toggle="tooltip" data-placement="top" title="Add Hutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd'${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
+      <button data-toggle="tooltip" data-placement="top" title="Add Hutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
       ${item.NoFaktur != null ? `
         <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
         <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}')"><i class="bi bi-trash"></i></button>
@@ -457,15 +457,15 @@ function loadAll () {
     </td>
     <td>${item.KodeCustSupp}</td>
     <td>${item.NAMACUST}</td>
-    <td>${item.NoFaktur}</td>
-    <td>${(new Date(item.Tanggal)).toLocaleDateString('en-CA')}</td>
-    <td>${(new Date(item.JatuhTempo)).toLocaleDateString('en-CA')}</td>
-    <td>${item.Valas}</td>
-    <td>${item.Kurs}</td>
+    <td>${item.NoFaktur == null ? '' : item.NoFaktur}</td>
+    <td>${formatTanggal(item.Tanggal)}</td>
+    <td>${formatTanggal(item.JatuhTempo)}</td>
+    <td>${item.Valas == null ? '' : item.Valas}</td>
+    <td>${item.Kurs == null ? '' : item.Kurs}</td>
     <td>${item.Debet == null ? '' : item.Debet}</td>
     <td>${item.DebetD == null ? '' : item.DebetD}</td>
-    <td>${item.Kredit}</td>
-    <td>${item.KreditD}</td>
+    <td>${item.Kredit== null ? '' : item.Kredit}</td>
+    <td>${item.KreditD== null ? '' : item.KreditD}</td>
     </tr>`
   });
 
