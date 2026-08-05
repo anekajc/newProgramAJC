@@ -480,13 +480,17 @@
       <div class="sp-filter-wrap">
         <ul class="radioChoiceMaster" id="giroTab" role="tablist">
           <li class="radioChoiceMaster-item" role="presentation">
-            <button class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#profile2" type="button" role="tab">Outstanding Penawaran</button>
+            <button class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#profile2" type="button" role="tab">Penawaran</button>
           </li>
           <li class="radioChoiceMaster-item" role="presentation">
             <button class="radioChoiceMaster-btn" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">SO</button>
           </li>
         </ul>
       </div>
+
+    </div>
+
+    <div class="sp-toolbar">
 
       <div class="sp-search-wrap">
         <i class="bi bi-search sp-search-icon"></i>
@@ -1421,9 +1425,7 @@
                     <div class="col-md-12">
                       <div class="row">
 
-
                       <!-- <div class="col-4">
-
 
                       <div class="form-group">
 
@@ -4805,7 +4807,7 @@ jQuery(function($) {
 
 $(document).ready(function(){
 
-  document.getElementById('breadcrumb').innerHTML = "Sales Order Test Update Script";
+  document.getElementById('breadcrumb').innerHTML = "Sales Order";
 
   $('#input_add_kodepelanggan').on('keyup', function () {
     let keyword = $(this).val()

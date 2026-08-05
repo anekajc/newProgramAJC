@@ -177,8 +177,8 @@
               <button class="btn-action-sm btn-action-info" title="Otorisasi" onclick="buttonOtorisasi('{{ $item[0]->NoBukti }}', '{{ $item[0]->IsOtorisasi1 }}')"><i class="bi bi-key"></i></button>
 
               <button class="btn-action-sm btn-action-success" title="Edit" onclick="buttonEdit('{{ $item[0]->NoBukti }}')">
-                            <i class="bi bi-pen"></i>
-                          </button>
+                <i class="bi bi-pen"></i>
+              </button>
 
               @endif
 
