@@ -7,7 +7,8 @@
 @section('content')
 @include('master/partials/sidebarPosting')
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+ <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
+
 
 <style>
   .sp-page-wrap {

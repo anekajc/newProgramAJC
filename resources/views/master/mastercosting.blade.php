@@ -4,7 +4,7 @@
 @endsection
 @section('content')
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -518,10 +518,13 @@ function refreshTabelPerkiraan(kodeCost){
           }
 
       document.getElementById("tabel_dataPerkiraan").innerHTML = rowTable
+      
       $("#tabelPerkiraan").DataTable({
         "lengthChange": false,
-          "paging": true,
-        });
+        "paging": true,
+        "searching": true,
+        "dom": 'tip'
+      });
 
 
     }
@@ -699,7 +702,7 @@ function buttonPerkiraan () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-md" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>

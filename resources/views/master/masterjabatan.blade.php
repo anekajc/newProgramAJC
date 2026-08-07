@@ -6,7 +6,8 @@
 
 <div class="container-fluid">
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+ <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
+
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>

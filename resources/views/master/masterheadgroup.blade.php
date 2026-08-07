@@ -5,8 +5,8 @@
 @section('content')
 <div class="container-fluid">
 
+ <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -252,7 +252,7 @@
                   <div class="input-group">
                       <input type="text" class="form-control" id="input_add_perkPers">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('1')">+</button>
                       </div>
                   </div>
               </div>
@@ -277,7 +277,7 @@
                   <div class="input-group">
                       <input type="text" class="form-control" id="input_add_perkJual">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('2')">+</button>
                       </div>
                   </div>
               </div>
@@ -319,17 +319,17 @@
               </div>
               </div>
               <div class="col-4">
-
-                <select id="input_subgroup_edit_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
+                  <div class="input-group">
+                      <input type="text" class="form-control" id="input_edit_perkPers">
+                      <div class="input-group-append">
+                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('3')">+</button>
+                      </div>
+                  </div>
               </div>
 
             </div>
-            <div class="row">
+            
+            <div class="row mt-2">
               <div class="col-2">
                 <div class="form-group">
                 <label>Nama Subgroup</label>
@@ -340,17 +340,16 @@
               </div>
               <div class="col-2">
                 <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
+                  <label>Perkiraan Jual</label>
+                </div>
               </div>
               <div class="col-4">
-
-                <select id="input_subgroup_edit_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
+                  <div class="input-group">
+                      <input type="text" class="form-control" id="input_edit_perkJual">
+                      <div class="input-group-append">
+                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('4')">+</button>
+                      </div>
+                  </div>
               </div>
             </div>
 
@@ -604,8 +603,45 @@
 <!-- End modal subkategori-->
 
 
+<!-- start modal select add akumulasi penyusutan -->
+<div class="modal fade"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Biaya Penyusutan</h5>
+        
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="tabelAddBiayaPenyusutan" class="table table-bordered table-striped"  >
+          <thead id='theadCustom' class="text-center">
+            <tr>
+              <th scope="col">Actions</th>
+              <th scope="col">Perkiraan</th>
+              <th scope="col">Keterangan</th>
+            </tr>
+          </thead>
+
+          <tbody id="tabel_dataBiayaPenyusutan" class="text-left" >
+            <tr>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+          </tr>
+          </tbody>
 
 
+        </table>
+
+
+    </div>
+        <div class="modal-footer">
+           
+        </div>
+  </div>
+</div>
+</div>
+<!-- End modal select add akumulasi penyusutan-->
 
 
 
@@ -742,8 +778,8 @@ function submitAddSubGroup () {
   let _token = $("#_token").val();
   let kodehdgroup = $("#input_subgroup_kodehdgroup").val();
   let kodesubgroup = $("#input_subgroup_add_kodesubgroup").val();
-  let perkpers = $("#input_subgroup_add_perkpers").val();
-  let perkjual = $("#input_subgroup_add_perkjual").val();
+  let perkpers = $("#input_add_perkPers").val();
+  let perkjual = $("#input_add_perkJual").val();
   let namasubgroup = $("#input_subgroup_add_namasubgroup").val();
   let kodegroup = $("#input_subgroup_kodegroup").val();
 
@@ -811,8 +847,8 @@ function submitEditSubGroup () {
   let _token = $("#_token").val();
   let kodehdgroup = $("#input_subgroup_kodehdgroup").val();
   let kodesubgroup = $("#input_subgroup_edit_kodesubgroup").val();
-  let perkpers = $("#input_subgroup_edit_perkpers").val();
-  let perkjual = $("#input_subgroup_edit_perkjual").val();
+  let perkpers = $("#input_edit_perkPers").val();
+  let perkjual = $("#input_edit_perkJual").val();
   let namasubgroup = $("#input_subgroup_edit_namasubgroup").val();
   let kodegroup = $("#input_subgroup_kodegroup").val();
 
@@ -877,32 +913,11 @@ function submitEditSubGroup () {
 function buttonAddSubGroup () {
   $('.showhide').hide();
   console.log('buttonAddSubGroup')
-  let _token = $("#_token").val();
-  $.ajax({
-    url: "{!! url('masterheadgrouplistperkiraan') !!}",
-    type: "get",
-    async: false,
-    data: {
-      _token : _token,
-    },
-    success: function(res) {
 
-      console.log(res)
-      let rowSelect = `<option selected disabled value="">Pilih Perkiraan</option>`
-
-      res.forEach((item, i) => {
-        // console.log(item)
-        rowSelect += `
-          <option value="${item.Perkiraan}">${item.Perkiraan} - ${item.Keterangan}</option>
-        `
-      });
-
-      document.getElementById("input_subgroup_add_perkjual").innerHTML = rowSelect
-      document.getElementById("input_subgroup_add_perkpers").innerHTML = rowSelect
-
-
-    }})
-
+  document.getElementById("input_subgroup_add_kodesubgroup").value = ''
+  document.getElementById("input_subgroup_add_namasubgroup").value = ''
+  document.getElementById("input_add_perkPers").value = ''
+  document.getElementById("input_add_perkJual").value = ''
 
   $('#addSubGroup').show();
 }
@@ -993,56 +1008,28 @@ function buttonEditSubGroup (kodesubgroup) {
   let kodehdgroup = $("#input_subgroup_kodehdgroup").val();
   console.log('buttonEditSubGroup')
   let _token = $("#_token").val();
+
   $.ajax({
-    url: "{!! url('masterheadgrouplistperkiraan') !!}",
+    url: "{!! url('masterheadgroupspdetailsubgroup') !!}",
     type: "get",
     async: false,
     data: {
       _token : _token,
+      kode: kodesubgroup,
+      kodehdgroup
     },
     success: function(res) {
-
+      console.log('DETAIL')
       console.log(res)
-      let rowSelect = `<option selected disabled value="">Pilih Perkiraan</option>`
+      console.log(res[0].KodeSubGrp)
+      console.log(res[0].NamaSubGrp)
+      document.getElementById("input_subgroup_edit_kodesubgroup").value = res[0].KodeSubGrp
+      document.getElementById("input_subgroup_edit_namasubgroup").value = res[0].NamaSubGrp
 
-      res.forEach((item, i) => {
-        // console.log(item)
-        rowSelect += `
-          <option value="${item.Perkiraan}">${item.Perkiraan} - ${item.Keterangan}</option>
-        `
-      });
-
-      document.getElementById("input_subgroup_edit_perkjual").innerHTML = rowSelect
-      document.getElementById("input_subgroup_edit_perkpers").innerHTML = rowSelect
-
+      document.getElementById("input_edit_perkPers").value = res[0].PerkPers
+      document.getElementById("input_edit_perkJual").value = res[0].PerkH
 
     }})
-
-    $.ajax({
-      url: "{!! url('masterheadgroupspdetailsubgroup') !!}",
-      type: "get",
-      async: false,
-      data: {
-        _token : _token,
-        kode: kodesubgroup,
-        kodehdgroup
-      },
-      success: function(res) {
-        console.log('DETAIL')
-        console.log(res)
-        console.log(res[0].KodeSubGrp)
-        console.log(res[0].NamaSubGrp)
-        document.getElementById("input_subgroup_edit_kodesubgroup").value = res[0].KodeSubGrp
-        document.getElementById("input_subgroup_edit_namasubgroup").value = res[0].NamaSubGrp
-
-        document.getElementById("input_subgroup_edit_perkpers").value = res[0].PerkPers
-        document.getElementById("input_subgroup_edit_perkjual").value = res[0].PerkH
-
-      }})
-
-
-    // masterheadgroupspdetailsubgroup
-
 
   $('#editSubGroup').show();
 }
@@ -1071,13 +1058,13 @@ function refreshSubGroup () {
       res.forEach((item, i) => {
         rowTable += `
         <tr>
+        <td class="text-center">
+          <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-pen"></i></button>
+          <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')" ><i class="bi bi-list"></i></button>
+          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-trash"></i></button>
+        </td>
         <td>${item.KodeSubGrp}</td>
         <td>${item.NamaSubGrp}</td>
-        <td class="text-center">
-          <button class="btn btn-success btn-sm" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-trash"></i></button>
-          <button class="btn btn-primary btn-sm" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')" ><i class="bi bi-list"></i></button>
-        </td>
         </tr>
         `
       });
@@ -1094,7 +1081,7 @@ function refreshSubGroup () {
 
 }
 
-function buttonSubGroup (kode , kodegroup) {
+function buttonSubGroup (kode, kodegroup) {
 
   console.log(kode , kodegroup)
 
@@ -1127,12 +1114,11 @@ function buttonSubGroup (kode , kodegroup) {
         `
       });
       if (!res.length) {
-        rowTable =`<tr><td colspan=3 class="text-center" >Belum ada data</td></tr>`
+        rowTable =`<tr><td colspan=3 class="text-center">Belum ada data</td></tr>`
       }
       document.getElementById("input_subgroup_kodegroup").value = kodegroup
       document.getElementById("input_subgroup_kodehdgroup").value = kode
       document.getElementById("tabel_data_subgroup").innerHTML = rowTable
-
 
     }})
 
@@ -1451,6 +1437,63 @@ function buttonEdit (kode) {
 
     }})
     $("#formEdit").modal('toggle')
+}
+
+
+function buttonPerkiraanSubGroup (kodeBiaya) {
+
+  $("#formAddBiayaPenyusutan").modal('toggle')
+
+  console.log('asd');
+  let _token = $("#_token").val();
+
+  if ($.fn.DataTable.isDataTable('#tabelAddBiayaPenyusutan')) {
+    $('#tabelAddBiayaPenyusutan').DataTable().destroy();
+  }
+
+  $.ajax({
+    url: "{!! url('masterheadgrouploadperkiraansubgroup') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token: _token,
+    },
+    success: function (res) {
+      console.log(res);
+      dataRefresh = res;
+    },
+  });
+
+  let rowTable = "";
+  dataRefresh.forEach((item, i) => {
+    rowTable += `<tr>
+      <td class="text-center">
+        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '${kodeBiaya}')"><i class="bi bi-plus"></i></button>
+      </td>
+      <td>${item.Perkiraan}</td>
+      <td>${item.Keterangan}</td>
+    </tr>`;
+  });
+  document.getElementById("tabel_dataBiayaPenyusutan").innerHTML = rowTable;
+
+  $("#tabelAddBiayaPenyusutan").DataTable({
+    "lengthChange": true,
+    "paging": true
+  });
+}
+
+function buttonPilihBiayaPenyusutan (perkiraan, keterangan, kodeBiaya) {
+  if (kodeBiaya == '1') {
+    document.getElementById("input_add_perkPers").value = perkiraan
+  } else if (kodeBiaya == '2') {
+    document.getElementById("input_add_perkJual").value = perkiraan
+  } else if (kodeBiaya == '3') {
+    document.getElementById("input_edit_perkPers").value = perkiraan
+  } else if (kodeBiaya == '4') {
+    document.getElementById("input_edit_perkJual").value = perkiraan
+  }
+
+  $("#formAddBiayaPenyusutan").modal('hide')
 }
 
 function buttonDelete (kode) {

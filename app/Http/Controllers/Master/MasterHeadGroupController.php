@@ -118,6 +118,11 @@ class MasterHeadGroupController extends Controller
     $listData = DB::connection('SML')->update('insert into dbSubGroup (KodeGrp , KodeSubGrp , NamaSubGrp , KodeHDGrp , PerkPers, PerkH) values (:kodegroup, :kodesubgroup , :namasubgroup , :kodehdgroup , :perkpers , :perkjual )' , ['kodegroup' => $req->kodegroup , 'kodesubgroup' => $req->kodesubgroup , 'namasubgroup' => $req->namasubgroup , 'kodehdgroup' => $req->kodehdgroup , 'perkpers' => $req->perkpers , 'perkjual' => $req->perkjual]);
     return 1;
   }
+  
+  public function loadPerkiraan () {
+    $listData = DB::connection('SML')->select("select Perkiraan, Keterangan, Kelompok, Tipe, Valas, DK, Neraca, FlagCashFlow, Simbol, IsPPN, GroupPerkiraan, Lokasi, iskirim, IsAktif from dbperkiraan");
+    return $listData;
+  }
 
   public function spEditSubGroup (Request $req) {
     $edit = DB::connection('SML')->update('update dbSubGroup set NamaSubGrp = :namasubgroup , PerkPers = :perkpers , PerkH = :perkjual where KodeSubGrp = :kodesubgroup and KodeHDGrp = :kodehdgroup' , [ 'namasubgroup' => $req->namasubgroup  , 'perkpers' => $req->perkpers  , 'perkjual' => $req->perkjual  , 'kodesubgroup' => $req->kodesubgroup , 'kodehdgroup' => $req->kodehdgroup]);

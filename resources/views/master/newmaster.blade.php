@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="{!! URL::asset('public/css/jquery-ui.min.css') !!}">
 
     
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+ <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
+
 
     <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/bootstrap.css') !!}">
     <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/style.css') !!}">

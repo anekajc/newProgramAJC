@@ -441,6 +441,7 @@ Route::get('/masterheadgroupspdetailsubkategori' , [MasterHeadGroupController::c
 Route::post('/masterheadgroupspaddsubkategori' , [MasterHeadGroupController::class, 'spAddSubKategori'])->middleware('auth');
 Route::post('/masterheadgroupspeditsubkategori' , [MasterHeadGroupController::class, 'spEditSubKategori'])->middleware('auth');
 Route::post('/masterheadgroupspdeletesubkategori' , [MasterHeadGroupController::class, 'spDeleteSubKategori'])->middleware('auth');
+Route::post('/masterheadgrouploadperkiraansubgroup' , [MasterHeadGroupController::class, 'loadPerkiraan'])->middleware('auth');
 
 // MASTER MERK ========================================================
 Route::get('/mastermerk' , [MasterMerkController::class, 'index'])->middleware('auth');
