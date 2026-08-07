@@ -617,6 +617,10 @@
 
 let dataRefresh = []
 
+$('#formSubKategori').on('hidden.bs.modal', function () {
+  $('#formSubGroup').css('opacity', 1);
+});
+
 function closeSubKategoriForm() {
    $('#formSubGroup').css('opacity', 1);
    $("#formSubKategori").modal('toggle')

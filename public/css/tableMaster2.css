@@ -114,6 +114,20 @@
       color: var(--sp-text-soft);
       transition: all .12s ease;
     }
+
+    .btn-action-md{
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 2px;
+    border:none;
+    color: var(--sp-text-soft);
+    transition: all .12s ease;
+    }
+
     .btn-action-sm:hover{ filter: brightness(0.97); transform: translateY(-1px); }
     .btn-action-success{ color: var(--sp-green); border-color: #cdebd7; background: var(--sp-green-bg); }
     .btn-action-warning{ color: var(--sp-amber); border-color: #cdebd7; background: var(--sp-amber-bg); }

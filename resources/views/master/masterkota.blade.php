@@ -96,13 +96,7 @@
               </div>
               <div class="col-8">
                 <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
-                  <select id="input_add_kodearea" class="form-control" aria-label="Default select example">
-                    <option selected value="0">Pilih Area</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                  </select>
+                  <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
                 </div>
               </div>
 
@@ -173,13 +167,7 @@
               </div>
               <div class="col-8">
                 <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
-                  <select id="input_edit_kodearea" class="form-control" aria-label="Default select example">
-                    <option selected value="0">Pilih Area</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                  </select>
+                  <input type="text" class="form-control" id="input_edit_kodearea" placeholder="Kode Area">
                 </div>
               </div>
 
@@ -254,29 +242,6 @@ function loadAll () {
 
 function buttonAdd () {
 
-  $.ajax({
-    url: "{!! url('masterkotalistarea') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function(res) {
-
-      console.log(res)
-      let rowTable = `<option selected value=0>Pilih Area</option>`
-      res.forEach((item, i) => {
-        rowTable += `
-          <option value="${item.KODEAREA}">${item.NAMAAREA}</option>
-        `
-      });
-
-      document.getElementById("input_add_kodearea").innerHTML = rowTable
-    }})
-
-    document.getElementById("input_add_kodekota").value = ''
-    document.getElementById("input_add_namakota").value = ''
-
-
   $("#form").modal('toggle')
 
 }
@@ -300,32 +265,9 @@ function buttonEdit (kodekota) {
       // document.getElementById("input_edit_kodearea").value = res[0].KodeArea
       document.getElementById("input_edit_namakota").value = res[0].NamaKota
       document.getElementById("input_edit_kodekota").value = res[0].KodeKota
-      tempkodearea = res[0].KodeArea
+      document.getElementById("input_edit_kodearea").value = res[0].KodeArea
 
     }})
-
-    console.log(tempkodearea , '>>>>')
-
-    $.ajax({
-      url: "{!! url('masterkotalistarea') !!}",
-      type: "get",
-      async: false,
-      data: {
-      },
-      success: function(res) {
-
-        console.log(res)
-        let rowTable = ``
-        res.forEach((item, i) => {
-          rowTable += `
-            <option value="${item.KODEAREA}">${item.NAMAAREA}</option>
-          `
-        });
-
-        document.getElementById("input_edit_kodearea").innerHTML = rowTable
-
-      }})
-      document.getElementById("input_edit_kodearea").value = tempkodearea
 
     $("#formEdit").modal('toggle')
 }

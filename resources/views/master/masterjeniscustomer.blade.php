@@ -214,6 +214,8 @@ function loadAll () {
 
 function buttonAdd () {
 
+  document.getElementById('input_add_kode').value = ''
+  document.getElementById('input_add_nama').value = ''
 
   $("#form").modal('toggle')
 
