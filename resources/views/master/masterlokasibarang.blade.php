@@ -184,8 +184,8 @@ function loadAll () {
     rowTable += `<tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODELOKASI}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODELOKASI}')"><i class="bi bi-trash"></i></button>
+        <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODELOKASI}')"><i class="bi bi-pen"></i></button>
+        <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODELOKASI}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
     <td>${item.KODELOKASI}</td>
@@ -194,17 +194,20 @@ function loadAll () {
   });
  
    let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
+    document.getElementById("tabel_data").innerHTML = rowTable
+    $("#tabel").DataTable({
+      "lengthChange": false,
+      "paging": true,
+      "searching": true,
+      "dom": 'tip',
+      "pageLength": currentLength
+    });
 }
 
 function buttonAdd () {
+
+  document.getElementById("input_add_kode").value = ''
+  document.getElementById("input_add_nama").value = ''
 
   $("#form").modal('toggle')
 

@@ -476,6 +476,10 @@ function loadAll () {
   dataRefresh.forEach((item, i) => {
     let temp = ""
 
+  function formatTanggal(date) {
+    return date == null ? '' : (new Date(date)).toLocaleDateString('en-CA');
+  }
+
     rowTable += `<tr>
 
     <td class="text-center">

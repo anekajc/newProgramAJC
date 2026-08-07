@@ -273,6 +273,8 @@ function buttonAdd () {
       document.getElementById("input_add_kodearea").innerHTML = rowTable
     }})
 
+    document.getElementById("input_add_kodekota").value = ''
+    document.getElementById("input_add_namakota").value = ''
 
 
   $("#form").modal('toggle')

@@ -510,6 +510,47 @@ function buttonAlamatEdit (nomor, kode, nama, alamat, telp, fax, up){
   $("#formAlamatEdit").modal('toggle')
 }
 
+
+function submitAddAlamat () {
+
+  let _token = $("#_token").val();
+  let kodeCustSupp = $("#input_add_kodeDetailAlamat").val();
+  let nama = $("#input_add_namaAlamat").val();
+  let alamat = $("#input_add_alamatAlamat").val();
+  let telp = $("#input_add_telpAlamat").val();
+  let fax = $("#input_add_faxAlamat").val();
+  let up = $("#input_add_upAlamat").val();
+
+  $.ajax({
+    url: "{!! url('mastersupplierspaddalamat') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token : _token,
+      kodeCustSupp,
+      nama,
+      alamat,
+      telp,
+      fax,
+      up
+    },
+    success: function(res) {
+
+      if (res != 1) {
+        alertify.warning(res);
+      }  else {
+        console.log(res ,'!')
+        // $("#formEdit").modal('toggle')
+        alertify.success("Data Alamat telah ditambah");
+        loadAlamat()
+        $("#formAlamatEdit").modal('hide')
+      }
+
+    }})
+
+  // console.log(kodearea, namaarea)
+}
+
 function submitAddAlamatEdit () {
 
   let _token = $("#_token").val();

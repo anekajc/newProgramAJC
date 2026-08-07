@@ -131,7 +131,6 @@ public function spAdd(Request $req) {
         return 'NPWP sudah ada di database';
     }
 
-
     $listData = DB::connection('SML')->update('insert into DBCUSTSUPP (HARI, USAHA, KODECUSTSUPP, NAMACUSTSUPP, ALAMAT1, Kota, KODEPOS, NEGARA, TELPON, FAX, EMAIL, NPPH23, NPPH22, HARIHUTPIUT, IsAktif, Att, AttPhone, AttDepart, bank, NoAcc, ATN, NPWP, NAMAPKP, ALAMATPKP1, KOTAPKP, IsPpn, Jenis) VALUES (:haribiasa, :usaha, :kode, :nama, :alamat, :kota, :kodepos, :negara, :telp, :fax, :email, :npph23, :npph21, :haripiutang, :isaktif, :att, :attphone, :attdepart, :bank, :accno, :atn, :npwp, :namapkp, :alamatpkp, :kotapkp, :isppn, :jenis)', [
         'haribiasa' => $req->haribiasa,  
         'usaha' => $req->bentukusaha,
@@ -192,29 +191,29 @@ public function spAdd(Request $req) {
                                               return $listData;
                                         }
 
-public function submitAlamat (Request $req)
-{
-    $ambilData = DB::connection('SML')->select("SELECT MAX(Nomor) as maxNomor
-                                                FROM DBALAMATCUST 
-                                                WHERE KODECUSTSUPP = :kode", 
-                                                ['kode' => $req->kode]);
-    
-    $nomorBaru = ($ambilData[0]->maxNomor ?? 0) + 1;
-    
-    $listData = DB::connection('SML')->insert("INSERT INTO dbAlamatCust (KodeCustSupp, Nomor, Alamat, Telp, Fax, Nama, pSurat, up) 
-                                               VALUES (:kode, :nomor, :alamat, :telp, :fax, :nama, 0, :up)", 
-                                               [
-                                                   'kode' => $req->kode, 
-                                                   'nomor' => $nomorBaru,
-                                                   'nama' => $req->nama, 
-                                                   'alamat' => $req->alamat, 
-                                                   'fax' => $req->fax, 
-                                                   'telp' => $req->telp, 
-                                                   'up' => $req->up
-                                               ]);
+    public function submitAlamat (Request $req)
+    {
+        $ambilData = DB::connection('SML')->select("SELECT MAX(Nomor) as maxNomor
+                                                    FROM DBALAMATCUST 
+                                                    WHERE KODECUSTSUPP = :kode", 
+                                                    ['kode' => $req->kode]);
+        
+        $nomorBaru = ($ambilData[0]->maxNomor ?? 0) + 1;
+        
+        $listData = DB::connection('SML')->insert("INSERT INTO dbAlamatCust (KodeCustSupp, Nomor, Alamat, Telp, Fax, Nama, pSurat, up, Area) 
+                                                  VALUES (:kode, :nomor, :alamat, :telp, :fax, :nama, 0, :up, 'blackpink')", 
+                                                  [
+                                                      'kode' => $req->kode, 
+                                                      'nomor' => $nomorBaru,
+                                                      'nama' => $req->nama, 
+                                                      'alamat' => $req->alamat, 
+                                                      'fax' => $req->fax, 
+                                                      'telp' => $req->telp, 
+                                                      'up' => $req->up
+                                                  ]);
 
-    return 1;
-}
+        return 1;
+    }
 
   public function spDeleteAlamat (Request $req) {
 
@@ -222,7 +221,8 @@ public function submitAlamat (Request $req)
     return $delete;
   }
 
-  public function spEditAlamat (Request $req) {
+  public function spEditAlamat (Request $req) 
+  {
     $edit = DB::connection('SML')->update('UPDATE dbAlamatCust set Alamat = :alamat, Telp = :telp, Fax = :fax, Nama = :nama, up =:up where KodeCustSupp = :kodeCustSupp and Nomor = :nomor' , 
     ['alamat'=> $req->alamat, 
     'nama' => $req->nama, 

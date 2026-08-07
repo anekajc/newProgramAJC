@@ -507,6 +507,39 @@
           <option value="-1">Semua</option>
         </select>
       </div>
+      
+          <div class="sp-filter-wrap">
+            <input type="date" onchange="" class="form-control text-center" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+            <span>-</span>
+            <input type="date" onchange="" class="form-control text-center" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+          </div>
+
+          <div class="sp-filter-wrap">
+            <select id="input_filterso" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+              <option value=0 selected>Semua SO</option>
+              <option value=1>SO Belum Otorisasi</option>
+              <option value=2>SO Sudah Otorisasi</option>
+              <option value=3>Belum proses</option>
+              <option value=4>Proses Sebagian</option>
+              <option value=5>Full supply</option>
+              <option value=6>SO Terclose</option>
+            </select>
+          </div>
+
+          <div class="sp-filter-wrap">
+            <select id="input_tipebayar" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+              <option value=4 selected>Semua Tipe</option>
+              <option value=0>CBD</option>
+              <option value=1>Kredit</option>
+              <option value=2>Termin</option>
+            </select>
+          </div>
+
+          <div class="sp-filter-wrap">
+            <button class="btn btn-success btn-lg" type="button" title="Details" onclick="buttonFilterSO()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
 
       <div class="sp-length-wrap">
         <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
@@ -561,40 +594,9 @@
       </div>
 
       <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <div class="sp-toolbar" style="margin-top: 10px">
-          <div class="sp-filter-wrap">
-            <input type="date" onchange="" class="form-control text-center" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-            <span>-</span>
-            <input type="date" onchange="" class="form-control text-center" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
-          </div>
-
-          <div class="sp-filter-wrap">
-            <select id="input_filterso" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-              <option value=0 selected>Semua SO</option>
-              <option value=1>SO Belum Otorisasi</option>
-              <option value=2>SO Sudah Otorisasi</option>
-              <option value=3>Belum proses</option>
-              <option value=4>Proses Sebagian</option>
-              <option value=5>Full supply</option>
-              <option value=6>SO Terclose</option>
-            </select>
-          </div>
-
-          <div class="sp-filter-wrap">
-            <select id="input_tipebayar" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-              <option value=4 selected>Semua Tipe</option>
-              <option value=0>CBD</option>
-              <option value=1>Kredit</option>
-              <option value=2>Termin</option>
-            </select>
-          </div>
-
-          <div class="sp-filter-wrap">
-            <button class="btn btn-success btn-lg" type="button" title="Details" onclick="buttonFilterSO()">
-              <i class="bi bi-search"></i>
-            </button>
-          </div>
-        </div>
+        
+        {{-- <div class="sp-toolbar" style="margin-top: 10px">
+        </div> --}}
 
         <div class="table-outer">
           <div class="table-wrap">

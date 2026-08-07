@@ -167,7 +167,7 @@
                   <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonKota()">+</button>
+                          <button type="button" class="btn btn-primary btn-select">+</button>
                       </div>
                   </div>
               </div>
@@ -191,7 +191,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area" readonly>
+                  <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area">
                 </div>
               </div>
             </div>
@@ -556,7 +556,7 @@
                   <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonKota()">+</button>
+                          <button type="button" class="btn btn-primary btn-select">+</button>
                       </div>
                   </div>
               </div>
@@ -580,7 +580,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area" readonly>
+                  <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area">
                 </div>
               </div>
             </div>
@@ -2117,11 +2117,12 @@ function buttonKota(searchValue = '') {
     // If search value is provided, search and auto-select
     if (searchValue) {
         handleSearchAndAutoSelect(searchValue);
-        if (testModalOpener === 1){
-          $("#formModalOpen").modal('toggle');
-        }
     }
-    
+
+    if (!searchValue || testModalOpener !== 0) {
+        $("#formModalOpen").modal('toggle');
+    }
+
 }
 
 function buttonSelectKota(kode, nama, area){
@@ -2221,8 +2222,8 @@ function setupEnterKeySearch(inputId, buttonFunction, options = {}) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    setupEnterKeySearch('input_add_kota', 'buttonKota');
-    setupEnterKeySearch('input_edit_kota', 'buttonKota');
+    setupEnterKeySearch('input_add_kota', 'buttonKota', { allowEmpty: true });
+    setupEnterKeySearch('input_edit_kota', 'buttonKota', { allowEmpty: true });
 });
 
 

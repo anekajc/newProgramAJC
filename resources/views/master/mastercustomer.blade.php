@@ -4,7 +4,6 @@
 @endsection
 @section('content')
 
-
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
@@ -1042,7 +1041,6 @@
 </div>
 </div>
 <!-- End modal detail akun-->
-
 
 <!-- start modal add detail akun-->
 <div class="modal fade"  id="formDetailAkunAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

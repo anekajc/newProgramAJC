@@ -181,7 +181,7 @@ function loadAll () {
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
           <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEBRG}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Deletel" class="btn-action-sm btn-action-primary" type="button" onclick="buttonHistory('${item.KODEBRG}')"><i class="bi bi-clock-history"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="History Lokasi Barang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonHistory('${item.KODEBRG}')"><i class="bi bi-clock-history"></i></button>
       </div>
     </td>
     <td>${item.KODEBRG}</td>

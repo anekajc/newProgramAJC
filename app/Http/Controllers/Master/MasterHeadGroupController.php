@@ -19,7 +19,6 @@ class MasterHeadGroupController extends Controller
   public function index(Request $req) {
 
 
-
     // $users = DB::connection("SML")->select('select * from new_users');
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
     $listData = DB::connection('SML')->select('SELECT * FROM DBHDGROUP');

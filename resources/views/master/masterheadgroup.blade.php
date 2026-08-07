@@ -227,7 +227,7 @@
 
     <div id="addSubGroup" class="container-fluid showhide">
             <!-- <div class="line"></div> -->
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4">
                 <h4>Add Subgroup</h4>
               </div>
@@ -258,7 +258,7 @@
               </div>
 
             </div>
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2">
                 <div class="form-group">
                 <label>Nama Subgroup</label>
@@ -416,9 +416,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Sub Kategori</h5>
-        <button type="button" class="close" onclick="closeSubKategoriForm()">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -1093,8 +1091,9 @@ function refreshSubGroup () {
 }
 
 function buttonSubGroup (kode , kodegroup) {
-  console.log('buttonSubGroup')
+
   console.log(kode , kodegroup)
+
   $('.showhide').hide();
   $.ajax({
     url: "{!! url('masterheadgrouplistsubgroup') !!}",
@@ -1113,8 +1112,8 @@ function buttonSubGroup (kode , kodegroup) {
         <tr>
         <td style="white-space:nowrap;" class='text-center'>
           <div class="action-buttons-wrap">
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')"><i class="bi bi-list"></i></button>
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')"><i class="bi bi-pen"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')"><i class="bi bi-list"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')"><i class="bi bi-pen"></i></button>
               <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')"><i class="bi bi-trash"></i></button>
           </div>
         </td>
@@ -1160,8 +1159,8 @@ function refreshSubKategori () {
         <td>${item.Urut}</td>
         <td>${item.Keterangan}</td>
         <td class="text-center">
-          <button class="btn btn-success btn-sm" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
+          <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
+          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
 
         </td>
         </tr>
@@ -1187,7 +1186,6 @@ function buttonSubKategori (kodesubgroup) {
   console.log('kodehdgroup' , kodehdgroup)
   console.log(kodesubgroup)
 
-
   $.ajax({
     url: "{!! url('masterheadgrouplistsubkategori') !!}",
     type: "get",
@@ -1205,8 +1203,8 @@ function buttonSubKategori (kodesubgroup) {
         rowTable += `
         <tr>
         <td class="text-center">
-          <button class="btn btn-success btn-sm" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
+          <button class="btn-action-sm btn-action-success"type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
+          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
         </td>
         <td>${item.Urut}</td>
         <td>${item.Keterangan}</td>
@@ -1346,8 +1344,8 @@ function loadAll () {
     rowTable += `<tr>
     <td style="white-space:nowrap;" class='text-center'>
       <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Sub Group" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubGroup('${item.KODEHDGRP}','${item.KODEGRP}' )"><i class="bi bi-list"></i></button>
           <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEHDGRP}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Sub Group" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubGroup('${item.KODEHDGRP}','${item.KODEGRP}')"><i class="bi bi-list"></i></button>
           <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODEHDGRP}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
