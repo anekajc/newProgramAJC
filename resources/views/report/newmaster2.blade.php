@@ -27,12 +27,17 @@
     <link rel="stylesheet" href="{!! URL::asset('public/css/alertify.css') !!}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
-    <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
-    
     <link rel="stylesheet" href="{!! URL::asset('public/css/style.css') !!}">
 
     <!-- Shared styling for .tb-report styled report tables (used by report* pages) -->
     <link rel="stylesheet" href="{!! URL::asset('public/css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+
+    <!-- Modal "Atur Kolom" (#formCustomizeTable.ct-modal) milik masterreport2 -->
+    <link rel="stylesheet" href="{!! URL::asset('public/css/customize-table.css') !!}?v={{ @filemtime(base_path('public/css/customize-table.css')) ?: '1' }}">
+
+    {{-- Header tabel interaktif + skin modal Filter/picker: sudah DIGABUNG ke
+         public/css/report-table.css (di-link di atas). public/css/report-table-v2.css
+         masih ada di disk sebagai arsip, tapi TIDAK dimuat lagi. --}}
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
