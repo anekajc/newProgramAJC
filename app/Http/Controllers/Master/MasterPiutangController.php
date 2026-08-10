@@ -67,14 +67,14 @@ class MasterPiutangController extends Controller
         b.Keterangan, c.NamaCustSupp AS NAMACUST, A.POcust
         FROM dbcustsupp c
         LEFT OUTER JOIN dbperkcustsupp d ON d.KodecustSupp = c.KODECUSTSUPP
-        LEFT OUTER JOIN vwhutpiut a ON c.kodecustsupp = a.kodecustsupp
+        LEFT OUTER JOIN vwhutpiut a ON c.kodecustsupp = a.kodecustsupp and a.TipeTrans = 'AWL'
         LEFT OUTER JOIN (
             SELECT a.Perkiraan, a.Kode, b.Keterangan
             FROM dbperkiraan b
             INNER JOIN DBPOSTHUTPIUT a ON a.Perkiraan = b.Perkiraan
             WHERE a.Kode = 'PT'
         ) b ON b.perkiraan = d.perkiraan
-        WHERE (b.Keterangan + ' (' + b.Perkiraan + ')') = :filter and a.TipeTrans = 'AWL'
+        WHERE (b.Keterangan + ' (' + b.Perkiraan + ')') = :filter 
         ORDER BY c.kodecustsupp", ['filter' => $req->filter]);
     return $listData;
   }

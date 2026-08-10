@@ -530,13 +530,6 @@ let listSelectHeadGroup = []
 let listSelectSubGroup = []
 let listSelectSubKategori = []
 
-function formatNumberDisplay(value) {
-  if (value === null || value === undefined || value === '') return '';
-  let parts = String(value).replace(/[^\d.]/g, '').split('.');
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return parts.join('.');
-}
-
 function loadAll () {
   let _token = $("#_token").val();
 

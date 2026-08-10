@@ -154,7 +154,7 @@
           </div>
 
           <!-- Perkiraan -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Perkiraan</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="namaPerkiraan" placeholder="Perkiraan" disabled>
@@ -162,7 +162,7 @@
           </div>
 
           <!-- No Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. Faktur</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_add_noFaktur" placeholder="No. Faktur">
@@ -170,7 +170,7 @@
           </div>
 
           <!-- Tanggal Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Tanggal Faktur</label>
             <div class="col-sm-4">
               <input type="date" class="form-control" id="input_add_tanggalFaktur">
@@ -181,7 +181,7 @@
             </div>
           </div>
 
-          <div class="form-group row">
+          <div class="form-group row mt-2">
 
             <div class="col-sm-3">
                 <label class="form-label">Valas</label>
@@ -202,7 +202,7 @@
           </div>
 
           <!-- Debet -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Jumlah</label>
             <div class="col-sm-4">
               <input type="number" class="form-control text-right" id="input_add_jumlah" value="0">
@@ -226,7 +226,7 @@
           </div>
 
           <!-- No PO -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label mt-2">No. PO</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_add_noPO" placeholder="No. PO">
@@ -234,7 +234,7 @@
           </div>
 
           
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label mt-2">Lok. Penerima</label>
             <div class="col-sm-4">
               <div class="input-group">
@@ -285,7 +285,7 @@
           </div>
 
           <!-- Perkiraan -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Perkiraan</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="namaPerkiraanEdit" placeholder="Perkiraan" disabled>
@@ -293,7 +293,7 @@
           </div>
 
           <!-- No Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">No. Faktur</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_edit_noFaktur" placeholder="No. Faktur" disabled>
@@ -301,7 +301,7 @@
           </div>
 
           <!-- Tanggal Faktur -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Tanggal Faktur</label>
             <div class="col-sm-4">
               <input type="date" class="form-control" id="input_edit_tanggalFaktur">
@@ -312,7 +312,7 @@
             </div>
           </div>
 
-          <div class="form-group row">
+          <div class="form-group row mt-2">
 
             <div class="col-sm-3">
                 <label class="form-label">Valas</label>
@@ -333,7 +333,7 @@
           </div>
 
           <!-- Debet -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label">Jumlah</label>
             <div class="col-sm-4">
               <input type="number" class="form-control text-right" id="input_edit_jumlah" value="0">
@@ -357,7 +357,7 @@
           </div>
 
           <!-- No PO -->
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label mt-2">No. PO</label>
             <div class="col-sm-9">
               <input type="text" class="form-control" id="input_edit_noPO" placeholder="No. PO">
@@ -365,7 +365,7 @@
           </div>
 
           
-          <div class="form-group row">
+          <div class="form-group row mt-2">
             <label class="col-sm-3 form-label mt-2">Lok. Penerima</label>
             <div class="col-sm-4">
               <div class="input-group">
@@ -482,7 +482,6 @@ function loadAll () {
   }
 
     rowTable += `<tr>
-
     <td class="text-center">
       <div class="action-buttons-wrap">
       <button data-toggle="tooltip" data-placement="top" title="Add Piutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
@@ -499,11 +498,11 @@ function loadAll () {
     <td>${formatTanggal(item.Tanggal)}</td>
     <td>${formatTanggal(item.JatuhTempo)}</td>
     <td>${item.Valas == null ? '' : item.Valas}</td>
-    <td>${item.Kurs == null ? '' : item.Kurs}</td>
-    <td>${item.Debet == null ? '' : item.Debet}</td>
-    <td>${item.DebetD == null ? '' : item.DebetD}</td>
-    <td>${item.Kredit== null ? '' : item.Kredit}</td>
-    <td>${item.KreditD== null ? '' : item.KreditD}</td>
+    <td>${formatNumberDisplay(item.Kurs)}</td>
+    <td>${formatNumberDisplay(item.Debet)}</td>
+    <td>${formatNumberDisplay(item.DebetD)}</td>
+    <td>${formatNumberDisplay(item.Kredit)}</td>
+    <td>${formatNumberDisplay(item.KreditD)}</td>
     </tr>`
   });
 
@@ -514,7 +513,8 @@ function loadAll () {
         "paging": true,
         "searching": true,
         "dom": 'tip',
-        "pageLength": currentLength
+        "pageLength": currentLength,
+        "ordering": false
       });
 }
 
