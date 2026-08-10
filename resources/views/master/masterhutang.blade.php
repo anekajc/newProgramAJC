@@ -462,11 +462,11 @@ function loadAll () {
     <td>${formatTanggal(item.Tanggal)}</td>
     <td>${formatTanggal(item.JatuhTempo)}</td>
     <td>${item.Valas == null ? '' : item.Valas}</td>
-    <td>${item.Kurs == null ? '' : item.Kurs}</td>
-    <td>${item.Debet == null ? '' : item.Debet}</td>
-    <td>${item.DebetD == null ? '' : item.DebetD}</td>
-    <td>${item.Kredit== null ? '' : item.Kredit}</td>
-    <td>${item.KreditD== null ? '' : item.KreditD}</td>
+    <td>${formatNumberDisplay(item.Kurs)}</td>
+    <td>${formatNumberDisplay(item.Debet)}</td>
+    <td>${formatNumberDisplay(item.DebetD)}</td>
+    <td>${formatNumberDisplay(item.Kredit)}</td>
+    <td>${formatNumberDisplay(item.KreditD)}</td>
     </tr>`
   });
 
@@ -477,7 +477,8 @@ function loadAll () {
         "paging": true,
         "searching": true,
         "dom": 'tip',
-        "pageLength": currentLength
+        "pageLength": currentLength,
+        "ordering": false
       });
 
 }
