@@ -484,9 +484,10 @@
               <thead id='theadCustom' class="text-center">
                 <tr>
                   <th scope="col">Actions</th>
-                  <th scope="col">Kode Customer</th>
-                  <th scope="col">Nama Customer</th>
-                  <th scope="col">Minggu Ke</th>
+                  <th scope="col">Tahun</th>
+                  <th scope="col">Kode Merk</th>
+                  <th scope="col">Nama Merk</th>
+                  <th scope="col">Target</th>
 
                 </tr>
               </thead>
@@ -529,10 +530,18 @@ let listSelectHeadGroup = []
 let listSelectSubGroup = []
 let listSelectSubKategori = []
 
+function formatNumberDisplay(value) {
+  if (value === null || value === undefined || value === '') return '';
+  let parts = String(value).replace(/[^\d.]/g, '').split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
 function loadAll () {
   let _token = $("#_token").val();
 
   document.getElementById('breadcrumb').innerHTML = "Master Sales"
+  document.getElementById('AddVisibility').hidden = true;
 
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
@@ -1000,12 +1009,13 @@ function buttonTarget (keynik) {
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn btn-success btn-sm hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
-            <button class="btn btn-danger btn-sm hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
-          <td>${item.TgtSales}</td>
+          <td>${item.namamerk}</td>
+          <td>${formatNumberDisplay(item.TgtSales)}</td>
           </tr>
           `
         });

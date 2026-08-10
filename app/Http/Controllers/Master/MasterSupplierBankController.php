@@ -79,7 +79,7 @@ class MasterSupplierBankController extends Controller
   }
 
   public function spDelete (Request $req){
-    $delete = DB::connection('SML')->delete('delete from DBCUSTSUPP where KODECUSTSUPP = :kode ',['kode' => $req->kode]);
+    $delete = DB::connection('SML')->delete("exec Sp_UpdBankTemp '',:kode,'','','','' " ,['kode' => $req->kode]);
     return $delete;
   }
 

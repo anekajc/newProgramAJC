@@ -159,6 +159,7 @@ function loadAll () {
   let _token = $("#_token").val();
 
   document.getElementById('breadcrumb').innerHTML = "Master Set Lokasi Barang"
+  document.getElementById('AddVisibility').hidden = true;
 
   $('#tabel').DataTable().destroy();
 

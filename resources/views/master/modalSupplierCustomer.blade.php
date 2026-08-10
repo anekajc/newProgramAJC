@@ -266,7 +266,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodeDetailAlamat" placeholder="Kode" disabled>
+                  <input type="text" class="form-control" id="input_add_kodeDetailAlamat" placeholder="Kode" readonly>
                 </div>
               </div>
 

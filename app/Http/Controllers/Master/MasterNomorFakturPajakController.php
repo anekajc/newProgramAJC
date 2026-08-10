@@ -84,23 +84,9 @@ class MasterNomorFakturPajakController extends Controller
 
   public function updateIsPenuh(Request $request)
   {
-      // Get the input data from the request
-      $kode = $request->input('kode');
-      $isPenuh = $request->input('isPenuh');
+      $update = DB::connection('SML')->update('update DBNomorFP set IsPenuh = :isPenuh where Kode = :kode', ['isPenuh' => $request->isPenuh, 'kode' => $request->kode]);
 
-      // Assuming you have a model for the dbNomorFP table
-      // Replace 'YourModel' with the actual model name
-      $record = YourModel::where('Kode', $kode)->first();
-
-      if (!$record) {
-          return response()->json(['message' => 'Record not found'], 404);
-      }
-
-      // Update the IsPenuh column
-      $record->IsPenuh = $isPenuh;
-      $record->save();
-
-      return response()->json(['message' => 'IsPenuh updated successfully']);
+      return $update;
   }
 
 

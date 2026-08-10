@@ -40,43 +40,14 @@ class MasterSupplierController extends Controller
 public function loadAll(Request $request)
 {
     $query = DB::connection('SML')->table('vwbrowssupp')
-        ->select(
-            'USAHA',
-            'KODECUSTSUPP',
-            'NAMACUSTSUPP',
-            'ALAMAT1',
-            'Kota',
-            'KODEPOS',
-            'NEGARA',
-            'TELPON',
-            'FAX',
-            'EMAIL',
-            'NPPH23',
-            'NPPH22',
-            'HARIHUTPIUT',
-            'IsAktif',
-            'Att',
-            'AttPhone',
-            'AttDepart',
-            'bank',
-            'NoAcc',
-            'ATN',
-            'NPWP',
-            'NAMAPKP',
-            'ALAMATPKP1',
-            'KOTAPKP',
-            'PPN',
-            'Jenis',
-            'namakota'
-        )
         ->where('Jenis', 0);
 
-    // Total before filtering
-    $total = $query->count();
+    // Total before filtering (cheap: single view, no joins)
+    $total = (clone $query)->count();
 
-    // ?? Filtering
-    if ($request->has('search') && !empty($request->search['value'])) {
-        $search = $request->search['value'];
+    // Filtering
+    $search = $request->input('search.value');
+    if (!empty($search)) {
         $query->where(function($q) use ($search) {
             $q->where('KODECUSTSUPP', 'like', "%{$search}%")
               ->orWhere('USAHA', 'like', "%{$search}%")
@@ -91,27 +62,74 @@ public function loadAll(Request $request)
         });
     }
 
-    // Count after filtering
-    $filtered = $query->count();
-
-    // Pagination
-    if ($request->has('start') && $request->has('length')) {
-        $query->skip($request->start)->take($request->length);
-    }
-
-    // Ordering
+    // Ordering — ROW_NUMBER() below needs an ORDER BY, and the column name is
+    // client-supplied, so it must be checked against an allow-list before it
+    // touches raw SQL.
+    $allowedColumns = ['KODECUSTSUPP', 'USAHA', 'NAMACUSTSUPP', 'ALAMAT1', 'namakota', 'NEGARA', 'TELPON', 'EMAIL'];
+    $orderColumn = 'KODECUSTSUPP';
+    $orderDir = 'asc';
     if ($request->has('order')) {
         $columns = $request->input('columns');
         $order = $request->input('order')[0];
-        $columnName = $columns[$order['column']]['data'];
-        $dir = $order['dir'];
-        $query->orderBy($columnName, $dir);
+        $requestedColumn = $columns[$order['column']]['data'] ?? null;
+        if (in_array($requestedColumn, $allowedColumns, true)) {
+            $orderColumn = $requestedColumn;
+        }
+        $orderDir = ($order['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
     }
 
-    $data = $query->get();
+    $start = (int) $request->input('start', 0);
+    $length = (int) $request->input('length', 10);
+
+    // DBSMLNEW's compatibility level doesn't support SQL Server's OFFSET/FETCH
+    // syntax (Laravel's default ->skip()->take() for sqlsrv), so page via
+    // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
+    // same pass so the filtered total doesn't need its own separate query.
+    $dataQuery = (clone $query)->select(
+        'USAHA',
+        'KODECUSTSUPP',
+        'NAMACUSTSUPP',
+        'ALAMAT1',
+        'Kota',
+        'KODEPOS',
+        'NEGARA',
+        'TELPON',
+        'FAX',
+        'EMAIL',
+        'NPPH23',
+        'NPPH22',
+        'HARIHUTPIUT',
+        'IsAktif',
+        'Att',
+        'AttPhone',
+        'AttDepart',
+        'bank',
+        'NoAcc',
+        'ATN',
+        'NPWP',
+        'NAMAPKP',
+        'ALAMATPKP1',
+        'KOTAPKP',
+        'PPN',
+        'Jenis',
+        'namakota',
+        DB::raw("ROW_NUMBER() OVER (ORDER BY {$orderColumn} {$orderDir}) as RowNum"),
+        DB::raw('COUNT(*) OVER () as TotalCount')
+    );
+
+    $paged = DB::connection('SML')->query()->fromSub($dataQuery, 'sub');
+
+    // DataTables sends length = -1 for the "Semua" (All) option, meaning no limit
+    if ($length >= 0) {
+        $paged->whereBetween('RowNum', [$start + 1, $start + $length]);
+    }
+
+    $data = $paged->get();
+
+    $filtered = $data->isNotEmpty() ? (int) $data->first()->TotalCount : (clone $query)->count();
 
     return response()->json([
-        "draw" => intval($request->draw),
+        "draw" => intval($request->input('draw')),
         "recordsTotal" => $total,
         "recordsFiltered" => $filtered,
         "data" => $data
@@ -200,10 +218,10 @@ public function spAdd(Request $req) {
         
         $nomorBaru = ($ambilData[0]->maxNomor ?? 0) + 1;
         
-        $listData = DB::connection('SML')->insert("INSERT INTO dbAlamatCust (KodeCustSupp, Nomor, Alamat, Telp, Fax, Nama, pSurat, up, Area) 
-                                                  VALUES (:kode, :nomor, :alamat, :telp, :fax, :nama, 0, :up, 'blackpink')", 
+        $listData = DB::connection('SML')->insert("INSERT INTO dbAlamatCust (KODECUSTSUPP, Nomor, Alamat, Telp, Fax, Nama, pSurat, up, Area) 
+                                                  VALUES (:kodeCustSupp, :nomor, :alamat, :telp, :fax, :nama, 0, :up, 'blackpink')", 
                                                   [
-                                                      'kode' => $req->kode, 
+                                                      'kodeCustSupp' => $req->kodeCustSupp, 
                                                       'nomor' => $nomorBaru,
                                                       'nama' => $req->nama, 
                                                       'alamat' => $req->alamat, 
@@ -211,7 +229,6 @@ public function spAdd(Request $req) {
                                                       'telp' => $req->telp, 
                                                       'up' => $req->up
                                                   ]);
-
         return 1;
     }
 

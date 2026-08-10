@@ -187,7 +187,7 @@
               </div>
               <div class="col-2 text-left">
                 <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Area</label>
+                  <label class="text-left">Area</label>
                 </div>
               </div>
               <div class="col-4">
@@ -576,7 +576,7 @@
               </div>
               <div class="col-2 text-left">
                 <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Area</label>
+                  <label class="text-left">Area</label>
                 </div>
               </div>
               <div class="col-4">
@@ -1321,6 +1321,7 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_namaPajak").value = res[0].NAMAPKP
       document.getElementById("input_edit_alamatPajak").value = res[0].ALAMATPKP1
       document.getElementById("input_edit_alamatPajak2").value = res[0].ALAMATPKP2
+      document.getElementById("input_edit_kodeArea").value = res[0].KodeArea
       
       // document.getElementById("input_edit_kurs").value = parseFloat(res[0].KURS).toFixed(2);
 
@@ -1338,7 +1339,6 @@ function buttonEdit (kode) {
     success: function(res) {
 
       document.getElementById("input_edit_namaArea").value = res[0].NamaKota
-      document.getElementById("input_edit_kodeArea").value = res[0].KodeArea
 
     }})
 
@@ -1390,7 +1390,7 @@ function submitEdit () {
   let kodeKota = $("#input_edit_kota").val(); //KodeKota
   let pCounter = $("#input_edit_counter").val(); //pCounter
   let isPpn = $("#input_edit_isPpn").val(); //IsPpn
-
+  let kodeArea = $("#input_edit_kodeArea").val();
   let kodePos = $("#input_edit_kodePos").val(); //KodePos
   let negara = $("#input_edit_negara").val(); //Negara
 
@@ -1425,6 +1425,7 @@ function submitEdit () {
       namaCustSupp,
       alamat1,
       alamat2,
+      kodeArea,
       
       kodeKota,
       counter: pCounter,
@@ -2089,8 +2090,8 @@ function buttonKota(searchValue = '') {
     dataRefresh.forEach((item, i) => {
         rowTable += `<tr>
             <td class="text-center">
-                <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectKota('${item.KodeKota}', '${item.NamaKota}', '${item.KodeArea}')">
-                    <i class="bi bi-plus"></i>
+                <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectKota('${item.KodeKota}', '${item.NamaKota}', '${item.KodeArea}')">
+                    <i class="bi bi-plus-square"></i>
                 </button>
             </td>
             <td>${item.KodeKota}</td>
@@ -2132,11 +2133,9 @@ function buttonKota(searchValue = '') {
 function buttonSelectKota(kode, nama, area){
   document.getElementById('input_add_kota').value = kode;
   document.getElementById('input_add_namaArea').value = nama;
-  document.getElementById('input_add_kodeArea').value = area;
 
   document.getElementById('input_edit_kota').value = kode;
   document.getElementById('input_edit_namaArea').value = nama;
-  document.getElementById('input_edit_kodeArea').value = area;
 
   $("#formModalOpen").modal("hide");
 }

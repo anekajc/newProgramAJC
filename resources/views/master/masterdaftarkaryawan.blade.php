@@ -625,8 +625,6 @@
 </div>
 <!-- End modal add-->
 
-
-
 @endsection
 
 @section('js')
@@ -858,11 +856,6 @@ function submitEdit () {
 
   if (!Kelamin) {
     alertify.warning("Kelamin harus diisi");
-    return;
-  }
-
-  if (!KTP) {
-    alertify.warning("No KTP harus diisi");
     return;
   }
 

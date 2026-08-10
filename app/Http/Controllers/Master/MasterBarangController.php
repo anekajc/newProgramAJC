@@ -141,28 +141,42 @@ join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
         });
     }
 
-    // count total (after filter)
-    $total = $query->count();
-
     // apply pagination
-    $start = $request->input('start', 0);
-    $length = $request->input('length', 10);
+    $start = (int) $request->input('start', 0);
+    $length = (int) $request->input('length', 10);
 
-    $data = $query
-        ->select(
-            'b.NAMA as nNAMAGROUP',
-            'c.NAMAHDGRP as nNAMAHDGROUP',
-            'd.NamaSubGrp as nNAMASUBGROUP',
-            'e.Keterangan as nNAMASUBKATEGORI',
-            'f.NAMAMERK as nNAMAMERK',
-            'a.*'
-        )
-        ->offset($start)
-        ->limit($length)
-        ->get();
+    // DBSMLNEW's compatibility level doesn't support SQL Server's OFFSET/FETCH
+    // syntax (Laravel's default ->offset()->limit() for sqlsrv), so page via
+    // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
+    // same pass so we don't run the whole joined+filtered query twice just
+    // to get the total.
+    $dataQuery = (clone $query)->select(
+        'b.NAMA as nNAMAGROUP',
+        'c.NAMAHDGRP as nNAMAHDGROUP',
+        'd.NamaSubGrp as nNAMASUBGROUP',
+        'e.Keterangan as nNAMASUBKATEGORI',
+        'f.NAMAMERK as nNAMAMERK',
+        'a.*',
+        DB::raw('ROW_NUMBER() OVER (ORDER BY a.KODEBRG) as RowNum'),
+        DB::raw('COUNT(*) OVER () as TotalCount')
+    );
+
+    $paged = DB::connection('SML')->query()->fromSub($dataQuery, 'sub');
+
+    // DataTables sends length = -1 for the "Semua" (All) option, meaning no limit
+    if ($length >= 0) {
+        $paged->whereBetween('RowNum', [$start + 1, $start + $length]);
+    }
+
+    $data = $paged->get();
+
+    // TotalCount rides on every row, but the page can come back empty (e.g.
+    // stale pagination state after the underlying data changed) — fall back
+    // to a real count only in that edge case.
+    $total = $data->isNotEmpty() ? (int) $data->first()->TotalCount : (clone $query)->count();
 
     return response()->json([
-        "draw" => intval($request->input('draw')), 
+        "draw" => intval($request->input('draw')),
         "recordsTotal" => $total,
         "recordsFiltered" => $total,
         "data" => $data

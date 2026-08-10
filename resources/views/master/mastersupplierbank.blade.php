@@ -316,37 +316,29 @@ function buttonEdit (kode) {
 
 
 function buttonDelete (kode) {
-  console.log(kode)
+
   let _token = $("#_token").val();
 
+  $.ajax({
+    url: "{!! url('mastersupplierbankspedit') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token : _token,
+      kode
+    },
+    success: function(res) {
 
-  alertify.confirm('Hapus Cust SUpp', 'Apakah yakin ingin menghapus Cust Supp ' + kode + ' ?',
-      function() {
-        console.log('yes')
-
-        $.ajax({
-          url: "{!! url('mastersupplierbankspdelete') !!}",
-          type: "post",
-          async: false,
-          data: {
-            _token : _token,
-            kode
-          },
-          success: function(res) {
-            if (res != 1) {
-              alertify.warning(res);
-            } else {
-              console.log(res)
-              loadAll()
-              alertify.success("Data Cust Supp telah dihapus");
-
-            }
-          }})
+      if (res != 1) {
+        alertify.warning(res);
+      }  else {
+        console.log(res ,'!')
+        // $("#formEdit").modal('toggle')
+        alertify.success("Data Supplier Bank Acc. telah diedit");
+        loadAll()
       }
-    ,function(){
-      console.log('no')
-    });
 
+    }})
 
 }
 
@@ -418,7 +410,7 @@ function submitEdit () {
     }})
 
 }
-//
+
 function submitAdd () {
 
   let _token = $("#_token").val();

@@ -302,7 +302,7 @@ function loadAll () {
     <td>${item.NoAwal}</td>
     <td>${item.NoAkhir}</td>
     <td class="text-center">
-    <input type="checkbox" class="is-penuh-checkbox" data-kode="${item.Kode}" ${item.IsPenuh === 1 ? 'checked' : ''}>
+    <input type="checkbox" class="is-penuh-checkbox" data-kode="${item.Kode}" ${item.IsPenuh == 1 ? 'checked' : ''}>
     </td>
 
     </tr>`
@@ -325,6 +325,26 @@ function buttonAdd () {
   $("#form").modal('toggle')
 
 }
+
+$(document).on('change', '.is-penuh-checkbox', function () {
+  let _token = $("#_token").val();
+  let kode = $(this).data('kode');
+  let isPenuh = $(this).prop('checked') ? 1 : 0;
+
+  $.ajax({
+    url: "{!! url('masternomorfakturpajakupdatepenuh') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token: _token,
+      kode,
+      isPenuh
+    },
+    success: function (res) {
+      alertify.success("Is Penuh berhasil diperbarui");
+    }
+  })
+})
 
 function buttonEdit(kode) {
   console.log(kode);
@@ -353,7 +373,7 @@ function buttonEdit(kode) {
       document.getElementById("seri2edit").value = seri2Value;
       document.getElementById("input_edit_noawal").value = res[0].NoAwal;
       document.getElementById("input_edit_noakhir").value = res[0].NoAkhir;
-      document.getElementById("input_edit_penuh").checked = res[0].IsPenuh === true;
+      document.getElementById("input_edit_penuh").checked = res[0].IsPenuh == 1;
     }
   });
   $("#formEdit").modal('toggle');
@@ -394,7 +414,7 @@ function buttonDelete (kode) {
 
 
 }
-//
+
 function submitEdit () {
 
   let _token = $("#_token").val();

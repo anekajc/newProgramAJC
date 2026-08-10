@@ -361,6 +361,7 @@ and a.Jenis=3 and a.KODECUSTSUPP = :kode" , ['kode' => $req->kode]);
         NoAcc = :accNo, 
         Bank = :bank, 
         ATN = :atasNama, 
+        KodeArea = :kodeArea, 
         IsPpn = :isPpn, 
         JENIS = :jenis, 
         PERKIRAAN = :perkiraan, 

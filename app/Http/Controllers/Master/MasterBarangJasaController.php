@@ -165,13 +165,29 @@ public function loadAll(Request $request)
         });
     }
 
-    $totalRecords    = $query->count();
-    $recordsFiltered = $totalRecords;
+    $start = (int) $start;
+    $length = (int) $length;
 
-    $listBarang = $query
-        ->offset($start)
-        ->limit($length)
-        ->get();
+    // DBSMLNEW's compatibility level doesn't support SQL Server's OFFSET/FETCH
+    // syntax (Laravel's default ->offset()->limit() for sqlsrv), so page via
+    // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
+    // same pass so the total doesn't need its own separate query.
+    $dataQuery = (clone $query)->addSelect([
+        DB::raw('ROW_NUMBER() OVER (ORDER BY a.KODEBRG) as RowNum'),
+        DB::raw('COUNT(*) OVER () as TotalCount')
+    ]);
+
+    $paged = DB::connection('SML')->query()->fromSub($dataQuery, 'sub');
+
+    // DataTables sends length = -1 for the "Semua" (All) option, meaning no limit
+    if ($length >= 0) {
+        $paged->whereBetween('RowNum', [$start + 1, $start + $length]);
+    }
+
+    $listBarang = $paged->get();
+
+    $totalRecords = $listBarang->isNotEmpty() ? (int) $listBarang->first()->TotalCount : (clone $query)->count();
+    $recordsFiltered = $totalRecords;
 
     return response()->json([
         "draw"            => intval($draw),

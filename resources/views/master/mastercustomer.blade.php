@@ -1455,7 +1455,6 @@ function submitEdit () {
 
 }
 
-
 function submitAdd () {
 
   let _token = $("#_token").val();
