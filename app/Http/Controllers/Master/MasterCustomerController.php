@@ -122,8 +122,8 @@ public function loadAll(Request $request)
         ->table('vwcustsupp')
         ->where('Jenis', 1);
 
-    // total data before filtering
-    $total = $query->count();
+    // total data before filtering (cheap: single view, no joins)
+    $total = (clone $query)->count();
 
     // ?? apply search if provided
     $search = $request->input('search.value');
@@ -142,46 +142,56 @@ public function loadAll(Request $request)
         });
     }
 
-    // filtered count
-    $filtered = $query->count();
-
     // apply pagination from datatables request
-    $start = $request->input('start', 0);
-    $length = $request->input('length', 10);
+    $start = (int) $request->input('start', 0);
+    $length = (int) $request->input('length', 10);
 
-    $data = $query
-        ->select(
-            'USAHA',
-            'KODECUSTSUPP',
-            'NAMACUSTSUPP',
-            'ALAMAT1',
-            'Kota',
-            'KODEPOS',
-            'NEGARA',
-            'TELPON',
-            'FAX',
-            'EMAIL',
-            'NPPH23',
-            'NPPH22',
-            'HARIHUTPIUT',
-            'IsAktif',
-            'Att',
-            'AttPhone',
-            'AttDepart',
-            'bank',
-            'NoAcc',
-            'ATN',
-            'NPWP',
-            'NAMAPKP',
-            'ALAMATPKP1',
-            'KOTAPKP',
-            'IsPpn',
-            'Jenis',
-            'namakota'
-        )
-        ->offset($start)
-        ->limit($length)
-        ->get();
+    // DBSMLNEW's compatibility level doesn't support SQL Server's OFFSET/FETCH
+    // syntax (Laravel's default ->offset()->limit() for sqlsrv), so page via
+    // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
+    // same pass so the filtered total doesn't need its own separate query.
+    $dataQuery = (clone $query)->select(
+        'USAHA',
+        'KODECUSTSUPP',
+        'NAMACUSTSUPP',
+        'ALAMAT1',
+        'Kota',
+        'KODEPOS',
+        'NEGARA',
+        'TELPON',
+        'FAX',
+        'EMAIL',
+        'NPPH23',
+        'NPPH22',
+        'HARIHUTPIUT',
+        'IsAktif',
+        'Att',
+        'AttPhone',
+        'AttDepart',
+        'bank',
+        'NoAcc',
+        'ATN',
+        'NPWP',
+        'NAMAPKP',
+        'ALAMATPKP1',
+        'KOTAPKP',
+        'IsPpn',
+        'Jenis',
+        'namakota',
+        DB::raw('ROW_NUMBER() OVER (ORDER BY KODECUSTSUPP) as RowNum'),
+        DB::raw('COUNT(*) OVER () as TotalCount')
+    );
+
+    $paged = DB::connection('SML')->query()->fromSub($dataQuery, 'sub');
+
+    // DataTables sends length = -1 for the "Semua" (All) option, meaning no limit
+    if ($length >= 0) {
+        $paged->whereBetween('RowNum', [$start + 1, $start + $length]);
+    }
+
+    $data = $paged->get();
+
+    $filtered = $data->isNotEmpty() ? (int) $data->first()->TotalCount : (clone $query)->count();
 
     return response()->json([
         "draw" => intval($request->input('draw')),

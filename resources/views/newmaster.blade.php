@@ -419,6 +419,16 @@
       input.value = parts.join('.');
   }
 
+  // Like formatNumber, but for display-only contexts (table cells, template
+  // strings) rather than live <input> elements: takes a raw value and
+  // returns a comma-formatted string instead of mutating input.value.
+  function formatNumberDisplay(value) {
+      if (value === null || value === undefined || value === '') return '';
+      let parts = String(value).replace(/[^\d.]/g, '').split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return parts.join('.');
+  }
+
   function format_timestamp(date) {
     if (!date) return '';
     const [tgl, waktu] = date.split(' ');

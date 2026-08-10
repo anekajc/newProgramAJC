@@ -1146,13 +1146,12 @@ function refreshSubKategori () {
       res.forEach((item, i) => {
         rowTable += `
         <tr>
-        <td>${item.Urut}</td>
-        <td>${item.Keterangan}</td>
         <td class="text-center">
           <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
           <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
-
         </td>
+        <td>${item.Urut}</td>
+        <td>${item.Keterangan}</td>
         </tr>
         `
       });

@@ -1281,6 +1281,24 @@ function loadAll() {
 }
 
 function buttonAdd () {
+
+  document.getElementById("input_add_noUrut").value = ''
+  document.getElementById("input_add_fax").value = ''
+  $('#form .modal-body input[type="text"]').val('')
+
+  document.getElementById("input_add_pph21").value = 0.00
+  document.getElementById("input_add_pph23").value = 0.00
+  document.getElementById("input_add_top").value = 0
+  document.getElementById("input_add_plafon").value = 0
+  document.getElementById("input_add_haripiutang").value = 0
+
+  document.getElementById("input_add_isppn").checked = false
+  document.getElementById("input_add_berikat").checked = false
+  document.getElementById("input_add_blacklist").checked = false
+
+  document.getElementById("input_add_bentukusaha").selectedIndex = 0
+  document.getElementById("input_add_isaktif").selectedIndex = 0
+
   $.ajax({
     url: "{!! url('mastercustomerlistselect') !!}",
     type: "get",

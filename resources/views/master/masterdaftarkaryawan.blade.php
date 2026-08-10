@@ -717,6 +717,10 @@ function loadAll () {
 
 function buttonAdd () {
 
+  document.getElementById("input_add_noUrut").value = ''
+  $('#form .modal-body input[type="text"], #form .modal-body input[type="number"], #form .modal-body input[type="date"]').val('')
+  $('#form .modal-body select').prop('selectedIndex', 0)
+
   $("#form").modal('toggle')
 
 }
