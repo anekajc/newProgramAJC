@@ -39,10 +39,109 @@ class MasterSupplierController extends Controller
 
 public function loadAll(Request $request)
 {
-    $query = DB::connection('SML')->table('vwbrowssupp')
-        ->where('Jenis', 0);
+    // @isaktif and @Perkiraan were hardcoded constants (1 and 'semua') in the
+    // original batch, which only ever resolved the WHERE clause down to
+    // "a.IsAktif = 1" with no Perkiraan filtering (its LIKE '%' matches
+    // everything) and the DataPostHutPiut call down to a fixed 'HT'. Inlined
+    // here as a single SELECT (no DECLARE / SELECT @var=) since only a plain
+    // SELECT can be used as a derived table below, which search/pagination
+    // needs.
+    $rawSql = "SELECT DISTINCT
+	a.KODECUSTSUPP,
+	a.NAMACUSTSUPP,
+	a.ALAMAT1,
+	a.ALAMAT2,
+	a.Kota,
+	a.TELPON,
+	a.FAX,
+	a.EMAIL,
+	a.KODEPOS,
+	a.NEGARA,
+	a.NPWP,
+	a.Tanggal,
+	a.PLAFON,
+	a.HARI,
+	a.HARIHUTPIUT,
+	a.BERIKAT,
+	a.USAHA,
+	a.PERKIRAAN,
+	a.JENIS,
+	a.NAMAPKP,
+	a.ALAMATPKP1,
+	a.ALAMATPKP2,
+	a.KOTAPKP,
+	a.Sales,
+	a.KodeVls,
+	a.KodeExp,
+	a.KodeTipe,
+	a.IsPpn,
+	a.IsAktif,
+	a.Kind,
+	a.ContactP,
+	a.Alamat1ContP,
+	a.Alamat2ContP,
+	a.KotaContP,
+	a.NegaraContP,
+	a.TelpContP,
+	a.FaxContP,
+	a.EmailContP,
+	a.KODEPOSContP,
+	a.HPContP,
+	a.SyaratPenerimaan,
+	a.SyaratPembayaran,
+	a.Agent,
+	a.Alamat1A,
+	a.Alamat2A,
+	a.KotaA,
+	a.NegaraA,
+	a.ContactA,
+	a.TelpA,
+	a.FaxA,
+	a.EmailA,
+	a.KODEPOSA,
+	a.HPA,
+	a.EmailContA,
+	a.PortOfLoading,
+	a.CountryOfOrigin,
+	a.TglInput,
+	a.iskontrak,
+	a.PPN,
+	a.HargaKe,
+	a.Att,
+	a.bank,
+	a.NoAcc,
+	a.IsMember,
+	a.TanggalValid,
+	a.DiscMember,
+	a.AttPhone,
+	a.ket,
+	a.JenisCustSupp,
+	a.IntCode,
+	a.CompCode,
+	a.AttDepart,
+	a.ATN,
+	a.pBlackList,
+	a.ALAMAT1 + CASE WHEN LTRIM(a.Alamat2) = '' THEN '' ELSE CHAR(13) + a.ALAMAT2 END ALAMAT,
+	a.Usaha + CASE WHEN ISNULL(a.Usaha, '') = '' THEN '' ELSE '. ' END + a.NamacustSupp Nama,
+	CASE WHEN a.iskontrak IS NULL THEN 0 WHEN a.iskontrak = 0 THEN 0 WHEN a.iskontrak = 1 THEN 1 END xkontrak,
+	F.NamaJenis,
+	Cs.NamaCustSupp MyAgent,
+	D.namaKota,
+	D.KodeArea,
+	E.namaArea,
+	[dbo].[DataPostHutPiut](a.KodecustSupp, 'HT') DetailAkun
+FROM dbCustSupp a
+	LEFT OUTER JOIN dbperkcustsupp b ON b.kodecustsupp = a.kodecustsupp
+	LEFT OUTER JOIN dbPerkiraan c ON c.perkiraan = b.perkiraan AND c.tipe = 1
+	LEFT OUTER JOIN dbkota D ON a.kota = D.KodeKota
+	LEFT OUTER JOIN dbarea E ON D.KodeArea = E.KodeArea
+	LEFT OUTER JOIN DbJenisCustSupp F ON a.JenisCustSupp = F.KodeJenis
+	LEFT OUTER JOIN dbCustSupp Cs ON Cs.KodeCustSupp = a.Agent
+WHERE a.IsAktif = 1";
 
-    // Total before filtering (cheap: single view, no joins)
+    $query = DB::connection('SML')->table(DB::raw("({$rawSql}) as base"));
+
+    // Total before filtering
     $total = (clone $query)->count();
 
     // Filtering
@@ -65,7 +164,7 @@ public function loadAll(Request $request)
     // Ordering — ROW_NUMBER() below needs an ORDER BY, and the column name is
     // client-supplied, so it must be checked against an allow-list before it
     // touches raw SQL.
-    $allowedColumns = ['KODECUSTSUPP', 'USAHA', 'NAMACUSTSUPP', 'ALAMAT1', 'namakota', 'NEGARA', 'TELPON', 'EMAIL'];
+    $allowedColumns = ['KODECUSTSUPP', 'USAHA', 'NAMACUSTSUPP', 'ALAMAT1', 'namaKota', 'NEGARA', 'TELPON', 'EMAIL'];
     $orderColumn = 'KODECUSTSUPP';
     $orderDir = 'asc';
     if ($request->has('order')) {
@@ -86,33 +185,7 @@ public function loadAll(Request $request)
     // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
     // same pass so the filtered total doesn't need its own separate query.
     $dataQuery = (clone $query)->select(
-        'USAHA',
-        'KODECUSTSUPP',
-        'NAMACUSTSUPP',
-        'ALAMAT1',
-        'Kota',
-        'KODEPOS',
-        'NEGARA',
-        'TELPON',
-        'FAX',
-        'EMAIL',
-        'NPPH23',
-        'NPPH22',
-        'HARIHUTPIUT',
-        'IsAktif',
-        'Att',
-        'AttPhone',
-        'AttDepart',
-        'bank',
-        'NoAcc',
-        'ATN',
-        'NPWP',
-        'NAMAPKP',
-        'ALAMATPKP1',
-        'KOTAPKP',
-        'PPN',
-        'Jenis',
-        'namakota',
+        '*',
         DB::raw("ROW_NUMBER() OVER (ORDER BY {$orderColumn} {$orderDir}) as RowNum"),
         DB::raw('COUNT(*) OVER () as TotalCount')
     );
@@ -128,12 +201,16 @@ public function loadAll(Request $request)
 
     $filtered = $data->isNotEmpty() ? (int) $data->first()->TotalCount : (clone $query)->count();
 
+    // Some column in this wide a.* pull can come back as raw bytes that
+    // aren't valid UTF-8 (e.g. a binary/varbinary column), which makes
+    // json_encode() fail outright. Substitute those bytes instead of
+    // 500'ing the whole response over one bad field.
     return response()->json([
         "draw" => intval($request->input('draw')),
         "recordsTotal" => $total,
         "recordsFiltered" => $filtered,
         "data" => $data
-    ]);
+    ], 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
 }
 
 public function spAdd(Request $req) {
@@ -209,28 +286,25 @@ public function spAdd(Request $req) {
                                               return $listData;
                                         }
 
-    public function submitAlamat (Request $req)
-    {
-        $ambilData = DB::connection('SML')->select("SELECT MAX(Nomor) as maxNomor
-                                                    FROM DBALAMATCUST 
-                                                    WHERE KODECUSTSUPP = :kode", 
-                                                    ['kode' => $req->kode]);
-        
-        $nomorBaru = ($ambilData[0]->maxNomor ?? 0) + 1;
-        
-        $listData = DB::connection('SML')->insert("INSERT INTO dbAlamatCust (KODECUSTSUPP, Nomor, Alamat, Telp, Fax, Nama, pSurat, up, Area) 
-                                                  VALUES (:kodeCustSupp, :nomor, :alamat, :telp, :fax, :nama, 0, :up, 'blackpink')", 
-                                                  [
-                                                      'kodeCustSupp' => $req->kodeCustSupp, 
-                                                      'nomor' => $nomorBaru,
-                                                      'nama' => $req->nama, 
-                                                      'alamat' => $req->alamat, 
-                                                      'fax' => $req->fax, 
-                                                      'telp' => $req->telp, 
-                                                      'up' => $req->up
-                                                  ]);
-        return 1;
-    }
+public function submitAlamat(Request $req)
+{
+    DB::connection('SML')->insert("
+        INSERT INTO dbAlamatCust (KODECUSTSUPP, Nomor, Alamat, Telp, Fax, Nama, pSurat, up, Area)
+        SELECT :kodeCustSupp, ISNULL(MAX(Nomor), 0) + 1, :alamat, :telp, :fax, :nama, 0, :up, 'blackpink'
+        FROM dbAlamatCust WITH (UPDLOCK, HOLDLOCK)
+        WHERE KODECUSTSUPP = :kodeCustSupp2
+    ", [
+        'kodeCustSupp' => $req->kodeCustSupp,
+        'alamat' => $req->alamat,
+        'telp' => $req->telp,
+        'fax' => $req->fax,
+        'nama' => $req->nama,
+        'up' => $req->up,
+        'kodeCustSupp2' => $req->kodeCustSupp,
+    ]);
+
+    return 1;
+}
 
   public function spDeleteAlamat (Request $req) {
 

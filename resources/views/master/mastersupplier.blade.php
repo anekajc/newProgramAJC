@@ -822,7 +822,7 @@ function loadAll () {
       { data: "USAHA" },
       { data: "NAMACUSTSUPP" },
       { data: "ALAMAT1" },
-      { data: "namakota" },
+      { data: "namaKota" },
       // { data: "KODEPOS" },
       { data: "NEGARA" },
       { data: "TELPON" },

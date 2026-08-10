@@ -1,86 +1,50 @@
-@extends('master.newmaster')
+@extends('newmaster')
 @section('buttons')
 
 @endsection
 @section('content')
-<div class="container-fluid">
 
-  <!-- <div id="qrcode"></div> -->
-<div class="row mt-4">
-      <div class="col-6 text-left">
-        <h2 style="margin-top:-85px;">Master Area</h2>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add Area
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
+ <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
+
+
+  {{-- <div class="sp-breadcrumb">
+    <span>Beranda</span>
+    <span class="sp-sep">›</span>
+    <span>Master</span>
+    <span class="sp-sep">›</span>
+    <span class="sp-crumb-active">Satuan</span>
+  </div> --}}
+
+  {{-- <div class="sp-page-head">
+    <div>
+      <h1>Master Satuan</h1>
     </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
+    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Satuan</button>
+  </div> --}}
 
-<div id="printContainer" style="display:none">
+<div id="contentContainer" class="container-fluid">
 
-</div>
-<div id="contentContainer" class="container-fluid" style="max-width: 900px; margin-top:-95px">
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-          <div class="row mt-4">
-              <!-- <div class="col-12 text-right">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Koreksi Stock Gudang</button>
-              </div> -->
-          </div>
-          <div class="row mt-3">
-            <div class="col-12" style="overflow:auto;">
-              <div class="">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
-                      <thead id='theadCustom' class="text-center">
-                        <tr>
-                          <th scope="col">Actions</th>
-                          <th scope="col">Kode Area</th>
-                          <th scope="col">Nama Area</th>
+  @include('master.partials.headerTableMaster')
 
-                        </tr>
-                      </thead>
-                      <tbody id="tabel_data" class="text-left">
-                      </tbody>
-
-
-                    </table>
-              </div>
-            </div>
-          </div>
-
-
+  <div class="table-outer">
+    <div class="table-wrap">
+      <table class="tb" id="tabel">
+        <thead>
+          <tr>
+            <th scope="col">Actions</th>
+            <th scope="col">Kode Area</th>
+            <th scope="col">Nama Area</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-right">
+      </tbody>
+      </table>
+    </div>
 </div>
 
+</div>
 
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -110,7 +74,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama Area</label>
@@ -162,10 +126,9 @@
                   <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
                 </div>
               </div>
-
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama Area</label>
@@ -176,9 +139,7 @@
                   <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area">
                 </div>
               </div>
-
             </div>
-
 
     </div>
   </div>
@@ -221,7 +182,7 @@
 
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-4 text-left">
                 <div class="form-group text-left">
                   <label class="text-left">Nama Area</label>
@@ -250,6 +211,7 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/masterTable.js') }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -258,6 +220,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
+  document.getElementById('breadcrumb').innerHTML = "Master Area"
 
   $('#tabel').DataTable().destroy();
 
@@ -278,29 +241,33 @@ function loadAll () {
     let temp = ""
 
     rowTable += `<tr>
-    <td class="text-center">
-      <button class="btn btn-success btn-sm hover-tooltip" type="button" onclick="buttonEdit('${item.KODEAREA}')" data-tooltip="Edit Area">
-        <i class="bi bi-pen"></i>
-      </button>
-      <button class="btn btn-danger btn-sm hover-tooltip" type="button" onclick="buttonDelete('${item.KODEAREA}')" data-tooltip="Delete Area">
-        <i class="bi bi-trash"></i>
-      </button>
+    <td style="white-space:nowrap;" class='text-center'>
+      <div class="action-buttons-wrap">
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEAREA}')"><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODEAREA}')"><i class="bi bi-trash"></i></button>
+      </div>
     </td>
     <td>${item.KODEAREA}</td>
     <td>${item.NAMAAREA}</td>
     </tr>`
   });
 
-  document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-    });
+   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
+      document.getElementById("tabel_data").innerHTML = rowTable
+      $("#tabel").DataTable({
+        "lengthChange": false,
+        "paging": true,
+        "searching": true,
+        "dom": 'tip',
+        "pageLength": currentLength
+      });
 
 }
 
 function buttonAdd () {
 
+  document.getElementById('input_add_kodearea').value = ''
+  document.getElementById('input_add_namaarea').value = ''
 
   $("#form").modal('toggle')
 

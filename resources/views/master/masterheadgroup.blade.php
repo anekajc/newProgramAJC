@@ -1163,7 +1163,6 @@ function refreshSubKategori () {
       document.getElementById("tabel_data_subkategori").innerHTML = rowTable
       // document.getElementById("input_subkategori_kodesubgroup").value = kodesubgroup
 
-
     }})
 }
 

@@ -95,9 +95,15 @@
                   <label class="text-left">Kode Area</label>
                 </div>
               </div>
-              <div class="col-8">
+              <div class="col-8">            
                 <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
+                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
+                  <select id="input_add_kodearea" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Pilih Area</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                  </select>
                 </div>
               </div>
 
@@ -166,9 +172,15 @@
                   <label class="text-left">Kode Area</label>
                 </div>
               </div>
-              <div class="col-8">
+              <div class="col-8">            
                 <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodearea" placeholder="Kode Area">
+                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
+                  <select id="input_edit_kodearea" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Pilih Area</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                  </select>
                 </div>
               </div>
 
@@ -242,14 +254,35 @@ function loadAll () {
 }
 
 function buttonAdd () {
-
+  
   document.getElementById('input_add_kodekota').value = ''
   document.getElementById('input_add_namakota').value = ''
-  document.getElementById('input_add_kodearea').value = ''
+
+  $.ajax({
+    url: "{!! url('masterkotalistarea') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+
+      console.log(res)
+      let rowTable = `<option selected value=0>Pilih Area</option>`
+      res.forEach((item, i) => {
+        rowTable += `
+          <option value="${item.KODEAREA}">${item.NAMAAREA}</option>
+        `
+      });
+
+      document.getElementById("input_add_kodearea").innerHTML = rowTable
+    }})
+
+
 
   $("#form").modal('toggle')
 
 }
+
 
 function buttonEdit (kodekota) {
   console.log(kodekota)

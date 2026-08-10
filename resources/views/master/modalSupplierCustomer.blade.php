@@ -521,6 +521,9 @@ function submitAddAlamat () {
   let fax = $("#input_add_faxAlamat").val();
   let up = $("#input_add_upAlamat").val();
 
+  console.log(kodeCustSupp, nama, alamat, telp, fax, up);
+  console.log('SUBMIT ADD ALAMAT')
+
   $.ajax({
     url: "{!! url('mastersupplierspaddalamat') !!}",
     type: "post",
@@ -543,7 +546,7 @@ function submitAddAlamat () {
         // $("#formEdit").modal('toggle')
         alertify.success("Data Alamat telah ditambah");
         loadAlamat()
-        $("#formAlamatEdit").modal('hide')
+        $("#formAlamatAdd").modal('hide')
       }
 
     }})

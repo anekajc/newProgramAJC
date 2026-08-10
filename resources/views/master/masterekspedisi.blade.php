@@ -1390,7 +1390,6 @@ function submitEdit () {
   let kodeKota = $("#input_edit_kota").val(); //KodeKota
   let pCounter = $("#input_edit_counter").val(); //pCounter
   let isPpn = $("#input_edit_isPpn").val(); //IsPpn
-  let kodeArea = $("#input_edit_kodeArea").val();
   let kodePos = $("#input_edit_kodePos").val(); //KodePos
   let negara = $("#input_edit_negara").val(); //Negara
 
@@ -1425,7 +1424,6 @@ function submitEdit () {
       namaCustSupp,
       alamat1,
       alamat2,
-      kodeArea,
       
       kodeKota,
       counter: pCounter,
@@ -2133,9 +2131,11 @@ function buttonKota(searchValue = '') {
 function buttonSelectKota(kode, nama, area){
   document.getElementById('input_add_kota').value = kode;
   document.getElementById('input_add_namaArea').value = nama;
+  document.getElementById('input_add_kodeArea').value = area;
 
   document.getElementById('input_edit_kota').value = kode;
   document.getElementById('input_edit_namaArea').value = nama;
+  document.getElementById('input_edit_kodeArea').value = area;
 
   $("#formModalOpen").modal("hide");
 }

@@ -691,7 +691,6 @@ $.ajax({
 function submitAddSales () {
 
   let _token = $("#_token").val();
-  console.log('submitAddSales')
   let kodeCustSupp = $("#input_custSupp_add_kodeCustSupp").val();
   let Mingguke = $("#input_custSupp_add_mingguKe").val();
 
@@ -963,8 +962,8 @@ function buttonSales (keynik) {
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn btn-success btn-sm hover-tooltip" onclick="buttonEditSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Edit Harga"><i class="bi bi-pen"></i></button>
-            <button class="btn btn-danger btn-sm hover-tooltip" onclick="buttonDeleteSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Delete Harga" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success btn-sm hover-tooltip" onclick="buttonEditSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Edit Harga"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Delete Harga" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.kodeCustSupp}</td>
           <td>${item.namaCustSupp}</td>
@@ -977,7 +976,6 @@ function buttonSales (keynik) {
         document.getElementById("input_harga_kodesales").value = keynik
 
       }})
-
 
   $("#formSales").modal('toggle')
 }
@@ -1002,7 +1000,7 @@ function buttonTarget (keynik) {
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn-action-sm btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-md btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
             <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
@@ -1038,8 +1036,8 @@ function refreshTableSales(keynik){
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn btn-success btn-sm hover-tooltip" onclick="buttonEditSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Edit Harga"><i class="bi bi-pen"></i></button>
-            <button class="btn btn-danger btn-sm hover-tooltip" onclick="buttonDeleteSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Delete Harga" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success btn-sm hover-tooltip" onclick="buttonEditSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Edit Harga"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteSales('${item.kodeCustSupp}', '${item.Keynik}')" type="button" data-tooltip="Delete Harga" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.kodeCustSupp}</td>
           <td>${item.namaCustSupp}</td>
