@@ -150,13 +150,22 @@ join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
     // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
     // same pass so we don't run the whole joined+filtered query twice just
     // to get the total.
+    // b (DBGROUP) and c (DBHDGROUP) stay joined — the search filter above
+    // matches against b.NAMA/c.NAMAHDGRP directly — but nothing in the blade
+    // reads their columns (nNAMAGROUP/nNAMAHDGROUP are commented out of the
+    // displayed columns), and a.* was pulling every DBBARANG column when the
+    // table only ever uses 7 of them.
     $dataQuery = (clone $query)->select(
-        'b.NAMA as nNAMAGROUP',
-        'c.NAMAHDGRP as nNAMAHDGROUP',
         'd.NamaSubGrp as nNAMASUBGROUP',
         'e.Keterangan as nNAMASUBKATEGORI',
         'f.NAMAMERK as nNAMAMERK',
-        'a.*',
+        'a.KODEBRG',
+        'a.NAMABRG',
+        'a.pAgen',
+        'a.SKU',
+        'a.SAT1',
+        'a.SAT2',
+        'a.PartNumber',
         DB::raw('ROW_NUMBER() OVER (ORDER BY a.KODEBRG) as RowNum'),
         DB::raw('COUNT(*) OVER () as TotalCount')
     );

@@ -1100,7 +1100,7 @@ function buttonGroupAktiva () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -1155,7 +1155,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1170,7 +1170,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1186,7 +1186,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -1253,7 +1253,7 @@ function loadAkumulasiPenyusutan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
@@ -1309,7 +1309,7 @@ function buttonAddListValas () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonAddPickValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonAddPickValas('${item.KODEVLS}', '${item.KURS}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KODEVLS}</td>
       <td>${item.KURS}</td>
@@ -1360,7 +1360,7 @@ function loadDevisi () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Devisi}</td>
       <td>${item.NamaDevisi}</td>

@@ -490,7 +490,7 @@ function buttonSelectPerkiraan (kode) {
       dataRefresh.forEach((item, i) => {
         rowTable += `<tr>
           <td class="text-center">
-            <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelect('${item.perkiraan}')"><i class='bi bi-plus'></i></button>
+            <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelect('${item.perkiraan}')"><i class="bi bi-plus-square"></i></button>
           </td>
           <td>${item.perkiraan}</td>
           <td>${item.keterangan}</td>

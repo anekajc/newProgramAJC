@@ -796,22 +796,39 @@ function loadAll () {
 
   $('#tabel').DataTable({
     processing: true,
-    serverSide: true,
     ajax: {
       url: "{!! url('mastersupplierloadall') !!}",
-      type: "GET"
+      type: "GET",
+      dataSrc: ''
     },
     columns: [
-      { 
-        data: "KODECUSTSUPP", 
+      {
+        data: "KODECUSTSUPP",
         render: function(data, type, row) {
           return `
-            <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${data}')" data-tooltip="Edit">
-                <i class="bi bi-pen"></i>
-            </button>
-            <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${data}')" data-tooltip="Delete">
-                <i class="bi bi-trash"></i>
-            </button>
+                        <button class="btn-action-sm btn-action-success hover-tooltip"
+                            onclick="buttonEdit('${data}')"
+                            data-tooltip="Edit Customer">
+                            <i class="bi bi-pen"></i>
+                        </button>
+
+                        <button class="btn-action-sm btn-action-primary hover-tooltip"
+                            onclick="buttonDetailAkun('${data}')"
+                            data-tooltip="Detail Akun">
+                            <i class="bi bi-card-text"></i>
+                        </button>
+
+                        <button class="btn-action-sm btn-action-primary hover-tooltip"
+                            onclick="buttonAlamat('${data}')"
+                            data-tooltip="Alamat">
+                            <i class="bi bi-house-door"></i>
+                        </button>
+
+                        <button class="btn-action-sm btn-action-danger hover-tooltip"
+                            onclick="buttonDelete('${data}')"
+                            data-tooltip="Delete Customer">
+                            <i class="bi bi-trash"></i>
+                        </button>
           `;
         },
         orderable: false,
@@ -823,10 +840,11 @@ function loadAll () {
       { data: "NAMACUSTSUPP" },
       { data: "ALAMAT1" },
       { data: "namaKota" },
-      // { data: "KODEPOS" },
       { data: "NEGARA" },
       { data: "TELPON" },
-      { data: "EMAIL" }
+      { data: "EMAIL" },
+      { data: "KODEPOS", visible: false },
+      { data: "FAX", visible: false }
     ],
     lengthChange: true,
     paging: true,
@@ -1227,8 +1245,8 @@ function loadDetailAkun (kodeDetail) {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
-        <button class="btn btn-danger btn-sm" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
+        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
       </td>
       <td>${item.KodeCustSupp}</td>
       <td>${item.Perkiraan}</td>
@@ -1333,75 +1351,6 @@ function submitAddDetailAkun () {
         alertify.success("Data Detail Akun telah ditambah");
         loadDetailAkun()
         $("#formDetailAkunAdd").modal('hide')
-      }
-
-    }})
-
-  // console.log(kodearea, namaarea)
-}
-
-function submitAddAlamat () {
-
-  let _token = $("#_token").val();
-  let kode = $("#input_add_kodeDetailAlamat").val();
-  let nama = $("#input_add_namaAlamat").val();
-  let up = $("#input_add_upAlamat").val();
-  let alamat = $("#input_add_alamatAlamat").val();
-  let telp = $("#input_add_telpAlamat").val();
-  let fax = $("#input_add_faxAlamat").val();
-
-  if (!kode) {
-    alertify.warning("Kode harus diisi");
-    return
-  }
-
-  if (!up) {
-    alertify.warning("Up harus diisi");
-    return
-  }  
-  
-  if (!nama) {
-    alertify.warning("Nama harus diisi");
-    return
-  }
-
-  if (!alamat) {
-    alertify.warning("Alamat harus diisi");
-    return
-  }  
-  
-  if (!telp) {
-    alertify.warning("Telp harus diisi");
-    return
-  }
-  if (!fax) {
-    alertify.warning("Fax harus diisi");
-    return
-  }
-
-  $.ajax({
-    url: "{!! url('mastersupplierspaddalamat') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token : _token,
-      kode,
-      nama,
-      up,
-      alamat,
-      telp,
-      fax
-    },
-    success: function(res) {
-
-      if (res != 1) {
-        alertify.warning(res);
-      }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
-        alertify.success("Data Alamat telah ditambah");
-        loadAlamat()
-        $("#formAlamatAdd").modal('hide')
       }
 
     }})

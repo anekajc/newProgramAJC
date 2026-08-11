@@ -322,6 +322,13 @@ function loadAll () {
 
 function buttonAdd () {
 
+  document.getElementById('seri1').value = '';
+  document.getElementById('seri2').value = '';
+  document.getElementById('input_add_nama').value = '';
+  document.getElementById('input_add_noawal').value = '';
+  document.getElementById('input_add_noakhir').value = '';
+  document.getElementById('input_add_penuh').checked = false;
+
   $("#form").modal('toggle')
 
 }

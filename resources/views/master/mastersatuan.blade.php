@@ -388,7 +388,7 @@ function buttonAmbilSatTax () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectSatTax('${item.KODETAX}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectSatTax('${item.KODETAX}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KODETAX}</td>
       <td>${item.NAMATAX}</td>

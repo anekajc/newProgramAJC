@@ -73,10 +73,10 @@
             </div>
 
           <div class="row mt-2 align-items-center">
-            <div class="col-md-5">
+            <div class="col-md-4">
               <label class="form-label">Hutang/Piutang</label>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-8">
               <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraandetail">
                 <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
@@ -489,7 +489,7 @@ function submitAddDetailAkunEdit () {
       }  else {
         console.log(res ,'!')
         // $("#formEdit").modal('toggle')
-        alertify.success("Data Detail Akun telah ditambah");
+        alertify.success("Data Detail Akun telah diedit");
         loadDetailAkun()
         $("#formDetailAkunEdit").modal('hide')
       }
@@ -585,7 +585,7 @@ function submitAddAlamatEdit () {
       }  else {
         console.log(res ,'!')
         // $("#formEdit").modal('toggle')
-        alertify.success("Data Alamat telah ditambah");
+        alertify.success("Data Alamat telah diedit");
         loadAlamat()
         $("#formAlamatEdit").modal('hide')
       }

@@ -37,180 +37,44 @@ class MasterSupplierController extends Controller
 
   }
 
-public function loadAll(Request $request)
+public function loadAll()
 {
-    // @isaktif and @Perkiraan were hardcoded constants (1 and 'semua') in the
-    // original batch, which only ever resolved the WHERE clause down to
-    // "a.IsAktif = 1" with no Perkiraan filtering (its LIKE '%' matches
-    // everything) and the DataPostHutPiut call down to a fixed 'HT'. Inlined
-    // here as a single SELECT (no DECLARE / SELECT @var=) since only a plain
-    // SELECT can be used as a derived table below, which search/pagination
-    // needs.
-    $rawSql = "SELECT DISTINCT
-	a.KODECUSTSUPP,
-	a.NAMACUSTSUPP,
-	a.ALAMAT1,
-	a.ALAMAT2,
-	a.Kota,
-	a.TELPON,
-	a.FAX,
-	a.EMAIL,
-	a.KODEPOS,
-	a.NEGARA,
-	a.NPWP,
-	a.Tanggal,
-	a.PLAFON,
-	a.HARI,
-	a.HARIHUTPIUT,
-	a.BERIKAT,
-	a.USAHA,
-	a.PERKIRAAN,
-	a.JENIS,
-	a.NAMAPKP,
-	a.ALAMATPKP1,
-	a.ALAMATPKP2,
-	a.KOTAPKP,
-	a.Sales,
-	a.KodeVls,
-	a.KodeExp,
-	a.KodeTipe,
-	a.IsPpn,
-	a.IsAktif,
-	a.Kind,
-	a.ContactP,
-	a.Alamat1ContP,
-	a.Alamat2ContP,
-	a.KotaContP,
-	a.NegaraContP,
-	a.TelpContP,
-	a.FaxContP,
-	a.EmailContP,
-	a.KODEPOSContP,
-	a.HPContP,
-	a.SyaratPenerimaan,
-	a.SyaratPembayaran,
-	a.Agent,
-	a.Alamat1A,
-	a.Alamat2A,
-	a.KotaA,
-	a.NegaraA,
-	a.ContactA,
-	a.TelpA,
-	a.FaxA,
-	a.EmailA,
-	a.KODEPOSA,
-	a.HPA,
-	a.EmailContA,
-	a.PortOfLoading,
-	a.CountryOfOrigin,
-	a.TglInput,
-	a.iskontrak,
-	a.PPN,
-	a.HargaKe,
-	a.Att,
-	a.bank,
-	a.NoAcc,
-	a.IsMember,
-	a.TanggalValid,
-	a.DiscMember,
-	a.AttPhone,
-	a.ket,
-	a.JenisCustSupp,
-	a.IntCode,
-	a.CompCode,
-	a.AttDepart,
-	a.ATN,
-	a.pBlackList,
-	a.ALAMAT1 + CASE WHEN LTRIM(a.Alamat2) = '' THEN '' ELSE CHAR(13) + a.ALAMAT2 END ALAMAT,
-	a.Usaha + CASE WHEN ISNULL(a.Usaha, '') = '' THEN '' ELSE '. ' END + a.NamacustSupp Nama,
-	CASE WHEN a.iskontrak IS NULL THEN 0 WHEN a.iskontrak = 0 THEN 0 WHEN a.iskontrak = 1 THEN 1 END xkontrak,
-	F.NamaJenis,
-	Cs.NamaCustSupp MyAgent,
-	D.namaKota,
-	D.KodeArea,
-	E.namaArea,
-	[dbo].[DataPostHutPiut](a.KodecustSupp, 'HT') DetailAkun
-FROM dbCustSupp a
-	LEFT OUTER JOIN dbperkcustsupp b ON b.kodecustsupp = a.kodecustsupp
-	LEFT OUTER JOIN dbPerkiraan c ON c.perkiraan = b.perkiraan AND c.tipe = 1
-	LEFT OUTER JOIN dbkota D ON a.kota = D.KodeKota
-	LEFT OUTER JOIN dbarea E ON D.KodeArea = E.KodeArea
-	LEFT OUTER JOIN DbJenisCustSupp F ON a.JenisCustSupp = F.KodeJenis
-	LEFT OUTER JOIN dbCustSupp Cs ON Cs.KodeCustSupp = a.Agent
-WHERE a.IsAktif = 1";
+    // Only ~2,100 active suppliers total, so this loads the full set once and
+    // lets DataTables page/sort/search it client-side instead of round-
+    // tripping to the server on every click. The query only pulls the
+    // columns the table actually displays or searches on: dbperkcustsupp/
+    // dbPerkiraan/dbarea/DbJenisCustSupp/the Agent self-join and the
+    // DataPostHutPiut scalar UDF were only feeding columns nothing renders,
+    // and DISTINCT was only needed to collapse the duplicate rows the
+    // dbperkcustsupp join produced.
+    $query = DB::connection('SML')
+        ->table('vwcustsupp')
+        ->where('Jenis', 1);
 
-    $query = DB::connection('SML')->table(DB::raw("({$rawSql}) as base"));
+    $data = DB::connection('SML')
+        ->table('dbCustSupp as a')
+        ->leftJoin('dbkota as D', 'a.Kota', '=', 'D.KodeKota')
+        ->where('a.IsAktif', 1)
+        ->where ('a.Jenis', 0)
+        ->select(
+            'a.KODECUSTSUPP',
+            'a.USAHA',
+            'a.NAMACUSTSUPP',
+            'a.ALAMAT1',
+            'a.KODEPOS',
+            'a.NEGARA',
+            'a.TELPON',
+            'a.FAX',
+            'a.EMAIL',
+            'D.namaKota'
+        )
+        ->orderBy('a.KODECUSTSUPP')
+        ->get();
 
-    // Total before filtering
-    $total = (clone $query)->count();
-
-    // Filtering
-    $search = $request->input('search.value');
-    if (!empty($search)) {
-        $query->where(function($q) use ($search) {
-            $q->where('KODECUSTSUPP', 'like', "%{$search}%")
-              ->orWhere('USAHA', 'like', "%{$search}%")
-              ->orWhere('NAMACUSTSUPP', 'like', "%{$search}%")
-              ->orWhere('ALAMAT1', 'like', "%{$search}%")
-              ->orWhere('Kota', 'like', "%{$search}%")
-              ->orWhere('KODEPOS', 'like', "%{$search}%")
-              ->orWhere('NEGARA', 'like', "%{$search}%")
-              ->orWhere('TELPON', 'like', "%{$search}%")
-              ->orWhere('FAX', 'like', "%{$search}%")
-              ->orWhere('EMAIL', 'like', "%{$search}%");
-        });
-    }
-
-    // Ordering — ROW_NUMBER() below needs an ORDER BY, and the column name is
-    // client-supplied, so it must be checked against an allow-list before it
-    // touches raw SQL.
-    $allowedColumns = ['KODECUSTSUPP', 'USAHA', 'NAMACUSTSUPP', 'ALAMAT1', 'namaKota', 'NEGARA', 'TELPON', 'EMAIL'];
-    $orderColumn = 'KODECUSTSUPP';
-    $orderDir = 'asc';
-    if ($request->has('order')) {
-        $columns = $request->input('columns');
-        $order = $request->input('order')[0];
-        $requestedColumn = $columns[$order['column']]['data'] ?? null;
-        if (in_array($requestedColumn, $allowedColumns, true)) {
-            $orderColumn = $requestedColumn;
-        }
-        $orderDir = ($order['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
-    }
-
-    $start = (int) $request->input('start', 0);
-    $length = (int) $request->input('length', 10);
-
-    // DBSMLNEW's compatibility level doesn't support SQL Server's OFFSET/FETCH
-    // syntax (Laravel's default ->skip()->take() for sqlsrv), so page via
-    // ROW_NUMBER() in a subquery instead. COUNT(*) OVER() rides along in the
-    // same pass so the filtered total doesn't need its own separate query.
-    $dataQuery = (clone $query)->select(
-        '*',
-        DB::raw("ROW_NUMBER() OVER (ORDER BY {$orderColumn} {$orderDir}) as RowNum"),
-        DB::raw('COUNT(*) OVER () as TotalCount')
-    );
-
-    $paged = DB::connection('SML')->query()->fromSub($dataQuery, 'sub');
-
-    // DataTables sends length = -1 for the "Semua" (All) option, meaning no limit
-    if ($length >= 0) {
-        $paged->whereBetween('RowNum', [$start + 1, $start + $length]);
-    }
-
-    $data = $paged->get();
-
-    $filtered = $data->isNotEmpty() ? (int) $data->first()->TotalCount : (clone $query)->count();
-
-    // Some column in this wide a.* pull can come back as raw bytes that
-    // aren't valid UTF-8 (e.g. a binary/varbinary column), which makes
-    // json_encode() fail outright. Substitute those bytes instead of
-    // 500'ing the whole response over one bad field.
-    return response()->json([
-        "draw" => intval($request->input('draw')),
-        "recordsTotal" => $total,
-        "recordsFiltered" => $filtered,
-        "data" => $data
-    ], 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
+    // Some column here can come back as raw bytes that aren't valid UTF-8,
+    // which makes json_encode() fail outright. Substitute those bytes
+    // instead of 500'ing the whole response over one bad field.
+    return response()->json($data, 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
 }
 
 public function spAdd(Request $req) {

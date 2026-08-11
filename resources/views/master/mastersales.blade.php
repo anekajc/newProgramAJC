@@ -1000,7 +1000,7 @@ function buttonTarget (keynik) {
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn-action-md btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
             <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
@@ -1069,12 +1069,13 @@ function refreshTableTarget(keynik){
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn btn-success btn-sm hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
-            <button class="btn btn-danger btn-sm hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success btn-sm hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger btn-sm hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
-          <td>${item.TgtSales}</td>
+          <td>${item.namamerk}</td>
+          <td>${formatNumberDisplay(item.TgtSales)}</td>
           </tr>
           `
         });
@@ -1145,7 +1146,7 @@ function buttonGudang () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectGudang('${item.KODEGDG}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectGudang('${item.KODEGDG}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KODEGDG}</td>
       <td>${item.NAMA}</td>
@@ -1201,7 +1202,7 @@ function buttonCosting () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectCosting('${item.KodeCost}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectCosting('${item.KodeCost}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KodeCost}</td>
       <td>${item.NamaCost}</td>
@@ -1255,7 +1256,7 @@ function buttonCustSupp () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectCustSupp('${item.KodeCust}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectCustSupp('${item.KodeCust}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KodeCust}</td>
       <td>${item.NamaCust}</td>
@@ -1311,7 +1312,7 @@ function buttonMerk () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectMerk('${item.KodeMerk}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectMerk('${item.KodeMerk}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KodeMerk}</td>
       <td>${item.NamaMerk}</td>

@@ -315,7 +315,7 @@ function loadSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
@@ -365,7 +365,7 @@ function loadEditSelectPerkiraan() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>

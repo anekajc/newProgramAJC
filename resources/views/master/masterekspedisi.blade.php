@@ -2030,7 +2030,7 @@ function buttonHutangPiutang () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectHutangPiutang('${item.Perkiraan}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectHutangPiutang('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>

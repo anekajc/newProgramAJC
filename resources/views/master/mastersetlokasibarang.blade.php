@@ -421,7 +421,7 @@ function buttonLokasiBarang () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectLokasi('${item.KODELOKASI}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectLokasi('${item.KODELOKASI}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KODELOKASI}</td>
     </tr>`;

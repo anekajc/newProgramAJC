@@ -818,7 +818,7 @@ function loadValas() {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihValas('${item.KODEVLS}', '${item.KURS}')"><i class='bi bi-plus'></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihValas('${item.KODEVLS}', '${item.KURS}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KODEVLS}</td>
       <td>${item.NAMAVLS}</td>
@@ -899,7 +899,7 @@ function buttonLokasiPenerima () {
 
     rowTable += `<tr>
       <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectLokasiPenerima('${item.KodeKebun}', '${item.namaKebun}')"><i class="bi bi-plus"></i></button>
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectLokasiPenerima('${item.KodeKebun}', '${item.namaKebun}')"><i class="bi bi-plus-square"></i></button>
       </td>
       <td>${item.KodeKebun}</td>
       <td>${item.namaKebun}</td>
