@@ -1439,7 +1439,6 @@ function submitEdit () {
       isAktif : aktif,
       att,
       attPhone,
-      
       attDepart,
       bank,
       accNo,
