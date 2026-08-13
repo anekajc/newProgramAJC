@@ -310,60 +310,54 @@
       font-size: 0.65rem;
     }
 
-    
-  .radioChoiceMaster {
-    display: inline-flex;
-    list-style: none;
-    margin: 0;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .radioChoiceMaster-item {
-    display: flex;
-  }
-
-  .radioChoiceMaster-btn {
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    background-color: transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    outline: none;
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .radioChoiceMaster-btn:hover {
-    color: #212529;
-    background-color: rgba(0,0,0,0.04);
-  }
-
-  .radioChoiceMaster-btn:focus,
-  .radioChoiceMaster-btn:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .radioChoiceMaster-btn.active {
-    color: #fff;
-    background-color: #007bff;
-    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
+  /* canvas/bootstrap.css defines .bg-primary/.text-white with !important,
+     which can win the cascade over Bootstrap 5's own !important version of
+     the same rule depending on stylesheet load order. Pinning these table
+     headers directly guarantees the intended look regardless of that. */
+  .table thead.bg-primary th,
+  .table thead.bg-primary td {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+    border-color: #0b5ed7 !important;
   }
 
   </style>
 {{-- end tampilan search pic --}}
+
+{{-- newmaster's <head> loads the Canvas theme's Bootstrap 4-era bootstrap.css
+     right after the Bootstrap 5 CDN link, so Canvas wins the cascade for any
+     rule both define (.row, .form-group, h1-h6 margins, .modal-body padding,
+     etc.) on every page. Re-declaring the same CDN link here (cached, same
+     URL) puts it after Canvas in this page's cascade only, so Bootstrap 5's
+     spacing actually applies on this page without touching the shared
+     layout or any other page. --}}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
 @endsection
 @section('content')
 
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+
+{{-- report-table.css/report-table.js power the report module's draggable-column/gear-menu
+     table (docs/new-slider-table-guide.md). Linked here page-locally (not in newmaster.blade.php)
+     so only #tabel on this page gets it. --}}
+<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+
+<style>
+  /* report-table.css resets `.tb-report *` to margin:0/padding:0 so its own
+     .rt-th/.rt-bar rules have a clean slate. #tabel's Actions-column buttons
+     use plain Bootstrap .btn/.btn-sm classes, and #tabel7's use
+     tableMaster2.css's .btn-action-sm -- neither is report-table.css's own
+     button styling, so restore their padding/margin inside the wrapper. */
+  .tb-report .tb tbody td .btn {
+    padding: 0.25rem 0.5rem;
+    margin: 0 2px 2px 0;
+  }
+  .tb-report .tb tbody td .btn-action-sm,
+  .tb-report .tb tbody td .btn-action-md {
+    margin: 2px;
+  }
+</style>
 
 <div id="printContainer" style="display:none">
 
@@ -420,7 +414,25 @@
 
       .sp-filter-wrap select {
         width: auto;
-        min-width: 160px;
+        min-width: 100px;
+      }
+
+      .sp-filter-wrap select#input_filterso {
+        min-width: 190px;
+      }
+
+      .sp-filter-wrap input[type="date"] {
+        min-width: 0;
+      }
+
+      /* tableMaster2.css's .sp-search-wrap uses flex-grow:1, so it expands
+         to fill whatever room is left in the toolbar (up to 340px) once the
+         other controls got compacted. Shrink it and let it scale with the
+         viewport instead of hard-coding one pixel width for one resolution. */
+      .sp-search-wrap {
+        flex: 0 1 auto;
+        width: clamp(160px, 16vw, 260px);
+        max-width: clamp(160px, 16vw, 260px);
       }
 
       .sp-length-wrap {
@@ -509,13 +521,13 @@
       </div>
       
           <div class="sp-filter-wrap">
-            <input type="date" onchange="" class="form-control text-center" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+            <input type="date" onchange="" class="form-control form-control-sm text-center" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
             <span>-</span>
-            <input type="date" onchange="" class="form-control text-center" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+            <input type="date" onchange="" class="form-control form-control-sm text-center" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
           </div>
 
           <div class="sp-filter-wrap">
-            <select id="input_filterso" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <select id="input_filterso" class="form-select form-select-sm" aria-label="Filter SO">
               <option value=0 selected>Semua SO</option>
               <option value=1>SO Belum Otorisasi</option>
               <option value=2>SO Sudah Otorisasi</option>
@@ -527,7 +539,7 @@
           </div>
 
           <div class="sp-filter-wrap">
-            <select id="input_tipebayar" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <select id="input_tipebayar" class="form-select form-select-sm" aria-label="Filter Tipe Bayar">
               <option value=4 selected>Semua Tipe</option>
               <option value=0>CBD</option>
               <option value=1>Kredit</option>
@@ -536,14 +548,18 @@
           </div>
 
           <div class="sp-filter-wrap">
-            <button class="btn btn-success btn-lg" type="button" title="Details" onclick="buttonFilterSO()">
+            <button class="btn btn-success btn-sm" type="button" title="Details" onclick="buttonFilterSO()">
               <i class="bi bi-search"></i>
             </button>
           </div>
 
       <div class="sp-length-wrap">
+      <button class="btn btn-secondary btn-lg" type="button" title="Details" onclick="buttonHeaderTable()">
+        <i class="bi bi-table"></i>
+      </button>
         <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
       </div>
+      
       
     </div>
 
@@ -551,6 +567,10 @@
 
       {{-- tab baru 2--}}
       <div class="tab-pane fade show active" id="profile2" role="tabpanel" aria-labelledby="profile2-tab">
+        {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and its
+             sticky-header table-wrap model) to just this table. --}}
+        <div class="tb-report main">
+        <div id="rtBarTabel7"></div>
         <div class="table-outer">
           <div class="table-wrap">
             <table id="tabel7" class="tb">
@@ -560,7 +580,6 @@
                   <th style="padding: 4px 12px;" scope="col">No Bukti</th>
                   <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Cust</th>
-                  <!-- <th style="padding: 4px 12px;" scope="col">PIC</th> -->
                   <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Qnt</th>
@@ -569,27 +588,10 @@
                 </tr>
               </thead>
               <tbody id="tabel7_data" class="text-left">
-                @for ($i = 0; $i < count($tempOutstanding7); $i++)
-                <tr>
-                  <td class="text-center">
-                    <button class="btn btn-primary btn-sm" type="button" title="Buat SO" onclick="buttonTambahSO('{{ $tempOutstanding7[$i][0]->NOBUKTI }}' , {{ $tempOutstanding7[$i][0]->PPN }} )">
-                      <i class="bi bi-plus"></i>
-                    </button>
-                  </td>
-                  <td>{{ $tempOutstanding7[$i][0]->NOBUKTI }}</td>
-                  <td>{!! date("d/m/Y", strtotime($tempOutstanding7[$i][0]->TANGGAL)) !!}</td>
-                  <!-- <td>{{ $tempOutstanding7[$i][0]->KODECUST }}</td> -->
-                  <td>{{ $tempOutstanding7[$i][0]->NAMACUSTSUPP }}</td>
-                  <td>{{ $tempOutstanding7[$i][0]->KODEBRG }}</td>
-                  <td>{{ $tempOutstanding7[$i][0]->NAMABRG }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding7[$i][0]->QNT, 2, '.', ',') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding7[$i][0]->QntSO, 2, '.', ',') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding7[$i][0]->Sisa, 2, '.', ',') }}</td>
-                </tr>
-                @endfor
               </tbody>
             </table>
           </div>
+        </div>
         </div>
       </div>
 
@@ -598,6 +600,10 @@
         {{-- <div class="sp-toolbar" style="margin-top: 10px">
         </div> --}}
 
+        {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and its
+             sticky-header table-wrap model) to just this table. --}}
+        <div class="tb-report main">
+        <div id="rtBarTabel"></div>
         <div class="table-outer">
           <div class="table-wrap">
             <table id="tabel" class="tb">
@@ -649,101 +655,10 @@
               </thead>
 
               <tbody id="tabel_data" class="text-left">
-                @for ($i = 0; $i < count($tempOutstanding1); $i++)
-                <tr>
-                  <td class="text-center">
-                    <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding1[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-info"></i>
-                    </button>
-
-                    @if ($tempOutstanding1[$i][0]->IsOtorisasi1 == 0 )
-                    <button class='btn btn-primary btn-sm' type='button' onclick='buttonOtorisasi('{{ $tempOutstanding1[$i][0]->NOBUKTI }}')'><i class='bi bi-key'></i></button>
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('{{$tempOutstanding1[$i][0]->NOBUKTI}}')"><i class="bi bi-pen"></i></button>
-                    @else
-                    <button class='btn btn-danger btn-sm' type='button' onclick='buttonBatalOtorisasi('{{$tempOutstanding1[$i][0]->NOBUKTI}}')'><i class='bi bi-key'></i></button><button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint('${item.NoBukti}')">
-                      <i class="bi bi-printer"></i>
-                    </button>
-                    @endif
-                    @if ($tempOutstanding1[$i][0]->cbdneedopen == 1 )
-                    <button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD('{{$tempOutstanding1[$i][0]->NOBUKTI}}')">
-                      <i class="bi bi-check-square-fill"></i>
-                    </button>
-                    @endif
-                  </td>
-                  <td>{{ $tempOutstanding1[$i][0]->NOBUKTI }}</td>
-                  <td>{!! date("d/m/Y", strtotime($tempOutstanding1[$i][0]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->NAMACUSTSUPP }}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->NAMASALES }}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->NAMAPIC }}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->NAMABOFFICE }}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->nopesanan }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding1[$i][0]->TotDPP, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding1[$i][0]->TotPPn, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding1[$i][0]->TotNet, 0, ',', '.') }}</td>
-
-                  @if ($tempOutstanding1[$i][0]->IsOtorisasi1 )
-                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                  @else
-                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                  @endif
-                  <td>{{ $tempOutstanding1[$i][0]->OtoUser1 ? $tempOutstanding1[$i][0]->OtoUser1 : '' }}</td>
-                  <td>{!! $tempOutstanding1[$i][0]->TglOto1 ? date("d/m/Y", strtotime($tempOutstanding1[$i][0]->TglOto1)) : '' !!}</td>
-                  <td>{{ $tempOutstanding1[$i][0]->userunblock ? $tempOutstanding1[$i][0]->userunblock : '' }}</td>
-                  <td>{!! $tempOutstanding1[$i][0]->tglunblock ? date("d/m/Y", strtotime($tempOutstanding1[$i][0]->tglunblock)) : '' !!}</td>
-                  <!-- @if ($tempOutstanding1[$i][0]->IsOtorisasi1 )
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                  <td>{!! $tempOutstanding1[$i][0]->TglOto1 ?  date("d/m/Y H:i:s", strtotime($tempOutstanding1[$i][0]->TglOto1)) : '' !!}</td>
-
-                  <td>{{ $tempOutstanding1[$i][0]->OtoUser1 }}</td>
-                  @if ($level > 1)
-                  @if ($tempOutstanding1[$i][0]->IsOtorisasi2 )
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                          <td>{!! $tempOutstanding1[$i][0]->TglOto2 ? date("d/m/Y H:i:s", strtotime($tempOutstanding1[$i][0]->TglOto2)) : '' !!}</td>
-
-                          <td>{{ $tempOutstanding1[$i][0]->OtoUser2 }}</td>
-                          @if ($level > 2)
-                          @if ($tempOutstanding1[$i][0]->IsOtorisasi3 )
-                                    <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                  @else
-                                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                  @endif
-                                  <td>{!! $tempOutstanding1[$i][0]->TglOto3 ? date("d/m/Y H:i:s", strtotime($tempOutstanding1[$i][0]->TglOto3)) : '' !!}</td>
-
-                                  <td>{{ $tempOutstanding1[$i][0]->OtoUser3 }}</td>
-                                  @if ($level > 3)
-                                  @if ($tempOutstanding1[$i][0]->IsOtorisasi4 )
-                                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                          @else
-                                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                          @endif
-                                          <td>{!! $tempOutstanding1[$i][0]->TglOto4 ? date("d/m/Y H:i:s", strtotime($tempOutstanding1[$i][0]->TglOto4)) : '' !!}</td>
-
-                                          <td>{{ $tempOutstanding1[$i][0]->OtoUser4 }}</td>
-                                          @if ($level > 4)
-                                          @if ($tempOutstanding1[$i][0]->IsOtorisasi5 )
-                                                    <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                                  @else
-                                                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                                  @endif
-                                                  <td>{!! $tempOutstanding1[$i][0]->TglOto5 ? date("d/m/Y H:i:s", strtotime($tempOutstanding1[$i][0]->TglOto5)) : '' !!}</td>
-
-                                                  <td>{{ $tempOutstanding1[$i][0]->OtoUser5 }}</td>
-
-                                            @endif
-                                    @endif
-                            @endif
-                    @endif -->
-                </tr>
-                @endfor
               </tbody>
             </table>
           </div>
+        </div>
         </div>
       </div>
 
@@ -895,11 +810,11 @@
 </div>
 
 <div id="page2" class="container-fluid" style="display: none" >
-      <div class="row">
-        <div class="col-6 text-left">
+      <div class="row d-flex justify-content-between align-items-center">
+        <div class="col-auto text-left">
           <h2>Form Sales Order</h2>
         </div>
-        <div class="col-6 text-right">
+        <div class="col-auto text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
@@ -915,7 +830,7 @@
         </div>
       </div>
           <div id="modalBodyAddMain" class="">
-            <div class="modal-body" style="margin-top:-30px;">
+            <div class="modal-body">
 
           <!-- <div class="container-fluid"> -->
 
@@ -957,13 +872,13 @@
                   </div>
                 </div> -->
                 <div class="col-md-4">
-                  <div class="form-group" style="margin-top:-12px;">
+                  <div class="form-group">
                     <label>No PO</label>
                   </div>
                 </div>
 
                 <div class="col-md-8">
-                  <div class="form-group input-group" style="margin-top:-12px">
+                  <div class="form-group input-group">
                     <textarea type="text" onkeyup="searchNoPO(this.value)" autocomplete="off"
                     class="form-control" style="width: 100%; resize: none" rows=3 placeholder="Ketik No PO"
                     class="form-control text-left" id="input_add_nopo"></textarea>
@@ -988,7 +903,7 @@
                       <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="input_add_namapelanggan"  disabled>
                     </div>
                   </div>
-                  <div class="col-md-12" style="margin-top:-10px;">
+                  <div class="col-md-12">
                     <div class="form-group">
                       <textarea  style="width: 100%; resize: none" rows=3 placeholder="Alamat Pelanggan" class="form-control text-left" id="input_add_alamatpelanggan"  disabled></textarea>
                     </div>
@@ -1058,23 +973,23 @@
                       <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0 >
                     </div>
                   </div>
-		              <div class="col-md-6" style="margin-top:-12px;">
+		              <div class="col-md-6">
                     <div class="form-group">
                       <label>Tanggal</label>
                     </div>
                   </div>
-                  <div class="col-md-6" style="margin-top:-12px;">
+                  <div class="col-md-6">
                     <div class="form-group">
                       <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
                     </div>
                   </div>
-                <div class="col-md-6" style="margin-top:-12px;">
+                <div class="col-md-6">
                   <div class="form-group">
                     <label>No Bukti</label>
                   </div>
                 </div>
 
-                <div class="col-md-6" style="margin-top:-12px;">
+                <div class="col-md-6">
                   <div class="form-group">
                     <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
                   </div>
@@ -1109,7 +1024,7 @@
                   </div>
                   </div>
 
-                  <div class="col-md-12" style="margin-top:-12px;">
+                  <div class="col-md-12">
                     <div class="row">
                       <div class="col-6">
                         <div class="form-group">
@@ -1123,7 +1038,7 @@
                     </div>
                     </div>
 
-                  <div class="col-md-12" style="margin-top:-12px;">
+                  <div class="col-md-12">
                     <div class="row">
                       <div class="col-6">
                         <div class="form-group">
@@ -1622,8 +1537,8 @@
           </div>
 
 
-          <div class="row ">
-            <div class="col-md-11 mt-2 text-right">
+          <div class="row d-flex justify-content-between align-items-center">
+            <div class="col-auto mt-2 text-right">
             <button type="button" class="btn btn-primary btn-lg" style="
               height: 30px;
               padding: 4px 12px;
@@ -1635,7 +1550,7 @@
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
               onclick="buttonTambahSOAll()" class="btn btn-secondary"><b>+ Tambah Penawaran</b></button>
             </div>
-          <div class="col-md-1 mt-2 text-right">
+          <div class="col-auto mt-2 text-right">
           <button type="button" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
@@ -1656,8 +1571,8 @@
               <!-- <hr/> -->
               <div class="row">
                 <div class="col-4">
-                  <h4 id="h4AddAddItem" style="margin-left:-35px;">Add Item</h4>
-                  <h4 id="h4AddEditItem" style="margin-left:-35px;">Edit Item</h4>
+                  <h4 id="h4AddAddItem">Add Item</h4>
+                  <h4 id="h4AddEditItem">Edit Item</h4>
                 </div>
               </div>
 
@@ -1671,12 +1586,12 @@
               <div class="col-md-12">
                 <!-- Barang -->
                 <div class="row">
-                  <div class="col-3" style="margin-top:-10px;">
+                  <div class="col-3">
                     <div class="form-group">
                       <label>Ref Pr</label>
                     </div>
                   </div>
-                  <div class="col-md-3" style="margin-top:-10px;">
+                  <div class="col-md-3">
                     <div class="input-group form-group">
                       <input type="text" class="form-control" id="input_add_add_refpr" onkeypress="" disabled>
                       <button onclick="buttonAddAddListRefPr()" id="buttonAddAddListRefPr" class="btn btn-primary btn-sm text-right" tabindex="1">
@@ -1687,12 +1602,12 @@
 
                   <div class="col-md-5" >
                     <div class="row">
-                      <div class="col-md-3" style="margin-top:-10px;">
+                      <div class="col-md-3">
                         <div class="form-group">
                           <label>No. Penye</label>
                         </div>
                       </div>
-                      <div class="col-md-9" style="margin-top:-10px;">
+                      <div class="col-md-9">
                         <div class="form-group input-group">
                           <input type="text" class="form-control text-right " id="input_add_add_nopenyerahan" value="" tabindex="5" disabled>
                           <button onclick="buttonAddAddListNoPenyerahan()" id="buttonAddAddListNoPenyerahan" class="btn btn-primary btn-sm text-right" tabindex="1">
@@ -1716,19 +1631,19 @@
           </div>
         </div>
 
-                      <div class="row" style="margin-top: -10px">
+                      <div class="row">
 
 
                     <!-- Barang dan Nama Produk -->
                     <div class="col-md-6">
                       <!-- Barang -->
                       <div class="row">
-                        <div class="col-3" style="margin-top:-10px;">
+                        <div class="col-3">
                           <div class="form-group">
                             <label>Barang</label>
                           </div>
                         </div>
-                        <div class="col-md-3" style="margin-top:-10px;">
+                        <div class="col-md-3">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_add_kodebarang" onkeypress="onKeyPressBarang(event)">
                             <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" tabindex="1">
@@ -1736,7 +1651,7 @@
                             </button>
                           </div>
                         </div>
-                        <div class="col-md-5" style="margin-top:-10px;">
+                        <div class="col-md-5">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_add_namabarang"  disabled>
 
@@ -1745,37 +1660,37 @@
                       </div>
                       <!-- Nama Produk -->
                       <div class="row">
-                        <div class="col-3" style="margin-top:-10px;">
+                        <div class="col-3">
                           <div class="form-group">
                             <label>Nama Alias</label>
                           </div>
                         </div>
-                        <div class="col-md-8" style="margin-top:-10px;">
+                        <div class="col-md-8">
                           <div class="form-group">
                             <input type="text" class="form-control" id="input_add_add_namaproduk" tabindex="2">
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-6" style="margin-left:-50px;">
+                    <div class="col-md-6">
                       <!-- Harga -->
                     <div class="row">
-                      <div class="col-md-3" style="margin-top:-10px;">
+                      <div class="col-md-3">
                         <div class="form-group">
                           <label>Qty</label>
                         </div>
                       </div>
-                      <div class="col-md-3" style="margin-top:-10px;">
+                      <div class="col-md-3">
                         <div class="form-group">
                           <input type="text" id="input_add_add_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" tabindex="5">
                         </div>
                       </div>
-                      <div class="col-md-3" style="margin-top:-10px;">
+                      <div class="col-md-3">
                         <div class="form-group">
                           <label>Disc %</label>
                         </div>
                       </div>
-                      <div class="col-md-3" style="margin-top:-10px;">
+                      <div class="col-md-3">
                         <div class="form-group">
                           <input type="number" class="form-control text-right" id="input_add_add_disc" onChange="onChangeInputAddAddDisc()" value="0.00" tabindex="8">
                         </div>
@@ -1785,20 +1700,20 @@
 
                     <div class="row">
 
-                          <div class="col-md-3" style="margin-top:-10px;">
+                          <div class="col-md-3">
                             <div class="form-group">
                               <label>Harga</label>
                             </div>
                           </div>
-                          <div class="col-md-3" style="margin-top:-10px;">
+                          <div class="col-md-3">
                             <input type="text" id="input_add_add_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()" tabindex="6">
                           </div>
-                          <div class="col-md-3" style="margin-top:-10px;">
+                          <div class="col-md-3">
                             <div class="form-group">
                               <label>Disc Rp</label>
                             </div>
                           </div>
-                          <div class="col-md-3" style="margin-top:-10px;">
+                          <div class="col-md-3">
                             <div class="form-group">
                               <input type="text" id="input_add_add_discrp" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDiscRp()" tabindex="7">
                               </div>
@@ -1826,12 +1741,12 @@
                     <!-- Satuan -->
                     <div class="col-md-3">
                       <div class="row">
-                        <div class="col-6" style="margin-top:-10px; ">
+                        <div class="col-6">
                           <div class="form-group">
                             <label>Satuan Tax</label>
                           </div>
                         </div>
-                        <div class="col-md-6" style="margin-top:-10px;">
+                        <div class="col-md-6">
                           <div class="form-group input-group">
                             <input type="hidden" class="form-control" id="input_add_add_kodesattax"  disabled>
 
@@ -1850,12 +1765,12 @@
                         <!-- Satuan -->
                         <div class="col-md-10 ">
                           <div class="row">
-                            <div class="col-md-4" style="margin-top:-10px; ">
+                            <div class="col-md-4">
                               <div class="form-group">
                                 <label>Sat Alias</label>
                               </div>
                             </div>
-                            <div class="col-md-8" style="margin-top:-10px;">
+                            <div class="col-md-8">
                               <div class="input-group form-group">
                                 <input type="text" class="form-control" id="input_add_add_satuanproduk" >
 
@@ -1866,17 +1781,17 @@
                       </div>
                     </div>
 
-                    <div class="col-md-3" style="margin-left:-50px;">
+                    <div class="col-md-3">
                       <div class="row">
                         <!-- Satuan -->
                         <div class="col-md-12">
                           <div class="row">
-                            <div class="col-6" style="margin-top:-10px;">
+                            <div class="col-6">
                               <div class="form-group">
                                 <label>Satuan</label>
                               </div>
                             </div>
-                            <div class="col-md-6" style="margin-top:-10px;">
+                            <div class="col-md-6">
                               <select id="input_add_add_nosat" onchange="onChangeInputAddAddNosat()" class="form-control form-select-lg mb-3" tabindex="4">
                                 <option value=0 selected>Pilih Satuan</option>
                               </select>
@@ -1890,7 +1805,7 @@
                       <div class="row">
 
 
-                      <div class="col-md-6" style='margin-top:-10px; ' >
+                      <div class="col-md-6" >
 
                         <div class="form-group">
 
@@ -1899,7 +1814,7 @@
                       </div>
 
 
-                      <div class="col-md-6" style="margin-top:-10px;">
+                      <div class="col-md-6">
                         <div class="form-group">
                           <input type="date" class="form-control text-right" onchange="()" id="input_add_add_tglkirim"  tabindex="6">
 
@@ -1938,12 +1853,12 @@
                       <!-- Satuan Produk -->
                       <div class="col-md-12">
                         <div class="row">
-                          <div class="col-md-6" style="margin-top:-10px;">
+                          <div class="col-md-6">
                             <div class="form-group">
                               <label>Booking</label>
                             </div>
                           </div>
-                          <div class="col-md-6" style="margin-top:-10px;">
+                          <div class="col-md-6">
                             <div class="form-group">
                               <!-- <input type="number" class="form-control text-right" id="input_add_add_qty" value="0.00" tabindex="5"> -->
                               <select id="input_add_add_booking" class="form-control form-select-lg mb-3" tabindex="10">
@@ -1956,7 +1871,7 @@
                       </div>
                     </div>
                   </div>
-                <div class="col-md-3" style="margin-top: -10px">
+                <div class="col-md-3">
                   <!-- Tambah Ke PO -->
                   <div class="row">
                     <div class="col-md-10" >
@@ -1981,11 +1896,11 @@
 
 
 
-                <div class="col-md-3" style=" margin-left:-50px;">
+                <div class="col-md-3">
                   <div class="row">
 
 
-                  <div class="col-md-6" style='margin-top:-10px;' >
+                  <div class="col-md-6" >
 
                     <div class="form-group">
 
@@ -1994,7 +1909,7 @@
                   </div>
 
 
-                  <div class="col-md-6" style="margin-top:-10px;">
+                  <div class="col-md-6">
                     <div class="form-group">
                       <select id="input_add_add_tambahkepo" class="form-control form-select-lg mb-3" tabindex="9">
                         <option value=0 selected>Tidak</option>
@@ -2010,7 +1925,7 @@
                   <div class="row">
 
 
-                  <div class="col-md-6" style='margin-top:-10px; ' >
+                  <div class="col-md-6" >
 
                     <div class="form-group">
 
@@ -2019,7 +1934,7 @@
                   </div>
 
 
-                  <div class="col-md-6" style="margin-top:-10px">
+                  <div class="col-md-6">
                     <div class="form-group">
                       <select id="input_add_add_status" class="form-control form-select-lg mb-3" tabindex="9">
                         <option value=0 selected>R</option>
@@ -2111,7 +2026,7 @@
 
 
                   <div class="row mt-2">
-                    <div class="col-md-12 text-right" style="margin-top:-15px;">
+                    <div class="col-md-12 text-right">
                       <button type="button" class="btn btn-danger btn-lg" style="
                       height: 30px;
                       padding: 4px 12px;
@@ -2919,7 +2834,7 @@
                   </div>
                   </div>
 
-                  <div class="col-md-12" style="margin-top:-12px;">
+                  <div class="col-md-12">
                     <div class="row">
                       <div class="col-6">
                         <div class="form-group">
@@ -2932,7 +2847,7 @@
                       </div>
                     </div>
 
-                  <div class="col-md-12" style="margin-top:-12px;">
+                  <div class="col-md-12">
                     <div class="row">
                       <div class="col-6">
                         <div class="form-group">
@@ -3692,9 +3607,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title" id="exampleModalLabel">Add</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
 
@@ -4534,9 +4447,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title" id="exampleModalLabel">Tambah Penawaran</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
 
@@ -4733,9 +4644,7 @@
 
         <div class="modal-header">
           <h5 class="modal-title">Pilih Design Cetak</h5>
-          <button type="button" class="close" data-dismiss="modal">
-            <span>&times;</span>
-          </button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
@@ -4762,6 +4671,7 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/report-table.js') }}"></script>
 <script type="text/javascript">
 
 let dataTambahSO = []
@@ -4797,6 +4707,381 @@ let tempRefPr = {}
 let tempNoPenyerahan = {}
 // let listBarangRefPR = []
 
+// -- #tabel/#tabel7 interactive column engine (docs/new-slider-table-guide.md port) --
+// Ported from resources/views/report/masterreport2.blade.php's gcart_header
+// engine. Persistence goes through SOController::loadHeader/simpanHeader
+// (SML-backed) instead of GlobalFunctionsController's MGL-backed originals,
+// since the MGL connection isn't configured anywhere in this app.
+//
+// report-table.js's ReportTable is a page-wide singleton -- it reads a
+// single window.gcart_header/g_href/etc., not one instance per table. Since
+// #tabel and #tabel7 both live on this page, each gets its own state object
+// below and activateEngineData()/bindEngineDom() swap which one is "live"
+// (assigned to the global names ReportTable and the do*Header functions
+// read) whenever the user switches tabs or a table gets re-rendered.
+var g_href = '';
+var g_modeReport = 1; // neither table has a Detail/Rekap switcher -- constant mode
+var gcart_header = [];
+var gsum_issubtotal = 0, gsum_isgrandtotal = 0;
+
+var lastTabelRows = [];
+var lastTabel7Rows = [];
+
+var tabelEngines = {
+  tabel: {
+    href: 'marketingso_tabel',
+    gcart_header: [],
+    issubtotal: 0,
+    isgrandtotal: 0,
+    tableSel: '#tabel',
+    barSel: '#rtBarTabel',
+    setDefault: function () { setDefaultHeaderTabel(); },
+    onChange: function () { reinitTabel(); }
+  },
+  tabel7: {
+    href: 'marketingso_tabel7',
+    gcart_header: [],
+    issubtotal: 0,
+    isgrandtotal: 0,
+    tableSel: '#tabel7',
+    barSel: '#rtBarTabel7',
+    setDefault: function () { setDefaultHeaderTabel7(); },
+    onChange: function () { reinitTabel7(); }
+  }
+};
+var activeEngineKey = null;
+
+// Swaps which table's column state the global gcart_header/g_href/etc.
+// point to. Data-only -- doesn't touch the DOM/ReportTable, so it's safe to
+// call before a DataTables rebuild (see reinitTabel/reinitTabel7).
+function activateEngineData(key) {
+  var prev = activeEngineKey && tabelEngines[activeEngineKey];
+  if (prev) {
+    prev.gcart_header = gcart_header;
+    prev.issubtotal = gsum_issubtotal;
+    prev.isgrandtotal = gsum_isgrandtotal;
+  }
+  activeEngineKey = key;
+  var e = tabelEngines[key];
+  g_href = e.href;
+  gcart_header = e.gcart_header;
+  gsum_issubtotal = e.issubtotal;
+  gsum_isgrandtotal = e.isgrandtotal;
+}
+
+// Re-binds ReportTable's drag/gear listeners to the given table's current
+// DOM. Must run AFTER any DataTables destroy()/rebuild, never before -- the
+// listeners bind to whatever thead/table nodes exist at call time.
+function bindEngineDom(key) {
+  var e = tabelEngines[key];
+  ReportTable.init({ table: e.tableSel, bar: e.barSel, onChange: e.onChange });
+}
+
+// Which tab the user is actually looking at right now -- used after
+// loadAll() refreshes both tables in the background regardless of which
+// one is visible, so the interactive engine ends up bound to the right one.
+function activeVisibleTabKey() {
+  return $('#home').hasClass('active') ? 'tabel' : 'tabel7';
+}
+
+// SO's two data sources (soloadall vs soloadsofilter) return the same
+// logical fields with different casing (e.g. nopesanan vs NoPesanan) ???
+// look a field up case-insensitively instead of trusting exact casing.
+function pickCI(row, key) {
+  if (row[key] !== undefined) { return row[key]; }
+  var lower = key.toLowerCase();
+  for (var k in row) {
+    if (k.toLowerCase() === lower) { return row[k]; }
+  }
+  return undefined;
+}
+
+function setDefaultHeaderTabel() {
+  gcart_header = [
+    ['NOBUKTI',      'No. Bukti',      1, 'varchar', 0, 0],
+    ['TANGGAL',      'Tanggal',        1, 'date',    0, 0],
+    ['NAMACUSTSUPP', 'Nama Pelanggan', 1, 'varchar', 0, 0],
+    ['NAMASALES',    'Sales',          1, 'varchar', 0, 0],
+    ['NAMAPIC',      'PIC',            1, 'varchar', 0, 0],
+    ['NAMABOFFICE',  'Inside Sales',   1, 'varchar', 0, 0],
+    ['nopesanan',    'PO Customer',    1, 'varchar', 0, 0],
+    ['TotDPP',       'DPP',            1, 'float',   0, 0],
+    ['TotPPn',       'PPN',            1, 'float',   0, 0],
+    ['TotNet',       'Total',          1, 'float',   0, 0],
+    ['IsOtorisasi1', 'IsOto',          1, 'bool',    0, 0],
+    ['OtoUser1',     'UserOto',        1, 'varchar', 0, 0],
+    ['TglOto1',      'TglOto',         1, 'date',    0, 0],
+    ['userunblock',  'User Open CBD',  1, 'varchar', 0, 0],
+    ['tglunblock',   'Tgl Open CBD',   1, 'date',    0, 0],
+  ];
+}
+
+function setDefaultHeaderTabel7() {
+  gcart_header = [
+    ['NOBUKTI',      'No Bukti',    1, 'varchar', 0, 0],
+    ['TANGGAL',      'Tanggal',     1, 'date',    0, 0],
+    ['NAMACUSTSUPP', 'Nama Cust',   1, 'varchar', 0, 0],
+    ['KODEBRG',      'Kode Brg',    1, 'varchar', 0, 0],
+    ['NAMABRG',      'Nama Barang', 1, 'varchar', 0, 0],
+    ['QNT',          'Qnt',         1, 'float',   0, 2],
+    ['QntSO',        'Qnt SO',      1, 'float',   0, 2],
+    ['Sisa',         'Sisa',        1, 'float',   0, 2],
+  ];
+}
+
+function doGetHeader(_str) {
+  var arr = [];
+  _str.split('||').forEach(function (part) {
+    var f = part.split(';;');
+    arr.push([f[0], f[1], Number(f[2]), f[3], Number(f[4]), Number(f[5])]);
+  });
+  return arr;
+}
+
+function doLoadHeader(_href, _mode) {
+  var _strHeader = "";
+  $.ajax({
+    url: "{!! url('soloadheader') !!}",
+    type: "get",
+    async: false,
+    data: { href: _href, mode: _mode },
+    success: function (res) {
+      if (res && res[0]) {
+        _strHeader = res[0].header;
+        gsum_issubtotal = Number(res[0].issubtotal) || 0;
+        gsum_isgrandtotal = Number(res[0].isgrandtotal) || 0;
+      }
+    }
+  });
+  return _strHeader;
+}
+
+// Named doSimpanHeader/doButtonVisibility/doSetDesimal/doButtonTotal/doMoveHeader
+// (not e.g. doSimpanHeaderTabel) on purpose: report-table.js's ReportTable
+// looks these exact names up on window as its persistence fallback ??? a
+// suffixed name would silently never be found, and drag/hide/decimal/total
+// would stop persisting without any error.
+function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+  var _strHeader = "";
+  _cart.forEach(function (item, i) {
+    if (i != 0) { _strHeader += '||'; }
+    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
+  });
+  $.ajax({
+    url: "{!! url('sosimpanheader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _href,
+      mode: _mode,
+      header: _strHeader,
+      issubtotal: _issubtotal,
+      isgrandtotal: _isgrandtotal
+    },
+    success: function (res) {}
+  });
+}
+
+function doSetHeader(_modereport, _isReset) {
+  _isReset = _isReset || false;
+  var _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+  if (_strHeader != "") {
+    gcart_header = doGetHeader(_strHeader);
+  } else {
+    tabelEngines[activeEngineKey].setDefault();
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+}
+
+function doMoveHeader(_from, _to) {
+  var moved = gcart_header.splice(_from, 1)[0];
+  gcart_header.splice(_to, 0, moved);
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonVisibility(_id) {
+  gcart_header[_id][2] = gcart_header[_id][2] ? 0 : 1;
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doSetDesimal(_index, _step) {
+  var v = (gcart_header[_index][5] || 0) + _step;
+  if (v < 0) { v = 0; }
+  if (v > 4) { v = 4; }
+  gcart_header[_index][5] = v;
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonTotal(_index) {
+  gcart_header[_index][4] = gcart_header[_index][4] ? 0 : 1;
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+// The Actions cell isn't part of gcart_header (not draggable/hideable) ???
+// same treatment as the reference report tables, which keep Actions fixed.
+function tabelActionsCell(row) {
+  var nobukti = pickCI(row, 'NOBUKTI');
+  var html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  if (Number(pickCI(row, 'IsOtorisasi1')) == 0) {
+    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
+  } else {
+    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  }
+  if (Number(pickCI(row, 'cbdneedopen')) == 1) {
+    html += '<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD(\'' + nobukti + '\')"><i class="bi bi-check-square-fill"></i></button>';
+  }
+  html += '</div></td>';
+  return html;
+}
+
+function tabel7ActionsCell(row) {
+  var nobukti = pickCI(row, 'NOBUKTI');
+  var ppn = pickCI(row, 'PPN');
+  var html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Buat SO" onclick="buttonTambahSO(\'' + nobukti + '\', ' + ppn + ')"><i class="bi bi-plus"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+// col[5] (decimals) is user-editable via the gear menu's stepper, so float
+// formatting has to read it live rather than assume a fixed precision --
+// #tabel's money columns default to 0dp, #tabel7's qty columns to 2dp.
+function tabelValueCell(row, col) {
+  var raw = pickCI(row, col[0]);
+  var type = col[3];
+
+  if (type === 'date') {
+    if (!raw) { return '<td></td>'; }
+    var d = new Date(raw);
+    var dd = ('0' + d.getDate()).slice(-2);
+    var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+    return '<td>' + dd + '/' + mm + '/' + d.getFullYear() + '</td>';
+  }
+  if (type === 'float') {
+    // Matches the Indonesian dot-thousands convention already used
+    // elsewhere on this page (buttonFilterSO's .toLocaleString('id-ID')).
+    var dp = Number(col[5]) || 0;
+    var n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+    return '<td style="text-align:right;">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+  }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+// rows: array of [rowObj] (same shape as $tempOutstanding1[$i][0] / item[0]
+// in the existing ajax handlers). Builds <tr>s from the current gcart_header
+// order/visibility so drag-reorder and hide actually change what's rendered.
+// rows: array of [rowObj] (same shape as $tempOutstanding1[$i][0] / item[0]
+// in the existing ajax handlers). Builds <tr>s from the current gcart_header
+// order/visibility so drag-reorder and hide actually change what's rendered.
+function renderTabelRows(rows) {
+  if (activeEngineKey !== 'tabel') { activateEngineData('tabel'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
+  var html = "";
+  (rows || []).forEach(function (rowWrap) {
+    var row = rowWrap[0];
+    html += '<tr>' + tabelActionsCell(row);
+    cols.forEach(function (col) {
+      html += tabelValueCell(row, col);
+    });
+    html += '</tr>';
+  });
+  document.getElementById('tabel_data').innerHTML = html;
+
+  var thead = document.querySelector('#tabel thead');
+  if (thead && window.ReportTable) {
+    // ReportTable.headHtml() only knows about gcart_header entries, so it
+    // never accounts for the fixed Actions column every body row starts
+    // with above. Splice a plain, non-draggable Actions <th> in as the
+    // first cell so thead/tbody column counts actually match -- a mismatch
+    // here is exactly what was breaking DataTables' destroy/reinit.
+    var headRowHtml = ReportTable.headHtml(cols)
+      .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+    thead.innerHTML = headRowHtml;
+  }
+}
+
+function renderTabel7Rows(rows) {
+  if (activeEngineKey !== 'tabel7') { activateEngineData('tabel7'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
+  var html = "";
+  (rows || []).forEach(function (rowWrap) {
+    var row = rowWrap[0];
+    html += '<tr>' + tabel7ActionsCell(row);
+    cols.forEach(function (col) {
+      html += tabelValueCell(row, col);
+    });
+    html += '</tr>';
+  });
+  document.getElementById('tabel7_data').innerHTML = html;
+
+  var thead = document.querySelector('#tabel7 thead');
+  if (thead && window.ReportTable) {
+    var headRowHtml = ReportTable.headHtml(cols)
+      .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+    thead.innerHTML = headRowHtml;
+  }
+}
+
+function reinitTabel() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
+    renderTabelRows(lastTabelRows);
+    $('#tabel').DataTable({
+      dom: 'tip',
+      lengthChange: false,
+      paging: true,
+      order: [[1, 'asc']],
+      columnDefs: [{ targets: [0], orderable: false }]
+    });
+
+    // DataTables' destroy()/rebuild cycle above detaches/replaces the DOM
+    // ReportTable was bound to, so re-bind it to the fresh table/thead/bar
+    // every time this runs -- not just once -- or a drag/gear action after
+    // any refresh throws trying to walk up from a now-detached node (the
+    // "reading 'parentNode'" crash).
+    bindEngineDom('tabel');
+  } catch (e) {
+    console.error('reinitTabel failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabel7() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel7')) { $('#tabel7').DataTable().destroy(); }
+    renderTabel7Rows(lastTabel7Rows);
+    $('#tabel7').DataTable({
+      dom: 'tip',
+      lengthChange: false,
+      paging: true,
+      order: [[1, 'asc']],
+      columnDefs: [{ targets: [0], orderable: false }]
+    });
+    bindEngineDom('tabel7');
+  } catch (e) {
+    console.error('reinitTabel7 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function buttonHeaderTable() {
+  var key = activeEngineKey || activeVisibleTabKey();
+  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
+    activateEngineData(key);
+    doSetHeader(g_modeReport, true);
+    if (key === 'tabel') { reinitTabel(); } else { reinitTabel7(); }
+    alertify.success('Kolom telah direset ke tampilan default');
+  }, function () {});
+}
+
 
 jQuery(function($) {
   $('.input-partial-number').autoNumeric('init',
@@ -4822,14 +5107,30 @@ $(document).ready(function(){
   // $("#form").modal('toggle')
   // let level = $("#level").val()
   // console.log(level)
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "order": [[1, 'asc']],
-          "columnDefs": [
-               {"targets" :[0] , 'orderable' : false}
-            ]
-        });
+      // #profile2/#tabel7 ("Penawaran") is the tab shown by default, so
+      // initialize it last -- reinitTabel()/reinitTabel7() each end by
+      // binding ReportTable to their own table, and whichever runs last
+      // wins, so this order leaves the actually-visible tab interactive.
+      activateEngineData('tabel');
+      doSetHeader(g_modeReport);
+      lastTabelRows = @json($tempOutstanding1);
+      reinitTabel();
+
+      activateEngineData('tabel7');
+      doSetHeader(g_modeReport);
+      lastTabel7Rows = @json($tempOutstanding7);
+      reinitTabel7();
+
+      // Re-bind the interactive engine whenever the user switches tabs --
+      // ReportTable's listeners are bound to one table's DOM at a time.
+      $('#tab-diterima-btn').on('shown.bs.tab', function () {
+        activateEngineData('tabel');
+        bindEngineDom('tabel');
+      });
+      $('#tab-dibuka-btn').on('shown.bs.tab', function () {
+        activateEngineData('tabel7');
+        bindEngineDom('tabel7');
+      });
 
         $("#tabel_tambahsoall").DataTable({
           "lengthChange": false,
@@ -4867,8 +5168,9 @@ $(document).ready(function(){
               });
 
         $("#tabel2").DataTable({
+          dom: 'tip',
           "lengthChange": false,
-            "paging": false ,
+            "paging": true ,
             "order": [[1, 'asc']],
           "columnDefs": [
                {"targets" :[0] , 'orderable' : false}
@@ -4876,8 +5178,9 @@ $(document).ready(function(){
           });
 
 	$("#tabel_oto").DataTable({
+            dom: 'tip',
             "lengthChange": false,
-              "paging": false ,
+              "paging": true ,
               "autoWidth": false,
             });
 
@@ -4892,14 +5195,38 @@ $(document).ready(function(){
             "searching" : false,
         });
 
-        $("#tabel7").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "order": [[1, 'asc']],
-          "columnDefs": [
-               {"targets" :[0] , 'orderable' : false}
-            ]
-                  });
+        // #tabel7's own DataTables init now happens inside reinitTabel7()
+        // above (called earlier in this same ready block) -- this leftover
+        // direct call from before the interactive-column engine existed was
+        // re-initializing it a second time with no destroy() in between,
+        // which is what threw "Cannot reinitialise DataTable".
+
+        // Drive the shared #page1 toolbar controls across every table in
+        // #page1 (masterTable.js isn't included on this page, so this isn't
+        // wired up anywhere else).
+        var page1Tables = ['#tabel', '#tabel2', '#tabel_oto', '#tabel7'];
+
+        var tabelFilterVisualTimeout;
+        $('#tabel_filter_visual').on('keyup', function () {
+          var value = this.value;
+          clearTimeout(tabelFilterVisualTimeout);
+          tabelFilterVisualTimeout = setTimeout(function () {
+            page1Tables.forEach(function (id) {
+              if ($.fn.DataTable.isDataTable(id)) {
+                $(id).DataTable().search(value).draw();
+              }
+            });
+          }, 400);
+        });
+
+        $('#tabel_length_visual').on('change', function () {
+          var len = Number(this.value);
+          page1Tables.forEach(function (id) {
+            if ($.fn.DataTable.isDataTable(id)) {
+              $(id).DataTable().page.len(len).draw();
+            }
+          });
+        });
 
     $("#tabel_add_list_pelanggan").DataTable({
       // "lengthChange": false,
@@ -5027,139 +5354,8 @@ function buttonFilterSO () {
       tipebayar
     },
     success: function(res) {
-      console.log("=======res========")
-      console.log(res)
-      $('#tabel').DataTable().destroy();
-
-      let rowTable = ""
-      // console.log('a' , rowTable)
-      res.forEach((item, i) => {
-        console.log(item)
-        // console.log(item[0])
-        // console.log(item[0].nopesanan)
-        let date1 = ""
-        if (item[0].TANGGAL) {
-            let date = new Date(item[0].TANGGAL);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-        rowTable += `
-        <tr>
-        <td class="text-center">
-
-          <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
-          ${item[0].IsOtorisasi1 == 0 ? `<button class='btn btn-primary btn-sm' type='button' onclick='buttonOtorisasi('${item[0].NOBUKTI}')'><i class='bi bi-key'></i></button><button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item[0].NOBUKTI}')"><i class="bi bi-pen"></i></button>` : `<button class='btn btn-danger btn-sm' type='button' onclick='buttonBatalOtorisasi('${item[0].NOBUKTI}')'><i class='bi bi-key'></i></button><button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint('${item.NoBukti}')">
-            <i class="bi bi-printer"></i>
-          </button>`}
-          ${item[0].cbdneedopen == 1 ? `<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD('${item[0].NOBUKTI}')">
-            <i class="bi bi-check-square-fill"></i>
-          </button>` : ``}
-
-        </td>
-        <td>${item[0].NOBUKTI}</td>
-        <td>${date1}</td>
-        <td>${item[0].NAMACUSTSUPP}</td>
-        <td>${item[0].NAMASALES ? item[0].NAMASALES : ''}</td>
-        <td>${item[0].NAMAPIC ? item[0].NAMAPIC : ''}</td>
-        <td>${item[0].NAMABOFFICE ? item[0].NAMABOFFICE : ''}</td>
-        <td>${item[0].NoPesanan ? item[0].NoPesanan : ''}</td>
-        <td class="text-right">
-          ${item[0].TotDPP ? parseInt(item[0].TotDPP).toLocaleString('id-ID') : ''}
-        </td>
-        <td class="text-right">
-          ${item[0].TotPPn ? parseInt(item[0].TotPPn).toLocaleString('id-ID') : ''}
-        </td>
-        <td class="text-right">
-          ${item[0].TotNet ? parseInt(item[0].TotSubTotal).toLocaleString('id-ID') : ''}
-        </td>
-        ${item[0].IsOtorisasi1 ? `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>`
-        :
-         `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-         ` }
-
-
-         <td>${item[0].OtoUser1 ? item[0].OtoUser1 : '' }</td>
-         <td>${item[0].TglOto1 ? formatDate(item[0].TglOto1) : '' }</td>
-         <td>${item[0].userunblock ? item[0].userunblock : '' }</td>
-         <td>${item[0].tglunblock ? formatDate(item[0].tglunblock) : '' }</td>
-  `
-  if (level > 1) {
-    rowTable += `
-    ${Number(item[0].IsOtorisasi2) ?
-        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-      :
-      '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-    }
-    <td>${item[0].TglOto2 ?  date(formatDate(item[0].TglOto2)) : '' }</td>
-
-    <td>${item[0].OtoUser2 }</td>
-    `
-    if (level > 2) {
-      rowTable += `
-      ${Number(item[0].IsOtorisasi3) ?
-          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-        :
-        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-      }
-      <td>${item[0].TglOto3 ?  date(formatDate(item[0].TglOto3)) : '' }</td>
-
-      <td>${item[0].OtoUser3 }</td>
-      `
-      if (level > 3) {
-        rowTable += `
-        ${Number(item[0].IsOtorisasi4) ?
-            '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-          :
-          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-        }
-        <td>${item[0].TglOto4 ?  date(formatDate(item[0].TglOto4)) : '' }</td>
-
-        <td>${item[0].OtoUser4 }</td>
-        `
-        if (level > 4) {
-          rowTable += `
-          ${Number(item[0].IsOtorisasi5) ?
-              '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-            :
-            '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-          }
-          <td>${item[0].TglOto5 ?  date(formatDate(item[0].TglOto5)) : '' }</td>
-
-          <td>${item[0].OtoUser5 }</td>
-          `
-
-
-        }
-
-      }
-
-    }
-
-  }
-
-  rowTable +=  `
-        </tr>
-        `
-
-
-
-      });
-      // console.log(rowTable)
-
-
-      document.getElementById("tabel_data").innerHTML = rowTable
-
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
-        });
-
-
+      lastTabelRows = res;
+      reinitTabel();
     },
     error: function (err) {
       console.log(err)
@@ -8301,8 +8497,6 @@ function buttonAddListAlamatKirim () {
       });
 
 
-
-
       if(!res.length) {
         rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
       }
@@ -8933,7 +9127,6 @@ function loadAll () {
     ketclose = 1
   }
 
-  $('#tabel').DataTable().destroy();
   let dataRefreshOutstanding = []
       let dataRefreshOutstanding7 = []
       console.log({tglawal,
@@ -8967,190 +9160,20 @@ function loadAll () {
     }})
 
 
-    let rowTable = ""
-    // console.log('a' , rowTable)
-    dataRefreshOutstanding.forEach((item, i) => {
-      console.log(item)
-      console.log(item[0])
-      console.log(item[0].nopesanan)
-      let date1 = ""
-      if (item[0].TANGGAL) {
-          let date = new Date(item[0].TANGGAL);
-          let day = ("0" + date.getDate()).slice(-2);
-          let month = ("0" + (date.getMonth() + 1)).slice(-2);
-          date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-        }
-      rowTable += `
-      <tr>
-      <td class="text-center">
+    lastTabelRows = dataRefreshOutstanding;
+    reinitTabel();
 
-        <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
-        ${item[0].IsOtorisasi1 == 0 ? `<button class='btn btn-primary btn-sm' type='button' onclick='buttonOtorisasi('${item[0].NOBUKTI}')'><i class='bi bi-key'></i></button><button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item[0].NOBUKTI}')"><i class="bi bi-pen"></i></button>` : `<button class='btn btn-danger btn-sm' type='button' onclick='buttonBatalOtorisasi('${item[0].NOBUKTI}')'><i class='bi bi-key'></i></button><button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint('${item.NoBukti}')">
-            <i class="bi bi-printer"></i>
-          </button>`}
-          ${item[0].cbdneedopen == 1 ? `<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD('${item[0].NOBUKTI}')">
-            <i class="bi bi-check-square-fill"></i>
-          </button>` : ``}
+    lastTabel7Rows = dataRefreshOutstanding7;
+    reinitTabel7();
 
+    buttonFilterSO()
 
-      </td>
-      <td>${item[0].NOBUKTI}</td>
-      <td>${date1}</td>
-      <td>${item[0].NAMACUSTSUPP}</td>
-      <td>${item[0].NAMASALES ? item[0].NAMASALES : ''}</td>
-      <td>${item[0].NAMAPIC ? item[0].NAMAPIC : ''}</td>
-      <td>${item[0].NAMABOFFICE ? item[0].NAMABOFFICE : ''}</td>
-      <td>${item[0].NoPesanan ? item[0].NoPesanan : ''}</td>
-      <td class="text-right">
-        ${item[0].TotDPP ? parseInt(item[0].TotDPP).toLocaleString('id-ID') : ''}
-      </td>
-      <td class="text-right">
-        ${item[0].TotPPn ? parseInt(item[0].TotPPn).toLocaleString('id-ID') : ''}
-      </td>
-      <td class="text-right">
-        ${item[0].TotNet ? parseInt(item[0].TotSubTotal).toLocaleString('id-ID') : ''}
-      </td>
-
-      ${item[0].IsOtorisasi1 ? `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>`
-      :
-       `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-       ` }
-
-
-       <td>${item[0].OtoUser1 ? item[0].OtoUser1 : '' }</td>
-       <td>${item[0].TglOto1 ? formatDate(item[0].TglOto1) : '' }</td>
-       <td>${item[0].userunblock ? item[0].userunblock : '' }</td>
-       <td>${item[0].tglunblock ? `formatDate(item[0].tglunblock)` : '' }</td>
-`
-if (level > 1) {
-  rowTable += `
-  ${Number(item[0].IsOtorisasi2) ?
-      '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-    :
-    '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-  }
-  <td>${item[0].TglOto2 ?  date(formatDate(item[0].TglOto2)) : '' }</td>
-
-  <td>${item[0].OtoUser2 }</td>
-  `
-  if (level > 2) {
-    rowTable += `
-    ${Number(item[0].IsOtorisasi3) ?
-        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-      :
-      '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-    }
-    <td>${item[0].TglOto3 ?  date(formatDate(item[0].TglOto3)) : '' }</td>
-
-    <td>${item[0].OtoUser3 }</td>
-    `
-    if (level > 3) {
-      rowTable += `
-      ${Number(item[0].IsOtorisasi4) ?
-          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-        :
-        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-      }
-      <td>${item[0].TglOto4 ?  date(formatDate(item[0].TglOto4)) : '' }</td>
-
-      <td>${item[0].OtoUser4 }</td>
-      `
-      if (level > 4) {
-        rowTable += `
-        ${Number(item[0].IsOtorisasi5) ?
-            '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-          :
-          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-        }
-        <td>${item[0].TglOto5 ?  date(formatDate(item[0].TglOto5)) : '' }</td>
-
-        <td>${item[0].OtoUser5 }</td>
-        `
-
-
-      }
-
-    }
-
-  }
-
-
-}
-
-rowTable +=  `
-      </tr>
-      `
-
-
-
-    });
-    // console.log(rowTable)
-
-
-    // document.getElementById("tabel_data").innerHTML = rowTable
-    //
-    // $("#tabel").DataTable({
-    //   "lengthChange": false,
-    //     "paging": false ,
-    //     "order": [[1, 'asc']],
-    //       "columnDefs": [
-    //            {"targets" :[0] , 'orderable' : false}
-    //         ]
-    //   });
-
-
-
-
-
-
-
-        $('#tabel7').DataTable().destroy();
-
-        let rowTable4 = ""
-        // console.log('a' , rowTable)
-        // console.log(dataRefreshOutstanding7)
-        dataRefreshOutstanding7.forEach((item, i) => {
-
-
-
-
-          rowTable4 += `
-          <tr>
-          <td>
-          <button class="btn btn-primary btn-sm" type="button" title="Buat SO" onclick="buttonTambahSO('${item[0].NOBUKTI }' , ${item[0].PPN } )">
-            <i class="bi bi-plus"></i>
-          </button>
-
-          </td>
-          <td>${item[0].NOBUKTI }</td>
-          <td>${item[0].TANGGAL ? formatDate(item[0].TANGGAL) : ''}</td>
-
-          <td>${item[0].NAMACUSTSUPP }</td>
-          <td>${item[0].KODEBRG }</td>
-          <td>${item[0].NAMABRG }</td>
-          <td style="text-align: right;">${item[0].QNT ? formatAngka(item[0].QNT) : '0.00' }</td>
-          <td style="text-align: right;">${item[0].QntSO ?formatAngka(item[0].QntSO) : '0.00' }</td>
-          <td style="text-align: right;">${item[0].Sisa ? formatAngka(item[0].Sisa) : '0.00' }</td>
-          </tr>
-          `
-
-
-
-        });
-
-        document.getElementById("tabel7_data").innerHTML = rowTable4
-
-        $("#tabel7").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
-          });
-
-          buttonFilterSO()
-
+    // Both tables above just got rebuilt regardless of which tab is
+    // actually visible -- whichever ran last "wins" the interactive
+    // binding, so restore it to match what the user is actually looking at.
+    var visibleKey = activeVisibleTabKey();
+    activateEngineData(visibleKey);
+    bindEngineDom(visibleKey);
 }
 
 
@@ -11315,18 +11338,12 @@ function searchBarangAll (e) {
             <td>${item.NAMAMERK ?? '-'}</td>
             <td>${item.Sat1 ?? '-'}</td>
 
-
         </tr>
         `
         });
         // $('#tabel_add_list_barangall').DataTable().destroy();
 
         document.getElementById("tabel_data_add_list_barangall").innerHTML = rowTable
-
-
-
-
-
 
       $("#tabel_add_list_barangall").DataTable({
         "lengthChange": false,
@@ -11364,7 +11381,6 @@ function generateInputNumber (id , style, classes, onchange) {
       function formatAngkaVal (angka) {
         return Number(angka.split(',').join(''))
       }
-
 
       function formatAngka (angkaString) {
   // console.log('formatAngka' , angkaString);

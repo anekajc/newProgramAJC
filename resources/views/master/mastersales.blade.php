@@ -368,7 +368,7 @@
             </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2">
                 <div class="form-group">
                  <label>Merk</label>
@@ -384,7 +384,7 @@
             </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-2">
               <div class="col-2">
                 <div class="form-group">
                  <label>Target</label>
@@ -397,7 +397,6 @@
             </div>
             </div>
             
-
             <div class="row mt-2">
               <div class="col-md-12 text-right">
                 <button type="button" onclick="submitAddTarget()" class="btn btn-primary" >Add</button>
@@ -736,6 +735,7 @@ function submitAddTarget () {
     success: function(res) {
       console.log(res)
       $('.showhide').hide();
+      alertify.success("Data Target telah ditambah");
       refreshTableTarget(keynikTemp)
 
     }})

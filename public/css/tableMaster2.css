@@ -411,7 +411,54 @@
       transform: translateX(0);
     }
 
-    
+      
+  .radioChoiceMaster {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .radioChoiceMaster-item {
+    display: flex;
+  }
+
+  .radioChoiceMaster-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .radioChoiceMaster-btn:hover {
+    color: #212529;
+    background-color: rgba(0,0,0,0.04);
+  }
+
+  .radioChoiceMaster-btn:focus,
+  .radioChoiceMaster-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .radioChoiceMaster-btn.active {
+    color: #fff;
+    background-color: #007bff;
+    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
+  }
+
     <style>
     
     #tabel th:first-child,

@@ -145,6 +145,8 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/sodetailCetak', [SOController::class, 'getDetailCetak']);
   Route::post('/soupdatecbd', [SOController::class, 'updateCBD']);
   Route::post('/soloadsofilter', [SOController::class, 'loadSOFilter']);
+  Route::get('/soloadheader', [SOController::class, 'loadHeader']);
+  Route::get('/sosimpanheader', [SOController::class, 'simpanHeader']);
 
 
 //   // closing so

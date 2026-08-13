@@ -38,12 +38,13 @@
             <th scope="col">Kode</th>
             <th scope="col">Bentuk Usaha</th>
             <th scope="col">Nama</th>
-            <th scope="coFl">Alamat</th>
+            <th scope="col">Alamat</th>
             <th scope="col">Kota</th>
-            <!-- <th scope="col">Kode Pos</th> -->
             <th scope="col">Negara</th>
             <th scope="col">Telpon</th>
             <th scope="col">Email</th>
+            <th scope="col">Kode Pos</th>
+            <th scope="col">Fax</th>
 
           </tr>
         </thead>
@@ -818,11 +819,6 @@ function loadAll () {
                             <i class="bi bi-card-text"></i>
                         </button>
 
-                        <button class="btn-action-sm btn-action-primary hover-tooltip"
-                            onclick="buttonAlamat('${data}')"
-                            data-tooltip="Alamat">
-                            <i class="bi bi-house-door"></i>
-                        </button>
 
                         <button class="btn-action-sm btn-action-danger hover-tooltip"
                             onclick="buttonDelete('${data}')"
@@ -853,6 +849,11 @@ function loadAll () {
   });
 }
 
+                        // <button class="btn-action-sm btn-action-primary hover-tooltip"
+                        //     onclick="buttonAlamat('${data}')"
+                        //     data-tooltip="Alamat">
+                        //     <i class="bi bi-house-door"></i>
+                        // </button>
             //SAVED - Button buat loadAll
             // <button class="btn btn-primary btn-sm hover-tooltip" type="button" onclick="buttonDetailAkun('${data}')" data-tooltip="Detail Akun">
             //     <i class="bi bi-card-text"></i>
