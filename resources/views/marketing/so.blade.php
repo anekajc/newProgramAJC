@@ -357,6 +357,82 @@
   .tb-report .tb tbody td .btn-action-md {
     margin: 2px;
   }
+
+  /* tableMaster2.css carries a legacy #tabel thead th / #tabel tbody td
+     re-skin (an ID selector applied only to this table, from before the
+     interactive column engine existed). ID selectors always beat
+     report-table.css's .tb-report .rt-th classes regardless of load order,
+     so #tabel's header cells were getting padding on *both* the outer <th>
+     (from that ID rule) and the inner .th-inner div (from report-table.css)
+     -- a double layer #tabel7 never had, since it has no such ID rule. Same
+     story for tbody td's font-size. Zero out just the sizing here so #tabel
+     falls back to the same report-table.css-driven sizing #tabel7 already
+     has; background/border coloring is left alone since that's cosmetic,
+     not the reported mismatch.
+
+     Header font-size is set to report-table.css's own literal value
+     (.tb-report .tb thead th { font-size: 13px }), not `inherit` -- that
+     rule targets thead th specifically rather than relying on inheritance
+     from the table's 15px base, so `inherit` here would have skipped past
+     it and pulled in the wrong (larger) size. tbody td has no such
+     thead-style override in report-table.css, so it really does just
+     inherit the table's 15px base -- `inherit` is correct there. */
+  #tabel.tb thead th {
+    padding: 0;
+    font-size: 13px;
+  }
+  #tabel.tb tbody td {
+    padding: 10px 14px;
+    font-size: inherit;
+  }
+
+  /* Holds the pagination element JS relocates here (see
+     moveDataTablePagination()) so it lives outside .table-wrap's
+     horizontal scroll -- .dataTables_paginate still floats right per
+     DataTables' own CSS, but now within this container's width (the
+     visible viewport, not the wide table), so it lands at a reachable
+     spot instead of the table's far edge. overflow:hidden clears the
+     float so this container doesn't collapse to zero height. */
+  .tb-pagination-outside {
+    overflow: hidden;
+    margin-top: 8px;
+    padding: 0 14px 10px;
+  }
+
+  /* Both DataTables' own base button look AND tableMaster2.css's prettier
+     version of it are scoped as ".dataTables_wrapper .dataTables_paginate
+     .paginate_button" -- a descendant selector that stopped matching the
+     moment moveDataTablePagination() relocated .dataTables_paginate out of
+     .dataTables_wrapper, since it's no longer a descendant of it. Re-declare
+     the same look here, scoped to the new location instead. */
+  .tb-pagination-outside .dataTables_paginate {
+    float: right;
+  }
+  .tb-pagination-outside .paginate_button {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0.4em 0.9em;
+    margin-left: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--sp-border, #e7e9ee);
+    color: var(--sp-text, #1f2430);
+    text-decoration: none !important;
+    cursor: pointer;
+  }
+  .tb-pagination-outside .paginate_button.current {
+    background: var(--sp-primary, #6f42f3);
+    border-color: var(--sp-primary, #6f42f3);
+    color: #fff;
+  }
+  .tb-pagination-outside .paginate_button.disabled {
+    cursor: default;
+    color: var(--sp-text-soft, #6b7280);
+    opacity: .6;
+  }
+  .tb-pagination-outside .paginate_button:hover:not(.disabled):not(.current) {
+    background: var(--sp-bg, #f4f5f7);
+  }
+
 </style>
 
 <div id="printContainer" style="display:none">
@@ -574,23 +650,21 @@
         <div class="table-outer">
           <div class="table-wrap">
             <table id="tabel7" class="tb">
-              <thead style="white-space:nowrap;">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">No Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Cust</th>
-                  <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Qnt</th>
-                  <th style="padding: 4px 12px;" scope="col">Qnt SO</th>
-                  <th style="padding: 4px 12px;" scope="col">Sisa</th>
-                </tr>
-              </thead>
+              {{-- Header content is fully JS-owned: replaceTheadWithHeader()
+                   (called from renderTabel7Rows(), which runs on page load via
+                   reinitTabel7()) replaces this <thead>'s contents entirely
+                   based on gcart_header, before the user ever sees it. The
+                   tag itself is just a placeholder for that selector. --}}
+              <thead style="white-space:nowrap;"></thead>
               <tbody id="tabel7_data" class="text-left">
               </tbody>
             </table>
           </div>
+          {{-- Pagination gets moved here by JS after each DataTables (re)init
+               (see reinitTabel7() in the js section) -- outside .table-wrap so
+               it's not part of the horizontally-scrolling area and stays put
+               below the table regardless of horizontal scroll position. --}}
+          <div id="tabel7PaginationOutside" class="tb-pagination-outside"></div>
         </div>
         </div>
       </div>
@@ -607,57 +681,25 @@
         <div class="table-outer">
           <div class="table-wrap">
             <table id="tabel" class="tb">
-              <thead style="white-space:nowrap;">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Pelanggan</th>
-                  <th style="padding: 4px 12px;" scope="col">Sales</th>
-                  <th style="padding: 4px 12px;" scope="col">PIC</th>
-                  <th style="padding: 4px 12px;" scope="col">Inside Sales</th>
-                  <th style="padding: 4px 12px;" scope="col">PO Customer</th>
-                  <th style="padding: 4px 12px;" scope="col">DPP</th>
-                  <th style="padding: 4px 12px;" scope="col">PPN</th>
-                  <th style="padding: 4px 12px;" scope="col">Total</th>
-                  <th style="padding: 4px 12px;" scope="col">IsOto</th>
-                  <th style="padding: 4px 12px;" scope="col">UserOto</th>
-                  <th style="padding: 4px 12px;" scope="col">TglOto</th>
-                  <th style="padding: 4px 12px;" scope="col">User Open CBD</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Open CBD</th>
-                  <!-- @if ($level > 1)
-
-                  <th style="padding: 4px 12px;" scope="col">Oto2</th>
-                  <th style="padding: 4px 12px;" scope="col">User Oto2</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Oto2</th>
-                  @if ($level > 2)
-
-                  <th style="padding: 4px 12px;" scope="col">Oto3</th>
-                  <th style="padding: 4px 12px;" scope="col">User Oto3</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Oto3</th>
-
-                    @if ($level > 3)
-
-                    <th style="padding: 4px 12px;" scope="col">Oto4</th>
-                    <th style="padding: 4px 12px;" scope="col">User Oto4</th>
-                    <th style="padding: 4px 12px;" scope="col">Tgl Oto4</th>
-
-                      @if ($level > 4)
-
-                      <th style="padding: 4px 12px;" scope="col">Oto5</th>
-                      <th style="padding: 4px 12px;" scope="col">User Oto5</th>
-                      <th style="padding: 4px 12px;" scope="col">Tgl Oto5</th>
-                      @endif
-                    @endif
-                  @endif
-                  @endif -->
-                </tr>
-              </thead>
+              {{-- Header content is fully JS-owned: replaceTheadWithHeader()
+                   (called from renderTabelRows(), which runs on page load via
+                   reinitTabel()) replaces this <thead>'s contents entirely
+                   based on gcart_header, before the user ever sees it. The
+                   tag itself is just a placeholder for that selector.
+                   (The old markup here also had a dead, always-commented-out
+                   Oto2-5 @if($level>1..4) block for a multi-level-approval
+                   view that gcart_header doesn't model -- dropped with it.) --}}
+              <thead style="white-space:nowrap;"></thead>
 
               <tbody id="tabel_data" class="text-left">
               </tbody>
             </table>
           </div>
+          {{-- Pagination gets moved here by JS after each DataTables (re)init
+               (see reinitTabel() in the js section) -- outside .table-wrap so
+               it's not part of the horizontally-scrolling area and stays put
+               below the table regardless of horizontal scroll position. --}}
+          <div id="tabelPaginationOutside" class="tb-pagination-outside"></div>
         </div>
         </div>
       </div>
@@ -686,17 +728,19 @@
                 @for ($i = 0; $i < count($tempOutstanding3); $i++)
                 <tr>
                   <td class="text-center">
-                    <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
+                  <div class="action-buttons-wrap">
+                    <button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
                       <i class="bi bi-info"></i>
                     </button>
-                    <button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
+                    <button class="btn-action-sm btn-action-danger" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
                       <i class="bi bi-key-fill"></i>
                     </button>
-                    <button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
+                    <button class="btn-action-sm btn-action-success" title="Open CBD" onclick="lockCBD('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
                       <i class="bi bi-check-square-fill"></i>
                     </button>
-                    <button style="" class="btn btn-primary btn-sm" type="button" onclick="submitPrint('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
+                    <button style="" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
                     </button>
+                  </div>
                   </td>
                   <td>{{ $tempOutstanding3[$i][0]->NOBUKTI }}</td>
                   <td>{!! date("d/m/Y", strtotime($tempOutstanding3[$i][0]->TANGGAL)) !!}</td>
@@ -747,13 +791,13 @@
                 @for ($i = 0; $i < count($tempOutstanding5); $i++)
                 <tr>
                   <td class="text-center">
-                    <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
+                    <button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
                       <i class="bi bi-info"></i>
                     </button>
-                    <button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
+                    <button class="btn-action-sm btn-action-danger" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
                       <i class="bi bi-key-fill"></i>
                     </button>
-                    <button style="" class="btn btn-primary btn-sm" type="button" onclick="submitPrint('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
+                    <button style="" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
                     </button>
                   </td>
                   <td>{{ $tempOutstanding5[$i][0]->NOBUKTI }}</td>
@@ -785,26 +829,6 @@
         </div>
       </div>
 
-      <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile-tab">
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabelRetur" class="tb">
-              <thead style="white-space:nowrap;">
-                <tr>
-                  <th scope="col">Profile 1</th>
-                  <th scope="col">No. SSP</th>
-                  <th scope="col">Tanggal</th>
-                  <th scope="col">No. Out</th>
-                  <th scope="col">Gudang</th>
-                </tr>
-              </thead>
-              <tbody id="tabelRetur_data" class="text-left">
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -812,7 +836,7 @@
 <div id="page2" class="container-fluid" style="display: none" >
       <div class="row d-flex justify-content-between align-items-center">
         <div class="col-auto text-left">
-          <h2>Form Sales Order</h2>
+          {{-- <h2>Form Add</h2> --}}
         </div>
         <div class="col-auto text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
@@ -898,12 +922,22 @@
 
                   <div class="row">
 
-                  <div class="col-md-12">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Nama Pelanggan</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
                     <div class="form-group">
                       <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="input_add_namapelanggan"  disabled>
                     </div>
                   </div>
-                  <div class="col-md-12">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Alamat Pelanggan</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
                     <div class="form-group">
                       <textarea  style="width: 100%; resize: none" rows=3 placeholder="Alamat Pelanggan" class="form-control text-left" id="input_add_alamatpelanggan"  disabled></textarea>
                     </div>
@@ -962,34 +996,34 @@
 
                 <div class="col-md-12" >
                 <div class="row">
-                  <div class="col-6">
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label>TOP</label>
                     </div>
                   </div>
 
-                  <div class="col-md-6">
+                  <div class="col-md-8">
                     <div class="form-group">
                       <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0 >
                     </div>
                   </div>
-		              <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label>Tanggal</label>
                     </div>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-8">
                     <div class="form-group">
                       <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
                     </div>
                   </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-group">
                     <label>No Bukti</label>
                   </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-8">
                   <div class="form-group">
                     <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
                   </div>
@@ -1007,13 +1041,13 @@
 
                   <div class="col-md-12">
                   <div class="row">
-                    <div class="col-6">
+                    <div class="col-md-4">
                       <div class="form-group">
                         <label>Pembayaran</label>
                       </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                       <div class="form-group">
                         <select  id="input_add_pembayaran" onchange="onChangeInputAddPembayaran()" class="form-control form-select-lg mb-3 text-center" aria-label=".form-select-lg example">
                           <option value=0 selected >Tunai/CBD</option>
@@ -1026,13 +1060,13 @@
 
                   <div class="col-md-12">
                     <div class="row">
-                      <div class="col-6">
+                      <div class="col-md-4">
                         <div class="form-group">
                           <label>TGL KIRIM</label>
                         </div>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-md-8">
                         <input type="date" class="form-control text-center" id="input_add_tanggalkirim" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
                       </div>
                     </div>
@@ -1040,13 +1074,13 @@
 
                   <div class="col-md-12">
                     <div class="row">
-                      <div class="col-6">
+                      <div class="col-md-4">
                         <div class="form-group">
                           <label>PPN</label>
                         </div>
                       </div>
 
-                      <div class="col-md-6">
+                      <div class="col-md-8">
                         <select onchange="onChangeTipePPN()" id="input_add_tipeppn" class="form-control text-center form-select-lg mb-3" aria-label=".form-select-lg example">
                           <option value=0 selected>None</option>
                           <option value=1 >Exclude</option>
@@ -1263,39 +1297,29 @@
 
                 <div class="col-md-3">
                   <div class="row">
-                     <div class="col-6" style="margin-top:40px">
+                    <div class="col-md-4">
                       <div class="form-group">
                         <label>DP</label>
                       </div>
                     </div>
 
-
-
-                  <div class="col-md-6" style="margin-top:35px">
-                    <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
-                    </div>
-                  </div>
-
-                    <div class="col-md-12">
-
-
-                    <div class="row">
-                      <div class="col-md-6" style="margin-top:-10px">
-                        <div class="form-group">
-                          <label>Tgl PO</label>
-                        </div>
+                    <div class="col-md-8">
+                      <div class="form-group">
+                        <input type="number" class="form-control text-right" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
                       </div>
+                    </div>
 
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label>Tgl PO</label>
+                      </div>
+                    </div>
 
-                    <div class="col-md-6" style="margin-top:-15px">
+                    <div class="col-md-8">
                       <div class="form-group">
                         <input type="date" class="form-control text-center" id="input_add_tanggalpo" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglPO()">
                       </div>
                     </div>
-                    </div>
-                    </div>
-
                   </div>
 
 
@@ -1317,6 +1341,13 @@
                 <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
                 <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
             </div> -->
+              </div>
+              {{-- Second explicit row (was previously just a wrap of the same
+                   24-unit row as Alamat Kirim/Lokasi Penerima/Keterangan/DP
+                   above -- splitting it out so each visual row is its own
+                   clean 4x col-md-3=12, not dependent on Bootstrap's wrap
+                   behavior lining up with these fields' differing heights). --}}
+              <div class="row">
             <div class="col-md-3">
               <div class="row">
                 <div class="col-md-6">
@@ -1448,17 +1479,19 @@
 
             <div class="col-md-3">
               <div class="row">
-                <div class="col-6" style="margin-top:-45px">
+                <div class="col-md-4">
                   <div class="form-group">
                     <label>Draft PO</label>
                   </div>
                 </div>
 
-              <div class="col-md-6" style="margin-top:-50px">
-                <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-                  <option value=0 selected>Tidak</option>
-                  <option value=1 >Ya</option>
-                </select>
+              <div class="col-md-8">
+                <div class="form-group">
+                  <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+                    <option value=0 selected>Tidak</option>
+                    <option value=1 >Ya</option>
+                  </select>
+                </div>
               </div>
               </div>
 
@@ -1972,7 +2005,7 @@
                         </tr>
                         <tr>
                           <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          <th style="padding: 4px 12px;" scope="col">Qnt</th>
+                          <th style="padding: 4px 12px;" scope="col">Qty</th>
                           <th style="padding: 4px 12px;" scope="col">Satuan</th>
                           <th style="padding: 4px 12px;" scope="col">Harga</th>
                           <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
@@ -1998,7 +2031,7 @@
                         </tr>
                         <tr>
                           <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          <th style="padding: 4px 12px;" scope="col">Qnt</th>
+                          <th style="padding: 4px 12px;" scope="col">Qty</th>
                           <th style="padding: 4px 12px;" scope="col">Satuan</th>
                           <th style="padding: 4px 12px;" scope="col">Harga</th>
                           <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
@@ -2236,7 +2269,7 @@
                               <thead class="text-center">
                                 <tr>
                                   <th scope="col">Tanggal</th>
-                                  <th scope="col">Qnt</th>
+                                  <th scope="col">Qty</th>
                                   <th scope="col">Satuan</th>
                                   <th scope="col">Valas</th>
                                   <th scope="col">Kurs</th>
@@ -2504,58 +2537,37 @@
               <div class="row" >
 
                 <div class="col">
-                  <div class="row">
-                    <div class="col-4 d-flex align-items-center">
-                      <label style="margin-top:6px; margin-left:-15px;">Disc %</label>
-                    </div>
-                    <div class="col-9" style="margin-left:-35px;">
-                      <input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00">
-                    </div>
-                  </div>
-                </div>
-
-
-                <div class="col">
-                  <div class="row">
-                    <div class="col-4 d-flex align-items-center">
-                      <label style="margin-top:6px;margin-left:-10px;">DiscRp</label>
-                    </div>
-                    <div class="col-9" style="margin-left:-35px;">
-                      <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value ="0.00" >
-                    </div>
+                  <div class="form-group">
+                    <label>Disc %</label>
+                    <input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00">
                   </div>
                 </div>
 
                 <div class="col">
-                  <div class="row">
-                    <div class="col-4 d-flex align-items-center">
-                      <label style="margin-top:6px; margin-left:-15px;">DPP</label>
-                    </div>
-                    <div class="col-9" style="margin-left:-65px;">
-                      <input type="text" class="form-control text-right" id="input_add_dpp" value ="0.00" disabled>
-                    </div>
+                  <div class="form-group">
+                    <label>DiscRp</label>
+                    <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value ="0.00" >
                   </div>
                 </div>
 
                 <div class="col">
-                  <div class="row">
-                    <div class="col-4 d-flex align-items-center">
-                      <label style="margin-top:6px; margin-left:-45px;">PPN</label>
-                    </div>
-                    <div class="col-9" style="margin-left:-90px;">
-                      <input type="text" class="form-control text-right" id="input_add_ppn" value ="0.00" disabled>
-                    </div>
+                  <div class="form-group">
+                    <label>DPP</label>
+                    <input type="text" class="form-control text-right" id="input_add_dpp" value ="0.00" disabled>
                   </div>
                 </div>
 
                 <div class="col">
-                  <div class="row">
-                    <div class="col-4 d-flex align-items-center">
-                      <label style="margin-top:6px; margin-left:-70px;">GrandTotal</label>
-                    </div>
-                    <div class="col-9" style="margin-left:-50px;">
-                      <input type="text" class="form-control text-right" id="input_add_grandtotal" value ="0.00" disabled>
-                    </div>
+                  <div class="form-group">
+                    <label>PPN</label>
+                    <input type="text" class="form-control text-right" id="input_add_ppn" value ="0.00" disabled>
+                  </div>
+                </div>
+
+                <div class="col">
+                  <div class="form-group">
+                    <label>GrandTotal</label>
+                    <input type="text" class="form-control text-right" id="input_add_grandtotal" value ="0.00" disabled>
                   </div>
                 </div>
 
@@ -3624,7 +3636,7 @@
             </div>
             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
             <div class="row">
-              <div class="col-12" style="overflow:auto; margin-top:-60px;">
+              <div class="col-12" style="overflow:auto; margin-top:-30px;">
               <!-- <div class="container-fluid"> -->
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center bg-primary text-white">
@@ -3683,7 +3695,7 @@
           </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_nopenyerahan" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
@@ -3738,7 +3750,7 @@
         </div>
         <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
         <div class="row">
-          <div class="col-12" style="overflow:auto; margin-top:-60px;">
+          <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_refpr" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
@@ -3795,7 +3807,7 @@
       </div>
       <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
       <div class="row">
-        <div class="col-12" style="overflow:auto; margin-top:-20px;">
+        <div class="col-12" style="overflow:auto; margin-top:-30px;">
         <!-- <div class="container-fluid"> -->
         <table id="tabel_add_list_barangrefpr" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
@@ -3856,12 +3868,12 @@
         <div class="container-fluid mt-4" >
           <div class="row">
             <div class="col-md-4" style="margin-top:-40px;">
-              <h3>Pelanggan</h3>
+              <h3>No PO</h3>
             </div>
           </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_nopo" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
@@ -3925,7 +3937,7 @@
           </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-40px;">
+            <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
@@ -3985,7 +3997,7 @@
         </div>
         <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
         <div class="row">
-          <div class="col-12" style="overflow:auto; margin-top:-60px;">
+          <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_sattax" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
@@ -4314,7 +4326,7 @@
       </div>
       <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
       <div class="row">
-        <div class="col-12" style="overflow:auto; margin-top:-60px;">
+        <div class="col-12" style="overflow:auto; margin-top:-30px;">
         <!-- <div class="container-fluid"> -->
         <table id="tabel_add_list_sales" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
@@ -4607,7 +4619,7 @@
 
       <div class="row ">
       <div class="col-md-12 mt-2 text-right">
-        <button type="button" id="submitAddTambahSOAll" class="btn btn-primary btn-lg" style="
+        <button type="button" id="submitAddTambahSOAllBottom" class="btn btn-primary btn-lg" style="
         height: 30px;
         padding: 4px 12px;
         border-radius: 20px;
@@ -4672,6 +4684,7 @@
 
 @section('js')
 <script src="{{ asset('js/report-table.js') }}"></script>
+<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
 <script type="text/javascript">
 
 let dataTambahSO = []
@@ -4708,92 +4721,40 @@ let tempNoPenyerahan = {}
 // let listBarangRefPR = []
 
 // -- #tabel/#tabel7 interactive column engine (docs/new-slider-table-guide.md port) --
-// Ported from resources/views/report/masterreport2.blade.php's gcart_header
-// engine. Persistence goes through SOController::loadHeader/simpanHeader
-// (SML-backed) instead of GlobalFunctionsController's MGL-backed originals,
-// since the MGL connection isn't configured anywhere in this app.
-//
-// report-table.js's ReportTable is a page-wide singleton -- it reads a
-// single window.gcart_header/g_href/etc., not one instance per table. Since
-// #tabel and #tabel7 both live on this page, each gets its own state object
-// below and activateEngineData()/bindEngineDom() swap which one is "live"
-// (assigned to the global names ReportTable and the do*Header functions
-// read) whenever the user switches tabs or a table gets re-rendered.
-var g_href = '';
-var g_modeReport = 1; // neither table has a Detail/Rekap switcher -- constant mode
-var gcart_header = [];
-var gsum_issubtotal = 0, gsum_isgrandtotal = 0;
+// The engine itself (gcart_header state, drag/hide/decimal/total persistence,
+// multi-table activate/bind) now lives in public/js/headerEngine.js so it can
+// be reused by other pages/menus later -- see that file's header comment for
+// its usage contract. Persistence goes through SOController::loadHeader/
+// simpanHeader (SML-backed) instead of GlobalFunctionsController's MGL-backed
+// originals, since the MGL connection isn't configured anywhere in this app.
+HeaderEngine.configure({
+  loadUrl: "{!! url('soloadheader') !!}",
+  simpanUrl: "{!! url('sosimpanheader') !!}"
+});
 
 var lastTabelRows = [];
 var lastTabel7Rows = [];
 
-var tabelEngines = {
-  tabel: {
-    href: 'marketingso_tabel',
-    gcart_header: [],
-    issubtotal: 0,
-    isgrandtotal: 0,
-    tableSel: '#tabel',
-    barSel: '#rtBarTabel',
-    setDefault: function () { setDefaultHeaderTabel(); },
-    onChange: function () { reinitTabel(); }
-  },
-  tabel7: {
-    href: 'marketingso_tabel7',
-    gcart_header: [],
-    issubtotal: 0,
-    isgrandtotal: 0,
-    tableSel: '#tabel7',
-    barSel: '#rtBarTabel7',
-    setDefault: function () { setDefaultHeaderTabel7(); },
-    onChange: function () { reinitTabel7(); }
-  }
-};
-var activeEngineKey = null;
-
-// Swaps which table's column state the global gcart_header/g_href/etc.
-// point to. Data-only -- doesn't touch the DOM/ReportTable, so it's safe to
-// call before a DataTables rebuild (see reinitTabel/reinitTabel7).
-function activateEngineData(key) {
-  var prev = activeEngineKey && tabelEngines[activeEngineKey];
-  if (prev) {
-    prev.gcart_header = gcart_header;
-    prev.issubtotal = gsum_issubtotal;
-    prev.isgrandtotal = gsum_isgrandtotal;
-  }
-  activeEngineKey = key;
-  var e = tabelEngines[key];
-  g_href = e.href;
-  gcart_header = e.gcart_header;
-  gsum_issubtotal = e.issubtotal;
-  gsum_isgrandtotal = e.isgrandtotal;
-}
-
-// Re-binds ReportTable's drag/gear listeners to the given table's current
-// DOM. Must run AFTER any DataTables destroy()/rebuild, never before -- the
-// listeners bind to whatever thead/table nodes exist at call time.
-function bindEngineDom(key) {
-  var e = tabelEngines[key];
-  ReportTable.init({ table: e.tableSel, bar: e.barSel, onChange: e.onChange });
-}
+HeaderEngine.registerTable('tabel', {
+  href: 'marketingso_tabel',
+  tableSel: '#tabel',
+  barSel: '#rtBarTabel',
+  setDefault: function () { setDefaultHeaderTabel(); },
+  onChange: function () { reinitTabel(); }
+});
+HeaderEngine.registerTable('tabel7', {
+  href: 'marketingso_tabel7',
+  tableSel: '#tabel7',
+  barSel: '#rtBarTabel7',
+  setDefault: function () { setDefaultHeaderTabel7(); },
+  onChange: function () { reinitTabel7(); }
+});
 
 // Which tab the user is actually looking at right now -- used after
 // loadAll() refreshes both tables in the background regardless of which
 // one is visible, so the interactive engine ends up bound to the right one.
 function activeVisibleTabKey() {
   return $('#home').hasClass('active') ? 'tabel' : 'tabel7';
-}
-
-// SO's two data sources (soloadall vs soloadsofilter) return the same
-// logical fields with different casing (e.g. nopesanan vs NoPesanan) ???
-// look a field up case-insensitively instead of trusting exact casing.
-function pickCI(row, key) {
-  if (row[key] !== undefined) { return row[key]; }
-  var lower = key.toLowerCase();
-  for (var k in row) {
-    if (k.toLowerCase() === lower) { return row[k]; }
-  }
-  return undefined;
 }
 
 function setDefaultHeaderTabel() {
@@ -4823,123 +4784,35 @@ function setDefaultHeaderTabel7() {
     ['NAMACUSTSUPP', 'Nama Cust',   1, 'varchar', 0, 0],
     ['KODEBRG',      'Kode Brg',    1, 'varchar', 0, 0],
     ['NAMABRG',      'Nama Barang', 1, 'varchar', 0, 0],
-    ['QNT',          'Qnt',         1, 'float',   0, 2],
-    ['QntSO',        'Qnt SO',      1, 'float',   0, 2],
+    ['QNT',          'Qty',         1, 'float',   0, 2],
+    ['QntSO',        'Qty SO',      1, 'float',   0, 2],
     ['Sisa',         'Sisa',        1, 'float',   0, 2],
   ];
-}
-
-function doGetHeader(_str) {
-  var arr = [];
-  _str.split('||').forEach(function (part) {
-    var f = part.split(';;');
-    arr.push([f[0], f[1], Number(f[2]), f[3], Number(f[4]), Number(f[5])]);
-  });
-  return arr;
-}
-
-function doLoadHeader(_href, _mode) {
-  var _strHeader = "";
-  $.ajax({
-    url: "{!! url('soloadheader') !!}",
-    type: "get",
-    async: false,
-    data: { href: _href, mode: _mode },
-    success: function (res) {
-      if (res && res[0]) {
-        _strHeader = res[0].header;
-        gsum_issubtotal = Number(res[0].issubtotal) || 0;
-        gsum_isgrandtotal = Number(res[0].isgrandtotal) || 0;
-      }
-    }
-  });
-  return _strHeader;
-}
-
-// Named doSimpanHeader/doButtonVisibility/doSetDesimal/doButtonTotal/doMoveHeader
-// (not e.g. doSimpanHeaderTabel) on purpose: report-table.js's ReportTable
-// looks these exact names up on window as its persistence fallback ??? a
-// suffixed name would silently never be found, and drag/hide/decimal/total
-// would stop persisting without any error.
-function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
-  var _strHeader = "";
-  _cart.forEach(function (item, i) {
-    if (i != 0) { _strHeader += '||'; }
-    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
-  });
-  $.ajax({
-    url: "{!! url('sosimpanheader') !!}",
-    type: "get",
-    async: false,
-    data: {
-      href: _href,
-      mode: _mode,
-      header: _strHeader,
-      issubtotal: _issubtotal,
-      isgrandtotal: _isgrandtotal
-    },
-    success: function (res) {}
-  });
-}
-
-function doSetHeader(_modereport, _isReset) {
-  _isReset = _isReset || false;
-  var _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
-  if (_strHeader != "") {
-    gcart_header = doGetHeader(_strHeader);
-  } else {
-    tabelEngines[activeEngineKey].setDefault();
-    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
-  }
-}
-
-function doMoveHeader(_from, _to) {
-  var moved = gcart_header.splice(_from, 1)[0];
-  gcart_header.splice(_to, 0, moved);
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
-}
-
-function doButtonVisibility(_id) {
-  gcart_header[_id][2] = gcart_header[_id][2] ? 0 : 1;
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
-}
-
-function doSetDesimal(_index, _step) {
-  var v = (gcart_header[_index][5] || 0) + _step;
-  if (v < 0) { v = 0; }
-  if (v > 4) { v = 4; }
-  gcart_header[_index][5] = v;
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
-}
-
-function doButtonTotal(_index) {
-  gcart_header[_index][4] = gcart_header[_index][4] ? 0 : 1;
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
 }
 
 // The Actions cell isn't part of gcart_header (not draggable/hideable) ???
 // same treatment as the reference report tables, which keep Actions fixed.
 function tabelActionsCell(row) {
-  var nobukti = pickCI(row, 'NOBUKTI');
+  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  if (Number(pickCI(row, 'IsOtorisasi1')) == 0) {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
+  html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  if (Number(HeaderEngine.pickCI(row, 'IsOtorisasi1')) == 0) {
+    html += '<button class="btn-action-sm btn-action-primary" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
   } else {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-    html += '<button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+    html += '<button class="btn-action-sm btn-action-danger" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn-action-sm btn-action-primary" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   }
-  if (Number(pickCI(row, 'cbdneedopen')) == 1) {
-    html += '<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD(\'' + nobukti + '\')"><i class="bi bi-check-square-fill"></i></button>';
+  if (Number(HeaderEngine.pickCI(row, 'cbdneedopen')) == 1) {
+    html += '<button class="btn-action-sm btn-action-success" title="Open CBD" onclick="lockCBD(\'' + nobukti + '\')"><i class="bi bi-check-square-fill"></i></button>';
   }
   html += '</div></td>';
   return html;
 }
 
 function tabel7ActionsCell(row) {
-  var nobukti = pickCI(row, 'NOBUKTI');
-  var ppn = pickCI(row, 'PPN');
+  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
+  var ppn = HeaderEngine.pickCI(row, 'PPN');
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn-action-sm btn-action-primary" type="button" title="Buat SO" onclick="buttonTambahSO(\'' + nobukti + '\', ' + ppn + ')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
@@ -4950,7 +4823,7 @@ function tabel7ActionsCell(row) {
 // formatting has to read it live rather than assume a fixed precision --
 // #tabel's money columns default to 0dp, #tabel7's qty columns to 2dp.
 function tabelValueCell(row, col) {
-  var raw = pickCI(row, col[0]);
+  var raw = HeaderEngine.pickCI(row, col[0]);
   var type = col[3];
 
   if (type === 'date') {
@@ -4981,8 +4854,35 @@ function tabelValueCell(row, col) {
 // rows: array of [rowObj] (same shape as $tempOutstanding1[$i][0] / item[0]
 // in the existing ajax handlers). Builds <tr>s from the current gcart_header
 // order/visibility so drag-reorder and hide actually change what's rendered.
+// ReportTable.init()'s bindHead(thead) attaches drag/gear listeners via
+// addEventListener with no matching removeEventListener anywhere -- calling
+// init() again (which reinitTabel()/reinitTabel7() do, on purpose, to
+// re-bind after DataTables rebuilds) is only safe if it's binding to a
+// GENUINELY NEW <thead> node each time. Mutating thead.innerHTML preserves
+// the node's own identity, so repeated init() calls kept stacking a fresh
+// set of listeners onto the same persistent thead -- one header change and
+// the gear button would fire its click handler twice, opening the menu and
+// immediately closing it again in the same click (toggle logic run twice).
+// Replacing the whole <thead> element (not just its contents) means old
+// listeners are discarded along with the old node instead of accumulating.
+function replaceTheadWithHeader(tableSel, cols) {
+  var oldThead = document.querySelector(tableSel + ' thead');
+  if (!oldThead || !window.ReportTable) { return; }
+  // ReportTable.headHtml() only knows about gcart_header entries, so it
+  // never accounts for the fixed Actions column every body row starts
+  // with. Splice a plain, non-draggable Actions <th> in as the first cell
+  // so thead/tbody column counts actually match -- a mismatch here is
+  // exactly what was breaking DataTables' destroy/reinit.
+  var headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+  var newThead = document.createElement('thead');
+  newThead.setAttribute('style', 'white-space:nowrap;');
+  newThead.innerHTML = headRowHtml;
+  oldThead.parentNode.replaceChild(newThead, oldThead);
+}
+
 function renderTabelRows(rows) {
-  if (activeEngineKey !== 'tabel') { activateEngineData('tabel'); }
+  if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
   var html = "";
   (rows || []).forEach(function (rowWrap) {
@@ -4994,22 +4894,11 @@ function renderTabelRows(rows) {
     html += '</tr>';
   });
   document.getElementById('tabel_data').innerHTML = html;
-
-  var thead = document.querySelector('#tabel thead');
-  if (thead && window.ReportTable) {
-    // ReportTable.headHtml() only knows about gcart_header entries, so it
-    // never accounts for the fixed Actions column every body row starts
-    // with above. Splice a plain, non-draggable Actions <th> in as the
-    // first cell so thead/tbody column counts actually match -- a mismatch
-    // here is exactly what was breaking DataTables' destroy/reinit.
-    var headRowHtml = ReportTable.headHtml(cols)
-      .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
-    thead.innerHTML = headRowHtml;
-  }
+  replaceTheadWithHeader('#tabel', cols);
 }
 
 function renderTabel7Rows(rows) {
-  if (activeEngineKey !== 'tabel7') { activateEngineData('tabel7'); }
+  if (HeaderEngine.activeKey() !== 'tabel7') { HeaderEngine.activateEngineData('tabel7'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
   var html = "";
   (rows || []).forEach(function (rowWrap) {
@@ -5021,13 +4910,24 @@ function renderTabel7Rows(rows) {
     html += '</tr>';
   });
   document.getElementById('tabel7_data').innerHTML = html;
+  replaceTheadWithHeader('#tabel7', cols);
+}
 
-  var thead = document.querySelector('#tabel7 thead');
-  if (thead && window.ReportTable) {
-    var headRowHtml = ReportTable.headHtml(cols)
-      .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
-    thead.innerHTML = headRowHtml;
-  }
+// DataTables names its auto-generated wrapper <tableId>_wrapper and puts
+// .dataTables_paginate inside it, alongside the table -- meaning it's part
+// of .table-wrap's horizontally-scrolling content and travels with column
+// scroll. Physically relocating the pagination element into a container
+// placed outside .table-wrap (see the tabel(7)PaginationOutside divs in the
+// markup) is the only reliable way to keep it out of that scroll entirely
+// and always visible below the table. Must run after every (re)init --
+// but destroy() only cleans up whatever is still inside .dataTables_wrapper
+// at that point, and the PREVIOUS pagination element was already moved out
+// of it by the previous call, so destroy() never touches it and it's left
+// behind as an orphan. Empty the target first so each reinit replaces last
+// time's pagination instead of stacking a new one on top of it.
+function moveDataTablePagination(tableId, targetSel) {
+  $(targetSel).empty();
+  $('#' + tableId + '_wrapper .dataTables_paginate').appendTo(targetSel);
 }
 
 function reinitTabel() {
@@ -5039,15 +4939,21 @@ function reinitTabel() {
       lengthChange: false,
       paging: true,
       order: [[1, 'asc']],
-      columnDefs: [{ targets: [0], orderable: false }]
+      // The custom drag/gear header now owns column interaction entirely --
+      // DataTables' own native sort-arrow indicator was rendering on top of
+      // it (specifically on whichever column "order" points at), looking
+      // like a doubled icon. ordering:false drops that native UI/classes
+      // completely while still honoring "order" for the initial sort.
+      ordering: false
     });
+    moveDataTablePagination('tabel', '#tabelPaginationOutside');
 
     // DataTables' destroy()/rebuild cycle above detaches/replaces the DOM
     // ReportTable was bound to, so re-bind it to the fresh table/thead/bar
     // every time this runs -- not just once -- or a drag/gear action after
     // any refresh throws trying to walk up from a now-detached node (the
     // "reading 'parentNode'" crash).
-    bindEngineDom('tabel');
+    HeaderEngine.bindEngineDom('tabel');
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -5063,9 +4969,10 @@ function reinitTabel7() {
       lengthChange: false,
       paging: true,
       order: [[1, 'asc']],
-      columnDefs: [{ targets: [0], orderable: false }]
+      ordering: false
     });
-    bindEngineDom('tabel7');
+    moveDataTablePagination('tabel7', '#tabel7PaginationOutside');
+    HeaderEngine.bindEngineDom('tabel7');
   } catch (e) {
     console.error('reinitTabel7 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -5073,10 +4980,10 @@ function reinitTabel7() {
 }
 
 function buttonHeaderTable() {
-  var key = activeEngineKey || activeVisibleTabKey();
+  var key = HeaderEngine.activeKey() || activeVisibleTabKey();
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    activateEngineData(key);
-    doSetHeader(g_modeReport, true);
+    HeaderEngine.activateEngineData(key);
+    HeaderEngine.doSetHeader(g_modeReport, true);
     if (key === 'tabel') { reinitTabel(); } else { reinitTabel7(); }
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
@@ -5111,25 +5018,25 @@ $(document).ready(function(){
       // initialize it last -- reinitTabel()/reinitTabel7() each end by
       // binding ReportTable to their own table, and whichever runs last
       // wins, so this order leaves the actually-visible tab interactive.
-      activateEngineData('tabel');
-      doSetHeader(g_modeReport);
+      HeaderEngine.activateEngineData('tabel');
+      HeaderEngine.doSetHeader(g_modeReport);
       lastTabelRows = @json($tempOutstanding1);
       reinitTabel();
 
-      activateEngineData('tabel7');
-      doSetHeader(g_modeReport);
+      HeaderEngine.activateEngineData('tabel7');
+      HeaderEngine.doSetHeader(g_modeReport);
       lastTabel7Rows = @json($tempOutstanding7);
       reinitTabel7();
 
       // Re-bind the interactive engine whenever the user switches tabs --
       // ReportTable's listeners are bound to one table's DOM at a time.
       $('#tab-diterima-btn').on('shown.bs.tab', function () {
-        activateEngineData('tabel');
-        bindEngineDom('tabel');
+        HeaderEngine.activateEngineData('tabel');
+        HeaderEngine.bindEngineDom('tabel');
       });
       $('#tab-dibuka-btn').on('shown.bs.tab', function () {
-        activateEngineData('tabel7');
-        bindEngineDom('tabel7');
+        HeaderEngine.activateEngineData('tabel7');
+        HeaderEngine.bindEngineDom('tabel7');
       });
 
         $("#tabel_tambahsoall").DataTable({
@@ -9172,8 +9079,8 @@ function loadAll () {
     // actually visible -- whichever ran last "wins" the interactive
     // binding, so restore it to match what the user is actually looking at.
     var visibleKey = activeVisibleTabKey();
-    activateEngineData(visibleKey);
-    bindEngineDom(visibleKey);
+    HeaderEngine.activateEngineData(visibleKey);
+    HeaderEngine.bindEngineDom(visibleKey);
 }
 
 
