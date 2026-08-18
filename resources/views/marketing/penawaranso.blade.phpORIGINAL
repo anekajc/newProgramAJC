@@ -187,77 +187,6 @@
     }
   </style>
 {{-- end tampilan search modal barang all --}}
-
-{{-- tableMaster2.css carries the .btn-action-{success,warning,primary,danger}
-     chip classes used below for #tabel2/#tabel3's Actions buttons. The
-     shared newmaster layout doesn't load it (so.blade.php links it the same
-     page-local way). --}}
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
-
-<style>
-  /* "Fresh look" pass matching so.blade.php/purchaseOrder.blade.php: flat
-     gray-uppercase header, light-purple row hover, consistent padding.
-     #tabel2/#tabel3 had no custom header/row styling at all before this --
-     just Bootstrap's default bg-primary/text-white header. */
-  #tabel2 thead th,
-  #tabel3 thead th {
-    background: #f8f9fb !important;
-    color: #6b7280 !important;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    border-bottom: 1px solid #e7e9ee;
-    padding: 10px 14px;
-  }
-  #tabel2 tbody td,
-  #tabel3 tbody td {
-    padding: 10px 14px;
-    font-size: 15px;
-  }
-  #tabel2 tbody tr:hover td,
-  #tabel3 tbody tr:hover td {
-    background-color: #f5f3ff;
-  }
-
-  /* Re-skins the Penawaran SO / Penawaran SO Otorisasi tab toggle to match
-     so.blade.php's .radioChoiceMaster pill look (white pill bar, rounded
-     buttons, solid-blue active state with a soft shadow), without touching
-     the underlying <div class="nav nav-tabs">/<a data-toggle="tab"> markup
-     -- that structure is what Bootstrap's tab JS binds to, so the visual
-     restyle is done entirely through these selectors instead of changing
-     tags. Replaces the old per-element inline styles (outlined pill,
-     always-on border, no real "active" state distinction). */
-  #nav-tab.nav-tabs {
-    display: inline-flex;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
-  }
-  #nav-tab.nav-tabs .nav-link {
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    background-color: transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-  #nav-tab.nav-tabs .nav-link:hover {
-    color: #212529;
-    background-color: rgba(0,0,0,0.04);
-  }
-  #nav-tab.nav-tabs .nav-link.active {
-    color: #fff;
-    background-color: #007bff;
-    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
-  }
-</style>
 @endsection
 @section('content')
 
@@ -271,23 +200,40 @@
 
 <div id="page1" class="container-fluid">
     <!-- <div id="qrcode"></div> -->
-    {{-- Tab toggle now lives in its own block at the top of page1, same
-         position/pattern as so.blade.php's first .sp-toolbar (just the
-         pill row, nothing else) and purchaseOrder.blade.php's
-         .card.tab-card (a dedicated card holding only the tab nav). Neither
-         reference page keeps a standalone page title next to it. --}}
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-         Penawaran SO
-      </a>
-
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-        Penawaran SO Otorisasi
-      </a>
-      <!-- <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false"
-        style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Penawaran SO Otorisasi
-      </a> -->
+    <div class="row">
+      <div class="col-6 text-left">
+        <h2 style="margin-top:-85px;">Penawaran SO</h2>
+      </div>
+      <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px;
+            margin-top: -150px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="buttonAdd()">
+          Add Penawaran
+        </button>
+      </div>
+      {{-- <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px;
+            margin-top: -150px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="loadAll()">
+          tes load all
+        </button>
+      </div> --}}
     </div>
 
   <div id="contentContainer" class="">
@@ -303,6 +249,26 @@
     <input type="hidden" id="level" value="{!! $level !!}" />
 
     <div class="card">
+      <div class="card-header" style="margin-top:-55px;">
+        <div class="row">
+          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
+              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+               Penawaran SO
+            </a>
+            
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
+              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+              Penawaran SO Otorisasi
+            </a>
+            <!-- <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false"
+              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+              Penawaran SO Otorisasi
+            </a> -->
+          </div>
+        </div>
+      </div>
+
       <div class="card-body" style="padding:0;">
         <div class="tab-content" id="myTabContent">
 
@@ -359,32 +325,12 @@
 
 
           <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            {{-- Add button now lives inside the tab it actually applies to
-                 (only "Penawaran SO" gets one -- "Otorisasi" doesn't, same
-                 as purchaseOrder.blade.php's .po-toolbar-act, which only
-                 appears on its "Purchase Order" tab, not "Outstanding PR"),
-                 instead of a page-level header shared by both tabs. --}}
-            <div class="row mb-2">
-              <div class="col-12 text-right">
-                <button type="button" class="btn btn-action-primary" style="
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    transition: background-color 0.3s, box-shadow 0.3s;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                    onclick="buttonAdd()">
-                  + Add Penawaran
-                </button>
-              </div>
-            </div>
             <div class="row">
               <div class="col-12" style="overflow:auto;">
                 <div class="container-fluid" style="padding:0; margin:0; width:100%;">
 
                   <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center">
+                    <thead class="text-center bg-primary text-white">
                       <tr>
                         <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
                         <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
@@ -547,7 +493,7 @@
                 <div class="container-fluid" style="padding:0; margin:0; width:100%;">
 
                   <table id="tabel3" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center">
+                    <thead class="text-center bg-primary text-white">
                       <tr>
                         <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
                         <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
@@ -5353,12 +5299,10 @@ function loadAll () {
             rowTable2 += `
             <tr>
               <td class="text-center" style='white-space:nowrap;'>
-                <div class="action-buttons-wrap">
-                <button class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-                <button class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
-                <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-                </div>
+                <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
+                <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>
+                <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
               </td>
               <td style='white-space:nowrap;'>${item.NoBukti || ''}</td>
               <td style='white-space:nowrap;'>${date1}</td>
@@ -5514,11 +5458,9 @@ function loadAll () {
         rowTable3 += `
         <tr>
           <td class="text-center" style='white-space:nowrap;'>
-            <div class="action-buttons-wrap">
-            <button class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-            <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-            <button class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
-            </div>
+            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
+            <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
+            <button class="btn btn-primary btn-sm" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
           </td>
           <td style='white-space:nowrap;'>${item.NoBukti}</td>
           <td style='white-space:nowrap;'>${date1}</td>

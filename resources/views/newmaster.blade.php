@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="{{ asset('css/canvas/custom.css') }}">
   <link rel="stylesheet" href="{{ asset('css/alertify.css') }}"> --}}
 
-  <link rel="stylesheet" href="{{ asset('css/newmaster.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/newmaster.css') }}?v={{ filemtime(public_path('css/newmaster.css')) }}">
   <link rel="stylesheet" href="{{ asset('css/tableMaster.css') }}">
 
   <title>AnekaJC</title>
@@ -625,6 +625,19 @@
     return (rows || []).map(mapMenuNode);
   }
 
+  // ── Expand/collapse a module's L1 list in the sidebar (click, not
+  // hover -- the .nav-group.open CSS this drives already existed for this
+  // purpose, it just wasn't wired to anything before). Bound to clicks on
+  // the label/chevron portion of .nav-item; the icon has its own onclick
+  // (showModuleHome) that stops propagation before it reaches this. ──────
+  function toggleModuleSubmenu(moduleKey) {
+    const ng = document.getElementById('ng-' + moduleKey);
+    if (!ng) return;
+    const willOpen = !ng.classList.contains('open');
+    document.querySelectorAll('.nav-group.open').forEach(g => g.classList.remove('open'));
+    if (willOpen) ng.classList.add('open');
+  }
+
   // ── Render the card-grid home for a module ───────────────────────────
   function showModuleHome(moduleKey) {
     closeReportPage();
@@ -697,8 +710,8 @@
     const nav = document.getElementById('nav');
     nav.innerHTML = modules.map(m => `
       <div class="nav-group" id="ng-${m.key}">
-        <div class="nav-item" onclick="showModuleHome('${m.key}')">
-          <span class="nav-icon">${icon(getModuleIcon(m.label, m.icon))}</span>
+        <div class="nav-item" onclick="toggleModuleSubmenu('${m.key}')">
+          <span class="nav-icon" onclick="event.stopPropagation(); showModuleHome('${m.key}')">${icon(getModuleIcon(m.label, m.icon))}</span>
           <span class="nav-label">${m.label}</span>
           <span class="nav-chevron">${icon('chevron')}</span>
         </div>

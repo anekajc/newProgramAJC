@@ -1,9 +1,455 @@
-@extends('newmaster')
+@extends('purchasing.newmasterx')
 @section('buttons')
 
+@section('page-title', 'Purchase Order')
+
 @endsection
-{{-- tampilan search bar 1 --}}
+{{-- tab bar baru--}}
   @section('css')
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi).
+       File khusus halaman ini: aturannya disalin dari public/css/report-table.css
+       dengan scope diganti ke #tabel/#tabel2/#rtBar (satu bar dipakai bersama,
+       dipindah lewat JS - lihat poPindahBar()), supaya reset ganas
+       `.tb-report * { margin:0; padding:0 }` di file aslinya tidak ikut terbawa. --}}
+  <link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <style>
+  /* {{-- Tampilan disamakan dengan gudang/permintaanpemakaian.blade.php (tab-toggle,
+       toolbar + page-title, tombol aksi bulat) - hanya CSS, id/class yang dipakai
+       JS (onclick, #tabel/#tabel2/#tabel3, nav-tab, dst) tidak diubah. --}} */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: #1f2430;
+  }
+
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+    }
+
+  /* Halaman ini dirancang mengisi tinggi layar (lihat poAturTinggiTabel()), jadi padding
+     atas #content layout dikecilkan supaya tab tidak menggantung jauh dari header. Aman
+     ditimpa dari sini karena blok <style> ini hanya ikut ter-render di halaman ini. */
+  #content { padding-top: 12px; }
+
+  /* layout newmasterx punya rule .card global (align-items:center) yang override ini */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  /* ---------- Kolom Aksi tabel (#tabel/#tabel2/#tabel3) - tombol bulat kecil,
+     warna pastel, sama seperti .btn-action-* di gudang/permintaanpemakaian ---------- */
+  #tabel td:first-child,
+  #tabel2 td:first-child,
+  #tabel3 td:first-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Di #tabel_add kolom Actions ada di paling kanan, bukan paling kiri. */
+  #tabel td:first-child .btn,
+  #tabel2 td:first-child .btn,
+  #tabel3 td:first-child .btn,
+  #tabel_add td:last-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel td:first-child .btn:hover,
+  #tabel2 td:first-child .btn:hover,
+  #tabel3 td:first-child .btn:hover,
+  #tabel_add td:last-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel td:first-child .btn-success,
+  #tabel2 td:first-child .btn-success,
+  #tabel3 td:first-child .btn-success,
+  #tabel_add td:last-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #tabel td:first-child .btn-warning,
+  #tabel2 td:first-child .btn-warning,
+  #tabel3 td:first-child .btn-warning,
+  #tabel_add td:last-child .btn-warning {
+    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+  }
+
+  #tabel td:first-child .btn-primary,
+  #tabel2 td:first-child .btn-primary,
+  #tabel3 td:first-child .btn-primary,
+  #tabel_add td:last-child .btn-primary {
+    color: #2563eb; border-color: #cfdcff; background: #e8edff;
+  }
+
+  #tabel td:first-child .btn-danger,
+  #tabel2 td:first-child .btn-danger,
+  #tabel3 td:first-child .btn-danger,
+  #tabel_add td:last-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  /* ---------- Header & baris tabel - bersih, uppercase abu-abu ---------- */
+  #tabel thead th,
+  #tabel2 thead th,
+  #tabel3 thead th,
+  #tabel_data_header th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee;
+    border-top: none;
+  }
+
+  /* Tabel Harga Terakhir & Stock Proyeksi: struktur header sama persis dengan
+     #tabel_data_header di atas (uppercase, 12px, garis bawah tipis), hanya warnanya
+     yang mengikuti tombol pemicunya - hijau untuk Histori Harga, merah untuk Stock
+     Proyeksi. Ditulis terpisah karena warnanya beda, bukan digabung ke selektor di atas. */
+  #tabel_add_harga_terakhir thead th {
+    background: #e7f7ed !important;
+    color: #16a34a !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #cdebd7;
+    border-top: none;
+  }
+
+  #tabel_add_stock_proyeksi thead th {
+    background: #fdeaea !important;
+    color: #dc2626 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #f7cfcf;
+    border-top: none;
+  }
+
+  #tabel tbody tr:nth-of-type(odd),
+  #tabel2 tbody tr:nth-of-type(odd),
+  #tabel3 tbody tr:nth-of-type(odd),
+  #tabel_add tbody tr:nth-of-type(odd),
+  #tabel_add_harga_terakhir tbody tr:nth-of-type(odd),
+  #tabel_add_stock_proyeksi tbody tr:nth-of-type(odd) {
+    background-color: #fbfbfc;
+  }
+
+  #tabel tbody tr:hover,
+  #tabel2 tbody tr:hover,
+  #tabel3 tbody tr:hover,
+  #tabel_add tbody tr:hover {
+    background-color: #f5f3ff;
+  }
+
+  /* Hover baris disesuaikan warna tabelnya masing-masing, bukan ungu seperti tabel lain. */
+  #tabel_add_harga_terakhir tbody tr:hover { background-color: #f2fbf5; }
+  #tabel_add_stock_proyeksi tbody tr:hover { background-color: #fef6f6; }
+
+  #tabel3.table-bordered th,
+  #tabel3.table-bordered td {
+    border-color: #e7e9ee !important;
+  }
+
+  /* ---------- Chip biru: Show/Hide Header (ikon truk), + Tambah Item, Simpan Data ----------
+     Satu kelas dipakai bertiga supaya warnanya tidak lagi jalan sendiri-sendiri. Tint-nya
+     sederet dengan chip hijau/merah/abu di bawah, memakai palet biru yang sudah ada di file
+     ini (dipakai juga oleh tombol aksi di dalam tabel). */
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+
+  /* ---------- Tombol Histori Harga / Stock Proyeksi / Batal ----------
+     Gaya chip: latar tint muda + teks berwarna, bukan latar solid menyala. Warna tint-nya
+     sengaja sama persis dengan header tabel yang dibuka tombol tersebut
+     (#tabel_add_harga_terakhir hijau, #tabel_add_stock_proyeksi merah), sehingga tombol dan
+     tabelnya terbaca sebagai satu pasangan. Sederet dengan Batal yang juga chip abu-abu. */
+  .btn-histori-harga {
+    background-color: #e7f7ed;
+    border-color: #cdebd7;
+    color: #16a34a;
+  }
+
+  .btn-histori-harga:hover,
+  .btn-histori-harga:focus {
+    background-color: #d8f0e2;
+    border-color: #b6e0c6;
+    color: #15803d;
+  }
+
+  .btn-histori-harga:active {
+    background-color: #c8e9d5 !important;
+    border-color: #a5d8b8 !important;
+    color: #15803d !important;
+  }
+
+  .btn-stock-proyeksi {
+    background-color: #fdeaea;
+    border-color: #f7cfcf;
+    color: #dc2626;
+  }
+
+  .btn-stock-proyeksi:hover,
+  .btn-stock-proyeksi:focus {
+    background-color: #fbdcdc;
+    border-color: #f2bcbc;
+    color: #b91c1c;
+  }
+
+  .btn-stock-proyeksi:active {
+    background-color: #f8cfcf !important;
+    border-color: #eda9a9 !important;
+    color: #b91c1c !important;
+  }
+
+  /* Batal = aksi sekunder, jadi abu-abu muda dengan teks gelap (bukan solid gelap). */
+  .btn-batal-add {
+    background-color: #f1f3f5;
+    border-color: #dee2e6;
+    color: #495057;
+  }
+
+  .btn-batal-add:hover,
+  .btn-batal-add:focus {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #343a40;
+  }
+
+  .btn-batal-add:active {
+    background-color: #dee2e6 !important;
+    border-color: #ced4da !important;
+    color: #343a40 !important;
+  }
+
+  /* Rule .card global di layout newmasterx sebenarnya untuk kartu menu dashboard
+     (flex + align-items:center + efek melayang saat hover). Kalau dipakai untuk card berisi
+     tabel, card-body tidak melar mengikuti halaman melainkan mengikuti lebar tabel,
+     sehingga card ikut tertarik melebihi batas halaman. */
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+  }
+
+  #page1 .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border) !important;
+  }
+
+  /* Tabel di dalam tab bisa punya kolom sangat banyak. Kolom Bootstrap adalah flex item
+     yang min-width bawaannya "auto", jadi tabel lebar malah memaksa card dan halaman ikut
+     melebar. min-width:0 membuat tabel discroll di dalam card, tidak melewati batas card. */
+  #page1 .tab-content .col-md-12 {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar tab Outstanding PR.
+     Bentuknya sengaja meniru .po-filter-wrap / .po-filter-inp milik
+     public/css/po-table-header.css supaya seragam dengan kotak periode di tab
+     Purchase Order, tapi ditulis di sini - dengan begitu perubahan ini cukup
+     mengunggah file blade-nya saja, file CSS bersama tidak perlu ikut diganti. */
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-indigo);
+    outline: none;
+    cursor: pointer;
+    /* Panah bawaan <select> disembunyikan lalu digambar ulang lewat background-image,
+       supaya warnanya bisa disamakan dengan kotak filter yang lain. padding-right
+       menyediakan ruang untuk panah itu. */
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237B8194' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  /* ---- Lapisan "sedang memuat" tabel Outstanding PR ----
+     Elemennya adalah .dataTables_processing bawaan DataTables (dihidupkan lewat opsi
+     processing + token "r" pada dom - lihat initTabelOutstanding()), tapi seluruh
+     tampilannya ditulis ulang di sini: dari teks polos menjadi lapisan yang menutup
+     #tabel_wrapper dengan chip + spinner di tengahnya.
+
+     Aturan bawaan `.dataTables_wrapper .dataTables_processing` dari jquery.dataTables.css
+     kalah dua kali: selector di bawah memakai id (specificity lebih tinggi) dan blok ini
+     dimuat belakangan - di newmasterx, tempat section css disisipkan ada di bawah <link>
+     DataTables. (Nama directive-nya sengaja tidak ditulis lengkap di sini: Blade tetap
+     mengompilasi directive walau berada di dalam komentar CSS.) */
+  #tabel_wrapper {
+    /* Acuan position:absolute lapisan di bawah. DataTables sendiri sudah menetapkannya,
+       ditulis ulang di sini supaya tidak bergantung pada file CSS-nya ikut termuat. */
+    position: relative;
+  }
+
+  #tabel_wrapper > .dataTables_processing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Bawaannya width:200px + margin negatif supaya memusatkan diri di top/left 50%.
+       Semuanya harus dinolkan, kalau tidak lapisan ini tidak menutup penuh. */
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(255, 255, 255, .62);
+    z-index: 40;
+    /* 45% pertama masih transparan, jadi respons yang cepat (mis. pindah halaman saat
+       datanya sedikit) selesai sebelum lapisan ini sempat terlihat - tidak berkedip. */
+    animation: poMunculLoading .34s ease-out both;
+  }
+
+  @keyframes poMunculLoading {
+    0%, 45% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  /* Chip dipusatkan memakai posisi absolut, BUKAN flexbox pada lapisan di atas.
+     Alasannya: DataTables menampilkan/menyembunyikan lapisan itu dengan menulis
+     `display:block` / `display:none` sebagai INLINE style. Jadi `display:flex` di
+     stylesheet akan selalu kalah, dan kalau dipaksa dengan !important justru perintah
+     `display:none` untuk MENYEMBUNYIKANNYA ikut terblokir - lapisannya tidak pernah
+     mau hilang. Menghindari properti display sama sekali membuat keduanya tidak
+     pernah berebut. */
+  .po-loading-chip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: rgba(31, 36, 48, .92);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+  }
+
+  .po-loading-spin {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: poPutarLoading .6s linear infinite;
+  }
+
+  @keyframes poPutarLoading {
+    to { transform: rotate(360deg); }
+  }
+  </style>
+{{-- tab bar baru--}}
+
+{{-- tampilan search bar 1 --}}
 
   <style>
   .rodokNdukurTitik{
@@ -12,10 +458,6 @@
   </style>
 
   <style>
-    .dataTables_wrapper {
-    overflow-x: auto;
-  }
-
   .dataTables_scrollBody {
       border: none !important;
   }
@@ -37,64 +479,10 @@
   #tabel thead tr:first-child th {
       border-top: none;
   }
-    </style>
-
-  <style>
-  #tabel_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel_filter label input {
-      width: 150px;
-      padding: 5px 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      box-shadow: none;
-      font-size: 0.65rem;
-    }
-
-  #tabel_filter label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #333;
-    }
   </style>
+
 {{-- end tampilan search bar 1 --}}
 
-{{-- tampilan search bar 2 --}}
-  <style>
-  #tabel2_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel2_filter label input {
-      width: 150px;
-      padding: 5px 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      box-shadow: none;
-      font-size: 0.65rem;
-    }
-
-  #tabel2_filter label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #333;
-    }
-
-  #tabel2_filter input:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-  </style>
 {{-- end tampilan search bar 2 --}}
 
 {{-- tampilan search bar 3 --}}
@@ -194,6 +582,10 @@
 
 {{-- tampilan search modal barang all --}}
   <style>
+
+  .card-header {
+    text-align: left !important;
+  }
     #input_search_barang_all {
       width: 150px;
       border-radius: 10px;
@@ -222,56 +614,11 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="page1" class="container-fluid">
+<div id="page1">
     <!-- <div id="qrcode"></div> -->
-    <div class="row">
-      <div class="col-6 text-left">
-        <h2>Purchase Order</h2>
-      </div>
-      <div class="col-6 d-flex justify-content-end">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px;
-            margin-top: 0px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddPr()">
-          Add Ref PR
-        </button>
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px;
-            margin-top: 0px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add PO
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px;
-            margin-top: -150px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
-    </div>
+    <!-- <div class="toolbar" style="margin-bottom: 20px">
+      <div class="page-title">Purchase Order</div>
+    </div> -->
 
   <div id="contentContainer" class="">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
@@ -285,48 +632,140 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
+    <!-- UNTUK TAB -->
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
+        <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+
+            <a class="nav-item nav-link active"
+              id="nav-profile-tab"
+              data-toggle="tab"
+              href="#profile"
+              role="tab"
+              aria-controls="profile"
+              aria-selected="true">
+                Purchase Order
+            </a>
+
+            <a class="nav-item nav-link"
+              id="nav-home-tab"
+              data-toggle="tab"
+              href="#home"
+              role="tab"
+              aria-controls="home"
+              aria-selected="false">
+                Outstanding PR
+            </a>
+
+        </div>
+      </div>
+    </div>
+
     <div class="card">
-      <div class="card-header">
-        <div class="row">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+
+    <!-- <div class="card-header">
+    <div class="d-flex justify-content-start">
+        <div class="nav nav-tabs" id="nav-tab" role="tablist"> -->
+     <!-- <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">Outstanding Packing - SPB</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" style="color: black;">Transaksi Spb</a> -->
+
+            <!-- <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
+              style="color: #007bff;  border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
               OutStanding PR
             </a>
             <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+              style="color: #007bff;  border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+              Purchase Order
+            </a>
+          </div>
+      </div>
+      
+    </div> -->
+
+
+      <!-- <div class="card-header" style="">
+        <div class="row">
+          <div class="nav nav-tabs col-12 justify-content-start" id="nav-tab" role="tablist" style="border-bottom: 0;">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
+              style="color: #007bff;  border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+              OutStanding PR
+            </a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
+              style="color: #007bff;  border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
               Purchase Order
             </a>
             <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false"
               style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
               PO Otorisasi
-            </a>
-          </div>
-        </div>
+            </a> -->
+          <!-- </div>
+        </div> -->
+      <!-- </div>  -->
+
+      <!-- <div class="card-header" style="padding-left: 0;">
+    <div class="row no-gutters">
+      <div class="nav col-12 justify-content-start" id="nav-tab" role="tablist" style="border-bottom: 0;">
+
+
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
+          style="color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px 0 0; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+          OutStanding PR
+        </a>
+
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
+          style="color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
+          Purchase Order
+        </a>
+
       </div>
+    </div>
+  </div> -->
 
       <div class="card-body" style="padding:0;">
-        <div class="tab-content" id="myTabContent">
+        <div class="tab-content" id="myTabContent" >
 
-          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
             <div class="row">
-              <div class="col-md-12" style='overflow:auto;'>
+              <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                  <table id="tabel" class="table table-bordered table-hover table-striped">
-                    <thead class="text-center bg-primary text-white">
+                  <div class="po-toolbar">
+                    <input type="search" id="poSearch1" class="po-search-inp" placeholder="Cari data">
+                    {{-- Jumlah baris per halaman. Nilai -1 = tampilkan semua data; angka itu
+                         dikirim apa adanya ke podataoutstandingpr, yang memperlakukannya
+                         sebagai "tanpa batas" - lihat POController@dataOutstandingPR. --}}
+                    <div class="po-len-wrap">
+                      <label for="poLen1">Tampilkan</label>
+                      <select id="poLen1" class="po-len-inp">
+                        <option value="10">10 data</option>
+                        <option value="25">25 data</option>
+                        <option value="50">50 data</option>
+                        <option value="100">100 data</option>
+                        <option value="-1">Semua data</option>
+                      </select>
+                    </div>
+                  </div>
+                  {{-- Bar kolom tersembunyi + tombol "Reset kolom" (diisi report-table.js).
+                       Satu elemen dipakai bersama #tabel dan #tabel2, dipindah lewat JS
+                       (poPindahBar) saat tab berganti - lihat poInitReportTableSekali().
+                       Sengaja di luar #tabel_wrapper supaya tidak ikut terhapus saat
+                       DataTables menulis ulang toolbar-nya. --}}
+                  <div id="rtBar"></div>
+                  <table id="tabel" class="data-table">
+                    <thead id="tabel_header" class="text-center ">
                       <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Kode Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Nama Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sat</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt PO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sisa PR</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Keterangan</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Out. SO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt Stock</th>
+                        <th style="padding: 4px 12px; " scope="col">Actions</th>
+                        <th style="padding: 4px 12px; " scope="col">No. Bukti</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px; " scope="col">Kode Barang</th>
+                        <th style="padding: 4px 12px; " scope="col">Nama Barang</th>
+                        <th style="padding: 4px 12px; " scope="col">Sat</th>
+                        <th style="padding: 4px 12px; " scope="col">Qnt</th>
+                        <th style="padding: 4px 12px; " scope="col">Qnt PO</th>
+                        <th style="padding: 4px 12px; " scope="col">Sisa PR</th>
+                        <th style="padding: 4px 12px; " scope="col">Keterangan</th>
+                        <th style="padding: 4px 12px; " scope="col">Out. SO</th>
+                        <th style="padding: 4px 12px; " scope="col">Qnt Stock</th>
+
                       </tr>
                     </thead>
                     <tbody id="tabel_data" class="text-left">
@@ -338,81 +777,104 @@
                               <i class="bi bi-plus-lg"></i>
                             </button>
                         </td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Nobukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("d/m/Y", strtotime($OutPR->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->kodebrg }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->NamaBrg }}</td>
-                        <td style='white-space:nowrap;' class='text-center'>{{ $OutPR->sat }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->Qnt, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QNTPO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->SisaPPL, 2) }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Keterangan }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntoutSO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntStock, 2) }}</td>
+                        <td style=''>{{ $OutPR->Nobukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($OutPR->Tanggal)) !!}</td>
+                        <td style=''>{{ $OutPR->kodebrg }}</td>
+                        <td style=''>{{ $OutPR->NamaBrg }}</td>
+                        <td style='' class='text-center'>{{ $OutPR->sat }}</td>
+                        <td style='' class='text-right'>{{ number_format($OutPR->Qnt, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($OutPR->QNTPO, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($OutPR->SisaPPL, 2) }}</td>
+                        <td style=''>{{ $OutPR->Keterangan }}</td>
+                        <td style='' class='text-right'>{{ number_format($OutPR->QntoutSO, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($OutPR->QntStock, 2) }}</td>
                       </tr>
                       @endforeach --}}
                     </tbody>
                   </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                    untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid" style="padding:0; margin:0; width:100%;">
+          <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab" >
 
-                  <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center bg-primary text-white">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Supplier</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Kirim</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. SO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PO. Cust</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">DPP Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PPN Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Grand Total Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto1</th>
+            <div class="row" >
+              <div class="col-md-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="poTglAwal" value="{!! $poTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="poTglAkhir" value="{!! $poTglAkhir !!}">
+                    </div>
+                    <input type="search" id="poSearch2" class="po-search-inp" placeholder="Cari data">
+                    <button class="po-btn-filter" type="button" id="poBtnFilter" onclick="$('#modalFilterPO').modal('show')">
+                      <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <div class="po-toolbar-act">
+                      <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+                      <button class="btn btn-primary" onclick="buttonAddPr()">+ Tambah PR</button>
+                    </div>
+                  </div>
+                  {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat poPindahBar(). --}}
+                  <table id="tabel2" class="data-table">
+                    <thead id="tabel2_header" class="text-center ">
+                        <tr>
+                        <th style="padding: 4px 12px; " scope="col">Actions</th>
+                        <th style="padding: 4px 12px; " scope="col">No Bukti</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px; " scope="col">Supplier</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal Kirim</th>
+                        <th style="padding: 4px 12px; " scope="col">No. SO</th>
+                        <th style="padding: 4px 12px; " scope="col">PO. Cust</th>
+                        <th style="padding: 4px 12px; " scope="col">DPP Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">PPN Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">Grand Total Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">Oto1</th>
+                        <th style="padding: 4px 12px; " scope="col">User Oto1</th>
+                        <th style="padding: 4px 12px; " scope="col">Tgl Oto1</th>
                         @if ($level > 1)
 
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto2</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto2</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto2</th>
+                        <th style="padding: 4px 12px; " scope="col">Oto2</th>
+                        <th style="padding: 4px 12px; " scope="col">User Oto2</th>
+                        <th style="padding: 4px 12px; " scope="col">Tgl Oto2</th>
                         @if ($level > 2)
 
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto3</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto3</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto3</th>
+                        <th style="padding: 4px 12px; " scope="col">Oto3</th>
+                        <th style="padding: 4px 12px; " scope="col">User Oto3</th>
+                        <th style="padding: 4px 12px; " scope="col">Tgl Oto3</th>
 
                           @if ($level > 3)
 
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto4</th>
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto4</th>
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto4</th>
+                          <th style="padding: 4px 12px; " scope="col">Oto4</th>
+                          <th style="padding: 4px 12px; " scope="col">User Oto4</th>
+                          <th style="padding: 4px 12px; " scope="col">Tgl Oto4</th>
 
                             @if ($level > 4)
 
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto5</th>
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto5</th>
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto5</th>
+                            <th style="padding: 4px 12px; " scope="col">Oto5</th>
+                            <th style="padding: 4px 12px; " scope="col">User Oto5</th>
+                            <th style="padding: 4px 12px; " scope="col">Tgl Oto5</th>
                             @endif
                           @endif
                         @endif
                         @endif
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Batal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Batal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Batal</th>
+                        <th style="padding: 4px 12px; " scope="col">Batal</th>
+                        <th style="padding: 4px 12px; " scope="col">User Batal</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal Batal</th>
+                        <th style="padding: 4px 12px; " scope="col">Status</th>
                       </tr>
                     </thead>
                     <tbody id="tabel2_data" class="text-left">
                       {{-- @foreach( $tempOutstanding3 as $PurchaseOrderData)
                       <tr>
-                        <td class="text-center"style='white-space:nowrap;'>
+                        <td class="text-center"style=''>
                             <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $PurchaseOrderData->NoBukti }}')">
                               <i class="bi bi-info"></i>
                             </button>
@@ -423,23 +885,23 @@
                               <i class="bi bi-key-fill"></i>
                             </button>
                         </td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("d/m/Y", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NamaCustSupp }}</td>
-                        <td style='white-space:nowrap;'>{!! date("d/m/Y", strtotime($PurchaseOrderData->tglKirim)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOSO }}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOPOCUST }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
+                        <td style=''>{{ $PurchaseOrderData->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->tglKirim)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOSO }}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
                           <!-- @if($PurchaseOrderData->IsOtorisasi1 == 1)
                             <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
                           @else
                             <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
                           @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
+                        <td style=''>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td style=''>
                           @if($PurchaseOrderData->TglOto1 === null)
                             -
                           @else
@@ -447,9 +909,9 @@
                           @endif
                         </td> -->
                         @if ($PurchaseOrderData->IsOtorisasi1 )
-                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
                         @endif
                         <td>{!! $PurchaseOrderData->TglOto1 ?  date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto1)) : '' !!}</td>
 
@@ -458,52 +920,53 @@
                         <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
                         @if ($level > 1)
                         @if ($PurchaseOrderData->IsOtorisasi2 )
-                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                @endif
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
                         <td>{!! $PurchaseOrderData->TglOto2 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto2)) : '' !!}</td>
 
                         <td>{{ $PurchaseOrderData->OtoUser2 }}</td>
                         @if ($level > 2)
                         @if ($PurchaseOrderData->IsOtorisasi3 )
-                                <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                @endif
-                                <td>{!! $PurchaseOrderData->TglOto3 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto3)) : '' !!}</td>
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto3 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto3)) : '' !!}</td>
 
-                                <td>{{ $PurchaseOrderData->OtoUser3 }}</td>
-                                @if ($level > 3)
-                                @if ($PurchaseOrderData->IsOtorisasi4 )
-                                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                        @else
-                                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                        @endif
-                                        <td>{!! $PurchaseOrderData->TglOto4 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto4)) : '' !!}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser3 }}</td>
+                        @if ($level > 3)
+                        @if ($PurchaseOrderData->IsOtorisasi4 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto4 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto4)) : '' !!}</td>
 
-                                        <td>{{ $PurchaseOrderData->OtoUser4 }}</td>
-                                        @if ($level > 4)
-                                        @if ($PurchaseOrderData->IsOtorisasi5 )
-                                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                                @else
-                                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                                @endif
-                                                <td>{!! $PurchaseOrderData->TglOto5 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto5)) : '' !!}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser4 }}</td>
+                        @if ($level > 4)
+                        @if ($PurchaseOrderData->IsOtorisasi5 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto5 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto5)) : '' !!}</td>
 
-                                                <td>{{ $PurchaseOrderData->OtoUser5 }}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser5 }}</td>
 
-                                          @endif
-                                  @endif
-                          @endif
-                  @endif
+                        @endif
+                        @endif
+                        @endif
+                        @endif
+
                           @if($PurchaseOrderData->Isbatal== 1)
                             <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
                           @else
                             <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
                           @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
+                        <td style=''>{{ $PurchaseOrderData->UserBatal }}</td>
+                        <td style=''>
                           @if($PurchaseOrderData->TglBatal === null)
                             -
                           @else
@@ -514,6 +977,11 @@
                       @endforeach --}}
                     </tbody>
                   </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                    untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                  </div>
 
                 </div>
               </div>
@@ -528,19 +996,19 @@
                   <table id="tabel3" class="table table-bordered table-hover table-striped table-responsive-lg">
                     <thead class="text-center bg-primary text-white">
                       <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Supplier</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Kirim</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. SO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PO. Cust</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">DPP Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PPN Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Grand Total Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized 1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized User</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized Date 1</th>
+                        <th style="padding: 4px 12px; " scope="col">Actions</th>
+                        <th style="padding: 4px 12px; " scope="col">No Bukti</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px; " scope="col">Supplier</th>
+                        <th style="padding: 4px 12px; " scope="col">Tanggal Kirim</th>
+                        <th style="padding: 4px 12px; " scope="col">No. SO</th>
+                        <th style="padding: 4px 12px; " scope="col">PO. Cust</th>
+                        <th style="padding: 4px 12px; " scope="col">DPP Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">PPN Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">Grand Total Rp</th>
+                        <th style="padding: 4px 12px; " scope="col">Authorized 1</th>
+                        <th style="padding: 4px 12px; " scope="col">Authorized User</th>
+                        <th style="padding: 4px 12px; " scope="col">Authorized Date 1</th>
                       </tr>
                     </thead>
                     <tbody id="tabel3_data" class="text-left">
@@ -554,23 +1022,23 @@
                               <i class="bi bi-key-fill"></i>
                             </button>
                         </td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("d/m/Y", strtotime($POOtorisasi->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NamaCustSupp }}</td>
-                        <td style='white-space:nowrap;'>{!! date("d/m/Y", strtotime($POOtorisasi->TglKirim)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NOSO }}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NOPOCUST }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
-                          @if($POOtorisasi->IsOtorisasi1 == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
+                        <td style=''>{{ $POOtorisasi->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->Tanggal)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->TglKirim)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NOSO }}</td>
+                        <td style=''>{{ $POOtorisasi->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
+                        @if($POOtorisasi->IsOtorisasi1 == 1)
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td style=''>{{ $POOtorisasi->OtoUser1 }}</td>
+                        <td style=''>
                           @if($POOtorisasi->TglOto1 === null)
                             -
                           @else
@@ -582,8 +1050,8 @@
                           @else
                             <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
                           @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
+                        <td style=''>{{ $POOtorisasi->UserBatal }}</td>
+                        <td style=''>
                           @if($POOtorisasi->TglBatal === null)
                             -
                           @else
@@ -660,12 +1128,11 @@
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="margin-top: -80px;">Form Purchase Order</h2>
+      <h2 style="">Form Purchase Order</h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
-          margin-top: -120px;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -680,7 +1147,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="margin-top:-60px;">
+    <div class="modal-body" style="">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
         <div class="col-md-3">
@@ -695,7 +1162,7 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Supplier" id="input_add_kodesupplier">
-                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" onclick="performSearchSupplier()">
+                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" style="height:32px;" onclick="performSearchSupplier()">
                   <i class="bi bi-plus"></i>
                 </button>
               </div>
@@ -724,8 +1191,6 @@
                 <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
-
-
 
           </div>
         </div>
@@ -766,8 +1231,7 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="input-group form-group">
-                    <input type="text" class="form-control" id="input_add_valas"  disabled>
-                    <button onclick="buttonAddListValas()" id="buttonAddListValas"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <select class="form-control" id="input_add_valas" onchange="onChangeValas()"></select>
                   </div>
                 </div>
               </div>
@@ -852,17 +1316,19 @@
           <hr/>
           <div class="row" style='margin-top:5px'>
             <div class="col-md-12 mt-2 text-left">
-              <button type="button" class="btn btn-primary btn-lg" style="
-                height: 30px;
+              <button type="button" class="btn btn-lg btn-show-hide-header btn-chip-biru" style="
+                height: 38px;
+                width: 38px;
                 margin-top: -35px;
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                text-transform: uppercase;
+                padding: 0;
+                border-radius: 8px;
+                font-size: 1.15rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                onclick="buttonShowHideHeader()" class="btn btn-secondary"><b>Show/Hide Header</b></button>
+                onclick="buttonShowHideHeader()" title="Show/Hide Header"><i class="bi bi-truck"></i></button>
             </div>
           </div>
             <div class="showhidemodalbodyaddmain mt-4" id="modalBodyAddMainHeader" style="display: none;">
@@ -875,9 +1341,12 @@
                         <label>Dikirim Ke</label>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <input class="form-control col-8" id="input_add_kodealamatkirim" readonly value='GMPL' >
-                      <button onclick="buttonAddListGudang()" id="buttonAddListGudang"  style="height:32px;" class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <select class="form-control" id="input_add_kodealamatkirim" onchange="onChangeKodeAlamatKirim()">
+                          <option value="GMPL">GMPL</option>
+                        </select>
+                      </div>
                     </div>
                     <div class="col-md-12">
                       <div class="input-group form-group">
@@ -894,9 +1363,11 @@
                         <label>Ekspedisi</label>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <input class="form-control col-8" id="input_add_kodeekspedisi" value ='-'readonly>
-                      <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" style="height:32px;" value = '-' class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <div class="col-md-12">
+                      <div class="input-group form-group">
+                        <input class="form-control" id="input_add_kodeekspedisi" value ='-' readonly>
+                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" style="height:32px;" value = '-' class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                      </div>
                     </div>
                     <div class="col-md-12">
                       <div class="form-group">
@@ -922,51 +1393,16 @@
                 <div class="col-md-3">
                   <div class="row">
 
-                    <!-- <div class="col-md-12">
-                      <div class="row">
-                        <div class="col-4">
-                          <div class="form-group"> -->
-                            <!-- <label>No SO</label> -->
-                          <!-- </div>
-                        </div>
-                        <div class="col-8" style="margin-top:-5px">
-                          <div class="input-group form-group"> -->
-                            <input type="hidden" class="form-control" id="input_add_noso" value='-' readonly>
-                            <!-- <button onclick="buttonAddListNoSO()" id="buttonAddListNoSo" style="height:32px;" class="btn btn-primary btn-sm text-right">
-                              <i class="bi bi-plus"></i>
-                            </button> -->
-                          <!-- </div>
-                        </div>
-                      </div> -->
-                    <!-- </div> -->
-
-                    <!-- <div class="col-md-12">
-                      <div class="row">
-                        <div class="col-4">
-                          <div class="form-group"> -->
-                            <!-- <label>No. PO Cust</label> -->
-                          <!-- </div>
-                        </div> -->
-                        <!-- <div class="col-8">
-                          <div class="form-group"> -->
-                            <input type="hidden" class="form-control" id="input_add_nopocust" value ='-' readonly>
-                          <!-- </div>
-                        </div>
-                      </div>
-                    </div> -->
+                    {{-- Field No. SO dan No. PO Cust dipindah ke form Add Item
+                         (lihat #addAddItem), id-nya tetap sama supaya semua
+                         script lama tidak berubah. --}}
 
                     <div class="col-md-12">
-                      <div class="row">
-                        <div class="col-4">
-                          <div class="form-group">
-                            <label>Tgl Kirim</label>
-                          </div>
-                        </div>
-                        <div class="col-8">
-                          <div class="form-group">
-                            <input type="date" class="form-control text-left" id="input_add_tanggalkirim" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
-                          </div>
-                        </div>
+                      <label>Tgl Kirim</label>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="form-group" style="margin-top: 14px">
+                        <input type="date" class="form-control text-left" id="input_add_tanggalkirim" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
                       </div>
                     </div>
 
@@ -1091,12 +1527,15 @@
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead id='tabel_data_header' class="text-center bg-primary text-white">
+            {{-- Pakai .data-table (didefinisikan di layout newmasterx) supaya tampilannya
+                 persis sama dengan tabel di page1 (#tabel/#tabel2): tanpa garis kotak
+                 per sel, hanya garis bawah tipis per baris. --}}
+            <table id="tabel_add" class="data-table">
+              <thead id='tabel_data_header' class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Qnt</th>
+                  <th style="padding: 4px 12px;" scope="col">Qty</th>
                   <th style="padding: 4px 12px;" scope="col">Sat</th>
                   <th style="padding: 4px 12px;" scope="col">Harga</th>
                   <th style="padding: 4px 12px;" scope="col">Diskon</th>
@@ -1135,7 +1574,7 @@
         </div>
 
         <div class="row">
-          <div class="col-md-11 mt-2 text-right">
+          <!-- <div class="col-md-11 mt-2 text-right">
             <button type="button" id='buttonTambahSOAll' class="btn btn-primary btn-lg" style="
               height: 30px;
               padding: 4px 12px;
@@ -1146,9 +1585,9 @@
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
               onclick="buttonTambahSOAll()" class="btn btn-secondary"><b>+ Tambah dari SO</b></button>
-          </div>
-          <div class="col-md-1 mt-2 text-right">
-            <button type="button" id='buttonTambahItem' class="btn btn-primary btn-lg" style="
+          </div> -->
+          <div class="col-md-12 mt-2 text-right">
+            <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1157,7 +1596,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
           </div>
         </div>
 
@@ -1166,256 +1605,170 @@
           <hr/>
 
             <div class="row">
-              <div class="col-4">
-                <h4 id="h4AddAddItem" style="margin-left:-35px;">Add Item</h4>
-                <h4 id="h4AddEditItem" style="margin-left:-35px;">Edit Item</h4>
+              <div class="col-12">
+                <h4 id="h4AddAddItem">Add Item</h4>
+                <h4 id="h4AddEditItem">Edit Item</h4>
               </div>
             </div>
 
-          <div class="row" style='margin-top:-30px'>
+          <div class="row">
             <div class="col-md-12">
-                <div class="row">
-              <!-- No Penyerahan -->
 
-              <div class="col-md-3">
-                <div class="row">
-                  <!-- No Penyerahan -->
-                  <div class="col-md-12">
-                    <div class="row" hidden>
-                      <div class="col-6">
-                        <div class="form-group">
-                          <label>Jasa</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="input-group form-group">
-                          <select id="input_add_add_jasa" class="form-control form-select-lg mb-3" disabled>
-                            <option value=0 selected>Tidak</option>
-                            <option value=1>Iya</option>
-                          </select>
-                        </div>
+              {{-- Field tersembunyi (jasa, FOC, No. PNW PO, No/Urut PPL).
+                   Urutannya sengaja tetap di atas: ada script yang memakai
+                   document.getElementById("buttonAddAddListBarang") dan yang
+                   pertama ketemu di DOM harus tetap tombol No. PNW PO ini. --}}
+              <div class="row" hidden>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Jasa</label>
+                    <select id="input_add_add_jasa" class="form-control" disabled>
+                      <option value=0 selected>Tidak</option>
+                      <option value=1>Iya</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group"> {{-- nama lama : nopenyerahan --}}
+                    <label>FOC</label>
+                    <select id="input_add_add_foc" onChange="LockFreeOfCharge()" class="form-control">
+                      <option value=0>Tidak</option>
+                      <option value=1>Iya</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>No. PNW PO</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" value="-" id="input_add_add_nopnwpo" readonly>
+                      <div class="input-group-append">
+                        <button onclick="buttonAddAddListPWO()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm" tabindex="1">
+                          <i class="bi bi-plus"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="row">
-                  <!-- No Penyerahan -->
-                  <div class="col-md-12">
-                    <div class="row" hidden>
-                      <div class="col-4">
-                        <div class="form-group">
-                          <label>FOC</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="input-group form-group"> {{-- nama lama : nopenyerahan --}}
-                          <select id="input_add_add_foc" onChange="LockFreeOfCharge()" class="form-control form-select-lg mb-3">
-                            <option value=0>Tidak</option>
-                            <option value=1>Iya</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <input type="text" min="1" max="100" class="form-control" id="input_add_add_noPPL" tabindex="1"> {{-- nama lama : satuanproduk --}}
+                    <input type="text" min="1" max="100" class="form-control" id="input_add_add_urutPPL" tabindex="1"> {{-- nama lama : satuanproduk --}}
                   </div>
                 </div>
               </div>
 
-              <div class="col-md-3" style="margin-left:-50px;">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label>QTY</label>
+              <div class="row">
+
+                {{-- Kolom kiri : identitas barang --}}
+                <div class="col-md-6">
+
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">+ Dari</label>
+                    <div class="col-md-4">
+                      <select id="input_add_add_outstanding" class="form-control" onchange="onChangeOutstanding()">
+                        <option value="PR" selected>PR</option>
+                        <option value="SO">SO</option>
+                        <option value="FOC">FOC</option>
+                      </select>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
+
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Kode Barang</label>
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <input type="text" class="form-control text-left" id="input_add_add_kodebarang">
+                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddAddListBarang" style="height:32px;" onclick="performSearch()" tabindex="1">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="col-md-5">
+                      <input type="text" class="form-control text-left" id="input_add_add_namabarangasli" placeholder="Nama Barang" readonly>
+                    </div>
+                  </div>
+
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Nama Barang</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control" id="input_add_add_namabarang">
+                    </div>
+                  </div>
+
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Note</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control" id="input_add_add_keteranganbarang">
+                    </div>
+                  </div>
+
+                  {{-- Label No. SO / No. PR ikut pilihan Outstanding di atas,
+                       lihat onChangeOutstanding(). Field ini diisi otomatis
+                       jadi dikunci (readonly + disabled). --}}
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0" id="labelAddAddNoso">No. PR</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control" id="input_add_noso" value="-" readonly disabled>
+                    </div>
+                  </div>
+
+                </div>
+
+                {{-- Kolom kanan : qty, harga, diskon --}}
+                <div class="col-md-6">
+
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">QTY</label>
+                    <div class="col-md-3">
                       <input type="text" id="input_add_add_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onblur="cekQntStock()" tabindex="5">
                     </div>
-                  </div>
-                </div>
-              </div>
-
-                <div class="col-md-3">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label>Satuan</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <select id="input_add_add_nosat" class="form-control form-select-lg mb-3">
+                    <label class="col-md-3 mb-0">Satuan</label>
+                    <div class="col-md-3">
+                      <select id="input_add_add_nosat" class="form-control">
                         <option value=0 selected>Tidak</option>
                       </select>
                     </div>
                   </div>
-                </div>
 
-              </div>
-
-                <div class="row">
-                  <!-- Barang dan Nama Produk -->
-                  <div class="col-md-6">
-                    <div class="row">
-                      <div class="col-3" style="margin-top:-25px;">
-                        <div class="form-group" hidden>
-                          <label>No. PNW PO</label>
-                        </div>
-                      </div>
-                      <div class="col-md-8" style="margin-top:-25px;">
-                        <div class="input-group form-group" hidden>
-                          <input type="text" class="form-control" value="-" id="input_add_add_nopnwpo" readonly>
-                          <button onclick="buttonAddAddListPWO()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" tabindex="1">
-                            <i class="bi bi-plus"></i>
-                          </button>
-                        </div>
-                      </div>
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Harga</label>
+                    <div class="col-md-3">
+                      <input type="text" id="input_add_add_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()" tabindex="6">
                     </div>
-
-                    <!-- Kode Barang and Nama Barang in same row, halved -->
-                    <div class="row">
-                      <!-- Kode Barang - Left Half -->
-                      <div class="col-md-6" style="margin-top:-12px;">
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <label>Kode Barang</label>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="input-group form-group">
-                              <input type="text" class="form-control" id="input_add_add_kodebarang">
-                              <button onclick="performSearch()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" tabindex="1">
-                                  <i class="bi bi-plus"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Nama Barang - Right Half -->
-                      <div class="col-md-5" style="margin-top:-12px;">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="input_add_add_namabarangasli" readonly>
-                        </div>
-                      </div>
-
-                    </div>
-
-                    <!-- Second Nama Barang (kept separate as requested) -->
-                    <div class="row">
-                      <div class="col-3" style="margin-top:-12px;">
-                        <div class="form-group">
-                          <label>Nama Barang</label>
-                        </div>
-                      </div>
-                      <div class="col-md-8" style="margin-top:-12px;">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="input_add_add_namabarang">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-3" style="margin-top:-12px;">
-                        <div class="form-group">
-                          <label>Note</label>
-                        </div>
-                      </div>
-                      <div class="col-md-8" style="margin-top:-12px;">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="input_add_add_keteranganbarang">
-                        </div>
-                      </div>
+                    <label class="col-md-3 mb-0">Harga Awal</label>
+                    <div class="col-md-3">
+                      <input type="text" id="input_add_add_hargaAwal" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" tabindex="6">
                     </div>
                   </div>
 
-                <div class="col-md-6" style="margin-left:-50px;">
-                  <div class="row">
-                    <!-- Harga - Left Half -->
-                    <div class="col-md-6" style="margin-top:-17px;">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Harga</label>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <input type="text" id="input_add_add_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()" tabindex="6">
-                          </div>
-                        </div>
-                      </div>
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Disc(%)</label>
+                    <div class="col-md-3">
+                      <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen1" value=0 onChange='calculateDiscRp()' tabindex="8">
                     </div>
-
-                    <!-- Harga - Left Half -->
-                    <div class="col-md-6" style="margin-top:-17px;">
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <label>Harga Awal</label>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
-                           <input type="text" id="input_add_add_hargaAwal" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" tabindex="6">
-                          </div>
-                        </div>
-                      </div>
+                    <div class="col-md-3">
+                      <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen2" value=0 onChange='calculateDiscRp()' tabindex="9">
                     </div>
-
-                    <!-- Disc RP - Right Half -->
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-3" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <label>Disc(%)</label>
-                      </div>
-                    </div>
-                    <div class="col-md-3" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen1" value=0 onChange='calculateDiscRp()' tabindex="8">
-                      </div>
-                    </div>
-                    <div class="col-md-3" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen2" value=0 onChange='calculateDiscRp()' tabindex="9">
-                      </div>
-                    </div>
-                    <div class="col-md-3" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen3" value=0 onChange='calculateDiscRp()' tabindex="10">
-                      </div>
+                    <div class="col-md-3">
+                      <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen3" value=0 onChange='calculateDiscRp()' tabindex="10">
                     </div>
                   </div>
 
-
-                  <div class="row">
-                    <div class="col-md-3" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <label>Disc RP</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6" style="margin-top:-12px;">
-                      <div class="form-group">
-                        <input type="text" id="input_add_add_discrp" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="reverseCalculateDiscPercent()"  tabindex="7">
-                      </div>
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">Disc RP</label>
+                    <div class="col-md-3">
+                      <input type="text" id="input_add_add_discrp" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="reverseCalculateDiscPercent()" tabindex="7">
                     </div>
                   </div>
 
-                </div>
+                  <div class="form-row align-items-center mb-2">
+                    <label class="col-md-3 mb-0">No. PO Cust</label>
+                    <div class="col-md-9">
+                      <input type="text" class="form-control" id="input_add_nopocust" value="-" readonly disabled>
+                    </div>
+                  </div>
 
-                <div class="col-md-1" style="margin-top:-10px;" hidden>
-                  <div class="form-group">
-                    <input type="text" min="1" max="100" class="form-control" id="input_add_add_noPPL" tabindex="1"> {{-- nama lama : satuanproduk --}}
-                  </div>
-                </div>
-                <div class="col-md-1" style="margin-top:-10px;" hidden>
-                  <div class="form-group">
-                    <input type="text" min="1" max="100" class="form-control" id="input_add_add_urutPPL" tabindex="1"> {{-- nama lama : satuanproduk --}}
-                  </div>
                 </div>
 
               </div>
@@ -1433,8 +1786,8 @@
 
                   <div class="col-md-12 mb-4" style="overflow:auto;">
                     <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                      <table id="tabel_add_harga_terakhir" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
+                      <table id="tabel_add_harga_terakhir" class="data-table">
+                        <thead class="text-center">
                           <tr>
                             <th style="padding: 4px 12px;" scope="col">Supplier</th>
                             <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -1480,8 +1833,8 @@
 
                   <div class="col-md-12 mb-4" style="overflow:auto;">
                     <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                      <table id="tabel_add_stock_proyeksi" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
+                      <table id="tabel_add_stock_proyeksi" class="data-table">
+                        <thead class="text-center">
                           <tr>
                             <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                             <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
@@ -1512,9 +1865,9 @@
           </div>
 
           <div class="row mt-2">
-            <div class="col-md-12 text-right" style="margin-top:-20px;">
+            <div class="col-md-12 text-right">
 
-              <button type="button" class="btn btn-success btn-lg" style="
+              <button type="button" class="btn btn-lg btn-histori-harga" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1523,9 +1876,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableHargaTerakhir()" class="btn btn-secondary">Histori Harga</button>
+              onclick="showTableHargaTerakhir()">Histori Harga</button>
 
-              <button type="button" class="btn btn-info btn-lg" style="
+              <button type="button" class="btn btn-lg btn-stock-proyeksi" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1534,9 +1887,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableStockProyeksi()" class="btn btn-secondary">Stock Proyeksi</button>
+              onclick="showTableStockProyeksi()">Stock Proyeksi</button>
 
-              <button type="button" class="btn btn-danger btn-lg" style="
+              <button type="button" class="btn btn-lg btn-batal-add" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1545,9 +1898,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="closeShowHideAdd()" class="btn btn-secondary">Batal</button>
+              onclick="closeShowHideAdd()">Batal</button>
 
-              <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
+              <button type="button" id="submitAddAdd" class="btn btn-lg btn-chip-biru" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1556,7 +1909,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()" class="btn btn-secondary">Simpan Data</button>
+              onclick="submitAddAdd()">Simpan Data</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
               height: 30px;
@@ -1615,7 +1968,9 @@
 
             </div>
 
+
             <div class="col-md-4">
+
 
             <div class="row">
               <div class="col-9">
@@ -2230,17 +2585,19 @@
 <hr/>
 <div class="row ">
 <div class="col-md-12 mt-2 text-left">
-  <button type="button" class="btn btn-primary btn-lg" style="
-  height: 30px;
+  <button type="button" class="btn btn-lg btn-show-hide-header btn-chip-biru" style="
+  height: 38px;
+  width: 38px;
   margin-top: -40px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-  onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
+  onclick="buttonShowHideHeaderDetail()" title="Show/Hide Header"><i class="bi bi-truck"></i></button>
 </div>
 </div>
   <div class="mt-4" id="modalBodyDetailMainHeader">
@@ -2714,10 +3071,10 @@
 
 <div id="page4" class="container-fluid" style="display: none" >
       <div class="row">
-        <div class="col-6 text-left" style='margin-top: -85px;'>
+        <div class="col-6 text-left" style=''>
           <h2>Referensi PR</h2>
         </div>
-        <div class="col-6 text-right" style='margin-top:-70px;'>
+        <div class="col-6 text-right" style=''>
           <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
           padding: 4px 12px;
@@ -2777,7 +3134,6 @@
           <th style="padding: 4px 12px;" scope="col">Merk</th>
           <th style="padding: 4px 12px;" scope="col">PartNumber</th>
           <!-- <th scope="col">Actions</th> -->
-
         </tr>
       </thead>
 
@@ -2859,6 +3215,7 @@
         </button>
       </div>
 
+
         <!-- <h1>Tes Modal</h1> -->
         <div class="modal-body" >
 
@@ -2869,6 +3226,7 @@
           <div class="col-md-6">
 
             <div class="row">
+
 
             <!-- <div class="col-md-12">
               <div class="form-group">
@@ -2917,11 +3275,13 @@
               </div>
             </div> -->
 
+
             <!-- <div class="col-md-4" style="margin-top:-10px;">
               <div class="form-group">
                 <label>No PO</label>
               </div>
             </div> -->
+
 
           <!-- <div class="col-md-8" style="margin-top:-10px;">
             <div class="input-group form-group">
@@ -2987,6 +3347,7 @@
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
                 <th style="padding: 4px 12px;" scope="col">Qty</th>
                 <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                <!-- <th scope="col">Actions</th> -->
 
               </tr>
             </thead>
@@ -3042,6 +3403,62 @@
 
 <!-- page3 end input_add -->
 
+<!-- modal filter status Purchase Order -->
+<div class="modal fade rt-filter" id="modalFilterPO">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-funnel"></i>
+          Filter Purchase Order
+          <span class="rt-active-badge" id="poFilterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterPO').modal('hide')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Penyaringan Data</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="poModalStatus">Status</label>
+              <select class="rt-native" id="poModalStatus">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+                <option value="Sebagian">Sebagian</option>
+                <option value="Batal">Batal</option>
+              </select>
+            </div>
+            <div>
+              <label class="rt-field-label" for="poModalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="poModalOtorisasi">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="poResetFilter()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+            onclick="$('#modalFilterPO').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="poTerapkanFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- end modal filter status Purchase Order -->
+
 <!-- start modal print-->
 <div class="modal fade" id="modalPrint" tabindex="-1">
     <div class="modal-dialog modal-sm">
@@ -3069,12 +3486,87 @@
   </div>
 <!-- end modal print-->
 
+{{--
+  BACKUP - modal "Table Setting" lama (tombol panah naik/turun + checkbox "Tampil").
+  Digantikan header tabel interaktif: seret judul kolom untuk mengurutkan, roda gigi
+  untuk sembunyikan kolom / atur desimal, dan bar #rtBar1 / #rtBar2 di atas tabel
+  untuk memunculkan kembali kolom dan me-reset susunannya.
+  Disimpan sebagai comment untuk referensi, tidak dipakai lagi.
+
+<div class="modal fade" id="formHeaderTable" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Table Setting</h5>
+        <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
+          data-dismiss="modal" aria-label="Close"
+          style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+          <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid mt-4">
+
+
+
+          <div class="row">
+            <div class="table-responsive">
+            <table id="tabel_headertable" class="table table-bordered table-striped">
+              <thead id="tabel_header_headertable" class="text-center bg-primary text-white">
+                <tr>
+                  <th scope="col">Actions</th>
+                  <th scope="col">Kolom</th>
+                  <th scope="col">Tampil</th>
+                </tr>
+              </thead>
+              <tbody id="tabel_data_headertable" class="text-left">
+                <tr>
+                  <td class="text-center" colspan="3">Silakan ketik pencarian</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          </div>
+
+
+
+        </div>
+
+        <div class="row ">
+          <div class="col-md-12 text-right">
+            <div class="row">
+              <div class="col-md-12">
+
+              </div>
+            </div>
+
+          <button type="button" class="btn btn-primary" onclick="saveHeaderTable()" class="btn btn-secondary"  >Save</button>
+      </div>
+      </div>
+      </div>
+
+
+
+    </div>
+  </div>
+</div>
+--}}
+
 @include('purchasing/modals/modalPOAdd')
 
 @endsection
 
 @section('js')
+{{-- window.ReportTable: header tabel interaktif (drag kolom, menu roda gigi, bar kolom
+     tersembunyi, tombol "Reset kolom"). Dimuat di halaman ini saja, bukan di layout
+     purchasing/newmasterx, supaya halaman purchasing yang lain tidak ikut terpengaruh.
+     File-nya berupa IIFE ber-guard, jadi aman meski dimuat lebih dari sekali. --}}
+<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
+
+let urutHeaderTable = 0
 let isoto1oto = 0
 let dataTableAdd = []
 let dataTableAddPr = []
@@ -3090,6 +3582,8 @@ let dataRefreshOutstanding2 = []
 let dataRefreshPenerimaan = []
 
 let listAlamatKirim = []
+
+let listValas = []
 
 let selectedNoBukti = ''
 
@@ -3117,7 +3611,87 @@ let tipeformitem = ''
     );
   });
 
+  /* BACKUP - penyimpan & pengurut kolom milik modal "Table Setting" lama.
+     Digantikan window.doSimpanHeader + fallback bawaan report-table.js.
+  function saveHeaderTable () {
+    let href = window.location.pathname.split('/').filter(Boolean)[1];
+    let _token = $("#_token").val();
+    // console.log()
 
+    console.log(JSON.stringify(xisshown))
+    console.log(JSON.stringify(xheadertableheader))
+    console.log(JSON.stringify(xheadertablevalue))
+    console.log(JSON.stringify(xisnumeric))
+    console.log(href)
+    $.ajax({
+      url: "{!! url('saveheadertable') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        header : JSON.stringify(xheadertableheader) ,
+         isnumber : JSON.stringify(xisnumeric) ,
+         tipe : '',
+           value : JSON.stringify(xheadertablevalue) ,
+            isshown : JSON.stringify(xisshown) ,
+
+          href : href,
+          urut: urutHeaderTable
+      },
+      success: function(res) {
+        loadAll()
+          $("#formHeaderTable").modal('toggle')
+
+      }})
+
+
+  }
+  function buttonChangeOrder (type = 0, index =0) {
+    console.log("buttonChangeOrder")
+    console.log(type , index)
+
+    // let xisshown = []
+    // let xheadertableheader = []
+    // let xheadertablevalue = []
+    // let xisnumeric = []
+    if (type == 0) {
+      //naikkin posisi -1
+      let tempisshown =  xisshown[index]
+      let tempheadertableheader =  xheadertableheader[index]
+      let tempheadertablevalue =  xheadertablevalue[index]
+      let tempisnumeric =  xisnumeric[index]
+
+      xisshown[index] = xisshown[index - 1]
+      xheadertableheader[index] = xheadertableheader[index - 1]
+      xheadertablevalue[index] = xheadertablevalue[index - 1]
+      xisnumeric[index] = xisnumeric[index - 1]
+
+      xisshown[index - 1] = tempisshown
+      xheadertableheader[index - 1] = tempheadertableheader
+      xheadertablevalue[index - 1] = tempheadertablevalue
+      xisnumeric[index - 1] = tempisnumeric
+      refreshHeaderTable()
+    } else {
+      // nurunin posisi +1
+      let tempisshown =  xisshown[index]
+      let tempheadertableheader =  xheadertableheader[index]
+      let tempheadertablevalue =  xheadertablevalue[index]
+      let tempisnumeric =  xisnumeric[index]
+
+      xisshown[index] = xisshown[index + 1]
+      xheadertableheader[index] = xheadertableheader[index + 1]
+      xheadertablevalue[index] = xheadertablevalue[index + 1]
+      xisnumeric[index] = xisnumeric[index + 1]
+
+      xisshown[index + 1] = tempisshown
+      xheadertableheader[index + 1] = tempheadertableheader
+      xheadertablevalue[index + 1] = tempheadertablevalue
+      xisnumeric[index + 1] = tempisnumeric
+      refreshHeaderTable()
+
+    }
+  }
+  END BACKUP */
 
   function onchangecheckboxtambahso (i) {
     console.log("onchangecheckboxtambahso" , i)
@@ -3188,6 +3762,7 @@ function buttonAddPr () {
       });
       document.getElementById("tabel_data_refpr").innerHTML = rowTable
 
+
       $('#page1').hide();
       $('#page4').show();
     }
@@ -3225,9 +3800,11 @@ function submitAddPr () {
       console.log("after ===========")
     }})
 
+
+
 }
 
-function buttonOtorisasi (nobukti, isoto1) {
+function buttonOtorisasi (nobukti , isoto1) {
   console.log(nobukti , isoto1)
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
@@ -3289,7 +3866,7 @@ function buttonOtorisasi (nobukti, isoto1) {
     }
   });
 
-  // Handle confirm/otorisasi button � unbind first to avoid duplicate handlers
+  // Handle confirm/otorisasi button   unbind first to avoid duplicate handlers
   $('#btn-confirm-otorisasi').off('click').on('click', function() {
 
       let _token = $("#_token").val();
@@ -3323,9 +3900,27 @@ function buttonOtorisasi (nobukti, isoto1) {
             `
           }
 
+          // });
           console.log(i, mssg)
 
+
+
+
+          // alertify.confirm('Konfirmasi Otorisasi', 'Apakah yakin ingin menghapus item ' + String(i) + ' ?',
+          //     function() {
+          //       console.log('yes')
+          //       let xtempx = 1;
+          //     }
+          //   ,function(){
+          //     console.log('no')
+          //       let xtempx = 0;
+          //   };
+          //   if (xtempx == 0) {
+          //     break;
+          //   })
+
         }
+
 
         console.log('mssg sini' , mssg)
         if (mssg) {
@@ -3366,6 +3961,9 @@ function buttonOtorisasi (nobukti, isoto1) {
             //   break;
             // })
 
+
+
+
         } else {
           console.log('else')
           // return
@@ -3403,6 +4001,11 @@ function buttonOtorisasi (nobukti, isoto1) {
         alertify.warning('Terjadi kesalahan silahkan refresh browser');
       }
     });
+
+
+    // return
+
+
 
   });
 }
@@ -5011,6 +5614,7 @@ function buttonAddAddItem () {
   $('.showhide').hide();
 
   $('#divhargaterakhir').hide();
+  $('#divStockProyeksi').hide();
 
   cleanFormAddAdd()
   document.getElementById("buttonAddAddListBarang").disabled = false
@@ -5086,6 +5690,7 @@ function buttonAddEditItem (i) {
 
   document.getElementById("input_add_add_jasa").value = tempAddEdit.Isjasa
   document.getElementById("input_add_add_foc").value = tempAddEdit.PFOC
+  syncOutstandingDariFOC()
   document.getElementById("input_add_add_nopnwpo").value = tempAddEdit.NoPNW
   document.getElementById("input_add_add_kodebarang").value = tempAddEdit.KodeBrg
   document.getElementById("input_add_add_namabarangasli").value = tempAddEdit.NamaBrg
@@ -5228,11 +5833,9 @@ function buttonAddListPIC () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPIC('${item.kodepic}' , '${item.nama}')">
         <td>${item.kodepic}</td>
         <td>${item.nama}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPIC('${item.kodepic}' , '${item.nama}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -5274,7 +5877,7 @@ function buttonAddAddListPWO () {
     },
     success: function(res) {
       let rowTable = `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPWO('-' , '-')">
           <td>-</td>
           <td>-</td>
           <td>-</td>
@@ -5283,11 +5886,10 @@ function buttonAddAddListPWO () {
           <td>-</td>
           <td>-</td>
           <td>-</td>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPWO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td>
         </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPWO('${item.no_bukti}' , '${item.tanggal}')">
           <td>${item.no_bukti}</td>
           <td>${item.tanggal}</td>
           <td>${item.supplier}</td>
@@ -5296,7 +5898,6 @@ function buttonAddAddListPWO () {
           <td>${item.qty}</td>
           <td>${item.satuan}</td>
           <td>${item.harga}</td>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPWO('${item.no_bukti}' , '${item.tanggal}')" type="button" ><i class="bi bi-plus"></i></button></td>
         </tr>`
       });
 
@@ -5351,22 +5952,18 @@ function buttonAddAddListBarang () {
         dataAddAddListItem = res
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
-          <tr>
-            <td style="white-space:nowrap;" class="text-center">
-              <button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangNonFOC(${i})" type="button" ><i class="bi bi-plus"></i>
-              </button>
-            </td>
-            <td style="white-space:nowrap;">${item.KodeBrg}</td>
-            <td style="white-space:nowrap;">${item.NamaBrg}</td>
-            <td style="white-space:nowrap;">${item.PartNumber}</td>
-            <td style="white-space:nowrap;">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
-            <td style="white-space:nowrap;">${item.Sat}</td>
-            <td style="white-space:nowrap;">${item.Qnt}</td>
-            <td style="white-space:nowrap;">${item.QntPO}</td>
-            <td style="white-space:nowrap;">${item.QntBatalPO}</td>
-            <td style="white-space:nowrap;">${item.SisaPPL}</td>
-            <td style="white-space:nowrap;">${item.NoBukti}</td>
-            <td style="white-space:nowrap;">${item.NosoCust}</td>
+          <tr class="pick-row" onclick="buttonAddAddPickBarangNonFOC(${i})">
+            <td style="">${item.KodeBrg}</td>
+            <td style="">${item.NamaBrg}</td>
+            <td style="">${item.PartNumber}</td>
+            <td style="">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
+            <td style="">${item.Sat}</td>
+            <td style="">${item.Qnt}</td>
+            <td style="">${item.QntPO}</td>
+            <td style="">${item.QntBatalPO}</td>
+            <td style="">${item.SisaPPL}</td>
+            <td style="">${item.NoBukti}</td>
+            <td style="">${item.NosoCust}</td>
           </tr>`
         });
 
@@ -5409,22 +6006,18 @@ function buttonAddAddListBarang () {
         dataAddAddListItem = res
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
-          <tr>
-            <td style="white-space:nowrap;" class="text-center">
-              <button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangNonFOC(${i})" type="button" ><i class="bi bi-plus"></i>
-              </button>
-            </td>
-            <td style="white-space:nowrap;">${item.KodeBrg}</td>
-            <td style="white-space:nowrap;">${item.NamaBrg}</td>
-            <td style="white-space:nowrap;">${item.PartNumber}</td>
-            <td style="white-space:nowrap;">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
-            <td style="white-space:nowrap;">${item.Sat}</td>
-            <td style="white-space:nowrap;">${item.Qnt}</td>
-            <td style="white-space:nowrap;">${item.QntPO}</td>
-            <td style="white-space:nowrap;">${item.QntBatalPO}</td>
-            <td style="white-space:nowrap;">${item.SisaPPL}</td>
-            <td style="white-space:nowrap;">${item.NoBukti}</td>
-            <td style="white-space:nowrap;">${item.NosoCust}</td>
+          <tr class="pick-row" onclick="buttonAddAddPickBarangNonFOC(${i})">
+            <td style="">${item.KodeBrg}</td>
+            <td style="">${item.NamaBrg}</td>
+            <td style="">${item.PartNumber}</td>
+            <td style="">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
+            <td style="">${item.Sat}</td>
+            <td style="">${item.Qnt}</td>
+            <td style="">${item.QntPO}</td>
+            <td style="">${item.QntBatalPO}</td>
+            <td style="">${item.SisaPPL}</td>
+            <td style="">${item.NoBukti}</td>
+            <td style="">${item.NosoCust}</td>
           </tr>`
         });
 
@@ -5468,14 +6061,11 @@ function buttonAddAddListBarang () {
         dataAddAddListItem = res
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
-          <tr>
-            <td style="white-space:nowrap;" class="text-center">
-              <button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangFOCPlus(${i})" type="button" ><i class="bi bi-plus"></i></button>
-            </td>
-            <td style="white-space:nowrap;">${item.Kodebrg}</td>
-            <td style="white-space:nowrap;">${item.NamaBrg}</td>
-            <td style="white-space:nowrap;">${item.partNumber}</td>
-            <td style="white-space:nowrap;">${item.NamaMerk}</td>
+          <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
+            <td style="">${item.Kodebrg}</td>
+            <td style="">${item.NamaBrg}</td>
+            <td style="">${item.partNumber}</td>
+            <td style="">${item.NamaMerk}</td>
           </tr>`
         });
 
@@ -5515,10 +6105,9 @@ function buttonAddAddListBarang () {
         dataAddAddListItem = res
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
-          <tr>
-            <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangNonFOCPlus(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+          <tr class="pick-row" onclick="buttonAddAddPickBarangNonFOCPlus(${i})">
             <td>${item.KodeBrg}</td>
-            <td style="white-space:nowrap;">${item.NamaBrg}</td>
+            <td style="">${item.NamaBrg}</td>
             <td>${item.Qnt}</td>
             <td>${item.Qnt2}</td>
             <td>${item.Sat}</td>
@@ -5717,7 +6306,13 @@ function buttonTambahSOAll () {
     alertify.warning("Data belum lengkap")
     return
   }
-  $('#tabel_add_list_noSo').DataTable().destroy();
+  // Tabelnya #tabel_tambahsoall (di modal #formTambahSo), BUKAN #tabel_add_list_noSo:
+  // baris di bawah membangun 8 sel (checkbox + 7 kolom) dan hanya thead
+  // #tabel_tambahsoall yang punya 8 kolom. Sebelumnya fungsi ini menulis ke
+  // #tabel_data_add_list_noSo yang cuma 3 kolom, sehingga barisnya melebihi header.
+  if ($.fn.DataTable.isDataTable('#tabel_tambahsoall')) {
+    $('#tabel_tambahsoall').DataTable().destroy();
+  }
   $.ajax({
     url: "{!! url('polistnoso') !!}",
     type: "post",
@@ -5745,8 +6340,8 @@ function buttonTambahSOAll () {
           </tr>`
       });
 
-      document.getElementById("tabel_data_add_list_noSo").innerHTML = rowTable
-      $("#tabel_add_list_noSo").DataTable({
+      document.getElementById("tabel_data_tambahsoall").innerHTML = rowTable
+      $("#tabel_tambahsoall").DataTable({
         "lengthChange": false,
           "paging": false ,
           "order": [[1, 'asc']],
@@ -5754,11 +6349,7 @@ function buttonTambahSOAll () {
                {"targets" :[0] , 'orderable' : false}
             ]
         });
-      document.getElementById("namaHeaderTable").textContent = 'Nomor SO'
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListNoSo').show();
-      $("#form").modal('toggle')
-      // $("#formTambahSo").modal('toggle')
+      $("#formTambahSo").modal('toggle')
 
     },
     error: function (err) {
@@ -5784,8 +6375,7 @@ function buttonAddListNoSO () {
     },
     success: function(res) {
       let rowTable = `
-        <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickNoSO('-' , '-')">
           <td>-</td>
           <td>-</td>
           <td>-</td>
@@ -5795,9 +6385,7 @@ function buttonAddListNoSO () {
 
       listNoSo.forEach((item, i) => {
         rowTable += `
-        <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('${item.NOBUKTI}' , '${item.NoPesanan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickNoSO('${item.NOBUKTI}' , '${item.NoPesanan}')">
           <td>${item.NOBUKTI}</td>
           <td>${item.Tanggal}</td>
           <td>${item.NoPesanan}</td></tr>`
@@ -5824,11 +6412,10 @@ function buttonAddListNoSO () {
 
 }
 
-function buttonAddListGudang () {
+function muatDropdownAlamatKirim () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_alamatkirim').DataTable().destroy();
   $.ajax({
     url: "{!! url('polistgudang') !!}",
     type: "post",
@@ -5837,34 +6424,22 @@ function buttonAddListGudang () {
       _token
     },
     success: function(res) {
-      let rowTable = ``
-
       listAlamatKirim = res
 
-      listAlamatKirim.forEach((item, i) => {
-        rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickAlamatKirim(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
-        <td>${item.KODEGDG}</td>
-        <td>${item.NAMA}</td>
-        <td>${item.Alamat}</td>
+      let selectEl = document.getElementById("input_add_kodealamatkirim")
+      let kodeTerpilih = selectEl.value
 
-        </tr>`
+      selectEl.innerHTML = ''
+      listAlamatKirim.forEach((item) => {
+        let opt = document.createElement('option')
+        opt.value = item.KODEGDG
+        opt.textContent = `${item.KODEGDG} - ${item.NAMA}`
+        selectEl.appendChild(opt)
       });
 
-      document.getElementById("tabel_data_add_list_alamatkirim").innerHTML = rowTable
-      $("#tabel_add_list_alamatkirim").DataTable({
-        "lengthChange": false,
-        "paging": true,
-      });
-
-      document.getElementById("namaHeaderTable").textContent = 'Dikirim Ke'
-
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListAlamatKirim').show();
-
-      $("#form").modal('toggle')
-
+      if (listAlamatKirim.some(item => item.KODEGDG === kodeTerpilih)) {
+        selectEl.value = kodeTerpilih
+      }
     },
     error: function (err) {
       console.log(err)
@@ -5872,6 +6447,21 @@ function buttonAddListGudang () {
     }
 
   })
+
+}
+
+function onChangeKodeAlamatKirim () {
+
+  let kode = document.getElementById("input_add_kodealamatkirim").value
+  let itemX = listAlamatKirim.find(item => item.KODEGDG === kode)
+  let alamat = itemX ? itemX.Alamat : ''
+
+  document.getElementById("input_add_alamatkirim").value = alamat
+
+  if (tipeform == 'edit') {
+    onChangeHeader('NoAlamatKirim' , kode)
+    onChangeHeader('AlamatKirim' , alamat)
+  }
 
 }
 
@@ -5890,17 +6480,13 @@ function buttonAddListLokasiPenerima () {
       _token
     },
     success: function(res) {
-      let rowTable = `<tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('-' , '-' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickLokasiPenerima('-' , '-' )">
         <td>-</td>
         <td>-</td>
-
         </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('${item.KodeCustsupp}' , '${item.NamaCust}' )" type="button"><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickLokasiPenerima('${item.KodeCustsupp}' , '${item.NamaCust}' )">
         <td>${item.Kota}</td>
         <td>${item.NamaCust}</td>
         </tr>`
@@ -5930,9 +6516,8 @@ function buttonAddListLokasiPenerima () {
 
 }
 
-function buttonAddListValas () {
+function muatDropdownValas () {
 
-  $('#tabel_add_list_valas').DataTable().destroy();
   $.ajax({
     url: "{!! url('polistvalas') !!}",
     type: "get",
@@ -5941,31 +6526,22 @@ function buttonAddListValas () {
 
     },
     success: function(res) {
-      let rowTable = ``
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-        <td>${item.kodevls}</td>
-        <td>${item.namavls}</td>
-        <td>${formatAngka(item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00')}</td>
+      listValas = res
 
-        </tr>`
+      let selectEl = document.getElementById("input_add_valas")
+      let kodeTerpilih = selectEl.value
+
+      selectEl.innerHTML = ''
+      listValas.forEach((item) => {
+        let opt = document.createElement('option')
+        opt.value = item.kodevls
+        opt.textContent = `${item.kodevls} - ${item.namavls}`
+        selectEl.appendChild(opt)
       });
 
-      document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
-      $("#tabel_add_list_valas").DataTable({
-        "lengthChange": false,
-        "paging": true,
-      });
-
-      document.getElementById("namaHeaderTable").textContent = 'Valas'
-
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListValas').show();
-
-      $("#form").modal('toggle')
-
+      if (listValas.some(item => item.kodevls === kodeTerpilih)) {
+        selectEl.value = kodeTerpilih
+      }
     },
     error: function (err) {
       console.log(err)
@@ -5974,6 +6550,20 @@ function buttonAddListValas () {
 
   })
 
+}
+
+function onChangeValas () {
+
+  let kode = document.getElementById("input_add_valas").value
+  let itemX = listValas.find(item => item.kodevls === kode)
+  let kurs = itemX && itemX.kurs ? parseFloat(itemX.kurs).toFixed(2) : '0.00'
+
+  document.getElementById("input_add_kurs").value = kurs
+
+  if (tipeform == 'edit') {
+    onChangeHeader('KODEVLS' , kode)
+    onChangeHeader('KURS' , kurs)
+  }
 
 }
 
@@ -5991,13 +6581,10 @@ function buttonAddListPelanggan ()
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="buttonAddPickPelanggan('${item.KodeCustSupp}' , '${item.NamaCustSupp}' , '${item.Alamat}','${item.HARIHUTPIUT}', '${item.PPN}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickPelanggan('${item.KodeCustSupp}' , '${item.NamaCustSupp}' , '${item.Alamat}','${item.HARIHUTPIUT}', '${item.PPN}')">
         <td>${item.KodeCustSupp}</td>
         <td>${item.NamaCustSupp}</td>
         <td>${item.Alamat}</td>
-
         </tr>`
       });
 
@@ -6036,11 +6623,9 @@ function buttonAddListBackOffice () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')">
         <td>${item.keynik}</td>
         <td>${item.fullname}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -6078,11 +6663,9 @@ function buttonAddListSales () {
         console.log(item.keynik)
         console.log(item.nama)
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')">
         <td>${item.keynik}</td>
         <td>${item.nama}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -6229,15 +6812,932 @@ function onChangeInputAddAddNosat () {
 
 }
 
+// ================= Outstanding PR & Purchase Order =================
+// Tabel "Outstanding PR" memakai server-side paging: data diambil per halaman lewat
+// podataoutstandingpr, bukan lagi menarik seluruh isi vwOutPPL sekaligus.
+// Tabel "Purchase Order" di-load lazy, yaitu saat tabnya pertama kali dibuka.
+
+let poTab2Sudahdimuat = false
+
+// Konfigurasi kolom mentah dari poloadall. Hanya dipakai sebagai bibit untuk poCart;
+// setelah itu yang jadi acuan render adalah poCart.
+let laheadertable = []
+let laheadertablevalue = []
+let laisnumeric = []
+let laisshown = []
+let ladesimal = []
+let laaliasordered = []
+let laheadertable2 = []
+let laheadertablevalue2 = []
+let laisnumeric2 = []
+let laisshown2 = []
+let ladesimal2 = []
+let laaliasordered2 = []
+
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ *
+ * report-table.js bekerja di atas satu array global `gcart_header` berisi kolom
+ * dengan 6 elemen: [field, label, tampil, tipe, total, desimal].
+ * Halaman ini punya DUA tabel dengan konfigurasinya masing-masing (urut 1 =
+ * Outstanding PR, urut 2 = Purchase Order), tersimpan di DBHEADERTABLE lewat
+ * endpoint saveheadertable/getheadertable yang sudah ada.
+ *
+ * poCart[urut] menyimpan array itu untuk tiap tabel, dan window.gcart_header
+ * selalu diarahkan ke cart milik tabel yang sedang aktif.
+ *
+ * Indeks 6, 7, 8 dipakai untuk menitipkan header/value/isnumeric aslinya.
+ * report-table.js tidak pernah menyentuh indeks di atas 5, dan karena drag &
+ * sembunyikan memindahkan seluruh baris array, ketiga nilai titipan itu ikut
+ * berpindah - jadi pemetaan balik ke payload simpan selalu tepat.
+ */
+
+let poCart = { 1 : [], 2 : [] }
+let poActiveUrut = 0
+
+// Tabel yang tabnya sedang tidak aktif tetap punya data lama tertinggal setelah
+// loadAll() (mis. sehabis simpan/edit/otorisasi). Ditandai di sini, baru benar-benar
+// digambar ulang saat tabnya dibuka - lihat handler shown.bs.tab di bawah.
+let poPerluGambar = { 1 : false, 2 : false }
+
+// Cache respons terakhir podataoutstandingpr, dipakai supaya menggeser/menyembunyikan
+// kolom tidak perlu menembak server lagi - lihat initTabelOutstanding().
+let poCacheTabel1 = null
+let poPakaiCacheTabel1 = false
+
+// Jumlah baris per halaman tabel Outstanding PR, dikendalikan dropdown #poLen1.
+// Disimpan di variabel, bukan hanya dibaca dari elemen select-nya, karena
+// initTabelOutstanding() melakukan destroy+init tiap kali kolom digeser/disembunyikan -
+// tanpa ini tabel selalu balik ke nilai awal walau dropdownnya masih menunjuk pilihan
+// pengguna. Nilai -1 berarti "semua data" (dipahami DataTables maupun servernya).
+let poPanjangHalaman1 = 10
+
+// href sengaja dipatok, bukan diambil dari window.location, karena POController@loadAll
+// juga memakai string yang sama saat MEMBACA konfigurasi. Kalau keduanya beda,
+// pengaturan yang disimpan tidak akan pernah terbaca lagi.
+const PO_HREF = 'purchaseorder'
+const PO_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date' }
+
+// Selektor dinamis: report-table.js menjalankan document.querySelector(cfg.table) setiap
+// kali dipakai (tidak menyimpan elemennya), jadi selektor ini otomatis menunjuk tabel di
+// tab yang sedang aktif tanpa perlu init() ulang tiap kali tab berpindah.
+const PO_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
+
+function poBuatCart (headers, values, isnumerics, isshowns, desimals, aliasordered) {
+  let cart = []
+  ;(headers || []).forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let label = h
+    if (aliasordered && aliasordered[i] && aliasordered[i].alias) {
+      label = aliasordered[i].alias
+    }
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null)
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+
+    cart.push([
+      tipe === 0 ? h : values[i],        // 0 nama field di data
+      label,                             // 1 judul kolom
+      Number(isshowns[i]) === 1 ? 1 : 0, // 2 tampil
+      PO_TIPE_NAMA[tipe] || 'varchar',   // 3 tipe data
+      0,                                 // 4 total (item roda giginya disembunyikan lewat CSS)
+      isNaN(des) ? 0 : des,              // 5 jumlah desimal
+      h,                                 // 6 header asli
+      values[i],                         // 7 value asli
+      tipe                               // 8 isnumeric asli
+    ])
+  });
+  return cart
+}
+
+// Kolom yang tampil. WAJIB hasil filter() dari cart, bukan map/salinan, karena
+// ReportTable.headHtml() memakai indexOf() terhadap gcart_header untuk mendapat
+// indeks global tiap kolom.
+function poKolomTampil (urut) {
+  return (poCart[urut] || []).filter(c => Number(c[2]) === 1)
+}
+
+function poKolomRender (c) {
+  return { field : c[0], label : c[1], tipe : Number(c[8]), desimal : Number(c[5]) }
+}
+
+// Arahkan komponen ke tabel tertentu. report-table.js menyimpan konfigurasinya di
+// satu variabel modul, jadi hanya satu tabel yang bisa dilayani pada satu waktu -
+// dan itu cukup, karena kedua tabel ada di tab yang saling eksklusif.
+function poAktifkanTabel (urut) {
+  poActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = poCart[urut]
+}
+
+// Dipanggil report-table.js sendiri (lewat cfg.onChange) tiap kali kolom digeser/
+// disembunyikan/diubah desimalnya. poActiveUrut selalu benar karena tab switch
+// memanggil poAktifkanTabel() sebelum tabel manapun bisa diinteraksi.
+function poOnChangeAktif () {
+  if (poActiveUrut === 2) {
+    renderTabelPO()
+  } else {
+    // true = pakai cache podataoutstandingpr terakhir, jangan menembak server -
+    // perubahan kolom tidak mengubah datanya, hanya cara menampilkannya.
+    initTabelOutstanding(true)
+  }
+}
+
+// Kalau public/js/report-table.js belum ikut terunggah, halaman harus tetap tampil:
+// judul kolomnya jatuh ke <th> biasa, hanya tanpa drag & roda gigi.
+function poHeadHtml (cols) {
+  if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+    return ReportTable.headHtml(cols)
+  }
+  let html = '<tr>'
+  cols.forEach((c) => {
+    html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`
+  });
+  return html + '</tr>'
+}
+
+// Ikat handler drag & roda gigi ke ELEMEN <thead> TEPAT SEKALI seumur halaman.
+// report-table.js tidak punya teardown, dan handler roda giginya berbunyi
+// "if (openGidx === g) { closeMenu(); return }" - kalau <thead> yang sama terikat
+// dua kali, klik roda gigi membuka lalu langsung menutup menunya sendiri di klik yang
+// sama. Makanya elemen <thead>-nya TIDAK BOLEH diganti lagi setelah ini; render ulang
+// selanjutnya hanya menulis ulang innerHTML-nya (lihat initTabelOutstanding/renderTabelPO).
+let poRtSudahInit = false
+
+function poInitReportTableSekali () {
+  if (poRtSudahInit || typeof ReportTable === 'undefined') { return }
+  poRtSudahInit = true
+
+  // Tabel yang tabnya SEDANG TIDAK aktif diikat lebih dulu, tanpa bar (supaya bar
+  // tidak ikut terikat dua kali). Tabel yang aktif diikat belakangan lewat selektor
+  // dinamis sekaligus mengikat bar - itulah cfg akhir yang dipakai report-table.js.
+  let urutTakAktif = $('#nav-profile-tab').hasClass('active') ? 1 : 2
+  ReportTable.init({
+    table    : urutTakAktif === 2 ? '#tabel2' : '#tabel',
+    onChange : poOnChangeAktif
+  })
+
+  ReportTable.init({
+    table    : PO_SELEKTOR_TABEL_AKTIF,
+    bar      : '#rtBar',
+    onChange : poOnChangeAktif
+  })
+
+  // DataTables memasang handler sort LANGSUNG di tiap <th> (bukan didelegasikan), sedangkan
+  // roda gigi/drag milik report-table.js didelegasikan di <thead> lewat listener fase bubble.
+  // <th> ada DI ANTARA tombol roda gigi dan <thead>, jadi klik pada roda gigi selalu lewat
+  // <th> dulu sebelum sampai <thead> - tanpa penanganan khusus, tiap klik roda gigi juga
+  // memicu sort DataTables (ubah urutan + fetch ulang data yang tidak perlu).
+  //
+  // stopPropagation() TIDAK BISA dipakai untuk "memblokir <th> tapi tetap sampai ke <thead>":
+  // begitu propagation dihentikan di titik manapun sebelum event mencapai targetnya, seluruh
+  // sisa perjalanan event (termasuk fase bubble yang seharusnya sampai ke <thead>) ikut batal -
+  // itu sebabnya percobaan pertama (stopPropagation di fase capture) malah membuat roda gigi
+  // sama sekali tidak merespons klik, bukan cuma berhenti memicu sort.
+  //
+  // Solusinya: hentikan event ASLINYA sebelum sempat mencapai <th> (fase capture, di <thead>),
+  // lalu tembakkan ULANG satu event click baru langsung ke <thead> dengan `target` di-override
+  // supaya listener report-table.js tetap mengenali elemen roda gigi/pegangan yang sebenarnya
+  // diklik. Event tembakan ulang ini tidak lewat <th> sama sekali, jadi DataTables tidak pernah
+  // melihatnya. Flag poGuardUlangKlik mencegah listener fase capture ini memproses event
+  // tembakan ulangnya sendiri (yang juga transit lewat <thead>, elemen yang sama).
+  let poGuardUlangKlik = false
+  let idThead = ['tabel_header', 'tabel2_header']
+  idThead.forEach((id) => {
+    let thead = document.getElementById(id)
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (poGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+
+      e.stopPropagation()
+      e.preventDefault()
+
+      poGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles : false, cancelable : true, view : window })
+      Object.defineProperty(ulang, 'target', { value : interaktif, configurable : true })
+      thead.dispatchEvent(ulang)
+      poGuardUlangKlik = false
+    }, true)
+  });
+}
+
+// Pindahkan elemen #rtBar supaya duduk tepat sebelum tabel yang sedang aktif.
+// Memindahkan sebuah node di DOM tidak melepas event listener yang menempel padanya,
+// jadi bar tidak perlu diikat ulang - report-table.js sudah mengikatnya sekali lewat
+// poInitReportTableSekali().
+//
+// BUG YANG PERNAH TERJADI: dulu fungsi ini selalu memakai <table> itu sendiri sebagai
+// acuan (tabel.parentNode.insertBefore(bar, tabel)). Itu cuma aman SEBELUM DataTables
+// membungkus tabel jadi #tabel_wrapper/#tabel2_wrapper. Begitu tab yang dituju pernah
+// digambar sekali (jadi tabelnya sudah dibungkus DataTables) dan user pindah tab lagi,
+// poPindahBar() ikut dipanggil oleh handler shown.bs.tab - saat itu tabel.parentNode
+// sudah jadi ISI wrapper, jadi #rtBar malah tersisip DI DALAM wrapper (bukan sebelum
+// wrapper). Reset kolom & bar kolom tersembunyi jadi tampak normal saat itu, tapi begitu
+// user menggeser/menyembunyikan kolom, renderTabelPO()/initTabelOutstanding() memanggil
+// .DataTable().destroy() yang MENGHAPUS wrapper lama - dan #rtBar ikut terhapus karena
+// posisinya di dalam wrapper itu. Refresh manual memulihkannya karena loadAll() memanggil
+// poPindahBar() sebelum tabel sempat dibungkus DataTables lagi. Perbaikannya: kalau
+// tabelnya sudah dibungkus DataTables, pakai elemen wrapper-nya sebagai acuan posisi,
+// bukan <table>-nya - supaya #rtBar selalu jadi SIBLING dari wrapper, bukan anak di
+// dalamnya.
+function poPindahBar (urut) {
+  let bar = document.getElementById('rtBar')
+  let id = urut === 2 ? 'tabel2' : 'tabel'
+  let tabel = document.getElementById(id)
+  if (!bar || !tabel) { return }
+
+  let acuan = tabel
+  if ($.fn.DataTable.isDataTable('#' + id)) {
+    acuan = document.getElementById(id + '_wrapper') || tabel
+  }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan)
+  }
+}
+
+// Ikat kotak search custom (#poSearch1/#poSearch2, statis di blade - lihat catatan
+// #rtBar di atas soal kenapa elemen di luar wrapper aman dari destroy()) ke instance
+// DataTables yang sedang aktif. Diikat sekali per input lewat dataset.rtBound karena
+// initTabelOutstanding()/renderTabelPO() memanggil ini tiap kali tabel di-destroy+init
+// ulang, sementara elemen inputnya sendiri tidak pernah diganti.
+let poTimerSearch1 = null
+function poIkatSearch (urut) {
+  let input = document.getElementById(urut === 2 ? 'poSearch2' : 'poSearch1')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let nilai = input.value
+    if (urut === 2) {
+      $('#tabel2').DataTable().search(nilai).draw()
+      return
+    }
+    // #tabel server-side - jangan tembak server tiap ketukan, sama seperti searchDelay
+    // bawaan DataTables yang dulu berlaku untuk kotak search default.
+    if (poTimerSearch1) { clearTimeout(poTimerSearch1) }
+    poTimerSearch1 = setTimeout(function () {
+      $('#tabel').DataTable().search(nilai).draw()
+    }, 400)
+  })
+}
+
+// Ikat dropdown "Tampilkan" (#poLen1) milik tab Outstanding PR. Sama seperti kotak
+// search di atas: elemennya statis di blade dan berada DI LUAR #tabel_wrapper, jadi
+// tidak ikut terhapus saat DataTables di-destroy - makanya cukup diikat sekali,
+// ditandai lewat dataset.rtBound.
+//
+// page.len(n).draw() sengaja dipakai, BUKAN destroy+init lewat initTabelOutstanding():
+// DataTables sendiri yang menghitung ulang halaman lalu menembak ajax dengan length
+// yang baru, jadi susunan kolom, urutan sort, dan kata pencarian tetap utuh.
+// .draw() tanpa argumen mengembalikan tampilan ke halaman pertama - memang yang
+// diinginkan, karena nomor halaman lama tidak lagi berarti setelah jumlah baris berubah.
+function poIkatPanjangHalaman () {
+  let sel = document.getElementById('poLen1')
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(poPanjangHalaman1)
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    poPanjangHalaman1 = (n === -1 || n > 0) ? n : 10
+    $('#tabel').DataTable().page.len(poPanjangHalaman1).draw()
+  })
+}
+
+// Ubah salah satu tanggal periode -> muat ulang data tab Purchase Order. Wajib pakai
+// loadTabelPO(true): tanpa flag paksa, penjaga poTab2Sudahdimuat akan menolak
+// permintaan kedua dan tabel tidak pernah berubah.
+function poIkatPeriode () {
+  let awal  = document.getElementById('poTglAwal')
+  let akhir = document.getElementById('poTglAkhir')
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    loadTabelPO(true)
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
+// Status penerimaan PO dihitung di browser dari qnt & qntbeli - urutannya penting,
+// yang cocok duluan menang (qnt 0 selalu Batal, walau qntbeli juga 0).
+function poAngka (v) {
+  let n = Number(v)
+  return isNaN(n) ? 0 : n
+}
+
+function poStatusPO (item) {
+  let qnt   = poAngka(item.qnt)
+  let qbeli = poAngka(item.qntbeli)
+  if (qnt === 0)    { return 'Batal' }
+  if (qbeli === 0)  { return 'Belum' }
+  if (qbeli < qnt)  { return 'Sebagian' }
+  return 'Sudah'
+}
+
+// Kelas badge disamakan dengan reportpengadaanpopo: hijau=selesai, biru=menunggu,
+// kuning=sebagian, merah=batal.
+const PO_BADGE_STATUS = {
+  'Sudah'    : 'is-active',
+  'Belum'    : 'is-user',
+  'Sebagian' : 'is-supervisor',
+  'Batal'    : 'is-inactive'
+}
+
+function poBadgeStatus (item) {
+  let status = poStatusPO(item)
+  let kelas = PO_BADGE_STATUS[status] || ''
+  return `<span class="sp-badge ${kelas}">${status}</span>`
+}
+
+// Otorisasi level 1 - artinya sama dengan kolom Oto1 di tabel: 1 = sudah, 0 = belum.
+function poOtorisasiPO (item) {
+  return Number(item.IsOtorisasi1) ? 'Sudah' : 'Belum'
+}
+
+// 'SEMUA' = tidak menyaring. Nilainya sengaja disimpan di luar renderTabelPO()
+// supaya tetap berlaku saat tabel digambar ulang (ganti periode, sehabis simpan, dst).
+let poFilterStatus = 'SEMUA'
+let poFilterOtorisasi = 'SEMUA'
+
+function poUpdateFilterBadge () {
+  let jml = 0
+  if (poFilterStatus !== 'SEMUA') { jml++ }
+  if (poFilterOtorisasi !== 'SEMUA') { jml++ }
+  let badge = document.getElementById('poFilterBadge')
+  if (badge) { badge.textContent = jml + ' aktif' }
+}
+
+function poTerapkanFilter () {
+  poFilterStatus = $('#poModalStatus').val() || 'SEMUA'
+  poFilterOtorisasi = $('#poModalOtorisasi').val() || 'SEMUA'
+  poUpdateFilterBadge()
+  $('#modalFilterPO').modal('hide')
+  renderTabelPO()
+}
+
+function poResetFilter () {
+  poFilterStatus = 'SEMUA'
+  poFilterOtorisasi = 'SEMUA'
+  $('#poModalStatus').val('SEMUA')
+  $('#poModalOtorisasi').val('SEMUA')
+  poUpdateFilterBadge()
+  $('#modalFilterPO').modal('hide')
+  renderTabelPO()
+}
+
+// Kotak scroll tabel dibuat setinggi sisa ruang di #content supaya halaman TIDAK perlu
+// scrollbar sendiri - yang discroll hanya isi tabel. Diukur dari DOM, bukan angka mati
+// seperti 65vh, karena tinggi bagian di atas/bawah kotak (kartu tab, toolbar, #rtBar,
+// pagination, catatan kaki) berbeda antar tab dan bisa berubah.
+function poAturTinggiTabel () {
+  let area = document.getElementById('content')
+  let pane = document.querySelector('#myTabContent .tab-pane.active')
+  if (!area || !pane) { return }
+  let wrap = pane.querySelector('.po-table-wrap')
+  if (!wrap) { return }
+
+  // Batasnya dibuka dulu supaya pengukuran memakai tinggi asli isi tab, bukan tinggi
+  // hasil pembatasan panggilan sebelumnya.
+  wrap.style.maxHeight = 'none'
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah
+  let kotak = wrap.getBoundingClientRect()
+  // Bagian yang ada DI BAWAH kotak tabel (pagination + catatan kaki) harus ikut
+  // disisihkan, kalau tidak keduanya terdorong keluar layar.
+  let bawah = pane.getBoundingClientRect().bottom - kotak.bottom
+
+  let sisa = batasBawah - kotak.top - bawah - 4
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
+}
+
+/* ---- Jembatan ke mesin penyimpan milik report-table.js ----
+ * doMoveHeader / doButtonVisibility / doSetDesimal / doButtonTotal SENGAJA tidak
+ * didefinisikan: report-table.js sudah punya fallback yang memutasi gcart_header
+ * sendiri lalu memanggil saveHeader(), dan saveHeader() itulah yang mampir ke
+ * doSimpanHeader di bawah. Jadi yang perlu disediakan hanya dua fungsi ini.
+ */
+window.g_href = PO_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = Number(mode) === 2 ? 2 : 1
+  let cart = poCart[urut] || []
+
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[6])
+    value.push(c[7])
+    isnumber.push(c[8])
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      // DBHEADERTABLE tidak punya kolom desimal; kolom `tipe` dipakai untuk itu
+      // karena selama ini ditulis kosong dan tidak pernah dibaca balik.
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : PO_HREF,
+      urut     : urut
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+// Dipakai tombol "Reset kolom" di bar. Tombol itu hanya muncul kalau fungsi ini ada.
+// Harus async:false karena report-table.js langsung menggambar ulang setelahnya.
+window.doSetHeader = function (mode, reset) {
+  if (!reset) { return }
+  let urut = Number(mode) === 2 ? 2 : 1
+
+  $.ajax({
+    url   : "{!! url('getheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val(),
+      href   : PO_HREF,
+      urut   : urut,
+      reset  : 1
+    },
+    success : function (res) {
+      if (urut === 2) {
+        poCart[2] = poBuatCart(res.headertableheader2, res.headertablevalue2, res.isnumeric2, res.isshown2, res.desimal2, res.aliasordered2)
+      } else {
+        poCart[1] = poBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered)
+      }
+      window.gcart_header = poCart[urut]
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal mengembalikan kolom ke pengaturan awal')
+    }
+  })
+}
+
+// formatAngka() selalu menempelkan '.' + bagian desimal, sehingga input tanpa titik
+// (mis. hasil toFixed(0)) jadi "123.undefined". Fungsi itu dipakai di puluhan tempat
+// lain jadi tidak diubah; khusus tabel ini dipakai versi yang sadar jumlah desimal.
+function poFormatAngkaDes (nilai, des) {
+  let d = Number(des)
+  if (isNaN(d) || d < 0) { d = 0 }
+
+  let mentah = (nilai === null || nilai === undefined || nilai === '') ? 0 : nilai
+  let angka = Number(String(mentah).split(',').join(''))
+  if (isNaN(angka)) {
+    return (nilai === null || nilai === undefined) ? '' : nilai
+  }
+
+  let teks = angka.toFixed(d)
+  let minus = teks.charAt(0) === '-'
+  if (minus) { teks = teks.substring(1) }
+
+  let bagian = teks.split('.')
+  let bulat = bagian[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (minus ? '-' : '') + bulat + (bagian[1] ? '.' + bagian[1] : '')
+}
+
+function poRenderNilai (col, item) {
+  let nilai = item[col.field]
+  if (col.tipe === 1) {
+    return poFormatAngkaDes(nilai, col.desimal)
+  }
+  if (col.tipe === 2) {
+    return nilai ? formatDate(nilai) : ""
+  }
+  return (nilai === null || nilai === undefined) ? "" : nilai
+}
+
+// pakaiCache = true dipanggil dari poOnChangeAktif() saat kolom digeser/disembunyikan/
+// diubah desimalnya - datanya tidak berubah, jadi respons podataoutstandingpr yang
+// tersimpan di poCacheTabel1 dipakai lagi, tanpa menembak server. pakaiCache diabaikan
+// (selalu ambil data baru) kalau memang belum ada cache untuk dipakai.
+function initTabelOutstanding (pakaiCache) {
+  poAktifkanTabel(1)
+
+  // Simpan posisi tampilan (halaman, urutan, kata pencarian) supaya destroy+init
+  // di bawah tidak mengembalikan tabel ke keadaan awal - dirasakan terutama saat
+  // pengguna sedang menggeser kolom di tengah pencarian/halaman tertentu.
+  let posisi = null
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    let dtLama = $('#tabel').DataTable()
+    posisi = {
+      start  : dtLama.page.info().start,
+      search : dtLama.search(),
+      order  : dtLama.order()
+    }
+    dtLama.destroy()
+  }
+  document.getElementById("tabel_data").innerHTML = ""
+
+  // Satu daftar kolom dipakai bersama oleh header, isi baris, dan pemetaan sort.
+  let cols = poKolomTampil(1)
+  let poKolomTabel1 = cols.map(poKolomRender)
+
+  // <thead> HANYA ditulis ulang innerHTML-nya, elemennya sendiri tidak diganti -
+  // sudah diikat sekali oleh poInitReportTableSekali(). Lihat catatan di sana.
+  let thead = document.getElementById('tabel_header')
+  thead.innerHTML = poHeadHtml(cols)
+  let baris = thead.querySelector('tr')
+  if (baris) {
+    baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
+  }
+
+  let columns = [{
+    data : null,
+    orderable : false,
+    className : 'text-center',
+    render : function (data, type, row) {
+      return `<button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${row.Nobukti}')"><i class="bi bi-plus-lg"></i></button>`
+    }
+  }]
+
+  poKolomTabel1.forEach((c) => {
+    columns.push({
+      data : null,
+      className : c.tipe === 1 ? 'text-right' : '',
+      render : function (data, type, row) {
+        return poRenderNilai(c, row)
+      }
+    })
+  });
+
+  poPakaiCacheTabel1 = !!(pakaiCache && poCacheTabel1)
+
+  // posisi.order diambil dari SEBELUM kolom berubah - kalau kolom yang tadi dipakai
+  // mengurutkan sudah tidak ada / bergeser di luar jangkauan (mis. baru saja disembunyikan),
+  // indeksnya bisa menunjuk ke kolom yang tidak ada lagi dan DataTables melempar error.
+  let orderAman = posisi ? posisi.order.filter((o) => o[0] < columns.length) : []
+
+  $("#tabel").DataTable({
+    // Indikator "sedang memuat". DataTables menampilkannya sendiri di SETIAP siklus
+    // ambil data server-side - muat awal, cari, sortir, pindah halaman, dan ganti isi
+    // dropdown "Tampilkan" - lalu menyembunyikannya lagi setelah barisnya selesai
+    // digambar. Jadi pada pilihan "Semua data" yang berat, lapisan ini tetap terlihat
+    // selama browser sibuk merender, bukan cuma selama menunggu jawaban server.
+    //
+    // Sebelumnya dimatikan karena tampilan bawaannya (teks polos di top:50% wrapper,
+    // tanpa latar) terlihat mengapung entah di mana. Sekarang dihidupkan lagi dengan
+    // elemennya ditata ulang lewat CSS menjadi lapisan yang menutup SELURUH
+    // #tabel_wrapper - lihat blok .po-loading-* di bagian atas file. Karena yang
+    // menggulung hanyalah .po-table-wrap DI DALAM wrapper, bukan wrapper-nya sendiri,
+    // lapisan itu diam di tempat berapa pun isi tabel discroll.
+    "processing" : true,
+    // Boleh berisi HTML - dipasang lewat innerHTML saat elemennya dibuat.
+    "language" : {
+      "processing" : '<span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span>'
+    },
+    "serverSide" : true,
+    // Pemilih jumlah baris bawaan DataTables tetap dimatikan; yang dipakai adalah
+    // dropdown #poLen1 di toolbar, supaya tampilannya seragam dengan kotak search
+    // dan periode yang juga dibuat sendiri - lihat poIkatPanjangHalaman().
+    "lengthChange" : false,
+    "pageLength" : poPanjangHalaman1,
+    "searchDelay" : 400,
+    // "r" di paling depan = elemen indikator memuat, sengaja DI LUAR .po-table-wrap
+    // supaya jadi anak langsung #tabel_wrapper dan tidak ikut tergulung bersama isi tabel.
+    "dom" : "r<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    "order" : orderAman,
+    "displayStart" : posisi ? posisi.start : 0,
+    "search" : posisi ? { "search" : posisi.search } : { "search" : "" },
+    "columns" : columns,
+    // Bentuk fungsi (bukan objek) dipilih khusus supaya bisa disajikan dari cache tanpa
+    // menembak server - lihat poPakaiCacheTabel1 di atas. Konsekuensinya opsi ajax.data
+    // (dulu dipakai memetakan orderCol/orderDir) sudah tidak berlaku pada bentuk fungsi,
+    // jadi pemetaannya dipindah ke sini.
+    "ajax" : function (data, callback, settings) {
+      if (poPakaiCacheTabel1 && poCacheTabel1) {
+        poPakaiCacheTabel1 = false
+        // DataTables menolak respons yang nomor "draw"-nya tidak cocok dengan yang
+        // baru saja dikirim (penjaga supaya respons XHR lama/kesasar tidak dipakai).
+        // Instance yang baru saja destroy+init ulang mulai dari draw=1 lagi, sedangkan
+        // draw pada cache masih milik instance sebelumnya - jadi harus ditimpa dulu.
+        callback(Object.assign({}, poCacheTabel1, { draw : data.draw }))
+        return
+      }
+
+      let kolom = null
+      let arah = 'asc'
+      if (data.order && data.order.length && data.order[0].column > 0) {
+        let c = poKolomTabel1[data.order[0].column - 1]
+        if (c) {
+          kolom = c.field
+          arah = data.order[0].dir
+        }
+      }
+
+      $.ajax({
+        url : "{!! url('podataoutstandingpr') !!}",
+        type : "get",
+        data : {
+          draw : data.draw,
+          start : data.start,
+          length : data.length,
+          search : data.search ? data.search.value : '',
+          orderCol : kolom,
+          orderDir : arah
+        },
+        success : function (res) {
+          poCacheTabel1 = res
+          callback(res)
+        },
+        error : function (err) {
+          // tampilkan pesan asli dari server supaya penyebabnya kelihatan di console
+          console.log('podataoutstandingpr gagal:', err.status, err.responseText)
+          alertify.warning('Gagal memuat data Outstanding PR')
+          // WAJIB memanggil callback walau gagal: DataTables baru memulihkan
+          // settings.bAjaxDataGet di ekor siklus draw (setelah callback dipanggil).
+          // Tanpa ini, sekali request gagal, tabel mengabaikan diam-diam setiap
+          // interaksi berikutnya (scroll, sort, search, ganti halaman) - seolah membeku.
+          callback({ draw : data.draw, data : [], recordsTotal : 0, recordsFiltered : 0 })
+        }
+      })
+    },
+    // Dijadwalkan lewat setTimeout, bukan dipanggil langsung: kalau poAturTinggiTabel()
+    // melempar error di sini (di dalam siklus draw DataTables), DataTables tidak pernah
+    // sampai ke baris yang memulihkan bAjaxDataGet - tabel jadi tidak merespons lagi.
+    // Elemen pagination juga baru ada setelah draw selesai.
+    "drawCallback" : function () {
+      setTimeout(poAturTinggiTabel, 0)
+    }
+  });
+
+  // Integrasi Bootstrap 4 yang ikut dibundel di public/js/datatables.min.js memberi kelas
+  // "card" pada elemen indikator memuat (ext.classes.sProcessing = "dataTables_processing
+  // card"). Di halaman ini kelas itu merusak: aturan `#page1 .card` di bagian atas file
+  // memaksa `display:block !important`, sementara DataTables menyembunyikan indikatornya
+  // dengan menulis inline `display:none` - dan inline style selalu kalah melawan
+  // !important. Akibatnya lapisan memuat muncul lalu tidak pernah mau hilang.
+  //
+  // Dilepas di sini, bukan dengan mengubah aturan `#page1 .card`, supaya kartu-kartu lain
+  // di halaman ini tidak ikut terpengaruh. Harus di dalam fungsi ini karena elemennya
+  // dibuat ulang tiap kali tabel di-destroy+init.
+  let elMemuat = document.querySelector('#tabel_wrapper > .dataTables_processing')
+  if (elMemuat) { elMemuat.classList.remove('card') }
+
+  poIkatSearch(1)
+  poIkatPanjangHalaman()
+  // Kotak search custom hidup di luar #tabel_wrapper, jadi destroy+init di atas
+  // tidak menghapus isinya - hanya perlu disamakan dengan kata pencarian yang
+  // sedang dipulihkan (posisi.search), kalau ada.
+  let inputSearch1 = document.getElementById('poSearch1')
+  if (inputSearch1) { inputSearch1.value = posisi ? posisi.search : '' }
+  poAturTinggiTabel()
+}
+
+// Ambil data tab "Purchase Order". Dipanggil saat tabnya dibuka, bukan saat halaman dimuat.
+function loadTabelPO (paksa) {
+  if (poTab2Sudahdimuat && !paksa) {
+    return
+  }
+  $.ajax({
+    url: "{!! url('poloadpurchaseorder') !!}",
+    type: "get",
+    data: {
+      tglawal  : $('#poTglAwal').val(),
+      tglakhir : $('#poTglAkhir').val()
+    },
+    success: function(res) {
+      dataRefreshOutstanding2 = res.tempOutstanding3
+      poTab2Sudahdimuat = true
+      renderTabelPO()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal memuat data Purchase Order')
+    }
+  })
+}
+
+function renderTabelPO () {
+  let level = $("#level").val()
+
+  poAktifkanTabel(2)
+
+  if ($.fn.DataTable.isDataTable('#tabel2')) {
+    $('#tabel2').DataTable().destroy()
+  }
+
+  // Satu daftar kolom untuk header DAN isi baris. Sebelumnya header dibangun dari
+  // laaliasordered2 yang berisi SEMUA kolom (mengabaikan isshown) sementara barisnya
+  // menghormati isshown, sehingga jumlah kolomnya bisa tidak sama.
+  let cols2 = poKolomTampil(2)
+  let kolomRender2 = cols2.map(poKolomRender)
+
+  // <thead> HANYA ditulis ulang innerHTML-nya, elemennya sendiri tidak diganti -
+  // sudah diikat sekali oleh poInitReportTableSekali(). Lihat catatan di sana.
+  let thead2 = document.getElementById('tabel2_header')
+
+  // Kolom otorisasi & batal digerbangi $level dan bukan bagian dari konfigurasi kolom,
+  // jadi tetap dirakit manual lalu ditempel di belakang judul hasil ReportTable.
+  let headerTable2 = ''
+headerTable2 += `<th style="padding: 4px 12px;" scope="col">Authorized</th>
+<th style="padding: 4px 12px;" scope="col">User Oto</th>
+<th style="padding: 4px 12px;" scope="col">Tanggal Oto</th>
+`
+
+  if (level > 1) {
+    headerTable2 += `<th style="padding: 4px 12px;" scope="col">Authorized2</th>
+    <th style="padding: 4px 12px;" scope="col">User Oto2</th>
+    <th style="padding: 4px 12px;" scope="col">Tanggal Oto2</th>
+  `
+}
+  if (level > 2) {
+    headerTable2 += `<th style="padding: 4px 12px;" scope="col">Authorized3</th>
+    <th style="padding: 4px 12px;" scope="col">User Oto3</th>
+    <th style="padding: 4px 12px;" scope="col">Tanggal Oto3</th>
+  `
+}
+    if (level > 3) {
+      headerTable2 += `<th style="padding: 4px 12px;" scope="col">Authorized4</th>
+      <th style="padding: 4px 12px;" scope="col">User Oto4</th>
+      <th style="padding: 4px 12px;" scope="col">Tanggal Oto4</th>
+    `
+  }
+      if (level > 4) {
+        headerTable2 += `<th style="padding: 4px 12px;" scope="col">Authorized5</th>
+        <th style="padding: 4px 12px;" scope="col">User Oto5</th>
+        <th style="padding: 4px 12px;" scope="col">Tanggal Oto5</th>
+      `
+
+
+      }
+
+headerTable2 += `<th style="padding: 4px 12px;" scope="col">Batal</th>
+<th style="padding: 4px 12px;" scope="col">User Batal</th>
+<th style="padding: 4px 12px;" scope="col">Status</th>`
+
+// Judul kolom yang bisa diseret & punya roda gigi dibuat ReportTable, lalu kolom
+// "Actions" disisipkan di depan dan kolom otorisasi/batal di belakangnya.
+thead2.innerHTML = poHeadHtml(cols2)
+let baris2 = thead2.querySelector('tr')
+if (baris2) {
+  baris2.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
+  baris2.insertAdjacentHTML('beforeend', headerTable2)
+}
+
+  let rowTable2 = ""
+
+  // Data mentahnya satu array datar di [0] - lihat catatan groupBy di controller.
+  let dataTampil2 = (dataRefreshOutstanding2 && dataRefreshOutstanding2[0]) ? dataRefreshOutstanding2[0] : []
+  if (poFilterStatus !== 'SEMUA') {
+    dataTampil2 = dataTampil2.filter(function (r) { return poStatusPO(r) === poFilterStatus })
+  }
+  if (poFilterOtorisasi !== 'SEMUA') {
+    dataTampil2 = dataTampil2.filter(function (r) { return poOtorisasiPO(r) === poFilterOtorisasi })
+  }
+
+  if (dataTampil2.length > 0) {
+    dataTampil2.forEach((item, i) => {
+
+        rowTable2 += `
+        <tr>
+          <td class="text-center" style=''>
+            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
+            <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>
+            <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('${item.NoBukti}' , ${item.IsOtorisasi1})"><i class="bi bi-key"></i></button>
+          </td>
+
+          `
+          // Daftar kolom yang sama persis dengan yang dipakai header di atas.
+          kolomRender2.forEach((c) => {
+            if (c.tipe === 1) {
+              rowTable2 += `<td style="text-align: right;">${poRenderNilai(c, item)}</td>`
+            } else {
+              rowTable2 += `<td>${poRenderNilai(c, item)}</td>`
+            }
+          });
+
+          rowTable2 += `
+
+          ${Number(item.IsOtorisasi1) ?
+              '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
+            :
+            '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+          }
+          <td>${item.TglOto1 || ''}</td>
+
+          <td>${item.OtoUser1 || ''}</td>
+          `
+
+          if (level > 1) {
+            rowTable2 += `
+            ${Number(item.IsOtorisasi2) ?
+                '<td class="text-success text-center">2<i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
+              :
+              '<td class="text-danger text-center">2<i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+            }
+
+            <td>${item.OtoUser2 || '' } </td>
+            <td>${item.TglOto2 || '' } </td>
+
+
+            `
+            if (level > 2) {
+              rowTable2 += `
+              ${Number(item.IsOtorisasi3) ?
+                  '<td class="text-success text-center">3<i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
+                :
+                '<td class="text-danger text-center">3<i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+              }
+              <td>${item.TglOto3 || ''} </td>
+
+              <td>${item.OtoUser3 || '' } </td>
+              `
+              if (level > 3) {
+                rowTable2 += `
+                ${Number(item.IsOtorisasi4) ?
+                    '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
+                  :
+                  '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+                }
+                <td>${item.TglOto4 || ''}</td>
+
+                <td>${item.OtoUser4 || '' }</td>
+                `
+                if (level > 4) {
+                  rowTable2 += `
+                  ${Number(item.IsOtorisasi5) ?
+                      '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
+                    :
+                    '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+                  }
+                  <td>${item.TglOto5 || '' }</td>
+
+                  <td>${item.OtoUser5 || '' }</td>
+                  `
+
+
+                }
+
+              }
+
+            }
+
+          }
+
+          rowTable2 += `  ${item.IsBatal == 1 ?
+              '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
+              '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
+            }
+          <td>${item.UserBatal || ''}</td>
+          <td class="text-center">${poBadgeStatus(item)}</td>
+
+        </tr>
+        `
+    });
+}
+
+  document.getElementById("tabel2_data").innerHTML = rowTable2
+
+  $("#tabel2").DataTable({
+    "lengthChange": false,
+    "paging": false,
+    "dom": "<'po-table-wrap't>",
+  });
+
+  poIkatSearch(2)
+  poIkatPeriode()
+  // Init DataTable di atas mereset filter pencarian - kotak #poSearch2 sendiri statis
+  // di blade dan nilainya tidak ikut hilang, jadi diterapkan ulang di sini supaya
+  // ganti periode tanggal tidak diam-diam membuang kata pencarian yang sedang aktif.
+  let inputSearch2 = document.getElementById('poSearch2')
+  if (inputSearch2 && inputSearch2.value) {
+    $('#tabel2').DataTable().search(inputSearch2.value).draw()
+  }
+  poAturTinggiTabel()
+}
+
 function loadAll () {
   console.log('loadall')
-  // return
-  let level = $("#level").val()
-  console.log(level)
-  let _token = $("#_token").val();
 
-  $('#tabel').DataTable().destroy();
+  // Idempotent - hanya benar-benar mengikat sekali seumur halaman, lihat definisinya.
+  poInitReportTableSekali()
 
+  let meta = null
   $.ajax({
     url: "{!! url('poloadall') !!}",
     type: "get",
@@ -6245,265 +7745,330 @@ function loadAll () {
     data: {
     },
     success: function(res) {
-      console.log(res)
-      dataRefreshOutstanding = res.tempOutstanding1
-      dataRefreshOutstanding2 = res.tempOutstanding3
-      dataRefreshOutstanding3 = res.tempOutstanding5
+      meta = res
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal memuat konfigurasi tabel')
     }})
 
-    let rowTable = ""
-    // console.log('a' , rowTable)
-    if (dataRefreshOutstanding && dataRefreshOutstanding.length > 0 && dataRefreshOutstanding[0] && dataRefreshOutstanding[0].length > 0) {
-    dataRefreshOutstanding[0].forEach((item, i) => {
-
-      let date1 = ""
-        if (item.Tanggal) {
-            let date = new Date(item.Tanggal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-
-      rowTable += `
-      <tr>
-        <td class="text-center" style='white-space:nowrap;'>
-            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item.Nobukti}')"><i class="bi bi-plus-lg"></i></button>
-        </td>
-        <td style='white-space:nowrap;'>${item.Nobukti}</td>
-        <td style='white-space:nowrap;'>${date1}</td>
-        <td style='white-space:nowrap;'>${item.kodebrg}</td>
-        <td style='white-space:nowrap;'>${item.NamaBrg}</td>
-        <td style='white-space:nowrap;' class='text-center'>${item.sat}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.Qnt).toFixed(2))}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.QNTPO).toFixed(2))}</td>
-        <td style='white-space:nowrap;' class='text-right'>${item.SisaPPL}</td>
-        <td style='white-space:nowrap;'>${item.Keterangan}</td>
-        <td style='white-space:nowrap;' class='text-right'>${item.QntoutSO || ''}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.QntStock).toFixed(2))}</td>
-      </tr>
-      `
-    });
+  if (!meta) {
+    return
   }
 
-    document.getElementById("tabel_data").innerHTML = rowTable
+  laisshown = meta.isshown
+  laheadertable = meta.headertableheader
+  laheadertablevalue = meta.headertablevalue
+  laisnumeric = meta.isnumeric
+  ladesimal = meta.desimal
+  laaliasordered = meta.aliasordered
 
-    $("#tabel").DataTable({
-      "lengthChange": false,
-        "paging": false,
-      });
+  laisshown2 = meta.isshown2
+  laheadertable2 = meta.headertableheader2
+  laheadertablevalue2 = meta.headertablevalue2
+  laisnumeric2 = meta.isnumeric2
+  ladesimal2 = meta.desimal2
+  laaliasordered2 = meta.aliasordered2
 
-      $('#tabel2').DataTable().destroy();
+  poCart[1] = poBuatCart(laheadertable, laheadertablevalue, laisnumeric, laisshown, ladesimal, laaliasordered)
+  poCart[2] = poBuatCart(laheadertable2, laheadertablevalue2, laisnumeric2, laisshown2, ladesimal2, laaliasordered2)
 
-      let rowTable2 = ""
+  // Data tab Purchase Order dianggap belum dimuat lagi - kalau tab itu sedang tidak
+  // aktif, ambilnya ditunda sampai tabnya benar-benar dibuka (lihat poPerluGambar di bawah).
+  dataRefreshOutstanding2 = []
+  poTab2Sudahdimuat = false
 
-      if (dataRefreshOutstanding2 && dataRefreshOutstanding2.length > 0 && dataRefreshOutstanding2[0] && dataRefreshOutstanding2[0].length > 0) {
-        dataRefreshOutstanding2[0].forEach((item, i) => {
-            let date1 = ""
-            if (item.Tanggal) {
-                let date = new Date(item.Tanggal);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date1 = date.getFullYear()+"/"+(month)+"/"+(day);
-            }
+  // Hanya tabel di tab yang SEDANG AKTIF yang digambar (dan menembak server kalau
+  // memang perlu). Tabel satunya ditandai lewat poPerluGambar dan baru benar-benar
+  // dikerjakan saat tabnya dibuka - lihat handler shown.bs.tab di bawah. Ini yang
+  // menghilangkan lag: sebelumnya kedua tabel selalu digambar ulang di sini.
+  let urutAktif = $('#nav-profile-tab').hasClass('active') ? 2 : 1
+  poPindahBar(urutAktif)
 
-            let date2 = ""
-            if (item.TglKirim) {
-                let date = new Date(item.tglKirim); // Fixed: was item.tglKirim (lowercase)
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date2 = date.getFullYear()+"/"+(month)+"/"+(day);
-            }
+  if (urutAktif === 2) {
+    loadTabelPO()
+    poPerluGambar[1] = true
+  } else {
+    initTabelOutstanding()
+    poPerluGambar[2] = true
+  }
+}
 
-            let date3 = ""
-            if (item.TglOto1) {
-                let date = new Date(item.TglOto1);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date3 = date.getFullYear()+"/"+(month)+"/"+(day); // Fixed: was date2
-            }
+$(function () {
+  muatDropdownAlamatKirim()
+  muatDropdownValas()
 
-            let date4 = ""
-            if (item.TglBatal) {
-                let date = new Date(item.TglBatal);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date4 = date.getFullYear()+"/"+(month)+"/"+(day); // Fixed: was date2
-            }
+  $('#modalFilterPO').on('show.bs.modal', function () {
+    $('#poModalStatus').val(poFilterStatus)
+    $('#poModalOtorisasi').val(poFilterOtorisasi)
+    poUpdateFilterBadge()
+  })
 
-            rowTable2 += `
-            <tr>
-              <td class="text-center" style='white-space:nowrap;'>
-                <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('${item.NoBukti}' , ${item.IsOtorisasi1})"><i class="bi bi-key"></i></button>
-              </td>
-              <td style='white-space:nowrap;'>${item.NoBukti || ''}</td>
-              <td style='white-space:nowrap;'>${date1}</td>
-              <td style='white-space:nowrap;'>${item.NamaCustSupp || ''}</td>
-              <td style='white-space:nowrap;'>${date2}</td>
-              <td style='white-space:nowrap;'>${item.NOSO || ''}</td>
-              <td style='white-space:nowrap;'>${item.NOPOCUST || ''}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.TotDPPRp).toFixed(2))}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.TotPPNRp).toFixed(2))}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.TotNetRp).toFixed(2))}</td>
-              ${Number(item.IsOtorisasi1) ?
-                  '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                :
-                '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-              }
-              <td>${item.TglOto1 || ''}</td>
+  // Pindah tab TIDAK menggambar ulang tabelnya lagi (itu sebabnya pindah tab dulu
+  // terasa lambat) - cukup arahkan komponen (poAktifkanTabel, poPindahBar,
+  // ReportTable.refresh) ke tabel yang baru aktif. Redraw sungguhan hanya terjadi
+  // kalau memang ditandai perlu oleh loadAll() sehabis simpan/edit/otorisasi, atau
+  // kalau tab Purchase Order memang belum pernah dimuat sama sekali.
+  $('#nav-profile-tab').on('shown.bs.tab', function () {
+    poAktifkanTabel(2)
+    poPindahBar(2)
+    if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
 
-              <td>${item.OtoUser1 || ''}</td>
-              `
-              console.log('level' , level)
-              if (level > 1) {
-                console.log('>')
-              } else {
-                console.log('a')
-              }
-
-              if (level > 1) {
-                console.log('masok')
-                rowTable2 += `
-                ${Number(item.IsOtorisasi2) ?
-                    '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                  :
-                  '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                }
-
-                <td>${item.OtoUser2 || '' }</td>
-                <td>${item.TglOto2 || '' }</td>
-
-
-                `
-                if (level > 2) {
-                  rowTable2 += `
-                  ${Number(item.IsOtorisasi3) ?
-                      '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                    :
-                    '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                  }
-                  <td>${item.TglOto3 || ''}</td>
-
-                  <td>${item.OtoUser3 || '' }</td>
-                  `
-                  if (level > 3) {
-                    rowTable2 += `
-                    ${Number(item.IsOtorisasi4) ?
-                        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                      :
-                      '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                    }
-                    <td>${item.TglOto4 || ''}</td>
-
-                    <td>${item.OtoUser4 || '' }</td>
-                    `
-                    if (level > 4) {
-                      rowTable2 += `
-                      ${Number(item.IsOtorisasi5) ?
-                          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                        :
-                        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                      }
-                      <td>${item.TglOto5 || '' }</td>
-
-                      <td>${item.OtoUser5 || '' }</td>
-                      `
-
-
-                    }
-
-                  }
-
-                }
-
-              }
-
-
-              rowTable2 += `  ${item.IsBatal == 1 ?
-                  '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
-                  '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                }
-              <td>${item.UserBatal || ''}</td>
-              <td>${date4}</td>
-            </tr>
-            `
-        });
+    if (!poTab2Sudahdimuat) {
+      poPerluGambar[2] = false
+      loadTabelPO()
+    } else if (poPerluGambar[2]) {
+      poPerluGambar[2] = false
+      loadTabelPO(true)
+    } else {
+      // Tab-nya sudah pernah digambar dan tidak perlu digambar ulang - tinggi bagian
+      // atas/bawah kotak beda antar tab, jadi tetap perlu diukur ulang di sini.
+      poAturTinggiTabel()
     }
+  })
 
-      document.getElementById("tabel2_data").innerHTML = rowTable2
+  $('#nav-home-tab').on('shown.bs.tab', function () {
+    poAktifkanTabel(1)
+    poPindahBar(1)
+    if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
 
-      $("#tabel2").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-        });
+    if (poPerluGambar[1]) {
+      poPerluGambar[1] = false
+      initTabelOutstanding()
+    } else {
+      poAturTinggiTabel()
+    }
+  })
 
-      $('#tabel3').DataTable().destroy();
+  // Layar diubah ukurannya (mis. resize jendela) - tinggi kotak tabel diukur ulang supaya
+  // tetap pas, didebounce supaya tidak menghitung ulang di setiap event resize.
+  let poTimerResize = null
+  $(window).on('resize', function () {
+    if (poTimerResize) { clearTimeout(poTimerResize) }
+    poTimerResize = setTimeout(poAturTinggiTabel, 150)
+  })
+})
 
-      let rowTable3 = ""
-      if (dataRefreshOutstanding3 && dataRefreshOutstanding3.length > 0 && dataRefreshOutstanding3[0] && dataRefreshOutstanding3[0].length > 0) {
-      dataRefreshOutstanding3[0].forEach((item, i) => {
+/* BACKUP - isi modal "Table Setting" lama. refreshHeaderTable() memang terdefinisi
+   dua kali (identik) di file aslinya, dan onclickcheckboxheadertable() yang dipanggil
+   checkbox "Tampil" tidak pernah ada sehingga fitur sembunyikan kolom lewat modal ini
+   selalu melempar ReferenceError. Semuanya digantikan roda gigi + bar #rtBar1/#rtBar2.
 
-        let date1 = ""
-        if (item.Tanggal) {
-            let date = new Date(item.Tanggal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
+function refreshHeaderTable () {
+  // let href = window.location.pathname.split('/').filter(Boolean)[1];
+  // console.log(href)
+  // let _token = $("#_token").val();
+  //
+  // $.ajax({
+  //   url: "{!! url('getheadertable') !!}",
+  //   type: "post",
+  //   async: false,
+  //   data: {
+  //     _token : _token,
+  //     href
+  //   },
+  //   success: function(res) {
+  //       console.log('======xxxxx==========')
+  //     console.log(res)
+  //     console.log(JSON.parse(res.isshown))
+  //     console.log(JSON.parse(res.headertableheader))
+  //     console.log(JSON.parse(res.headertablevalue))
+  //     console.log(JSON.parse(res.isnumeric))
+  //     xisshown = JSON.parse(res.isshown)
+  //     xheadertableheader = JSON.parse(res.headertableheader)
+  //     xheadertablevalue = JSON.parse(res.headertablevalue)
+  //     xisnumeric = JSON.parse(res.isnumeric)
+      let rowTable = ''
+      console.log('len' , xheadertableheader.length)
+      xheadertableheader.forEach((item, i) => {
+        console.log(i)
+        rowTable +=  `<tr>`
+        rowTable += `<td class="text-center">`
+        if (i != 0) {
+          console.log("button down")
+          rowTable +=  `<button class="btn btn-primary btn-sm" title="" onclick="buttonChangeOrder(0 , ${i})"><i class="bi bi-arrow-up"></i></button>`
+        } else {
+            rowTable +=  `<button class="btn btn-secondary btn-sm" title="" onclick=""><i class="bi bi-arrow-up" disabled></i></button>`
+        }
+        if (i != xheadertableheader.length - 1 ) {
 
-        let date2 = ""
-        if (item.TglKirim) {
-            let date = new Date(item.TglKirim);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date2 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
+            console.log("button up")
+            rowTable += `<button class="btn btn-primary btn-sm" title="" onclick="buttonChangeOrder(1 , ${i})"><i class="bi bi-arrow-down"></i></button>`
+        } else {
+            rowTable += `<button class="btn btn-secondary btn-sm" title="" onclick=""><i class="bi bi-arrow-down" disabled></i></button>`
+        }
+
+        rowTable += `</td>`
+          rowTable+= `  <td>${item}</td>
+            <td class="text-center"><input class="" type="checkbox" value="" onchange='onclickcheckboxheadertable(${i})' id="headertable_checkbox${i}"></td>
 
 
-          let date4 = ""
-        if (item.TglBatal) {
-            let date = new Date(item.TglBatal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date4 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
 
-        rowTable3 += `
-        <tr>
-          <td class="text-center" style='white-space:nowrap;'>
-            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-            <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-            <button class="btn btn-primary btn-sm" type="button" onclick="openPrintModal('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
-          </td>
-          <td style='white-space:nowrap;'>${item.NoBukti}</td>
-          <td style='white-space:nowrap;'>${date1}</td>
-          <td style='white-space:nowrap;'>${item.NamaCustSupp}</td>
-          <td style='white-space:nowrap;'>${date2}</td>
-          <td style='white-space:nowrap;'>${item.NOSO}</td>
-          <td style='white-space:nowrap;'>${item.NOPOCUST}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.TotDPPRp).toFixed(2))}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.TotPPNRp).toFixed(2))}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.TotNetRp).toFixed(2))}</td>
-            ${item.IsOtorisasi1 == 1 ?
-              '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
-              '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-            }
-          <td>${item.OtoUser1}</td>
-          <td>${item.TglOto1}</td>
-        </tr>
+
+
         `
+        rowTable += `</tr>`
       });
-    }
 
-      document.getElementById("tabel3_data").innerHTML = rowTable3
 
-      $("#tabel3").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-        });
+
+      document.getElementById("tabel_data_headertable").innerHTML = rowTable
+      console.log(xisshown)
+      xheadertableheader.forEach((item, i) => {
+        console.log(xisshown[i])
+        console.log(Number(xisshown[i]))
+        if (Number(xisshown[i])) {
+
+          document.getElementById(`headertable_checkbox${i}`).checked = true
+        }
+
+      });
+      // $("#formHeaderTable").modal('toggle')
+
+
+
+  //   }
+  // })
 
 }
+
+function refreshHeaderTable () {
+  // let href = window.location.pathname.split('/').filter(Boolean)[1];
+  // console.log(href)
+  // let _token = $("#_token").val();
+  //
+  // $.ajax({
+  //   url: "{!! url('getheadertable') !!}",
+  //   type: "post",
+  //   async: false,
+  //   data: {
+  //     _token : _token,
+  //     href
+  //   },
+  //   success: function(res) {
+  //       console.log('======xxxxx==========')
+  //     console.log(res)
+  //     console.log(JSON.parse(res.isshown))
+  //     console.log(JSON.parse(res.headertableheader))
+  //     console.log(JSON.parse(res.headertablevalue))
+  //     console.log(JSON.parse(res.isnumeric))
+  //     xisshown = JSON.parse(res.isshown)
+  //     xheadertableheader = JSON.parse(res.headertableheader)
+  //     xheadertablevalue = JSON.parse(res.headertablevalue)
+  //     xisnumeric = JSON.parse(res.isnumeric)
+      let rowTable = ''
+      console.log('len' , xheadertableheader.length)
+      xheadertableheader.forEach((item, i) => {
+        console.log(i)
+        rowTable +=  `<tr>`
+        rowTable += `<td class="text-center">`
+        if (i != 0) {
+          console.log("button down")
+          rowTable +=  `<button class="btn btn-primary btn-sm" title="" onclick="buttonChangeOrder(0 , ${i})"><i class="bi bi-arrow-up"></i></button>`
+        } else {
+            rowTable +=  `<button class="btn btn-secondary btn-sm" title="" onclick=""><i class="bi bi-arrow-up" disabled></i></button>`
+        }
+        if (i != xheadertableheader.length - 1 ) {
+
+            console.log("button up")
+            rowTable += `<button class="btn btn-primary btn-sm" title="" onclick="buttonChangeOrder(1 , ${i})"><i class="bi bi-arrow-down"></i></button>`
+        } else {
+            rowTable += `<button class="btn btn-secondary btn-sm" title="" onclick=""><i class="bi bi-arrow-down" disabled></i></button>`
+        }
+
+        rowTable += `</td>`
+          rowTable+= `  <td>${item}</td>
+            <td class="text-center"><input class="" type="checkbox" value="" onchange='onclickcheckboxheadertable(${i})' id="headertable_checkbox${i}"></td>
+
+
+
+
+
+        `
+        rowTable += `</tr>`
+      });
+
+
+
+      document.getElementById("tabel_data_headertable").innerHTML = rowTable
+      console.log(xisshown)
+      xheadertableheader.forEach((item, i) => {
+        console.log(xisshown[i])
+        console.log(Number(xisshown[i]))
+        if (Number(xisshown[i])) {
+
+          document.getElementById(`headertable_checkbox${i}`).checked = true
+        }
+
+      });
+      // $("#formHeaderTable").modal('toggle')
+
+
+
+  //   }
+  // })
+
+}
+
+function buttonHeaderTable (urut = 1) {
+  urutHeaderTable = urut
+  console.log(urut)
+    let href = window.location.pathname.split('/').filter(Boolean)[1];
+    console.log(href)
+    let _token = $("#_token").val();
+
+    $.ajax({
+      url: "{!! url('getheadertable') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        href
+      },
+      success: function(res) {
+          console.log('======xxxxx==========')
+        console.log(res)
+
+        // if (res.isparsed == 0) {
+        //   xisshown = JSON.parse(res.isshown)
+        //   xheadertableheader = JSON.parse(res.headertableheader)
+        //   xheadertablevalue = JSON.parse(res.headertablevalue)
+        //   xisnumeric = JSON.parse(res.isnumeric)
+        //
+        //
+        // } else {
+        if (urutHeaderTable == 1) {
+          xisshown = res.isshown
+         xheadertableheader = res.headertableheader
+         xheadertablevalue = res.headertablevalue
+         xisnumeric = res.isnumeric
+
+        } else {
+          xisshown = res.isshown2
+          xheadertableheader = res.headertableheader2
+          xheadertablevalue = res.headertablevalue2
+          xisnumeric = res.isnumeric2
+
+        }
+
+
+        // }
+        // console.log(JSON.parse(res.isshown))
+        // console.log(JSON.parse(res.headertableheader))
+        // console.log(JSON.parse(res.headertablevalue))
+        // console.log(JSON.parse(res.isnumeric))
+
+        refreshHeaderTable()
+        $("#formHeaderTable").modal('toggle')
+
+      }
+    })
+
+
+
+}
+END BACKUP */
+
 
 function buttonAddAddPickBarangAll (kodebrg) {
 
@@ -6953,8 +8518,9 @@ function buttonAddPickPelanggan (kode, nama , alamat, hari, ppn) {
   document.getElementById("input_add_alamatsupplier").value = alamat
   document.getElementById("input_add_pembayaran").value = 0
   document.getElementById("input_add_hari").value = hari
-  document.getElementById("input_add_kodealamatkirim").value = ''
-  document.getElementById("input_add_alamatkirim").value = ''
+  document.getElementById("input_add_kodealamatkirim").value = 'GMPL'
+  let itemGudangDefault = listAlamatKirim.find(item => item.KODEGDG === 'GMPL')
+  document.getElementById("input_add_alamatkirim").value = itemGudangDefault ? itemGudangDefault.Alamat : ''
   document.getElementById("input_add_kodepic").value = ''
   document.getElementById("input_add_namapic").value = ''
   document.getElementById("input_add_kodeekspedisi").value = '-'
@@ -7114,6 +8680,7 @@ function cleanFormAddAdd () {
   document.getElementById("input_add_add_discpersen3").value = '0.00'
   document.getElementById("input_add_add_hargaAwal").value = '0.00'
   // document.getElementById("input_add_add_tambahkepo").value = 0
+  syncOutstandingDariFOC()
 
 }
 
@@ -7133,9 +8700,7 @@ function lockFormAdd () {
   document.getElementById("input_add_add_foc").disabled = true
 
   document.getElementById("buttonAddListPelanggan").hidden = true
-  document.getElementById("buttonAddListGudang").hidden = true
   document.getElementById("buttonAddListSales").hidden = true
-  document.getElementById("buttonAddListValas").hidden = true
   document.getElementById("buttonAddListPIC").hidden = true
   document.getElementById("buttonAddListLokasiPenerima").hidden = true
   document.getElementById("buttonAddListBackOffice").hidden = true
@@ -7184,9 +8749,7 @@ function unlockFormAdd () {
   document.getElementById("input_add_add_foc").disabled = false
 
   document.getElementById("buttonAddListPelanggan").hidden = false
-  document.getElementById("buttonAddListGudang").hidden = false
   document.getElementById("buttonAddListSales").hidden = false
-  document.getElementById("buttonAddListValas").hidden = false
   document.getElementById("buttonAddListPIC").hidden = false
   document.getElementById("buttonAddListLokasiPenerima").hidden = false
   document.getElementById("buttonAddListBackOffice").hidden = false
@@ -7237,9 +8800,7 @@ function cleanFormAdd () {
   document.getElementById("input_add_draftpo").disabled = false
 
   document.getElementById("buttonAddListPelanggan").disabled = false
-  document.getElementById("buttonAddListGudang").disabled = false
   document.getElementById("buttonAddListSales").disabled = false
-  document.getElementById("buttonAddListValas").disabled = false
   document.getElementById("buttonAddListPIC").disabled = false
   document.getElementById("buttonAddListLokasiPenerima").disabled = false
   document.getElementById("buttonAddListBackOffice").disabled = false
@@ -9469,6 +11030,9 @@ function generateInputNumber (id , style, classes, onchange) {
 
   function formatAngka (angkaString) {
   // console.log('formatAngka' , angkaString);
+  if(!angkaString) {
+      return '0.00'
+  }
         let tempAngka = angkaString.split('.')
 
         if (tempAngka[0][0] == '-') {
@@ -9594,23 +11158,62 @@ function calculateDiscRp() {
   document.getElementById('input_add_add_discrp').value = totalDiscount
 }
 
+// Dropdown "Outstanding" di form Add Item.
+// PR  -> label field nomor jadi "No. PR", FOC dimatikan
+// SO  -> label field nomor jadi "No. SO", FOC dimatikan
+// FOC -> label dibiarkan apa adanya, flag FOC dinyalakan sehingga
+//        Harga & Disc terkunci lewat LockFreeOfCharge().
+function onChangeOutstanding () {
+  let outstanding = document.getElementById('input_add_add_outstanding').value
+  let labelNoso = document.getElementById('labelAddAddNoso')
+
+  if (outstanding == 'PR') {
+    labelNoso.textContent = 'No. PR'
+    document.getElementById('input_add_add_foc').value = 0
+  } else if (outstanding == 'SO') {
+    labelNoso.textContent = 'No. SO'
+    document.getElementById('input_add_add_foc').value = 0
+  } else {
+    document.getElementById('input_add_add_foc').value = 1
+  }
+
+  LockFreeOfCharge()
+}
+
+// Balikan dari onChangeOutstanding(): dipakai waktu form Add Item dibuka
+// atau waktu edit item, supaya dropdown ikut nilai FOC yang sudah ada.
+function syncOutstandingDariFOC () {
+  let focState = document.getElementById('input_add_add_foc').value
+  let outstanding = document.getElementById('input_add_add_outstanding')
+
+  if (focState == 1) {
+    outstanding.value = 'FOC'
+  } else if (outstanding.value == 'FOC') {
+    outstanding.value = 'SO'
+    document.getElementById('labelAddAddNoso').textContent = 'No. SO'
+  }
+}
+
 function LockFreeOfCharge(){
   let focState = document.getElementById('input_add_add_foc').value
 
   if (focState == 1){
     document.getElementById('input_add_add_harga').disabled = true;
+    document.getElementById('input_add_add_hargaAwal').disabled = true;
     document.getElementById('input_add_add_discrp').disabled = true;
     document.getElementById('input_add_add_discpersen1').disabled = true;
     document.getElementById('input_add_add_discpersen2').disabled = true;
     document.getElementById('input_add_add_discpersen3').disabled = true;
 
     document.getElementById('input_add_add_harga').value = 0,00 ;
+    document.getElementById('input_add_add_hargaAwal').value = 0.00 ;
     document.getElementById('input_add_add_discrp').value = 0,00 ;
     document.getElementById('input_add_add_discpersen1').value = 0 ;
     document.getElementById('input_add_add_discpersen2').value = 0 ;
     document.getElementById('input_add_add_discpersen3').value = 0 ;
   } else {
     document.getElementById('input_add_add_harga').disabled = false;
+    document.getElementById('input_add_add_hargaAwal').disabled = false;
     document.getElementById('input_add_add_discrp').disabled = false;
     document.getElementById('input_add_add_discpersen1').disabled = false;
     document.getElementById('input_add_add_discpersen2').disabled = false;
@@ -9624,7 +11227,7 @@ function LockFreeOfCharge(){
   <script>
     const tabHome = document.getElementById('nav-home-tab');
     const tabProfile = document.getElementById('nav-profile-tab');
-    const tabProfile1 = document.getElementById('nav-profile1-tab');
+    // const tabProfile1 = document.getElementById('nav-profile1-tab');
 
     function setActiveTab(homeActive) {
       if (homeActive == 0) {
@@ -9633,8 +11236,8 @@ function LockFreeOfCharge(){
         tabProfile.style.backgroundColor = '#f8f9fa';
         tabProfile.style.color = '#007bff';
 
-        tabProfile1.style.backgroundColor = '#f8f9fa';
-        tabProfile1.style.color = '#007bff';
+        // tabProfile1.style.backgroundColor = '#f8f9fa';
+        // tabProfile1.style.color = '#007bff';
 
       } else if (homeActive == 1){
         tabHome.style.backgroundColor = '#f8f9fa';
@@ -9643,8 +11246,8 @@ function LockFreeOfCharge(){
         tabProfile.style.backgroundColor = '#007bff';
         tabProfile.style.color = '#fff';
 
-        tabProfile1.style.backgroundColor = '#f8f9fa';
-        tabProfile1.style.color = '#007bff';
+        // tabProfile1.style.backgroundColor = '#f8f9fa';
+        // tabProfile1.style.color = '#007bff';
       }
       else if (homeActive == 2){
         tabProfile.style.backgroundColor = '#f8f9fa';
@@ -9653,13 +11256,13 @@ function LockFreeOfCharge(){
         tabHome.style.backgroundColor = '#f8f9fa';
         tabHome.style.color = '#007bff';
 
-        tabProfile1.style.backgroundColor = '#007bff';
-        tabProfile1.style.color = '#fff';
+        // tabProfile1.style.backgroundColor = '#007bff';
+        // tabProfile1.style.color = '#fff';
       }
     }
 
-    // Default warna tab
-    setActiveTab(0);
+    // Default warna tab - Purchase Order aktif duluan saat halaman dibuka
+    setActiveTab(1);
 
     // buat ganti tab
     tabHome.addEventListener('click', function () {
@@ -9670,9 +11273,9 @@ function LockFreeOfCharge(){
       setActiveTab(1);
     });
 
-    tabProfile1.addEventListener('click', function () {
-      setActiveTab(2);
-    });
+    // tabProfile1.addEventListener('click', function () {
+    //   setActiveTab(2);
+    // });
 
 
     function performSearchSupplier () {

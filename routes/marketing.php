@@ -32,36 +32,36 @@ Route::middleware('auth')->group(function () {
 
 
 
-//   //PENAWARAN SO
-// Route::get('/penawaranso', [PenawaranSOController::class, 'index']);
-// Route::post('/penawaransocekhargaoto', [PenawaranSOController::class, 'cekHargaOto']);
-// Route::get('/penawaransoprint', [PenawaranSOController::class, 'spCetak']);
-// Route::get('/penawaransoloadall', [PenawaranSOController::class, 'loadAll']);
+  //PENAWARAN SO
+Route::get('/penawaranso', [PenawaranSOController::class, 'index']);
+Route::post('/penawaransocekhargaoto', [PenawaranSOController::class, 'cekHargaOto']);
+Route::get('/penawaransoprint', [PenawaranSOController::class, 'spCetak']);
+Route::get('/penawaransoloadall', [PenawaranSOController::class, 'loadAll']);
 
-// Route::get('/penawaransolistpelanggan', [PenawaranSOController::class, 'listPelanggan']); //
-// Route::get('/penawaransolistttd', [PenawaranSOController::class, 'listttd']);  //
+Route::get('/penawaransolistpelanggan', [PenawaranSOController::class, 'listPelanggan']); //
+Route::get('/penawaransolistttd', [PenawaranSOController::class, 'listttd']);  //
 
-// Route::get('/penawaransolistbarangfoc', [PenawaranSOController::class, 'listBarangFOC']);
-// Route::post('/penawaransolistbarangnosominus', [PenawaranSOController::class, 'listBarangNonFOC1']); //
-// Route::get('/penawaransolistbarangnosoplus', [PenawaranSOController::class, 'listBarangNonFOC2']);
-// Route::post('/penawaransolistpwo', [PenawaranSOController::class, 'listPWO']);
-// Route::post('/penawaransolistgudang', [PenawaranSOController::class, 'listGudang']);
-// Route::post('/penawaransolistnoso', [PenawaranSOController::class, 'listNoSo']);
-// Route::post('/penawaransolistlokasipenerima', [PenawaranSOController::class, 'listLokasiPenerima']);
-// Route::post('/penawaransospadd', [PenawaranSOController::class, 'spAdd']);
-// Route::post('/penawaransocekharga', [PenawaranSOController::class, 'spCekHarga']);
-// Route::post('/penawaransogetdetail', [PenawaranSOController::class, 'getDetail']);
-// Route::post('/cekpenawaransoDet', [PenawaranSOController::class, 'cekPoDet']);
-// Route::post('/penawaransoceksatuanbarang', [PenawaranSOController::class, 'cekSatuanBarang']);
-// Route::post('/penawaransocekotorisasi', [PenawaranSOController::class, 'cekOtorisasi']);
-// Route::post('/penawaransoupdateotorisasi', [PenawaranSOController::class, 'updateOtorisasi']);
-// Route::post('/penawaransoupdatebatalotorisasi', [PenawaranSOController::class, 'updateBatalOtorisasi']);
-// Route::post('/penawaransospupdatepo', [PenawaranSOController::class, 'spUpdatePO']);
-// Route::post('/penawaransoonchangeheader', [PenawaranSOController::class, 'onChangeHeader']);
-// Route::post('/penawaransolistbarangnosominusallso', [PenawaranSOController::class, 'listBarangNonFOC1AllSO']);
-// Route::get('/penawaransolistvalas', [PenawaranSOController::class, 'listValas']);
-// Route::get('/penawaransocheckhargaddd', [PenawaranSOController::class, 'CheckHargaAdd']);
-// // Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']);
+Route::get('/penawaransolistbarangfoc', [PenawaranSOController::class, 'listBarangFOC']);
+Route::post('/penawaransolistbarangnosominus', [PenawaranSOController::class, 'listBarangNonFOC1']); //
+Route::get('/penawaransolistbarangnosoplus', [PenawaranSOController::class, 'listBarangNonFOC2']);
+Route::post('/penawaransolistpwo', [PenawaranSOController::class, 'listPWO']);
+Route::post('/penawaransolistgudang', [PenawaranSOController::class, 'listGudang']);
+Route::post('/penawaransolistnoso', [PenawaranSOController::class, 'listNoSo']);
+Route::post('/penawaransolistlokasipenerima', [PenawaranSOController::class, 'listLokasiPenerima']);
+Route::post('/penawaransospadd', [PenawaranSOController::class, 'spAdd']);
+Route::post('/penawaransocekharga', [PenawaranSOController::class, 'spCekHarga']);
+Route::post('/penawaransogetdetail', [PenawaranSOController::class, 'getDetail']);
+Route::post('/cekpenawaransoDet', [PenawaranSOController::class, 'cekPoDet']);
+Route::post('/penawaransoceksatuanbarang', [PenawaranSOController::class, 'cekSatuanBarang']);
+Route::post('/penawaransocekotorisasi', [PenawaranSOController::class, 'cekOtorisasi']);
+Route::post('/penawaransoupdateotorisasi', [PenawaranSOController::class, 'updateOtorisasi']);
+Route::post('/penawaransoupdatebatalotorisasi', [PenawaranSOController::class, 'updateBatalOtorisasi']);
+Route::post('/penawaransospupdatepo', [PenawaranSOController::class, 'spUpdatePO']);
+Route::post('/penawaransoonchangeheader', [PenawaranSOController::class, 'onChangeHeader']);
+Route::post('/penawaransolistbarangnosominusallso', [PenawaranSOController::class, 'listBarangNonFOC1AllSO']);
+Route::get('/penawaransolistvalas', [PenawaranSOController::class, 'listValas']);
+Route::get('/penawaransocheckhargaddd', [PenawaranSOController::class, 'CheckHargaAdd']);
+Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']);
 
 
 //   // VERIF PENAWARAN

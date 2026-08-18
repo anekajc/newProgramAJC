@@ -98,17 +98,23 @@
       opacity: 0; transition: opacity 0.18s, transform 0.2s; flex-shrink: 0;
     }
     .sidebar:hover .nav-chevron { opacity: 1; }
-    .nav-group.open > .nav-item .nav-chevron,
-    .nav-group:hover > .nav-item .nav-chevron { transform: rotate(90deg); color: rgba(255,255,255,0.6); }
+    .nav-group.open > .nav-item .nav-chevron { transform: rotate(90deg); color: rgba(255,255,255,0.6); }
 
     .nav-children {
       max-height: 0; overflow: hidden;
       transition: max-height 0.25s ease;
       background: rgba(0,0,0,0.15);
     }
-    .nav-group:hover .nav-children,
+    /* Click-to-open only (via toggleModuleSubmenu(), bound to the label/
+       chevron click) -- was .nav-group:hover .nav-children, which opened
+       the submenu just from mousing over the module row. */
     .nav-group.open .nav-children { max-height: 600px; }
     .sidebar:not(:hover) .nav-children { max-height: 0 !important; }
+
+    /* .nav-icon and .nav-label are independently clickable now (icon opens
+       the module home, label/chevron toggle the submenu list) -- keep that
+       distinction visible on hover. */
+    .nav-icon:hover { opacity: 1; }
 
     .nav-child {
       display: flex; align-items: center;
