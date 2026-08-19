@@ -257,6 +257,65 @@
     background-color: #007bff;
     box-shadow: 0 2px 6px rgba(0,123,255,0.35);
   }
+
+  /* Wraps the pill tab bar in its own card, matching purchaseOrder.blade.php's
+     .card.tab-card -- a dedicated card holding only the tab nav, separate
+     from the card below it that holds the tables. */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+</style>
+
+{{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel2/#tabel3's
+     drag-to-reorder/hide/decimal column headers -- same engine so.blade.php uses (see that
+     file's header comment), extracted there specifically so other pages could reuse it
+     instead of each re-implementing purchaseOrder.blade.php's ~900-line one-off version
+     (which turned out to depend on two ajax routes -- podataoutstandingpr/poloadpurchaseorder
+     -- that don't actually exist in this app, so it never worked). --}}
+<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+
+<style>
+  /* "Reset kolom" pill + its row, matching so.blade.php's copy of this same block.
+     Kept OUTSIDE #rtBarTabel2/#rtBarTabel3 (as a flex sibling, not a child) because
+     report-table.js's renderBar() fully overwrites those divs' innerHTML on every
+     drag/hide/decimal change -- a button placed inside them would vanish on the
+     first re-render. Not part of report-table.css itself, so declared here. */
+  .rt-bar-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .rt-bar-row .rt-bar { margin-bottom: 0; }
+  .rt-reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--rt-border);
+    border-radius: var(--rt-radius);
+    background: var(--rt-card);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--rt-ink-soft);
+  }
+  .rt-reset-btn:hover {
+    color: #D64550;
+    border-color: #D64550;
+    background: #FEF2F2;
+  }
 </style>
 @endsection
 @section('content')
@@ -271,23 +330,21 @@
 
 <div id="page1" class="container-fluid">
     <!-- <div id="qrcode"></div> -->
-    {{-- Tab toggle now lives in its own block at the top of page1, same
-         position/pattern as so.blade.php's first .sp-toolbar (just the
-         pill row, nothing else) and purchaseOrder.blade.php's
-         .card.tab-card (a dedicated card holding only the tab nav). Neither
-         reference page keeps a standalone page title next to it. --}}
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-         Penawaran SO
-      </a>
+    {{-- Tab bar wrapped in its own card, matching purchaseOrder.blade.php's
+         .card.tab-card -- a dedicated card holding only the tab nav,
+         separate from the card below holding the tables. --}}
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
+        <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+             Penawaran SO
+          </a>
 
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-        Penawaran SO Otorisasi
-      </a>
-      <!-- <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false"
-        style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Penawaran SO Otorisasi
-      </a> -->
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+            Penawaran SO Otorisasi
+          </a>
+        </div>
+      </div>
     </div>
 
   <div id="contentContainer" class="">
@@ -302,320 +359,90 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
-    <div class="card">
-      <div class="card-body" style="padding:0;">
-        <div class="tab-content" id="myTabContent">
-
-          <!-- <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            <div class="row">
-              <div class="col-md-12" style='overflow:auto;'>
-                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                  <table id="tabel" class="table table-bordered table-hover table-striped">
-                    <thead class="text-center bg-primary text-white">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Kode Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Nama Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sat</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt PO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sisa PR</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Keterangan</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Out. SO</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt Stock</th>
-
-                      </tr>
-                    </thead>
-                    <tbody id="tabel_data" class="text-left">
-                      {{-- @foreach ($tempOutstanding1 as $OutPR)
-                      <tr>
-
-                         <td class="text-center">
-                            <button class="btn btn-success btn-sm" type="button" title="Details" onclick="buttonAdd('{{ $OutPR->Nobukti }}')">
-                              <i class="bi bi-plus-lg"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Nobukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($OutPR->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->kodebrg }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->NamaBrg }}</td>
-                        <td style='white-space:nowrap;' class='text-center'>{{ $OutPR->sat }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->Qnt, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QNTPO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->SisaPPL, 2) }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Keterangan }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntoutSO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntStock, 2) }}</td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div> -->
-
+    {{-- No outer Bootstrap .card here (unlike the old markup this replaces) --
+         .tb-report/.tb-report .main below already render as their own card-like
+         panel (report-table.css), the same way so.blade.php's tables sit directly
+         in its tab-content with no surrounding .card. Nesting them inside a
+         Bootstrap .card as well double-boxed the toolbar/table/hint text, each
+         fighting the other's padding and rounded corners. --}}
+    <div class="tab-content" id="myTabContent">
 
           <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            {{-- Add button now lives inside the tab it actually applies to
-                 (only "Penawaran SO" gets one -- "Otorisasi" doesn't, same
-                 as purchaseOrder.blade.php's .po-toolbar-act, which only
-                 appears on its "Purchase Order" tab, not "Outstanding PR"),
-                 instead of a page-level header shared by both tabs. --}}
-            <div class="row mb-2">
-              <div class="col-12 text-right">
-                <button type="button" class="btn btn-action-primary" style="
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    transition: background-color 0.3s, box-shadow 0.3s;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                    onclick="buttonAdd()">
-                  + Add Penawaran
+            {{-- Toolbar matching purchaseOrder.blade.php's .po-toolbar on its "Purchase
+                 Order" tab (period filter + search + Filter button + Add), rebuilt with
+                 report-table.css's own .tb-report/.toolbar/.filter-wrap/.search-inp/
+                 .btn-load/.action-group classes -- the same ones so.blade.php's toolbar
+                 already uses -- instead of duplicating another copy of that CSS. --}}
+            <div class="tb-report main">
+              <div class="toolbar" style="margin-bottom:10px;">
+                <input type="search" id="tabel2_search" class="search-inp" placeholder="Cari data...">
+
+                <div class="filter-wrap">
+                  <label>Periode</label>
+                  <input type="date" class="filter-inp" id="tabel2_tglawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                  <span class="filter-sep">s/d</span>
+                  <input type="date" class="filter-inp" id="tabel2_tglakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                </div>
+
+                <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+                  <i class="bi bi-funnel"></i> Filter
                 </button>
+
+                <div class="action-group">
+                  <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">+ Add Penawaran</button>
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid" style="padding:0; margin:0; width:100%;">
 
-                  <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Customer</th>
-                        <!-- <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Kirim</th> -->
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. SO</th>
-                        <!-- <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PO. Cust</th> -->
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">DPP Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PPN Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Grand Total Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto1</th>
-                        @if ($level > 1)
+              <div class="rt-bar-row">
+                <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
+                  <i class="bi bi-arrow-clockwise"></i> Reset kolom
+                </button>
+                <div id="rtBarTabel2"></div>
+              </div>
 
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto2</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto2</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto2</th>
-                        @if ($level > 2)
-
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto3</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto3</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto3</th>
-
-                          @if ($level > 3)
-
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto4</th>
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto4</th>
-                          <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto4</th>
-
-                            @if ($level > 4)
-
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto5</th>
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto5</th>
-                            <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tgl Oto5</th>
-                            @endif
-                          @endif
-                        @endif
-                        @endif
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Batal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Batal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Batal</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabel2_data" class="text-left">
-                      {{-- @foreach( $tempOutstanding3 as $PurchaseOrderData)
-                      <tr>
-                        <td class="text-center"style='white-space:nowrap;'>
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-info"></i>
-                            </button>
-                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-pencil-fill"></i>
-                            </button>
-                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-key-fill"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NamaCustSupp }}</td>
-                       <!--  <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($PurchaseOrderData->tglKirim)) !!}</td> -->
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOSO }}</td>
-                      <!--   <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOPOCUST }}</td> -->
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
-                          <!-- @if($PurchaseOrderData->IsOtorisasi1 == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($PurchaseOrderData->TglOto1 === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglOto1)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td> -->
-                        @if ($PurchaseOrderData->IsOtorisasi1 )
-                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                        @endif
-                        <td>{!! $PurchaseOrderData->TglOto1 ?  date("Y/m/d", strtotime($PurchaseOrderData->TglOto1)) : '' !!}</td>
-
-                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        @if ($level > 1)
-                        @if ($PurchaseOrderData->IsOtorisasi2 )
-                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                @endif
-                        <td>{!! $PurchaseOrderData->TglOto2 ? date("Y/m/d", strtotime($PurchaseOrderData->TglOto2)) : '' !!}</td>
-
-                        <td>{{ $PurchaseOrderData->OtoUser2 }}</td>
-                        @if ($level > 2)
-                        @if ($PurchaseOrderData->IsOtorisasi3 )
-                                <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                @else
-                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                @endif
-                                <td>{!! $PurchaseOrderData->TglOto3 ? date("Y/m/d", strtotime($PurchaseOrderData->TglOto3)) : '' !!}</td>
-
-                                <td>{{ $PurchaseOrderData->OtoUser3 }}</td>
-                                @if ($level > 3)
-                                @if ($PurchaseOrderData->IsOtorisasi4 )
-                                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                        @else
-                                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                        @endif
-                                        <td>{!! $PurchaseOrderData->TglOto4 ? date("Y/m/d", strtotime($PurchaseOrderData->TglOto4)) : '' !!}</td>
-
-                                        <td>{{ $PurchaseOrderData->OtoUser4 }}</td>
-                                        @if ($level > 4)
-                                        @if ($PurchaseOrderData->IsOtorisasi5 )
-                                                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                                                @else
-                                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                                                @endif
-                                                <td>{!! $PurchaseOrderData->TglOto5 ? date("Y/m/d", strtotime($PurchaseOrderData->TglOto5)) : '' !!}</td>
-
-                                                <td>{{ $PurchaseOrderData->OtoUser5 }}</td>
-
-                                          @endif
-                                  @endif
-                          @endif
-                  @endif
-                          @if($PurchaseOrderData->Isbatal== 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($PurchaseOrderData->TglBatal === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglBatal)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
+              <div class="table-outer">
+                <div class="table-wrap">
+                  <table id="tabel2" class="tb">
+                    {{-- Header content is fully JS-owned -- penawaransoReplaceThead()
+                         (called from renderTabel2Rows(), run on page load via loadAll())
+                         replaces this <thead>'s contents based on gcart_header. --}}
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel2_data" class="text-left"></tbody>
                   </table>
-
+                </div>
+                <div class="rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
                 </div>
               </div>
             </div>
           </div>
 
           <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid" style="padding:0; margin:0; width:100%;">
+            <div class="tb-report main">
+              <div class="toolbar" style="margin-bottom:10px;">
+                <input type="search" id="tabel3_search" class="search-inp" placeholder="Cari data...">
+              </div>
 
-                  <table id="tabel3" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Customer</th>
-                       <!--  <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Kirim</th> -->
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. SO</th>
-                     <!--    <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PO. Cust</th> -->
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">DPP Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">PPN Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Grand Total Rp</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized 1</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized User</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Authorized Date 1</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabel3_data" class="text-left">
-                      {{-- @foreach ($tempOutstanding5 as $POOtorisasi)
-                      <tr>
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $POOtorisasi->NoBukti }}')">
-                              <i class="bi bi-info"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $POOtorisasi->NoBukti }}')">
-                              <i class="bi bi-key-fill"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($POOtorisasi->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NamaCustSupp }}</td>
-                     <!--    <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($POOtorisasi->TglKirim)) !!}</td> -->
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NOSO }}</td>
-                  <!--       <td style='white-space:nowrap;'>{{ $POOtorisasi->NOPOCUST }}</td> -->
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
-                          @if($POOtorisasi->IsOtorisasi1 == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($POOtorisasi->TglOto1 === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($POOtorisasi->TglOto1)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                          @if($POOtorisasi->Isbatal == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($POOtorisasi->TglBatal === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($POOtorisasi->TglBatal)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
+              <div class="rt-bar-row">
+                <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel3')">
+                  <i class="bi bi-arrow-clockwise"></i> Reset kolom
+                </button>
+                <div id="rtBarTabel3"></div>
+              </div>
+
+              <div class="table-outer">
+                <div class="table-wrap">
+                  <table id="tabel3" class="tb">
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel3_data" class="text-left"></tbody>
                   </table>
-
+                </div>
+                <div class="rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
                 </div>
               </div>
             </div>
@@ -670,23 +497,67 @@
             </div>
           </div> -->
 
-        </div>
-      </div>
-
     </div>
   </div>
 
 </div>
 
+{{-- Filter modal for the "Penawaran SO" tab's Filter button. Reuses report-table.css's
+     #modalFilter.rt-filter styling verbatim (that CSS is scoped to the literal id
+     "modalFilter", the same id so.blade.php's own filter modal uses -- safe to repeat
+     here since each page has its own DOM). --}}
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-funnel"></i>
+          Filter Penawaran SO
+          <span class="rt-active-badge" id="penawaransoFilterBadge" style="display:none">1 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilter').modal('hide')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Penyaringan Data</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="penawaransoModalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="penawaransoModalOtorisasi">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="penawaransoResetFilter()">Reset</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+            onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="penawaransoTerapkanFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="margin-top: -80px;">Form Penawaran</h2>
+      <h2 style="">Form Penawaran</h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
-          margin-top: -120px;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -701,7 +572,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="margin-top:-60px;">
+    <div class="modal-body" style="">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
         <div class="col-md-3">
@@ -3088,6 +2959,8 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/report-table.js') }}"></script>
+<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
 <script type="text/javascript">
 $purut=0
 let dataTableAdd = []
@@ -3097,8 +2970,312 @@ let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
+let dataRefreshOutstanding3 = []
 
 let dataRefreshPenerimaan = []
+
+// -- #tabel2/#tabel3 interactive column engine (public/js/headerEngine.js) --
+// Same shared drag/hide/decimal-column engine so.blade.php uses (extracted
+// there from its original #tabel/#tabel7 implementation specifically so it
+// could be reused here instead of duplicating it). Persistence goes through
+// PenawaranSOController::loadHeader/simpanHeader -- the same generic
+// (username, href, reportmode) contract SOController's own loadHeader/
+// simpanHeader use, just with a href unique to each of this page's tables.
+HeaderEngine.configure({
+  loadUrl: "{!! url('penawaransoloadheader') !!}",
+  simpanUrl: "{!! url('penawaransosimpanheader') !!}"
+});
+
+var lastTabel2Rows = [];
+var lastTabel3Rows = [];
+
+HeaderEngine.registerTable('tabel2', {
+  href: 'penawaranso_tabel2',
+  tableSel: '#tabel2',
+  barSel: '#rtBarTabel2',
+  setDefault: function () { setDefaultHeaderTabel2(); },
+  onChange: function () { reinitTabel2(); }
+});
+HeaderEngine.registerTable('tabel3', {
+  href: 'penawaranso_tabel3',
+  tableSel: '#tabel3',
+  barSel: '#rtBarTabel3',
+  setDefault: function () { setDefaultHeaderTabel3(); },
+  onChange: function () { reinitTabel3(); }
+});
+
+// #tabel2's columns match dbpenawaranso's loadAll() query (Marketing/PenawaranSOController::
+// loadAll()); "No. SO" is kept for parity with the table this replaces even though that
+// query doesn't actually select a NOSO field, so it always renders blank today.
+function setDefaultHeaderTabel2() {
+  gcart_header = [
+    ['NoBukti',      'No Bukti',       1, 'varchar', 0, 0],
+    ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
+    ['NamaCustSupp', 'Customer',       1, 'varchar', 0, 0],
+    ['NOSO',         'No. SO',         1, 'varchar', 0, 0],
+    ['TotDPPRp',     'DPP Rp',         1, 'float',   0, 2],
+    ['TotPPNRp',     'PPN Rp',         1, 'float',   0, 2],
+    ['TotNetRp',     'Grand Total Rp', 1, 'float',   0, 2]
+  ];
+}
+
+function setDefaultHeaderTabel3() {
+  gcart_header = [
+    ['NoBukti',      'No Bukti',       1, 'varchar', 0, 0],
+    ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
+    ['NamaCustSupp', 'Customer',       1, 'varchar', 0, 0],
+    ['NOSO',         'No. SO',         1, 'varchar', 0, 0],
+    ['TotDPPRp',     'DPP Rp',         1, 'float',   0, 2],
+    ['TotPPNRp',     'PPN Rp',         1, 'float',   0, 2],
+    ['TotNetRp',     'Grand Total Rp', 1, 'float',   0, 2]
+  ];
+}
+
+function tabel2ActionsCell(row) {
+  var nobukti = HeaderEngine.pickCI(row, 'NoBukti');
+  var html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  html += '<button class="btn-action-sm btn-action-success" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
+  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+function tabel3ActionsCell(row) {
+  var nobukti = HeaderEngine.pickCI(row, 'NoBukti');
+  var html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn-action-sm btn-action-danger" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+function penawaransoFormatTanggal(raw) {
+  if (!raw) { return ''; }
+  var d = new Date(raw);
+  var dd = ('0' + d.getDate()).slice(-2);
+  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+  return dd + '/' + mm + '/' + d.getFullYear();
+}
+
+// col: [field, label, visible, type, hasTotal, decimals] -- same shape as gcart_header rows.
+function penawaransoValueCell(row, col) {
+  var raw = HeaderEngine.pickCI(row, col[0]);
+  var type = col[3];
+  if (type === 'date') {
+    return '<td>' + penawaransoFormatTanggal(raw) + '</td>';
+  }
+  if (type === 'float') {
+    var dp = Number(col[5]) || 0;
+    var n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+    return '<td class="text-right">' + formatAngka(n.toFixed(dp)) + '</td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+function penawaransoOtoBoolCell(flag) {
+  return Number(flag)
+    ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+    : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+}
+
+// Kolom Otorisasi (level 1..$level) + Batal ditempel FIXED di belakang kolom hasil cart --
+// jumlahnya berubah tergantung level login, jadi tidak cocok disimpan/diseret sebagai
+// bagian dari layout kolom milik user (sama seperti kolom Authorized/Batal di
+// purchaseOrder.blade.php's renderTabelPO(), yang juga dirakit manual di luar poCart).
+function penawaransoOtoHeaderTabel2(level) {
+  var html = '<th style="padding: 4px 12px;" scope="col">Oto1</th>'
+    + '<th style="padding: 4px 12px;" scope="col">User Oto1</th>'
+    + '<th style="padding: 4px 12px;" scope="col">Tgl Oto1</th>';
+  for (var lvl = 2; lvl <= level; lvl++) {
+    html += '<th style="padding: 4px 12px;" scope="col">Oto' + lvl + '</th>'
+      + '<th style="padding: 4px 12px;" scope="col">User Oto' + lvl + '</th>'
+      + '<th style="padding: 4px 12px;" scope="col">Tgl Oto' + lvl + '</th>';
+  }
+  html += '<th style="padding: 4px 12px;" scope="col">Batal</th>'
+    + '<th style="padding: 4px 12px;" scope="col">User Batal</th>'
+    + '<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>';
+  return html;
+}
+
+function penawaransoOtoRowTabel2(row, level) {
+  var html = penawaransoOtoBoolCell(row.IsOtorisasi1)
+    + '<td>' + (row.OtoUser1 || '') + '</td>'
+    + '<td>' + (row.TglOto1 ? penawaransoFormatTanggal(row.TglOto1) : '') + '</td>';
+  for (var lvl = 2; lvl <= level; lvl++) {
+    html += penawaransoOtoBoolCell(row['IsOtorisasi' + lvl])
+      + '<td>' + (row['OtoUser' + lvl] || '') + '</td>'
+      + '<td>' + (row['TglOto' + lvl] ? penawaransoFormatTanggal(row['TglOto' + lvl]) : '') + '</td>';
+  }
+  html += penawaransoOtoBoolCell(row.IsBatal)
+    + '<td>' + (row.UserBatal || '') + '</td>'
+    + '<td>' + (row.TglBatal ? penawaransoFormatTanggal(row.TglBatal) : '') + '</td>';
+  return html;
+}
+
+function penawaransoOtoHeaderTabel3() {
+  return '<th style="padding: 4px 12px;" scope="col">Authorized</th>'
+    + '<th style="padding: 4px 12px;" scope="col">User Oto</th>'
+    + '<th style="padding: 4px 12px;" scope="col">Tanggal Oto</th>';
+}
+
+function penawaransoOtoRowTabel3(row) {
+  return penawaransoOtoBoolCell(row.IsOtorisasi1)
+    + '<td>' + (row.OtoUser1 || '') + '</td>'
+    + '<td>' + (row.TglOto1 ? penawaransoFormatTanggal(row.TglOto1) : '') + '</td>';
+}
+
+// ReportTable.init()'s bindHead(thead) attaches drag/gear listeners with no matching
+// removeEventListener -- calling init() again (which reinitTabel2()/reinitTabel3() do,
+// on purpose, to re-bind after DataTables rebuilds) is only safe against a genuinely
+// NEW <thead> node each time, so the whole element is replaced here rather than just
+// its innerHTML (same reasoning as so.blade.php's replaceTheadWithHeader()).
+function penawaransoReplaceThead(tableSel, cols, trailingHtml) {
+  var oldThead = document.querySelector(tableSel + ' thead');
+  if (!oldThead || !window.ReportTable) { return; }
+  var headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>')
+    .replace('</tr>', trailingHtml + '</tr>');
+  var newThead = document.createElement('thead');
+  newThead.setAttribute('style', 'white-space:nowrap;');
+  newThead.innerHTML = headRowHtml;
+  oldThead.parentNode.replaceChild(newThead, oldThead);
+}
+
+// Client-side period + Otorisasi filtering, same idea as purchaseOrder.blade.php's
+// poFilterStatus/poFilterOtorisasi (filtering the already-fetched array, not re-querying
+// the server -- penawaransoloadall has no date-range/otorisasi params to filter by).
+var penawaransoFilterOtorisasi = 'SEMUA';
+
+function penawaransoFilterRowsTabel2(rows) {
+  var awalEl = document.getElementById('tabel2_tglawal');
+  var akhirEl = document.getElementById('tabel2_tglakhir');
+  var awal = awalEl ? awalEl.value : '';
+  var akhir = akhirEl ? akhirEl.value : '';
+  return (rows || []).filter(function (row) {
+    var tgl = row.Tanggal ? String(row.Tanggal).slice(0, 10) : '';
+    if (awal && tgl && tgl < awal) { return false; }
+    if (akhir && tgl && tgl > akhir) { return false; }
+    if (penawaransoFilterOtorisasi === 'Sudah' && !Number(row.IsOtorisasi1)) { return false; }
+    if (penawaransoFilterOtorisasi === 'Belum' && Number(row.IsOtorisasi1)) { return false; }
+    return true;
+  });
+}
+
+function renderTabel2Rows(rows) {
+  if (HeaderEngine.activeKey() !== 'tabel2') { HeaderEngine.activateEngineData('tabel2'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
+  var level = Number($('#level').val()) || 1;
+  var dataTampil = penawaransoFilterRowsTabel2(rows);
+  var html = '';
+  dataTampil.forEach(function (row) {
+    html += '<tr>' + tabel2ActionsCell(row);
+    cols.forEach(function (col) { html += penawaransoValueCell(row, col); });
+    html += penawaransoOtoRowTabel2(row, level) + '</tr>';
+  });
+  document.getElementById('tabel2_data').innerHTML = html;
+  penawaransoReplaceThead('#tabel2', cols, penawaransoOtoHeaderTabel2(level));
+}
+
+function renderTabel3Rows(rows) {
+  if (HeaderEngine.activeKey() !== 'tabel3') { HeaderEngine.activateEngineData('tabel3'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; });
+  var html = '';
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabel3ActionsCell(row);
+    cols.forEach(function (col) { html += penawaransoValueCell(row, col); });
+    html += penawaransoOtoRowTabel3(row) + '</tr>';
+  });
+  document.getElementById('tabel3_data').innerHTML = html;
+  penawaransoReplaceThead('#tabel3', cols, penawaransoOtoHeaderTabel3());
+}
+
+function reinitTabel2() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(lastTabel2Rows);
+    $('#tabel2').DataTable({ dom: 't', lengthChange: false, paging: false, ordering: false });
+    HeaderEngine.bindEngineDom('tabel2');
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabel3() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
+    renderTabel3Rows(lastTabel3Rows);
+    $('#tabel3').DataTable({ dom: 't', lengthChange: false, paging: false, ordering: false });
+    HeaderEngine.bindEngineDom('tabel3');
+  } catch (e) {
+    console.error('reinitTabel3 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function penawaransoUpdateFilterBadge() {
+  var badge = document.getElementById('penawaransoFilterBadge');
+  if (!badge) { return; }
+  badge.style.display = (penawaransoFilterOtorisasi !== 'SEMUA') ? '' : 'none';
+}
+
+function penawaransoTerapkanFilter() {
+  penawaransoFilterOtorisasi = $('#penawaransoModalOtorisasi').val() || 'SEMUA';
+  penawaransoUpdateFilterBadge();
+  $('#modalFilter').modal('hide');
+  reinitTabel2();
+}
+
+function penawaransoResetFilter() {
+  penawaransoFilterOtorisasi = 'SEMUA';
+  $('#penawaransoModalOtorisasi').val('SEMUA');
+  penawaransoUpdateFilterBadge();
+  $('#modalFilter').modal('hide');
+  reinitTabel2();
+}
+
+function buttonHeaderTable(key) {
+  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
+    HeaderEngine.activateEngineData(key);
+    HeaderEngine.doSetHeader(1, true);
+    if (key === 'tabel2') { reinitTabel2(); } else { reinitTabel3(); }
+    alertify.success('Kolom telah direset ke tampilan default');
+  }, function () {});
+}
+
+// One-time seed: load each table's saved column layout (or fall back to its
+// setDefault()) before the very first render. Order matters -- ReportTable's
+// drag/gear listeners are a page-wide singleton bound to whichever table is
+// bound LAST (see bindEngineDom() calls in reinitTabel2/3), so tabel2 (the
+// tab shown by default) must be initialized after tabel3, not before.
+HeaderEngine.activateEngineData('tabel2');
+HeaderEngine.doSetHeader(1);
+HeaderEngine.activateEngineData('tabel3');
+HeaderEngine.doSetHeader(1);
+
+$('#nav-home-tab').on('shown.bs.tab', function () {
+  HeaderEngine.activateEngineData('tabel2');
+  HeaderEngine.bindEngineDom('tabel2');
+});
+$('#nav-profile-tab').on('shown.bs.tab', function () {
+  HeaderEngine.activateEngineData('tabel3');
+  HeaderEngine.bindEngineDom('tabel3');
+});
+$('#modalFilter').on('show.bs.modal', function () {
+  $('#penawaransoModalOtorisasi').val(penawaransoFilterOtorisasi);
+});
+$('#tabel2_search').on('input', function () {
+  $('#tabel2').DataTable().search($(this).val()).draw();
+});
+$('#tabel3_search').on('input', function () {
+  $('#tabel3').DataTable().search($(this).val()).draw();
+});
+$('#tabel2_tglawal, #tabel2_tglakhir').on('change', function () {
+  reinitTabel2();
+});
 
 let listAlamatKirim = []
 
@@ -5283,12 +5460,6 @@ function onChangeInputAddAddNosat () {
 function loadAll () {
   console.log('loadall')
 
-  let level = $("#level").val()
-  console.log(level)
-  let _token = $("#_token").val();
-
-  $('#tabel').DataTable().destroy();
-
   $.ajax({
     url: "{!! url('penawaransoloadall') !!}",
     type: "get",
@@ -5296,262 +5467,19 @@ function loadAll () {
     data: {
     },
     success: function(res) {
-      // dataRefreshOutstanding = res.tempOutstanding1
       dataRefreshOutstanding2 = res.tempOutstanding3
       dataRefreshOutstanding3 = res.tempOutstanding5
-
-
-      // console.log('tempOutstanding2',res.tempOutstanding3)
-      // console.log('dataRefreshOutstanding2',dataRefreshOutstanding2)
-
-      // console.log('tempOutstanding5',res.tempOutstanding5)
-      // console.log('dataRefreshOutstanding3',dataRefreshOutstanding3)
     }})
 
-    let rowTable = ""
-   
+  lastTabel2Rows = dataRefreshOutstanding2 || []
+  lastTabel3Rows = dataRefreshOutstanding3 || []
 
-      $('#tabel2').DataTable().destroy();
+  // tabel2 (the tab shown by default) goes last -- see the ordering note on
+  // the one-time HeaderEngine seeding above.
+  reinitTabel3()
+  reinitTabel2()
 
-      let rowTable2 = ""
-
-      if (dataRefreshOutstanding2 && dataRefreshOutstanding2.length > 0 && dataRefreshOutstanding2 && dataRefreshOutstanding2.length > 0) {
-        dataRefreshOutstanding2.forEach((item, i) => {
-            // console.log('item tabel 2', item)
-            let date1 = ""
-            if (item.Tanggal) {
-                let date = new Date(item.Tanggal);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date1 = date.getFullYear()+"/"+(month)+"/"+(day);
-            }
-
-            let date2 = ""
-            if (item.TglKirim) {
-                let date = new Date(item.tglKirim); // Fixed: was item.tglKirim (lowercase)
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date2 = date.getFullYear()+"/"+(month)+"/"+(day);
-            }
-
-            let date3 = ""
-            if (item.TglOto1) {
-                let date = new Date(item.TglOto1);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date3 = date.getFullYear()+"/"+(month)+"/"+(day); // Fixed: was date2
-            }
-
-            let date4 = ""
-            if (item.TglBatal) {
-                let date = new Date(item.TglBatal);
-                let day = ("0" + date.getDate()).slice(-2);
-                let month = ("0" + (date.getMonth() + 1)).slice(-2);
-                date4 = date.getFullYear()+"/"+(month)+"/"+(day); // Fixed: was date2
-            }
-
-            rowTable2 += `
-            <tr>
-              <td class="text-center" style='white-space:nowrap;'>
-                <div class="action-buttons-wrap">
-                <button class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-                <button class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
-                <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-                </div>
-              </td>
-              <td style='white-space:nowrap;'>${item.NoBukti || ''}</td>
-              <td style='white-space:nowrap;'>${date1}</td>
-              <td style='white-space:nowrap;'>${item.NamaCustSupp || ''}</td>
-              <!-- <td style='white-space:nowrap;'>${date2}</td> -->
-              <td style='white-space:nowrap;'>${item.NOSO || ''}</td>
-              <!-- <td style='white-space:nowrap;'>${item.NOPOCUST || ''}</td> -->
-              <td class="text-right">${formatAngka(parseFloat(item.TotDPPRp).toFixed(2))}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.TotPPNRp).toFixed(2))}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.TotNetRp).toFixed(2))}</td>
-              ${Number(item.IsOtorisasi1) ?
-                  '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                :
-                '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-              }
-              <td>${item.TglOto1 ? formatDate(item.TglOto1) : '' }</td>
-
-              <td>${item.OtoUser1 }</td>
-              `
-              // console.log('level' , level)
-              if (level > 1) {
-                console.log('>')
-              } else {
-                console.log('a')
-              }
-
-              if (level > 1) {
-                console.log('masok')
-                rowTable2 += `
-                ${Number(item.IsOtorisasi2) ?
-                    '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                  :
-                  '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                }
-
-                <td>${item.OtoUser2 }</td>
-                <td>${item.TglOto2 ?  formatDate(item.TglOto2) : '' }</td>
-
-                
-                `
-                if (level > 2) {
-                  rowTable2 += `
-                  ${Number(item.IsOtorisasi3) ?
-                      '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                    :
-                    '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                  }
-                  <td>${item.TglOto3 ?  formatDate(item.TglOto3) : '' }</td>
-
-                  <td>${item.OtoUser3 }</td>
-                  `
-                  if (level > 3) {
-                    rowTable2 += `
-                    ${Number(item.IsOtorisasi4) ?
-                        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                      :
-                      '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                    }
-                    <td>${item.TglOto4 ?  formatDate(item.TglOto4) : '' }</td>
-
-                    <td>${item.OtoUser4 }</td>
-                    `
-                    if (level > 4) {
-                      rowTable2 += `
-                      ${Number(item.IsOtorisasi5) ?
-                          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-                        :
-                        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                      }
-                      <td>${item.TglOto5 ?  formatDate(item.TglOto5) : '' }</td>
-
-                      <td>${item.OtoUser5 }</td>
-                      `
-
-
-                    }
-
-                  }
-
-                }
-
-              }
-
-
-              rowTable2 += `  ${item.IsBatal == 1 ?
-                  '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
-                  '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-                }
-              <td>${item.UserBatal || ''}</td>
-              <td>${date4}</td>
-            </tr>
-            `
-        });
-    }
-
-      document.getElementById("tabel2_data").innerHTML = rowTable2
-
-      $("#tabel2").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-        });
-
-
-
-
-
-
-
-
-
-        
-        
-
-      $('#tabel3').DataTable().destroy();
-      let rowTable3 = ""
-
-      console.log('dataRefreshOutstanding3', dataRefreshOutstanding3[0])
-      if (dataRefreshOutstanding3 && dataRefreshOutstanding3.length > 0 && dataRefreshOutstanding3 && dataRefreshOutstanding3.length > 0) {
-      dataRefreshOutstanding3.forEach((item, i) => {
-        // console.log('item tabel 3', item)
-        let date1 = ""
-        if (item.Tanggal) {
-            let date = new Date(item.Tanggal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-
-        let date2 = ""
-        if (item.TglKirim) {
-            let date = new Date(item.TglKirim);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date2 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-
-          let date3 = ""
-        if (item.TglOto1) {
-            let date = new Date(item.TglOto1);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date3 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-
-          let date4 = ""
-        if (item.TglBatal) {
-            let date = new Date(item.TglBatal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date4 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-
-        rowTable3 += `
-        <tr>
-          <td class="text-center" style='white-space:nowrap;'>
-            <div class="action-buttons-wrap">
-            <button class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-            <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-            <button class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
-            </div>
-          </td>
-          <td style='white-space:nowrap;'>${item.NoBukti}</td>
-          <td style='white-space:nowrap;'>${date1}</td>
-          <td style='white-space:nowrap;'>${item.NamaCustSupp}</td>
-          <!-- <td style='white-space:nowrap;'>${date2}</td> -->
-          <td style='white-space:nowrap;'>${item.NOSO}</td>
-          <!-- <td style='white-space:nowrap;'>${item.NOPOCUST}</td> -->
-          <td class="text-right">${formatAngka(parseFloat(item.TotDPPRp).toFixed(2))}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.TotPPNRp).toFixed(2))}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.TotNetRp).toFixed(2))}</td>
-            ${item.IsOtorisasi1 == 1 ?
-              '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
-              '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-            }
-          <td>${item.OtoUser1}</td>
-          <td>${date3}</td>
-        </tr>
-        `
-      });
-    }
-
-      document.getElementById("tabel3_data").innerHTML = rowTable3
-
-      $("#tabel3").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-        });
-
-
-
-
-        //setActiveTab(0);
-        console.log('loadall selesai');
+  console.log('loadall selesai');
 }
 
 

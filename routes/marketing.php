@@ -37,6 +37,8 @@ Route::get('/penawaranso', [PenawaranSOController::class, 'index']);
 Route::post('/penawaransocekhargaoto', [PenawaranSOController::class, 'cekHargaOto']);
 Route::get('/penawaransoprint', [PenawaranSOController::class, 'spCetak']);
 Route::get('/penawaransoloadall', [PenawaranSOController::class, 'loadAll']);
+Route::get('/penawaransoloadheader', [PenawaranSOController::class, 'loadHeader']);
+Route::get('/penawaransosimpanheader', [PenawaranSOController::class, 'simpanHeader']);
 
 Route::get('/penawaransolistpelanggan', [PenawaranSOController::class, 'listPelanggan']); //
 Route::get('/penawaransolistttd', [PenawaranSOController::class, 'listttd']);  //
@@ -64,15 +66,15 @@ Route::get('/penawaransocheckhargaddd', [PenawaranSOController::class, 'CheckHar
 Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']);
 
 
-//   // VERIF PENAWARAN
-//   Route::get('/verifikasipenawaran', [VerifikasiPenawaranController::class, 'index']);
-//   Route::post('/verifikasipenawaranotorisasi', [VerifikasiPenawaranController::class, 'spOtorisasi']);
-//   Route::post('/verifikasipenawaranbatalotorisasi', [VerifikasiPenawaranController::class, 'spBatalOtorisasi']);
-//   Route::get('/verifikasipenawaranloadall', [VerifikasiPenawaranController::class, 'loadAll']);
-//   Route::get('/verifikasipenawaranloadallinfo', [VerifikasiPenawaranController::class, 'loadAllInfo']);
-//   Route::post('/verifikasipenawarandetailbarang', [VerifikasiPenawaranController::class, 'detailBarang']);
-//   Route::post('/get-barang', [VerifikasiPenawaranController::class, 'getBarang']);
-//   Route::post('/get-customer', [VerifikasiPenawaranController::class, 'getCustomer']);
+  // VERIF PENAWARAN
+  Route::get('/verifikasipenawaran', [VerifikasiPenawaranController::class, 'index']);
+  Route::post('/verifikasipenawaranotorisasi', [VerifikasiPenawaranController::class, 'spOtorisasi']);
+  Route::post('/verifikasipenawaranbatalotorisasi', [VerifikasiPenawaranController::class, 'spBatalOtorisasi']);
+  Route::get('/verifikasipenawaranloadall', [VerifikasiPenawaranController::class, 'loadAll']);
+  Route::get('/verifikasipenawaranloadallinfo', [VerifikasiPenawaranController::class, 'loadAllInfo']);
+  Route::post('/verifikasipenawarandetailbarang', [VerifikasiPenawaranController::class, 'detailBarang']);
+  Route::post('/get-barang', [VerifikasiPenawaranController::class, 'getBarang']);
+  Route::post('/get-customer', [VerifikasiPenawaranController::class, 'getCustomer']);
 
 //   // VERIF BARANG
 //   Route::get('/verifikasibarang', [VerifikasiBarangController::class, 'index']);

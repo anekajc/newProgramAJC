@@ -977,7 +977,7 @@
 <div id="page2" class="container-fluid" style="display: none" >
       <div class="row d-flex justify-content-between align-items-center">
         <div class="col-auto text-left">
-          <h2>Form Sales Order</h2>
+          {{-- <h2>Form Sales Order</h2> --}}
         </div>
         <div class="col-auto text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
@@ -986,6 +986,7 @@
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
+              margin-bottom: 30px;
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
@@ -1010,7 +1011,6 @@
                       <label>Pelanggan</label>
                     </div>
                   </div>
-
 
                   <div class="col-md-8" >
                     <div class="input-group mb-3 position-relative">
@@ -1085,7 +1085,6 @@
                   </div>
                   </div>
 
-
               </div>
 
               <div class="col-md-3">
@@ -1105,7 +1104,6 @@
 
                   </div>
 
-
                 </div>
               </div>
               <div class="col-md-6" style="display: none">
@@ -1119,7 +1117,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-12" style="margin-top:-12px; display: none">
+              <div class="col-md-12" style="display: none">
                   <div class="row">
                     <div class="col-6">
                       <div class="form-group">
@@ -1135,9 +1133,9 @@
                   </div>
                 </div>
 
-                <div class="col-md-12" >
+                <div class="col-md-12">
                 <div class="row">
-                  <div class="col-md-4">
+                  <div class="col-md-4 mb-4">
                     <div class="form-group">
                       <label>TOP</label>
                     </div>
@@ -1148,7 +1146,7 @@
                       <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0 >
                     </div>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-4 mt-2">
                     <div class="form-group">
                       <label>Tanggal</label>
                     </div>
@@ -1231,7 +1229,6 @@
                     </div>
                     </div>
 
-
                 </div>
 
               </div>
@@ -1239,7 +1236,7 @@
               </div>
 
           <hr/>
-          <div class="row ">
+          <div class="row">
           <div class="col-md-12 mt-2 text-left">
               <button type="button" class="btn btn-lg btn-show-hide-header btn-action-primary" style="
                 height: 38px;
@@ -1284,13 +1281,7 @@
                     </div>
                   </div>
 
-
-
-
                   </div>
-
-
-
 
                 </div>
                 <div class="col-md-3">
@@ -1320,7 +1311,6 @@
                     </div>
                   </div>
 
-
                   </div>
 
                   <!-- <div class="row">
@@ -1338,7 +1328,6 @@
                   </div> -->
                   <div class="row">
 
-
                   <!-- <div class="col-md-12">
                     <div class="form-group">
 
@@ -1347,13 +1336,9 @@
 
                   </div>
 
-
-
-
                   <div class="row">
 
                   <!-- <div class="col-md-12">
-
 
                   </div> -->
                   <!-- <div class="col-md-12">
@@ -1364,44 +1349,24 @@
                   </div> -->
                   </div>
 
-
-
-
-
-
-
-
-
                 </div>
 
                 <div class="col-md-3">
-
-
 
                   <div class="row">
                     <div class="col-md-12">
                       <label>Keterangan</label>
                     </div>
 
-
-
                   <div class="col-md-12">
 
                     <div class="form-group" style="margin-top: 14px">
                       <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_catatan" onblur="onChangeCatatan()"></textarea>
 
-
                     </div>
                   </div>
 
-
-
-
-
-
-
                   </div>
-
 
                   <div class="row">
 
@@ -1409,30 +1374,13 @@
 
                   <div class="row">
 
-
                   </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                   <div class="row ">
 
               </div>
 
                 </div>
-
 
                 <div class="col-md-3">
                   <div class="row">
@@ -1461,24 +1409,17 @@
                     </div>
                   </div>
 
-
-
-
                   <div class="row">
 
                   <!-- <div class="col-md-12">
 
-
-
                   </div> -->
-
-
 
                   </div>
 
                 </div>
                 <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
-                <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
+                <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" >Save Header</button>
             </div> -->
               </div>
               {{-- Second explicit row (was previously just a wrap of the same
@@ -1491,7 +1432,6 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="row">
-
 
                   <div class="col-9">
                     <div class="form-group">
@@ -1536,25 +1476,18 @@
 
                 </div>
 
-
-
-
                 <!-- <div class="row"> -->
 
                 <!-- </div> -->
-
 
               </div>
 
             </div>
 
-
-
             <div class="col-md-3">
               <div class="row">
                 <div class="col-md-6">
                   <div class="row">
-
 
                   <div class="col-9">
                     <div class="form-group">
@@ -1700,14 +1633,11 @@
                 </tr>
                 </tbody>
 
-
               </table>
             </div>
               <!-- <button onclick="buttonSubKategori()">tes</button> -->
 
-
           </div>
-
 
           <div class="row d-flex justify-content-between align-items-center">
             <div class="col-auto mt-2 text-right">
@@ -1720,7 +1650,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonTambahSOAll()" class="btn btn-secondary"><b>+ Tambah Penawaran</b></button>
+              onclick="buttonTambahSOAll()"><b>+ Tambah Penawaran</b></button>
             </div>
           <div class="col-auto mt-2 text-right">
           <button type="button" class="btn btn-primary btn-lg" style="
@@ -1732,7 +1662,7 @@
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+            onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
           </div>
           </div>
 
@@ -1752,7 +1682,6 @@
                 <div class="col-md-6">
 
                 <div class="row">
-
 
               <!-- Barang dan Nama Produk -->
               <div class="col-md-12">
@@ -1796,7 +1725,6 @@
               </div>
               <!-- Harga -->
 
-
                 <!-- Disc RP -->
 
             </div>
@@ -1804,7 +1732,6 @@
         </div>
 
                       <div class="row">
-
 
                     <!-- Barang dan Nama Produk -->
                     <div class="col-md-6">
@@ -1892,21 +1819,11 @@
 
                         </div>
 
-
                     </div></div></div>
 
                       <!-- Disc RP -->
 
-
-
-
-
-
-
               <div class="row">
-
-
-
 
                 <div class="col-md-12">
                   <div class="row">
@@ -1929,7 +1846,6 @@
                           </div>
                         </div>
                       </div>
-
 
                     </div>
                     <div class="col-md-3">
@@ -1976,7 +1892,6 @@
                     <div class="col-md-3" style="">
                       <div class="row">
 
-
                       <div class="col-md-6" >
 
                         <div class="form-group">
@@ -1984,7 +1899,6 @@
                           <label>Tgl Kirim</label>
                         </div>
                       </div>
-
 
                       <div class="col-md-6">
                         <div class="form-group">
@@ -1996,16 +1910,10 @@
                     </div>
                     </div>
 
-
-
                   </div>
                 </div>
 
-
-
               </div>
-
-
 
                 <div class="col-md-12">
 
@@ -2066,11 +1974,8 @@
 
                 </div>
 
-
-
                 <div class="col-md-3">
                   <div class="row">
-
 
                   <div class="col-md-6" >
 
@@ -2079,7 +1984,6 @@
                       <label>Tambah Ke PO</label>
                     </div>
                   </div>
-
 
                   <div class="col-md-6">
                     <div class="form-group">
@@ -2096,7 +2000,6 @@
                 <div class="col-md-3" style="">
                   <div class="row">
 
-
                   <div class="col-md-6" >
 
                     <div class="form-group">
@@ -2104,7 +2007,6 @@
                       <label>Status</label>
                     </div>
                   </div>
-
 
                   <div class="col-md-6">
                     <div class="form-group">
@@ -2133,7 +2035,6 @@
                       <label>Harga Terakhir</label>
                     </div>
                   </div>
-
 
                   <div class="col-md-12 mb-4" style="overflow:auto;">
                   <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
@@ -2196,7 +2097,6 @@
                   </div>
                   </div>
 
-
                   <div class="row mt-2">
                     <div class="col-md-12 text-right">
                       <button type="button" class="btn btn-danger btn-lg" style="
@@ -2208,7 +2108,7 @@
                       text-transform: uppercase;
                       transition: background-color 0.3s, box-shadow 0.3s;
                       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="closeShowHideAdd()" class="btn btn-secondary">Batal</button>
+                      onclick="closeShowHideAdd()">Batal</button>
 
                       <button type="button" class="btn btn-success btn-lg" style="
                       height: 30px;
@@ -2219,7 +2119,7 @@
                       text-transform: uppercase;
                       transition: background-color 0.3s, box-shadow 0.3s;
                       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="showTableHargaTerakhir()" class="btn btn-secondary">Histori Harga</button>
+                      onclick="showTableHargaTerakhir()">Histori Harga</button>
 
                       <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
                       height: 30px;
@@ -2230,7 +2130,7 @@
                       text-transform: uppercase;
                       transition: background-color 0.3s, box-shadow 0.3s;
                       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="submitAddAdd()" class="btn btn-secondary">Submit Add</button>
+                      onclick="submitAddAdd()">Submit Add</button>
 
                       <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
                       height: 30px;
@@ -2241,7 +2141,7 @@
                       text-transform: uppercase;
                       transition: background-color 0.3s, box-shadow 0.3s;
                       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+                      onclick="submitAddEdit()">Submit Edit</button>
                     </div>
                     <div  id="addEditItem" class="container-fluid showhide">
                         <!-- <div class="line"></div> -->
@@ -2258,7 +2158,6 @@
                           <div class="row">
 
                         <div class="col-md-4">
-
 
                         <div class="row">
                           <div class="col-9">
@@ -2281,14 +2180,9 @@
 
                         </div>
 
-
-
-
                         </div>
 
-
                         <div class="col-md-4">
-
 
                         <div class="row">
                           <div class="col-9">
@@ -2311,15 +2205,11 @@
 
                         </div>
 
-
-
-
                         </div>
                         </div>
                         </div>
 
                         <div class="col-md-4">
-
 
                         <div class="row">
                           <div class="col-9">
@@ -2343,14 +2233,9 @@
 
                         </div>
 
-
-
-
                         </div>
 
-
                         <!-- <div class="col-md-4">
-
 
                         <div class="row">
                           <div class="col-12">
@@ -2358,7 +2243,6 @@
                               <label>Nama Barang</label>
                             </div>
                           </div>
-
 
                         <div class="col-md-12">
                           <div class="form-group">
@@ -2372,14 +2256,12 @@
 
                         <div class="col-md-4">
 
-
                         <div class="row">
                           <div class="col-12">
                             <div class="form-group">
                               <label>Nama Alias</label>
                             </div>
                           </div>
-
 
                         <div class="col-md-12">
                           <div class="form-group">
@@ -2393,14 +2275,12 @@
 
                         <div class="col-md-12">
 
-
                         <div class="row">
                           <div class="col-12">
                             <div class="form-group">
                               <label>Harga Terakhir</label>
                             </div>
                           </div>
-
 
                         <div class="col-md-12 mb-4">
                           <div class="form-group">
@@ -2419,7 +2299,6 @@
                                 </tr>
                               </thead>
 
-
                               <tbody id="tabel_data_edit_harga_terakhir" class="text-left" >
 
                                 <tr >
@@ -2433,11 +2312,8 @@
                                   <td>-</td>
                                   <td>-</td>
 
-
-
                               </tr>
                               </tbody>
-
 
                             </table>
                           </div>
@@ -2447,21 +2323,17 @@
 
                         </div>
 
-
                         <div class="col-md-12">
                           <div class="row">
 
-
                           <div class="col-md-2">
                             <div class="row">
-
 
                           <div class="col-md-12">
                             <div class="form-group">
                               <label>Qty</label>
                             </div>
                           </div>
-
 
                         <div class="col-md-12">
                           <div class="form-group">
@@ -2475,13 +2347,11 @@
                         <div class="col-md-2">
                           <div class="row">
 
-
                         <div class="col-12">
                           <div class="form-group">
                             <label>Satuan</label>
                           </div>
                         </div>
-
 
                         <div class="col-md-12">
                           <select id="input_add_edit_nosat" onchange="onChangeInputAddAddNosat()" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -2494,13 +2364,11 @@
                       <div class="col-md-2">
                         <div class="row">
 
-
                       <div class="col-12">
                         <div class="form-group">
                           <label>Satuan Produk</label>
                         </div>
                       </div>
-
 
                       <div class="col-md-12">
                         <div class="form-group">
@@ -2513,13 +2381,11 @@
                     <div class="col-md-2">
                     <div class="row">
 
-
                     <div class="col-12">
                     <div class="form-group">
                       <label>Harga</label>
                     </div>
                     </div>
-
 
                     <div class="col-md-12">
                     <div class="form-group">
@@ -2530,17 +2396,14 @@
                     </div>
                     </div>
 
-
                     <div class="col-md-2">
                       <div class="row">
-
 
                     <div class="col-12">
                       <div class="form-group">
                         <label>Disc %</label>
                       </div>
                     </div>
-
 
                     <div class="col-md-12">
                     <div class="form-group">
@@ -2554,13 +2417,11 @@
                     <div class="col-md-2">
                       <div class="row">
 
-
                     <div class="col-12">
                       <div class="form-group">
                         <label>Disc Rp</label>
                       </div>
                     </div>
-
 
                     <div class="col-md-12">
                     <div class="form-group">
@@ -2575,20 +2436,17 @@
                     <div class="col-md-12">
                     <div class="row">
 
-
                     </div>
                     </div>
 
                       <div class="col-md-2">
                         <div class="row">
 
-
                       <div class="col-12">
                         <div class="form-group">
                           <label>Tambah ke PO</label>
                         </div>
                       </div>
-
 
                       <div class="col-md-12">
                         <select onchange="" id="input_add_edit_tambahkepo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -2604,13 +2462,11 @@
                     <div class="col-md-2">
                     <div class="row">
 
-
                     <div class="col-12">
                     <div class="form-group">
                       <label>Booking</label>
                     </div>
                     </div>
-
 
                     <div class="col-md-12">
                     <select onchange="" id="input_add_edit_booking" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -2625,13 +2481,11 @@
                     <div class="col-md-2">
                     <div class="row">
 
-
                     <div class="col-12">
                     <div class="form-group">
                     <label>Urgent</label>
                     </div>
                     </div>
-
 
                     <div class="col-md-12">
                     <select onchange="" id="input_add_edit_urgent" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -2643,11 +2497,7 @@
                     </div>
                     </div>
 
-
-
                       </div>
-
-
 
                       <div class="row mt-2">
                         <div class="col-md-12 text-right">
@@ -2656,15 +2506,12 @@
 
                       </div>
 
-
                       <hr/>
 
                       </div>
 
-
                     <hr/>
                     </div>
-
 
                   </div>
 
@@ -2715,24 +2562,14 @@
               </div>
                 <!-- QTY, dan Satuan Produk -->
 
-
                 <!-- Tambahan -->
 
-
                 <!-- Satuan, Harga -->
-
-
 
                   </div>
                     <!-- <div class="col-md-12"> -->
 
                       <div class="row">
-
-
-
-
-
-
 
                 </div>
 

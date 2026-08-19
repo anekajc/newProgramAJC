@@ -280,6 +280,39 @@ foreach ($tempOutstanding4 as $p) {
 
   }
 
+  // Backs public/js/headerEngine.js's drag/hide/decimal column layout for
+  // #tabel2 and #tabel3 (see penawaranso.blade.php). Same generic
+  // (username, href, reportmode) contract as SOController::loadHeader/
+  // simpanHeader -- href just needs to be unique per table.
+  public function loadHeader (Request $req) {
+    $header = DB::connection('SML')->select('select * from DBSIMPANHEADER where username = :user and href = :href and reportmode = :mode', [
+      'user' => \Auth::user()->username,
+      'href' => $req->href,
+      'mode' => $req->mode,
+    ]);
+
+    return $header;
+  }
+
+  public function simpanHeader (Request $req) {
+    DB::connection('SML')->update('delete from DBSIMPANHEADER where username = :user and href = :href and reportmode = :mode', [
+      'user' => \Auth::user()->username,
+      'href' => $req->href,
+      'mode' => $req->mode,
+    ]);
+
+    DB::connection('SML')->insert('insert into DBSIMPANHEADER (username, href, reportmode, header, issubtotal, isgrandtotal) values (:user, :href, :mode, :header, :issubtotal, :isgrandtotal)', [
+      'user' => \Auth::user()->username,
+      'href' => $req->href,
+      'mode' => $req->mode,
+      'header' => $req->header,
+      'issubtotal' => $req->issubtotal,
+      'isgrandtotal' => $req->isgrandtotal,
+    ]);
+
+    return 1;
+  }
+
 
   public function cekHargaOto (Request $req) {
 
