@@ -179,46 +179,44 @@
 <link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
 
 <style>
-  /* Tab bar container, matching purchaseOrder.blade.php's .card.tab-card + .custom-tabs. */
-  .tab-card {
-    display: block !important;
-    align-items: flex-start !important;
-    padding: 0 !important;
-    border: none !important;
-    margin-bottom: 6px !important;
-  }
-  .tab-card .card-body {
-    padding: 5px 10px !important;
-  }
-  .custom-tabs {
+  /* Tab pill, matching so.blade.php's .radioChoiceMaster look exactly (copied
+     from that file) -- sits inline at the left of the toolbar row below,
+     not in its own separate card. */
+  .radioChoiceMaster {
     display: inline-flex;
-    justify-content: flex-start;
+    list-style: none;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .radioChoiceMaster-btn {
+    display: inline-flex;
     align-items: center;
-    gap: 2px;
-    background-color: #f1f3f5;
-    border-radius: 20px;
-    padding: 3px;
-  }
-  .custom-tabs .nav-link {
-    display: inline-block !important;
-    padding: 5px 16px !important;
-    font-size: 0.75rem !important;
     border: none;
-    border-radius: 17px;
-    color: #495057;
-    background: transparent;
-    font-weight: 600;
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
   }
-  .custom-tabs .nav-link:hover {
-    background: transparent;
-    color: #007bff;
+  .radioChoiceMaster-btn:hover {
+    color: #212529;
+    background-color: rgba(0,0,0,0.04);
   }
-  .custom-tabs .nav-link.active {
-    background: #007bff;
-    border-color: #007bff;
+  .radioChoiceMaster-btn.active {
     color: #fff;
-    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+    background-color: #007bff;
+    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
   }
 
   /* #tabel body row look + circular Actions-column buttons, copied from
@@ -258,6 +256,41 @@
   }
   #tabel td:first-child .btn-danger {
     color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  /* "Reset kolom" pill + its row, same block used in penawaranso.blade.php/
+     so.blade.php -- kept OUTSIDE #rtBarTabel (as a flex sibling, not a child)
+     because report-table.js's renderBar() fully overwrites that div's
+     innerHTML on every drag/hide/decimal change. Not part of report-table.css
+     itself, so declared here. */
+  .rt-bar-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .rt-bar-row .rt-bar { margin-bottom: 0; }
+  .rt-reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--rt-border);
+    border-radius: var(--rt-radius);
+    background: var(--rt-card);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--rt-ink-soft);
+  }
+  .rt-reset-btn:hover {
+    color: #D64550;
+    border-color: #D64550;
+    background: #FEF2F2;
   }
 </style>
 @endsection
@@ -301,18 +334,16 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  {{-- Tab bar in its own card, matching purchaseOrder.blade.php's .card.tab-card --
-       a dedicated card holding only the tab nav, separate from the table below it
-       (which gets its own report-table.css card via .tb-report .table-wrap). Only
-       one real tab exists here ("Verifikasi") -- nav-profile-tab elsewhere in this
-       file's JS is dead/never wired to a second pane, so it isn't given one either. --}}
-  <div class="card mb-3 tab-card">
-    <div class="card-body">
-      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-          Verifikasi
-        </a>
-      </div>
+  {{-- Tab pill in its own row above the toolbar, matching purchaseOrder.blade.php's
+       screenshot (tabs sit above the filter row, not inline inside it) and
+       so.blade.php's own placement of .radioChoiceMaster. Only one real tab
+       exists here ("Verifikasi"); nav-profile-tab elsewhere in this file's JS
+       is dead/never wired to a second pane, so it isn't given one either. --}}
+  <div style="margin-bottom:12px;">
+    <div class="radioChoiceMaster" id="nav-tab" role="tablist">
+      <a class="radioChoiceMaster-btn active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" disabled>
+        Verifikasi
+      </a>
     </div>
   </div>
 
@@ -323,11 +354,13 @@
   <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
     <div class="tb-report main">
-      {{-- Toolbar matching purchaseOrder.blade.php's .po-toolbar, rebuilt with
-           report-table.css's own .toolbar/.search-inp/.action-group/.btn-load
-           classes (the same ones so.blade.php/penawaranso.blade.php's toolbars
-           use) instead of a bare Bootstrap row. Still a plain GET form -- same
-           field ids/names/values and submit behavior as before, only restyled. --}}
+      {{-- Toolbar matching purchaseOrder.blade.php's .po-toolbar layout: search
+           fields + the submit/filter button grouped together on the left. PO
+           also has a right-hand +Add/+Tambah PR group pushed over by
+           .action-group's margin-left:auto, but this page has no equivalent
+           "add" action, so there's nothing on the right here. Still a plain
+           GET form -- same field ids/names/values and submit behavior as
+           before, only restyled. --}}
       <form method="GET" class="toolbar" style="margin-bottom:10px;">
         <input type="text"
             id="search_customer"
@@ -347,84 +380,33 @@
             value="{{ request('search_barang') }}"
             class="search-inp"
             placeholder="Search Barang">
-        <div class="action-group">
-          <button type="submit" name="search" value="1" class="btn-load">
-            <i class="bi bi-search"></i> Cari
-          </button>
-        </div>
+        <button type="submit" name="search" value="1" class="btn-load">
+          <i class="bi bi-search"></i> Cari
+        </button>
       </form>
+
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable()">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel"></div>
+      </div>
 
       <div class="table-outer">
       <div class="table-wrap">
           <table id="tabel" class="tb">
-            <thead class="text-center">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
-                    <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-                    <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;" scope="col" style="min-width: 150px">Customer</th>
-                    <th style="padding: 4px 12px;" scope="col">PIC</th>
-                    <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
-                    <th style="padding: 4px 12px;" scope="col">Verifikasi</th>
-                    <th style="padding: 4px 12px;" scope="col">Tgl Verf</th>
-                    <th style="padding: 4px 12px;" scope="col">User Verf</th>
-                    <th style="padding: 4px 12px;" scope="col">Harga</th>
-                    <th style="padding: 4px 12px;" scope="col">Tipe</th>
-                    <th style="padding: 4px 12px;" scope="col">Merk</th>
-
-                    <th style="padding: 4px 12px;" scope="col">Ket</th>
-                    <th style="padding: 4px 12px;" scope="col">Qnt</th>
-                    <th style="padding: 4px 12px;" scope="col">Qnt SO</th>
-                    <th style="padding: 4px 12px;" scope="col">Sisa</th>
-
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding); $i++)
-                <tr>
-                  <td class="text-center">
-                      @if ($tempOutstanding[$i]->IsVerf == 1)
-                      <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('{{ $tempOutstanding[$i]->NOBUKTI }}', '{{ $tempOutstanding[$i]->Urut }}')"><i class="bi bi-dash"></i></button>
-                      @else
-                      <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('{{ $tempOutstanding[$i]->NOBUKTI }}' , '{{ $tempOutstanding[$i]->Urut }}')"><i class="bi bi-plus"></i></button>
-
-                      @endif
-                  </td>
-                  <td>{{ $tempOutstanding[$i]->NOBUKTI }}</td>
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding[$i]->NAMACUSTSUPP }}</td>
-                          <td>{{ $tempOutstanding[$i]->NAMAPIC }}</td>
-                          <td>{{ $tempOutstanding[$i]->KODEBRG }}</td>
-                          <td>{{ $tempOutstanding[$i]->NAMABRG }}</td>
-                          @if ($tempOutstanding[$i]->IsVerf)
-                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                          <td>{!! $tempOutstanding[$i]->TglVerf ? date("Y/m/d", strtotime($tempOutstanding[$i]->TANGGAL)) : '' !!}</td>
-
-                  <td>{{ $tempOutstanding[$i]->UserVerf }}</td>
-                  <td class="text-right">{{ number_format($tempOutstanding[$i]->HARGA , 2 ,'.' , ',') }}</td>
-
-                  <td>{{ $tempOutstanding[$i]->tipe }}</td>
-                  <td>{{ $tempOutstanding[$i]->NamaMerk }}</td>
-                  <td>{{ $tempOutstanding[$i]->ketdet }}</td>
-                  <td class="text-right">{{ number_format($tempOutstanding[$i]->QNT , 2 ,'.' , ',') }}</td>
-                  <td class="text-right">{{ number_format($tempOutstanding[$i]->QntSO , 2 ,'.' , ',') }}</td>
-                  <td class="text-right">{{ number_format($tempOutstanding[$i]->Sisa , 2 ,'.' , ',') }}</td>
-
-
-
-
-                </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
+            {{-- Header content is fully JS-owned -- verifPenawaranReplaceThead()
+                 (called from renderTabelRows(), run on page load and after every
+                 search/otorisasi refresh) replaces this <thead>'s contents based
+                 on gcart_header. --}}
+            <thead style="white-space:nowrap;"></thead>
+            <tbody id="tabel_data" class="text-left"></tbody>
+          </table>
+      </div>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
       </div>
     </div>
@@ -1835,6 +1817,8 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/report-table.js') }}"></script>
+<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
 <script type="text/javascript">
 let xppncust = 0
 
@@ -1846,7 +1830,130 @@ let dataEdit = {}
 
 let tempKode = ''
 
+// -- #tabel interactive column engine (public/js/headerEngine.js) --
+// Same shared drag/hide/decimal-column engine used by so.blade.php/
+// penawaranso.blade.php, backed by VerifikasiPenawaranController::
+// loadHeader/simpanHeader (same generic (username, href, reportmode)
+// contract, its own href so its saved layout doesn't collide with any
+// other page's).
+HeaderEngine.configure({
+  loadUrl: "{!! url('verifikasipenawaranloadheader') !!}",
+  simpanUrl: "{!! url('verifikasipenawaransimpanheader') !!}"
+});
+
+var lastTabelRows = [];
+
+HeaderEngine.registerTable('tabel', {
+  href: 'verifikasipenawaran_tabel',
+  tableSel: '#tabel',
+  barSel: '#rtBarTabel',
+  setDefault: function () { setDefaultHeaderTabel(); },
+  onChange: function () { reinitTabel(); }
+});
+
+// Columns match VerifikasiPenawaranController::index()/loadAll()'s SELECT list.
+function setDefaultHeaderTabel() {
+  gcart_header = [
+    ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
+    ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
+    ['NAMACUSTSUPP', 'Customer',  1, 'varchar', 0, 0],
+    ['NAMAPIC',      'PIC',       1, 'varchar', 0, 0],
+    ['KODEBRG',      'Kode Brg',  1, 'varchar', 0, 0],
+    ['NAMABRG',      'Nama Brg',  1, 'varchar', 0, 0],
+    ['IsVerf',       'Verifikasi',1, 'bool',    0, 0],
+    ['TglVerf',      'Tgl Verf',  1, 'date',    0, 0],
+    ['UserVerf',     'User Verf', 1, 'varchar', 0, 0],
+    ['HARGA',        'Harga',     1, 'float',   0, 2],
+    ['tipe',         'Tipe',      1, 'varchar', 0, 0],
+    ['NamaMerk',     'Merk',      1, 'varchar', 0, 0],
+    ['ketdet',       'Ket',       1, 'varchar', 0, 0],
+    ['QNT',          'Qnt',       1, 'float',   0, 2],
+    ['QntSO',        'Qnt SO',    1, 'float',   0, 2],
+    ['Sisa',         'Sisa',      1, 'float',   0, 2]
+  ];
+}
+
+function tabelActionsCell(row) {
+  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
+  var urut = HeaderEngine.pickCI(row, 'Urut');
+  if (Number(HeaderEngine.pickCI(row, 'IsVerf')) === 1) {
+    return '<td class="text-center"><button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-dash"></i></button></td>';
+  }
+  return '<td class="text-center"><button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-plus"></i></button></td>';
+}
+
+// col[5] (decimals) is user-editable via the gear menu's stepper, so float
+// formatting has to read it live rather than assume a fixed precision.
+function tabelValueCell(row, col) {
+  var raw = HeaderEngine.pickCI(row, col[0]);
+  var type = col[3];
+  if (type === 'date') {
+    return '<td>' + (raw ? formatDate(raw, '/') : '') + '</td>';
+  }
+  if (type === 'float') {
+    return '<td class="text-right">' + (raw !== undefined && raw !== null && raw !== '' ? formatAngka(raw) : '') + '</td>';
+  }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+function verifPenawaranReplaceThead(cols) {
+  var oldThead = document.querySelector('#tabel thead');
+  if (!oldThead || !window.ReportTable) { return; }
+  var headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+  var newThead = document.createElement('thead');
+  newThead.setAttribute('style', 'white-space:nowrap;');
+  newThead.innerHTML = headRowHtml;
+  oldThead.parentNode.replaceChild(newThead, oldThead);
+}
+
+function renderTabelRows(rows) {
+  if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
+  var html = '';
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabelActionsCell(row);
+    cols.forEach(function (col) { html += tabelValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel_data').innerHTML = html;
+  verifPenawaranReplaceThead(cols);
+}
+
+function reinitTabel() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
+    renderTabelRows(lastTabelRows);
+    $('#tabel').DataTable({ dom: 't', lengthChange: false, paging: false, ordering: false });
+    HeaderEngine.bindEngineDom('tabel');
+  } catch (e) {
+    console.error('reinitTabel failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function buttonHeaderTable() {
+  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
+    HeaderEngine.activateEngineData('tabel');
+    HeaderEngine.doSetHeader(1, true);
+    reinitTabel();
+    alertify.success('Kolom telah direset ke tampilan default');
+  }, function () {});
+}
+
+HeaderEngine.activateEngineData('tabel');
+HeaderEngine.doSetHeader(1);
+lastTabelRows = @json($tempOutstanding);
+reinitTabel();
+
 $(document).ready(function(){
+
+  document.getElementById('breadcrumb').innerHTML = "Verifikasi Penawaran";
 
   $("#tabel2").DataTable({
     lengthChange: false,
@@ -1860,68 +1967,11 @@ $(document).ready(function(){
 });
 
 function renderTable(data) {
-
-  // bersihkan DataTable dengan benar
-  if ($.fn.DataTable.isDataTable('#tabel')) {
-    $('#tabel').DataTable().clear().destroy();
-  }
-
-  // kosongkan tbody agar tidak numpuk
-  $('#tabel_data').empty();
-
-  let html = '';
-
-  data.forEach(item => {
-
-    html += `
-      <tr id="row_${item.NOBUKTI}_${item.Urut}">
-
-        <td class="text-center action">
-          ${item.IsVerf == 1
-            ? `<button class="btn btn-danger btn-sm"
-                onclick="buttonBatalOtorisasi('${item.NOBUKTI}','${item.Urut}')">-</button>`
-            : `<button class="btn btn-primary btn-sm"
-                onclick="buttonOtorisasi('${item.NOBUKTI}','${item.Urut}')">+</button>`
-          }
-        </td>
-
-        <td>${item.NOBUKTI ?? ''}</td>
-        <td>${formatDate(item.TANGGAL,'/') ?? ''}</td>
-        <td>${item.NAMACUSTSUPP ?? ''}</td>
-        <td>${item.NAMAPIC ?? ''}</td>
-        <td>${item.KODEBRG ?? ''}</td>
-        <td>${item.NAMABRG ?? ''}</td>
-	${Number(item.IsVerf) ?
-          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>'
-          :
-          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'
-        }
-        <td>${item.TglVerf ? formatDate(item.TglVerf,'/') : ''}</td>
-        <td>${item.UserVerf ?? ''}</td>
-        <td class="text-right">${item.HARGA ?? ''}</td>
-        <td>${item.tipe ?? ''}</td>
-        <td>${item.NamaMerk ?? ''}</td>
-        <td>${item.ketdet ?? ''}</td>
-        <td class="text-right">${item.QNT ?? ''}</td>
-        <td class="text-right">${item.QntSO ?? ''}</td>
-        <td class="text-right">${item.Sisa ?? ''}</td>
-
-      </tr>
-    `;
-  });
-
-  $('#tabel_data').html(html);
-
-  // init ulang DataTable
-  $('#tabel').DataTable({
-    dom: 't',
-    lengthChange: false,
-    paging: false,
-    order: [[1, 'asc']],
-    columnDefs: [
-      { targets: [0], orderable: false }
-    ]
-  });
+  // Kept as a thin wrapper (searchData()'s success callback + the initial
+  // page-ready call above both call this by name) -- the actual rendering
+  // now goes through the interactive column engine.
+  lastTabelRows = data || [];
+  reinitTabel();
 }
 
 function searchData() {

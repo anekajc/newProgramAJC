@@ -397,7 +397,8 @@
      tables), not tableMaster2's original numbers, which assumed a single
      flat <th>/<td> layer that only #tabel2/#tabel_oto actually have. */
   #tabel2 thead th,
-  #tabel_oto thead th {
+  #tabel_oto thead th,
+  #tabel_add thead th {
     background: #f8f9fb;
     color: #6b7280;
     font-size: 13px;
@@ -408,12 +409,14 @@
     padding: 10px 14px;
   }
   #tabel2 tbody td,
-  #tabel_oto tbody td {
+  #tabel_oto tbody td,
+  #tabel_add tbody td {
     padding: 10px 14px;
     font-size: 15px;
   }
   #tabel2 tbody tr:hover,
-  #tabel_oto tbody tr:hover {
+  #tabel_oto tbody tr:hover,
+  #tabel_add tbody tr:hover {
     background-color: #f5f3ff;
   }
 
@@ -487,6 +490,7 @@
 <div id="printContainer" style="display:none">
 
 </div>
+
 <div id="page1" class="container-fluid">
 
   <div id="contentContainer" class="container-fluid">
@@ -677,10 +681,86 @@
       </ul>
     </div>
 
+
+<div id="soFilters2" style="display:none;">
     <div class="tb-report">
     <div class="toolbar" style="margin-bottom:10px;">
 
+      <div class="filter-wrap">
+        <label for="tabel_length_visual">Tampilkan</label>
+        <select id="tabel_length_visual" class="filter-inp" style="cursor:pointer;">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="-1">Semua</option>
+        </select>
+      </div>
+
+
       <input type="search" id="tabel_filter_visual" class="search-inp" placeholder="Cari data...">
+
+
+      <div class="action-group">
+        <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
+      </div>
+
+    </div>
+    </div>
+
+    <div class="modal fade rt-filter" id="modalFilter" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-funnel"></i> Filter Data
+              <span class="rt-active-badge" id="soFilterBadge" style="display:none">1 aktif</span>
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="rt-section">
+              <div class="rt-group-label">Status</div>
+              <div class="rt-grid-2">
+                <div>
+                  <label class="rt-field-label">Status SO</label>
+                  <select id="input_filterso" class="rt-native" aria-label="Filter SO">
+                    <option value=0 selected>Semua SO</option>
+                    <option value=1>SO Belum Otorisasi</option>
+                    <option value=2>SO Sudah Otorisasi</option>
+                    <option value=3>Belum proses</option>
+                    <option value=4>Proses Sebagian</option>
+                    <option value=5>Full supply</option>
+                    <option value=6>SO Terclose</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="rt-field-label">Tipe Bayar</label>
+                  <select id="input_tipebayar" class="rt-native" aria-label="Filter Tipe Bayar">
+                    <option value=4 selected>Semua Tipe</option>
+                    <option value=0>CBD</option>
+                    <option value=1>Kredit</option>
+                    <option value=2>Termin</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="rt-reset-link" onclick="soResetFilterFields()">Reset</button>
+            <div class="rt-footer-buttons">
+              <button type="button" class="rt-btn rt-btn-ghost" data-bs-dismiss="modal">Batal</button>
+              <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterSO(); $('#modalFilter').modal('hide');">Terapkan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="soFilters" style="display:none;">
+    <div class="tb-report">
+    <div class="toolbar" style="margin-bottom:10px;">
 
       <div class="filter-wrap">
         <label for="tabel_length_visual">Tampilkan</label>
@@ -699,6 +779,8 @@
         <span class="filter-sep">s/d</span>
         <input type="date" onchange="" class="filter-inp" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
       </div>
+
+      <input type="search" id="tabel_filter_visual" class="search-inp" placeholder="Cari data...">
 
       <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
         <i class="bi bi-funnel"></i> Filter
@@ -759,6 +841,7 @@
         </div>
       </div>
     </div>
+  </div>
 
     <div class="tab-content" id="myTabContent">
 
@@ -974,13 +1057,13 @@
   </div>
 </div>
 
-<div id="page2" class="container-fluid" style="display: none" >
-      <div class="row d-flex justify-content-between align-items-center">
-        <div class="col-auto text-left">
-          {{-- <h2>Form Sales Order</h2> --}}
-        </div>
-        <div class="col-auto text-right">
-          <button type="button" class="btn btn-danger btn-lg" style="
+<div id="page2" class="container-fluid" style="display: none">
+  <div class="row d-flex justify-content-between align-items-center">
+    <div class="col-auto text-left">
+      {{-- <h2>Form Sales Order</h2> --}}
+    </div>
+    <div class="col-auto text-right">
+      <button type="button" class="btn btn-action-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -990,255 +1073,218 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonCloseForm()">
-            Close
-          </button>
-        </div>
-      </div>
-          <div id="modalBodyAddMain" class="">
-            <div class="modal-body">
+        onclick="buttonCloseForm()">
+        Close
+      </button>
+    </div>
+  </div>
+  <div id="modalBodyAddMain" class="">
+    <div class="modal-body">
 
-          <!-- <div class="container-fluid"> -->
+      <!-- <div class="container-fluid"> -->
 
-            <div class="row">
+      <div class="row g-3">
 
-              <input type="hidden" class="form-control" id="input_add_nourut">
-              <div class="col-md-3">
+        <input type="hidden" class="form-control" id="input_add_nourut">
 
-                <div class="row">
-                  <div class="col-md-4" >
-                    <div class="form-group">
-                      <label>Pelanggan</label>
-                    </div>
-                  </div>
+        <div class="col-md-3">
 
-                  <div class="col-md-8" >
-                    <div class="input-group mb-3 position-relative">
-                      <input
-                      type="text"
-                      class="form-control text-left"
-                      placeholder="Cari Pelanggan..."
-                      id="input_add_kodepelanggan"
-                      onkeyup="searchPelanggan(this.value)"
-                      autocomplete="off">
-                      <div id="dropdown_pelanggan"
-                          class="dropdown-menu w-100">
-                      </div>
-                    </div>
-                  </div>
-               <!--  <div class="col-md-4" style="margin-top:-12px;" hidden>
-                  <div class="form-group">
-                    <label>No Bukti</label>
-                  </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Pelanggan</label>
+            </div>
+            <div class="col-8">
+              <div class="input-group position-relative">
+                <input
+                  type="text"
+                  class="form-control text-left"
+                  placeholder="Cari Pelanggan..."
+                  id="input_add_kodepelanggan"
+                  onkeyup="searchPelanggan(this.value)"
+                  autocomplete="off">
+                <div id="dropdown_pelanggan"
+                  class="dropdown-menu w-100">
                 </div>
-                <div class="col-md-8" style="margin-top:-12px;" hidden>
-                  <div class="form-group">
-                    <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
-                  </div>
-                </div> -->
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>No PO</label>
-                  </div>
+              </div>
+            </div>
+          </div>
+
+          <!--  <div class="col-md-4" style="margin-top:-12px;" hidden>
+                <div class="form-group">
+                  <label>No Bukti</label>
                 </div>
+              </div>
+              <div class="col-md-8" style="margin-top:-12px;" hidden>
+                <div class="form-group">
+                  <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
+                </div>
+              </div> -->
 
-                <div class="col-md-8">
-                  <div class="form-group input-group">
-                    <textarea type="text" onkeyup="searchNoPO(this.value)" autocomplete="off"
-                    class="form-control" style="width: 100%; resize: none" rows=3 placeholder="Ketik No PO"
-                    class="form-control text-left" id="input_add_nopo"></textarea>
+          <div class="row align-items-start mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No PO</label>
+            </div>
+            <div class="col-8">
+              <div class="input-group">
+                <textarea type="text" onkeyup="searchNoPO(this.value)" autocomplete="off"
+                  class="form-control" style="width: 100%; resize: none" rows=3 placeholder="Ketik No PO"
+                  class="form-control text-left" id="input_add_nopo"></textarea>
 
-                    <input type="hidden" class="form-control text-left" id="input_add_idpo" placeholder="" >
-                    <!-- <input type="text" class="form-control" id="input_add_nopo" onblur="onChangeNoPO()" disabled>
+                <input type="hidden" class="form-control text-left" id="input_add_idpo" placeholder="">
+                <!-- <input type="text" class="form-control" id="input_add_nopo" onblur="onChangeNoPO()" disabled>
                     <button onclick="buttonAddListNoPo()" id="buttonAddListNoPo"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
+              </div>
+              <div id="dropdown_nopo" class="dropdown-menu" style="width:100%"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Nama Pelanggan</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="input_add_namapelanggan" disabled>
+            </div>
+          </div>
+
+          <div class="row align-items-start mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Alamat Pelanggan</label>
+            </div>
+            <div class="col-8">
+              <textarea style="width: 100%; resize: none" rows=3 placeholder="Alamat Pelanggan" class="form-control text-left" id="input_add_alamatpelanggan" disabled></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+          <div class="row" style="display: none">
+
+            <div class="col-md-6" style="display: none">
+
+              <div class="row" style="display: none">
+                <div class="col-9">
+                  <div class="form-group">
+                    <label>Valas</label>
                   </div>
-                  <div id="dropdown_nopo" class="dropdown-menu" style="width:100%"></div>
+                </div>
+                <div class="col-3 text-right">
+                  <div class="form-group">
                   </div>
 
                 </div>
 
               </div>
-
-              <div class="col-md-3">
-
-                  <div class="row">
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Nama Pelanggan</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="input_add_namapelanggan"  disabled>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Alamat Pelanggan</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <textarea  style="width: 100%; resize: none" rows=3 placeholder="Alamat Pelanggan" class="form-control text-left" id="input_add_alamatpelanggan"  disabled></textarea>
-                    </div>
-                  </div>
-                  </div>
-
-              </div>
-
-              <div class="col-md-3">
-                <div class="row">
-
-                  <div class="col-md-6" style="display: none">
-
-                  <div class="row" style="display: none">
-                    <div class="col-9">
-                      <div class="form-group">
-                        <label>Valas</label>
-                      </div>
-                    </div>
-                    <div class="col-3 text-right">
-                      <div class="form-group">
-                    </div>
-
-                  </div>
-
-                </div>
-              </div>
-              <div class="col-md-6" style="display: none">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="input-group form-group">
-                      <input type="text" class="form-control" id="input_add_valas"  disabled>
-                      <button onclick="buttonAddListValas()" id="buttonAddListValas"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-12" style="display: none">
-                  <div class="row">
-                    <div class="col-6">
-                      <div class="form-group">
-                        <label>Kurs</label>
-                      </div>
-                    </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <input type="text" class="form-control text-right" id="input_add_kurs"  disabled>
-                    </div>
-                  </div>
-                  </div>
-                </div>
-
+            </div>
+            <div class="col-md-6" style="display: none">
+              <div class="row">
                 <div class="col-md-12">
-                <div class="row">
-                  <div class="col-md-4 mb-4">
-                    <div class="form-group">
-                      <label>TOP</label>
-                    </div>
-                  </div>
+                  <div class="input-group form-group">
+                    <input type="text" class="form-control" id="input_add_valas" disabled>
+                    <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
 
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0 >
-                    </div>
                   </div>
-                  <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                      <label>Tanggal</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
-                    </div>
-                  </div>
-                <div class="col-md-4">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="display: none">
+            <div class="col-md-12">
+              <div class="row">
+                <div class="col-6">
                   <div class="form-group">
-                    <label>No Bukti</label>
+                    <label>Kurs</label>
                   </div>
                 </div>
 
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <div class="form-group">
-                    <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
+                    <input type="text" class="form-control text-right" id="input_add_kurs" disabled>
                   </div>
                 </div>
-
-                </div>
               </div>
+            </div>
+          </div>
 
-              </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">TOP</label>
+            </div>
+            <div class="col-8">
+              <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0>
+            </div>
+          </div>
 
-              </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tanggal</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+          </div>
 
-              <div class="col-md-3">
-                <div class="row">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No Bukti</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
+            </div>
+          </div>
 
-                  <div class="col-md-12">
-                  <div class="row">
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>Pembayaran</label>
-                      </div>
-                    </div>
+        </div>
 
-                    <div class="col-md-8">
-                      <div class="form-group">
-                        <select  id="input_add_pembayaran" onchange="onChangeInputAddPembayaran()" class="form-control form-select-lg mb-3 text-center" aria-label=".form-select-lg example">
-                          <option value=0 selected >Tunai/CBD</option>
-                          <option value=1  >Kredit</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  </div>
+        <div class="col-md-3">
 
-                  <div class="col-md-12">
-                    <div class="row">
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label>TGL KIRIM</label>
-                        </div>
-                      </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Pembayaran</label>
+            </div>
+            <div class="col-8">
+              <select id="input_add_pembayaran" onchange="onChangeInputAddPembayaran()" class="form-control text-center" aria-label=".form-select-lg example">
+                <option value=0 selected>Tunai/CBD</option>
+                <option value=1>Kredit</option>
+              </select>
+            </div>
+          </div>
 
-                      <div class="col-md-8">
-                        <input type="date" class="form-control text-center" id="input_add_tanggalkirim" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
-                      </div>
-                    </div>
-                    </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tgl Kirim</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control text-center" id="input_add_tanggalkirim" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
+            </div>
+          </div>
 
-                  <div class="col-md-12">
-                    <div class="row">
-                      <div class="col-md-4">
-                        <div class="form-group">
-                          <label>PPN</label>
-                        </div>
-                      </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">PPN</label>
+            </div>
+            <div class="col-8">
+              <select onchange="onChangeTipePPN()" id="input_add_tipeppn" class="form-control text-center" aria-label=".form-select-lg example">
+                <option value=0 selected>None</option>
+                <option value=1>Exclude</option>
+                <option value=2>Include</option>
+              </select>
+            </div>
+          </div>
 
-                      <div class="col-md-8">
-                        <select onchange="onChangeTipePPN()" id="input_add_tipeppn" class="form-control text-center form-select-lg mb-3" aria-label=".form-select-lg example">
-                          <option value=0 selected>None</option>
-                          <option value=1 >Exclude</option>
-                          <option value=2 >Include</option>
-                        </select>
-                      </div>
-                    </div>
-                    </div>
+        </div>
 
-                </div>
+      </div>
 
-              </div>
-
-              </div>
-
-          <hr/>
-          <div class="row">
-          <div class="col-md-12 mt-2 text-left">
-              <button type="button" class="btn btn-lg btn-show-hide-header btn-action-primary" style="
+      <div class="row">
+        <div class="col-md-12 mt-2 text-left">
+          <button type="button" class="btn btn-lg btn-show-hide-header btn-action-primary" style="
                 height: 38px;
                 width: 38px;
                 margin-top: -35px;
@@ -1250,70 +1296,70 @@
                 justify-content: center;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                onclick="buttonShowHideHeader()" title="Show/Hide Header"><i class="bi bi-truck"></i></button>
-            </div>
-          </div>
-            <div class="showhidemodalbodyaddmain mt-4" id="modalBodyAddMainHeader" style="display: none">
-              <div class="row">
-                <div class="col-md-3">
-                  <div class="row">
-                    <div class="col-9">
-                      <div class="form-group">
-                        <label>Alamat Kirim</label>
-                      </div>
-                    </div>
-                    <div class="col-3 text-right">
-                      <div class="form-group">
-                    <button onclick="buttonAddListAlamatKirim()" id="buttonAddListAlamatKirim"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-                    </div>
-
-                  </div>
-
-                  <!-- <div class="col-md-12">
-                    <div class="form-group">
-
-                    </div>
-                  </div> -->
-                  <div class="col-md-12">
-                    <div class="form-group">
-                      <input type="hidden" class="form-control" id="input_add_kodealamatkirim" >
-                      <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_alamatkirim"  disabled></textarea>
-                    </div>
-                  </div>
-
-                  </div>
-
+            onclick="buttonShowHideHeader()" title="Show/Hide Header"><i class="bi bi-truck"></i></button>
+        </div>
+      </div>
+      <div class="showhidemodalbodyaddmain mt-4" id="modalBodyAddMainHeader" style="display: none">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-9">
+                <div class="form-group">
+                  <label>Alamat Kirim</label>
                 </div>
-                <div class="col-md-3">
-                  <div class="row">
+              </div>
+              <div class="col-3 text-right">
+                <div class="form-group">
+                  <button onclick="buttonAddListAlamatKirim()" id="buttonAddListAlamatKirim" class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                </div>
 
-                    <div class="col-9">
-                      <div class="form-group">
-                        <label>Lokasi Penerima</label>
-                      </div>
-                    </div>
-                    <div class="col-3 text-right">
-                      <div class="form-group">
-                    <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-                    </div>
+              </div>
 
-                  </div>
-
-                  <!-- <div class="col-md-12">
+              <!-- <div class="col-md-12">
                     <div class="form-group">
 
                     </div>
                   </div> -->
-                  <div class="col-md-12">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <input type="hidden" class="form-control" id="input_add_kodealamatkirim">
+                  <textarea type="text" style="width: 100%; resize: none" rows=4 class="form-control" id="input_add_alamatkirim" disabled></textarea>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+          <div class="col-md-3">
+            <div class="row">
+
+              <div class="col-9">
+                <div class="form-group">
+                  <label>Lokasi Penerima</label>
+                </div>
+              </div>
+              <div class="col-3 text-right">
+                <div class="form-group">
+                  <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                </div>
+
+              </div>
+
+              <!-- <div class="col-md-12">
                     <div class="form-group">
-                      <input type="hidden" class="form-control" id="input_add_kodelokasipenerima" >
-                      <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control text-left" id="input_add_alamatlokasipenerima"  disabled></textarea>
+
                     </div>
-                  </div>
+                  </div> -->
+              <div class="col-md-12">
+                <div class="form-group">
+                  <input type="hidden" class="form-control" id="input_add_kodelokasipenerima">
+                  <textarea type="text" style="width: 100%; resize: none" rows=4 class="form-control text-left" id="input_add_alamatlokasipenerima" disabled></textarea>
+                </div>
+              </div>
 
-                  </div>
+            </div>
 
-                  <!-- <div class="row">
+            <!-- <div class="row">
                     <div class="col-9">
                       <div class="form-group">
                         <label>PIC</label>
@@ -1326,112 +1372,112 @@
 
                   </div>
                   </div> -->
-                  <div class="row">
+            <div class="row">
 
-                  <!-- <div class="col-md-12">
+              <!-- <div class="col-md-12">
                     <div class="form-group">
 
                     </div>
                   </div> -->
 
-                  </div>
+            </div>
 
-                  <div class="row">
+            <div class="row">
 
-                  <!-- <div class="col-md-12">
+              <!-- <div class="col-md-12">
 
                   </div> -->
-                  <!-- <div class="col-md-12">
+              <!-- <div class="col-md-12">
                     <div class="form-group">
                       <input type="hidden" class="form-control" id="input_add_kodesales" >
                       <input type="text" class="form-control" id="input_add_namasales"  disabled>
                     </div>
                   </div> -->
-                  </div>
+            </div>
 
-                </div>
+          </div>
 
-                <div class="col-md-3">
+          <div class="col-md-3">
 
-                  <div class="row">
-                    <div class="col-md-12">
-                      <label>Keterangan</label>
-                    </div>
-
-                  <div class="col-md-12">
-
-                    <div class="form-group" style="margin-top: 14px">
-                      <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_catatan" onblur="onChangeCatatan()"></textarea>
-
-                    </div>
-                  </div>
-
-                  </div>
-
-                  <div class="row">
-
-                  </div>
-
-                  <div class="row">
-
-                  </div>
-
-                  <div class="row ">
-
+            <div class="row">
+              <div class="col-md-12">
+                <label>Keterangan</label>
               </div>
 
+              <div class="col-md-12">
+
+                <div class="form-group">
+                  <textarea type="text" style="width: 100%; resize: none" rows=4 class="form-control" id="input_add_catatan" onblur="onChangeCatatan()"></textarea>
+
                 </div>
+              </div>
 
-                <div class="col-md-3">
-                  <div class="row">
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>DP</label>
-                      </div>
-                    </div>
+            </div>
 
-                    <div class="col-md-8">
-                      <div class="form-group">
-                        <input type="number" class="form-control text-right" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
-                      </div>
-                    </div>
+            <div class="row">
 
-                    <div class="col-md-4">
-                      <div class="form-group">
-                        <label>Tgl PO</label>
-                      </div>
-                    </div>
+            </div>
 
-                    <div class="col-md-8">
-                      <div class="form-group">
-                        <input type="date" class="form-control text-center" id="input_add_tanggalpo" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglPO()">
-                      </div>
-                    </div>
-                  </div>
+            <div class="row">
 
-                  <div class="row">
+            </div>
 
-                  <!-- <div class="col-md-12">
+            <div class="row ">
+
+            </div>
+
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4 mb-2">
+                <div class="form-group">
+                  <label>DP</label>
+                </div>
+              </div>
+
+              <div class="col-md-8 mb-2">
+                <div class="form-group">
+                  <input type="number" class="form-control text-right" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Tgl PO</label>
+                </div>
+              </div>
+
+              <div class="col-md-8">
+                <div class="form-group">
+                  <input type="date" class="form-control text-center" id="input_add_tanggalpo" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglPO()">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+
+              <!-- <div class="col-md-12">
 
                   </div> -->
 
-                  </div>
+            </div>
 
-                </div>
-                <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
+          </div>
+          <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
                 <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" >Save Header</button>
             </div> -->
-              </div>
-              {{-- Second explicit row (was previously just a wrap of the same
+        </div>
+        {{-- Second explicit row (was previously just a wrap of the same
                    24-unit row as Alamat Kirim/Lokasi Penerima/Keterangan/DP
                    above -- splitting it out so each visual row is its own
                    clean 4x col-md-3=12, not dependent on Bootstrap's wrap
                    behavior lining up with these fields' differing heights). --}}
-              <div class="row">
-            <div class="col-md-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="row">
+        <div class="row mt-2">
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row">
 
                   <div class="col-9">
                     <div class="form-group">
@@ -1440,17 +1486,17 @@
                   </div>
                   <div class="col-3 text-right">
                     <div class="form-group">
-                  <!-- <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
+                      <!-- <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
+                    </div>
+
                   </div>
+                </div>
+              </div>
 
-                </div>
-                </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="row">
+              <div class="col-md-6">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="row">
 
                       <!-- <div class="col-4">
 
@@ -1461,33 +1507,33 @@
                       </div> -->
                       <div class="col-12">
 
-                      <div class="input-group form-group">
-                        <input type="hidden" class="form-control" id="input_add_kodebackoffice" >
-                        <input type="text" class="form-control" id="input_add_namabackoffice"  disabled>
-                        <!-- <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus" hidden></i></button> -->
+                        <div class="input-group form-group">
+                          <input type="hidden" class="form-control" id="input_add_kodebackoffice">
+                          <input type="text" class="form-control" id="input_add_namabackoffice" disabled>
+                          <!-- <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus" hidden></i></button> -->
+
+                        </div>
 
                       </div>
-
-                      </div>
-                      </div>
-                    <!-- </div> -->
                     </div>
+                    <!-- </div> -->
                   </div>
-
                 </div>
-
-                <!-- <div class="row"> -->
-
-                <!-- </div> -->
 
               </div>
 
+              <!-- <div class="row"> -->
+
+              <!-- </div> -->
+
             </div>
 
-            <div class="col-md-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="row">
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row">
 
                   <div class="col-9">
                     <div class="form-group">
@@ -1496,152 +1542,152 @@
                   </div>
                   <div class="col-3 text-right">
                     <div class="form-group">
-                  <!-- <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
-                  </div>
-
-                </div>
-                </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="input-group form-group">
-                        <input type="hidden" class="form-control" id="input_add_kodepic"  >
-                        <input type="text" class="form-control" id="input_add_namapic"  disabled>
-                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-
-                      </div>
+                      <!-- <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
                     </div>
+
                   </div>
                 </div>
-
               </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="input-group form-group">
+                      <input type="hidden" class="form-control" id="input_add_kodepic">
+                      <input type="text" class="form-control" id="input_add_namapic" disabled>
+                      <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
+          </div>
 
-            <div class="col-md-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="row">
-                    <div class="col-9">
-                      <div class="form-group">
-                        <label>Sales</label>
-                      </div>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row">
+                  <div class="col-9">
+                    <div class="form-group">
+                      <label>Sales</label>
                     </div>
-                    <div class="col-3 text-right">
-                      <div class="form-group">
-                    <!-- <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
+                  </div>
+                  <div class="col-3 text-right">
+                    <div class="form-group">
+                      <!-- <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
                     </div>
 
                   </div>
 
-                  </div>
                 </div>
-                <div class="col-md-6">
-                  <div class="input-group form-group">
-                    <input type="hidden" class="form-control" id="input_add_kodesales" >
-                    <input type="text" class="form-control" id="input_add_namasales"  disabled>
-                    <!-- <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
+              </div>
+              <div class="col-md-6">
+                <div class="input-group form-group">
+                  <input type="hidden" class="form-control" id="input_add_kodesales">
+                  <input type="text" class="form-control" id="input_add_namasales" disabled>
+                  <!-- <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button> -->
 
-                  </div>
                 </div>
-
               </div>
 
             </div>
 
-            <div class="col-md-3">
-              <div class="row">
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>Draft PO</label>
-                  </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Draft PO</label>
                 </div>
+              </div>
 
               <div class="col-md-8">
                 <div class="form-group">
-                  <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+                  <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control mb-3" aria-label=".form-select-lg example">
                     <option value=0 selected>Tidak</option>
-                    <option value=1 >Ya</option>
+                    <option value=1>Ya</option>
                   </select>
                 </div>
               </div>
-              </div>
-
             </div>
 
-              </div>
-
           </div>
 
-            <hr/>
-          </div>
+        </div>
 
-          </div>
-          <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
+      </div>
 
-            <!-- sinia -->
+      <hr />
+    </div>
 
-          <!-- END ADD EDIT -->
+  </div>
+  <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
 
-          <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
-            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-            <div class="row">
-              <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Alias</th>
-                    <th style="padding: 4px 12px;" scope="col">Merk</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty</th>
-                    <th style="padding: 4px 12px;" scope="col">Sat</th>
-                    <th style="padding: 4px 12px;" scope="col">Tax</th>
-                    <th style="padding: 4px 12px;" scope="col">Harga</th>
-                    <th style="padding: 4px 12px;" scope="col">Diskon</th>
-                    <th style="padding: 4px 12px;" scope="col">NDPP</th>
-                    <th style="padding: 4px 12px;" scope="col">No SPK</th>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data_add" class="text-left" >
-                  <tr >
+    <!-- sinia -->
 
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td>1</td>
-                    <td class="text-center">
-                      <div class="btn-group" role="group">
-                        <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="">
-                          <i class="bi bi-info"></i>
-                        </button>
-                        <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="">
-                          <i class="bi bi-key-fill"></i>
-                        </button>
-                        <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="">
-                          <i class="bi bi-pencil-fill"></i>
-                        </button>
-                      </div>
-                    </td>
-                </tr>
-                </tbody>
+    <!-- END ADD EDIT -->
 
-              </table>
-            </div>
-              <!-- <button onclick="buttonSubKategori()">tes</button> -->
+    <div class="container-fluid" style="overflow:auto;">
+      <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+      <div class="row">
+        <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
+          <thead class="text-center">
+            <tr>
+              <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+              <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+              <th style="padding: 4px 12px;" scope="col">Nama Alias</th>
+              <th style="padding: 4px 12px;" scope="col">Merk</th>
+              <th style="padding: 4px 12px;" scope="col">Qty</th>
+              <th style="padding: 4px 12px;" scope="col">Sat</th>
+              <th style="padding: 4px 12px;" scope="col">Tax</th>
+              <th style="padding: 4px 12px;" scope="col">Harga</th>
+              <th style="padding: 4px 12px;" scope="col">Diskon</th>
+              <th style="padding: 4px 12px;" scope="col">NDPP</th>
+              <th style="padding: 4px 12px;" scope="col">No SPK</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tabel_data_add" class="text-left">
+            <tr>
 
-          </div>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td class="text-center">
+                <div class="btn-group" role="group">
+                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="">
+                    <i class="bi bi-info"></i>
+                  </button>
+                  <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="">
+                    <i class="bi bi-key-fill"></i>
+                  </button>
+                  <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
 
-          <div class="row d-flex justify-content-between align-items-center">
-            <div class="col-auto mt-2 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+        </table>
+      </div>
+      <!-- <button onclick="buttonSubKategori()">tes</button> -->
+
+    </div>
+
+    <div class="row d-flex justify-content-between align-items-center">
+      <div class="col-auto mt-2 text-right">
+        <button type="button" class="btn btn-action-primary btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1650,10 +1696,10 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonTambahSOAll()"><b>+ Tambah Penawaran</b></button>
-            </div>
-          <div class="col-auto mt-2 text-right">
-          <button type="button" class="btn btn-primary btn-lg" style="
+          onclick="buttonTambahSOAll()"><b>+ Tambah Penawaran</b></button>
+      </div>
+      <div class="col-auto mt-2 text-right">
+        <button type="button" class="btn btn-action-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -1662,580 +1708,571 @@
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+          onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+      </div>
+    </div>
+
+    <!-- ADD add -->
+    <div id="addAddItem" class="container-fluid showhide">
+      <hr />
+      <!-- <div class="line"></div> -->
+      <!-- <hr/> -->
+      <div class="row">
+        <div class="col-4">
+          <h4 id="h4AddAddItem">Add Item</h4>
+          <h4 id="h4AddEditItem">Edit Item</h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+
+          <div class="row">
+
+            <!-- Barang dan Nama Produk -->
+            <div class="col-md-12">
+              <!-- Barang -->
+              <div class="row">
+                <div class="col-3">
+                  <div class="form-group">
+                    <label>Ref Pr</label>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="input-group form-group">
+                    <input type="text" class="form-control" id="input_add_add_refpr" onkeypress="" disabled>
+                    <button onclick="buttonAddAddListRefPr()" id="buttonAddAddListRefPr" class="btn btn-primary btn-sm text-right" tabindex="1">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-md-5">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label>No. Penye</label>
+                      </div>
+                    </div>
+                    <div class="col-md-9">
+                      <div class="form-group input-group">
+                        <input type="text" class="form-control text-right " id="input_add_add_nopenyerahan" value="" tabindex="5" disabled>
+                        <button onclick="buttonAddAddListNoPenyerahan()" id="buttonAddAddListNoPenyerahan" class="btn btn-primary btn-sm text-right" tabindex="1">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <!-- Nama Produk -->
+
+            </div>
+            <!-- Harga -->
+
+            <!-- Disc RP -->
+
           </div>
+        </div>
+      </div>
+
+      <div class="row">
+
+        <!-- Barang dan Nama Produk -->
+        <div class="col-md-6">
+          <!-- Barang -->
+          <div class="row">
+            <div class="col-3">
+              <div class="form-group">
+                <label>Barang</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="input-group form-group">
+                <input type="text" class="form-control" id="input_add_add_kodebarang" onkeypress="onKeyPressBarang(event)">
+                <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" tabindex="1">
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="input-group form-group">
+                <input type="text" class="form-control" id="input_add_add_namabarang" disabled>
+
+              </div>
+            </div>
+          </div>
+          <!-- Nama Produk -->
+          <div class="row mt-2">
+            <div class="col-3">
+              <div class="form-group">
+                <label>Nama Alias</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input type="text" class="form-control" id="input_add_add_namaproduk" tabindex="2">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <!-- Harga -->
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Qty</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="text" id="input_add_add_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" tabindex="5">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Disc %</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="number" class="form-control text-right" id="input_add_add_disc" onChange="onChangeInputAddAddDisc()" value="0.00" tabindex="8">
+              </div>
+            </div>
+
           </div>
 
-          <!-- ADD add -->
-          <div  id="addAddItem" class="container-fluid showhide">
-            <hr/>
+          <div class="row mt-2">
+
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Harga</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <input type="text" id="input_add_add_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()" tabindex="6">
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Disc Rp</label>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <input type="text" id="input_add_add_discrp" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDiscRp()" tabindex="7">
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Disc RP -->
+
+      <div class="row mt-2">
+
+        <div class="col-md-12">
+          <div class="row">
+            <!-- Satuan -->
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label>Satuan Tax</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group input-group">
+                    <input type="hidden" class="form-control" id="input_add_add_kodesattax" disabled>
+
+                    <input type="text" class="form-control" id="input_add_add_sattax" disabled>
+                    <button onclick="buttonAddAddListSattax()" id="buttonAddAddListSattax" class="btn btn-primary btn-sm text-right">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div class="col-md-3">
+              <div class="row">
+                <!-- Satuan -->
+                <div class="col-md-10 ">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label>Sat Alias</label>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div class="input-group form-group">
+                        <input type="text" class="form-control" id="input_add_add_satuanproduk">
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="row">
+                <!-- Satuan -->
+                <div class="col-md-12">
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="form-group">
+                        <label>Satuan</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <select id="input_add_add_nosat" onchange="onChangeInputAddAddNosat()" class="form-control mb-3" tabindex="4">
+                        <option value=0 selected>Pilih Satuan</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3" style="">
+              <div class="row">
+
+                <div class="col-md-6">
+
+                  <div class="form-group">
+
+                    <label>Tgl Kirim</label>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <input type="date" class="form-control text-right" onchange="()" id="input_add_add_tglkirim" tabindex="6">
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-3">
+          <div class="row">
+            <!-- Satuan Produk -->
+            <div class="col-md-12">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Booking</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <!-- <input type="number" class="form-control text-right" id="input_add_add_qty" value="0.00" tabindex="5"> -->
+                    <select id="input_add_add_booking" class="form-control mb-3" tabindex="10">
+                      <option value=0 selected>Tidak</option>
+                      <option value=1>Ya</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <!-- Tambah Ke PO -->
+          <div class="row">
+            <div class="col-md-10">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <!-- <label>Tambah Ke PO</label> -->
+                    <label>Urgent</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <select id="input_add_add_urgent" class="form-control mb-3" tabindex="11">
+                    <option value=0 selected>Tidak</option>
+                    <option value=1>Ya</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+
+            <div class="col-md-6">
+
+              <div class="form-group">
+
+                <label>Tambah Ke PO</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <select id="input_add_add_tambahkepo" class="form-control mb-3" tabindex="9">
+                  <option value=0 selected>Tidak</option>
+                  <option value=1>Ya</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-md-3" style="">
+          <div class="row">
+
+            <div class="col-md-6">
+
+              <div class="form-group">
+
+                <label>Status</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <select id="input_add_add_status" class="form-control mb-3" tabindex="9">
+                  <option value=0 selected>R</option>
+                  <option value=1>P0</option>
+                  <option value=2>P1</option>
+                  <option value=3>P2</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+
+          <div id="divhargaterakhir" class="">
+            <div class="row">
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label>Harga Terakhir</label>
+                </div>
+              </div>
+
+              <div class="col-md-12 mb-4" style="overflow:auto;">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <table id="tabel_add_harga_terakhir" class="table table-bordered table-hover table-striped table-responsive-lg">
+                    <thead class="text-center bg-primary text-white">
+                      <tr>
+                        <th colspan="6">History Harga Jual</th>
+                      </tr>
+                      <tr>
+                        <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px;" scope="col">Qty</th>
+                        <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                        <th style="padding: 4px 12px;" scope="col">Harga</th>
+                        <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
+                        <th style="padding: 4px 12px;" scope="col">Total Diskon</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="tabel_data_add_harga_terakhir" class="text-left">
+                      <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table id="tabel_add_harga_beli" class="table table-bordered table-hover table-striped table-responsive-lg">
+                    <thead class="text-center bg-primary text-white">
+                      <tr>
+                        <th colspan="6">History Harga Beli</th>
+                      </tr>
+                      <tr>
+                        <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px;" scope="col">Qty</th>
+                        <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                        <th style="padding: 4px 12px;" scope="col">Harga</th>
+                        <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
+                        <th style="padding: 4px 12px;" scope="col">Total Diskon</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="tabel_data_add_harga_beli" class="text-left">
+                      <tr>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-12 d-flex justify-content-end mb-3" style="gap: 10px;">
+
+              <button type="button" class="btn btn-action-success btn-lg" style="
+                      height: 30px;
+                      padding: 4px 12px;
+                      border-radius: 20px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      transition: background-color 0.3s, box-shadow 0.3s;
+                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                onclick="showTableHargaTerakhir()">Histori Harga</button>
+
+              <button type="button" class="btn btn-action-danger btn-lg" style="
+                      height: 30px;
+                      padding: 4px 12px;
+                      border-radius: 20px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      transition: background-color 0.3s, box-shadow 0.3s;
+                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                onclick="closeShowHideAdd()">Batal</button>
+
+              <button type="button" id="submitAddAdd" class="btn btn-action-primary btn-lg" style="
+                      height: 30px;
+                      padding: 4px 12px;
+                      border-radius: 20px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      transition: background-color 0.3s, box-shadow 0.3s;
+                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                onclick="submitAddAdd()">Simpan Data</button>
+
+              <button type="button" id="submitAddEdit" class="btn btn-action-primary btn-lg" style="
+                      height: 30px;
+                      padding: 4px 12px;
+                      border-radius: 20px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      transition: background-color 0.3s, box-shadow 0.3s;
+                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                onclick="submitAddEdit()">Simpan Data</button>
+            </div>
+            <div id="addEditItem" class="container-fluid showhide">
               <!-- <div class="line"></div> -->
               <!-- <hr/> -->
               <div class="row">
                 <div class="col-4">
-                  <h4 id="h4AddAddItem">Add Item</h4>
-                  <h4 id="h4AddEditItem">Edit Item</h4>
+                  <h4>Edit Item</h4>
                 </div>
               </div>
-
-              <div class="row">
-                <div class="col-md-6">
-
-                <div class="row">
-
-              <!-- Barang dan Nama Produk -->
-              <div class="col-md-12">
-                <!-- Barang -->
-                <div class="row">
-                  <div class="col-3">
-                    <div class="form-group">
-                      <label>Ref Pr</label>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="input-group form-group">
-                      <input type="text" class="form-control" id="input_add_add_refpr" onkeypress="" disabled>
-                      <button onclick="buttonAddAddListRefPr()" id="buttonAddAddListRefPr" class="btn btn-primary btn-sm text-right" tabindex="1">
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="col-md-5" >
-                    <div class="row">
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <label>No. Penye</label>
-                        </div>
-                      </div>
-                      <div class="col-md-9">
-                        <div class="form-group input-group">
-                          <input type="text" class="form-control text-right " id="input_add_add_nopenyerahan" value="" tabindex="5" disabled>
-                          <button onclick="buttonAddAddListNoPenyerahan()" id="buttonAddAddListNoPenyerahan" class="btn btn-primary btn-sm text-right" tabindex="1">
-                            <i class="bi bi-plus"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-                <!-- Nama Produk -->
-
-              </div>
-              <!-- Harga -->
-
-                <!-- Disc RP -->
-
-            </div>
-          </div>
-        </div>
-
-                      <div class="row">
-
-                    <!-- Barang dan Nama Produk -->
-                    <div class="col-md-6">
-                      <!-- Barang -->
-                      <div class="row">
-                        <div class="col-3">
-                          <div class="form-group">
-                            <label>Barang</label>
-                          </div>
-                        </div>
-                        <div class="col-md-3">
-                          <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_kodebarang" onkeypress="onKeyPressBarang(event)">
-                            <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" tabindex="1">
-                              <i class="bi bi-plus"></i>
-                            </button>
-                          </div>
-                        </div>
-                        <div class="col-md-5">
-                          <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_namabarang"  disabled>
-
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Nama Produk -->
-                      <div class="row">
-                        <div class="col-3">
-                          <div class="form-group">
-                            <label>Nama Alias</label>
-                          </div>
-                        </div>
-                        <div class="col-md-8">
-                          <div class="form-group">
-                            <input type="text" class="form-control" id="input_add_add_namaproduk" tabindex="2">
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <!-- Harga -->
-                    <div class="row">
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <label>Qty</label>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <input type="text" id="input_add_add_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" tabindex="5">
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <label>Disc %</label>
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <div class="form-group">
-                          <input type="number" class="form-control text-right" id="input_add_add_disc" onChange="onChangeInputAddAddDisc()" value="0.00" tabindex="8">
-                        </div>
-                    </div>
-
-                    </div>
-
-                    <div class="row">
-
-                          <div class="col-md-3">
-                            <div class="form-group">
-                              <label>Harga</label>
-                            </div>
-                          </div>
-                          <div class="col-md-3">
-                            <input type="text" id="input_add_add_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()" tabindex="6">
-                          </div>
-                          <div class="col-md-3">
-                            <div class="form-group">
-                              <label>Disc Rp</label>
-                            </div>
-                          </div>
-                          <div class="col-md-3">
-                            <div class="form-group">
-                              <input type="text" id="input_add_add_discrp" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDiscRp()" tabindex="7">
-                              </div>
-
-                        </div>
-
-                    </div></div></div>
-
-                      <!-- Disc RP -->
-
               <div class="row">
 
                 <div class="col-md-12">
+
                   <div class="row">
-                    <!-- Satuan -->
-                    <div class="col-md-3">
+
+                    <div class="col-md-4">
+
                       <div class="row">
-                        <div class="col-6">
+                        <div class="col-9">
                           <div class="form-group">
-                            <label>Satuan Tax</label>
+                            <label>Ref PR</label>
                           </div>
                         </div>
-                        <div class="col-md-6">
-                          <div class="form-group input-group">
-                            <input type="hidden" class="form-control" id="input_add_add_kodesattax"  disabled>
-
-                            <input type="text" class="form-control" id="input_add_add_sattax"  disabled>
-                            <button onclick="buttonAddAddListSattax()" id="buttonAddAddListSattax" class="btn btn-primary btn-sm text-right" >
-                              <i class="bi bi-plus"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                    <div class="col-md-3">
-                      <div class="row">
-                        <!-- Satuan -->
-                        <div class="col-md-10 ">
-                          <div class="row">
-                            <div class="col-md-4">
-                              <div class="form-group">
-                                <label>Sat Alias</label>
-                              </div>
-                            </div>
-                            <div class="col-md-8">
-                              <div class="input-group form-group">
-                                <input type="text" class="form-control" id="input_add_add_satuanproduk" >
-
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-3">
-                      <div class="row">
-                        <!-- Satuan -->
-                        <div class="col-md-12">
-                          <div class="row">
-                            <div class="col-6">
-                              <div class="form-group">
-                                <label>Satuan</label>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <select id="input_add_add_nosat" onchange="onChangeInputAddAddNosat()" class="form-control form-select-lg mb-3" tabindex="4">
-                                <option value=0 selected>Pilih Satuan</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-md-3" style="">
-                      <div class="row">
-
-                      <div class="col-md-6" >
-
-                        <div class="form-group">
-
-                          <label>Tgl Kirim</label>
-                        </div>
-                      </div>
-
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="date" class="form-control text-right" onchange="()" id="input_add_add_tglkirim"  tabindex="6">
-
-                        </div>
-                      </div>
-
-                    </div>
-                    </div>
-
-                  </div>
-                </div>
-
-              </div>
-
-                <div class="col-md-12">
-
-                  <div class="row">
-                    <div class="col-md-3">
-
-                    </div>
-
-                      <!-- Satuan, Harga -->
-
-                  </div>
-
-                </div>
-                <div class="row" style="">
-                  <div class="col-md-3">
-                    <div class="row">
-                      <!-- Satuan Produk -->
-                      <div class="col-md-12">
-                        <div class="row">
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <label>Booking</label>
-                            </div>
-                          </div>
-                          <div class="col-md-6">
-                            <div class="form-group">
-                              <!-- <input type="number" class="form-control text-right" id="input_add_add_qty" value="0.00" tabindex="5"> -->
-                              <select id="input_add_add_booking" class="form-control form-select-lg mb-3" tabindex="10">
-                                <option value=0 selected>Tidak</option>
-                                <option value=1>Ya</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                <div class="col-md-3">
-                  <!-- Tambah Ke PO -->
-                  <div class="row">
-                    <div class="col-md-10" >
-                      <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-3 text-right">
                           <div class="form-group">
-                            <!-- <label>Tambah Ke PO</label> -->
-                            <label>Urgent</label>
-                          </div>
-                        </div>
-                        <div class="col-md-8">
-                          <select id="input_add_add_urgent" class="form-control form-select-lg mb-3" tabindex="11">
-                            <option value=0 selected>Tidak</option>
-                            <option value=1>Ya</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div class="col-md-3">
-                  <div class="row">
-
-                  <div class="col-md-6" >
-
-                    <div class="form-group">
-
-                      <label>Tambah Ke PO</label>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <select id="input_add_add_tambahkepo" class="form-control form-select-lg mb-3" tabindex="9">
-                        <option value=0 selected>Tidak</option>
-                        <option value=1>Ya</option>
-                      </select>
-                    </div>
-                  </div>
-
-                </div>
-                </div>
-
-                <div class="col-md-3" style="">
-                  <div class="row">
-
-                  <div class="col-md-6" >
-
-                    <div class="form-group">
-
-                      <label>Status</label>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <select id="input_add_add_status" class="form-control form-select-lg mb-3" tabindex="9">
-                        <option value=0 selected>R</option>
-                        <option value=1>P0</option>
-                        <option value=2>P1</option>
-                        <option value=3>P2</option>
-                      </select>
-                    </div>
-                  </div>
-
-                </div>
-                </div>
-
-                </div>
-
-                <div class="row">
-                  <div class="col-md-12">
-
-                <div id="divhargaterakhir" class="">
-                  <div class="row">
-
-                  <div class="col-12">
-                    <div class="form-group">
-                      <label>Harga Terakhir</label>
-                    </div>
-                  </div>
-
-                  <div class="col-md-12 mb-4" style="overflow:auto;">
-                  <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                    <table id="tabel_add_harga_terakhir" class="table table-bordered table-hover table-striped table-responsive-lg">
-                      <thead class="text-center bg-primary text-white">
-                        <tr>
-                          <th colspan="6">History Harga Jual</th>
-                        </tr>
-                        <tr>
-                          <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          <th style="padding: 4px 12px;" scope="col">Qty</th>
-                          <th style="padding: 4px 12px;" scope="col">Satuan</th>
-                          <th style="padding: 4px 12px;" scope="col">Harga</th>
-                          <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
-                          <th style="padding: 4px 12px;" scope="col">Total Diskon</th>
-                        </tr>
-                      </thead>
-
-                      <tbody id="tabel_data_add_harga_terakhir" class="text-left" >
-                        <tr>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <table id="tabel_add_harga_beli" class="table table-bordered table-hover table-striped table-responsive-lg">
-                      <thead class="text-center bg-primary text-white">
-                        <tr>
-                          <th colspan="6">History Harga Beli</th>
-                        </tr>
-                        <tr>
-                          <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          <th style="padding: 4px 12px;" scope="col">Qty</th>
-                          <th style="padding: 4px 12px;" scope="col">Satuan</th>
-                          <th style="padding: 4px 12px;" scope="col">Harga</th>
-                          <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
-                          <th style="padding: 4px 12px;" scope="col">Total Diskon</th>
-                        </tr>
-                      </thead>
-
-                      <tbody id="tabel_data_add_harga_beli" class="text-left" >
-                        <tr>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                  </div>
-                  </div>
-
-                  </div>
-                  </div>
-
-                  <div class="row mt-2">
-                    <div class="col-md-12 text-right">
-                      <button type="button" class="btn btn-danger btn-lg" style="
-                      height: 30px;
-                      padding: 4px 12px;
-                      border-radius: 20px;
-                      font-size: 0.75rem;
-                      font-weight: 600;
-                      text-transform: uppercase;
-                      transition: background-color 0.3s, box-shadow 0.3s;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="closeShowHideAdd()">Batal</button>
-
-                      <button type="button" class="btn btn-success btn-lg" style="
-                      height: 30px;
-                      padding: 4px 12px;
-                      border-radius: 20px;
-                      font-size: 0.75rem;
-                      font-weight: 600;
-                      text-transform: uppercase;
-                      transition: background-color 0.3s, box-shadow 0.3s;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="showTableHargaTerakhir()">Histori Harga</button>
-
-                      <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
-                      height: 30px;
-                      padding: 4px 12px;
-                      border-radius: 20px;
-                      font-size: 0.75rem;
-                      font-weight: 600;
-                      text-transform: uppercase;
-                      transition: background-color 0.3s, box-shadow 0.3s;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="submitAddAdd()">Submit Add</button>
-
-                      <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
-                      height: 30px;
-                      padding: 4px 12px;
-                      border-radius: 20px;
-                      font-size: 0.75rem;
-                      font-weight: 600;
-                      text-transform: uppercase;
-                      transition: background-color 0.3s, box-shadow 0.3s;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="submitAddEdit()">Submit Edit</button>
-                    </div>
-                    <div  id="addEditItem" class="container-fluid showhide">
-                        <!-- <div class="line"></div> -->
-                        <!-- <hr/> -->
-                        <div class="row">
-                          <div class="col-4">
-                            <h4>Edit Item</h4>
-                          </div>
-                        </div>
-                        <div class="row">
-
-                          <div class="col-md-12">
-
-                          <div class="row">
-
-                        <div class="col-md-4">
-
-                        <div class="row">
-                          <div class="col-9">
-                            <div class="form-group">
-                              <label>Ref PR</label>
-                            </div>
-                          </div>
-                          <div class="col-3 text-right">
-                            <div class="form-group">
-                          <button onclick=""  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus" ></i></button>
+                            <button onclick="" class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
                           </div>
 
                         </div>
 
                         <div class="col-md-12">
                           <div class="form-group">
-                            <input type="text" class="form-control" id="input_add_edit_refpr" value=""  disabled>
+                            <input type="text" class="form-control" id="input_add_edit_refpr" value="" disabled>
                           </div>
                         </div>
 
-                        </div>
+                      </div>
 
-                        </div>
+                    </div>
 
-                        <div class="col-md-4">
+                    <div class="col-md-4">
 
-                        <div class="row">
-                          <div class="col-9">
-                            <div class="form-group">
-                              <label>No Penyerahan</label>
-                            </div>
+                      <div class="row">
+                        <div class="col-9">
+                          <div class="form-group">
+                            <label>No Penyerahan</label>
                           </div>
-                          <div class="col-3 text-right">
-                            <div class="form-group">
-                          <button onclick=""  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
+                        </div>
+                        <div class="col-3 text-right">
+                          <div class="form-group">
+                            <button onclick="" class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
                           </div>
 
                         </div>
 
                         <div class="col-md-12">
                           <div class="form-group">
-                            <input type="text" class="form-control" id="input_add_edit_nopenyerahan"  disabled>
+                            <input type="text" class="form-control" id="input_add_edit_nopenyerahan" disabled>
                           </div>
                         </div>
 
-                        </div>
+                      </div>
 
-                        </div>
-                        </div>
-                        </div>
+                    </div>
+                  </div>
+                </div>
 
-                        <div class="col-md-4">
+                <div class="col-md-4">
 
-                        <div class="row">
-                          <div class="col-9">
-                            <div class="form-group">
-                              <label>Barang</label>
-                            </div>
-                          </div>
-                          <div class="col-3 text-right">
-                            <div class="form-group">
-                          <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang"  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
-                          </div>
+                  <div class="row">
+                    <div class="col-9">
+                      <div class="form-group">
+                        <label>Barang</label>
+                      </div>
+                    </div>
+                    <div class="col-3 text-right">
+                      <div class="form-group">
+                        <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang" class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
+                      </div>
 
-                        </div>
+                    </div>
 
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <input type="hidden" class="form-control" id="input_add_edit_kodebarang" >
-                            <input type="text" class="form-control" id="input_add_edit_namabarang"  disabled>
-                          </div>
-                        </div>
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <input type="hidden" class="form-control" id="input_add_edit_kodebarang">
+                        <input type="text" class="form-control" id="input_add_edit_namabarang" disabled>
+                      </div>
+                    </div>
 
-                        </div>
+                  </div>
 
-                        </div>
+                </div>
 
-                        <!-- <div class="col-md-4">
+                <!-- <div class="col-md-4">
 
                         <div class="row">
                           <div class="col-12">
@@ -2254,98 +2291,98 @@
 
                         </div> -->
 
-                        <div class="col-md-4">
+                <div class="col-md-4">
 
-                        <div class="row">
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label>Nama Alias</label>
-                            </div>
-                          </div>
-
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <input type="text" class="form-control" id="input_add_edit_namaproduk" >
-                          </div>
-                        </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="col-md-12">
-
-                        <div class="row">
-                          <div class="col-12">
-                            <div class="form-group">
-                              <label>Harga Terakhir</label>
-                            </div>
-                          </div>
-
-                        <div class="col-md-12 mb-4">
-                          <div class="form-group">
-                            <table id="tabel_edit_harga_terakhir" class="table table-bordered table-striped"  >
-                              <thead class="text-center">
-                                <tr>
-                                  <th scope="col">Tanggal</th>
-                                  <th scope="col">Qty</th>
-                                  <th scope="col">Satuan</th>
-                                  <th scope="col">Valas</th>
-                                  <th scope="col">Kurs</th>
-                                  <th scope="col">Harga</th>
-                                  <th scope="col">Disc Rp</th>
-                                  <th scope="col">Total Diskon</th>
-
-                                </tr>
-                              </thead>
-
-                              <tbody id="tabel_data_edit_harga_terakhir" class="text-left" >
-
-                                <tr >
-
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                                  <td>-</td>
-
-                              </tr>
-                              </tbody>
-
-                            </table>
-                          </div>
-                        </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="col-md-12">
-                          <div class="row">
-
-                          <div class="col-md-2">
-                            <div class="row">
-
-                          <div class="col-md-12">
-                            <div class="form-group">
-                              <label>Qty</label>
-                            </div>
-                          </div>
-
-                        <div class="col-md-12">
-                          <div class="form-group">
-                           <input type="text" id="input_add_edit_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDiscRp()">
-                          </div>
-                        </div>
-
-                        </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="form-group">
+                        <label>Nama Alias</label>
                       </div>
+                    </div>
 
-                        <div class="col-md-2">
-                          <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="input_add_edit_namaproduk">
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="col-md-12">
+
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="form-group">
+                        <label>Harga Terakhir</label>
+                      </div>
+                    </div>
+
+                    <div class="col-md-12 mb-4">
+                      <div class="form-group">
+                        <table id="tabel_edit_harga_terakhir" class="table table-bordered table-striped">
+                          <thead class="text-center">
+                            <tr>
+                              <th scope="col">Tanggal</th>
+                              <th scope="col">Qty</th>
+                              <th scope="col">Satuan</th>
+                              <th scope="col">Valas</th>
+                              <th scope="col">Kurs</th>
+                              <th scope="col">Harga</th>
+                              <th scope="col">Disc Rp</th>
+                              <th scope="col">Total Diskon</th>
+
+                            </tr>
+                          </thead>
+
+                          <tbody id="tabel_data_edit_harga_terakhir" class="text-left">
+
+                            <tr>
+
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+                              <td>-</td>
+
+                            </tr>
+                          </tbody>
+
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-2">
+                      <div class="row">
+
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Qty</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <input type="text" id="input_add_edit_qty" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDiscRp()">
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="row">
 
                         <div class="col-12">
                           <div class="form-group">
@@ -2361,233 +2398,228 @@
 
                       </div>
                     </div>
-                      <div class="col-md-2">
-                        <div class="row">
+                    <div class="col-md-2">
+                      <div class="row">
 
-                      <div class="col-12">
-                        <div class="form-group">
-                          <label>Satuan Produk</label>
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Satuan Produk</label>
+                          </div>
                         </div>
-                      </div>
 
-                      <div class="col-md-12">
-                        <div class="form-group">
-                        <input type="text" class="form-control" id="input_add_edit_satuanproduk" >
-                      </div>
-                      </div>
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <input type="text" class="form-control" id="input_add_edit_satuanproduk">
+                          </div>
+                        </div>
 
-                    </div>
+                      </div>
                     </div>
                     <div class="col-md-2">
-                    <div class="row">
+                      <div class="row">
 
-                    <div class="col-12">
-                    <div class="form-group">
-                      <label>Harga</label>
-                    </div>
-                    </div>
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Harga</label>
+                          </div>
+                        </div>
 
-                    <div class="col-md-12">
-                    <div class="form-group">
-                    <input type="text" id="input_add_edit_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()">
-                    </div>
-                    </div>
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <input type="text" id="input_add_edit_harga" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onchange="onChangeInputAddAddHarga()">
+                          </div>
+                        </div>
 
-                    </div>
+                      </div>
                     </div>
 
                     <div class="col-md-2">
                       <div class="row">
+
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Disc %</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <input type="text" id="input_add_edit_disc" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDisc()">
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="col-md-2">
+                      <div class="row">
+
+                        <div class="col-12">
+                          <div class="form-group">
+                            <label>Disc Rp</label>
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <input type="number" class="form-control text-right" id="input_add_edit_discrp" onChange="onChangeInputAddAddDiscRp()" value="0.00">
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="row">
+
+                  </div>
+                </div>
+
+                <div class="col-md-2">
+                  <div class="row">
 
                     <div class="col-12">
                       <div class="form-group">
-                        <label>Disc %</label>
+                        <label>Tambah ke PO</label>
                       </div>
                     </div>
 
                     <div class="col-md-12">
-                    <div class="form-group">
-                    <input type="text" id="input_add_edit_disc" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" onChange="onChangeInputAddAddDisc()">
-                    </div>
+                      <select onchange="" id="input_add_edit_tambahkepo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+                        <option value=0 selected>Pilih</option>
+                        <option value=1>Tidak</option>
+                        <option value=2>Ya</option>
+                      </select>
                     </div>
 
-                    </div>
-                    </div>
+                  </div>
+                </div>
 
-                    <div class="col-md-2">
-                      <div class="row">
+                <div class="col-md-2">
+                  <div class="row">
 
                     <div class="col-12">
                       <div class="form-group">
-                        <label>Disc Rp</label>
+                        <label>Booking</label>
                       </div>
                     </div>
 
                     <div class="col-md-12">
-                    <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_add_edit_discrp" onChange="onChangeInputAddAddDiscRp()" value ="0.00" >
-                    </div>
-                    </div>
-
-                    </div>
-                    </div>
-                    </div>
-                    </div>
-                    <div class="col-md-12">
-                    <div class="row">
-
-                    </div>
+                      <select onchange="" id="input_add_edit_booking" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+                        <option value=0 selected>Tidak</option>
+                        <option value=1>Ya</option>
+                      </select>
                     </div>
 
-                      <div class="col-md-2">
-                        <div class="row">
+                  </div>
+                </div>
 
-                      <div class="col-12">
-                        <div class="form-group">
-                          <label>Tambah ke PO</label>
-                        </div>
-                      </div>
-
-                      <div class="col-md-12">
-                        <select onchange="" id="input_add_edit_tambahkepo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-                          <option value=0 selected>Pilih</option>
-                          <option value=1 >Tidak</option>
-                          <option value=2 >Ya</option>
-                        </select>
-                      </div>
-
-                    </div>
-                    </div>
-
-                    <div class="col-md-2">
-                    <div class="row">
+                <div class="col-md-2">
+                  <div class="row">
 
                     <div class="col-12">
-                    <div class="form-group">
-                      <label>Booking</label>
-                    </div>
+                      <div class="form-group">
+                        <label>Urgent</label>
+                      </div>
                     </div>
 
                     <div class="col-md-12">
-                    <select onchange="" id="input_add_edit_booking" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-                      <option value=0 selected>Tidak</option>
-                      <option value=1 >Ya</option>
-                    </select>
+                      <select onchange="" id="input_add_edit_urgent" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+                        <option value=0 selected>Tidak</option>
+                        <option value=1>Ya</option>
+                      </select>
                     </div>
 
-                    </div>
-                    </div>
-
-                    <div class="col-md-2">
-                    <div class="row">
-
-                    <div class="col-12">
-                    <div class="form-group">
-                    <label>Urgent</label>
-                    </div>
-                    </div>
-
-                    <div class="col-md-12">
-                    <select onchange="" id="input_add_edit_urgent" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-                    <option value=0 selected>Tidak</option>
-                    <option value=1 >Ya</option>
-                    </select>
-                    </div>
-
-                    </div>
-                    </div>
-
-                      </div>
-
-                      <div class="row mt-2">
-                        <div class="col-md-12 text-right">
-                          <button type="button" class="btn btn-secondary" onclick="closeShowHideAdd()" >Batal</button>
-                        </div>
-
-                      </div>
-
-                      <hr/>
-
-                      </div>
-
-                    <hr/>
-                    </div>
-
-                  </div>
-
-                </div>
-
-              <!-- SINI -->
-              </div>
-              <div class="container-fluid" style="margin-top: 10px;">
-              <div class="row" >
-
-                <div class="col">
-                  <div class="form-group">
-                    <label>Disc %</label>
-                    <input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00">
-                  </div>
-                </div>
-
-                <div class="col">
-                  <div class="form-group">
-                    <label>DiscRp</label>
-                    <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value ="0.00" >
-                  </div>
-                </div>
-
-                <div class="col">
-                  <div class="form-group">
-                    <label>DPP</label>
-                    <input type="text" class="form-control text-right" id="input_add_dpp" value ="0.00" disabled>
-                  </div>
-                </div>
-
-                <div class="col">
-                  <div class="form-group">
-                    <label>PPN</label>
-                    <input type="text" class="form-control text-right" id="input_add_ppn" value ="0.00" disabled>
-                  </div>
-                </div>
-
-                <div class="col">
-                  <div class="form-group">
-                    <label>GrandTotal</label>
-                    <input type="text" class="form-control text-right" id="input_add_grandtotal" value ="0.00" disabled>
                   </div>
                 </div>
 
               </div>
 
-              </div>
-                <!-- QTY, dan Satuan Produk -->
-
-                <!-- Tambahan -->
-
-                <!-- Satuan, Harga -->
-
-                  </div>
-                    <!-- <div class="col-md-12"> -->
-
-                      <div class="row">
-
+              <div class="row mt-2">
+                <div class="col-md-12 text-right">
+                  <button type="button" class="btn btn-secondary" onclick="closeShowHideAdd()">Batal</button>
                 </div>
 
-                    </div>
+              </div>
 
+              <hr />
 
+            </div>
 
+            <hr />
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SINI -->
+    </div>
+    <div class="container-fluid" style="margin-top: 10px;">
+      <div class="row">
+
+        <div class="col">
+          <div class="form-group">
+            <label>Disc %</label>
+            <input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00">
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-group">
+            <label>DiscRp</label>
+            <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-group">
+            <label>DPP</label>
+            <input type="text" class="form-control text-right" id="input_add_dpp" value="0.00" disabled>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-group">
+            <label>PPN</label>
+            <input type="text" class="form-control text-right" id="input_add_ppn" value="0.00" disabled>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="form-group">
+            <label>GrandTotal</label>
+            <input type="text" class="form-control text-right" id="input_add_grandtotal" value="0.00" disabled>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- QTY, dan Satuan Produk -->
+
+    <!-- Tambahan -->
+
+    <!-- Satuan, Harga -->
+
+  </div>
+  <!-- <div class="col-md-12"> -->
+
+</div>
 
 
 <!-- page3 -->
 
-<div id="page3" class="container-fluid" style="display: none" >
-      <div class="row d-flex justify-content-between align-items-center">
+<!-- page3 -->
+
+<div id="page3" class="container-fluid" style="display: none">
+      <div class="row d-flex justify-content-between align-items-center mb-3">
         <div class="col-auto text-left">
-          <h2>Detail SO</h2>
+          {{-- <h2>Detail SO</h2> --}}
         </div>
         <div class="col-auto text-right">
-        <button id="btnOtorisasiDetail" type="button" class="btn btn-primary btn-lg" style="
+        <button id="btnOtorisasiDetail" type="button" class="btn btn-action-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -2598,7 +2630,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             Otorisasi
           </button>
-          <button type="button" class="btn btn-danger btn-lg" style="
+          <button type="button" class="btn btn-action-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -2621,152 +2653,63 @@
             <div class="row">
 
               <input type="hidden" class="form-control" id="input_detail_nourut" >
+
               <div class="col-md-3">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>No Bukti</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Tanggal</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Pelanggan</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="input-group form-group">
-                      <input type="text" class="form-control text-left" id="input_detail_kodepelanggan" disabled>
-                    </div>
-                  </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">No Bukti</label></div>
+                  <div class="col-8"><input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Tanggal</label></div>
+                  <div class="col-8"><input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Pelanggan</label></div>
+                  <div class="col-8"><div class="input-group"><input type="text" class="form-control text-left" id="input_detail_kodepelanggan" disabled></div></div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Nama Pelanggan</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="text" class="form-control text-left" id="input_detail_namapelanggan"  disabled>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Alamat Pelanggan</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <textarea  style="width: 100%; resize: none" rows=3  class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea>
-                    </div>
-                  </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Nama Pelanggan</label></div>
+                  <div class="col-8"><input type="text" class="form-control text-left" id="input_detail_namapelanggan" disabled></div>
+                </div>
+                <div class="row align-items-start mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Alamat Pelanggan</label></div>
+                  <div class="col-8"><textarea style="width: 100%; resize: none" rows=3 class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea></div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Valas</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="input-group form-group">
-                      <input type="text" class="form-control text-center" id="input_detail_valas"  disabled>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Kurs</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="text" class="form-control text-right" id="input_detail_kurs"  disabled>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TOP</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_detail_hari" disabled value=0 min=0 >
-                    </div>
-                  </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Valas</label></div>
+                  <div class="col-8"><div class="input-group"><input type="text" class="form-control text-center" id="input_detail_valas" disabled></div></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Kurs</label></div>
+                  <div class="col-8"><input type="text" class="form-control text-right" id="input_detail_kurs" disabled></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">TOP</label></div>
+                  <div class="col-8"><input type="number" class="form-control text-right" id="input_detail_hari" disabled value=0 min=0></div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>Pembayaran</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <select  id="input_detail_pembayaran" disabled class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example">
-                        <option value=0 selected >Tunai/CBD</option>
-                        <option value=1  >Kredit</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>TGL KIRIM</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <input type="date" class="form-control text-left" id="input_detail_tanggalkirim" value="{!! date('Y-m-d') !!}" disabled>
-                    </div>
-                  </div>
-
-                  <div class="col-md-4">
-                    <div class="form-group">
-                      <label>PPN</label>
-                    </div>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="form-group">
-                      <select  id="input_detail_tipeppn" class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example" disabled>
-                        <option value=0 selected>None</option>
-                        <option value=1 >Exclude</option>
-                        <option value=2 >Include</option>
-                      </select>
-                    </div>
-                  </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">Pembayaran</label></div>
+                  <div class="col-8"><select id="input_detail_pembayaran" disabled class="form-control text-left form-select-lg" aria-label=".form-select-lg example"><option value=0 selected>Tunai/CBD</option><option value=1>Kredit</option></select></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">TGL KIRIM</label></div>
+                  <div class="col-8"><input type="date" class="form-control text-left" id="input_detail_tanggalkirim" value="{!! date('Y-m-d') !!}" disabled></div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-4"><label class="form-label mb-0">PPN</label></div>
+                  <div class="col-8"><select id="input_detail_tipeppn" class="form-control text-left form-select-lg" aria-label=".form-select-lg example" disabled><option value=0 selected>None</option><option value=1>Exclude</option><option value=2>Include</option></select></div>
                 </div>
               </div>
 
-
-
-              </div>
 
 
 
@@ -2807,7 +2750,7 @@
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
+            onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><i class="bi bi-truck"></i></button>
           </div>
           </div>
             <div class="mt-4" id="modalBodyDetailMainHeader">
@@ -3004,12 +2947,10 @@
               </div>
             </div>
 
-            <hr/>
-
           </div>
 
           </div>
-          <div class=" container-fluid" id="" style="margin-top:-40px;">
+          <div class="container-fluid" id="">
 
             <!-- sinia -->
 
@@ -3110,7 +3051,6 @@
           </div>
           </div>
 </div>
-
 
 <!-- page3 end input_add -->
 
@@ -3310,7 +3250,7 @@
 <!-- end page 4-->
 
 <!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade rt-picker-v2" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
     <div class="modal-content">
       <div class="modal-header">
@@ -3337,7 +3277,6 @@
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center bg-primary text-white">
                   <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                     <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -3345,15 +3284,11 @@
                   </tr>
                 </thead>
                 <tbody id="tabel_data_add_list_pelanggan" class="text-left" >
-                  <tr >
+                  <tr>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
-                      <td class="text-center">
-                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                      </td>
                 </tr>
                 </tbody>
               </table>
@@ -3396,19 +3331,14 @@
             <table id="tabel_add_list_nopenyerahan" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">No Sample</th>
                     <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_nopenyerahan" class="text-left" >
-                <tr >
+                <tr>
                   <td>-</td>
                     <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
             </table>
@@ -3451,21 +3381,16 @@
           <table id="tabel_add_list_refpr" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Nobukti</th>
                   <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_refpr" class="text-left" >
-              <tr >
+              <tr>
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -3508,7 +3433,6 @@
         <table id="tabel_add_list_barangrefpr" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
             <tr>
-            <th style="padding: 4px 12px;" scope="col">Actions</th>
               <th style="padding: 4px 12px;" scope="col">Nobukti</th>
               <th style="padding: 4px 12px;" scope="col">Tanggal</th>
               <th style="padding: 4px 12px;" scope="col">Ref Pr</th>
@@ -3520,7 +3444,7 @@
             </tr>
           </thead>
           <tbody id="tabel_data_add_list_barangrefpr" class="text-left" >
-            <tr >
+            <tr>
               <td>-</td>
               <td>-</td>
               <td>-</td>
@@ -3528,10 +3452,6 @@
               <td>-</td>
               <td>-</td>
               <td>-</td>
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
           </tr>
           </tbody>
         </table>
@@ -3574,7 +3494,6 @@
             <table id="tabel_add_list_nopo" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">ID</th>
                   <th style="padding: 4px 12px;" scope="col">Cust</th>
                   <th style="padding: 4px 12px;" scope="col">No Pesanan</th>
@@ -3583,15 +3502,11 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_nopo" class="text-left" >
-                <tr >
+                <tr>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
             </table>
@@ -3638,7 +3553,6 @@
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                   <th style="padding: 4px 12px;" scope="col">Merk</th>
@@ -3647,13 +3561,11 @@
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
                 @for ($i = 0; $i < count($listBarangAll); $i++)
-                <tr >
-                <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')" type="button" ><i class="bi bi-plus"></i></button></td>
+                <tr class="pick-row" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')">
                   <td>{{ $listBarangAll[$i]->Kodebrg }}</td>
                   <td>{{ $listBarangAll[$i]->NamaBrg }}</td>
                   <td>{{ $listBarangAll[$i]->namamerk }}</td>
                   <td>{{ $listBarangAll[$i]->Sat1 }}</td>
-
               </tr>
               @endfor
               </tbody>
@@ -3698,7 +3610,6 @@
           <table id="tabel_add_list_sattax" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-              <th style="padding: 4px 12px;" scope="col">Actions x</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
@@ -3706,8 +3617,7 @@
             <tbody id="tabel_data_add_list_sattax" class="text-left" >
               @for ($i = 0; $i < count($listSattax); $i++)
 
-              <tr >
-              <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSattax('{{ $listSattax[$i]->KODETAX }}','{{ $listSattax[$i]->NAMATAX }}')" type="button" ><i class="bi bi-plus"></i></button></td>
+              <tr class="pick-row" onclick="buttonAddPickSattax('{{ $listSattax[$i]->KODETAX }}','{{ $listSattax[$i]->NAMATAX }}')">
                 <td>{{ $listSattax[$i]->KODETAX }}</td>
                 <td>{{ $listSattax[$i]->NAMATAX }}</td>
             </tr>
@@ -3753,7 +3663,6 @@
             <table id="tabel_add_list_barang" class="table table-bordered table-striped"  >
               <thead class="text-center">
                 <tr>
-                <th scope="col">Actions</th>
                   <th scope="col">Kode</th>
                   <th scope="col">Nama</th>
                   <th scope="col">Merk</th>
@@ -3761,16 +3670,11 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barang" class="text-left" >
-                <tr >
-                <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
+                <tr>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-
               </tr>
               </tbody>
             </table>
@@ -3802,20 +3706,14 @@
             <table id="tabel_add_list_pic" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_pic" class="text-left" >
-                <tr >
+                <tr>
                   <td>-</td>
                   <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
             </table>
@@ -3858,20 +3756,14 @@
           <table id="tabel_add_list_lokasipenerima" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_lokasipenerima" class="text-left" >
-              <tr >
+              <tr>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -3914,8 +3806,6 @@
             <table id="tabel_add_list_alamatkirim" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Nomor</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                   <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -3926,10 +3816,6 @@
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
             </table>
@@ -3972,19 +3858,14 @@
           <table id="tabel_add_list_backoffice" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_backoffice" class="text-left" >
-              <tr >
+              <tr>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -4027,19 +3908,14 @@
         <table id="tabel_add_list_sales" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
             <tr>
-            <th style="padding: 4px 12px;" scope="col">Actions</th>
               <th style="padding: 4px 12px;" scope="col">Kode</th>
               <th style="padding: 4px 12px;" scope="col">Nama</th>
             </tr>
           </thead>
           <tbody id="tabel_data_add_list_sales" class="text-left" >
-            <tr >
+            <tr>
               <td>-</td>
               <td>-</td>
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
           </tr>
           </tbody>
         </table>
@@ -4082,7 +3958,6 @@
           <table id="tabel_add_list_valas" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
                 <th style="padding: 4px 12px;" scope="col">Kurs</th>
@@ -4090,14 +3965,10 @@
             </thead>
 
             <tbody id="tabel_data_add_list_valas" class="text-left" >
-              <tr >
+              <tr>
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -4266,7 +4137,7 @@
         <div class="row" style="overflow:auto; margin-top: 10px">
           <!-- <div class="row "> -->
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" id="submitAddTambahSOAll" class="btn btn-primary btn-lg" style="
+            {{-- <button type="button" id="submitAddTambahSOAll" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -4276,7 +4147,7 @@
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
             onclick="submitAddTambahSOAll()" class="btn btn-secondary">Submit Add</button>
-          </div>
+          </div> --}}
           <!-- </div> -->
           <table id="tabel_tambahsoall" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
@@ -4412,7 +4283,7 @@ let tempEditEdit = {}
 
 let tipeform = ''
 let tipeformitem = ''
-let tempRefPr = {}
+let tempRefPR = {}
 let tempNoPenyerahan = {}
 // let listBarangRefPR = []
 
@@ -7198,8 +7069,6 @@ function buttonAddAddItem () {
   $('#divhargaterakhir').hide();
 
 
-
-
   cleanFormAddAdd()
 
   document.getElementById("buttonAddAddListRefPr").disabled = false
@@ -7494,20 +7363,14 @@ function buttonAddListPIC () {
       let rowTable = ``
       listpic.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPIC('${i}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickPIC('${i}')">
         <td>${item.kodepic}</td>
         <td>${item.nama}</td>
-
         </tr>`
       });
 
-
-
-
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
 
@@ -7558,15 +7421,12 @@ function buttonAddListNoPo () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoPo('${item.POCustomer}' , '${item.ID}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickNoPo('${item.POCustomer}' , '${item.ID}')">
         <td>${item.ID}</td>
         <td>${item.namacustsupp}</td>
         <td>${item.POCustomer}</td>
         <td>${formatDate(item.TglInput , '/')}</td>
         <td>${formatDate(item.TglTerima , '/')}</td>
-
         </tr>`
       });
 
@@ -7574,7 +7434,7 @@ function buttonAddListNoPo () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=6>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_nopo").innerHTML = rowTable
 
@@ -7628,17 +7488,11 @@ function onKeyPressBarang (e) {
         res.forEach((item, i) => {
 
           rowTable +=          `
-          <tr >
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('${item.Kodebrg}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+          <tr class="pick-row" onclick="buttonAddAddPickBarangAll('${item.Kodebrg}')">
             <td>${item.Kodebrg}</td>
             <td>${item.NamaBrg}</td>
             <td>${item.NAMAMERK}</td>
             <td>${item.Sat1}</td>
-
-
-
-
         </tr>
         `
         });
@@ -7731,8 +7585,7 @@ function buttonAddAddListBarang () {
           res.forEach((item, i) => {
 
             rowTable +=          `
-            <tr >
-            <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('${item.KODEBRG}')" type="button" ><i class="bi bi-plus"></i></button></td>
+            <tr class="pick-row" onclick="buttonAddAddPickBarangAll('${item.KODEBRG}')">
             <td>${item.NOBUKTI}</td>
               <td>${item.TANGGAL}</td>
               <td>${item.REFPR}</td>
@@ -7741,10 +7594,6 @@ function buttonAddAddListBarang () {
               <td>${item.namamerk}</td>
               <td>${item.Sisa1}</td>
               <td>${item.SAT_1}</td>
-
-
-
-
           </tr>
           `
           });
@@ -7819,14 +7668,11 @@ function buttonAddAddListBarang () {
         dataAddAddListItem = res
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
-          <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarang(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+          <tr class="pick-row" onclick="buttonAddAddPickBarang(${i})">
           <td>${item.Kodebrg}</td>
           <td>${item.NamaBrg}</td>
           <td>${item.namamerk}</td>
           <td>${item.Sat1}</td>
-
-
           </tr>`
         });
 
@@ -7892,26 +7738,20 @@ function buttonAddAddListRefPr () {
         return
       }
       listRefPR = res
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickRefPr('-')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickRefPr('-')">
       <td>-</td>
       <td>-</td>
       <td>-</td>
-
       </tr>`
 
       listRefPR = res
 
       listRefPR.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickRefPr(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickRefPr(${i} )">
         <td>${item.nobukti}</td>
         <td>${item.tanggal}</td>
         <td>${item.refPR}</td>
-
         </tr>`
 
         // '
@@ -7961,7 +7801,7 @@ function buttonAddAddListNoPenyerahan () {
   let refpr = tempRefPR.nobukti
 
   if (!kodecustsupp ) {
-    alertify.warning("Isi RefPR terlebih dahulu")
+    alertify.warning("Isi pelanggan terlebih dahulu")
     return
   }
 
@@ -7982,24 +7822,18 @@ function buttonAddAddListNoPenyerahan () {
         alertify.warning("Data tidak ditemukkan")
         return
       }
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoPenyerahan('-')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickNoPenyerahan('-')">
       <td>-</td>
       <td>-</td>
-
       </tr>`
 
       listnopenyerahan = res
 
       listnopenyerahan.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoPenyerahan(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickNoPenyerahan(${i} )">
         <td>${item.NOBUKTI}</td>
         <td>${item.NAMABRG}</td>
-
         </tr>`
 
         // '
@@ -8071,26 +7905,20 @@ function buttonAddListAlamatKirim () {
         $('#tabel_add_list_alamatkirim').DataTable().destroy();
       }
 
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickAlamatKirim('-')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickAlamatKirim('-')">
       <td>-</td>
       <td>-</td>
       <td>-</td>
-
       </tr>`
 
       listAlamatKirim = res
 
       listAlamatKirim.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickAlamatKirim(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickAlamatKirim(${i} )">
         <td>${item.nomor}</td>
         <td>${item.nama}</td>
         <td>${item.alamat}</td>
-
         </tr>`
 
         // '
@@ -8105,7 +7933,7 @@ function buttonAddListAlamatKirim () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_alamatkirim").innerHTML = rowTable
 
@@ -8155,29 +7983,20 @@ function buttonAddListLokasiPenerima () {
         $('#tabel_add_list_lokasipenerima').DataTable().destroy();
       }
 
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('-' , '-' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickLokasiPenerima('-' , '-' )">
       <td>-</td>
       <td>-</td>
-
       </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('${item.kodekebun}' , '${item.nama}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickLokasiPenerima('${item.kodekebun}' , '${item.nama}' )">
         <td>${item.kodekebun}</td>
         <td>${item.nama}</td>
-
         </tr>`
       });
 
-
-
-
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_lokasipenerima").innerHTML = rowTable
 
@@ -8218,21 +8037,15 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )">
         <td>${item.kodevls}</td>
         <td>${item.namavls}</td>
         <td class="text-right">${item.kurs ? formatAngka(parseFloat(item.kurs).toFixed(2)) : '0.00'}</td>
-
         </tr>`
       });
 
-
-
-
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
 
@@ -8267,12 +8080,7 @@ function buttonAddListPelanggan () {
       res.forEach((item, i) => {
 
         rowTable += `
-        <tr>
-          <td class="text-center">
-            <button class="btn btn-primary btn-sm"
-              style="margin-top:10px;"
-              type="button"
-              onclick="
+        <tr class="pick-row" onclick="
 
                 if (!'${item.KodeSls ?? ''}' || !'${item.NamaSales ?? ''}') {
                   alertify.warning('Warning: Sales belum lengkap untuk pelanggan ini');
@@ -8293,12 +8101,7 @@ function buttonAddListPelanggan () {
                   '${item.BOffice ?? ''}',
                   '${item.NamaBackOffice ?? ''}'
                 )
-              "
-            >
-              <i class="bi bi-plus"></i>
-            </button>
-          </td>
-
+              ">
           <td>${item.kodecustsupp}</td>
           <td>${item.namacustsupp}</td>
           <td>${item.alamat1}</td>
@@ -8410,20 +8213,14 @@ function buttonAddListBackOffice () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')">
         <td>${item.keynik}</td>
         <td>${item.fullname}</td>
-
         </tr>`
       });
 
-
-
-
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_backoffice").innerHTML = rowTable
 
@@ -8461,12 +8258,9 @@ function buttonAddListSales () {
         console.log(item.keynik)
         console.log(item.nama)
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')">
         <td>${item.keynik}</td>
         <td>${item.nama}</td>
-
         </tr>`
       });
 
@@ -8474,7 +8268,7 @@ function buttonAddListSales () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_sales").innerHTML = rowTable
       $("#tabel_add_list_sales").DataTable({
@@ -10635,13 +10429,7 @@ function buttonDetail (NOBUKTI) {
 
   })
 
-
-
-
 }
-
-
-
 
 function refreshDataTableAdd (NOBUKTI = "") {
   console.log('refereshdatatableadd' , NOBUKTI)
@@ -10707,8 +10495,8 @@ function refreshDataTableAdd (NOBUKTI = "") {
             <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
             <td>${item.noserah ? item.noserah : ''}</td>
             <td class="text-center">
-            <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-             <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
+            <button class="btn-action-sm btn-action-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+             <button class="btn-action-sm btn-action-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
             </tr>`
           });
 
@@ -10937,14 +10725,11 @@ function searchBarangAll (e) {
         res.forEach((item, i) => {
 
           rowTable +=          `
-          <tr >
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('${item.Kodebrg}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+          <tr class="pick-row" onclick="buttonAddAddPickBarangAll('${item.Kodebrg}')">
             <td>${item.Kodebrg}</td>
             <td>${item.NamaBrg}</td>
             <td>${item.NAMAMERK ?? '-'}</td>
             <td>${item.Sat1 ?? '-'}</td>
-
         </tr>
         `
         });
@@ -11061,6 +10846,55 @@ function generateInputNumber (id , style, classes, onchange) {
   $('#dropdown_pelanggantambahso').html(html).show()
 }
 
+
+$(document).ready(function () {
+
+    /*
+     * Default state:
+     *
+     * Penawaran (#profile2)
+     * = filters hidden
+     */
+
+    $('#soFilters').hide();
+    $('#soFilters2').show();
+
+
+    /*
+     * When SO tab is opened
+     *
+     * #home
+     * = show filters
+     */
+
+    $('#tab-diterima-btn').on('shown.bs.tab', function () {
+
+        $('#soFilters').show();
+        $('#soFilters2').hide();
+
+    });
+
+
+    /*
+     * When Penawaran tab is opened
+     *
+     * #profile2
+     * = hide filters
+     *
+     * Also close the filter modal in case
+     * the user switches tabs while it is open.
+     */
+
+    $('#tab-dibuka-btn').on('shown.bs.tab', function () {
+
+        $('#soFilters').hide();
+        $('#soFilters2').show();
+
+        $('#modalFilter').modal('hide');
+
+    });
+
+});
 
 
 </script>

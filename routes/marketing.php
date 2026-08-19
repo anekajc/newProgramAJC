@@ -72,6 +72,8 @@ Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd'])
   Route::post('/verifikasipenawaranbatalotorisasi', [VerifikasiPenawaranController::class, 'spBatalOtorisasi']);
   Route::get('/verifikasipenawaranloadall', [VerifikasiPenawaranController::class, 'loadAll']);
   Route::get('/verifikasipenawaranloadallinfo', [VerifikasiPenawaranController::class, 'loadAllInfo']);
+  Route::get('/verifikasipenawaranloadheader', [VerifikasiPenawaranController::class, 'loadHeader']);
+  Route::get('/verifikasipenawaransimpanheader', [VerifikasiPenawaranController::class, 'simpanHeader']);
   Route::post('/verifikasipenawarandetailbarang', [VerifikasiPenawaranController::class, 'detailBarang']);
   Route::post('/get-barang', [VerifikasiPenawaranController::class, 'getBarang']);
   Route::post('/get-customer', [VerifikasiPenawaranController::class, 'getCustomer']);

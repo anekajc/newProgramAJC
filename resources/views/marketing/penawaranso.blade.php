@@ -639,7 +639,7 @@
             </div>
 
             
-            <div class="col-md-12" style="margin-top:-10px;">
+            <div class="col-md-12">
               <div class="form-group">
                 <textarea style="width: 100%; resize: none;" rows=2 placeholder="perihal" class="form-control text-left align-items-left" id="input_add_alamatsupplier"  ></textarea>
               </div>
@@ -1173,7 +1173,7 @@
     </div>
 
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
-        <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
+        <div class="container-fluid" style="overflow:auto;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
             <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
