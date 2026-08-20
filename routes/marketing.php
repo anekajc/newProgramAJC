@@ -180,33 +180,35 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
 //   Route::post('/uangmukajualspbataloto', [UangMukaJualController::class, 'spBatalOto']);
 
 
-//   // suratjalan
-//   Route::get('/suratjalan', [SuratJalanController::class, 'index']);
-//   Route::post('/suratjalangetdetail', [SuratJalanController::class, 'getDetail']);
-//   Route::get('/suratjalanspnobukti', [SuratJalanController::class, 'getNoBukti']);
-//   Route::get('/suratjalanlistgudang', [SuratJalanController::class, 'listGudang']);
-//   Route::get('/suratjalanlistekspedisi', [SuratJalanController::class, 'listEkspedisi']);
-//   Route::post('/suratjalanspadd', [SuratJalanController::class, 'spAdd']);
-//   Route::get('/suratjalanloadall', [SuratJalanController::class, 'loadAll']);
-//   Route::post('/suratjalanspotorisasi', [SuratJalanController::class, 'spOtorisasi']);
-//   Route::post('/suratjalanspbatalotorisasi', [SuratJalanController::class, 'spBatalOtorisasi']);
-//   Route::post('/suratjalangetdetailkoreksi', [SuratJalanController::class, 'getDetailKoreksi']);
-//   Route::post('/suratjalanspkoreksi', [SuratJalanController::class, 'spKoreksi']);
-//   Route::post('/suratjalanlistbarang', [SuratJalanController::class, 'listBarang']);
-//   Route::post('/suratJalanAddKirimTerima', [SuratJalanController::class, 'spAddKirimTerima']);
-//   Route::post('/suratJalanAddKirimTerimaAcc', [SuratJalanController::class, 'spAddKirimTerimaAcc']);
+  // suratjalan
+  Route::get('/suratjalan', [SuratJalanController::class, 'index']);
+  Route::post('/suratjalangetdetail', [SuratJalanController::class, 'getDetail']);
+  Route::get('/suratjalanspnobukti', [SuratJalanController::class, 'getNoBukti']);
+  Route::get('/suratjalanlistgudang', [SuratJalanController::class, 'listGudang']);
+  Route::get('/suratjalanlistekspedisi', [SuratJalanController::class, 'listEkspedisi']);
+  Route::post('/suratjalanspadd', [SuratJalanController::class, 'spAdd']);
+  Route::get('/suratjalanloadall', [SuratJalanController::class, 'loadAll']);
+  Route::post('/suratjalanspotorisasi', [SuratJalanController::class, 'spOtorisasi']);
+  Route::post('/suratjalanspbatalotorisasi', [SuratJalanController::class, 'spBatalOtorisasi']);
+  Route::post('/suratjalangetdetailkoreksi', [SuratJalanController::class, 'getDetailKoreksi']);
+  Route::post('/suratjalanspkoreksi', [SuratJalanController::class, 'spKoreksi']);
+  Route::post('/suratjalanlistbarang', [SuratJalanController::class, 'listBarang']);
+  Route::post('/suratJalanAddKirimTerima', [SuratJalanController::class, 'spAddKirimTerima']);
+  Route::post('/suratJalanAddKirimTerimaAcc', [SuratJalanController::class, 'spAddKirimTerimaAcc']);
+  Route::get('/suratjalanloadheader', [SuratJalanController::class, 'loadHeader']);
+  Route::get('/suratjalansimpanheader', [SuratJalanController::class, 'simpanHeader']);
 
-//   // retursuratjalan
-//   Route::get('/retursuratjalan', [ReturSuratJalanController::class, 'index']);
-//   Route::get('/retursuratjalanspnobukti', [ReturSuratJalanController::class, 'getNoBukti']);
-//   Route::post('/retursuratjalanlistsj', [ReturSuratJalanController::class, 'listSJ']);
-//   Route::get('/retursuratjalanlistcustsuppbaru', [ReturSuratJalanController::class, 'listCustSuppBaru']);
-//   Route::post('/retursuratjalanlistbarang', [ReturSuratJalanController::class, 'listBarang']);
-//   Route::post('/retursuratjalanspadd', [ReturSuratJalanController::class, 'spAdd']);
-//   Route::post('/retursuratjalanspdetail', [ReturSuratJalanController::class, 'getDetail']);
-//   Route::get('/retursuratjalanloadall', [ReturSuratJalanController::class, 'loadAll']);
-//   Route::post('/retursuratjalanspoto', [ReturSuratJalanController::class, 'spOtorisasi']);
-//   Route::post('/retursuratjalanspbataloto', [ReturSuratJalanController::class, 'spBatalOtorisasi']);
+  // retursuratjalan
+  Route::get('/retursuratjalan', [ReturSuratJalanController::class, 'index']);
+  Route::get('/retursuratjalanspnobukti', [ReturSuratJalanController::class, 'getNoBukti']);
+  Route::post('/retursuratjalanlistsj', [ReturSuratJalanController::class, 'listSJ']);
+  Route::get('/retursuratjalanlistcustsuppbaru', [ReturSuratJalanController::class, 'listCustSuppBaru']);
+  Route::post('/retursuratjalanlistbarang', [ReturSuratJalanController::class, 'listBarang']);
+  Route::post('/retursuratjalanspadd', [ReturSuratJalanController::class, 'spAdd']);
+  Route::post('/retursuratjalanspdetail', [ReturSuratJalanController::class, 'getDetail']);
+  Route::get('/retursuratjalanloadall', [ReturSuratJalanController::class, 'loadAll']);
+  Route::post('/retursuratjalanspoto', [ReturSuratJalanController::class, 'spOtorisasi']);
+  Route::post('/retursuratjalanspbataloto', [ReturSuratJalanController::class, 'spBatalOtorisasi']);
 
 //   // Invoice Penjualan
 //   Route::get('/invoicepenjualan', [InvoicePenjualanController::class, 'index']);
