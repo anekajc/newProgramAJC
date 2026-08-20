@@ -77,9 +77,10 @@
 
   </div>
 
-  <script src="{!! URL::asset('public/js/canvas/jquery.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/canvas/function.js') !!}"></script>
-  <script src="{{ URL::asset('public/js/alertify.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 
   <script type="text/javascript">
   
