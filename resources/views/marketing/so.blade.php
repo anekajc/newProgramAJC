@@ -1,6 +1,8 @@
 @extends('newmaster')
 @section('buttons')
 
+@section('page-title', 'Sales Order')
+
 @endsection
 <div id="imagecontainer" class="d-none" style="">
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
@@ -8,6 +10,181 @@
 
 {{-- tampilan search bar 1 --}}
   @section('css')
+
+  {{-- Whole-row-clickable picker style from docs/new-cust-supp-modal-guide.md, ported 1:1
+       from public/css/report-table.css's .rt-picker-v2 (already in production on 19+ pages)
+       but ID-scoped to these 6 pickers instead of adding the rt-picker-v2 CLASS to #form --
+       that class skins the whole shared picker modal (every other picker's table/header/
+       font lives in the same #form), so applying it there would restyle every other picker
+       (Pelanggan, Sales, BackOffice, Valas, NoPo, ...) too. Values (colors, spacing, sticky
+       header, pagination skin) are copied verbatim from .rt-picker-v2; only the selector is
+       different. Modal chrome (.modal-content/.modal-header rounding+shadow) is intentionally
+       NOT copied here since that's shared across the whole #form modal, not per-table. --}}
+  <style>
+  #tabel_add_list_alamatkirim,
+  #tabel_add_list_lokasipenerima,
+  #tabel_add_list_pic,
+  #tabel_add_list_refpr,
+  #tabel_add_list_nopenyerahan,
+  #tabel_add_list_sattax {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  #tabel_add_list_alamatkirim.table-bordered, #tabel_add_list_alamatkirim.table-bordered tr, #tabel_add_list_alamatkirim.table-bordered th, #tabel_add_list_alamatkirim.table-bordered td,
+  #tabel_add_list_lokasipenerima.table-bordered, #tabel_add_list_lokasipenerima.table-bordered tr, #tabel_add_list_lokasipenerima.table-bordered th, #tabel_add_list_lokasipenerima.table-bordered td,
+  #tabel_add_list_pic.table-bordered, #tabel_add_list_pic.table-bordered tr, #tabel_add_list_pic.table-bordered th, #tabel_add_list_pic.table-bordered td,
+  #tabel_add_list_refpr.table-bordered, #tabel_add_list_refpr.table-bordered tr, #tabel_add_list_refpr.table-bordered th, #tabel_add_list_refpr.table-bordered td,
+  #tabel_add_list_nopenyerahan.table-bordered, #tabel_add_list_nopenyerahan.table-bordered tr, #tabel_add_list_nopenyerahan.table-bordered th, #tabel_add_list_nopenyerahan.table-bordered td,
+  #tabel_add_list_sattax.table-bordered, #tabel_add_list_sattax.table-bordered tr, #tabel_add_list_sattax.table-bordered th, #tabel_add_list_sattax.table-bordered td {
+    border: none;
+  }
+
+  #tabel_add_list_alamatkirim.table-striped tbody tr:nth-of-type(odd),
+  #tabel_add_list_lokasipenerima.table-striped tbody tr:nth-of-type(odd),
+  #tabel_add_list_pic.table-striped tbody tr:nth-of-type(odd),
+  #tabel_add_list_refpr.table-striped tbody tr:nth-of-type(odd),
+  #tabel_add_list_nopenyerahan.table-striped tbody tr:nth-of-type(odd),
+  #tabel_add_list_sattax.table-striped tbody tr:nth-of-type(odd) {
+    background: #fff;
+    --bs-table-accent-bg: transparent;
+    box-shadow: none;
+  }
+
+  #tabel_add_list_alamatkirim thead th,
+  #tabel_add_list_lokasipenerima thead th,
+  #tabel_add_list_pic thead th,
+  #tabel_add_list_refpr thead th,
+  #tabel_add_list_nopenyerahan thead th,
+  #tabel_add_list_sattax thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #FAFBFF;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  #tabel_add_list_alamatkirim tbody tr.pick-row,
+  #tabel_add_list_lokasipenerima tbody tr.pick-row,
+  #tabel_add_list_pic tbody tr.pick-row,
+  #tabel_add_list_refpr tbody tr.pick-row,
+  #tabel_add_list_nopenyerahan tbody tr.pick-row,
+  #tabel_add_list_sattax tbody tr.pick-row {
+    border-bottom: 1px solid #F1F5F9;
+    cursor: pointer;
+    transition: background .12s;
+  }
+
+  #tabel_add_list_alamatkirim tbody tr.pick-row td,
+  #tabel_add_list_lokasipenerima tbody tr.pick-row td,
+  #tabel_add_list_pic tbody tr.pick-row td,
+  #tabel_add_list_refpr tbody tr.pick-row td,
+  #tabel_add_list_nopenyerahan tbody tr.pick-row td,
+  #tabel_add_list_sattax tbody tr.pick-row td {
+    padding: 9px 14px;
+    vertical-align: middle;
+  }
+
+  #tabel_add_list_alamatkirim tbody tr.pick-row:hover td,
+  #tabel_add_list_lokasipenerima tbody tr.pick-row:hover td,
+  #tabel_add_list_pic tbody tr.pick-row:hover td,
+  #tabel_add_list_refpr tbody tr.pick-row:hover td,
+  #tabel_add_list_nopenyerahan tbody tr.pick-row:hover td,
+  #tabel_add_list_sattax tbody tr.pick-row:hover td {
+    background: #F8F9FF;
+  }
+
+  #tabel_add_list_alamatkirim tbody tr.pick-row td:first-child,
+  #tabel_add_list_lokasipenerima tbody tr.pick-row td:first-child,
+  #tabel_add_list_pic tbody tr.pick-row td:first-child,
+  #tabel_add_list_refpr tbody tr.pick-row td:first-child,
+  #tabel_add_list_nopenyerahan tbody tr.pick-row td:first-child,
+  #tabel_add_list_sattax tbody tr.pick-row td:first-child {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  /* DataTables wraps table+search+pagination in #<tableId>_wrapper, as SIBLINGS of the
+     table rather than descendants -- these have to be scoped to the wrapper id, not the
+     table id, to actually reach the search box and pagination footer. */
+  #tabel_add_list_alamatkirim_wrapper,
+  #tabel_add_list_lokasipenerima_wrapper,
+  #tabel_add_list_pic_wrapper,
+  #tabel_add_list_refpr_wrapper,
+  #tabel_add_list_nopenyerahan_wrapper,
+  #tabel_add_list_sattax_wrapper {
+    font-size: 13px;
+    color: var(--rt-ink-soft);
+    padding-top: 12px;
+  }
+
+  #tabel_add_list_alamatkirim_wrapper .dataTables_filter input,
+  #tabel_add_list_lokasipenerima_wrapper .dataTables_filter input,
+  #tabel_add_list_pic_wrapper .dataTables_filter input,
+  #tabel_add_list_refpr_wrapper .dataTables_filter input,
+  #tabel_add_list_nopenyerahan_wrapper .dataTables_filter input,
+  #tabel_add_list_sattax_wrapper .dataTables_filter input {
+    padding: 7px 10px;
+    font-size: 13px;
+    margin-left: 6px;
+    outline: none;
+  }
+
+  #tabel_add_list_alamatkirim_wrapper .dataTables_filter input:focus,
+  #tabel_add_list_lokasipenerima_wrapper .dataTables_filter input:focus,
+  #tabel_add_list_pic_wrapper .dataTables_filter input:focus,
+  #tabel_add_list_refpr_wrapper .dataTables_filter input:focus,
+  #tabel_add_list_nopenyerahan_wrapper .dataTables_filter input:focus,
+  #tabel_add_list_sattax_wrapper .dataTables_filter input:focus {
+    border-color: var(--rt-blue);
+    box-shadow: 0 0 0 3px var(--rt-blue-soft);
+  }
+
+  #tabel_add_list_alamatkirim_wrapper .dataTables_paginate .paginate_button,
+  #tabel_add_list_lokasipenerima_wrapper .dataTables_paginate .paginate_button,
+  #tabel_add_list_pic_wrapper .dataTables_paginate .paginate_button,
+  #tabel_add_list_refpr_wrapper .dataTables_paginate .paginate_button,
+  #tabel_add_list_nopenyerahan_wrapper .dataTables_paginate .paginate_button,
+  #tabel_add_list_sattax_wrapper .dataTables_paginate .paginate_button {
+    margin-left: 4px;
+    padding: 4px 10px !important;
+    color: var(--rt-ink) !important;
+    background: #fff !important;
+  }
+
+  #tabel_add_list_alamatkirim_wrapper .dataTables_paginate .paginate_button:hover,
+  #tabel_add_list_lokasipenerima_wrapper .dataTables_paginate .paginate_button:hover,
+  #tabel_add_list_pic_wrapper .dataTables_paginate .paginate_button:hover,
+  #tabel_add_list_refpr_wrapper .dataTables_paginate .paginate_button:hover,
+  #tabel_add_list_nopenyerahan_wrapper .dataTables_paginate .paginate_button:hover,
+  #tabel_add_list_sattax_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--rt-bg) !important;
+    border-color: var(--rt-border) !important;
+    color: var(--rt-ink) !important;
+  }
+
+  #tabel_add_list_alamatkirim_wrapper .dataTables_paginate .paginate_button.current,
+  #tabel_add_list_lokasipenerima_wrapper .dataTables_paginate .paginate_button.current,
+  #tabel_add_list_pic_wrapper .dataTables_paginate .paginate_button.current,
+  #tabel_add_list_refpr_wrapper .dataTables_paginate .paginate_button.current,
+  #tabel_add_list_nopenyerahan_wrapper .dataTables_paginate .paginate_button.current,
+  #tabel_add_list_sattax_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--rt-blue) !important;
+    border-color: var(--rt-blue) !important;
+    color: #fff !important;
+  }
+  </style>
+
   <style>
   #tabel_filter {
       display: flex;
@@ -338,10 +515,312 @@
 
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-{{-- report-table.css/report-table.js power the report module's draggable-column/gear-menu
-     table (docs/new-slider-table-guide.md). Linked here page-locally (not in newmaster.blade.php)
-     so only #tabel on this page gets it. --}}
 <link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+
+<link rel="stylesheet" href="{{ asset('css/so-table-header.css') }}?v={{ filemtime(public_path('css/so-table-header.css')) }}">
+
+<style>
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-title {
+    font-size: 19px;
+    font-weight: 800;
+    color: #1f2430;
+  }
+
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  /* newmaster.css punya rule .card global (align-items:center, dibuat untuk kartu menu
+     dashboard) yang menimpa ini kalau tidak ditulis ulang di sini. */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+  }
+
+  #page1 .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border) !important;
+  }
+
+  /* ---------- Kolom Aksi tabel (#tabel2/#tabel_oto) - tombol bulat kecil,
+     warna pastel, sama seperti .btn-action-* di gudang/permintaanpemakaian ----------
+     #tabel/#tabel7 SENGAJA tidak ikut di grup ini: aksinya dirender lewat
+     .action-buttons-wrap milik tabelActionsCell()/tabel7ActionsCell() (tableMaster2.css),
+     bukan lewat kelas .btn Bootstrap polos seperti #tabel2/#tabel_oto. */
+  #tabel2 td:first-child,
+  #tabel_oto td:first-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #tabel2 td:first-child .btn,
+  #tabel_oto td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel2 td:first-child .btn:hover,
+  #tabel_oto td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel2 td:first-child .btn-success,
+  #tabel_oto td:first-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #tabel2 td:first-child .btn-warning,
+  #tabel_oto td:first-child .btn-warning {
+    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+  }
+
+  #tabel2 td:first-child .btn-primary,
+  #tabel_oto td:first-child .btn-primary {
+    color: #2563eb; border-color: #cfdcff; background: #e8edff;
+  }
+
+  #tabel2 td:first-child .btn-danger,
+  #tabel_oto td:first-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  #tabel2 td:first-child .btn-info,
+  #tabel_oto td:first-child .btn-info {
+    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
+  }
+
+  #tabel2 tbody tr:nth-of-type(odd),
+  #tabel_oto tbody tr:nth-of-type(odd) {
+    background-color: #fbfbfc;
+  }
+
+  #tabel2 tbody tr:hover,
+  #tabel_oto tbody tr:hover {
+    background-color: #f5f3ff;
+  }
+
+  /* ---------- Chip biru / Reset kolom (sudah disediakan .rt-reset-btn di CSS lain) ---------- */
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+
+  .btn-batal-add {
+    background-color: #f1f3f5;
+    border-color: #dee2e6;
+    color: #495057;
+  }
+
+  .btn-batal-add:hover,
+  .btn-batal-add:focus {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #343a40;
+  }
+
+  .btn-batal-add:active {
+    background-color: #dee2e6 !important;
+    border-color: #ced4da !important;
+    color: #343a40 !important;
+  }
+
+  /* Dropdown "Tampilkan" di toolbar tab yang dimuat lewat AJAX (#tabel2/#tabel_oto).
+     Meniru .po-len-wrap milik purchaseOrder.blade.php 1:1. */
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink);
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  /* ---- Lapisan "sedang memuat" tabel #tabel2/#tabel_oto (dimuat lewat AJAX di loadAll) ----
+     Sama seperti #tabel_wrapper/#tabelso_wrapper milik purchaseOrder.blade.php. */
+  #tabel2_wrapper,
+  #tabel_oto_wrapper {
+    position: relative;
+  }
+
+  #tabel2_wrapper > .dataTables_processing,
+  #tabel_oto_wrapper > .dataTables_processing {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(255, 255, 255, .62);
+    z-index: 40;
+    animation: soMunculLoading .34s ease-out both;
+  }
+
+  @keyframes soMunculLoading {
+    0%, 45% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .po-loading-chip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: rgba(31, 36, 48, .92);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+  }
+
+  .po-loading-spin {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: soPutarLoading .6s linear infinite;
+  }
+
+  @keyframes soPutarLoading {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---------- Header tabel #tabel2/#tabel_oto - bersih, uppercase abu-abu (disamakan
+     dengan #tabel_data_header PO) ---------- */
+  #tabel2 thead th,
+  #tabel_oto thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee;
+    border-top: none;
+  }
+
+  #tabel2.table-bordered th,
+  #tabel2.table-bordered td,
+  #tabel_oto.table-bordered th,
+  #tabel_oto.table-bordered td {
+    border-color: #e7e9ee !important;
+  }
+</style>
 
 <style>
   /* report-table.css resets `.tb-report *` to margin:0/padding:0 so its own
@@ -435,52 +914,6 @@
     background-color: #f5f3ff;
   }
 
-  /* Holds the pagination element JS relocates here (see
-     moveDataTablePagination()) so it lives outside .table-wrap's
-     horizontal scroll -- .dataTables_paginate still floats right per
-     DataTables' own CSS, but now within this container's width (the
-     visible viewport, not the wide table), so it lands at a reachable
-     spot instead of the table's far edge. overflow:hidden clears the
-     float so this container doesn't collapse to zero height. */
-  .tb-pagination-outside {
-    overflow: hidden;
-    margin-top: 8px;
-    padding: 0 14px 10px;
-  }
-
-  /* Both DataTables' own base button look AND tableMaster2.css's prettier
-     version of it are scoped as ".dataTables_wrapper .dataTables_paginate
-     .paginate_button" -- a descendant selector that stopped matching the
-     moment moveDataTablePagination() relocated .dataTables_paginate out of
-     .dataTables_wrapper, since it's no longer a descendant of it. Re-declare
-     the same look here, scoped to the new location instead. */
-  .tb-pagination-outside .dataTables_paginate {
-    float: right;
-  }
-  .tb-pagination-outside .paginate_button {
-    box-sizing: border-box;
-    display: inline-block;
-    padding: 0.4em 0.9em;
-    margin-left: 4px;
-    border-radius: 6px;
-    border: 1px solid var(--sp-border, #e7e9ee);
-    color: var(--sp-text, #1f2430);
-    text-decoration: none !important;
-    cursor: pointer;
-  }
-  .tb-pagination-outside .paginate_button.current {
-    background: var(--sp-primary, #6f42f3);
-    border-color: var(--sp-primary, #6f42f3);
-    color: #fff;
-  }
-  .tb-pagination-outside .paginate_button.disabled {
-    cursor: default;
-    color: var(--sp-text-soft, #6b7280);
-    opacity: .6;
-  }
-  .tb-pagination-outside .paginate_button:hover:not(.disabled):not(.current) {
-    background: var(--sp-bg, #f4f5f7);
-  }
 
 </style>
 
@@ -666,25 +1099,32 @@
       }
     </style>
 
-    <div style="margin-bottom:12px;">
-      <ul class="radioChoiceMaster" id="giroTab" role="tablist">
-        <li class="radioChoiceMaster-item" role="presentation">
-          <button class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#profile2" type="button" role="tab">Penawaran</button>
-        </li>
-        <li class="radioChoiceMaster-item" role="presentation">
-          <button class="radioChoiceMaster-btn" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">SO</button>
-        </li>
-      </ul>
+    {{-- Tab bar: purchaseOrder.blade.php's own card.tab-card + custom-tabs pattern,
+         copied 1:1. Same two tabs/targets as before (data-bs-toggle, not PO's
+         data-toggle -- this page runs real Bootstrap 5, PO's newmasterx layout
+         runs the Canvas Bootstrap-4-era theme's jQuery plugin instead). --}}
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
+        <div class="nav nav-tabs border-0 custom-tabs" id="giroTab" role="tablist">
+          <button class="nav-item nav-link active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#profile2" type="button" role="tab">Penawaran</button>
+          <button class="nav-item nav-link" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">SO</button>
+        </div>
+      </div>
     </div>
 
-    <div class="tb-report">
-    <div class="toolbar" style="margin-bottom:10px;">
+    {{-- Toolbar shared by both tabs (Penawaran/SO): one filter/search/date-range drives
+         BOTH tables via one soloadall call -- that's SO's own existing behavior, kept
+         exactly as-is, just restyled with PO's po-toolbar/po-search-inp/po-filter-wrap/
+         po-btn-filter classes instead of report-table.css's toolbar/search-inp/filter-wrap. --}}
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+    <div class="po-toolbar">
 
-      <input type="search" id="tabel_filter_visual" class="search-inp" placeholder="Cari data...">
+      <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
 
-      <div class="filter-wrap">
+      <div class="po-len-wrap">
         <label for="tabel_length_visual">Tampilkan</label>
-        <select id="tabel_length_visual" class="filter-inp" style="cursor:pointer;">
+        <select id="tabel_length_visual" class="po-len-inp">
           <option value="10">10</option>
           <option value="25">25</option>
           <option value="50">50</option>
@@ -693,22 +1133,23 @@
         </select>
       </div>
 
-      <div class="filter-wrap">
+      <div class="po-filter-wrap">
         <label>Periode</label>
-        <input type="date" onchange="" class="filter-inp" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-        <span class="filter-sep">s/d</span>
-        <input type="date" onchange="" class="filter-inp" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+        <input type="date" onchange="" class="po-filter-inp" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+        <span class="po-filter-sep">s/d</span>
+        <input type="date" onchange="" class="po-filter-inp" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
       </div>
 
-      <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+      <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
         <i class="bi bi-funnel"></i> Filter
       </button>
 
-      <div class="action-group">
+      <div class="po-toolbar-act">
         <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
       </div>
 
     </div>
+      </div>
     </div>
 
     <div class="modal fade rt-filter" id="modalFilter" tabindex="-1" aria-hidden="true">
@@ -760,216 +1201,127 @@
       </div>
     </div>
 
+    <div class="card">
+    <div class="card-body" style="padding:0;">
     <div class="tab-content" id="myTabContent">
 
       {{-- tab baru 2--}}
       <div class="tab-pane fade show active" id="profile2" role="tabpanel" aria-labelledby="profile2-tab">
-        {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and its
-             sticky-header table-wrap model) to just this table. --}}
-        <div class="tb-report main">
         <div class="rt-bar-row">
           <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable()">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
+            <i class="bi bi-arrow-counterclockwise"></i> Reset kolom
           </button>
           <div id="rtBarTabel7"></div>
         </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel7" class="tb">
-              {{-- Header content is fully JS-owned: replaceTheadWithHeader()
-                   (called from renderTabel7Rows(), which runs on page load via
-                   reinitTabel7()) replaces this <thead>'s contents entirely
-                   based on gcart_header, before the user ever sees it. The
-                   tag itself is just a placeholder for that selector. --}}
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel7_data" class="text-left">
-              </tbody>
-            </table>
-          </div>
-          {{-- Pagination gets moved here by JS after each DataTables (re)init
-               (see reinitTabel7() in the js section) -- outside .table-wrap so
-               it's not part of the horizontally-scrolling area and stays put
-               below the table regardless of horizontal scroll position. --}}
-          <div id="tabel7PaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
+        <div class="po-table-wrap">
+          <table id="tabel7" class="tb data-table">
+
+            <thead style="white-space:nowrap;"></thead>
+            <tbody id="tabel7_data" class="text-left">
+            </tbody>
+          </table>
         </div>
+        <div class="po-rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+          untuk menyembunyikan kolom atau mengatur jumlah desimal.
         </div>
       </div>
 
       <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-        
-        {{-- <div class="sp-toolbar" style="margin-top: 10px">
-        </div> --}}
-
-        {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and its
-             sticky-header table-wrap model) to just this table. --}}
-        <div class="tb-report main">
         <div class="rt-bar-row">
           <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable()">
             <i class="bi bi-arrow-clockwise"></i> Reset kolom
           </button>
           <div id="rtBarTabel"></div>
         </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel" class="tb">
-              {{-- Header content is fully JS-owned: replaceTheadWithHeader()
-                   (called from renderTabelRows(), which runs on page load via
-                   reinitTabel()) replaces this <thead>'s contents entirely
-                   based on gcart_header, before the user ever sees it. The
-                   tag itself is just a placeholder for that selector.
-                   (The old markup here also had a dead, always-commented-out
-                   Oto2-5 @if($level>1..4) block for a multi-level-approval
-                   view that gcart_header doesn't model -- dropped with it.) --}}
-              <thead style="white-space:nowrap;"></thead>
+        <div class="po-table-wrap">
+          <table id="tabel" class="tb data-table">
+            {{-- Header content is fully JS-owned: replaceTheadWithHeader()
+                 (called from renderTabelRows(), which runs on page load via
+                 reinitTabel()) replaces this <thead>'s contents entirely
+                 based on gcart_header, before the user ever sees it. The
+                 tag itself is just a placeholder for that selector.
+                 (The old markup here also had a dead, always-commented-out
+                 Oto2-5 @if($level>1..4) block for a multi-level-approval
+                 view that gcart_header doesn't model -- dropped with it.) --}}
+            <thead style="white-space:nowrap;"></thead>
 
-              <tbody id="tabel_data" class="text-left">
-              </tbody>
-            </table>
-          </div>
-          {{-- Pagination gets moved here by JS after each DataTables (re)init
-               (see reinitTabel() in the js section) -- outside .table-wrap so
-               it's not part of the horizontally-scrolling area and stays put
-               below the table regardless of horizontal scroll position. --}}
-          <div id="tabelPaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
+            <tbody id="tabel_data" class="text-left">
+            </tbody>
+          </table>
         </div>
+        <div class="po-rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+          untuk menyembunyikan kolom atau mengatur jumlah desimal.
         </div>
       </div>
 
+      {{-- #tabel2/#tabel_oto stay plain tables (no drag/gear columns) -- matching
+           purchaseOrder.blade.php's own "Purchase Order"/"PO Otorisasi" tabs, which are
+           also plain. Neither pane has a nav button in #giroTab above, same as before this
+           rebuild -- they're not currently reachable from the UI; only their internal
+           markup/CSS and data-refresh wiring (loadAll -> soDataTabel2Tabel_oto()) changed. --}}
       <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel2" class="tb">
-              <thead style="white-space:nowrap;">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">No Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Pelanggan</th>
-                  <th style="padding: 4px 12px;" scope="col">PO Customer</th>
-                  <th style="padding: 4px 12px;" scope="col">DPP</th>
-                  <th style="padding: 4px 12px;" scope="col">PPN</th>
-                  <th style="padding: 4px 12px;" scope="col">Total</th>
-                  <th style="padding: 4px 12px;" scope="col">Oto</th>
-                  <th style="padding: 4px 12px;" scope="col">User Oto</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
-                </tr>
-              </thead>
+        <div class="po-table-wrap">
+          <table id="tabel2" class="data-table">
+            <thead style="white-space:nowrap;">
+              <tr>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
+                <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                <th style="padding: 4px 12px;" scope="col">Nama Pelanggan</th>
+                <th style="padding: 4px 12px;" scope="col">PO Customer</th>
+                <th style="padding: 4px 12px;" scope="col">DPP</th>
+                <th style="padding: 4px 12px;" scope="col">PPN</th>
+                <th style="padding: 4px 12px;" scope="col">Total</th>
+                <th style="padding: 4px 12px;" scope="col">Oto</th>
+                <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+              </tr>
+            </thead>
 
-              <tbody id="tabel2_data" class="text-left">
-                @for ($i = 0; $i < count($tempOutstanding3); $i++)
-                <tr>
-                  <td class="text-center">
-                  <div class="action-buttons-wrap">
-                    <button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-info"></i>
-                    </button>
-                    <button class="btn-action-sm btn-action-danger" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-key-fill"></i>
-                    </button>
-                    <button class="btn-action-sm btn-action-success" title="Open CBD" onclick="lockCBD('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-check-square-fill"></i>
-                    </button>
-                    <button style="" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('{{ $tempOutstanding3[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
-                    </button>
-                  </div>
-                  </td>
-                  <td>{{ $tempOutstanding3[$i][0]->NOBUKTI }}</td>
-                  <td>{!! date("d/m/Y", strtotime($tempOutstanding3[$i][0]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding3[$i][0]->NAMACUSTSUPP }}</td>
-                  <td>{{ $tempOutstanding3[$i][0]->nopesanan }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding3[$i][0]->TotDPP, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding3[$i][0]->TotPPn, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding3[$i][0]->TotNet, 0, ',', '.') }}</td>
-                  @if ($tempOutstanding3[$i][0]->IsOtorisasi1 )
-                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                  @else
-                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                  @endif
-                  <td>{{ $tempOutstanding3[$i][0]->OtoUser1 }}</td>
-                  <td>{!! date("d/m/Y H:i:s", strtotime($tempOutstanding3[$i][0]->TglOto1)) !!}</td>
-                </tr>
-                @endfor
-              </tbody>
-            </table>
-          </div>
+            {{-- Rows are JS-owned (renderTabel2Rows(), from lastTabel2Rows) so the exact
+                 same markup serves both the initial page load and loadAll()'s refresh --
+                 matching #tabel/#tabel7's lastTabelRows/renderTabelRows pattern. --}}
+            <tbody id="tabel2_data" class="text-left">
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {{-- Tab baru --}}
       <div class="tab-pane fade" id="home2" role="tabpanel" aria-labelledby="home2-tab">
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel_oto" class="tb">
-              <thead style="white-space:nowrap;">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">No Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Pelanggan</th>
-                  <th style="padding: 4px 12px;" scope="col">PO Customer</th>
-                  <th style="padding: 4px 12px;" scope="col">DPP</th>
-                  <th style="padding: 4px 12px;" scope="col">PPN</th>
-                  <th style="padding: 4px 12px;" scope="col">Total</th>
-                  <th style="padding: 4px 12px;" scope="col">Open CBD</th>
-                  <th style="padding: 4px 12px;" scope="col">User Open CBD</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Open CBD</th>
-                  <th style="padding: 4px 12px;" scope="col">Oto</th>
-                  <th style="padding: 4px 12px;" scope="col">User Oto</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
-                </tr>
-              </thead>
-              <tbody id="tabel_oto_data" class="text-left">
-                @for ($i = 0; $i < count($tempOutstanding5); $i++)
-                <tr>
-                  <td class="text-center">
-                    <button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-info"></i>
-                    </button>
-                    <button class="btn-action-sm btn-action-danger" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')">
-                      <i class="bi bi-key-fill"></i>
-                    </button>
-                    <button style="" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('{{ $tempOutstanding5[$i][0]->NOBUKTI }}')"><i class="bi bi-printer"></i>
-                    </button>
-                  </td>
-                  <td>{{ $tempOutstanding5[$i][0]->NOBUKTI }}</td>
-                  <td>{!! date("d/m/Y", strtotime($tempOutstanding5[$i][0]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding5[$i][0]->NAMACUSTSUPP }}</td>
-                  <td>{{ $tempOutstanding5[$i][0]->nopesanan }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding5[$i][0]->TotDPP, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding5[$i][0]->TotPPn, 0, ',', '.') }}</td>
-                  <td style="text-align: right;">{{ number_format($tempOutstanding5[$i][0]->TotNet, 0, ',', '.') }}</td>
-                  @if ($tempOutstanding5[$i][0]->unblock )
-                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                  @else
-                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                  @endif
-                  <td>{{ $tempOutstanding5[$i][0]->userunblock }}</td>
-                  <td>{{$tempOutstanding5[$i][0]->tglunblock}}</td>
-                  @if ($tempOutstanding5[$i][0]->IsOtorisasi1 )
-                  <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                  @else
-                  <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                  @endif
-                  <td>{{ $tempOutstanding5[$i][0]->OtoUser1 }}</td>
-                  <td>{!! date("d/m/Y H:i:s", strtotime($tempOutstanding5[$i][0]->TglOto1)) !!}</td>
-                </tr>
-                @endfor
-              </tbody>
-            </table>
-          </div>
+        <div class="po-table-wrap">
+          <table id="tabel_oto" class="data-table">
+            <thead style="white-space:nowrap;">
+              <tr>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
+                <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                <th style="padding: 4px 12px;" scope="col">Nama Pelanggan</th>
+                <th style="padding: 4px 12px;" scope="col">PO Customer</th>
+                <th style="padding: 4px 12px;" scope="col">DPP</th>
+                <th style="padding: 4px 12px;" scope="col">PPN</th>
+                <th style="padding: 4px 12px;" scope="col">Total</th>
+                <th style="padding: 4px 12px;" scope="col">Open CBD</th>
+                <th style="padding: 4px 12px;" scope="col">User Open CBD</th>
+                <th style="padding: 4px 12px;" scope="col">Tgl Open CBD</th>
+                <th style="padding: 4px 12px;" scope="col">Oto</th>
+                <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+              </tr>
+            </thead>
+            {{-- Rows are JS-owned (renderTabelOtoRows(), from lastTabelOtoRows) --
+                 see the matching note on #tabel2_data above. --}}
+            <tbody id="tabel_oto_data" class="text-left">
+            </tbody>
+          </table>
         </div>
       </div>
 
+    </div>
+    </div>
     </div>
   </div>
 </div>
@@ -2525,18 +2877,15 @@
 
 </div>
 
-
 <!-- page3 -->
 
-<!-- page3 -->
-
-<div id="page3" class="container-fluid" style="display: none">
-      <div class="row d-flex justify-content-between align-items-center mb-3">
+<div id="page3" class="container-fluid" style="display: none" >
+      <div class="row d-flex justify-content-between align-items-center">
         <div class="col-auto text-left">
-          {{-- <h2>Detail SO</h2> --}}
+          <h2>Detail SO</h2>
         </div>
         <div class="col-auto text-right">
-        <button id="btnOtorisasiDetail" type="button" class="btn btn-action-primary btn-lg" style="
+        <button id="btnOtorisasiDetail" type="button" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -2547,7 +2896,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
             Otorisasi
           </button>
-          <button type="button" class="btn btn-action-danger btn-lg" style="
+          <button type="button" class="btn btn-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -2570,63 +2919,152 @@
             <div class="row">
 
               <input type="hidden" class="form-control" id="input_detail_nourut" >
-
               <div class="col-md-3">
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">No Bukti</label></div>
-                  <div class="col-8"><input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Tanggal</label></div>
-                  <div class="col-8"><input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Pelanggan</label></div>
-                  <div class="col-8"><div class="input-group"><input type="text" class="form-control text-left" id="input_detail_kodepelanggan" disabled></div></div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>No Bukti</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Tanggal</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Pelanggan</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input type="text" class="form-control text-left" id="input_detail_kodepelanggan" disabled>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Nama Pelanggan</label></div>
-                  <div class="col-8"><input type="text" class="form-control text-left" id="input_detail_namapelanggan" disabled></div>
-                </div>
-                <div class="row align-items-start mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Alamat Pelanggan</label></div>
-                  <div class="col-8"><textarea style="width: 100%; resize: none" rows=3 class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea></div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Nama Pelanggan</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="text" class="form-control text-left" id="input_detail_namapelanggan"  disabled>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Alamat Pelanggan</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <textarea  style="width: 100%; resize: none" rows=3  class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Valas</label></div>
-                  <div class="col-8"><div class="input-group"><input type="text" class="form-control text-center" id="input_detail_valas" disabled></div></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Kurs</label></div>
-                  <div class="col-8"><input type="text" class="form-control text-right" id="input_detail_kurs" disabled></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">TOP</label></div>
-                  <div class="col-8"><input type="number" class="form-control text-right" id="input_detail_hari" disabled value=0 min=0></div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Valas</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input type="text" class="form-control text-center" id="input_detail_valas"  disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Kurs</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="text" class="form-control text-right" id="input_detail_kurs"  disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TOP</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="number" class="form-control text-right" id="input_detail_hari" disabled value=0 min=0 >
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div class="col-md-3">
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">Pembayaran</label></div>
-                  <div class="col-8"><select id="input_detail_pembayaran" disabled class="form-control text-left form-select-lg" aria-label=".form-select-lg example"><option value=0 selected>Tunai/CBD</option><option value=1>Kredit</option></select></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">TGL KIRIM</label></div>
-                  <div class="col-8"><input type="date" class="form-control text-left" id="input_detail_tanggalkirim" value="{!! date('Y-m-d') !!}" disabled></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                  <div class="col-4"><label class="form-label mb-0">PPN</label></div>
-                  <div class="col-8"><select id="input_detail_tipeppn" class="form-control text-left form-select-lg" aria-label=".form-select-lg example" disabled><option value=0 selected>None</option><option value=1>Exclude</option><option value=2>Include</option></select></div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Pembayaran</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <select  id="input_detail_pembayaran" disabled class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example">
+                        <option value=0 selected >Tunai/CBD</option>
+                        <option value=1  >Kredit</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>TGL KIRIM</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input type="date" class="form-control text-left" id="input_detail_tanggalkirim" value="{!! date('Y-m-d') !!}" disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>PPN</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <select  id="input_detail_tipeppn" class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example" disabled>
+                        <option value=0 selected>None</option>
+                        <option value=1 >Exclude</option>
+                        <option value=2 >Include</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+
+
+              </div>
 
 
 
@@ -2658,7 +3096,7 @@
           <hr/>
           <div class="row ">
           <div class="col-md-12 mt-2 text-left">
-            <button type="button" class="btn btn-action-primary btn-lg" style="
+            <button type="button" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -2667,7 +3105,7 @@
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><i class="bi bi-truck"></i></button>
+            onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
           </div>
           </div>
             <div class="mt-4" id="modalBodyDetailMainHeader">
@@ -2716,43 +3154,37 @@
               </div>
 
               <div class="col-md-3">
-
                 <div class="row">
                   <div class="col-md-12">
                     <label>Keterangan</label>
                   </div>
-
                   <div class="col-md-12">
-
-                    <div class="form-group">
-                      <textarea type="text" style="width: 100%; resize: none" rows=4 class="form-control" id="input_detail_catatan" disabled></textarea>
-
+                    <div class="form-group" style="margin-top: 14px">
+                      <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control text-left" id="input_detail_catatan" disabled></textarea>
                     </div>
                   </div>
-
                 </div>
-
               </div>
 
               <div class="col-md-3">
-
-                <div class="row align-items-start mb-2">
-                  <div class="col-4">
-                    <label class="form-label mb-0">No PO</label>
-                  </div>
-                  <div class="col-8">
-                    <input type="text" class="form-control text-left" id="input_detail_nopo" disabled>
-                  </div>
-                </div>
-
                 <div class="row">
-                  <div class="col-md-4 mb-2">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label>No PO</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <input  type="text" class="form-control text-left" id="input_detail_nopo"  disabled>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label>DP</label>
                     </div>
                   </div>
-
-                  <div class="col-md-8 mb-2">
+                  <div class="col-md-8">
                     <div class="form-group">
                       <input type="number" class="form-control text-right" id="input_detail_dp" value='0.00' disabled>
                     </div>
@@ -2763,18 +3195,16 @@
                       <label>Tgl PO</label>
                     </div>
                   </div>
-
                   <div class="col-md-8">
                     <div class="form-group">
-                      <input type="date" class="form-control text-center" id="input_detail_tanggalpo" value="{!! date('Y-m-d') !!}" disabled>
+                      <input type="date" class="form-control text-left" id="input_detail_tanggalpo" value="{!! date('Y-m-d') !!}" disabled>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            <div class="row mt-2">
+            <div class="row">
               <div class="col-md-3">
                 <div class="row">
                   <div class="col-md-6">
@@ -2862,9 +3292,9 @@
                   </div>
                   <div class="col-md-8">
                     <div class="form-group">
-                      <select id="input_detail_draftpo" class="form-control mb-3" aria-label=".form-select-lg example" disabled>
+                      <select  id="input_detail_draftpo" class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example" disabled>
                         <option value=0 selected>Tidak</option>
-                        <option value=1>Ya</option>
+                        <option value=1 >Ya</option>
                       </select>
                     </div>
                   </div>
@@ -2872,10 +3302,12 @@
               </div>
             </div>
 
+            <hr/>
+
           </div>
 
           </div>
-          <div class="container-fluid" id="">
+          <div class=" container-fluid" id="" style="margin-top:-40px;">
 
             <!-- sinia -->
 
@@ -2885,51 +3317,41 @@
             <!-- <input type="hidden" name="noUrut" id="input_detail_noUrut" value="" /> -->
             <div class="row" style="overflow:auto;">
               <table id="tabel_detail" class="table table-bordered table-hover table-striped table-responsive-lg">
-          <thead class="text-center">
-            <tr>
-              <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-              <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-              <th style="padding: 4px 12px;" scope="col">Nama Alias</th>
-              <th style="padding: 4px 12px;" scope="col">Merk</th>
-              <th style="padding: 4px 12px;" scope="col">Qty</th>
-              <th style="padding: 4px 12px;" scope="col">Sat</th>
-              <th style="padding: 4px 12px;" scope="col">Tax</th>
-              <th style="padding: 4px 12px;" scope="col">Harga</th>
-              <th style="padding: 4px 12px;" scope="col">Diskon</th>
-              <th style="padding: 4px 12px;" scope="col">NDPP</th>
-              <th style="padding: 4px 12px;" scope="col">No SPK</th>
-            </tr>
-          </thead>
-          <tbody id="tabel_data_detail" class="text-left">
-            <tr>
+                <thead class="text-center bg-primary text-white">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama Alias</th>
+                    <th style="padding: 4px 12px;" scope="col">Merk</th>
+                    <th style="padding: 4px 12px;" scope="col">Qty</th>
+                    <th style="padding: 4px 12px;" scope="col">Sat</th>
+                    <th style="padding: 4px 12px;" scope="col">Tax</th>
+                    <th style="padding: 4px 12px;" scope="col">Harga</th>
+                    <th style="padding: 4px 12px;" scope="col">Diskon</th>
+                    <th style="padding: 4px 12px;" scope="col">NDPP</th>
+                    <th style="padding: 4px 12px;" scope="col">No SPK</th>
+                    <!-- <th scope="col">Actions</th> -->
 
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td class="text-center">
-                <div class="btn-group" role="group">
-                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="">
-                    <i class="bi bi-info"></i>
-                  </button>
-                  <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="">
-                    <i class="bi bi-key-fill"></i>
-                  </button>
-                  <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="">
-                    <i class="bi bi-pencil-fill"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
+                  </tr>
+                </thead>
 
-        </table>
+                <tbody id="tabel_data_detail" class="text-left" >
+
+                  <tr >
+
+                    <td></td>
+                    <td></td>
+
+                      <td class="text-center">
+                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                        <button class="btn btn-success btn-sm" type="button" ><i class="bi bi-pen"></i></button>
+                        <button class="btn btn-danger btn-sm" type="button" ><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-list"></i></button>
+                      </td>
+                </tr>
+                </tbody>
+
+              </table>
             </div>
               <!-- <button onclick="buttonSubKategori()">tes</button> -->
           </div>
@@ -2986,6 +3408,7 @@
           </div>
           </div>
 </div>
+
 
 <!-- page3 end input_add -->
 
@@ -3185,7 +3608,7 @@
 <!-- end page 4-->
 
 <!-- start modal add -->
-<div class="modal fade rt-picker-v2" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
     <div class="modal-content">
       <div class="modal-header">
@@ -3212,7 +3635,7 @@
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center bg-primary text-white">
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                     <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -3220,12 +3643,15 @@
                   </tr>
                 </thead>
                 <tbody id="tabel_data_add_list_pelanggan" class="text-left" >
-                  <tr>
+                  <tr >
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
-                    <td>-</td>
+                      <td class="text-center">
+                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
+                      </td>
                 </tr>
                 </tbody>
               </table>
@@ -3266,17 +3692,15 @@
             <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_nopenyerahan" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">No Sample</th>
                     <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_nopenyerahan" class="text-left" >
-                <tr>
+                <tr class="pick-row">
                   <td>-</td>
-                    <td>-</td>
                     <td>-</td>
               </tr>
               </tbody>
@@ -3318,17 +3742,15 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_refpr" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead>
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Nobukti</th>
                   <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_refpr" class="text-left" >
-              <tr>
-                <td>-</td>
+              <tr class="pick-row">
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
@@ -3374,6 +3796,7 @@
         <table id="tabel_add_list_barangrefpr" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
             <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
               <th style="padding: 4px 12px;" scope="col">Nobukti</th>
               <th style="padding: 4px 12px;" scope="col">Tanggal</th>
               <th style="padding: 4px 12px;" scope="col">Ref Pr</th>
@@ -3385,7 +3808,7 @@
             </tr>
           </thead>
           <tbody id="tabel_data_add_list_barangrefpr" class="text-left" >
-            <tr>
+            <tr >
               <td>-</td>
               <td>-</td>
               <td>-</td>
@@ -3393,6 +3816,10 @@
               <td>-</td>
               <td>-</td>
               <td>-</td>
+                <td class="text-center">
+                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                  <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
+                </td>
           </tr>
           </tbody>
         </table>
@@ -3435,7 +3862,7 @@
             <table id="tabel_add_list_nopo" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">ID</th>
                   <th style="padding: 4px 12px;" scope="col">Cust</th>
                   <th style="padding: 4px 12px;" scope="col">No Pesanan</th>
@@ -3444,13 +3871,15 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_nopo" class="text-left" >
-                <tr>
+                <tr >
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
+                    <td class="text-center">
+                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                      <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
+                    </td>
               </tr>
               </tbody>
             </table>
@@ -3497,6 +3926,7 @@
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center bg-primary text-white">
                 <tr>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                   <th style="padding: 4px 12px;" scope="col">Merk</th>
@@ -3505,11 +3935,13 @@
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
                 @for ($i = 0; $i < count($listBarangAll); $i++)
-                <tr class="pick-row" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')">
+                <tr >
+                <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')" type="button" ><i class="bi bi-plus"></i></button></td>
                   <td>{{ $listBarangAll[$i]->Kodebrg }}</td>
                   <td>{{ $listBarangAll[$i]->NamaBrg }}</td>
                   <td>{{ $listBarangAll[$i]->namamerk }}</td>
                   <td>{{ $listBarangAll[$i]->Sat1 }}</td>
+
               </tr>
               @endfor
               </tbody>
@@ -3552,7 +3984,7 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_sattax" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead>
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
@@ -3607,6 +4039,7 @@
             <table id="tabel_add_list_barang" class="table table-bordered table-striped"  >
               <thead class="text-center">
                 <tr>
+                <th scope="col">Actions</th>
                   <th scope="col">Kode</th>
                   <th scope="col">Nama</th>
                   <th scope="col">Merk</th>
@@ -3614,11 +4047,16 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barang" class="text-left" >
-                <tr>
+                <tr >
+                <td class="text-center">
+                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
+                    </td>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
+
               </tr>
               </tbody>
             </table>
@@ -3648,16 +4086,15 @@
             <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_pic" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_pic" class="text-left" >
-                <tr>
-                  <td>-</td>
+                <tr class="pick-row">
                   <td>-</td>
                   <td>-</td>
               </tr>
@@ -3700,16 +4137,15 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_lokasipenerima" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead>
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
+
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_lokasipenerima" class="text-left" >
-              <tr>
-                <td>-</td>
+              <tr class="pick-row">
                 <td>-</td>
                 <td>-</td>
             </tr>
@@ -3752,17 +4188,16 @@
             <div class="col-12" style="overflow:auto; margin-top:-30px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_alamatkirim" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+
                   <th style="padding: 4px 12px;" scope="col">Nomor</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                   <th style="padding: 4px 12px;" scope="col">Alamat</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_alamatkirim" class="text-left" >
-                <tr>
-                  <td>-</td>
+                <tr class="pick-row">
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
@@ -3808,16 +4243,19 @@
           <table id="tabel_add_list_backoffice" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_backoffice" class="text-left" >
-              <tr>
+              <tr >
                 <td>-</td>
                 <td>-</td>
-                <td>-</td>
+                  <td class="text-center">
+                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
+                  </td>
             </tr>
             </tbody>
           </table>
@@ -3860,16 +4298,19 @@
         <table id="tabel_add_list_sales" class="table table-bordered table-hover table-striped table-responsive-lg">
           <thead class="text-center bg-primary text-white">
             <tr>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
               <th style="padding: 4px 12px;" scope="col">Kode</th>
               <th style="padding: 4px 12px;" scope="col">Nama</th>
             </tr>
           </thead>
           <tbody id="tabel_data_add_list_sales" class="text-left" >
-            <tr>
+            <tr >
               <td>-</td>
               <td>-</td>
-              <td>-</td>
+                <td class="text-center">
+                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
+                </td>
           </tr>
           </tbody>
         </table>
@@ -3912,7 +4353,7 @@
           <table id="tabel_add_list_valas" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
                 <th style="padding: 4px 12px;" scope="col">Kurs</th>
@@ -3920,11 +4361,14 @@
             </thead>
 
             <tbody id="tabel_data_add_list_valas" class="text-left" >
-              <tr>
+              <tr >
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                <td>-</td>
+                  <td class="text-center">
+                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
+                  </td>
             </tr>
             </tbody>
           </table>
@@ -4093,7 +4537,7 @@
         <div class="row" style="overflow:auto; margin-top: 10px">
           <!-- <div class="row "> -->
           <div class="col-md-12 mt-2 text-right">
-            {{-- <button type="button" id="submitAddTambahSOAll" class="btn btn-primary btn-lg" style="
+            <button type="button" id="submitAddTambahSOAll" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -4103,7 +4547,7 @@
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
             onclick="submitAddTambahSOAll()" class="btn btn-secondary">Submit Add</button>
-          </div> --}}
+          </div>
           <!-- </div> -->
           <table id="tabel_tambahsoall" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
@@ -4202,6 +4646,7 @@
 <!-- end modal print-->
 
 
+
 @endsection
 
 @section('js')
@@ -4238,7 +4683,7 @@ let tempEditEdit = {}
 
 let tipeform = ''
 let tipeformitem = ''
-let tempRefPR = {}
+let tempRefPr = {}
 let tempNoPenyerahan = {}
 // let listBarangRefPR = []
 
@@ -4256,6 +4701,16 @@ HeaderEngine.configure({
 
 var lastTabelRows = [];
 var lastTabel7Rows = [];
+var lastTabel2Rows = [];
+var lastTabelOtoRows = [];
+
+// Tabel yang tabnya sedang tidak aktif tetap punya data lama tertinggal setelah
+// loadAll() kalau selalu digambar ulang tanpa syarat. Ditandai di sini, baru benar-benar
+// digambar ulang saat tabnya dibuka -- lihat handler shown.bs.tab di bawah. Port 1:1 dari
+// poPerluGambar milik purchaseOrder.blade.php, dibatasi ke #tabel/#tabel7 (dua tab yang
+// punya tombol nav dan bisa dibuka user) -- #tabel2/#tabel_oto tidak reachable lewat UI
+// sama sekali (tidak punya tombol nav), jadi selalu digambar langsung begitu datanya ada.
+var soPerluGambar = { tabel: false, tabel7: false, tabel2: false, tabel_oto: false };
 
 HeaderEngine.registerTable('tabel', {
   href: 'marketingso_tabel',
@@ -4435,29 +4890,42 @@ function renderTabel7Rows(rows) {
   replaceTheadWithHeader('#tabel7', cols);
 }
 
-// DataTables names its auto-generated wrapper <tableId>_wrapper and puts
-// .dataTables_paginate inside it, alongside the table -- meaning it's part
-// of .table-wrap's horizontally-scrolling content and travels with column
-// scroll. Physically relocating the pagination element into a container
-// placed outside .table-wrap (see the tabel(7)PaginationOutside divs in the
-// markup) is the only reliable way to keep it out of that scroll entirely
-// and always visible below the table. Must run after every (re)init --
-// but destroy() only cleans up whatever is still inside .dataTables_wrapper
-// at that point, and the PREVIOUS pagination element was already moved out
-// of it by the previous call, so destroy() never touches it and it's left
-// behind as an orphan. Empty the target first so each reinit replaces last
-// time's pagination instead of stacking a new one on top of it.
-function moveDataTablePagination(tableId, targetSel) {
-  $(targetSel).empty();
-  $('#' + tableId + '_wrapper .dataTables_paginate').appendTo(targetSel);
+// Kotak scroll tabel dibuat setinggi sisa ruang di #content supaya halaman TIDAK perlu
+// scrollbar sendiri - yang discroll hanya isi tabel. Diukur dari DOM, bukan angka mati
+// seperti 65vh, karena tinggi bagian di atas/bawah kotak (kartu tab, toolbar, bar reset
+// kolom, catatan kaki) berbeda antar tab dan bisa berubah.
+// Port 1:1 dari poAturTinggiTabel() milik purchaseOrder.blade.php.
+function soAturTinggiTabel() {
+  let area = document.getElementById('content')
+  let pane = document.querySelector('#myTabContent .tab-pane.active')
+  if (!area || !pane) { return }
+  let wrap = pane.querySelector('.po-table-wrap')
+  if (!wrap) { return }
+
+  wrap.style.maxHeight = 'none'
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah
+  let kotak = wrap.getBoundingClientRect()
+  let bawah = pane.getBoundingClientRect().bottom - kotak.bottom
+
+  let sisa = batasBawah - kotak.top - bawah - 4
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
 }
+
+// #tabel/#tabel7 dom string disamakan 1:1 dengan purchaseOrder.blade.php: 'po-table-wrap't
+// membungkus HANYA isi tabelnya dalam kotak scroll (lihat .po-table-wrap di so-table-header.css),
+// sedangkan info+pagination ('i'/'p') ada DI LUAR kotak itu supaya tidak ikut tergulung -
+// menggantikan moveDataTablePagination()/.tb-pagination-outside yang dipakai sebelumnya untuk
+// menyelesaikan masalah yang sama.
+const SO_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
 
 function reinitTabel() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
     $('#tabel').DataTable({
-      dom: 'tip',
+      dom: SO_DOM_STRING,
       lengthChange: false,
       paging: true,
       order: [[1, 'asc']],
@@ -4466,9 +4934,9 @@ function reinitTabel() {
       // it (specifically on whichever column "order" points at), looking
       // like a doubled icon. ordering:false drops that native UI/classes
       // completely while still honoring "order" for the initial sort.
-      ordering: false
+      ordering: false,
+      drawCallback: function () { setTimeout(soAturTinggiTabel, 0); }
     });
-    moveDataTablePagination('tabel', '#tabelPaginationOutside');
 
     // DataTables' destroy()/rebuild cycle above detaches/replaces the DOM
     // ReportTable was bound to, so re-bind it to the fresh table/thead/bar
@@ -4476,6 +4944,8 @@ function reinitTabel() {
     // any refresh throws trying to walk up from a now-detached node (the
     // "reading 'parentNode'" crash).
     HeaderEngine.bindEngineDom('tabel');
+    soPerluGambar.tabel = false;
+    soAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -4487,16 +4957,142 @@ function reinitTabel7() {
     if ($.fn.DataTable.isDataTable('#tabel7')) { $('#tabel7').DataTable().destroy(); }
     renderTabel7Rows(lastTabel7Rows);
     $('#tabel7').DataTable({
-      dom: 'tip',
+      dom: SO_DOM_STRING,
       lengthChange: false,
       paging: true,
       order: [[1, 'asc']],
-      ordering: false
+      ordering: false,
+      drawCallback: function () { setTimeout(soAturTinggiTabel, 0); }
     });
-    moveDataTablePagination('tabel7', '#tabel7PaginationOutside');
     HeaderEngine.bindEngineDom('tabel7');
+    soPerluGambar.tabel7 = false;
+    soAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel7 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+// #tabel2/#tabel_oto: tabel biasa (tanpa drag/gear kolom), sama seperti tab "Purchase
+// Order"/"PO Otorisasi" milik purchaseOrder.blade.php -- lihat renderTabelPO() di sana.
+// Barisnya JS-owned (lastTabel2Rows/lastTabelOtoRows) supaya kode yang sama melayani
+// pemuatan awal halaman maupun refresh lewat loadAll().
+function so2FormatTanggal(raw) {
+  if (!raw) { return '' }
+  let d = new Date(raw)
+  if (isNaN(d.getTime())) { return raw }
+  let dd = ('0' + d.getDate()).slice(-2)
+  let mm = ('0' + (d.getMonth() + 1)).slice(-2)
+  return dd + '/' + mm + '/' + d.getFullYear()
+}
+
+function so2FormatTanggalJam(raw) {
+  if (!raw) { return '' }
+  let d = new Date(raw)
+  if (isNaN(d.getTime())) { return raw }
+  let hh = ('0' + d.getHours()).slice(-2)
+  let mi = ('0' + d.getMinutes()).slice(-2)
+  let ss = ('0' + d.getSeconds()).slice(-2)
+  return so2FormatTanggal(raw) + ' ' + hh + ':' + mi + ':' + ss
+}
+
+function so2Rupiah(n) {
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+}
+
+function so2BoolCell(v) {
+  return Number(v)
+    ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+    : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+}
+
+function renderTabel2Rows(rows) {
+  let html = ''
+  ;(rows || []).forEach(function (rowWrap) {
+    let row = rowWrap[0]
+    html += '<tr><td class="text-center">'
+      + '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + row.NOBUKTI + '\')"><i class="bi bi-info"></i></button>'
+      + '<button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi(\'' + row.NOBUKTI + '\')"><i class="bi bi-key-fill"></i></button>'
+      + '<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD(\'' + row.NOBUKTI + '\')"><i class="bi bi-check-square-fill"></i></button>'
+      + '<button class="btn btn-info btn-sm" type="button" title="Print" onclick="submitPrint(\'' + row.NOBUKTI + '\')"><i class="bi bi-printer"></i></button>'
+      + '</td>'
+      + '<td>' + row.NOBUKTI + '</td>'
+      + '<td>' + so2FormatTanggal(row.TANGGAL) + '</td>'
+      + '<td>' + (row.NAMACUSTSUPP || '') + '</td>'
+      + '<td>' + (row.nopesanan || '') + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotDPP) + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotPPn) + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotNet) + '</td>'
+      + so2BoolCell(row.IsOtorisasi1)
+      + '<td>' + (row.OtoUser1 || '') + '</td>'
+      + '<td>' + so2FormatTanggalJam(row.TglOto1) + '</td>'
+      + '</tr>'
+  });
+  document.getElementById('tabel2_data').innerHTML = html
+}
+
+function renderTabelOtoRows(rows) {
+  let html = ''
+  ;(rows || []).forEach(function (rowWrap) {
+    let row = rowWrap[0]
+    html += '<tr><td class="text-center">'
+      + '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + row.NOBUKTI + '\')"><i class="bi bi-info"></i></button>'
+      + '<button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi(\'' + row.NOBUKTI + '\')"><i class="bi bi-key-fill"></i></button>'
+      + '<button class="btn btn-info btn-sm" type="button" title="Print" onclick="submitPrint(\'' + row.NOBUKTI + '\')"><i class="bi bi-printer"></i></button>'
+      + '</td>'
+      + '<td>' + row.NOBUKTI + '</td>'
+      + '<td>' + so2FormatTanggal(row.TANGGAL) + '</td>'
+      + '<td>' + (row.NAMACUSTSUPP || '') + '</td>'
+      + '<td>' + (row.nopesanan || '') + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotDPP) + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotPPn) + '</td>'
+      + '<td style="text-align:right;">' + so2Rupiah(row.TotNet) + '</td>'
+      + so2BoolCell(row.unblock)
+      + '<td>' + (row.userunblock || '') + '</td>'
+      + '<td>' + (row.tglunblock || '') + '</td>'
+      + so2BoolCell(row.IsOtorisasi1)
+      + '<td>' + (row.OtoUser1 || '') + '</td>'
+      + '<td>' + so2FormatTanggalJam(row.TglOto1) + '</td>'
+      + '</tr>'
+  });
+  document.getElementById('tabel_oto_data').innerHTML = html
+}
+
+function reinitTabel2() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(lastTabel2Rows);
+    $('#tabel2').DataTable({
+      dom: SO_DOM_STRING,
+      lengthChange: false,
+      paging: true,
+      order: [[1, 'asc']],
+      columnDefs: [{ targets: [0], orderable: false }],
+      drawCallback: function () { setTimeout(soAturTinggiTabel, 0); }
+    });
+    soPerluGambar.tabel2 = false;
+    soAturTinggiTabel();
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabelOto() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel_oto')) { $('#tabel_oto').DataTable().destroy(); }
+    renderTabelOtoRows(lastTabelOtoRows);
+    $('#tabel_oto').DataTable({
+      dom: SO_DOM_STRING,
+      lengthChange: false,
+      paging: true,
+      autoWidth: false,
+      drawCallback: function () { setTimeout(soAturTinggiTabel, 0); }
+    });
+    soPerluGambar.tabel_oto = false;
+    soAturTinggiTabel();
+  } catch (e) {
+    console.error('reinitTabelOto failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
   }
 }
@@ -4535,29 +5131,40 @@ $(document).ready(function(){
   // $("#form").modal('toggle')
   // let level = $("#level").val()
   // console.log(level)
-      // #profile2/#tabel7 ("Penawaran") is the tab shown by default, so
-      // initialize it last -- reinitTabel()/reinitTabel7() each end by
-      // binding ReportTable to their own table, and whichever runs last
-      // wins, so this order leaves the actually-visible tab interactive.
+      // Only the tab actually visible on load (#profile2/#tabel7, "Penawaran" -- see
+      // "show active" on its tab-pane) is drawn immediately; #tabel/"SO" is left marked
+      // soPerluGambar so it only costs a redraw once the user actually opens that tab --
+      // port of purchaseOrder.blade.php's own loadAll()/poPerluGambar lazy-draw split.
       HeaderEngine.activateEngineData('tabel');
       HeaderEngine.doSetHeader(g_modeReport);
       lastTabelRows = @json($tempOutstanding1);
-      reinitTabel();
+      soPerluGambar.tabel = true;
 
       HeaderEngine.activateEngineData('tabel7');
       HeaderEngine.doSetHeader(g_modeReport);
       lastTabel7Rows = @json($tempOutstanding7);
       reinitTabel7();
 
-      // Re-bind the interactive engine whenever the user switches tabs --
-      // ReportTable's listeners are bound to one table's DOM at a time.
+      // #tabel2/#tabel_oto have no nav-tab button (not reachable from the UI, same as
+      // before this rebuild) so there's no shown.bs.tab moment to defer their draw to --
+      // just render them immediately once their data exists.
+      lastTabel2Rows = @json($tempOutstanding3);
+      reinitTabel2();
+      lastTabelOtoRows = @json($tempOutstanding5);
+      reinitTabelOto();
+
+      // Re-bind the interactive engine whenever the user switches tabs -- ReportTable's
+      // listeners are bound to one table's DOM at a time -- and draw the tab lazily if
+      // loadAll() left it marked dirty.
       $('#tab-diterima-btn').on('shown.bs.tab', function () {
         HeaderEngine.activateEngineData('tabel');
-        HeaderEngine.bindEngineDom('tabel');
+        if (soPerluGambar.tabel) { reinitTabel(); } else { HeaderEngine.bindEngineDom('tabel'); }
+        soAturTinggiTabel();
       });
       $('#tab-dibuka-btn').on('shown.bs.tab', function () {
         HeaderEngine.activateEngineData('tabel7');
-        HeaderEngine.bindEngineDom('tabel7');
+        if (soPerluGambar.tabel7) { reinitTabel7(); } else { HeaderEngine.bindEngineDom('tabel7'); }
+        soAturTinggiTabel();
       });
 
         $("#tabel_tambahsoall").DataTable({
@@ -4581,36 +5188,18 @@ $(document).ready(function(){
           $("#tabel_add_list_refpr").DataTable({
             "lengthChange": false,
               "paging": false ,
-              "order": [[1, 'asc']],
-              "columnDefs": [
-                   {"targets" :[0] , 'orderable' : false}
-                ]
+              "order": [[0, 'asc']]
             });
             $("#tabel_add_list_nopenyerahan").DataTable({
               "lengthChange": false,
                 "paging": false ,
-                "order": [[1, 'asc']],
-                "columnDefs": [
-                     {"targets" :[0] , 'orderable' : false}
-                  ]
+                "order": [[0, 'asc']]
               });
 
-        $("#tabel2").DataTable({
-          dom: 'tip',
-          "lengthChange": false,
-            "paging": true ,
-            "order": [[1, 'asc']],
-          "columnDefs": [
-               {"targets" :[0] , 'orderable' : false}
-            ]
-          });
-
-	$("#tabel_oto").DataTable({
-            dom: 'tip',
-            "lengthChange": false,
-              "paging": true ,
-              "autoWidth": false,
-            });
+        // #tabel2/#tabel_oto's own DataTables init now happens inside
+        // reinitTabel2()/reinitTabelOto() above (called earlier in this same ready
+        // block) -- this leftover direct call from before that existed would
+        // re-initialize both a second time with no destroy() in between.
 
         $("#tabel_add_list_barang").DataTable({
           "lengthChange": false,
@@ -4788,7 +5377,15 @@ function buttonFilterSO () {
     },
     success: function(res) {
       lastTabelRows = res;
-      reinitTabel();
+      // Only draw #tabel immediately if it's actually the visible tab -- otherwise
+      // this would silently undo the lazy-draw deferral loadAll() just set up
+      // (soPerluGambar.tabel), redrawing a tab the user isn't even looking at.
+      // Mirrors the same soPerluGambar check the shown.bs.tab handlers use.
+      if (activeVisibleTabKey() === 'tabel') {
+        reinitTabel();
+      } else {
+        soPerluGambar.tabel = true;
+      }
     },
     error: function (err) {
       console.log(err)
@@ -7320,8 +7917,7 @@ function buttonAddListPIC () {
       let rowTable = ``
       listpic.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPIC('${i}')" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickPIC('${i}')">
 
         <td>${item.kodepic}</td>
         <td>${item.nama}</td>
@@ -7333,7 +7929,7 @@ function buttonAddListPIC () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
 
@@ -7718,8 +8314,7 @@ function buttonAddAddListRefPr () {
         return
       }
       listRefPR = res
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickRefPr('-')" type="button" ><i class="bi bi-plus"></i></button></td>
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickRefPr('-')">
 
       <td>-</td>
       <td>-</td>
@@ -7731,8 +8326,7 @@ function buttonAddAddListRefPr () {
 
       listRefPR.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickRefPr(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickRefPr(${i} )">
 
         <td>${item.nobukti}</td>
         <td>${item.tanggal}</td>
@@ -7758,11 +8352,8 @@ function buttonAddAddListRefPr () {
       $("#tabel_add_list_refpr").DataTable({
         "lengthChange": false,
           "paging": false ,
-          "order": [[1, 'asc']],
-          "searching" : true,
-          "columnDefs": [
-               {"targets" :[0] , 'orderable' : false}
-            ]
+          "order": [[0, 'asc']],
+          "searching" : true
     });
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListRefPR').show();
@@ -7808,8 +8399,7 @@ function buttonAddAddListNoPenyerahan () {
         alertify.warning("Data tidak ditemukkan")
         return
       }
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoPenyerahan('-')" type="button" ><i class="bi bi-plus"></i></button></td>
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickNoPenyerahan('-')">
 
       <td>-</td>
       <td>-</td>
@@ -7820,8 +8410,7 @@ function buttonAddAddListNoPenyerahan () {
 
       listnopenyerahan.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoPenyerahan(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickNoPenyerahan(${i} )">
 
         <td>${item.NOBUKTI}</td>
         <td>${item.NAMABRG}</td>
@@ -7897,8 +8486,7 @@ function buttonAddListAlamatKirim () {
         $('#tabel_add_list_alamatkirim').DataTable().destroy();
       }
 
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickAlamatKirim('-')" type="button" ><i class="bi bi-plus"></i></button></td>
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickAlamatKirim('-')">
 
       <td>-</td>
       <td>-</td>
@@ -7910,28 +8498,18 @@ function buttonAddListAlamatKirim () {
 
       listAlamatKirim.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickAlamatKirim(${i} )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickAlamatKirim(${i} )">
 
         <td>${item.nomor}</td>
         <td>${item.nama}</td>
         <td>${item.alamat}</td>
 
         </tr>`
-
-        // '
-        // <tr>
-        // <td> '+ item.nomor + '</td>
-        // <td> '+ item.nama + '</td>
-        // <td>+ ' + item.alamat + '</td>
-        // <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAlamatKirim( `' + item.nomor + '` , `'+ item.nama + '` , `' + item.alamat +'` )" type="button" ><i class="bi bi-plus"></i></button></td>
-        //
-        // </tr>'
       });
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_alamatkirim").innerHTML = rowTable
 
@@ -7981,8 +8559,7 @@ function buttonAddListLokasiPenerima () {
         $('#tabel_add_list_lokasipenerima').DataTable().destroy();
       }
 
-      let rowTable = `<tr>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('-' , '-' )" type="button" ><i class="bi bi-plus"></i></button></td>
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickLokasiPenerima('-' , '-' )">
 
       <td>-</td>
       <td>-</td>
@@ -7990,8 +8567,7 @@ function buttonAddListLokasiPenerima () {
       </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('${item.kodekebun}' , '${item.nama}' )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickLokasiPenerima('${item.kodekebun}' , '${item.nama}' )">
 
         <td>${item.kodekebun}</td>
         <td>${item.nama}</td>
@@ -8003,7 +8579,7 @@ function buttonAddListLokasiPenerima () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_lokasipenerima").innerHTML = rowTable
 
@@ -8562,6 +9138,8 @@ function loadAll () {
 
   let dataRefreshOutstanding = []
       let dataRefreshOutstanding7 = []
+      let dataRefreshOutstanding3 = []
+      let dataRefreshOutstanding5 = []
       console.log({tglawal,
       tglakhir,
       tipefilter,
@@ -8585,26 +9163,39 @@ function loadAll () {
       console.log('res loadall')
       console.log(res)
       dataRefreshOutstanding = res.tempOutstanding1
-      // dataRefreshOutstanding2 = res.tempOutstanding3
-      // dataRefreshOutstanding4 = res.tempOutstanding5
+      dataRefreshOutstanding3 = res.tempOutstanding3
+      dataRefreshOutstanding5 = res.tempOutstanding5
       dataRefreshOutstanding7 = res.tempOutstanding7
-
 
     }})
 
-
     lastTabelRows = dataRefreshOutstanding;
-    reinitTabel();
-
     lastTabel7Rows = dataRefreshOutstanding7;
-    reinitTabel7();
+
+    // Only the tab the user is actually looking at gets redrawn immediately -- the other
+    // is left marked soPerluGambar and only costs a redraw once its tab is actually opened
+    // (see the shown.bs.tab handlers). Port of purchaseOrder.blade.php's own
+    // loadAll()/poPerluGambar lazy-draw split.
+    var visibleKey = activeVisibleTabKey();
+    if (visibleKey === 'tabel') {
+      reinitTabel();
+      soPerluGambar.tabel7 = true;
+    } else {
+      reinitTabel7();
+      soPerluGambar.tabel = true;
+    }
+
+    // #tabel2/#tabel_oto have no nav-tab button to defer to -- always refreshed in place.
+    lastTabel2Rows = dataRefreshOutstanding3;
+    reinitTabel2();
+    lastTabelOtoRows = dataRefreshOutstanding5;
+    reinitTabelOto();
 
     buttonFilterSO()
 
-    // Both tables above just got rebuilt regardless of which tab is
-    // actually visible -- whichever ran last "wins" the interactive
-    // binding, so restore it to match what the user is actually looking at.
-    var visibleKey = activeVisibleTabKey();
+    // reinitTabel()/reinitTabel2()/reinitTabelOto() above may have rebound the
+    // interactive engine's DOM to a table other than the one actually visible --
+    // restore it to match what the user is looking at.
     HeaderEngine.activateEngineData(visibleKey);
     HeaderEngine.bindEngineDom(visibleKey);
 }

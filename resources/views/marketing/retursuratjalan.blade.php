@@ -4,6 +4,96 @@
 @endsection
 
 @section('css')
+
+{{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel/#tabel2's
+     draggable-column/gear-menu headers and "Tampilkan" (page-length) control, copied 1:1
+     from Sales Order's page1 (see so.blade.php's #tabel/#tabel7). Linked here page-locally
+     so only this page gets it. --}}
+<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+
+<style>
+  /* Holds the pagination element JS relocates here (see moveDataTablePagination()) so it
+     lives outside .table-wrap's horizontal scroll -- .dataTables_paginate still floats
+     right per DataTables' own CSS, but now within this container's width (the visible
+     viewport, not the wide table), so it lands at a reachable spot instead of the
+     table's far edge. overflow:hidden clears the float so this container doesn't
+     collapse to zero height. Matches so.blade.php's .tb-pagination-outside 1:1. */
+  .tb-pagination-outside {
+    overflow: hidden;
+    margin-top: 8px;
+    padding: 0 14px 10px;
+  }
+  .tb-pagination-outside .dataTables_paginate {
+    float: right;
+  }
+  .tb-pagination-outside .paginate_button {
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0.4em 0.9em;
+    margin-left: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--sp-border, #e7e9ee);
+    color: var(--sp-text, #1f2430);
+    text-decoration: none !important;
+    cursor: pointer;
+  }
+  .tb-pagination-outside .paginate_button.current {
+    background: var(--sp-primary, #6f42f3);
+    border-color: var(--sp-primary, #6f42f3);
+    color: #fff;
+  }
+  .tb-pagination-outside .paginate_button.disabled {
+    cursor: default;
+    color: var(--sp-text-soft, #6b7280);
+    opacity: .6;
+  }
+  .tb-pagination-outside .paginate_button:hover:not(.disabled):not(.current) {
+    background: var(--sp-bg, #f4f5f7);
+  }
+
+  /* report-table.css's .filter-wrap/.toolbar classes (the "Tampilkan" control) are
+     designed to sit directly above a .tb-report table -- give them the same small
+     bottom margin so.blade.php's toolbar has. */
+  .tb-report .toolbar {
+    margin-bottom: 10px;
+  }
+
+  /* "Reset kolom" pill + the row that holds it alongside the hidden-columns bar. Not
+     part of report-table.css itself (so.blade.php declares these page-locally too) --
+     kept OUTSIDE #rtBarTabelX as a flex sibling, not a child, because report-table.js's
+     renderBar() fully overwrites those divs' innerHTML on every drag/hide/decimal
+     change; a button placed inside them would vanish on the first re-render. */
+  .rt-bar-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .rt-bar-row .rt-bar { margin-bottom: 0; }
+  .rt-reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--rt-border);
+    border-radius: var(--rt-radius);
+    background: var(--rt-card);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--rt-ink-soft);
+  }
+  .rt-reset-btn:hover {
+    color: #D64550;
+    border-color: #D64550;
+    background: #FEF2F2;
+  }
+</style>
+
 <style>
 #tabel_filter {
     display: flex;
@@ -151,6 +241,73 @@
   }
 </style>
 {{-- end tampilan search modal barang all --}}
+
+{{-- Header restyle to match Sales Order's page1 (see SalesOrder.blade.php):
+     tableMaster2.css is what defines .btn-action-primary, used below on the
+     + RSPB button in place of the old inline-styled pill button. --}}
+<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+
+{{-- radioChoiceMaster pill-tab look, copied 1:1 from Sales Order's page1 inline
+     <style> block. Sales Order applies this to <button data-bs-toggle="tab">
+     elements; this page's tabs still run on the Bootstrap 4 tab plugin
+     (data-toggle="tab" + <a href="#...">), so the only additions versus Sales
+     Order's copy are `display: inline-flex; align-items: center;` and
+     `text-decoration: none;` on .radioChoiceMaster-btn -- an <a> needs both
+     (box behavior and underline removal) that a <button> gets for free.
+     Everything else, including colors and the active state, is unchanged
+     from Sales Order's version. --}}
+<style>
+  .radioChoiceMaster {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .radioChoiceMaster-item {
+    display: flex;
+  }
+
+  .radioChoiceMaster-btn {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .radioChoiceMaster-btn:hover {
+    color: #212529;
+    background-color: rgba(0,0,0,0.04);
+    text-decoration: none;
+  }
+
+  .radioChoiceMaster-btn:focus,
+  .radioChoiceMaster-btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .radioChoiceMaster-btn.active {
+    color: #fff;
+    background-color: #007bff;
+    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
+  }
+</style>
 @endsection
 
 
@@ -161,22 +318,12 @@
 <div class="container-fluid">
 
   <!-- <div id="qrcode"></div> -->
-  <div class="row">
+  <div class="row align-items-center">
     <div class="col-6 text-left">
-      <h2 style="margin-top:-85px;">Retur SJ</h2>
+      <h2>Retur SJ</h2>
     </div>
     <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-lg" style="
-          height: 30px;
-          margin-top: -150px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonAdd()">
+      <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">
         + RSPB
       </button>
     </div>
@@ -200,130 +347,109 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card" style="margin-top:-55px;">
-<div class="card-header" >
-<div class="row">
-  <nav style="width: 100%;">
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
-         style="color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; text-align: left; border: 2px solid #007bff;">
-        Retur SJ Belum Otorisasi
-      </a>
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Retur SJ Sudah Otorisasi
-      </a>
-    </div>
-  </nav>
-
+  {{-- Deliberately NOT wrapped in .card -- newmaster.css's global .card rule
+       (display:flex; align-items:center;) is meant for the dashboard module-home
+       tile grid, and squeezes any .card-body down to its content's intrinsic width
+       instead of stretching it, which is what made this table render far narrower
+       than Sales Order's. Sales Order's own working pattern (giroTab) confirms this:
+       its pill tab bar and table content both sit directly in the page flow with no
+       .card wrapper at all -- matched 1:1 here. --}}
+  <div style="margin-bottom:12px;">
+<ul class="radioChoiceMaster" id="nav-tab" role="tablist">
+  <li class="radioChoiceMaster-item" role="presentation">
+    <a class="radioChoiceMaster-btn active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+      Retur SJ Belum Otorisasi
+    </a>
+  </li>
+  <li class="radioChoiceMaster-item" role="presentation">
+    <a class="radioChoiceMaster-btn" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+      Retur SJ Sudah Otorisasi
+    </a>
+  </li>
+</ul>
 </div>
-</div>
-<div class="card-body" style="padding:0;" >
 <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto;">
-        <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-
-              <table id="tabel" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
-                    <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-                    <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;" scope="col">No SPB</th>
-                    <th style="padding: 4px 12px;" scope="col">Tgl SPB</th>
-                    <th style="padding: 4px 12px;" scope="col">Customer</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding); $i++)
-                <tr>
-                  <td class='text-center'>
-                    <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $tempOutstanding[$i]->NOBUKTI }}' , 'detail')"><i class="bi bi-info"></i></button>
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('{{ $tempOutstanding[$i]->NOBUKTI }}' , '{{ $tempOutstanding[$i]->IsOtorisasi1 }}')"><i class="bi bi-pen"></i></button>
-                    @if ($tempOutstanding[$i]->IsOtorisasi1 == 1)
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto('{{ $tempOutstanding[$i]->NOBUKTI }}' , 'edit')"><i class="bi bi-key"></i></button>
-                    @else
-                    <button class="btn btn-primary btn-sm" type="button" onclick="buttonOto('{{ $tempOutstanding[$i]->NOBUKTI }}' , 'add')"><i class="bi bi-key"></i></button>
-
-                    @endif
-
-                  </td>
-                  <td>{{ $tempOutstanding[$i]->NOBUKTI }}</td>
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding[$i]->NOSPB }}</td>
-
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i]->TglSPB)) !!}</td>
-                  <td>{{ $tempOutstanding[$i]->NamaCustSupp }}</td>
-
-
-                </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
-        </div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <div class="filter-wrap">
+        <label for="tabel_length_visual">Tampilkan</label>
+        <select id="tabel_length_visual" class="filter-inp" style="cursor:pointer;">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="-1">Semua</option>
+        </select>
       </div>
+    </div>
+    {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and the
+         "Tampilkan" toolbar above) to just this table. Sits directly under .tab-pane
+         with no .row/.col-12 wrapper -- matching so.blade.php's page1 exactly, since
+         that wrapper's grid padding/negative-margin is what was shrinking this table
+         down from full width. --}}
+    <div class="tb-report main">
+    <div class="rt-bar-row">
+      <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
+        <i class="bi bi-arrow-clockwise"></i> Reset kolom
+      </button>
+      <div id="rtBarTabel"></div>
+    </div>
+    <div class="table-outer">
+      <div class="table-wrap">
+        <table id="tabel" class="tb">
+          {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
+               renderTabelRows(), which runs on page load via reinitTabel()) replaces
+               this <thead>'s contents based on gcart_header before the user ever sees
+               it -- the tag itself is just a placeholder for that selector. --}}
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div id="tabelPaginationOutside" class="tb-pagination-outside"></div>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
+    </div>
     </div>
   </div>
 
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto;">
-        <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-
-              <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
-                    <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-                    <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;" scope="col">No SPB</th>
-                    <th style="padding: 4px 12px;" scope="col">Tgl SPB</th>
-                    <th style="padding: 4px 12px;" scope="col">Customer</th>
-                    <th style="padding: 4px 12px;" scope="col">User Oto1</th>
-                    <th style="padding: 4px 12px;" scope="col">Tgl Oto1</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel2_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding2); $i++)
-                <tr>
-                  <td class='text-center'>
-                    <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $tempOutstanding2[$i]->NOBUKTI }}' , 'detail')"><i class="bi bi-info"></i></button>
-                    @if ($tempOutstanding2[$i]->IsOtorisasi1 == 1)
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto('{{ $tempOutstanding2[$i]->NOBUKTI }}' , 'edit')"><i class="bi bi-key"></i></button>
-                    @else
-                    <button class="btn btn-primary btn-sm" type="button" onclick="buttonOto('{{ $tempOutstanding2[$i]->NOBUKTI }}' , 'add')"><i class="bi bi-key"></i></button>
-
-                    @endif
-
-                  </td>
-                  <td>{{ $tempOutstanding2[$i]->NOBUKTI }}</td>
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding2[$i]->TANGGAL)) !!}</td>
-                  <td>{{ $tempOutstanding2[$i]->NOSPB }}</td>
-
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding2[$i]->TglSPB)) !!}</td>
-                  <td>{{ $tempOutstanding2[$i]->NamaCustSupp }}</td>
-
-                  <td>{{ $tempOutstanding2[$i]->OtoUser1 }}</td>
-                  <td>{!! $tempOutstanding2[$i]->TglOto1 ? date("Y/m/d", strtotime($tempOutstanding2[$i]->TglOto1)) : '' !!}</td>
-
-
-
-                </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
-        </div>
+    <div class="toolbar" style="margin-bottom:10px;">
+      <div class="filter-wrap">
+        <label for="tabel2_length_visual">Tampilkan</label>
+        <select id="tabel2_length_visual" class="filter-inp" style="cursor:pointer;">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="-1">Semua</option>
+        </select>
       </div>
+    </div>
+    <div class="tb-report main">
+    <div class="rt-bar-row">
+      <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
+        <i class="bi bi-arrow-clockwise"></i> Reset kolom
+      </button>
+      <div id="rtBarTabel2"></div>
+    </div>
+    <div class="table-outer">
+      <div class="table-wrap">
+        <table id="tabel2" class="tb">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel2_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div id="tabel2PaginationOutside" class="tb-pagination-outside"></div>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
+    </div>
+    </div>
     </div>
   </div>
 
@@ -1494,6 +1620,8 @@
 @endsection
 
 @section('js')
+<script src="{{ asset('js/report-table.js') }}"></script>
+<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
 <script type="text/javascript">
 
 let listSJ = []
@@ -1511,29 +1639,233 @@ let dataFormDetail = {}
 let dataBarangAdd = {}
 let dataBarangEdit = {}
 
+// -- #tabel/#tabel2 interactive column engine -- same shared drag/hide/decimal-column
+// engine so.blade.php uses for #tabel/#tabel7 (copied 1:1). Persistence goes through
+// ReturSuratJalanController::loadHeader/simpanHeader (SML-backed), keyed by a href
+// unique to each of this page's tables.
+HeaderEngine.configure({
+  loadUrl: "{!! url('retursuratjalanloadheader') !!}",
+  simpanUrl: "{!! url('retursuratjalansimpanheader') !!}"
+});
+
+var lastTabelRows = [];
+var lastTabel2Rows = [];
+
+HeaderEngine.registerTable('tabel', {
+  href: 'retursuratjalan_tabel',
+  tableSel: '#tabel',
+  barSel: '#rtBarTabel',
+  setDefault: function () { setDefaultHeaderTabel(); },
+  onChange: function () { reinitTabel(); }
+});
+HeaderEngine.registerTable('tabel2', {
+  href: 'retursuratjalan_tabel2',
+  tableSel: '#tabel2',
+  barSel: '#rtBarTabel2',
+  setDefault: function () { setDefaultHeaderTabel2(); },
+  onChange: function () { reinitTabel2(); }
+});
+
+function setDefaultHeaderTabel() {
+  gcart_header = [
+    ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
+    ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
+    ['NOSPB',        'No SPB',    1, 'varchar', 0, 0],
+    ['TglSPB',       'Tgl SPB',   1, 'date',    0, 0],
+    ['NamaCustSupp', 'Customer',  1, 'varchar', 0, 0]
+  ];
+}
+
+function setDefaultHeaderTabel2() {
+  gcart_header = [
+    ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
+    ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
+    ['NOSPB',        'No SPB',    1, 'varchar', 0, 0],
+    ['TglSPB',       'Tgl SPB',   1, 'date',    0, 0],
+    ['NamaCustSupp', 'Customer',  1, 'varchar', 0, 0],
+    ['OtoUser1',     'User Oto1', 1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto1',  1, 'date',    0, 0]
+  ];
+}
+
+// Fixed, non-draggable Actions cell for #tabel (Retur SJ Belum Otorisasi) -- same
+// buttons/onclick args the old static markup and loadAll() row-builder both used,
+// just read via pickCI() now.
+function tabelActionsCell(row) {
+  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
+  var isOto1 = HeaderEngine.pickCI(row, 'IsOtorisasi1');
+  var html = '<td class="text-center">';
+  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
+  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + isOto1 + '\')"><i class="bi bi-pen"></i></button> ';
+  html += (Number(isOto1) === 1)
+    ? '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>'
+    : '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+  html += '</td>';
+  return html;
+}
+
+// Fixed Actions cell for #tabel2 (Retur SJ Sudah Otorisasi) -- no Koreksi button here,
+// matching the old markup/loadAll() exactly.
+function tabel2ActionsCell(row) {
+  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
+  var isOto1 = HeaderEngine.pickCI(row, 'IsOtorisasi1');
+  var html = '<td class="text-center">';
+  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
+  html += (Number(isOto1) === 1)
+    ? '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>'
+    : '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+  html += '</td>';
+  return html;
+}
+
+// col: [field, label, visible, type, hasTotal, decimals]. Date formatting matches this
+// page's own formatDate(date, '/') convention (yyyy/mm/dd), not so.blade.php's dd/mm/yyyy
+// -- preserves the exact display this page already had, only the mechanism changed.
+function retursuratjalanFormatTanggal(raw) {
+  if (!raw) { return ''; }
+  var d = new Date(raw);
+  if (isNaN(d)) { return ''; }
+  var dd = ('0' + d.getDate()).slice(-2);
+  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+  return d.getFullYear() + '/' + mm + '/' + dd;
+}
+
+function tabelValueCell(row, col) {
+  var raw = HeaderEngine.pickCI(row, col[0]);
+  var type = col[3];
+
+  if (type === 'date') {
+    return '<td>' + retursuratjalanFormatTanggal(raw) + '</td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+// ReportTable.init()'s bindHead(thead) attaches drag/gear listeners with no matching
+// removeEventListener -- calling init() again (which reinitTabel()/reinitTabel2() do, on
+// purpose, to re-bind after DataTables rebuilds) is only safe against a genuinely NEW
+// <thead> node each time, so the whole element is replaced here rather than just its
+// innerHTML.
+function replaceTheadWithHeader(tableSel, cols) {
+  var oldThead = document.querySelector(tableSel + ' thead');
+  if (!oldThead || !window.ReportTable) { return; }
+  // ReportTable.headHtml() only knows about gcart_header entries, so it never accounts
+  // for the fixed Actions column every body row starts with. Splice a plain,
+  // non-draggable Actions <th> in as the first cell so thead/tbody column counts
+  // actually match.
+  var headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+  var newThead = document.createElement('thead');
+  newThead.setAttribute('style', 'white-space:nowrap;');
+  newThead.innerHTML = headRowHtml;
+  oldThead.parentNode.replaceChild(newThead, oldThead);
+}
+
+// DataTables names its auto-generated wrapper <tableId>_wrapper and puts
+// .dataTables_paginate inside it, alongside the table -- meaning it's part of
+// .table-wrap's horizontally-scrolling content. Physically relocating the pagination
+// element into a container placed outside .table-wrap keeps it out of that scroll and
+// always visible below the table. Empty the target first so each reinit replaces last
+// time's pagination instead of stacking a new one on top of it.
+function moveDataTablePagination(tableId, targetSel) {
+  $(targetSel).empty();
+  $('#' + tableId + '_wrapper .dataTables_paginate').appendTo(targetSel);
+}
+
+function renderTabelRows(rows) {
+  if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
+  var html = '';
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabelActionsCell(row);
+    cols.forEach(function (col) { html += tabelValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel_data').innerHTML = html;
+  replaceTheadWithHeader('#tabel', cols);
+}
+
+function renderTabel2Rows(rows) {
+  if (HeaderEngine.activeKey() !== 'tabel2') { HeaderEngine.activateEngineData('tabel2'); }
+  var cols = gcart_header.filter(function (c) { return c[2] === 1; });
+  var html = '';
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabel2ActionsCell(row);
+    cols.forEach(function (col) { html += tabelValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel2_data').innerHTML = html;
+  replaceTheadWithHeader('#tabel2', cols);
+}
+
+function reinitTabel() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
+    renderTabelRows(lastTabelRows);
+    $('#tabel').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
+    moveDataTablePagination('tabel', '#tabelPaginationOutside');
+    HeaderEngine.bindEngineDom('tabel');
+  } catch (e) {
+    console.error('reinitTabel failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabel2() {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(lastTabel2Rows);
+    $('#tabel2').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
+    moveDataTablePagination('tabel2', '#tabel2PaginationOutside');
+    HeaderEngine.bindEngineDom('tabel2');
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function buttonHeaderTable(key) {
+  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
+    HeaderEngine.activateEngineData(key);
+    HeaderEngine.doSetHeader(1, true);
+    (key === 'tabel' ? reinitTabel : reinitTabel2)();
+    alertify.success('Kolom telah direset ke tampilan default');
+  }, function () {});
+}
+
 $(document).ready(function(){
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "order": [[1, 'asc']],
-          "columnDefs": [
-              {"targets" :[0] , 'orderable' : false},
-          // { "type": "date", "targets": [3] },
-          // {  "className": "text-right", "targets": [9,10,11,12] },
-          // "columns" : [{"width" : "20px"}]
-        ]
+
+      // #home/#tabel ("Retur SJ Belum Otorisasi") is the tab shown by default, so
+      // initialize it last -- reinitTabel()/reinitTabel2() each end by binding
+      // ReportTable to their own table, and whichever runs last wins, so this order
+      // leaves the actually-visible tab interactive.
+      HeaderEngine.activateEngineData('tabel2');
+      HeaderEngine.doSetHeader(1);
+      lastTabel2Rows = @json($tempOutstanding2);
+      reinitTabel2();
+
+      HeaderEngine.activateEngineData('tabel');
+      HeaderEngine.doSetHeader(1);
+      lastTabelRows = @json($tempOutstanding);
+      reinitTabel();
+
+      // Re-bind the interactive engine whenever the user switches tabs -- ReportTable's
+      // listeners are bound to one table's DOM at a time.
+      $('#nav-home-tab').on('shown.bs.tab', function () {
+        HeaderEngine.activateEngineData('tabel');
+        HeaderEngine.bindEngineDom('tabel');
+      });
+      $('#nav-profile-tab').on('shown.bs.tab', function () {
+        HeaderEngine.activateEngineData('tabel2');
+        HeaderEngine.bindEngineDom('tabel2');
+      });
+
+      ['tabel', 'tabel2'].forEach(function (key) {
+        $('#' + key + '_length_visual').on('change', function () {
+          var len = Number(this.value);
+          $('#' + key).DataTable().page.len(len).draw();
         });
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                {"targets" :[0] , 'orderable' : false},
-            // { "type": "date", "targets": [3] },
-            // {  "className": "text-right", "targets": [9,10,11,12] },
-            // "columns" : [{"width" : "20px"}]
-          ]
-          });
+      });
+
         $("#tabel_add_list_nosj").DataTable({
           "lengthChange": false,
             "paging": false ,
@@ -1671,94 +2003,12 @@ function loadAll () {
     },
     success: function(res) {
       console.log(res)
-        $('#tabel').DataTable().destroy();
 
+      lastTabelRows = res.tempOutstanding
+      reinitTabel()
 
-        let rowTable = ''
-        res.tempOutstanding.forEach((item, i) => {
-          rowTable += `<tr>
-          <td class='text-center'>
-              <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NOBUKTI }' , 'detail')"><i class="bi bi-info"></i></button>
-              <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item.NOBUKTI }' , '${item.IsOtorisasi1 }')"><i class="bi bi-pen"></i></button>
-              ${item.IsOtorisasi1 == 1 ? `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto('${item.NOBUKTI }' , 'edit')"><i class="bi bi-key"></i></button>` : `<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto('${item.NOBUKTI }' , 'add')"><i class="bi bi-key"></i></button>`}
-
-
-
-            </td>
-            <td>${item.NOBUKTI }</td>
-            <td>${formatDate(item.TANGGAL, '/')}</td>
-            <td>${item.NOSPB }</td>
-
-            <td>${formatDate(item.TglSPB, '/')}</td>
-            <td>${item.NamaCustSupp }</td>
-
-
-          </tr>`
-
-
-        });
-
-
-        document.getElementById("tabel_data").innerHTML = rowTable
-
-        $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "order": [[1, 'asc']],
-          "columnDefs": [
-              {"targets" :[0] , 'orderable' : false},
-          // { "type": "date", "targets": [3] },
-          // {  "className": "text-right", "targets": [9,10,11,12] },
-          // "columns" : [{"width" : "20px"}]
-        ]
-        });
-
-
-
-        $('#tabel2').DataTable().destroy();
-
-
-        let rowTable2 = ''
-        res.tempOutstanding2.forEach((item, i) => {
-          rowTable2 += `<tr>
-          <td class='text-center'>
-              <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NOBUKTI }' , 'detail')"><i class="bi bi-info"></i></button>
-              ${item.IsOtorisasi1 == 1 ? `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto('${item.NOBUKTI }' , 'edit')"><i class="bi bi-key"></i></button>` : `<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto('${item.NOBUKTI }' , 'add')"><i class="bi bi-key"></i></button>`}
-
-
-
-            </td>
-            <td>${item.NOBUKTI }</td>
-            <td>${formatDate(item.TANGGAL, '/')}</td>
-            <td>${item.NOSPB }</td>
-
-            <td>${formatDate(item.TglSPB, '/')}</td>
-            <td>${item.NamaCustSupp }</td>
-
-            <td>${item.OtoUser1 }</td>
-            <td>${ item.TglOto1 ? formatDate(item.TglOto1,'/') : '' }</td>
-
-
-
-          </tr>`
-
-
-        });
-
-
-        document.getElementById("tabel2_data").innerHTML = rowTable2
-
-        $("#tabel2").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "order": [[1, 'asc']],
-          "columnDefs": [
-              {"targets" :[0] , 'orderable' : false},
-          // { "type": "date", "targets": [3] },
-          // {  "className": "text-right", "targets": [9,10,11,12] },
-          // "columns" : [{"width" : "20px"}]
-        ]
-        });
+      lastTabel2Rows = res.tempOutstanding2
+      reinitTabel2()
     }})
 
 

@@ -209,6 +209,8 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/retursuratjalanloadall', [ReturSuratJalanController::class, 'loadAll']);
   Route::post('/retursuratjalanspoto', [ReturSuratJalanController::class, 'spOtorisasi']);
   Route::post('/retursuratjalanspbataloto', [ReturSuratJalanController::class, 'spBatalOtorisasi']);
+  Route::get('/retursuratjalanloadheader', [ReturSuratJalanController::class, 'loadHeader']);
+  Route::get('/retursuratjalansimpanheader', [ReturSuratJalanController::class, 'simpanHeader']);
 
 //   // Invoice Penjualan
 //   Route::get('/invoicepenjualan', [InvoicePenjualanController::class, 'index']);
