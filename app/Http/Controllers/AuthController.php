@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,16 @@ class AuthController extends Controller
         );
 
         return redirect()->intended(route('home'));
+    }
+
+    /**
+     * Called by the login page on load. Legacy no-op: it used to reset every
+     * user's online status, which would clear the "User sudah login" lock for
+     * all users, so the body stays disabled.
+     */
+    public function updateIdle(): Response
+    {
+        return response()->noContent();
     }
 
     /**
