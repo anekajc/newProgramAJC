@@ -1,21 +1,19 @@
 @extends('report.masterreport2')
 
 {{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php).
-     .checkmark-red is also defined there. Only the two toolbar dropdown-toggle buttons and the
+     .checkmark-red is also defined there. Only the (disabled) Tolakan dropdown-toggle and the
      saldo summary table need page-local tweaks. --}}
 <style>
-  #inputReportMode, #inputTolakan, #inputPerkiraanBtn {
+  #inputTolakan {
     border: 0; background: none; padding: 0; box-shadow: none;
     color: #495057; font-weight: 600;
   }
-  #inputReportMode:hover, #inputReportMode:focus,
-  #inputTolakan:hover,   #inputTolakan:focus,
-  #inputPerkiraanBtn:hover, #inputPerkiraanBtn:focus { color: #0d6efd; box-shadow: none; }
+  #inputTolakan:hover, #inputTolakan:focus { color: #0d6efd; box-shadow: none; }
 
   /* Saldo/signature summary is a second <tbody> inside #mainTable, so it inherits
      the .tb table width & styling. Give its cells the same padding + light row
      separator as data rows (override the base .tb td border:0 rule). */
-  #kasSummary td { padding: 9px 14px; border-bottom: 1px solid #F1F5F9 !important; }
+  #kasSummary td { padding: 9px 14px !important; border-bottom: 1px solid #F1F5F9 !important; }
 </style>
 
 @section('header2')
@@ -24,9 +22,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title">Kas Harian</div>
-      </div>
+      </div> --}}
 
       <!-- Periode (date range) -->
       <div class="filter-wrap">
@@ -36,27 +34,9 @@
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
-      <!-- Perkiraan (dropdown; diisi dari reportaccountingkasharian_loadperkiraan) -->
-      <div class="filter-wrap">
-        <label>Perkiraan</label>
-        <input type="hidden" id="inputPerkiraan" value="-">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputPerkiraanBtn"
-                data-bs-toggle="dropdown" aria-expanded="false"><span id="perkiraanLabel">-</span></button>
-        <ul class="dropdown-menu" id="dropdownPerkiraan" aria-labelledby="inputPerkiraanBtn"
-            style="max-height:320px; overflow:auto;"></ul>
-      </div>
-
-      <!-- Report Mode (Rp / Valas) -->
-      <div class="filter-wrap">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputReportMode"
-                data-bs-toggle="dropdown" aria-expanded="false">Mode: <span id="reportModeLabel">Rp</span></button>
-        <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
-          <li><a class="dropdown-item" style="cursor:pointer" data-value="1" onclick="setReportMode('1')">Rp
-            <span class="checkmark-red" style="display:none">&#10003;</span></a></li>
-          <li><a class="dropdown-item" style="cursor:pointer" data-value="2" onclick="setReportMode('2')">Valas
-            <span class="checkmark-red" style="display:none">&#10003;</span></a></li>
-        </ul>
-      </div>
+      {{-- Perkiraan (dropdown akun) & Report Mode (Rp/Valas) pindah ke modal Filter Laporan /
+           ReportTable "Tampilan" switcher (#rtBar) -- lihat docs/new-filter-modal-ui-guide.md
+           §3a: jangan duplikasi switcher yang sudah ada di #rtBar. --}}
 
       <!-- Tolakan ga perlu di pakai -->
       {{-- <div class="filter-wrap">
@@ -72,9 +52,18 @@
         </ul>
       </div> --}}
 
+      {{-- Search --}}
+      <div>
+        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
+      </div>
+
       <!-- Actions: row-level search + customize + tampilkan + export -->
       <div class="action-group">
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
+        {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) --
+             lihat catatan di modal Filter di bawah. --}}
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="fas fa-filter"></i> Filter
+        </button>
         {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
@@ -122,6 +111,60 @@
   <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
 
 </div><!-- /tb-report -->
+
+{{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
+<!-- modal filter -->
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i> Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+             $.fn.modal milik BS4 (jQuery baru dimuat SESUDAH bundle BS5 di masterreport2).
+             data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
+        <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          {{-- Rp/Valas TIDAK di sini -- halaman ini sudah punya switcher "Tampilan" di
+               #rtBar lewat ReportTable.init({ views: {...} }), lihat
+               docs/new-filter-modal-ui-guide.md §3a. --}}
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="modalPerkiraan">Perkiraan</label>
+              {{-- Diisi dari reportaccountingkasharian_loadperkiraan (loadPerkiraanDropdown()).
+                   Selalu punya nilai (tidak ada opsi "Semua") -- pilihan wajib, bukan filter
+                   yang bisa dimatikan, jadi TIDAK dihitung di badge (lihat updateFilterBadge()). --}}
+              <select class="rt-native" id="modalPerkiraan"></select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                  onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- modal filter -->
 @endsection
 
 
@@ -134,6 +177,7 @@
   let globalDate2     = "{!! date('Y-m-d') !!}";
   let globalTolakan   = "2";   // default: Semua (dekoratif — tidak dikirim ke proc, sama seperti versi lama)
   let globalReportMode = "1";  // default: Rp (1 = Rp/detail, 2 = Valas/rekap)
+  let globalPerkiraan  = "-";  // diisi loadPerkiraanDropdown() saat page load (selalu wajib diisi)
 
   let g_reportTitle = "";
   let g_date1 = "", g_date2 = "", g_inputPerkiraan = "";
@@ -155,8 +199,8 @@
     loadPerkiraanDropdown();           // isi dropdown Perkiraan + pilih akun pertama
 
     // Header tabel interaktif. "Tampilan" = mode report halaman ini (Rp = detail,
-    // Valas = rekap); tetap sinkron dengan dropdown Mode di toolbar karena
-    // keduanya lewat setReportMode().
+    // Valas = rekap), satu-satunya switcher mode sekarang (lihat §3a di
+    // docs/new-filter-modal-ui-guide.md — tidak diduplikasi di modal Filter).
     ReportTable.init({
       table: '#mainTable',
       bar: '#rtBar',
@@ -228,10 +272,6 @@
     jenisreport = Number(val);   // 1 = Rp, 2 = Valas
     DetOrRekap  = Number(val);
 
-    $('#reportModeLabel').text(val === '1' ? 'Rp' : 'Valas');
-    $('#dropdownReportMode .checkmark-red').hide();
-    $(`#dropdownReportMode .dropdown-item[data-value='${val}'] .checkmark-red`).show();
-
     setModeReport();
   }
 
@@ -239,6 +279,34 @@
     g_modeReport = (jenisreport === 1) ? modereport_detail : modereport_rekap;
     doSetHeader(g_modeReport);   // muat susunan kolom (default / hasil kustomisasi user)
     doShowCustomize();
+  }
+
+  /* ── FILTER MODAL ──
+        Satu-satunya field di sini adalah Perkiraan. Ia TIDAK ikut dihitung di badge
+        karena tidak punya opsi "Semua" — wajib selalu diisi, jadi bukan "filter yang
+        dinyalakan" (aturan sama seperti Outstanding di reportmarketinghistoryoutso,
+        lihat docs/new-filter-modal-ui-guide.md §5). ── */
+  function updateFilterBadge() {
+    $('#filterBadge').text('0 aktif');
+  }
+
+  function resetAllFilters() {
+    if ($('#modalPerkiraan option').length) {
+      $('#modalPerkiraan').prop('selectedIndex', 0);
+    }
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () {
+    $('#modalPerkiraan').val(globalPerkiraan);
+    updateFilterBadge();
+  });
+
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
+  function applyModalFilter() {
+    setPerkiraan($('#modalPerkiraan').val());
+    $('#modalFilter').modal('hide');
   }
 
   /* ── EXPORT ── */
@@ -276,8 +344,7 @@
     const groupby = (DetOrRekap === 1) ? 'nobukti' : 'Perkiraan';
     const _date1  = $('#inputDate1').val();
     const _date2  = $('#inputDate2').val();
-    let   _perk   = $('#inputPerkiraan').val();
-    if (!_perk) { _perk = '-'; }
+    const _perk   = globalPerkiraan || '-';
 
     g_reportTitle = 'REPORT ACCOUNTING KAS HARIAN';
     g_date1 = _date1; g_date2 = _date2; g_inputPerkiraan = _perk;
@@ -603,10 +670,10 @@
     return ['nobukti', 'tanggal'];
   }
 
-  /* ── DROPDOWN PERKIRAAN ──
+  /* ── SELECT PERKIRAAN (modal Filter Laporan) ──
         Diisi sekali dari reportaccountingkasharian_loadperkiraan saat page load.
-        Memilih item hanya menyetel nilai (#inputPerkiraan) + label; laporan baru
-        dimuat saat klik Tampilkan (konsisten dgn filter Periode/Mode). ── */
+        Memilih item hanya menyetel globalPerkiraan; laporan baru dimuat saat klik
+        Tampilkan (konsisten dgn filter Periode/Mode). ── */
   function loadPerkiraanDropdown() {
     let list = [];
     $.ajax({
@@ -618,32 +685,19 @@
 
     let html = "";
     list.forEach((item) => {
-      const ket = (item.Keterangan != null ? String(item.Keterangan) : '').replace(/"/g, '&quot;');
-      html += '<li><a class="dropdown-item perkiraan-item" style="cursor:pointer" '
-            + 'data-value="' + item.Perkiraan + '" data-ket="' + ket + '">'
-            + item.Perkiraan + ' - ' + (item.Keterangan != null ? item.Keterangan : '')
-            + ' <span class="checkmark-red" style="display:none">&#10003;</span></a></li>';
+      const ket = (item.Keterangan != null ? String(item.Keterangan) : '');
+      html += '<option value="' + item.Perkiraan + '">'
+            + item.Perkiraan + ' - ' + ket + '</option>';
     });
-    $("#dropdownPerkiraan").html(html);
+    $("#modalPerkiraan").html(html);
 
     // pilih akun pertama sebagai default (tidak ada opsi "Semua")
-    if (list.length) {
-      setPerkiraan(list[0].Perkiraan, list[0].Keterangan != null ? list[0].Keterangan : '');
-    }
+    if (list.length) { setPerkiraan(list[0].Perkiraan); }
   }
 
-  function setPerkiraan(kode, ket) {
-    $("#inputPerkiraan").val(kode);
-    $("#perkiraanLabel").text(kode);
-    $("#inputPerkiraanBtn").attr('title', kode + (ket ? ' - ' + ket : ''));
-
-    $('#dropdownPerkiraan .checkmark-red').hide();
-    $(`#dropdownPerkiraan .perkiraan-item[data-value='${kode}'] .checkmark-red`).show();
+  function setPerkiraan(kode) {
+    globalPerkiraan = kode;
+    $("#modalPerkiraan").val(kode);
   }
-
-  // klik item dropdown (event delegation — menghindari masalah escaping di onclick)
-  $(document).on('click', '#dropdownPerkiraan .perkiraan-item', function () {
-    setPerkiraan($(this).data('value'), $(this).data('ket'));
-  });
 </script>
 @endsection

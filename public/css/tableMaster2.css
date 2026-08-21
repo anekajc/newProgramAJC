@@ -79,7 +79,7 @@
     }
     #contentContainer .btn:active{ transform: translateY(1px); }
 
-    #contentContainer .btn-primary{
+    /* #contentContainer .btn-primary{
       background: var(--sp-primary);
       border-color: var(--sp-primary);
       color: #fff;
@@ -89,7 +89,7 @@
       background: var(--sp-primary-dk);
       border-color: var(--sp-primary-dk);
       color: #fff;
-    }
+    } */
     #contentContainer .btn-secondary{
       background: #fff;
       border-color: var(--sp-border);
@@ -126,6 +126,12 @@
     border:none;
     color: var(--sp-text-soft);
     transition: all .12s ease;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    /* transition: background-color 0.3s, box-shadow 0.3s; */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .btn-action-sm:hover{ filter: brightness(0.97); transform: translateY(-1px); }
@@ -133,7 +139,7 @@
     .btn-action-warning{ color: var(--sp-amber); border-color: #cdebd7; background: var(--sp-amber-bg); }
     .btn-action-primary{ color: var(--sp-blue); border-color: #cfdcff; background: var(--sp-blue-bg); }
     .btn-action-danger { color: var(--sp-red);  border-color: #f7cfcf; background: var(--sp-red-bg); }
-    
+
     .action-buttons-wrap {
         display: flex;
         flex-wrap: nowrap;
@@ -343,7 +349,7 @@
     .sp-badge.is-user        { background: var(--sp-blue-bg);  color: var(--sp-blue); }
     .sp-badge.is-supervisor  { background: var(--sp-amber-bg); color: var(--sp-amber); }
     .sp-badge.is-admin       { background: var(--sp-green-bg); color: var(--sp-green); }
-    
+
     .sp-badge.is-active      { background: var(--sp-green-bg); color: var(--sp-green); }
     .sp-badge.is-inactive    { background: var(--sp-red-bg); color: var(--sp-red); }
 
@@ -411,58 +417,131 @@
       transform: translateX(0);
     }
 
-      
-  .radioChoiceMaster {
-    display: inline-flex;
-    list-style: none;
-    margin: 0;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .radioChoiceMaster-item {
-    display: flex;
-  }
-
-  .radioChoiceMaster-btn {
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    background-color: transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    outline: none;
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .radioChoiceMaster-btn:hover {
-    color: #212529;
-    background-color: rgba(0,0,0,0.04);
-  }
-
-  .radioChoiceMaster-btn:focus,
-  .radioChoiceMaster-btn:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .radioChoiceMaster-btn.active {
-    color: #fff;
-    background-color: #007bff;
-    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
-  }
-
-    <style>
-    
     #tabel th:first-child,
     #tabel td:first-child {
       width: 1%;
       white-space: nowrap;
     }
+
+    /* ---------------------------------------------------------------------
+       Moved from gudang/permintaanpemakaian.blade.php so other gudang pages
+       (this file is loaded globally by gudang/newmaster.blade.php) can reuse
+       the tab strip / pill buttons / fixed action column / .tb-report
+       DataTables chrome without copy-pasting the page-local <style> block.
+    ----------------------------------------------------------------------- */
+
+    /* Tab strip (e.g. "PPI Belum/Sudah Otorisasi") — segmented toggle, pairs
+       with Bootstrap's data-toggle="tab" (switch instan tanpa reload). */
+    .tab-toggle {
+      display: inline-flex;
+      /* .tb-report .content (parent) is display:flex; flex-direction:column with
+         default align-items:stretch, so every direct child gets stretched full-width
+         regardless of its own display value — align-self:flex-start opts this one out. */
+      align-self: flex-start;
+      background-color: #f1f3f5;
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .tab-toggle-btn {
+      display: inline-block;
+      border: none;
+      background: transparent;
+      color: #495057;
+      border-radius: 17px;
+      padding: 5px 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .tab-toggle-btn:hover {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .tab-toggle-btn.active {
+      background-color: #007bff;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+    }
+
+    /* Kolom Aksi pada tabel .tb-report — fixed, tidak ikut drag/gear kolom, dan
+       lebar menyempit mengikuti tombol (bukan ikut melebar rata kolom lain). */
+    .tb-report .tb thead th.rt-fixed-th {
+      cursor: default;
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    /* Tombol pill bersama (pengganti style= inline yang berulang di tombol modal).
+       Scoped #contentContainer .btn.btn-pill-* (specificity 1 id + 2 classes) so it
+       beats the generic "#contentContainer .btn" rule above (1 id + 1 class) — without
+       this extra scoping the pill look (radius/padding/font-size/shadow) is silently
+       flattened to the generic button style on every page that loads this file.
+       .modal .btn.btn-pill-* ditambahkan supaya tombol modal (Batal/Submit/dst) juga
+       bisa pakai kelas ini — modal-modal itu sengaja diletakkan DI LUAR #contentContainer
+       (lihat catatan .tb-report di halaman gudang/pemakaianbarang.blade.php), jadi rule
+       #contentContainer di atas tidak menjangkaunya. */
+    #contentContainer .btn.btn-pill-primary,
+    #contentContainer .btn.btn-pill-secondary,
+    .modal .btn.btn-pill-primary,
+    .modal .btn.btn-pill-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 30px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Tombol aksi bulat di kolom Aksi (tabel .tb-report) — Detail/Edit/Otorisasi/dst. */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* Tabel di dalam .tb-report yang masih pakai DataTables bawaan (bukan mesin
+       ReportTable interaktif): report-table.css hanya menata DataTables di bawah
+       .rt-picker-v2, jadi reset .tb-report * { margin:0; padding:0 } perlu
+       dikompensasi di sini. */
+    .tb-report .dataTables_wrapper {
+      padding: 0 0 10px;
+    }
+
+    .tb-report .dataTables_filter {
+      text-align: right;
+      padding-bottom: 10px;
+    }
+
+    .tb-report .dataTables_filter input {
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .tb-report .dataTables_info {
+      padding-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .tb-report table.dataTable thead th.sorting,
+    .tb-report table.dataTable thead th.sorting_asc,
+    .tb-report table.dataTable thead th.sorting_desc {
+      padding-right: 26px;
+    }
+
+    /* Gaya tombol OK/Cancel dialog AlertifyJS ("Batal Otorisasi" dll) dipindah ke
+       public/css/report-table.css — cari blok .ajs-app-buttons di sana. Alasannya
+       report-table.css dimuat 46 view (termasuk semua halaman report yang punya
+       dialog "Reset Kolom"), sedangkan tableMaster2.css cuma dimuat 2 view. */

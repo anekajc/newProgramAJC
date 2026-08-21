@@ -174,6 +174,16 @@
   display: flex;
   flex-direction: column;
   padding: 20px 24px 0;
+  /* newmaster.css (the gudang/report layout shell) defines a bare ".content"
+     rule (flex:1; overflow-y:auto; height:0) meant for its own #content pane.
+     That class name collides with this div, and since the shell rule sets
+     properties this rule doesn't touch, they leak through regardless of this
+     selector's higher specificity — collapsing this box toward its padding
+     (height:0 under box-sizing:border-box) and giving it its own scrollbar,
+     clipping the toolbar/title. Explicitly reset them here. */
+  height: auto;
+  flex: none;
+  overflow: visible;
 }
 
 /* TOOLBAR */
@@ -603,7 +613,7 @@
 
 /* group header row */
 .tb-report .group-row td {
-  padding: 8px 14px;
+  padding: 8px 14px !important;
   font-size: 11.5px;
   font-weight: 800;
   text-transform: uppercase;
@@ -662,8 +672,21 @@
   font-weight: 700;
 }
 
+/* placeholder row ("Atur filter lalu klik Tampilkan..." / "Tidak ada data
+   ditemukan") — previously had no rule at all, so it fell through to the
+   blanket .tb-report * { margin:0; padding:0 } reset and rendered cramped. */
+.tb-report .empty-row td {
+  padding: 9px 14px !important;
+  color: var(--muted);
+  font-style: italic;
+}   
+
 .tb-report .data-row td {
-  padding: 9px 14px;
+  /* !important: defeats public/css/newmaster.css's blanket
+     `table tbody td { padding: 0 10px !important }` (loaded after this file
+     on masterreport2/newmaster2x pages), which otherwise crushes this to
+     0 vertical padding regardless of this rule's higher specificity. */
+  padding: 9px 14px !important;
 }
 
 .tb-report .data-row td.num {
@@ -705,7 +728,7 @@
 
 /* subtotal row */
 .tb-report .subtotal-row td {
-  padding: 9px 14px;
+  padding: 9px 14px !important;
   background: #F8F9FF;
   border-top: 1.5px solid var(--border);
   border-bottom: 2px solid var(--border);
@@ -740,7 +763,7 @@
 
 /* grand total row */
 .tb-report .grand-total td {
-  padding: 11px 14px;
+  padding: 11px 14px !important;
   background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
   font-weight: 800;
   font-size: 14.5px;
@@ -928,7 +951,7 @@
 }
 
 .tb-report .ledger-table tbody td {
-  padding: 9px 12px;
+  padding: 9px 12px !important;
   border-bottom: 1px solid #F1F5F9;
 }
 
@@ -946,7 +969,7 @@
 }
 
 .tb-report .ledger-total td {
-  padding: 9px 12px;
+  padding: 9px 12px !important;
   background: #EEF2FF;
   font-weight: 800;
   border-top: 1.5px solid var(--accent);
@@ -1129,7 +1152,7 @@
 
 .tb-report .kas-voucher td,
 .tb-report .kas-voucher th {
-  padding: 5px 10px;
+  padding: 5px 10px !important;
   vertical-align: top;          /* borders come from the global table grid rule */
 }
 
@@ -1176,7 +1199,7 @@
 .tb-report .inv-meta th {
   border: 0 !important;
   background: transparent;
-  padding: 1px 8px 1px 0;
+  padding: 1px 8px 1px 0 !important;
   vertical-align: top;
 }
 /* invoice line-items table: keep the body grid, but drop the header-row border.
@@ -1406,7 +1429,8 @@
 .tb-report .rt-bar .rt-drop { position: relative; }
 
 .tb-report .rt-bar .rt-hidden-btn,
-.tb-report .rt-bar .rt-view-btn {
+.tb-report .rt-bar .rt-view-btn,
+.tb-report .rt-bar .rt-reset-btn {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1425,6 +1449,16 @@
 .tb-report .rt-bar .rt-hidden-btn { color: var(--rt-ink-soft); }
 .tb-report .rt-bar .rt-hidden-btn:hover:not(:disabled) { color: var(--rt-ink); border-color: #D6D8E4; }
 .tb-report .rt-bar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
+
+/* Reset kolom — kembalikan susunan kolom ke setDefaultHeader() halaman.
+   Aksi destruktif (menghapus layout tersimpan user), jadi diberi warna merah
+   saat hover supaya beda dari tombol lain di bar. */
+.tb-report .rt-bar .rt-reset-btn { color: var(--rt-ink-soft); }
+.tb-report .rt-bar .rt-reset-btn:hover {
+  color: var(--rt-red);
+  border-color: var(--rt-red);
+  background: #FEF2F2;
+}
 
 .tb-report .rt-bar .rt-view-btn { color: var(--rt-ink); }
 .tb-report .rt-bar .rt-view-btn:hover { border-color: #D6D8E4; }
@@ -1640,7 +1674,7 @@
   padding: 11px 12px;
   border-radius: var(--rt-radius);
   border: none;
-  /* border: 1px solid var(--rt-border); */
+  border: 1px solid var(--rt-border);
   font-size: 14px;
   font-family: inherit;
   color: var(--rt-ink);
@@ -1858,7 +1892,7 @@
 }
 
 .rt-picker-v2 table tbody tr.pick-row td {
-  padding: 9px 14px;
+  padding: 9px 14px !important;
   vertical-align: middle;
 }
 
@@ -1868,7 +1902,7 @@
 
 .rt-picker-v2 table tbody tr.pick-row td:first-child {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13.5px;
+  font-size: 15px;
   color: var(--muted);
 }
 
@@ -1913,4 +1947,77 @@
   background: var(--rt-blue) !important;
   border-color: var(--rt-blue) !important;
   color: #fff !important;
+}
+
+/* ===================================================================
+   Tombol OK / Cancel dialog AlertifyJS — gaya bersama
+   -------------------------------------------------------------------
+   Dipakai dengan menempel kelas ke root dialog dari JS:
+
+     var dlg = alertify.confirm(...);            // atau alertify.prompt(...)
+     dlg.elements.root.classList.add('ajs-app-buttons');
+
+   Tambahkan 'is-danger' untuk aksi merusak (tombol OK jadi merah):
+
+     dlg.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+
+   Pemakai saat ini:
+     - Reset Kolom      -> public/js/report-table.js (resetHeader())
+     - Batal Otorisasi  -> resources/views/gudang/permintaanpemakaian.blade.php
+
+   Tanpa kelas itu rule di bawah tidak jalan, jadi dialog alertify lain
+   di aplikasi tidak ikut berubah.
+
+   .ajs-ok     = tombol OK     (alertify.defaults.theme.ok)
+   .ajs-cancel = tombol Cancel (alertify.defaults.theme.cancel)
+
+   Selector dibuat spesifik (.ajs-footer .ajs-buttons .ajs-button) supaya
+   menang atas alertify.css tanpa perlu !important.
+=================================================================== */
+.ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button {
+  border-radius: var(--sp-radius-sm);
+  border: 1px solid var(--sp-border);
+  background: #fff;
+  color: var(--sp-text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  text-transform: none;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+/* OK default = aksi normal -> biru */
+.ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button.ajs-ok {
+  color: var(--sp-blue);
+  border-color: #cfdcff;
+  background: var(--sp-blue-bg);
+}
+
+/* OK pada .is-danger = aksi merusak -> merah, samakan dengan .btn-action-danger */
+.ajs-app-buttons.is-danger .ajs-footer .ajs-buttons .ajs-button.ajs-ok {
+  color: var(--sp-red);
+  border-color: #f7cfcf;
+  background: var(--sp-red-bg);
+}
+
+/* Cancel = aksi netral */
+.ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button.ajs-cancel {
+  color: var(--sp-text-soft);
+  border-color: var(--sp-border);
+  background: #fff;
+}
+
+.ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+.ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+}
+
+.ajs-app-buttons.is-danger .ajs-footer .ajs-buttons .ajs-button:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
 }
