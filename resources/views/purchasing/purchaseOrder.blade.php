@@ -737,7 +737,7 @@
             </a>
           </div>
       </div>
-      
+
     </div> -->
 
 
@@ -5689,7 +5689,7 @@ function buttonAddEditItem (i) {
   document.getElementById("input_add_add_noPPL").value = tempAddEdit.NoPPL
   document.getElementById("input_add_add_urutPPL").value = tempAddEdit.UrutPPL
   document.getElementById("input_add_add_keteranganbarang").value = tempAddEdit.KeteranganBarang
-  document.getElementById("input_add_add_hargaAwal").value = formatAngka(tempAddEdit.Hrgawal || 0)
+  document.getElementById("input_add_add_hargaAwal").value = Number(tempAddEdit.Hrgawal) ? formatAngka(parseFloat(tempAddEdit.Hrgawal).toFixed(2)) : '0.00'
   poKunciHargaAwal()
 
   // No. PR/No. SO di layar = asal barang milik ITEM ini (NoPPL-nya sendiri), bukan lagi
