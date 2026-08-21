@@ -10,11 +10,11 @@
   <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap"
         rel="stylesheet" type="text/css" />
 
-  {{-- Vendor CSS --}} 
+  {{-- Vendor CSS --}}
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  
+
   {{-- <link rel="stylesheet" href="{{ asset('css/semantic.css') }}">
   <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}">
   <link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="{{ asset('css/canvas/custom.css') }}">
   <link rel="stylesheet" href="{{ asset('css/alertify.css') }}"> --}}
 
-  <link rel="stylesheet" href="{{ asset('css/newmaster.css') }}?v={{ filemtime(public_path('css/newmaster.css')) }}">
-  <link rel="stylesheet" href="{{ asset('css/tableMaster.css') }}">
+  <link rel="stylesheet" href="{!! URL::asset('public/css/newmaster.css') !!}?v={{ filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('public/css/tableMaster.css') !!}">
 
   <title>AnekaJC</title>
 
@@ -97,7 +97,7 @@
 
     {{-- Submenu flyout styles (L0=2 hover popout) --}}
     <style>
-      
+
   .sidebar-footer {
     margin-top: auto;
     border-top: 1px solid rgba(255,255,255,0.08);
@@ -213,7 +213,7 @@
       transform: rotate(90deg);
       color: rgba(255, 255, 255, 0.6);
     }
-    
+
     .nav-child.has-sub {
       justify-content: flex-start; /* was space-between */
     }
@@ -319,7 +319,7 @@
     </header>
 
 <section class="content">
-  <div id="content-dynamic" style="display:none;"></div>
+  <div id="content-dynamic" class="nm-ui" style="display:none;"></div>
   <div id="content-report" style="display:none;"></div>
   <div id="content-blade">
     <div class="container-fluid clearfix">
@@ -455,13 +455,13 @@
     const multiplier = Math.pow(10, precision || 0);
     return Math.round(value * multiplier) / multiplier;
   }
-  
+
   function format_date(date) {
     if (!date) return '';
     const [y, m, d] = date.split('-');
     return `${d}/${m}/${y}`;
   }
-  	
+
   function formatNumber(input) {
       let value = input.value.replace(/[^\d.]/g, '');
       let parts = value.split('.');
@@ -497,7 +497,7 @@
     'bar-chart':     `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M18 20V10M12 20V4M6 20v-6"/></svg>`,
     box:             `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline stroke-linecap="round" points="3.27 6.96 12 12.01 20.73 6.96"/><line stroke-linecap="round" x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
     chevron:         `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`,
-    
+
     'file-text':     `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline stroke-linecap="round" points="14 2 14 8 20 8"/><line stroke-linecap="round" x1="16" y1="13" x2="8" y2="13"/><line stroke-linecap="round" x1="16" y1="17" x2="8" y2="17"/><polyline stroke-linecap="round" points="10 9 9 9 8 9"/></svg>`,
     tool:            `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`,
     monitor:         `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>`,
