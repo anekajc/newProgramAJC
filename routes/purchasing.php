@@ -202,6 +202,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkhargaddd',                    [POController::class, 'CheckHargaAdd']);
     Route::get('/purchaseorderlistrefpr',           [POController::class, 'listRefPr']);
     Route::post('/pospaddtambahso',                 [POController::class, 'spAddTambahSO']);
+    // Barang outstanding dari SEMUA SO sekaligus - dipakai dropdown "+ Dari" = SO di form
+    // Purchase Order. Route terpisah, bukan menumpang polistbarangnosoplus di atas, karena
+    // route itu masih dipakai gudang/transferbarang dan purchasing/perintahreturbeli.
+    Route::get('/polistbarangsoall',                [POController::class, 'listBarangSOAll']);
+    Route::get('/poloadpurchaseorder',              [POController::class, 'loadPurchaseOrder']);
+    Route::get('/podataoutstandingpr',              [POController::class, 'dataOutstandingPR']);
+    Route::get('/podataoutstandingso',              [POController::class, 'dataOutstandingSO']);
+    Route::post('/purchaseorderspaddpr',            [POController::class, 'spAddPr']);
 
     // // ── PURCHASE ORDER NON STOCK ──────────────────────────────────────────
     // Route::get('/pononstock',                       [PONonStockController::class, 'index']);
