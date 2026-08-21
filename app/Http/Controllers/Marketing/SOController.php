@@ -678,115 +678,123 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
 
     }
 
- //    $tempOutstanding2 = DB::connection("SML")->select("
- //        select a.* ,Isnull(M6.PoCustomer, A.NoPesanan) as NoPesanan, m.NAMACUSTSUPP , m1.Nama NAMASALES ,
- //               m3.Nama NAMAPIC , mx.username NAMABOFFICE,
- //
- //        Case when A.Kodevls='IDR' then B.SubTotalRp else B.SubTotal end Total,
- //        Case when A.Kodevls='IDR' then I.TotDiskonRp else I.TotDiskon end Diskon,
- //        Case when A.Kodevls='IDR' then I.TotDPPRp else I.TotDPP end TotDPP,
- //        Case when A.Kodevls='IDR' then I.TotPPnRp else I.TotPPn end TotPPn,
- //        Case when A.Kodevls='IDR' then I.TotNetRp else I.TotNet end TotNet,
- //        I.TotSubTotal,
- //
- //        Cast(
- //            Case
- //                when
- //                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
- //                then 0 else 1
- //            end
- //        As Bit) NeedOtorisasi,
- //
- //        A.nopesanan, A.unblock, A.userunblock,
- // case when A.tglunblock is null then '' else CONVERT(VARCHAR, a.tglunblock, 103) end tglunblock
- //
- //
- //        from dbso a
- //        left join dbSODet B on B.NoBukti=a.NoBukti
- //        left join dbPOCustsupp M6 on A.IDPOCUst = M6.ID
- //
- //        left join DBCUSTSUPP M on M.KODECUSTSUPP = a.kodecust
- //        left join vwRpDetSO I on I.NoBukti=A.NoBukti
- //        left join dbKaryawan M1 on A.KODESLS=M1.KeyNIK
- //        left join DBPICCUSTSUPP M3 on A.KodePF=M3.KODEPIC and A.KODECUST=m3.KODECUSTSUPP
- //        left join [user] Mx on a.boffice=Mx.keynik
- //
- //        where MONTH(a.TANGGAL) = :bulan
- //        and YEAR(a.TANGGAL) = :tahun
- //        and A.Tipebayar = 0
- //        and ISNULL(A.unblock,0) = 0
- //        and Cast(
- //            Case
- //                when
- //                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
- //                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
- //                then 0 else 1
- //            end
- //        As Bit) = 0
- //    ", ["bulan" => $periode->bulan, "tahun" => $periode->tahun]);
- //
- //    $tempOutstanding3 = collect($tempOutstanding2)->groupBy('NOBUKTI')->values();
+    // #tabel2 ("Sudah Otorisasi"-ish plain tab) and #tabel_oto ("Open CBD" plain tab) on
+    // page1 used to only get this data once, server-rendered at page load (see index()
+    // above, whose query this is copied from verbatim) -- loadAll() never refreshed them.
+    // Restored here so the front-end's AJAX refresh (soloadall) can keep both in sync with
+    // the rest of page1 too, matching purchaseOrder.blade.php's own loadAll() refreshing
+    // its "Purchase Order" tab via loadTabelPO(). Periode-scoped like index(), not
+    // tglawal/tglakhir-filtered like tempOutstanding1 above -- neither tab is wired to the
+    // date-range filter modal in the UI.
+    $tempOutstanding2 = DB::connection("SML")->select("
+        select a.* ,Isnull(M6.PoCustomer, A.NoPesanan) as NoPesanan, m.NAMACUSTSUPP , m1.Nama NAMASALES ,
+               m3.Nama NAMAPIC , mx.username NAMABOFFICE,
+
+        Case when A.Kodevls='IDR' then B.SubTotalRp else B.SubTotal end Total,
+        Case when A.Kodevls='IDR' then I.TotDiskonRp else I.TotDiskon end Diskon,
+        Case when A.Kodevls='IDR' then I.TotDPPRp else I.TotDPP end TotDPP,
+        Case when A.Kodevls='IDR' then I.TotPPnRp else I.TotPPn end TotPPn,
+        Case when A.Kodevls='IDR' then I.TotNetRp else I.TotNet end TotNet,
+        I.TotSubTotal,
+
+        Cast(
+            Case
+                when
+                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
+                then 0 else 1
+            end
+        As Bit) NeedOtorisasi,
+
+        A.nopesanan, A.unblock, A.userunblock,
+ case when A.tglunblock is null then '' else CONVERT(VARCHAR, a.tglunblock, 103) end tglunblock
 
 
-    // $tempOutstanding4 = DB::connection("SML")->select("
-    //     select a.* ,Isnull(M6.PoCustomer, A.NoPesanan) as NoPesanan, m.NAMACUSTSUPP , m1.Nama NAMASALES ,
-    //            m3.Nama NAMAPIC , mx.username NAMABOFFICE,
-    //
-    //     Case when A.Kodevls='IDR' then B.SubTotalRp else B.SubTotal end Total,
-    //     Case when A.Kodevls='IDR' then I.TotDiskonRp else I.TotDiskon end Diskon,
-    //     Case when A.Kodevls='IDR' then I.TotDPPRp else I.TotDPP end TotDPP,
-    //     Case when A.Kodevls='IDR' then I.TotPPnRp else I.TotPPn end TotPPn,
-    //     Case when A.Kodevls='IDR' then I.TotNetRp else I.TotNet end TotNet,
-    //     I.TotSubTotal,
-    //
-    //     Cast(
-    //         Case
-    //             when
-    //                 Case when A.IsOtorisasi1=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi2=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi3=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi4=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
-    //             then 0 else 1
-    //         end
-    //     As Bit) NeedOtorisasi,
-    //
-    //     A.nopesanan, A.unblock, A.userunblock, A.tglunblock
-    //
-    //     from dbso a
-    //     left join dbSODet B on B.NoBukti=a.NoBukti
-    //     left join dbPOCustsupp M6 on A.IDPOCUst = M6.ID
-    //
-    //     left join DBCUSTSUPP M on M.KODECUSTSUPP = a.kodecust
-    //     left join vwRpDetSO I on I.NoBukti=A.NoBukti
-    //     left join dbKaryawan M1 on A.KODESLS=M1.KeyNIK
-    //     left join DBPICCUSTSUPP M3 on A.KodePF=M3.KODEPIC and A.KODECUST=m3.KODECUSTSUPP
-    //     left join [user] Mx on a.boffice=Mx.keynik
-    //
-    //     where MONTH(a.TANGGAL) = :bulan
-    //     and YEAR(a.TANGGAL) = :tahun
-    //     and (ISNULL(A.unblock,0) = 1 OR A.Tipebayar = 1)
-    //     and Cast(
-    //         Case
-    //             when
-    //                 Case when A.IsOtorisasi1=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi2=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi3=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi4=1 then 1 else 0 end +
-    //                 Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
-    //             then 0 else 1
-    //         end
-    //     As Bit) = 0
-    // ", ["bulan" => $periode->bulan, "tahun" => $periode->tahun]);
-    //
-    // $tempOutstanding5 = collect($tempOutstanding4)->groupBy('NOBUKTI')->values();
+        from dbso a
+        left join dbSODet B on B.NoBukti=a.NoBukti
+        left join dbPOCustsupp M6 on A.IDPOCUst = M6.ID
+
+        left join DBCUSTSUPP M on M.KODECUSTSUPP = a.kodecust
+        left join vwRpDetSO I on I.NoBukti=A.NoBukti
+        left join dbKaryawan M1 on A.KODESLS=M1.KeyNIK
+        left join DBPICCUSTSUPP M3 on A.KodePF=M3.KODEPIC and A.KODECUST=m3.KODECUSTSUPP
+        left join [user] Mx on a.boffice=Mx.keynik
+
+        where MONTH(a.TANGGAL) = :bulan
+        and YEAR(a.TANGGAL) = :tahun
+        and A.Tipebayar = 0
+        and ISNULL(A.unblock,0) = 0
+        and Cast(
+            Case
+                when
+                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
+                then 0 else 1
+            end
+        As Bit) = 0
+    ", ["bulan" => $periode->bulan, "tahun" => $periode->tahun]);
+
+    $tempOutstanding3 = collect($tempOutstanding2)->groupBy('NOBUKTI')->values();
+
+
+    $tempOutstanding4 = DB::connection("SML")->select("
+        select a.* ,Isnull(M6.PoCustomer, A.NoPesanan) as NoPesanan, m.NAMACUSTSUPP , m1.Nama NAMASALES ,
+               m3.Nama NAMAPIC , mx.username NAMABOFFICE,
+
+        Case when A.Kodevls='IDR' then B.SubTotalRp else B.SubTotal end Total,
+        Case when A.Kodevls='IDR' then I.TotDiskonRp else I.TotDiskon end Diskon,
+        Case when A.Kodevls='IDR' then I.TotDPPRp else I.TotDPP end TotDPP,
+        Case when A.Kodevls='IDR' then I.TotPPnRp else I.TotPPn end TotPPn,
+        Case when A.Kodevls='IDR' then I.TotNetRp else I.TotNet end TotNet,
+        I.TotSubTotal,
+
+        Cast(
+            Case
+                when
+                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
+                then 0 else 1
+            end
+        As Bit) NeedOtorisasi,
+
+        A.nopesanan, A.unblock, A.userunblock, A.tglunblock
+
+        from dbso a
+        left join dbSODet B on B.NoBukti=a.NoBukti
+        left join dbPOCustsupp M6 on A.IDPOCUst = M6.ID
+
+        left join DBCUSTSUPP M on M.KODECUSTSUPP = a.kodecust
+        left join vwRpDetSO I on I.NoBukti=A.NoBukti
+        left join dbKaryawan M1 on A.KODESLS=M1.KeyNIK
+        left join DBPICCUSTSUPP M3 on A.KodePF=M3.KODEPIC and A.KODECUST=m3.KODECUSTSUPP
+        left join [user] Mx on a.boffice=Mx.keynik
+
+        where MONTH(a.TANGGAL) = :bulan
+        and YEAR(a.TANGGAL) = :tahun
+        and (ISNULL(A.unblock,0) = 1 OR A.Tipebayar = 1)
+        and Cast(
+            Case
+                when
+                    Case when A.IsOtorisasi1=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi2=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi3=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi4=1 then 1 else 0 end +
+                    Case when A.IsOtorisasi5=1 then 1 else 0 end = A.MaxOL
+                then 0 else 1
+            end
+        As Bit) = 0
+    ", ["bulan" => $periode->bulan, "tahun" => $periode->tahun]);
+
+    $tempOutstanding5 = collect($tempOutstanding4)->groupBy('NOBUKTI')->values();
 
     $tempOutstanding6 = DB::connection("SML")->select("
     declare @Tahun int, @Bulan int,@pAgen Bit,@pJasa bit
@@ -821,8 +829,8 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
         // "tempOutstanding" => $tempOutstanding,
         "tempOutstanding1" => $tempOutstanding1,
         // "tempOutstanding2" => $tempOutstanding2,
-        // "tempOutstanding3" => $tempOutstanding3,
-        // "tempOutstanding5" => $tempOutstanding5,
+        "tempOutstanding3" => $tempOutstanding3,
+        "tempOutstanding5" => $tempOutstanding5,
 
         "tempOutstanding7" => $tempOutstanding7
     ];
