@@ -2,7 +2,8 @@
  * po-table-header.css
  *
  * Header tabel interaktif (drag kolom + menu roda gigi + bar "kolom
- * tersembunyi" + tombol "Reset kolom") untuk halaman Purchase Order.
+ * tersembunyi" + tombol "Reset kolom" + modal filter) untuk halaman-halaman
+ * purchasing yang memakai report-table.js.
  *
  * Aturan di sini disalin dari public/css/report-table.css, TAPI scope-nya
  * diganti. Di file aslinya semua aturan header/bar diikat ke
@@ -11,17 +12,20 @@
  * nama variabel generik (--bg, --border, --text, --accent). Memuat
  * report-table.css di layout purchasing akan merusak layout Bootstrap
  * halaman-halaman purchasing, jadi yang disalin hanya bagian yang dipakai
- * komponen, dengan scope khusus halaman ini:
+ * komponen, dengan scope khusus halaman-halaman ini:
  *
- *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 thead th.rt-th
- *   .tb-report .rt-bar              ->  #rtBar (satu elemen, dipindah lewat JS
- *                                       antara tabel yang sedang aktif - lihat
- *                                       poPindahBar() di purchaseOrder.blade.php)
+ *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 / #tabelso thead th.rt-th
+ *   .tb-report .rt-bar              ->  #rtBar (satu elemen per halaman, dipindah
+ *                                       lewat JS - lihat poPindahBar()/prPindahBar())
  *   .tb-report .rt-hint             ->  .po-rt-hint
  *   .rt-colmenu                     ->  disalin apa adanya (menunya memang
  *                                       di-appendChild ke <body>)
+ *   #modalFilter.rt-filter          ->  .rt-filter (dipakai lebih dari satu id modal,
+ *                                       lihat #modalFilterPO & #modalFilterPR di bawah)
  *
- * Dipakai oleh: resources/views/purchasing/purchaseOrder.blade.php
+ * Dipakai oleh:
+ *   - resources/views/purchasing/purchaseOrder.blade.php (#modalFilterPO)
+ *   - resources/views/purchasing/pembelianpermintaannonagen.blade.php (#modalFilterPR)
  * ============================================================ */
 
 /* Hanya variabel --rt-* yang benar-benar dipakai aturan di bawah.
@@ -44,17 +48,19 @@
   --sp-red:   #dc2626;  --sp-red-bg:   #fdeaea;
 }
 
-/* ============ Judul kolom (#tabel dan #tabel2) ============ */
+/* ============ Judul kolom (#tabel, #tabel2, #tabelso) ============ */
 
 /* Padding pindah ke .th-inner supaya area drag mengisi penuh sel. */
 #tabel thead th.rt-th,
-#tabel2 thead th.rt-th {
+#tabel2 thead th.rt-th,
+#tabelso thead th.rt-th {
   padding: 0;
   vertical-align: middle;
 }
 
 #tabel thead th.rt-th .th-inner,
-#tabel2 thead th.rt-th .th-inner {
+#tabel2 thead th.rt-th .th-inner,
+#tabelso thead th.rt-th .th-inner {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -63,13 +69,16 @@
 }
 
 #tabel thead th.rt-th .th-inner.dragging,
-#tabel2 thead th.rt-th .th-inner.dragging { opacity: .4; }
+#tabel2 thead th.rt-th .th-inner.dragging,
+#tabelso thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabel thead th.rt-th.drag-over .th-inner,
-#tabel2 thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
+#tabel2 thead th.rt-th.drag-over .th-inner,
+#tabelso thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabel thead th.rt-th .th-label,
-#tabel2 thead th.rt-th .th-label {
+#tabel2 thead th.rt-th .th-label,
+#tabelso thead th.rt-th .th-label {
   flex: 1 1 auto;
   min-width: 0;
   white-space: nowrap;
@@ -77,11 +86,13 @@
 
 /* kolom numerik: judul rata kanan seperti angkanya */
 #tabel thead th.rt-th.num .th-label,
-#tabel2 thead th.rt-th.num .th-label { text-align: right; }
+#tabel2 thead th.rt-th.num .th-label,
+#tabelso thead th.rt-th.num .th-label { text-align: right; }
 
 /* pegangan drag */
 #tabel thead th.rt-th .th-grip,
-#tabel2 thead th.rt-th .th-grip {
+#tabel2 thead th.rt-th .th-grip,
+#tabelso thead th.rt-th .th-grip {
   display: grid;
   grid-template-columns: repeat(2, 3px);
   gap: 3px;
@@ -91,7 +102,8 @@
 }
 
 #tabel thead th.rt-th .th-grip i,
-#tabel2 thead th.rt-th .th-grip i {
+#tabel2 thead th.rt-th .th-grip i,
+#tabelso thead th.rt-th .th-grip i {
   width: 3px;
   height: 3px;
   border-radius: 50%;
@@ -99,11 +111,13 @@
 }
 
 #tabel thead th.rt-th:hover .th-grip,
-#tabel2 thead th.rt-th:hover .th-grip { opacity: 1; }
+#tabel2 thead th.rt-th:hover .th-grip,
+#tabelso thead th.rt-th:hover .th-grip { opacity: 1; }
 
 /* tombol roda gigi */
 #tabel thead th.rt-th .th-gear,
-#tabel2 thead th.rt-th .th-gear {
+#tabel2 thead th.rt-th .th-gear,
+#tabelso thead th.rt-th .th-gear {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,12 +137,15 @@
 }
 
 #tabel thead th.rt-th:hover .th-gear,
-#tabel2 thead th.rt-th:hover .th-gear { opacity: 1; }
+#tabel2 thead th.rt-th:hover .th-gear,
+#tabelso thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabel thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear.active,
 #tabel2 thead th.rt-th .th-gear:hover,
-#tabel2 thead th.rt-th .th-gear.active {
+#tabel2 thead th.rt-th .th-gear.active,
+#tabelso thead th.rt-th .th-gear:hover,
+#tabelso thead th.rt-th .th-gear.active {
   opacity: 1;
   background: var(--rt-indigo-soft);
   color: var(--rt-indigo);
@@ -138,10 +155,11 @@
    Dengan .th-inner yang mengisi penuh sel, ikon itu bertabrakan dengan roda
    gigi, jadi digeser sedikit ke kiri. */
 #tabel thead th.rt-th,
-#tabel2 thead th.rt-th { background-position: right 26px center; }
+#tabel2 thead th.rt-th,
+#tabelso thead th.rt-th { background-position: right 26px center; }
 
 /* ============ Menu kolom (dipasang di <body>, position:fixed) ============
-   Disalin apa adanya dari report-table.css ï¿½ memang sudah tanpa scope,
+   Disalin apa adanya dari report-table.css � memang sudah tanpa scope,
    karena menunya di-appendChild ke document.body. */
 
 .rt-colmenu {
@@ -175,7 +193,7 @@
 
 .rt-colmenu .rt-colmenu-item:hover { background: var(--rt-bg); }
 
-/* baris stepper/switch bukan aksi tunggal ï¿½ jangan beri efek klik di seluruh baris */
+/* baris stepper/switch bukan aksi tunggal � jangan beri efek klik di seluruh baris */
 .rt-colmenu .rt-colmenu-item.is-static { cursor: default; }
 .rt-colmenu .rt-colmenu-item.is-static:hover { background: transparent; }
 
@@ -262,7 +280,7 @@
 
 #rtBar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
 
-/* Reset kolom ï¿½ aksi destruktif (menghapus pengaturan kolom tersimpan user),
+/* Reset kolom � aksi destruktif (menghapus pengaturan kolom tersimpan user),
    jadi diberi warna merah saat hover supaya beda dari tombol lain di bar. */
 #rtBar .rt-reset-btn { color: var(--rt-ink-soft); }
 
@@ -460,18 +478,19 @@
   transform: translateY(-1px);
 }
 
-/* ============ Modal filter status (#modalFilterPO) ============
+/* ============ Modal filter status (.rt-filter) ============
    Disalin dari public/css/report-table.css (#modalFilter.rt-filter ...), dengan
-   selector diganti ke #modalFilterPO dan var(--rt-blue*) diganti var(--rt-indigo*)
-   karena file ini tidak mendefinisikan --rt-blue. */
+   selector diganti ke .rt-filter (dipakai #modalFilterPO & #modalFilterPR) dan
+   var(--rt-blue*) diganti var(--rt-indigo*) karena file ini tidak mendefinisikan
+   --rt-blue. */
 
-#modalFilterPO.rt-filter .modal-header {
+.rt-filter .modal-header {
   padding: 20px 24px;
   align-items: center;
   gap: 12px;
 }
 
-#modalFilterPO.rt-filter .modal-title {
+.rt-filter .modal-title {
   font-size: 17px;
   font-weight: 700;
   color: var(--rt-ink);
@@ -480,12 +499,12 @@
   gap: 8px;
 }
 
-#modalFilterPO.rt-filter .modal-title i {
+.rt-filter .modal-title i {
   color: var(--rt-indigo);
   font-size: 14px;
 }
 
-#modalFilterPO .rt-active-badge {
+.rt-filter .rt-active-badge {
   font-size: 11px;
   font-weight: 700;
   color: var(--rt-indigo);
@@ -495,19 +514,19 @@
   margin-left: 10px;
 }
 
-#modalFilterPO.rt-filter .modal-body {
+.rt-filter .modal-body {
   padding: 20px 24px;
 }
 
-#modalFilterPO.rt-filter .rt-section {
+.rt-filter .rt-section {
   margin-bottom: 22px;
 }
 
-#modalFilterPO.rt-filter .rt-section:last-child {
+.rt-filter .rt-section:last-child {
   margin-bottom: 0;
 }
 
-#modalFilterPO.rt-filter .rt-group-label {
+.rt-filter .rt-group-label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .06em;
@@ -516,17 +535,17 @@
   margin: 0 0 10px;
 }
 
-#modalFilterPO.rt-filter .rt-grid-2 {
+.rt-filter .rt-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-#modalFilterPO.rt-filter .rt-grid-2 + .rt-grid-2 {
+.rt-filter .rt-grid-2 + .rt-grid-2 {
   margin-top: 10px;
 }
 
-#modalFilterPO.rt-filter .rt-field-label {
+.rt-filter .rt-field-label {
   display: block;
   font-size: 11px;
   font-weight: 700;
@@ -536,7 +555,7 @@
   margin-bottom: 6px;
 }
 
-#modalFilterPO.rt-filter select.rt-native {
+.rt-filter select.rt-native {
   width: 100%;
   padding: 11px 12px;
   border-radius: var(--rt-radius);
@@ -552,13 +571,13 @@
   cursor: pointer;
 }
 
-#modalFilterPO.rt-filter select.rt-native:focus {
+.rt-filter select.rt-native:focus {
   outline: none;
   border-color: var(--rt-indigo);
   box-shadow: 0 0 0 3px var(--rt-indigo-soft);
 }
 
-#modalFilterPO.rt-filter .modal-footer {
+.rt-filter .modal-footer {
   padding: 16px 24px 20px;
   border-top: 1px solid var(--rt-border-soft);
   display: flex;
@@ -566,7 +585,7 @@
   justify-content: space-between;
 }
 
-#modalFilterPO.rt-filter .rt-reset-link {
+.rt-filter .rt-reset-link {
   font-size: 13px;
   font-weight: 700;
   color: var(--rt-red);
@@ -576,16 +595,16 @@
   padding: 6px 4px;
 }
 
-#modalFilterPO.rt-filter .rt-reset-link:hover {
+.rt-filter .rt-reset-link:hover {
   text-decoration: underline;
 }
 
-#modalFilterPO.rt-filter .rt-footer-buttons {
+.rt-filter .rt-footer-buttons {
   display: flex;
   gap: 10px;
 }
 
-#modalFilterPO.rt-filter .rt-btn {
+.rt-filter .rt-btn {
   font-size: 13.5px;
   font-weight: 700;
   padding: 10px 20px;
@@ -595,26 +614,26 @@
   font-family: inherit;
 }
 
-#modalFilterPO.rt-filter .rt-btn-ghost {
+.rt-filter .rt-btn-ghost {
   background: var(--rt-bg);
   color: var(--rt-ink-soft);
 }
 
-#modalFilterPO.rt-filter .rt-btn-ghost:hover {
+.rt-filter .rt-btn-ghost:hover {
   background: var(--rt-border);
 }
 
-#modalFilterPO.rt-filter .rt-btn-primary {
+.rt-filter .rt-btn-primary {
   background: var(--rt-indigo);
   color: #fff;
 }
 
-#modalFilterPO.rt-filter .rt-btn-primary:hover {
+.rt-filter .rt-btn-primary:hover {
   opacity: .92;
 }
 
 @media (max-width: 520px) {
-  #modalFilterPO.rt-filter .rt-grid-2 {
+  .rt-filter .rt-grid-2 {
     grid-template-columns: 1fr;
   }
 }
@@ -639,7 +658,8 @@
 }
 
 #tabel thead th,
-#tabel2 thead th {
+#tabel2 thead th,
+#tabelso thead th {
   position: sticky;
   top: 0;
   z-index: 20;
