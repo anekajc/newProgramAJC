@@ -32,7 +32,7 @@ class LaporanAccountingJurnalMemorialController extends Controller {
 
   public function doReport(Request $req) {
     
-    $res = DB::connection('MGL')->select("exec Sp_LapJurnal 'BMM',:divisi,:date1,:date2",
+    $res = DB::connection('SML')->select("exec Sp_LapJurnal 'BMM',:divisi,:date1,:date2",
     ['date1' => $req->date1,'date2' => $req->date2,'divisi' => $req->divisi]);
     return $res;
   }

@@ -28,7 +28,7 @@ class LaporanAccountingLabaRugiController extends Controller {
 
   public function doReport(Request $req) {
     
-    $res = DB::connection('MGL')->select("exec sp_ReportLabaRugi :inputBulan,:inputTahun,:divisi,0,:totalA,:totalB,:totalC ",
+    $res = DB::connection('SML')->select("exec sp_ReportLabaRugi :inputBulan,:inputTahun,:divisi,0,:totalA,:totalB,:totalC ",
     ['inputBulan' => $req->inputBulan,'inputTahun' => $req->inputTahun,'divisi' => $req->divisi,'totalA' => $req->totalA,'totalB' => $req->totalB,'totalC' => $req->totalC]);
     return $res;
   }

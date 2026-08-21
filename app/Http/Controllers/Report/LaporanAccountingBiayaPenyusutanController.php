@@ -28,7 +28,7 @@ class LaporanAccountingBiayaPenyusutanController extends Controller {
 
   public function doReport(Request $req) {
     
-    $res = DB::connection('MGL')->select("exec sp_LapSusutAktiva :inputBulan,:inputTahun,:divisi",
+    $res = DB::connection('SML')->select("exec sp_LapSusutAktiva :inputBulan,:inputTahun,:divisi",
     ['inputBulan' => $req->inputBulan,'inputTahun' => $req->inputTahun,'divisi' => $req->divisi]);
     return $res;
   }

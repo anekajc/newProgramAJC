@@ -27,7 +27,7 @@ class LaporanAccountingBiayaController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $res = DB::connection('MGL')->select("exec Sp_LapBiaya :divisi,:inputBulan,:inputTahun,:inputPerkiraan1,:inputPerkiraan2",
+    $res = DB::connection('SML')->select("exec Sp_LapBiaya :divisi,:inputBulan,:inputTahun,:inputPerkiraan1,:inputPerkiraan2",
     ['inputBulan' => $req->inputBulan,'inputTahun' => $req->inputTahun,'divisi' => $req->divisi,'inputPerkiraan1' => $req->inputPerkiraan1,'inputPerkiraan2' => $req->inputPerkiraan2]);
     return $res;
   }

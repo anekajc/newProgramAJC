@@ -34,7 +34,7 @@ class LaporanAccountingBukuBesarController extends Controller {
     // filters divisions with LIKE, so translate that to the '%' wildcard.
     $divisi = ($req->divisi === null || $req->divisi === '' || $req->divisi === '-') ? '%' : $req->divisi;
 
-    $res = DB::connection('MGL')->select("exec Sp_ReportBukuTambahan :awal, :akhir, :date1, :date2, :divisi, 'sa', 'y', 0",
+    $res = DB::connection('SML')->select("exec Sp_ReportBukuTambahan :awal, :akhir, :date1, :date2, :divisi, 'sa', 'y', 0",
     ['awal'=> $req->inputPerkiraan1, 'akhir' => $req->inputPerkiraan2, 'date1' => $req->date1,'date2' => $req->date2,'divisi' => $divisi]);
     return $res;
   }
