@@ -17,7 +17,7 @@ class AuthController extends Controller
      */
     public function index(): RedirectResponse
     {
-        return redirect()->route('login');
+        return redirect('/');
     }
 
     /**
@@ -84,6 +84,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect('/');
     }
 }

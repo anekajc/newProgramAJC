@@ -25,7 +25,7 @@ class SOController extends Controller
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
     }
-    
+
     // $username = \Auth::user()->username;
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(4);
