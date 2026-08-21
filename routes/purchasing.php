@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Purchasing\PembelianPermintaanNonAgenController;
-// use App\Http\Controllers\Purchasing\PembelianPermintaanAgenController;
-// use App\Http\Controllers\Purchasing\PembelianPermintaanNonStockController;
-// use App\Http\Controllers\Purchasing\PembelianClosingPRController;
+use App\Http\Controllers\Purchasing\PembelianPermintaanAgenController;
+use App\Http\Controllers\Purchasing\PembelianPermintaanNonStockController;
+use App\Http\Controllers\Purchasing\PembelianClosingPRController;
 // use App\Http\Controllers\Purchasing\PembelianPermintaanDebetNoteController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaKreditController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaTunaiController;
@@ -36,35 +36,44 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembelianpermintaannonagenupdateotorisasi',   [PembelianPermintaanNonAgenController::class, 'updateOtorisasi']);
     Route::post('/pembelianpermintaannonagenupdatebatalotorisasi', [PembelianPermintaanNonAgenController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN PERMINTAAN AGEN ─────────────────────────────────────────
-    // Route::get('/pembelianpermintaanagen',                      [PembelianPermintaanAgenController::class, 'index']);
-    // Route::get('/pembelianpermintaanagenspnobukti',             [PembelianPermintaanAgenController::class, 'getNoBukti']);
-    // Route::get('/pembelianpermintaanagenlistbarang',            [PembelianPermintaanAgenController::class, 'listBarang']);
-    // Route::post('/pembelianpermintaanagenspadd',                [PembelianPermintaanAgenController::class, 'spAdd']);
-    // Route::get('/pembelianpermintaanagenspdetail',              [PembelianPermintaanAgenController::class, 'spDetail']);
-    // Route::get('/pembelianpermintaanagenloadall',               [PembelianPermintaanAgenController::class, 'loadAll']);
-    // Route::post('/pembelianpermintaanagenspdelete',             [PembelianPermintaanAgenController::class, 'spDelete']);
-    // Route::get('/pembelianpermintaanagenlistdepartemen',        [PembelianPermintaanAgenController::class, 'listDepartemen']);
-    // Route::post('/pembelianpermintaanagenupdateotorisasi',      [PembelianPermintaanAgenController::class, 'updateOtorisasi']);
-    // Route::post('/pembelianpermintaanagenupdatebatalotorisasi', [PembelianPermintaanAgenController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN NON STOCK ───────────────────────────────────────────────
-    // Route::get('/pembelianpermintaannonstock',                      [PembelianPermintaanNonStockController::class, 'index']);
-    // Route::get('/pembelianpermintaannonstockspnobukti',             [PembelianPermintaanNonStockController::class, 'getNoBukti']);
-    // Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
-    // Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
-    // Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
-    // Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
-    // Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
-    // Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
-    // Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
-    // Route::post('/pembelianpermintaannonstockupdatebatalotorisasi', [PembelianPermintaanNonStockController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN CLOSING PR ──────────────────────────────────────────────
-    // Route::get('/pembelianclosingpr',       [PembelianClosingPRController::class, 'index']);
-    // Route::get('/pembelianclosingprloadall',[PembelianClosingPRController::class, 'loadAll']);
-    // Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
-    // Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
+    // ── PEMBELIAN PERMINTAAN AGEN ─────────────────────────────────────────
+    Route::get('/pembelianpermintaanagen',                      [PembelianPermintaanAgenController::class, 'index']);
+    Route::get('/pembelianpermintaanagenspnobukti',             [PembelianPermintaanAgenController::class, 'getNoBukti']);
+    Route::get('/pembelianpermintaanagenlistbarang',            [PembelianPermintaanAgenController::class, 'listBarang']);
+    Route::post('/pembelianpermintaanagenspadd',                [PembelianPermintaanAgenController::class, 'spAdd']);
+    Route::get('/pembelianpermintaanagenspdetail',              [PembelianPermintaanAgenController::class, 'spDetail']);
+    Route::get('/pembelianpermintaanagenloadall',               [PembelianPermintaanAgenController::class, 'loadAll']);
+    Route::post('/pembelianpermintaanagenspdelete',             [PembelianPermintaanAgenController::class, 'spDelete']);
+    Route::get('/pembelianpermintaanagenlistdepartemen',        [PembelianPermintaanAgenController::class, 'listDepartemen']);
+    Route::post('/pembelianpermintaanagenupdateotorisasi',      [PembelianPermintaanAgenController::class, 'updateOtorisasi']);
+    Route::post('/pembelianpermintaanagenupdatebatalotorisasi', [PembelianPermintaanAgenController::class, 'updateBatalOtorisasi']);
+
+
+    // ── PEMBELIAN NON STOCK ───────────────────────────────────────────────
+    Route::get('/pembelianpermintaannonstock',                      [PembelianPermintaanNonStockController::class, 'index']);
+    Route::get('/pembelianpermintaannonstockspnobukti',             [PembelianPermintaanNonStockController::class, 'getNoBukti']);
+    Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
+    Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
+    Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
+    Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
+    Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
+    Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
+    Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
+    Route::post('/pembelianpermintaannonstockupdatebatalotorisasi', [PembelianPermintaanNonStockController::class, 'updateBatalOtorisasi']);
+
+    // ── PEMBELIAN CLOSING PR ──────────────────────────────────────────────
+    Route::get('/pembelianclosingpr',       [PembelianClosingPRController::class, 'index']);
+    Route::get('/pembelianclosingprloadall',[PembelianClosingPRController::class, 'loadAll']);
+    Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
+    Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
+
+    Route::post('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
+    Route::post('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
+    Route::post('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
+    Route::post('/pembelianclosingprheadertable',[PembelianClosingPRController::class, 'headerTable']);
+
 
     // // ── PEMBELIAN DEBET NOTE ──────────────────────────────────────────────
     // Route::get('/pembelianpermintaandebetnote',     [PembelianPermintaanDebetNoteController::class, 'index']);

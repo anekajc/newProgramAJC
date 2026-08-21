@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Models\NewMenu;
-use App\Models\NewAksesMenu;
-use App\Models\NewPeriode;
-use App\Models\NewUsers;
+use App\Model\NewMenu;
+use App\Model\NewAksesMenu;
+use App\Model\NewPeriode;
+use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
-use App\Models\VwPPL;
-use App\Models\DBFLMENU;
+use App\Model\VwPPL;
+use App\Model\DBFLMENU;
+
+
 
 // use App\Http\Controllers\NewMenuController;
 
@@ -18,6 +20,9 @@ class PembelianPermintaanNonAgenController extends Controller
 {
 
   public function index(Request $req) {
+
+
+
 
     $kodemenu = '030101';
     // $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
@@ -57,14 +62,14 @@ class PembelianPermintaanNonAgenController extends Controller
     //                   ->where('pAgen', 0)
     //                   ->get()
     //                   ->groupBy('NoBukti');
-    $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+    $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  month(tanggal) = :bulan and year(tanggal) = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
                       // ->where('isOtorisasi1', 1)
 //                       $timestamp = strtotime($variable);
 //
 // if ($timestamp !== false) {
 //     echo "Valid date string.";
 // }
-$otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
+$otorisasi = collect($otorisasi)->groupBy('NoBukti');
     $tempOtorisasi = [];
     foreach ($otorisasi as $groupedData) {
         $tempOtorisasi[] = $groupedData;
@@ -76,8 +81,23 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     $headertablevalue = [];
     $headertableheader = [];
     $headerisshown = [];
-    // $headerisshown = $headertable[0]->isshown;
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $aliasOrdered = [];
+
     $isparsed = 0;
+    $headertablealias = [];
+    // $headerisshown = $headertable[0]->isshown;
+    // $isparsed = 0;
+    $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->path() ]);
+// @dd($req->href);
+    // @dd($xxx);
+    if ($xxx ) {
+
+      $headertablealias = json_decode($xxx[0]->value);
+    } else {
+
+      $headertablealias = [];
+    }
     if (count($headertable) > 0) {
       $isnumberheadertable = json_decode($headertable[0]->isnumber);
       $headertablevalue = json_decode($headertable[0]->value);
@@ -121,9 +141,32 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
 
 
     }
+
+    $aliasOrdered = [];
+    if ($headertablealias) {
+      foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+              if ($item->value === $header) {
+
+                    array_push( $aliasOrdered , $item);
+                  break;
+              }
+          }
+      }
+    } else {
+      foreach ($headertablevalue as $header) {
+
+
+                    array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+
+
+      }
+    }
     // @dd($headertablevalue);
+    // @dd($aliasOrdered);
 
     return view('purchasing.pembelianpermintaannonagen' ,[
+      "aliasordered" => $aliasOrdered,
       "headertableheader" => $headertableheader ,
       "isnumeric" => $isnumberheadertable,
       "headertablevalue" => $headertablevalue,
@@ -157,7 +200,11 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     //                      ->groupBy('NoBukti');
     // return  ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ];
     // return "select * from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi ;
-    $outstanding = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi , ["tglawal" => $req->tglawal ,"tglakhir" => $req->tglakhir  ]);
+    // Qnt/QntBatal/QntPO ikut diambil (dengan alias eksplisit, supaya key JSON-nya pasti
+    // "Qnt"/"QntBatal"/"QntPO") untuk menghitung badge Status "Sudah/Belum/Batal" di
+    // pembelianpermintaannonagen.blade.php (prStatusPR()). Ketiganya dikecualikan dari
+    // penurunan kolom default di bawah supaya tidak ikut jadi kolom tabel.
+    $outstanding = DB::connection("SML")->select("select NoBukti  , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1, Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi , ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ]);
     $collection1 = collect($outstanding)->groupBy('NoBukti');
     $tempOutstanding = [];
     foreach ($collection1 as $groupedData) {
@@ -187,7 +234,23 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     $headertablevalue = [];
     $headertableheader = [];
     $headerisshown = [];
+    $aliasOrdered = [];
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+
     $isparsed = 0;
+    $headertablealias = [];
+
+    $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->href ]);
+// @dd($req->href);
+    // @dd($xxx);
+    if ($xxx ) {
+
+      $headertablealias = json_decode($xxx[0]->value);
+    } else {
+
+      $headertablealias = [];
+    }
     if (count($headertable) > 0) {
       $isnumberheadertable = json_decode($headertable[0]->isnumber);
       $headertablevalue = json_decode($headertable[0]->value);
@@ -198,12 +261,15 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
       // $headertable = [];
 
       $isparsed = 1;
+      // Qnt/QntBatal/QntPO dipakai hanya untuk menghitung badge Status di JS, bukan kolom
+      // tabel - lihat komentar di query vwppl di atas.
+      $kolomInternal = ['Qnt', 'QntBatal', 'QntPO'];
       if(!$tempOutstanding) {
 
       } else {
         foreach ($tempOutstanding[0][0] as $key => $value) {
 
-          if (str_contains($key, "Oto")) {
+          if (str_contains($key, "Oto") || in_array($key, $kolomInternal, true)) {
 
 
           } else {
@@ -232,7 +298,29 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
 
     }
 
+    $aliasOrdered = [];
+    if ($headertablealias) {
+      foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+              if ($item->value === $header) {
+
+                    array_push( $aliasOrdered , $item);
+                  break;
+              }
+          }
+      }
+    } else {
+      foreach ($headertablevalue as $header) {
+
+
+                    array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+
+
+      }
+    }
+
     return [
+      "aliasordered" => $aliasOrdered,
       "headertableheader" => $headertableheader ,
       "isnumeric" => $isnumberheadertable,
       "headertablevalue" => $headertablevalue,
