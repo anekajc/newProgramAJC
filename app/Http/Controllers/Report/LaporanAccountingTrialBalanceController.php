@@ -30,7 +30,7 @@ class LaporanAccountingTrialBalanceController extends Controller {
 
   public function doReport(Request $req) {
 
-    $res = DB::connection('MGL')->select("exec Sp_ReportMutasi :inputBulan,:inputTahun,:divisi,'' ",
+    $res = DB::connection('SML')->select("exec Sp_ReportMutasi :inputBulan,:inputTahun,:divisi,'' ",
     ['inputBulan' => $req->inputBulan,'inputTahun' => $req->inputTahun,'divisi' => $req->divisi]);
     return $res;
   }

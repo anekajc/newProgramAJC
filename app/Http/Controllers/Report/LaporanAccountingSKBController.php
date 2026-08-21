@@ -36,7 +36,7 @@ class LaporanAccountingSKBController extends Controller {
 
     $values  = [$tglAwal, $tglAkhir];
     
-    $res = DB::connection('MGL')->select('exec sp_ReportBukuTambahanSKB ?,?',
+    $res = DB::connection('SML')->select('exec sp_ReportBukuTambahanSKB ?,?',
       $values);
 
     return $res;
