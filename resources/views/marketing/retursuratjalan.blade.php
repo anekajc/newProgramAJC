@@ -5,11 +5,134 @@
 
 @section('css')
 
-{{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel/#tabel2's
-     draggable-column/gear-menu headers and "Tampilkan" (page-length) control, copied 1:1
-     from Sales Order's page1 (see so.blade.php's #tabel/#tabel7). Linked here page-locally
-     so only this page gets it. --}}
 <link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+
+<link rel="stylesheet" href="{{ asset('css/rsj-table-header.css') }}?v={{ filemtime(public_path('css/rsj-table-header.css')) }}">
+
+<style>
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-flex !important;
+    align-items: center;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  /* newmaster.css punya rule .card global (align-items:center, dibuat untuk kartu menu
+     dashboard) yang menimpa ini kalau tidak ditulis ulang di sini. */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+  }
+
+  #page1 .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border) !important;
+  }
+
+  /* Dropdown "Tampilkan" di toolbar, meniru .po-len-wrap milik so.blade.php/
+     purchaseOrder.blade.php 1:1. */
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink);
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  /* Form label look (page2 Add form, page3 Detail form) copied 1:1 from so.blade.php's
+     own #page2/#page3 label rule -- bold uppercase Poppins, matching Form Sales Order's
+     input labels exactly. margin-bottom:10px here loses to .form-label.mb-0's
+     !important on the row/col fields that use align-items-center (same interaction
+     so.blade.php's own page2 already relies on), so the tight row alignment isn't
+     affected. */
+  #page2 label,
+  #page3 label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: "Poppins", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+</style>
 
 <style>
   /* Holds the pagination element JS relocates here (see moveDataTablePagination()) so it
@@ -247,89 +370,11 @@
      + RSPB button in place of the old inline-styled pill button. --}}
 <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
-{{-- radioChoiceMaster pill-tab look, copied 1:1 from Sales Order's page1 inline
-     <style> block. Sales Order applies this to <button data-bs-toggle="tab">
-     elements; this page's tabs still run on the Bootstrap 4 tab plugin
-     (data-toggle="tab" + <a href="#...">), so the only additions versus Sales
-     Order's copy are `display: inline-flex; align-items: center;` and
-     `text-decoration: none;` on .radioChoiceMaster-btn -- an <a> needs both
-     (box behavior and underline removal) that a <button> gets for free.
-     Everything else, including colors and the active state, is unchanged
-     from Sales Order's version. --}}
-<style>
-  .radioChoiceMaster {
-    display: inline-flex;
-    list-style: none;
-    margin: 0;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .radioChoiceMaster-item {
-    display: flex;
-  }
-
-  .radioChoiceMaster-btn {
-    display: inline-flex;
-    align-items: center;
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    background-color: transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    outline: none;
-    box-shadow: none;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
-  .radioChoiceMaster-btn:hover {
-    color: #212529;
-    background-color: rgba(0,0,0,0.04);
-    text-decoration: none;
-  }
-
-  .radioChoiceMaster-btn:focus,
-  .radioChoiceMaster-btn:focus-visible {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .radioChoiceMaster-btn.active {
-    color: #fff;
-    background-color: #007bff;
-    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
-  }
-</style>
 @endsection
 
 
 @section('content')
 <div id="page1" class="container-fluid">
-
-
-<div class="container-fluid">
-
-  <!-- <div id="qrcode"></div> -->
-  <div class="row align-items-center">
-    <div class="col-6 text-left">
-      <h2>Retur SJ</h2>
-    </div>
-    <div class="col-6 text-right">
-      <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">
-        + RSPB
-      </button>
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
 
 <div id="printContainer" style="display:none">
 
@@ -347,56 +392,64 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  {{-- Deliberately NOT wrapped in .card -- newmaster.css's global .card rule
-       (display:flex; align-items:center;) is meant for the dashboard module-home
-       tile grid, and squeezes any .card-body down to its content's intrinsic width
-       instead of stretching it, which is what made this table render far narrower
-       than Sales Order's. Sales Order's own working pattern (giroTab) confirms this:
-       its pill tab bar and table content both sit directly in the page flow with no
-       .card wrapper at all -- matched 1:1 here. --}}
-  <div style="margin-bottom:12px;">
-<ul class="radioChoiceMaster" id="nav-tab" role="tablist">
-  <li class="radioChoiceMaster-item" role="presentation">
-    <a class="radioChoiceMaster-btn active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-      Retur SJ Belum Otorisasi
-    </a>
-  </li>
-  <li class="radioChoiceMaster-item" role="presentation">
-    <a class="radioChoiceMaster-btn" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-      Retur SJ Sudah Otorisasi
-    </a>
-  </li>
-</ul>
-</div>
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="toolbar" style="margin-bottom:10px;">
-      <div class="filter-wrap">
-        <label for="tabel_length_visual">Tampilkan</label>
-        <select id="tabel_length_visual" class="filter-inp" style="cursor:pointer;">
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="-1">Semua</option>
-        </select>
+
+  {{-- Tab bar: so.blade.php's own card.tab-card + custom-tabs pattern, copied 1:1.
+       Same two tabs/targets as before (data-toggle, not so.blade.php's data-bs-toggle --
+       this page's tabs still run on the Bootstrap 4 tab plugin, per the removed
+       radioChoiceMaster block's own note; changing it isn't part of this restyle). --}}
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item-page nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+          Belum Otorisasi
+        </a>
+        <a class="nav-item-page nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+          Sudah Otorisasi
+        </a>
       </div>
     </div>
-    {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and the
-         "Tampilkan" toolbar above) to just this table. Sits directly under .tab-pane
-         with no .row/.col-12 wrapper -- matching so.blade.php's page1 exactly, since
-         that wrapper's grid padding/negative-margin is what was shrinking this table
-         down from full width. --}}
-    <div class="tb-report main">
-    <div class="rt-bar-row">
-      <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
-        <i class="bi bi-arrow-clockwise"></i> Reset kolom
-      </button>
-      <div id="rtBarTabel"></div>
+  </div>
+
+  {{-- Toolbar shared by both tabs: one search/length control drives whichever tab is
+       visible (see the shared page1Tables-style wiring in the js section), same as
+       so.blade.php's shared toolbar. --}}
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+  <div class="po-toolbar">
+
+    <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
+
+    <div class="po-len-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="po-len-inp">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
     </div>
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table id="tabel" class="tb">
+
+    <div class="po-toolbar-act">
+      <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">+ RSPB</button>
+    </div>
+
+  </div>
+    </div>
+  </div>
+
+  <div class="card">
+  <div class="card-body" style="padding:0;">
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel"></div>
+      </div>
+      <div class="po-table-wrap">
+        <table id="tabel" class="tb data-table">
           {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
                renderTabelRows(), which runs on page load via reinitTabel()) replaces
                this <thead>'s contents based on gcart_header before the user ever sees
@@ -405,61 +458,36 @@
           <tbody id="tabel_data" class="text-left"></tbody>
         </table>
       </div>
-      <div id="tabelPaginationOutside" class="tb-pagination-outside"></div>
-      <div class="rt-hint">
+      <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
         Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
         untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
     </div>
-    </div>
-  </div>
 
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="toolbar" style="margin-bottom:10px;">
-      <div class="filter-wrap">
-        <label for="tabel2_length_visual">Tampilkan</label>
-        <select id="tabel2_length_visual" class="filter-inp" style="cursor:pointer;">
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="-1">Semua</option>
-        </select>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel2"></div>
       </div>
-    </div>
-    <div class="tb-report main">
-    <div class="rt-bar-row">
-      <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
-        <i class="bi bi-arrow-clockwise"></i> Reset kolom
-      </button>
-      <div id="rtBarTabel2"></div>
-    </div>
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table id="tabel2" class="tb">
+      <div class="po-table-wrap">
+        <table id="tabel2" class="tb data-table">
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel2_data" class="text-left"></tbody>
         </table>
       </div>
-      <div id="tabel2PaginationOutside" class="tb-pagination-outside"></div>
-      <div class="rt-hint">
+      <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
         Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
         untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
     </div>
-    </div>
-    </div>
+
   </div>
-
-
-
-
-</div>
-</div>
-</div>
-
+  </div>
+  </div>
 
 </div>
 
@@ -470,17 +498,18 @@
   <div class="container-fluid">
 
     <!-- <div id="qrcode"></div> -->
-    <div class="row" style="margin-top: -50px">
-      <div class="col-6 text-left">
+    <div class="row d-flex justify-content-between align-items-center">
+      <div class="col-auto text-left">
         <h1>Form Retur SJ</h1>
       </div>
-      <div class="col-6 text-right">
+      <div class="col-auto text-right">
         <button type="button" class="btn btn-primary btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
+            margin-bottom: 30px;
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
@@ -497,55 +526,42 @@
 
     <div class="container-fluid">
       <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-      <div class="row">
+      <div class="row g-3">
 
         <div class="col-3">
-          <div class="row">
 
-
-          <div class="col-4">
-            <div class="form-group">
-              <label>No SJ</label>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No SJ</label>
+            </div>
+            <div class="col-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
+                <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-plus"></i></button>
+              </div>
             </div>
           </div>
-          <!-- <div class="col-3 text-right">
-            <div class="form-group">
-          </div> -->
-          <div class="col-8">
-            <div class="form-group input-group">
-              <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
-              <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-plus"></i></button>
-            </div>
-          </div>
+
         </div>
-          </div>
 
           <div class="col-3">
-            <div class="row">
+            <div class="row align-items-center mb-2">
               <div class="col-4">
-                <div class="form-group">
-                  <label>No Bukti</label>
-                </div>
+                <label class="form-label mb-0">No Bukti</label>
               </div>
               <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nobukti" placeholder="No SO" disabled>
-                </div>
+                <input type="text" class="form-control" id="input_add_nobukti" placeholder="No SO" disabled>
               </div>
             </div>
           </div>
 
           <div class="col-3">
-            <div class="row">
+            <div class="row align-items-center mb-2">
               <div class="col-4">
-                <div class="form-group">
-                  <label>Tanggal</label>
-                </div>
+                <label class="form-label mb-0">Tanggal</label>
               </div>
               <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
-                </div>
+                <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
               </div>
             </div>
           </div>
@@ -565,136 +581,92 @@
       <div class="container-fluid">
 
 
-      <div class="row">
+      <div class="row g-3">
         <div class="col-3">
-          <div class="row">
+          <div class="row align-items-center mb-2">
             <div class="col-4">
-              <div class="form-group">
-                <label>Customer</label>
-              </div>
+              <label class="form-label mb-0">Customer</label>
             </div>
             <div class="col-8">
-                <div class="form-group input-group">
+                <div class="input-group">
                   <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
                   <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustSupp" onclick="buttonAddListCustSupp()"><i class="bi bi-plus"></i></button>
                 </div>
             </div>
-            <!-- <div class="col-2">
-              <div class="form-group">
-
-
-              </div>
-
-            </div> -->
           </div>
-            <div class="row" style="margin-top: -10px">
+            <div class="row mb-2">
 
             <div class="col-12">
-              <div class="form-group">
                 <textarea  style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_customer"  disabled></textarea>
-              </div>
             </div>
           </div>
 
         </div>
         <div class="col-3">
-          <div class="row">
+          <div class="row align-items-center mb-2">
             <div class="col-4">
-              <div class="form-group">
-                <label>No SO</label>
-              </div>
+              <label class="form-label mb-0">No SO</label>
             </div>
             <div class="col-8">
-              <div class="form-group">
                 <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
                 <input type="text" class="form-control" id="input_add_noso" placeholder="" disabled>
-              </div>
             </div>
           </div>
-            <div class="row" style="margin-top: -10px">
-
+            <div class="row align-items-start mb-2">
 
             <div class="col-4">
-              <div class="form-group">
-
-                <label>Catatan</label>
-              </div>
-
+                <label class="form-label mb-0">Catatan</label>
             </div>
             <div class="col-8">
-              <div class="form-group">
                 <textarea  style="width: 100%; resize: none; " rows=4  class="form-control" id="input_add_catatan"  ></textarea>
-              </div>
             </div>
 
           </div>
         </div>
 
         <div class="col-3">
-          <div class="row">
+          <div class="row align-items-center mb-2">
             <div class="col-4">
-              <div class="form-group">
-                <label>Tgl SJ</label>
-              </div>
+              <label class="form-label mb-0">Tgl SJ</label>
             </div>
             <div class="col-8">
-              <div class="form-group">
                 <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
               <input type="date" class="form-control" id="input_add_tanggalsj" value="{!! date('Y-m-d') !!}" disabled>
-              </div>
             </div>
 
           </div>
-            <div class="row" style="margin-top: -10px">
+            <div class="row align-items-center mb-2">
 
-
-
-            <!-- <div class="row"> -->
               <div class="col-4">
-                <div class="form-group">
-                  <label>Gudang</label>
-                </div>
+                <label class="form-label mb-0">Gudang</label>
               </div>
               <div class="col-8">
-                  <div class="form-group">
                     <input type="text" class="form-control" id="input_add_gudang" placeholder="" disabled>
-                  </div>
               </div>
-
-            <!-- </div> -->
 
           </div>
         </div>
 
         <div class="col-3">
-          <div class="row">
+          <div class="row align-items-center mb-2">
             <div class="col-4">
-              <div class="form-group">
-                <label>Tgl SC</label>
-              </div>
+              <label class="form-label mb-0">Tgl SC</label>
             </div>
 
             <div class="col-8">
-              <div class="form-group">
                 <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
 
               <input type="date" class="form-control" id="input_add_tanggalsc" value="{!! date('Y-m-d') !!}" disabled>
-              </div>
             </div>
 
           </div>
-            <div class="row" style="margin-top: -10px">
-
+            <div class="row align-items-center mb-2">
 
             <div class="col-4">
-              <div class="form-group">
-                <label>No Pol Kend</label>
-              </div>
+              <label class="form-label mb-0">No Pol Kend</label>
             </div>
             <div class="col-8">
-                <div class="form-group">
                   <input type="text" class="form-control" id="input_add_nopol" placeholder="" >
-                </div>
             </div>
 
           </div>
@@ -807,23 +779,16 @@
       <h4>Add Item</h4>
     </div>
   </div>
-  <div class="row">
+  <div class="row g-3">
 
     <div class="col-3">
 
-
-
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-4">
-      <div class="form-group">
-      <label>Kode Barang</label>
+      <label class="form-label mb-0">Kode Barang</label>
     </div>
-    </div>
-    <!-- <div class="col-3 text-right">
-
-      </div> -->
     <div class="col-8">
-      <div class="form-group input-group">
+      <div class="input-group">
 
         <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
         <button type="button" id="buttonAddListBarang" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
@@ -835,11 +800,9 @@
 </div>
 
 <div class="col-6">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-2">
-      <div class="form-group">
-      <label>Nama Barang</label>
-    </div>
+      <label class="form-label mb-0">Nama Barang</label>
     </div>
     <div class="col-6">
       <input id="AddAddNamaBrg" type="text" class="form-control" disabled>
@@ -851,20 +814,11 @@
 
 </div>
 
-</div>
-<div class="row" style="margin-top: -10px">
-
 <div class="col-3 ">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-4">
-      <div class="form-group">
-      <label>Retur Supp</label>
+      <label class="form-label mb-0">Retur Supp</label>
     </div>
-    </div>
-    <!-- <div class="col-4 text-right">
-
-        <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
-      </div> -->
     <div class="col-8">
       <select  id="AddAddReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
         <option value=0 selected>Tidak</option>
@@ -877,11 +831,9 @@
   </div>
 </div>
 <div class="col-6 ">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-2">
-      <div class="form-group">
-      <label>Qty</label>
-    </div>
+      <label class="form-label mb-0">Qty</label>
     </div>
     <div class="col-4">
       <input id="AddAddInputQty" type="number" value='0.00' class="form-control text-right">
@@ -937,21 +889,14 @@
       <h4>Edit Item</h4>
     </div>
   </div>
-  <div class="row">
+  <div class="row g-3">
 
     <div class="col-3">
 
-
-
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-4">
-      <div class="form-group">
-      <label>Kode Barang</label>
+      <label class="form-label mb-0">Kode Barang</label>
     </div>
-    </div>
-    <!-- <div class="col-4 text-right">
-
-    </div> -->
     <div class="col-8">
       <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
     </div>
@@ -961,11 +906,9 @@
 </div>
 
 <div class="col-6">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-2">
-      <div class="form-group">
-      <label>Nama Barang</label>
-    </div>
+      <label class="form-label mb-0">Nama Barang</label>
     </div>
     <div class="col-6">
       <input id="AddEditNamaBrg" type="text" class="form-control" disabled>
@@ -977,21 +920,11 @@
 
 </div>
 
-</div>
-
-<div class="row" style="margin-top: -10px">
-
 <div class="col-3 ">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-4">
-      <div class="form-group">
-      <label>Retur Supp</label>
+      <label class="form-label mb-0">Retur Supp</label>
     </div>
-    </div>
-    <!-- <div class="col-4 text-right">
-
-        <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
-      </div> -->
     <div class="col-8">
       <select  id="AddEditReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
         <option value=0 selected>Tidak</option>
@@ -1004,11 +937,9 @@
   </div>
 </div>
 <div class="col-6">
-  <div class="row">
+  <div class="row align-items-center mb-2">
     <div class="col-2">
-      <div class="form-group">
-      <label>Qty</label>
-    </div>
+      <label class="form-label mb-0">Qty</label>
     </div>
     <div class="col-4">
       <input id="AddEditInputQty" type="number" value='0.00' class="form-control text-right">
@@ -1156,13 +1087,7 @@
               </div>
             </div>
 
-
           </div>
-
-
-
-
-
 
         </div>
 
@@ -1760,16 +1685,32 @@ function replaceTheadWithHeader(tableSel, cols) {
   oldThead.parentNode.replaceChild(newThead, oldThead);
 }
 
-// DataTables names its auto-generated wrapper <tableId>_wrapper and puts
-// .dataTables_paginate inside it, alongside the table -- meaning it's part of
-// .table-wrap's horizontally-scrolling content. Physically relocating the pagination
-// element into a container placed outside .table-wrap keeps it out of that scroll and
-// always visible below the table. Empty the target first so each reinit replaces last
-// time's pagination instead of stacking a new one on top of it.
-function moveDataTablePagination(tableId, targetSel) {
-  $(targetSel).empty();
-  $('#' + tableId + '_wrapper .dataTables_paginate').appendTo(targetSel);
+// Kotak scroll tabel dibuat setinggi sisa ruang di #content supaya halaman TIDAK perlu
+// scrollbar sendiri - port 1:1 dari soAturTinggiTabel()/poAturTinggiTabel() milik
+// so.blade.php/purchaseOrder.blade.php.
+function rsjAturTinggiTabel() {
+  var area = document.getElementById('content');
+  var pane = document.querySelector('#myTabContent .tab-pane.active');
+  if (!area || !pane) { return; }
+  var wrap = pane.querySelector('.po-table-wrap');
+  if (!wrap) { return; }
+
+  wrap.style.maxHeight = 'none';
+
+  var padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+  var batasBawah = area.getBoundingClientRect().bottom - padBawah;
+  var kotak = wrap.getBoundingClientRect();
+  var bawah = pane.getBoundingClientRect().bottom - kotak.bottom;
+
+  var sisa = batasBawah - kotak.top - bawah - 4;
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
 }
+
+// dom string disamakan 1:1 dengan so.blade.php: 'po-table-wrap't membungkus HANYA isi
+// tabelnya dalam kotak scroll, sedangkan info+pagination ('i'/'p') ada DI LUAR kotak itu
+// supaya tidak ikut tergulung -- menggantikan moveDataTablePagination()/
+// .tb-pagination-outside yang dipakai sebelumnya untuk menyelesaikan masalah yang sama.
+const RSJ_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
 
 function renderTabelRows(rows) {
   if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
@@ -1801,9 +1742,9 @@ function reinitTabel() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
-    $('#tabel').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel', '#tabelPaginationOutside');
+    $('#tabel').DataTable({ dom: RSJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(rsjAturTinggiTabel, 0); } });
     HeaderEngine.bindEngineDom('tabel');
+    rsjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -1814,9 +1755,9 @@ function reinitTabel2() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
     renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel2', '#tabel2PaginationOutside');
+    $('#tabel2').DataTable({ dom: RSJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(rsjAturTinggiTabel, 0); } });
     HeaderEngine.bindEngineDom('tabel2');
+    rsjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel2 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -1833,6 +1774,8 @@ function buttonHeaderTable(key) {
 }
 
 $(document).ready(function(){
+
+      document.getElementById('breadcrumb').innerHTML = "Retur Surat Jalan"
 
       // #home/#tabel ("Retur SJ Belum Otorisasi") is the tab shown by default, so
       // initialize it last -- reinitTabel()/reinitTabel2() each end by binding
@@ -1853,16 +1796,31 @@ $(document).ready(function(){
       $('#nav-home-tab').on('shown.bs.tab', function () {
         HeaderEngine.activateEngineData('tabel');
         HeaderEngine.bindEngineDom('tabel');
+        rsjAturTinggiTabel();
       });
       $('#nav-profile-tab').on('shown.bs.tab', function () {
         HeaderEngine.activateEngineData('tabel2');
         HeaderEngine.bindEngineDom('tabel2');
+        rsjAturTinggiTabel();
       });
 
-      ['tabel', 'tabel2'].forEach(function (key) {
-        $('#' + key + '_length_visual').on('change', function () {
-          var len = Number(this.value);
-          $('#' + key).DataTable().page.len(len).draw();
+      // Shared toolbar controls (one search box + one Tampilkan dropdown for both tabs,
+      // matching so.blade.php's shared-toolbar pattern) instead of the old per-tab ones.
+      var page1Tables = ['#tabel', '#tabel2'];
+      var tabelFilterVisualTimeout;
+      $('#tabel_filter_visual').on('keyup', function () {
+        var value = this.value;
+        clearTimeout(tabelFilterVisualTimeout);
+        tabelFilterVisualTimeout = setTimeout(function () {
+          page1Tables.forEach(function (id) {
+            if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().search(value).draw(); }
+          });
+        }, 400);
+      });
+      $('#tabel_length_visual').on('change', function () {
+        var len = Number(this.value);
+        page1Tables.forEach(function (id) {
+          if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().page.len(len).draw(); }
         });
       });
 
@@ -3114,8 +3072,8 @@ function setNewNoBukti (ppn) {
   // const tabProfile = document.getElementById('nav-profile-tab');
 
   function setActiveTab(idNav) {
-    $(".nav-item").css("background-color", "#f8f9fa");
-    $(".nav-item").css("color", "#007bff");
+    $(".nav-item-page ").css("background-color", "#f8f9fa");
+    $(".nav-item-page ").css("color", "#007bff");
     console.log(idNav)
     document.getElementById(idNav).style.backgroundColor = '#007bff';
     document.getElementById(idNav).style.color = '#fff';
