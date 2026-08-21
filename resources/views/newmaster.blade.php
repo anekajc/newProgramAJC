@@ -330,7 +330,6 @@
   </div>
 </section>
 
-
 <!-- start modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data ) -->
       <div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
@@ -371,6 +370,57 @@
 
 <!-- Bootstrap -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.min.js"></script>
+
+<script>
+  // Bootstrap 5 dropped jQuery entirely, so it never registers the old $.fn.modal
+  // plugin -- but this app's pages (so.blade.php, suratjalan.blade.php,
+  // penawaranso.blade.php, and others using this layout) still open every picker/
+  // filter modal the Bootstrap-4 jQuery-plugin way: $('#id').modal('show'|'hide'|
+  // 'toggle') or $('#id').modal({backdrop:'static', ...}). Without this shim those
+  // calls throw "$(...).modal is not a function" and silently abort (no visible
+  // error since this layout's own keydown handler below blocks F12/Ctrl+Shift+I),
+  // which is why picker modals stopped opening. Event bindings like
+  // .on('shown.bs.modal', fn) don't need a shim -- Bootstrap 5 already dispatches
+  // those as real DOM events that bubble, which jQuery's .on() picks up natively;
+  // only the .modal(command) invocation itself needs bridging to bootstrap.Modal.
+  if (window.jQuery && window.bootstrap && !jQuery.fn.modal) {
+    jQuery.fn.modal = function (option) {
+      return this.each(function () {
+        var el = this;
+        var instance = bootstrap.Modal.getOrCreateInstance(el, typeof option === 'object' ? option : {});
+        if (typeof option !== 'string') { return; }
+
+        var wasShown = el.classList.contains('show');
+        instance[option]();
+
+        // Bootstrap 5's show()/hide() set their internal "shown" state (and fire
+        // data-bs-dismiss/Esc/backdrop-click wiring) synchronously right away --
+        // that part always works. But the actual DOM reveal/hide only happens
+        // inside a callback deferred until a CSS transitionend fires on the
+        // backdrop/dialog. If that event never fires (any CSS on the page nudging
+        // the fade transition can cause this), the callback -- and the visible
+        // change -- never runs: the backdrop still appears (dimmed page) but the
+        // dialog itself stays invisible, with no error. Force the DOM state here
+        // instead of waiting on that event; idempotent and harmless if Bootstrap's
+        // own callback already did it first.
+        if (option === 'show' || (option === 'toggle' && !wasShown)) {
+          el.style.display = 'block';
+          el.removeAttribute('aria-hidden');
+          el.setAttribute('aria-modal', 'true');
+          void el.offsetHeight; // force reflow so .show still transitions in
+          el.classList.add('show');
+        } else if (option === 'hide' || (option === 'toggle' && wasShown)) {
+          el.classList.remove('show');
+          setTimeout(function () {
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+            el.removeAttribute('aria-modal');
+          }, 200);
+        }
+      });
+    };
+  }
+</script>
 
 <!-- Alertify (needs CSS too) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
