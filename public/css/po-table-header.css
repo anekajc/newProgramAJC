@@ -13,7 +13,7 @@
  * halaman-halaman purchasing, jadi yang disalin hanya bagian yang dipakai
  * komponen, dengan scope khusus halaman ini:
  *
- *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 thead th.rt-th
+ *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 / #tabelso thead th.rt-th
  *   .tb-report .rt-bar              ->  #rtBar (satu elemen, dipindah lewat JS
  *                                       antara tabel yang sedang aktif - lihat
  *                                       poPindahBar() di purchaseOrder.blade.php)
@@ -44,17 +44,19 @@
   --sp-red:   #dc2626;  --sp-red-bg:   #fdeaea;
 }
 
-/* ============ Judul kolom (#tabel dan #tabel2) ============ */
+/* ============ Judul kolom (#tabel, #tabel2, #tabelso) ============ */
 
 /* Padding pindah ke .th-inner supaya area drag mengisi penuh sel. */
 #tabel thead th.rt-th,
-#tabel2 thead th.rt-th {
+#tabel2 thead th.rt-th,
+#tabelso thead th.rt-th {
   padding: 0;
   vertical-align: middle;
 }
 
 #tabel thead th.rt-th .th-inner,
-#tabel2 thead th.rt-th .th-inner {
+#tabel2 thead th.rt-th .th-inner,
+#tabelso thead th.rt-th .th-inner {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -63,13 +65,16 @@
 }
 
 #tabel thead th.rt-th .th-inner.dragging,
-#tabel2 thead th.rt-th .th-inner.dragging { opacity: .4; }
+#tabel2 thead th.rt-th .th-inner.dragging,
+#tabelso thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabel thead th.rt-th.drag-over .th-inner,
-#tabel2 thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
+#tabel2 thead th.rt-th.drag-over .th-inner,
+#tabelso thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabel thead th.rt-th .th-label,
-#tabel2 thead th.rt-th .th-label {
+#tabel2 thead th.rt-th .th-label,
+#tabelso thead th.rt-th .th-label {
   flex: 1 1 auto;
   min-width: 0;
   white-space: nowrap;
@@ -77,11 +82,13 @@
 
 /* kolom numerik: judul rata kanan seperti angkanya */
 #tabel thead th.rt-th.num .th-label,
-#tabel2 thead th.rt-th.num .th-label { text-align: right; }
+#tabel2 thead th.rt-th.num .th-label,
+#tabelso thead th.rt-th.num .th-label { text-align: right; }
 
 /* pegangan drag */
 #tabel thead th.rt-th .th-grip,
-#tabel2 thead th.rt-th .th-grip {
+#tabel2 thead th.rt-th .th-grip,
+#tabelso thead th.rt-th .th-grip {
   display: grid;
   grid-template-columns: repeat(2, 3px);
   gap: 3px;
@@ -91,7 +98,8 @@
 }
 
 #tabel thead th.rt-th .th-grip i,
-#tabel2 thead th.rt-th .th-grip i {
+#tabel2 thead th.rt-th .th-grip i,
+#tabelso thead th.rt-th .th-grip i {
   width: 3px;
   height: 3px;
   border-radius: 50%;
@@ -99,11 +107,13 @@
 }
 
 #tabel thead th.rt-th:hover .th-grip,
-#tabel2 thead th.rt-th:hover .th-grip { opacity: 1; }
+#tabel2 thead th.rt-th:hover .th-grip,
+#tabelso thead th.rt-th:hover .th-grip { opacity: 1; }
 
 /* tombol roda gigi */
 #tabel thead th.rt-th .th-gear,
-#tabel2 thead th.rt-th .th-gear {
+#tabel2 thead th.rt-th .th-gear,
+#tabelso thead th.rt-th .th-gear {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,12 +133,15 @@
 }
 
 #tabel thead th.rt-th:hover .th-gear,
-#tabel2 thead th.rt-th:hover .th-gear { opacity: 1; }
+#tabel2 thead th.rt-th:hover .th-gear,
+#tabelso thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabel thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear.active,
 #tabel2 thead th.rt-th .th-gear:hover,
-#tabel2 thead th.rt-th .th-gear.active {
+#tabel2 thead th.rt-th .th-gear.active,
+#tabelso thead th.rt-th .th-gear:hover,
+#tabelso thead th.rt-th .th-gear.active {
   opacity: 1;
   background: var(--rt-indigo-soft);
   color: var(--rt-indigo);
@@ -138,10 +151,11 @@
    Dengan .th-inner yang mengisi penuh sel, ikon itu bertabrakan dengan roda
    gigi, jadi digeser sedikit ke kiri. */
 #tabel thead th.rt-th,
-#tabel2 thead th.rt-th { background-position: right 26px center; }
+#tabel2 thead th.rt-th,
+#tabelso thead th.rt-th { background-position: right 26px center; }
 
 /* ============ Menu kolom (dipasang di <body>, position:fixed) ============
-   Disalin apa adanya dari report-table.css ï¿½ memang sudah tanpa scope,
+   Disalin apa adanya dari report-table.css � memang sudah tanpa scope,
    karena menunya di-appendChild ke document.body. */
 
 .rt-colmenu {
@@ -175,7 +189,7 @@
 
 .rt-colmenu .rt-colmenu-item:hover { background: var(--rt-bg); }
 
-/* baris stepper/switch bukan aksi tunggal ï¿½ jangan beri efek klik di seluruh baris */
+/* baris stepper/switch bukan aksi tunggal � jangan beri efek klik di seluruh baris */
 .rt-colmenu .rt-colmenu-item.is-static { cursor: default; }
 .rt-colmenu .rt-colmenu-item.is-static:hover { background: transparent; }
 
@@ -262,7 +276,7 @@
 
 #rtBar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
 
-/* Reset kolom ï¿½ aksi destruktif (menghapus pengaturan kolom tersimpan user),
+/* Reset kolom � aksi destruktif (menghapus pengaturan kolom tersimpan user),
    jadi diberi warna merah saat hover supaya beda dari tombol lain di bar. */
 #rtBar .rt-reset-btn { color: var(--rt-ink-soft); }
 
@@ -639,7 +653,8 @@
 }
 
 #tabel thead th,
-#tabel2 thead th {
+#tabel2 thead th,
+#tabelso thead th {
   position: sticky;
   top: 0;
   z-index: 20;

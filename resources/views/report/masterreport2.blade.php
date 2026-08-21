@@ -1,6 +1,6 @@
-@extends('report.newmaster2')
+@extends('report.newmaster2x')
 <!-- Font Awesome CDN -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
 rel="stylesheet">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@ rel="stylesheet">
 @yield('header2')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-6 text-left"> 
+    <div class="col-6 text-left">
       @yield('reportname')
     </div>
   </div>
@@ -39,33 +39,33 @@ rel="stylesheet">
 
                 <div class="row pr-3" style="display: flex; justify-content: right;">
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
                   margin-right: 8px;
-                  font-weight: 600; 
-                  text-transform: uppercase; 
+                  font-weight: 600;
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormFilterData()">Filter Data</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormCustomizeTable()">Customize Table</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="makeTable('REPORT')">Submit</button>
                 </div>
@@ -79,21 +79,21 @@ rel="stylesheet">
           <div id="showTableReport" style="display:none; background-color: white; padding: 10px" class="row mt-4 rounded">
             <div class="col-12 text-right">
               <button type="button" class="btn btn-success" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doExportTableToExcel('tabel')">Export to Excel</button>
               <button type="button" class="btn btn-danger" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doCloseTable()">Close Table</button>
             </div>
@@ -227,10 +227,10 @@ rel="stylesheet">
   var g_modeModal = "";
   var gmodal_customizetable = "customizetable";
   var gmodal_filterdata = "filterdata";
-  
+
   // === GRAND TOTAL FINAL  ===
   var gsum_isfinalgrandtotal = 1;
-  var gsum_colFinal = {}; 
+  var gsum_colFinal = {};
 
   var g_modeReport;
   var gcart_header = [];
@@ -273,7 +273,7 @@ rel="stylesheet">
       case gmodal_filterdata :
                  doShowReportFilter();
                  break;
-                              
+
       default :
                  makeTable('REPORT');
                  break;
@@ -295,7 +295,7 @@ rel="stylesheet">
       case gmodal_filterdata :
                  doCloseFormFilterData();
                  break;
-     
+
       default :
                 return;
     }
@@ -722,7 +722,7 @@ rel="stylesheet">
         if (v === "float" || v === "double" || v === "decimal") return "float";
         if (v === "varchar" || v === "string" || v === "text") return "varchar";
     }
-    return "varchar"; 
+    return "varchar";
   }
 
   function doSetRowTableWithGrouping(data, tempcart) {
@@ -843,7 +843,7 @@ rel="stylesheet">
 
     let needGrouping = (typeof g_needGrouping !== "undefined") ? g_needGrouping : false;
 
-    let avgCol = getAverageColumn(tempcart); 
+    let avgCol = getAverageColumn(tempcart);
     let needAverage = avgCol !== null;
     let avgSum = 0;
     let avgCnt = 0;
@@ -1100,7 +1100,7 @@ rel="stylesheet">
         rowHeader += '  <th scope="col" style="border: 1px solid black;">No</th>';
       } else {
         rowHeader += '  <th scope="col" style="border: 1px solid black;">' + item[1] + '</th>';
-        if ((item[4] === 1) && (item[3] == "float" || item[3] == "int")) { 
+        if ((item[4] === 1) && (item[3] == "float" || item[3] == "int")) {
           gsum_posArray.push(posCount);
         }
       }
@@ -1261,7 +1261,7 @@ rel="stylesheet">
               rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
             } else if (itemcart[3] == "int") {
               rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _value + '</td>';
-            } 
+            }
           } else {
             rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;"></td>';
           }
@@ -1420,7 +1420,7 @@ rel="stylesheet">
       if (_match) {
         cart_filterHeader.push(_match);
       }
-    });    
+    });
 
     // HEADER TABLE FILTER
     let _str = '<tr>';

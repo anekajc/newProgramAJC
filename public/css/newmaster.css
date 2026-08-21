@@ -98,23 +98,17 @@
       opacity: 0; transition: opacity 0.18s, transform 0.2s; flex-shrink: 0;
     }
     .sidebar:hover .nav-chevron { opacity: 1; }
-    .nav-group.open > .nav-item .nav-chevron { transform: rotate(90deg); color: rgba(255,255,255,0.6); }
+    .nav-group.open > .nav-item .nav-chevron,
+    .nav-group:hover > .nav-item .nav-chevron { transform: rotate(90deg); color: rgba(255,255,255,0.6); }
 
     .nav-children {
       max-height: 0; overflow: hidden;
       transition: max-height 0.25s ease;
       background: rgba(0,0,0,0.15);
     }
-    /* Click-to-open only (via toggleModuleSubmenu(), bound to the label/
-       chevron click) -- was .nav-group:hover .nav-children, which opened
-       the submenu just from mousing over the module row. */
+    .nav-group:hover .nav-children,
     .nav-group.open .nav-children { max-height: 600px; }
     .sidebar:not(:hover) .nav-children { max-height: 0 !important; }
-
-    /* .nav-icon and .nav-label are independently clickable now (icon opens
-       the module home, label/chevron toggle the submenu list) -- keep that
-       distinction visible on hover. */
-    .nav-icon:hover { opacity: 1; }
 
     .nav-child {
       display: flex; align-items: center;
@@ -169,14 +163,21 @@
     }
     .logout-link:hover { opacity: 0.75; }
 
-    /* CONTENT */
+    /* CONTENT (shell) */
     .content { flex: 1; overflow-y: auto; padding: 28px 32px; height: 0; }
 
-    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .page-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+    /* -- Demo-page content kit below -- these class names (.card, .btn, .btn-danger,
+       .badge, .data-table, ...) collide with Bootstrap 4, which every page in this repo
+       already uses (gudang alone has 24 .card and .btn-danger on ~20 pages). Nothing
+       here renders the reference's card-grid/toolbar markup, so these rules are scoped
+       under an opt-in ".nm-ui" wrapper instead of applying globally. Add that class to
+       a container only if you actually build a page using this kit. See
+       docs/sidebar-navigation-migration.md §9. */
+    .nm-ui .page-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .nm-ui .page-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
 
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-    .card {
+    .nm-ui .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+    .nm-ui .card {
       background: var(--white); border-radius: var(--radius);
       padding: 24px 16px 20px;
       display: flex; flex-direction: column; align-items: center;
@@ -185,58 +186,58 @@
       transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
       text-align: center;
     }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); border-color: transparent; }
-    .card-icon-wrap { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-    .card-icon-wrap svg { width: 28px; height: 28px; }
-    .card-label { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.3; }
+    .nm-ui .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); border-color: transparent; }
+    .nm-ui .card-icon-wrap { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .nm-ui .card-icon-wrap svg { width: 28px; height: 28px; }
+    .nm-ui .card-label { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.3; }
 
-    .c-blue   { background:#EFF6FF; color:#1D4ED8; }
-    .c-green  { background:#F0FDF4; color:#15803D; }
-    .c-orange { background:#FFF7ED; color:#C2410C; }
-    .c-purple { background:#F5F3FF; color:#6D28D9; }
-    .c-teal   { background:#F0FDFA; color:#0F766E; }
-    .c-pink   { background:#FDF2F8; color:#9D174D; }
-    .c-yellow { background:#FEFCE8; color:#A16207; }
-    .c-red    { background:#FEF2F2; color:#B91C1C; }
-    .c-indigo { background:#EEF2FF; color:#3730A3; }
-    .c-cyan   { background:#ECFEFF; color:#0E7490; }
+    .nm-ui .c-blue   { background:#EFF6FF; color:#1D4ED8; }
+    .nm-ui .c-green  { background:#F0FDF4; color:#15803D; }
+    .nm-ui .c-orange { background:#FFF7ED; color:#C2410C; }
+    .nm-ui .c-purple { background:#F5F3FF; color:#6D28D9; }
+    .nm-ui .c-teal   { background:#F0FDFA; color:#0F766E; }
+    .nm-ui .c-pink   { background:#FDF2F8; color:#9D174D; }
+    .nm-ui .c-yellow { background:#FEFCE8; color:#A16207; }
+    .nm-ui .c-red    { background:#FEF2F2; color:#B91C1C; }
+    .nm-ui .c-indigo { background:#EEF2FF; color:#3730A3; }
+    .nm-ui .c-cyan   { background:#ECFEFF; color:#0E7490; }
 
-    .subpage { display: none; flex-direction: column; gap: 20px; }
-    .subpage.visible { display: flex; }
+    .nm-ui .subpage { display: none; flex-direction: column; gap: 20px; }
+    .nm-ui .subpage.visible { display: flex; }
 
-    .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: var(--blue); color: white; }
-    .btn-outline { background: white; color: var(--text-main); border: 1.5px solid var(--border); }
-    .btn-danger  { background: #FEF2F2; color: #B91C1C; border: 1.5px solid #FECACA; }
+    .nm-ui .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .nm-ui .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
+    .nm-ui .btn:hover { opacity: 0.85; }
+    .nm-ui .btn-primary { background: var(--blue); color: white; }
+    .nm-ui .btn-outline { background: white; color: var(--text-main); border: 1.5px solid var(--border); }
+    .nm-ui .btn-danger  { background: #FEF2F2; color: #B91C1C; border: 1.5px solid #FECACA; }
 
-    .data-table-wrap { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table thead th {
+    .nm-ui .data-table-wrap { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+    .nm-ui .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .nm-ui .data-table thead th {
       background: #F9FAFB; padding: 11px 16px;
       text-align: left; font-weight: 600; font-size: 12px;
       color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em;
       border-bottom: 1px solid var(--border);
     }
-    .data-table tbody td { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; color: var(--text-main); }
-    .data-table tbody tr:last-child td { border-bottom: none; }
-    .data-table tbody tr:hover td { background: #F9FAFB; }
+    .nm-ui .data-table tbody td { padding: 12px 16px; border-bottom: 1px solid #F3F4F6; color: var(--text-main); }
+    .nm-ui .data-table tbody tr:last-child td { border-bottom: none; }
+    .nm-ui .data-table tbody tr:hover td { background: #F9FAFB; }
 
-    .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
-    .badge-green  { background: #DCFCE7; color: #15803D; }
-    .badge-blue   { background: #DBEAFE; color: #1D4ED8; }
-    .badge-gray   { background: #F3F4F6; color: #6B7280; }
-    .badge-orange { background: #FEF3C7; color: #B45309; }
-    .badge-red    { background: #ffe0e0; color: #e30000; }
+    .nm-ui .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
+    .nm-ui .badge-green  { background: #DCFCE7; color: #15803D; }
+    .nm-ui .badge-blue   { background: #DBEAFE; color: #1D4ED8; }
+    .nm-ui .badge-gray   { background: #F3F4F6; color: #6B7280; }
+    .nm-ui .badge-orange { background: #FEF3C7; color: #B45309; }
+    .nm-ui .badge-red    { background: #ffe0e0; color: #e30000; }
 
-    .summary-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 4px; }
-    .summary-card { background: white; border-radius: var(--radius); padding: 18px 20px; border: 1px solid var(--border); }
-    .summary-card .sc-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
-    .summary-card .sc-value { font-size: 20px; font-weight: 700; }
-    .summary-card .sc-sub   { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+    .nm-ui .summary-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 4px; }
+    .nm-ui .summary-card { background: white; border-radius: var(--radius); padding: 18px 20px; border: 1px solid var(--border); }
+    .nm-ui .summary-card .sc-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+    .nm-ui .summary-card .sc-value { font-size: 20px; font-weight: 700; }
+    .nm-ui .summary-card .sc-sub   { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
 
-    .grid-view { display: none; }
-    .grid-view.visible { display: block; }
-    .list-view { display: none; }
-    .list-view.visible { display: block; }
+    .nm-ui .grid-view { display: none; }
+    .nm-ui .grid-view.visible { display: block; }
+    .nm-ui .list-view { display: none; }
+    .nm-ui .list-view.visible { display: block; }

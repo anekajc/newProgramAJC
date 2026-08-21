@@ -15,8 +15,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal">
-                    </button>
+                    {{-- PAKAI data-bs-dismiss (Bootstrap 5), JANGAN data-dismiss (Bootstrap 4).
+                         Halaman report memuat dua Bootstrap: BS 4.0.0 (lokal, newmaster2) dan
+                         BS 5.3.3 (CDN, masterreport2). BS5 mendaftarkan plugin jQuery-nya saat
+                         DOMContentLoaded, jadi SESUDAH BS4 yang mendaftar langsung saat script
+                         dieksekusi — BS5 menang, dan itu berlaku juga untuk $("...").modal(...)
+                         di script bawah. Karena modal ini dibuka & ditutup lewat BS5, cukup
+                         data-bs-dismiss. Sudah diuji di browser. --}}
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <table id="tabelSelect" class="table table-bordered table-striped">

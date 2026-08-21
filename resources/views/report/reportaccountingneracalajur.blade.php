@@ -12,7 +12,6 @@
         <div class="toolbar">
           <div>
             <div class="page-title">Neraca Lajur</div>
-            <div class="page-sub" id="pageSubLine">Dicetak oleh:  {{ $akses['user'] }} &nbsp;<i class="bi bi-dot"></i>&nbsp; <span id="printTime"></span></div>
           </div>
 
           <!-- Period selector (populated dynamically by populatePeriodSelectors) -->
@@ -24,11 +23,6 @@
 
           <!-- Search -->
           <input class="search-inp" type="text" placeholder="Cari akun..." oninput="applyFilters()">
-
-          <!-- Zero toggle -->
-          <button class="tgl-btn" id="zeroToggle" onclick="toggleZero()">
-            <span class="tgl-dot"></span> Sembunyikan nol
-          </button>
 
           <!-- Export -->
           <div class="export-wrap" id="exportWrap">
@@ -180,13 +174,13 @@
     console.log(val)
     // hapus centang dulu
     $('#dropdownReportMode .dropdown-item').each(function() {
-      let itemText = $(this).text().replace(' ?', '').trim();
+      let itemText = $(this).text().replace(' ✔', '').trim();
       $(this).text(itemText);
     });
 
     // tambah centang di item terpilih
     $(`#dropdownReportMode .dropdown-item[data-value='${val}']`).each(function() {
-      $(this).html(`${$(this).text()} <span class="checkmark-red">?</span>`);
+      $(this).html(`${$(this).text()} <span class="checkmark-red">✔</span>`);
     });
 
     // update g_modeReport sesuai pilihan order & detail/rekap
@@ -289,7 +283,7 @@
     doShowCustomize();
   }
 
-  /* -- DATA (populated from Sp_NerajaLajur via makeTable) -- */
+  /* ── DATA (populated from Sp_NerajaLajur via makeTable) ── */
     let accountGroups = [];
 
     const GROUP_META = {
@@ -361,10 +355,10 @@
         .map(k => Object.assign({}, GROUP_META[k], { accounts: buckets[k] }));
     }
 
-    /* -- STATE -- */
-    let hideZero = false, typeFilter = 'all', searchStr = '', currentPeriod = '6/2026';
+    /* ── STATE ── */
+    let typeFilter = 'all', searchStr = '', currentPeriod = '6/2026';
 
-    /* -- FORMAT -- */
+    /* ── FORMAT ── */
     // fmtN / fmtFull (full Rupiah, e.g. "Rp 3.500.000") live in
     // public/js/report-table.js so all report* pages share one formatter.
     // Single Saldo Awal / Akhir values (Kredit columns are unused)
@@ -376,30 +370,33 @@
              a.akD === 0;
     }
 
-    /* -- KPI -- */
+    /* ── KPI ── */
     function renderKpi() {
       const el = document.getElementById('kpiStrip');
       el.innerHTML = accountGroups.map(g => {
-        // Net Saldo Akhir for the group (signed sum, matching the table subtotal) —
-        // not a sum of absolute values.
-        const saldoAkhir = g.accounts.reduce((s, a) => s + netAkhir(a), 0);
+        // Pendapatan (rev) & Beban (exp) show the period movement (Mutasi + Penyesuaian):
+        // MD - MK + JPD - JPK. All other groups show the net Saldo Akhir (signed sum,
+        // matching the table subtotal) — not a sum of absolute values.
+        const saldoAkhir = (g.key === 'rev' || g.key === 'exp')
+          ? g.accounts.reduce((s, a) => s + (a.mD - a.mK + a.jpD - a.jpK), 0)
+          : g.accounts.reduce((s, a) => s + netAkhir(a), 0);
         const count = g.accounts.length;
         return `<div class="kpi-card" style="border-left:3px solid ${g.color}">
       <div class="kpi-dot" style="background:${g.color}"></div>
       <div class="kpi-body">
         <div class="kpi-label">${g.label}</div>
-        <div class="kpi-val" style="color:${g.color}">${fmtN(saldoAkhir)}</div>
+        <div class="kpi-val" style="color:${g.color}">${fmtN(Math.abs(saldoAkhir))}</div>
         <div class="kpi-count">${count} akun</div>
       </div>
     </div>`;
       }).join('');
     }
 
-  /* -- RENDER TABLE -- */
+  /* ── RENDER TABLE ── */
     function render() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-      let visibleCount = 0, zeroHidden = 0;
+      let visibleCount = 0;
 
       const search = document.querySelector('.search-inp')?.value?.toLowerCase() || '';
 
@@ -407,7 +404,6 @@
         if (typeFilter !== 'all' && typeFilter !== g.key) return;
 
         const filteredAccs = g.accounts.filter(a => {
-          if (hideZero && isZero(a)) { zeroHidden++; return false; }
           if (search && !a.code.includes(search) && !a.name.toLowerCase().includes(search)) return false;
           return true;
         });
@@ -491,18 +487,10 @@
       }
 
       // footer
-      const hidden = zeroHidden;
-      let msg = `Menampilkan ${visibleCount} akun`;
-      if (hidden > 0) msg += ` · ${hidden} akun nol disembunyikan`;
-      document.getElementById('footerLabel').textContent = msg;
+      document.getElementById('footerLabel').textContent = `Menampilkan ${visibleCount} akun`;
     }
 
-    /* -- CONTROLS -- */
-    function toggleZero() {
-      hideZero = !hideZero;
-      document.getElementById('zeroToggle').classList.toggle('on', hideZero);
-      render();
-    }
+    /* ── CONTROLS ── */
     function setTypeFilter(type, btn) {
       typeFilter = type;
       document.querySelectorAll('.tf').forEach(b => b.classList.remove('on'));
@@ -511,7 +499,7 @@
     }
     function applyFilters() { render(); }
 
-    /* -- PERIOD PICKER -- */
+    /* ── PERIOD PICKER ── */
     const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
@@ -540,7 +528,7 @@
       makeTable('REPORT');
     }
 
-    /* -- EXPORT -- */
+    /* ── EXPORT ── */
     function toggleExport() {
       document.getElementById('exportDrop').classList.toggle('open');
     }
@@ -564,23 +552,22 @@
       accountGroups.forEach(g => {
         if (typeFilter !== 'all' && typeFilter !== g.key) return;
         g.accounts.forEach(a => {
-          if (hideZero && isZero(a)) return;
           rows.push([a.code, a.name, a.awD, a.mD, a.mK, a.jpD, a.jpK, a.rlD, a.rlK, a.akD]);
         });
       });
       const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
       const ext = (fmt === 'Excel') ? 'xls' : 'csv';
-      const blob = new Blob(['?' + csv], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'NeracaLajur_' + currentPeriod.replace('/', '-') + '.' + ext;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast('??', 'Data diekspor sebagai ' + fmt);
+      showToast('📄', 'Data diekspor sebagai ' + fmt);
     }
 
-    /* -- DRILL DOWN (real ledger via Sp_LapJurnal) -- */
+    /* ── DRILL DOWN (real ledger via Sp_LapJurnal) ── */
     function openDrill(acc, group) {
       const awal = netAwal(acc);
       const sa = netAkhir(acc);
@@ -676,7 +663,7 @@
     // and the shared fmtRp / invDate / fmtDMY helpers now live in
     // public/js/report-table.js, configured via window.ReportTableConfig above.
 
-    /* -- TOAST -- */
+    /* ── TOAST ── */
     function showToast(icon, msg) {
       const t = document.getElementById('toast');
       document.getElementById('ti').textContent = icon;
@@ -684,8 +671,6 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3000);
     }
-
-    document.getElementById('printTime').textContent = new Date().toLocaleString('id-ID');
 
 </script>
 

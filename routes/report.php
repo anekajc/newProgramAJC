@@ -610,8 +610,6 @@ Route::get('/laporanstockkartustock_doReport', [LaporanStockKartuStockController
 Route::get('/reportaccountingkasharian', [LaporanAccountingKasHarianController::class, 'index']);
 Route::get('/reportaccountingkasharian_loadperkiraan', [LaporanAccountingKasHarianController::class, 'loadPerkiraan']);
 Route::get('/reportaccountingkasharian_doReport', [LaporanAccountingKasHarianController::class, 'doReport']);
-Route::get('/reportaccountingkasharian_doFilter', [LaporanAccountingKasHarianController::class, 'doFilter']);
-Route::get('/reportaccountingkasharian_doReportFilter', [LaporanAccountingKasHarianController::class, 'doReportFilter']);
 Route::get('/reportaccountingkasharian_saldoawal',[LaporanAccountingKasHarianController::class, 'doReportSaldoAwal']);
 
 // Bank Harian
