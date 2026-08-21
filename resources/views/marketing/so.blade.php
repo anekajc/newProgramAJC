@@ -513,11 +513,11 @@
 @endsection
 @section('content')
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+<link rel="stylesheet" href="{{ URL::asset('css/tableMaster2.css') }}">
 
-<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
+<link rel="stylesheet" href="{{ URL::asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
 
-<link rel="stylesheet" href="{{ asset('css/so-table-header.css') }}?v={{ filemtime(public_path('css/so-table-header.css')) }}">
+<link rel="stylesheet" href="{{ URL::asset('css/so-table-header.css') }}?v={{ filemtime(public_path('css/so-table-header.css')) }}">
 
 <style>
   .toolbar {
