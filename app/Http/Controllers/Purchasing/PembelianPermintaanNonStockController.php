@@ -10,7 +10,7 @@ use App\Model\NewAksesMenu;
 use App\Model\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
-use App\Model\VwPPL;
+use App\Modesl\VwPPL;
 use App\Model\DBFLMENU;
 
 

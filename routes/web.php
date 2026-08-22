@@ -63,7 +63,7 @@ Route::get('/spgetstockakhir', [GlobalController::class, 'getStockAkhir'])->midd
 
 require __DIR__.'/accounting.php';
 require __DIR__.'/marketing.php';
-// require __DIR__.'/gudang.php';
+require __DIR__.'/gudang.php';
 require __DIR__.'/purchasing.php';
 require __DIR__.'/master.php';
 require __DIR__.'/report.php';
