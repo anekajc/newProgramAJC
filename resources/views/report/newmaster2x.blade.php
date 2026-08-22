@@ -10,60 +10,60 @@
     // chain of ancestor GROUPS down to the current page recursively, rather than
     // hand-checking a fixed number of levels. Tracked by KODEMENU (always present and
     // unique per row — used throughout NewMenuController's own hierarchy building),
-    // not href: several pure category-header rows share a blank href, and href-based
-    // path membership would let those collide with each other.
-    $activePath = [];
+// not href: several pure category-header rows share a blank href, and href-based
+// path membership would let those collide with each other.
+$activePath = [];
 
-    $findPath = function ($nodes, $target) use (&$findPath) {
-        foreach ($nodes as $node) {
-            $nodeHref = trim($node->href ?? '', '/');
-            if ($nodeHref !== '' && strcasecmp($nodeHref, $target) === 0) {
-                return []; // matched leaf itself — no ancestor groups left to add here
-            }
-            // ?? []: NewMenuController::getMenuL0Report() only assigns ->child to
-            // menu0/menu1/menu2 -- the deepest level (menu3) is pushed into its
-            // parent's child array but never gets ->child set on itself. Reading it
-            // there returns null (Eloquent's magic __get), and count(null) is a fatal
-            // TypeError under PHP 8. Missing child is structurally "no children" here
-            // (menu3 is the deepest level in this schema), so default to [].
-            if (count($node->child ?? []) > 0) {
-                $childPath = $findPath($node->child ?? [], $target);
-                if ($childPath !== null) {
-                    return array_merge([$node['KODEMENU']], $childPath);
-                }
-            }
+$findPath = function ($nodes, $target) use (&$findPath) {
+    foreach ($nodes as $node) {
+        $nodeHref = trim($node->href ?? '', '/');
+        if ($nodeHref !== '' && strcasecmp($nodeHref, $target) === 0) {
+            return []; // matched leaf itself — no ancestor groups left to add here
         }
-        return null;
-    };
-
-    if ($currentHref !== '') {
-        foreach ($akses['menul0'] as $m0) {
-            $path = $findPath([$m0], $currentHref);
-            if ($path !== null) {
-                $activePath = $path;
-                break;
+        // ?? []: NewMenuController::getMenuL0Report() only assigns ->child to
+        // menu0/menu1/menu2 -- the deepest level (menu3) is pushed into its
+        // parent's child array but never gets ->child set on itself. Reading it
+            // there returns null (Eloquent's magic __get), and count(null) is a fatal
+        // TypeError under PHP 8. Missing child is structurally "no children" here
+        // (menu3 is the deepest level in this schema), so default to [].
+        if (count($node->child ?? []) > 0) {
+            $childPath = $findPath($node->child ?? [], $target);
+            if ($childPath !== null) {
+                return array_merge([$node['KODEMENU']], $childPath);
             }
         }
     }
+    return null;
+};
 
-    // Icon dictionary keyed by Keterangan — shared vocabulary with the purchasing
-    // sidebar (docs/sidebar-navigation-migration.md §3.4): DBMENUREPORT's top-level
+if ($currentHref !== '') {
+    foreach ($akses['menul0'] as $m0) {
+        $path = $findPath([$m0], $currentHref);
+        if ($path !== null) {
+            $activePath = $path;
+            break;
+        }
+    }
+}
+
+// Icon dictionary keyed by Keterangan — shared vocabulary with the purchasing
+// sidebar (docs/sidebar-navigation-migration.md §3.4): DBMENUREPORT's top-level
     // Keterangan values are the same module names as DBMENU's.
-    $iconMap = [
-        'Berkas' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>',
-        'Master' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
-        'Accounting' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path stroke-linecap="round" d="M1 10h22"/></svg>',
-        'Pengadaan' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line stroke-linecap="round" x1="3" y1="6" x2="21" y2="6"/><path stroke-linecap="round" d="M16 10a4 4 0 01-8 0"/></svg>',
-        'Marketing' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline stroke-linecap="round" points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline stroke-linecap="round" points="17 6 23 6 23 12"/></svg>',
-        'Gudang' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" d="M9 22V12h6v10"/></svg>',
-        'Report' =>
-            '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+$iconMap = [
+    'Berkas' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>',
+    'Master' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+    'Accounting' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path stroke-linecap="round" d="M1 10h22"/></svg>',
+    'Pengadaan' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line stroke-linecap="round" x1="3" y1="6" x2="21" y2="6"/><path stroke-linecap="round" d="M16 10a4 4 0 01-8 0"/></svg>',
+    'Marketing' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline stroke-linecap="round" points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline stroke-linecap="round" points="17 6 23 6 23 12"/></svg>',
+    'Gudang' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" d="M9 22V12h6v10"/></svg>',
+    'Report' =>
+        '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M18 20V10M12 20V4M6 20v-6"/></svg>',
     ];
 @endphp
 <!DOCTYPE html>
@@ -119,7 +119,7 @@
 
     <!-- Document Title
   ============================================= -->
-    <title >@yield('title', $akses['namamenu'])</title>
+    <title>@yield('title', $akses['namamenu'])</title>
 
     @yield('css')
     <style>
