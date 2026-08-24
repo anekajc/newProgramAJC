@@ -63,6 +63,273 @@
 
 #content { padding-top: 12px; }
 
+{{-- Everything below this line, up to the closing style tag, is copied verbatim
+     from marketing/so.blade.php's own @section('css') (which itself copied it
+     from purchaseOrder.blade.php) -- only the id list was retargeted from
+     so.blade.php's #tabel_oto/#tabel7 to this page's actual table ids
+     (#tabel/#tabel2/#tabel3), the same widening pattern so.blade.php used.
+     po-table-header.css only hardcodes its .rt-th drag/gear + header styling
+     for #tabel/#tabel2/#tabel7, so #tabel3 ("Invoice Sudah Diotorisasi") was
+     rendering completely unstyled -- these rules restore the same look. --}}
+#tabel2 td:first-child,
+#tabel3 td:first-child {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+#tabel td:first-child .btn,
+#tabel2 td:first-child .btn,
+#tabel3 td:first-child .btn,
+#tabel_add td:last-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+#tabel td:first-child .btn:hover,
+#tabel2 td:first-child .btn:hover,
+#tabel3 td:first-child .btn:hover,
+#tabel_add td:last-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+#tabel td:first-child .btn-success,
+#tabel2 td:first-child .btn-success,
+#tabel3 td:first-child .btn-success,
+#tabel_add td:last-child .btn-success {
+  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+}
+
+#tabel td:first-child .btn-warning,
+#tabel2 td:first-child .btn-warning,
+#tabel3 td:first-child .btn-warning,
+#tabel_add td:last-child .btn-warning {
+  color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+}
+
+#tabel td:first-child .btn-primary,
+#tabel2 td:first-child .btn-primary,
+#tabel3 td:first-child .btn-primary,
+#tabel_add td:last-child .btn-primary {
+  color: #2563eb; border-color: #cfdcff; background: #e8edff;
+}
+
+#tabel td:first-child .btn-danger,
+#tabel2 td:first-child .btn-danger,
+#tabel3 td:first-child .btn-danger,
+#tabel_add td:last-child .btn-danger {
+  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+}
+
+#tabel td:first-child .btn-info,
+#tabel2 td:first-child .btn-info,
+#tabel3 td:first-child .btn-info,
+#tabel_add td:last-child .btn-info {
+  color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
+}
+
+#tabel thead th,
+#tabel2 thead th,
+#tabel3 thead th,
+#tabel_data_header th,
+#addTable_data_header th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#tabel tbody tr:nth-of-type(odd),
+#tabel2 tbody tr:nth-of-type(odd),
+#tabel3 tbody tr:nth-of-type(odd),
+#tabel_add tbody tr:nth-of-type(odd),
+#detailTable tbody tr:nth-of-type(odd) {
+  background-color: #fbfbfc;
+}
+
+#tabel tbody tr:hover,
+#tabel2 tbody tr:hover,
+#tabel3 tbody tr:hover,
+#tabel_add tbody tr:hover,
+#detailTable tbody tr:hover {
+  background-color: #f5f3ff;
+}
+
+#tabel2.table-bordered th,
+#tabel2.table-bordered td,
+#tabel3.table-bordered th,
+#tabel3.table-bordered td {
+  border-color: #e7e9ee !important;
+}
+
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
+
+.btn-histori-harga {
+  background-color: #e7f7ed;
+  border-color: #cdebd7;
+  color: #16a34a;
+}
+
+.btn-histori-harga:hover,
+.btn-histori-harga:focus {
+  background-color: #d8f0e2;
+  border-color: #b6e0c6;
+  color: #15803d;
+}
+
+.btn-histori-harga:active {
+  background-color: #c8e9d5 !important;
+  border-color: #a5d8b8 !important;
+  color: #15803d !important;
+}
+
+.btn-batal-add {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.btn-batal-add:hover,
+.btn-batal-add:focus {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #343a40;
+}
+
+.btn-batal-add:active {
+  background-color: #dee2e6 !important;
+  border-color: #ced4da !important;
+  color: #343a40 !important;
+}
+
+.po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card);
+  border: 1.5px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+#tabel_wrapper,
+#tabel2_wrapper,
+#tabel3_wrapper {
+  position: relative;
+}
+
+#tabel_wrapper > .dataTables_processing,
+#tabel2_wrapper > .dataTables_processing,
+#tabel3_wrapper > .dataTables_processing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, .62);
+  z-index: 40;
+  animation: poMunculLoading .34s ease-out both;
+}
+
+@keyframes poMunculLoading {
+  0%, 45% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.po-loading-chip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(31, 36, 48, .92);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+}
+
+.po-loading-spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: poPutarLoading .6s linear infinite;
+}
+
+@keyframes poPutarLoading {
+  to { transform: rotate(360deg); }
+}
+
 .tab-card {
   display: block !important;
   align-items: flex-start !important;
@@ -455,12 +722,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-6 text-left">
-            <h1>Form Add</h1>
+            
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+            <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -475,8 +742,6 @@
 
       </div>
       <!-- <h5 class="modal-title" id="modalTitleDetail">Detail</h5> -->
-
-
 
 
     <div id="" class="mt-4">
@@ -581,8 +846,8 @@
 
     <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
 
-          <table id="addTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="addTable" class="data-table"  >
+            <thead id="addTable_data_header" class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">v</th>
                 <th style="padding: 4px 12px;" scope="col">No SPB</th>
@@ -591,7 +856,6 @@
 
               </tr>
             </thead>
-
 
             <tbody id="addTableData" class="" >
               <tr >
@@ -630,12 +894,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-6 text-left">
             <h1>Form Koreksi</h1>
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+            <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -946,10 +1210,10 @@
     <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
 
           <table id="koreksiTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+            <thead class="text-center">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Kode brg</th>
-                <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+                <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Produk</th>
                 <th style="padding: 4px 12px;" scope="col">No SPB</th>
                 <th style="padding: 4px 12px;" scope="col">Qty</th>
@@ -1076,12 +1340,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-6 text-left">
             <h1>Form Detail</h1>
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+            <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -1350,8 +1614,8 @@
 
     <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
 
-          <table id="detailTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="detailTable" class="data-table"  >
+            <thead id="tabel_data_header" class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode brg</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
@@ -1460,12 +1724,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-6 text-left">
             <h1>Form Detail</h1>
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+            <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -1654,12 +1918,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-6 text-left">
             <h1>Form Otorisasi</h1>
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg" style="
+            <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -4119,12 +4383,7 @@ function refreshDataTableKoreksifirstadd (nobukti , tipeRefresh = '') {
 
 }
 
-
-
-
-
 function buttonDetail (nobukti) {
-  console.log('buttonDetail', nobukti)
 
   let _token = $("#_token").val()
 
@@ -4294,7 +4553,6 @@ function buttonCloseFormAddDetail () {
   $('#page1').show();
 }
 
-
 function loadAll () {
   console.log('loadAll')
           $.ajax({
@@ -4308,7 +4566,6 @@ function loadAll () {
               $('#tabel').DataTable().destroy();
 
               let rowTable = ''
-
 
               res.tempOutstanding.forEach((item, i) => {
                 rowTable += `<tr>
