@@ -36,6 +36,22 @@
     // can share a blank href, and href-based matching would let those collide.
     $isOnPath = in_array($node['KODEMENU'], $activePath, true);
     $isCurrent = $nodeHref !== '' && strcasecmp($nodeHref, $currentHref) === 0;
+
+    // DBMENUREPORT.href holds a BARE route slug ("reportaccountinghutangkartu"), never
+    // an absolute path, so it has to be resolved through url() -- the same base-URL
+    // prefixing newmaster.blade.php's goTo() applies to the sidebar it builds from
+    // /getmenu. Emitting the raw slug only happens to work while the app is served
+    // from the domain root; under a subdirectory deploy every one of these links 404s.
+    // ($nodeHref is already trimmed of leading slashes above, matching goTo()'s
+    // href.replace(/^\//, '').)
+    //
+    // 238 DBMENUREPORT rows use "#" as a placeholder href (category headers, plus a
+    // number of childless rows that therefore render as leaves here). Raw-href markup
+    // made those harmless no-ops -- clicking just set the fragment -- but url('#')
+    // resolves to the app home, which would turn every placeholder into a surprise
+    // navigation away from the page. Keep them non-clickable instead: null $navUrl
+    // means the onclick attribute is omitted entirely.
+    $navUrl = ($nodeHref !== '' && $nodeHref !== '#') ? url($nodeHref) : null;
 @endphp
 
 @if ($depth === 0)
@@ -65,7 +81,7 @@
     @else
         {{-- Top-level entry with no children: a single clickable row, no chevron/children. --}}
         <div class="nav-group {{ $isCurrent ? 'active' : '' }}">
-            <div class="nav-item" onclick="window.location.href='{{ $node->href }}'">
+            <div class="nav-item" @if ($navUrl) onclick="window.location.href='{{ $navUrl }}'" @endif>
                 <span class="nav-icon">{!! $iconMap[$node['Keterangan']] ?? '' !!}</span>
                 <span class="nav-label">{{ $node['Keterangan'] }}</span>
             </div>
@@ -86,7 +102,7 @@
         </div>
     @else
         <div class="nav-child {{ $isCurrent ? 'active-child' : '' }}"
-            onclick="window.location.href='{{ $node->href }}'">
+            @if ($navUrl) onclick="window.location.href='{{ $navUrl }}'" @endif>
             {{ $node['Keterangan'] }}
         </div>
     @endif

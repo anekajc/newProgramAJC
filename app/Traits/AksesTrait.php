@@ -11,6 +11,12 @@ use Carbon\Carbon;use Illuminate\Support\Arr;
 
 trait AksesTrait {
 	public function cekAkses($href) {
+		// Sesi habis / user sudah logout: jangan sentuh Auth::user() (null),
+		// cukup kembalikan flag supaya controller me-redirect ke halaman login.
+		if (!\Auth::check()) {
+			return array('userLoggedOut' => true);
+		}
+
 		$akses = array('userLoggedOut' => false);
 
     	// $periode = NewPeriode::where('USERID' , \Auth::User()->username)->first();
@@ -52,6 +58,10 @@ trait AksesTrait {
 	}
 
 	public function getAksesMenu($href) {
+		if (!\Auth::check()) {
+			return array();
+		}
+
 		return DB::connection('SML')->select('select fl.* from DBFLMENUREPORT fl left outer join DBMENUREPORT m on (fl.L1 = m.KODEMENU) where fl.UserID = :user and m.href = :href' , ['user' => \Auth::User()->username, 'href' => $href]);
 	}
 

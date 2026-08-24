@@ -310,11 +310,19 @@ $iconMap = [
                             @if (count($m2->child ?? []) > 0)
                                 <div class="nav-flyout-caption">{{ $m2['Keterangan'] }}</div>
                                 @foreach ($m2->child as $m3)
-                                    <div class="nav-flyout-item" onclick="window.location.href='{{ $m3->href }}'">
+                                    {{-- Same href handling as report/partials/sidebar-nav-node.blade.php:
+                                         DBMENUREPORT.href is a bare route slug, so resolve it through
+                                         url(); "#" placeholder rows stay non-clickable rather than
+                                         resolving to the app home. --}}
+                                    @php $m3Href = trim($m3->href ?? '', '/'); @endphp
+                                    <div class="nav-flyout-item"
+                                        @if ($m3Href !== '' && $m3Href !== '#') onclick="window.location.href='{{ url($m3Href) }}'" @endif>
                                         {{ $m3['Keterangan'] }}</div>
                                 @endforeach
                             @else
-                                <div class="nav-flyout-item" onclick="window.location.href='{{ $m2->href }}'">
+                                @php $m2Href = trim($m2->href ?? '', '/'); @endphp
+                                <div class="nav-flyout-item"
+                                    @if ($m2Href !== '' && $m2Href !== '#') onclick="window.location.href='{{ url($m2Href) }}'" @endif>
                                     {{ $m2['Keterangan'] }}</div>
                             @endif
                         @endforeach
@@ -532,7 +540,7 @@ $iconMap = [
 
         function doUpdateDBMENUREPORT() {
             $.ajax({
-                url: "{!! url('globalfunctions_doUpdateDBMENUREPORT') !!}",
+                url: "{!! url('functionglobal_doUpdateDBMENUREPORT') !!}",
                 type: "get",
                 async: false,
                 success: function(res) {

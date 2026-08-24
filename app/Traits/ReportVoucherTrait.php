@@ -8,13 +8,20 @@ use Illuminate\Support\Facades\DB;
 /**
  * Shared report endpoints used by the accounting "styled table" reports
  * (Neraca Lajur, Trial Balance, Buku Besar, â€¦): the drill-down ledger and the
- * bottom voucher panels (Bukti Kas/Bank, Invoice, Faktur Pembelian), plus the
- * legacy filter/division helpers.
+ * bottom voucher panels (Bukti Kas/Bank, Invoice, Faktur Pembelian), plus a
+ * division-list helper.
  *
  * Each report controller pulls these in with `use ReportVoucherTrait;` so the
  * identical bodies live in one place. `doReport` stays per-controller because
- * each report calls a different stored procedure. Routes are unchanged â€” they
- * resolve to these methods on whichever controller `use`s the trait.
+ * each report calls a different stored procedure.
+ *
+ * IMPORTANT: pulling this trait in does NOT wire up routes. doLedger/doKasharian/
+ * doInvoice/doLpb/loadDivisi still need `Route::get(...)` entries per controller
+ * for that controller's page to actually reach them - add whichever ones the
+ * controller's Blade view calls (grep the view for kasUrl/invoiceUrl/lpbUrl/
+ * loadDivisiDropdown/etc. rather than assuming). Confirmed empty (as of 2026-08)
+ * for every one of the 24 controllers using this trait except where a route was
+ * deliberately added.
  */
 trait ReportVoucherTrait {
 
@@ -36,7 +43,7 @@ trait ReportVoucherTrait {
     $perkiraan = trim($req->perkiraan);
     $divisi = ($req->divisi === null || $req->divisi === '' || $req->divisi === '-') ? '%' : $req->divisi;
 
-    $rows = DB::connection('MGL')->select("exec Sp_ReportBukuTambahan :awal, :akhir, :date1, :date2, :divisi, 'sa', 'y', 0",
+    $rows = DB::connection('SML')->select("exec Sp_ReportBukuTambahan :awal, :akhir, :date1, :date2, :divisi, 'sa', 'y', 0",
       ['awal' => $perkiraan, 'akhir' => $perkiraan, 'date1' => $date1, 'date2' => $date2, 'divisi' => $divisi]);
 
     // The proc emits a synthetic 'SALDO AWAL' opening row; the drill panel builds
@@ -53,7 +60,7 @@ trait ReportVoucherTrait {
    * so the print proc's internal counts don't become the first PDO result set.
    */
   public function doKasharian(Request $req) {
-    $res = DB::connection('MGL')->select("SET NOCOUNT ON; EXEC dbo.CetakKasharian :nobukti",
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakKasharian :nobukti",
       ['nobukti' => trim($req->nobukti)]);
     return $res;
   }
@@ -63,7 +70,7 @@ trait ReportVoucherTrait {
    * (different proc + layout from the B* vouchers).
    */
   public function doInvoice(Request $req) {
-    $res = DB::connection('MGL')->select("SET NOCOUNT ON; EXEC dbo.CetakInvoicePenjualan :nobukti",
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakInvoicePenjualan :nobukti",
       ['nobukti' => trim($req->nobukti)]);
     return $res;
   }
@@ -73,29 +80,8 @@ trait ReportVoucherTrait {
    * row's Jenis is BPL.
    */
   public function doLpb(Request $req) {
-    $res = DB::connection('MGL')->select("SET NOCOUNT ON; EXEC dbo.CetakPenerimaanACC :nobukti",
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakPenerimaanACC :nobukti",
       ['nobukti' => trim($req->nobukti)]);
-    return $res;
-  }
-
-  public function doFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-    $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwreporttransferPR where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-    return $listData;
-  }
-
-  public function doReportFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-    $res = [];
-
-    for ($i=0; $i < count($req->listdata); $i++) {
-      $row = DB::connection('MGL')->select('select * from VwreporttransferPR where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-
-      for ($j=0; $j < count($row); $j++) {
-        $res = array_add($res, $i+$j, $row[$j]);
-      }
-    }
-
     return $res;
   }
 

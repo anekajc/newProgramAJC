@@ -1,6 +1,20 @@
-@extends('report.masterreport4')
+@extends('report.masterreport2')
 
-  {{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php) --}}
+  {{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php).
+       Header dua tingkat (band Mutasi/Koreksi) dibangun manual per docs/new-slider-table-guide.md
+       TANPA drag (ReportTable.headHtml() tidak bisa render rowspan/colspan) — tiap kolom tetap
+       punya menu roda gigi (sembunyikan/desimal/total), lihat buildGroupedThead(). gcart_header
+       (Detail mode) SENGAJA tetap menyertakan 2 baris penanda type:'group' ('' / Mutasi, '' /
+       Koreksi) persis seperti sebelumnya — mengubah bentuknya akan membuat layout yang sudah
+       tersimpan milik user lama (DBSIMPANHEADER) tidak nyambung index-nya lagi dengan kode baru
+       ini. Mode Rekap (globalReportMode='1') tidak pernah dipakai — tidak ada kontrol UI apa pun
+       yang mengubahnya dari default '0', jadi cabang itu dead code, dibiarkan apa adanya. --}}
+<style>
+  /* Tidak ada drag-reorder di halaman ini (header dua tingkat/grouped tidak bisa
+     menoleransi kolom pindah band) -- timpa cursor:grab bawaan .th-inner supaya
+     tidak menyiratkan kolom bisa diseret. Gear (hide/desimal/total) tetap aktif. */
+  .tb-report .tb thead th.rt-th .th-inner { cursor: default; }
+</style>
 
 @include('report.modalAccountingJurnal')
 
@@ -10,9 +24,9 @@
 
         <!-- TOOLBAR ROW 1 -->
         <div class="toolbar">
-          <div>
+          {{-- <div>
             <div class="page-title">Report Trial Balance</div>
-          </div>
+          </div> --}}
 
           <!-- Period selector (populated dynamically by populatePeriodSelectors) -->
           <div class="period-select-wrap">
@@ -54,7 +68,10 @@
         <!-- KPI STRIP -->
         <div class="kpi-strip" id="kpiStrip"></div>
 
-        <!-- TABLE -->
+        <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+        <div id="rtBar"></div>
+
+        <!-- TABLE — header dua tingkat (band Mutasi/Koreksi) dibangun oleh buildGroupedThead() -->
         <div class="table-outer">
           <div class="table-wrap">
             <table class="tb" id="mainTable">
@@ -80,6 +97,11 @@
           <div class="table-footer">
             <span id="footerLabel">Menampilkan semua akun</span>
           </div>
+        </div>
+
+        <div class="rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
         </div>
 
       </div><!-- /content -->
@@ -144,10 +166,13 @@
   var jenisreport = 0; // ini untuk detail dan rekap
 
   $(document).ready(function() {
-    // Keep the shared report engine's header state initialised (masterreport4
-    // still references these), even though this report renders its own table.
+    // setReportMode() -> setModeReport() -> doSetHeader() already populates gcart_header
+    // (saved layout, or setDefaultHeader() on first visit). NOTE: an explicit extra
+    // setDefaultHeader() call used to sit right here — harmless before (render() never
+    // read gcart_header), but it would have silently thrown away doSetHeader()'s loaded
+    // layout on every single page load once the interactive header actually depends on
+    // it, so it's removed rather than kept "for safety".
     setReportMode(globalReportMode);
-    setDefaultHeader();
 
     // The styled .tb-report table is the only table this report uses. Strip the
     // shared engine's old table markup from this page and keep it hidden (we
@@ -156,6 +181,15 @@
     $("#showTableReport").empty().hide();
 
     populatePeriodSelectors();
+
+    // Header tabel interaktif TANPA drag (lihat komentar di atas file): gear per kolom
+    // untuk sembunyikan/desimal/total, + bar "Reset kolom"/kolom tersembunyi. Tidak ada
+    // "Tampilan" switcher -- mode Rekap tidak pernah dipakai (lihat komentar di atas file).
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: render
+    });
 
     setTimeout(() => {
       makeTable('REPORT');
@@ -366,13 +400,123 @@
       }).join('');
     }
 
-  /* ── RENDER TABLE ── */
+  /* ── HEADER DUA TINGKAT (band Mutasi/Koreksi), TANPA drag ──
+     ReportTable.headHtml() cuma bisa satu baris flat, jadi header dibangun manual di sini --
+     tapi tiap kolom tetap dapat tombol roda gigi (data-rtgear) yang didengarkan oleh listener
+     yang sama dipasang ReportTable.init() (event delegation di elemen <thead>, lihat
+     docs/new-slider-table-guide.md). Kolom TIDAK bisa diseret (tidak ada .th-inner[draggable]/
+     .th-grip di markup) supaya band Mutasi/Koreksi tidak pernah pecah. gcart_header (Detail
+     mode) menandai band pakai baris type:'group' (field='', label='Mutasi'/'Koreksi') --
+     baris itu sendiri TIDAK dapat gear (bukan kolom data sungguhan), band-nya mencakup semua
+     baris non-group berikutnya sampai penanda group lain / akhir array. ── */
+    function leafTh(idx, label, col, rowspan2) {
+      const isNum = (col[3] === 'float' || col[3] === 'int');
+      return '<th class="rt-th' + (isNum ? ' num' : '') + '"' + (rowspan2 ? ' rowspan="2"' : '') +
+        ' data-gidx="' + idx + '">' +
+        '<div class="th-inner">' +
+        '<span class="th-label">' + label + '</span>' +
+        '<button type="button" class="th-gear" data-rtgear="' + idx + '" title="Setting kolom"><i class="bi bi-gear"></i></button>' +
+        '</div></th>';
+    }
+
+    function buildGroupedThead() {
+      const all = gcart_header;
+      let row1 = '', row2 = '';
+      let i = 0;
+      while (i < all.length) {
+        const col = all[i];
+        if (col[3] === 'group') {
+          const label = col[1];
+          let j = i + 1, count = 0;
+          while (j < all.length && all[j][3] !== 'group') {
+            if (Number(all[j][2]) === 1) { count++; }
+            j++;
+          }
+          if (count > 0) {
+            row1 += '<th colspan="' + count + '" class="th-group">' + label + '</th>';
+            for (let k = i + 1; k < j; k++) {
+              if (Number(all[k][2]) === 1) { row2 += leafTh(k, all[k][1], all[k], false); }
+            }
+          }
+          i = j;
+        } else {
+          if (Number(col[2]) === 1) { row1 += leafTh(i, col[1], col, true); }
+          i++;
+        }
+      }
+      return '<tr>' + row1 + '</tr><tr>' + row2 + '</tr>';
+    }
+
+    // Baris total: nilai di tiap kolom numerik yang ditotal; label membentang seluruh kolom
+    // non-total yang BERURUTAN mulai dari kolom non-total pertama (bukan cuma satu sel sempit)
+    // supaya label yang panjang ("Subtotal PENDAPATAN") tidak wrap.
+    function totalRow(label, sums, cols, totalKeys, cls) {
+      const labelIdx = cols.findIndex(c => totalKeys.indexOf(c[0]) === -1);
+      if (labelIdx === -1) {
+        return '<tr class="' + cls + '">' + cols.map(c => '<td class="num">' + format_number(sums[c[0]], c[5]) + '</td>').join('') + '</tr>';
+      }
+      let span = 1;
+      while (labelIdx + span < cols.length && totalKeys.indexOf(cols[labelIdx + span][0]) === -1) { span++; }
+
+      const tds = [];
+      let idx = 0;
+      while (idx < cols.length) {
+        if (idx === labelIdx) {
+          tds.push('<td colspan="' + span + '">' + label + '</td>');
+          idx += span;
+          continue;
+        }
+        const c = cols[idx];
+        tds.push(totalKeys.indexOf(c[0]) !== -1 ? '<td class="num">' + format_number(sums[c[0]], c[5]) + '</td>' : '<td></td>');
+        idx++;
+      }
+      return '<tr class="' + cls + '">' + tds.join('') + '</tr>';
+    }
+
+    // gcart_header field name -> nilai di object akun. Sebagian besar cocok langsung (SaldoAwal/
+    // MD/MK/JPD/JPK), tapi 'perkiraan'/'Keterangan'/'SaldoKAkhir' TIDAK cocok dengan property
+    // object akun (code/name/SAldoAkhir) -- perbedaan ejaan ini sudah ada sejak awal (lihat
+    // buildGroups()) dan tidak pernah kelihatan karena render() dulu tidak pernah baca
+    // gcart_header sama sekali. Alih-alih mengganti nama field di gcart_header (yang tidak akan
+    // sampai ke layout tersimpan milik user lama, lihat catatan di atas file), cukup di-alias
+    // di sini saja.
+    function acctVal(a, field) {
+      if (field === 'perkiraan') return a.code;
+      if (field === 'Keterangan') return a.name;
+      if (field === 'SaldoKAkhir') return a.SAldoAkhir;
+      return a[field];
+    }
+
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+  /* ── RENDER TABLE ──
+     Kolom terlihat & urutan dari gcart_header (item[2]===1, kecuali baris penanda 'group')
+     supaya show/hide lewat gear benar-benar berpengaruh; urutan itu sendiri tetap sama karena
+     tidak ada drag di halaman ini. ── */
     function render() {
+      const cols = gcart_header.filter(c => c[2] === 1 && c[3] !== 'group');
+      const thead = document.querySelector('#mainTable thead');
+      thead.innerHTML = buildGroupedThead();
+      ReportTable.refresh();   // segarkan #rtBar (biasanya efek samping headHtml(), tapi di sini header dibangun manual)
+
       const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
       let visibleCount = 0;
 
       const search = document.querySelector('.search-inp')?.value?.toLowerCase() || '';
+
+      const totalCols = cols.filter(c => (c[3] === 'float' || c[3] === 'int') && c[4] === 1);
+      const totalKeys = totalCols.map(c => c[0]);
+
+      const GROUP_DOT = {
+        asset: '<i class="bi bi-circle-fill text-primary"></i>', liab: '<i class="bi bi-circle-fill text-purple"></i>',
+        equity: '<i class="bi bi-circle-fill text-success"></i>', rev: '<i class="bi bi-circle-fill text-teal"></i>',
+        exp: '<i class="bi bi-circle-fill text-warning"></i>'
+      };
+
+      let html = '';
 
       accountGroups.forEach(g => {
         if (typeFilter !== 'all' && typeFilter !== g.key) return;
@@ -384,79 +528,64 @@
         if (!filteredAccs.length) return;
 
         // group header row
-        const gtr = document.createElement('tr');
-        gtr.className = 'group-row ' + g.cls;
-        gtr.innerHTML = `<td colspan="8">
-      <span style="margin-right:8px">
-        ${{ g_asset: '<i class="bi bi-circle-fill text-primary"></i>', g_liab: '<i class="bi bi-circle-fill text-purple"></i>', g_equity: '<i class="bi bi-circle-fill text-success">', g_rev: '<i class="bi bi-circle-fill text-teal">', g_exp: '<i class="bi bi-circle-fill text-warning">' }['g_' + g.key] || ''}
-      </span>
-      ${g.label}
-      <span style="font-size:11px;font-weight:600;opacity:.7;margin-left:8px">(${filteredAccs.length} akun)</span>
-    </td>`;
-        tbody.appendChild(gtr);
+        html += '<tr class="group-row ' + g.cls + '"><td colspan="' + cols.length + '">' +
+          '<span style="margin-right:8px">' + (GROUP_DOT[g.key] || '') + '</span>' + g.label +
+          ' <span style="font-size:11px;font-weight:600;opacity:.7;margin-left:8px">(' + filteredAccs.length + ' akun)</span></td></tr>';
 
-        // running subtotals for the 6 numeric columns
-        const sub = { SaldoAwal: 0, MD: 0, MK: 0, JPD: 0, JPK: 0, SAldoAkhir: 0 };
+        // running subtotals for the visible total columns
+        const sub = {}; totalKeys.forEach(k => sub[k] = 0);
 
         filteredAccs.forEach(a => {
           const zero = isZero(a);
-          ['SaldoAwal','MD','MK','JPD','JPK','SAldoAkhir'].forEach(k => sub[k] += a[k]);
+          totalKeys.forEach(k => { sub[k] += (acctVal(a, k) || 0); });
 
-          const tr = document.createElement('tr');
-          tr.className = `data-row ${g.tcls}${zero ? ' zero-row' : ''}`;
-          tr.title = `Klik untuk melihat detail transaksi ${a.code}`;
-          tr.innerHTML = `
-        <td class="code">${a.code}</td>
-        <td class="name">${a.name}<span class="drill-hint"><i class="bi bi-arrow-right-short"></i> detail</span></td>
-        <td class="num" style="font-weight:600">${fmtN(a.SaldoAwal)}</td>
-        <td class="num">${fmtN(a.MD)}</td>
-        <td class="num">${fmtN(a.MK)}</td>
-        <td class="num">${fmtN(a.JPD)}</td>
-        <td class="num">${fmtN(a.JPK)}</td>
-        <td class="num" style="font-weight:600">${fmtN(a.SAldoAkhir)}</td>
-      `;
-          tr.onclick = () => openDrill(a, g);
-          tbody.appendChild(tr);
+          const rowHtml = cols.map(function (c) {
+            const key = c[0], type = c[3];
+            const v = acctVal(a, key);
+            if (key === 'perkiraan') { return '<td class="code">' + esc(v) + '</td>'; }
+            if (key === 'Keterangan') { return '<td class="name">' + esc(v) + '<span class="drill-hint"><i class="bi bi-arrow-right-short"></i> detail</span></td>'; }
+            if (type === 'float' || type === 'int') {
+              const bold = (key === 'SaldoAwal' || key === 'SaldoKAkhir') ? ' style="font-weight:600"' : '';
+              return '<td class="num"' + bold + '>' + format_number(v, c[5]) + '</td>';
+            }
+            return '<td>' + (v == null ? '' : esc(v)) + '</td>';
+          }).join('');
+
+          html += '<tr class="data-row ' + g.tcls + (zero ? ' zero-row' : '') + '" title="Klik untuk melihat detail transaksi ' +
+            esc(a.code) + '" data-acc-code="' + esc(a.code) + '" data-acc-group="' + esc(g.key) + '">' + rowHtml + '</tr>';
           visibleCount++;
         });
 
         // subtotal
-        const str = document.createElement('tr');
-        str.className = 'subtotal-row ' + g.cls;
-        str.innerHTML = `
-      <td colspan="2">Subtotal ${g.label}</td>
-      <td class="num">${fmtN(sub.SaldoAwal)}</td>
-      <td class="num">${fmtN(sub.MD)}</td>
-      <td class="num">${fmtN(sub.MK)}</td>
-      <td class="num">${fmtN(sub.JPD)}</td>
-      <td class="num">${fmtN(sub.JPK)}</td>
-      <td class="num">${fmtN(sub.SAldoAkhir)}</td>
-    `;
-        tbody.appendChild(str);
+        html += totalRow('Subtotal ' + g.label, sub, cols, totalKeys, 'subtotal-row ' + g.cls);
       });
 
       // grand total
       if (typeFilter === 'all') {
         const allAccs = accountGroups.flatMap(g => g.accounts);
-        const tot = { SaldoAwal: 0, MD: 0, MK: 0, JPD: 0, JPK: 0, SAldoAkhir: 0 };
-        allAccs.forEach(a => Object.keys(tot).forEach(k => tot[k] += a[k]));
-        const gtr2 = document.createElement('tr');
-        gtr2.className = 'grand-total';
-        gtr2.innerHTML = `
-      <td colspan="2" style="font-weight:800">TOTAL KESELURUHAN</td>
-      <td class="num">${fmtN(tot.SaldoAwal)}</td>
-      <td class="num">${fmtN(tot.MD)}</td>
-      <td class="num">${fmtN(tot.MK)}</td>
-      <td class="num">${fmtN(tot.JPD)}</td>
-      <td class="num">${fmtN(tot.JPK)}</td>
-      <td class="num">${fmtN(tot.SAldoAkhir)}</td>
-    `;
-        tbody.appendChild(gtr2);
+        const tot = {}; totalKeys.forEach(k => tot[k] = 0);
+        allAccs.forEach(a => totalKeys.forEach(k => { tot[k] += (acctVal(a, k) || 0); }));
+        html += totalRow('TOTAL KESELURUHAN', tot, cols, totalKeys, 'grand-total');
       }
+
+      tbody.innerHTML = html;
 
       // footer
       document.getElementById('footerLabel').textContent = `Menampilkan ${visibleCount} akun`;
     }
+
+    // Klik baris data untuk buka drill-down. Delegasi event (bukan onclick/closure per baris)
+    // karena render() membangun tbody lewat innerHTML sekarang -- baris dicari lewat kode akun +
+    // key grup (unik per baris) daripada nge-serialize seluruh objek akun ke sebuah atribut.
+    $(document).on('click', '#tableBody tr.data-row', function () {
+      const code = $(this).data('acc-code');
+      const gkey = $(this).data('acc-group');
+      const g = accountGroups.find(x => x.key === gkey);
+      if (!g) return;
+      const a = g.accounts.find(x => x.code === code);
+      if (!a) return;
+      openDrill(a, g);
+    });
 
     /* ── CONTROLS ── */
     function setTypeFilter(type, btn) {
@@ -510,15 +639,40 @@
       if (fmt === 'Print') { window.print(); return; }
       exportDelimited(fmt);
     }
+    // Kolom terlihat + label yang diberi prefiks band (gcart_header sendiri cuma simpan
+    // "Debet"/"Kredit" polos untuk kolom Mutasi & Koreksi -- band-nya cuma ada di baris
+    // penanda 'group' -- jadi tanpa prefiks CSV-nya akan ambigu, dua kolom "Debet" berbeda
+    // arti). Traversal-nya sama seperti buildGroupedThead() supaya kolom yang diekspor selalu
+    // sinkron dengan yang tampil di layar.
+    function visibleColsWithLabels() {
+      const all = gcart_header;
+      const out = [];
+      let i = 0;
+      while (i < all.length) {
+        const col = all[i];
+        if (col[3] === 'group') {
+          const bandLabel = col[1];
+          let j = i + 1;
+          while (j < all.length && all[j][3] !== 'group') {
+            if (Number(all[j][2]) === 1) { out.push({ col: all[j], label: bandLabel + ' ' + all[j][1] }); }
+            j++;
+          }
+          i = j;
+        } else {
+          if (Number(col[2]) === 1) { out.push({ col: col, label: col[1] }); }
+          i++;
+        }
+      }
+      return out;
+    }
+
     function exportDelimited(fmt) {
-      const rows = [['Perkiraan', 'Keterangan', 'Saldo Awal',
-        'Mutasi Debet', 'Mutasi Kredit',
-        'Koreksi Debet', 'Koreksi Kredit',
-        'Saldo Akhir']];
+      const cols = visibleColsWithLabels();
+      const rows = [cols.map(c => c.label)];
       accountGroups.forEach(g => {
         if (typeFilter !== 'all' && typeFilter !== g.key) return;
         g.accounts.forEach(a => {
-          rows.push([a.code, a.name, a.SaldoAwal, a.MD, a.MK, a.JPD, a.JPK, a.SAldoAkhir]);
+          rows.push(cols.map(c => acctVal(a, c.col[0])));
         });
       });
       const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');

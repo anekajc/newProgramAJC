@@ -28,9 +28,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title" id="jurnalTitle">Jurnal Penerimaan Kas</div>
-      </div>
+      </div> --}}
 
       <!-- Jurnal (DROPDOWN; pilih salah satu dari 7 jenis jurnal) -->
       <div class="filter-wrap">
@@ -50,6 +50,11 @@
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
+      {{-- Search --}}
+      <div>
+        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
+      </div>
+
       <!-- Divisi (DROPDOWN; sumber loadDivisi) -->
       <div class="filter-wrap">
         <label>Divisi</label>
@@ -62,7 +67,6 @@
 
       <!-- Actions: search + tampilkan + export -->
       <div class="action-group">
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>

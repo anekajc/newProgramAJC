@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Models\NewMenu;
-use App\Models\NewAksesMenu;
-use App\Models\DBFLMENU;
-use App\Models\NewPeriode;
-use App\Models\NewUsers;
+use App\Model\NewMenu;
+use App\Model\NewAksesMenu;
+use App\Model\DBFLMENU;
+use App\Model\NewPeriode;
+use App\Model\NewUsers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use App\Models\VwPPL;
+use App\Model\VwPPL;
+
+
+// use App\Http\Controllers\NewMenuController;
 
 class PembelianPermintaanAgenController extends Controller
 {
@@ -19,17 +22,17 @@ class PembelianPermintaanAgenController extends Controller
     public function index(Request $req)
     {
         $kodemenu = '030102';
-    
+
         $akses = app('App\Http\Controllers\GlobalController')
             ->getAkses($kodemenu, $req->path());
-    
+
         if (!$akses || !$akses->HASACCESS) {
             return redirect('/home');
         }
-    
+
         $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
         $menul0  = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
-    
+
         // =========================
         // Belum Otorisasi
         // =========================
@@ -43,12 +46,12 @@ class PembelianPermintaanAgenController extends Controller
             })
             ->get()
             ->groupBy('NoBukti');
-    
+
         $tempOutstanding = [];
         foreach ($outstanding as $groupedData) {
             $tempOutstanding[] = $groupedData;
         }
-    
+
         // =========================
         // Data Otorisasi
         // =========================
@@ -64,32 +67,32 @@ class PembelianPermintaanAgenController extends Controller
                 "tahun" => $periode->tahun
             ]
         );
-    
+
         $otorisasi = collect($otorisasi)->groupBy('NoBukti');
-    
+
         $tempOtorisasi = [];
         foreach ($otorisasi as $groupedData) {
             $tempOtorisasi[] = $groupedData;
         }
-    
+
         // =========================
         // Header Table
         // =========================
         $reqHeader = new Request([
             'href' => 'pembelianpermintaanagen'
         ]);
-    
+
         $header = app('App\Http\Controllers\HeaderTableController')
             ->getHeaderTable($reqHeader);
-    
+
         return view('purchasing.pembelianpermintaanagen', [
-    
+
             "aliasordered"      => $header['aliasordered'],
             "headertableheader" => $header['headertableheader'],
             "isnumeric"         => $header['isnumeric'],
             "headertablevalue"  => $header['headertablevalue'],
             "isshown"           => $header['isshown'],
-    
+
             "menul0"            => $menul0,
             "periode"           => $periode,
             "akses"             => $akses,
@@ -102,52 +105,53 @@ class PembelianPermintaanAgenController extends Controller
     public function loadAll(Request $req)
     {
         $queryOtorisasi = '';
-    
+
         if ($req->isoto != 2) {
             $queryOtorisasi = ' AND IsOtorisasi1 = ' . $req->isoto;
         }
-    
+
         // =========================
         // Header Table
         // =========================
         $reqHeader = new Request([
             'href' => 'pembelianpermintaanagen'
         ]);
-    
+
         $header = app('App\Http\Controllers\HeaderTableController')
             ->getHeaderTable($reqHeader);
-    
+
         // =========================
         // Data Pembelian Agen
         // =========================
         $outstanding = DB::connection("SML")->select(
-            "SELECT NoBukti, Tanggal, IsOtorisasi1, TglOto1, OtoUser1,
+            "SELECT NoBukti, CONVERT(varchar(10), Tanggal, 23) AS Tanggal, IsOtorisasi1, TglOto1, OtoUser1,
                     Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO
              FROM vwPPL
              WHERE Tanggal BETWEEN :tglawal AND :tglakhir
                AND IsJasa = 0
                AND pAgen = 1
-               $queryOtorisasi",
+               $queryOtorisasi
+             ORDER BY Tanggal DESC, NoBukti DESC",
             [
                 "tglawal"  => $req->tglawal,
                 "tglakhir" => $req->tglakhir
             ]
         );
-    
+
         $collection = collect($outstanding)->groupBy('NoBukti');
-    
+
         $tempOutstanding = [];
         foreach ($collection as $groupedData) {
             $tempOutstanding[] = $groupedData;
         }
-    
+
         // Mengikuti pola Non Agen
         $tempOtorisasi = [];
-    
+
         return [
             "listData1" => $tempOutstanding,
             "listData2" => $tempOtorisasi,
-    
+
             "aliasordered"      => $header['aliasordered'],
             "headertableheader" => $header['headertableheader'],
             "isnumeric"         => $header['isnumeric'],
@@ -194,6 +198,7 @@ class PembelianPermintaanAgenController extends Controller
     $detailOutstanding = VwPPL::all()->where('NoBukti', $req->nobukti )->sortBy('Urut');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
+      // code...
       array_push($tempOutstanding,$do);
     }
     return $tempOutstanding;
@@ -206,20 +211,35 @@ class PembelianPermintaanAgenController extends Controller
   }
 
   public function getNoBukti (Request $req) {
+    // $values = [
+    //   'a'
+    // ];
+    // return 'tes';
+    // $po = DB::connection("SML")->select('exec sp_outstanding_po ?',$values);
+    // $periode = NewPeriode::where('user_id' , \Auth::id())->first();
     $username = \Auth::user()->username;
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $inisial = DB::connection("SML")->select('select PRA from DBNOMOR');
+    // $inisial = DB::connection("SML")->select('select SPR from DBNOMOR');
+    // return [$periode->bulan,$inisial[0]->PBL,$username];
     $values = [
         $inisial[0]->PRA,
         $periode->bulan,
         $periode->tahun,
         $username,
+        // $periode
+        // $periode
     ];
     $noBukti = DB::connection('SML')->select('exec SP_IsiNobukti ?,?,?,?',$values);
     return $noBukti;
   }
 
   public function listBarang (Request $req) {
+    // $harga = DB::connection('SML')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
+    //     select b.NAMAMERK ,  a.* from dbbarang a
+    // join DBMERK b on a.KodeMerk = b.KODEMERK
+    //  where a.KODEGRP = 'BJ' and a.pAgen = 1
+
     if (!$req->filled('search')) {
         return response()->json([]);
     }
@@ -267,12 +287,15 @@ class PembelianPermintaanAgenController extends Controller
         if ($choice=='I' ){
 
         $purut = DB::connection('SML')->select('select max(urut)+1 xurut from DBPPLdet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+            // return 'uuu';
         $xurut= $purut[0]->xurut;
         }else {
+            // return 'mmm';
             $xurut = $req->urut;
         }
 
     }else{
+        // return 'ttt';
         $xurut=1;
     }
 
@@ -316,7 +339,10 @@ class PembelianPermintaanAgenController extends Controller
 
   public function spDelete (Request $req) {
 
+    // $listData = $req->listData;
+    // foreach ($listData as $d) {
     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PR',$req->nobukti,'',$req->urut,'DBPPLDET');
+      // code...
       $values = [
         $req->choice,
         $req->nobukti,
@@ -343,7 +369,15 @@ class PembelianPermintaanAgenController extends Controller
 
       ];
       DB::connection('SML')->statement('exec sp_PPL ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+    // }
     return 1;
+    // foreach ($penerimaan as $p) {
+    //   // code...
+    //   array_push($tempPenerimaan, $p);
+    // }
+    //
+    // DB::connection('SML')->statement('exec sp_RSPB ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?' ,$values);
+    // return 1;
   }
 
 }

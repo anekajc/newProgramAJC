@@ -7,14 +7,6 @@
      Perkiraan Awal/Akhir (rentang akun, modal). Tidak ada kolom No Bukti/No Nota → tanpa panel voucher.
      Sumber: Sp_LapBiaya :divisi,:bulan,:tahun,:perk1,:perk2. --}}
 <style>
-  .checkmark-red { color: red !important; font-weight: bold; margin-left: 6px; }
-
-  #inputDivisiBtn {
-    border: 0; background: none; padding: 0; box-shadow: none;
-    color: #495057; font-weight: 600;
-  }
-  #inputDivisiBtn:hover, #inputDivisiBtn:focus { color: #0d6efd; box-shadow: none; }
-
   /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
   .tb-report .table-wrap { min-height: 10vh; }
 </style>
@@ -25,10 +17,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title">Laporan Biaya</div>
-        <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div>
-      </div>
+      </div> --}}
 
       <!-- Period selector (populated dynamically by populatePeriodSelectors) -->
       <div class="period-select-wrap">
@@ -37,29 +28,18 @@
         <select class="period-select" id="periodTahun" onchange="changePeriodParts()"></select>
       </div>
 
-      <!-- Divisi (DROPDOWN; sumber loadDivisi, default divisi pertama) -->
-      <div class="filter-wrap">
-        <label>Divisi</label>
-        <input type="hidden" id="inputDivisi" value="-">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputDivisiBtn"
-                data-bs-toggle="dropdown" aria-expanded="false"><span id="divisiLabel">-</span></button>
-        <ul class="dropdown-menu" id="dropdownDivisi" aria-labelledby="inputDivisiBtn"
-            style="max-height:320px; overflow:auto;"></ul>
-      </div>
+      {{-- Divisi & Perkiraan (awal/akhir) pindah ke modal "Filter Laporan" -- lihat
+           docs/new-filter-modal-ui-guide.md. Nilai sebenarnya: globalDivisi (var JS) +
+           #inputPerkiraan1 / #inputPerkiraan2 (hidden input di dalam modal). --}}
 
-      <!-- Perkiraan range (modal — buttonSelect di modalAccountingJurnal) -->
-      <div class="filter-wrap">
-        <label>Perkiraan</label>
-        <input type="text" class="filter-inp" id="inputPerkiraan1" value="-" style="width:80px">
-        <button type="button" class="btn-pick" onclick="buttonSelect('selectPerkiraan1')">+</button>
-        <span class="filter-sep">s/d</span>
-        <input type="text" class="filter-inp" id="inputPerkiraan2" value="-" style="width:80px">
-        <button type="button" class="btn-pick" onclick="buttonSelect('selectPerkiraan2')">+</button>
-      </div>
-
-      <!-- Actions: search + tampilkan + export -->
+      <!-- Actions: search + filter + tampilkan + export -->
       <div class="action-group">
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
+        {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) --
+             lihat catatan di modal Filter di bawah. --}}
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="fas fa-filter"></i> Filter
+        </button>
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -71,6 +51,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
 
     <!-- TABLE (kolom di-render dari gcart_header; tabel rata + grand total) -->
     <div class="table-outer">
@@ -89,12 +72,79 @@
       </div>
     </div>
 
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
+    </div>
+
   </div><!-- /content -->
 
   <!-- TOAST -->
   <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
 
 </div><!-- /tb-report -->
+
+{{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
+<!-- modal filter -->
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i> Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+             $.fn.modal milik BS4 (jQuery baru dimuat SESUDAH bundle BS5 di masterreport2).
+             data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
+        <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-1">
+            <div>
+              <label class="rt-field-label" for="modalDivisi">Divisi</label>
+              {{-- Diisi dari laporanaccountingbiaya_loaddivisi (loadDivisiDropdown()). Selalu
+                   punya nilai (tidak ada opsi "Semua") -- pilihan wajib, bukan filter yang bisa
+                   dimatikan, jadi TIDAK dihitung di badge (lihat updateFilterBadge()). --}}
+              <select class="rt-native" id="modalDivisi"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="rt-section">
+          <div class="rt-group-label">Perkiraan
+            <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+          </div>
+          <div class="rt-grid-2" id="pickFields"></div>
+
+          {{-- Nilai sebenarnya (dibaca makeTable() & ditulis modalAccountingJurnal's buttonPilih()) --}}
+          <input type="hidden" id="inputPerkiraan1" value="-">
+          <input type="hidden" id="inputPerkiraan2" value="-">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                  onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- modal filter -->
 
 @endsection
 
@@ -107,15 +157,30 @@
   let g_reportTitle = "";
   let lastRows = [];   // hasil fetch terakhir (dipakai render / search)
 
+  let globalDivisi = "-";  // diisi loadDivisiDropdown() saat page load (selalu wajib diisi)
+
   // Report mode dipakai engine masterreport2 (doSetHeader) — cukup satu int.
   g_modeReport = 20;
 
   const reportUrl = "{{ url('laporanaccountingbiaya_doReport') }}";
 
   $(document).ready(function () {
-    document.getElementById('printTime').textContent = new Date().toLocaleString('id-ID');
+    // #printTime tidak ada di markup halaman ini (blok page-title/page-sub dikomentari) --
+    // dijaga null supaya TIDAK melempar exception yang membatalkan sisa ready() (populatePeriodSelectors
+    // & loadDivisiDropdown di bawah tidak akan jalan kalau baris ini error).
+    var pt = document.getElementById('printTime');
+    if (pt) pt.textContent = new Date().toLocaleString('id-ID');
+
     populatePeriodSelectors();
     loadDivisiDropdown();   // isi dropdown Divisi (default: divisi pertama)
+
+    // Header tabel interaktif: seret kolom, menu roda gigi (sembunyikan/desimal/total).
+    // Tidak ada "Tampilan" switcher -- halaman ini cuma satu mode (g_modeReport tetap).
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: function () { if (lastRows.length) { applyFilters(); } else { render(); } }
+    });
 
     // Sengaja TIDAK memuat data saat halaman dibuka — laporan hanya dimuat setelah
     // pengguna klik tombol "Tampilkan" (atau memilih filter lalu Tampilkan).
@@ -193,7 +258,7 @@
 
     let _perk1 = $('#inputPerkiraan1').val() || '-';
     let _perk2 = $('#inputPerkiraan2').val() || '-';
-    let _divisi = $('#inputDivisi').val() || '-';
+    let _divisi = globalDivisi || '-';
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
@@ -237,11 +302,9 @@
     const showGrand = hasTotal && (gsum_isgrandtotal === 1);
     const search = ($('#searchBox2').val() || '').trim().toLowerCase();
 
-    // HEADER dinamis
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
+    // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     const rows = (lastRows || []).filter(r => !search || rowSearchText(r, cols).indexOf(search) !== -1);
 
@@ -305,10 +368,10 @@
 
   function getKolomFilter() { return ['perkiraan', 'keterangan']; }
 
-  /* Rentang Perkiraan memakai modal bersama (buttonSelect di modalAccountingJurnal.blade.php)
-     yang langsung menulis ke #inputPerkiraan1 / #inputPerkiraan2. */
-
-  /* ── DROPDOWN DIVISI (sumber loadDivisi; default: divisi pertama) ── */
+  /* ── SELECT DIVISI (modal Filter Laporan) ──
+        Diisi sekali dari laporanaccountingbiaya_loaddivisi saat page load. Memilih item
+        hanya menyetel globalDivisi; laporan baru dimuat saat klik Tampilkan (konsisten
+        dgn filter Periode/Perkiraan). ── */
   function loadDivisiDropdown() {
     let list = [];
     $.ajax({
@@ -319,29 +382,115 @@
 
     let html = '';
     list.forEach((item) => {
-      const nama = (item.NamaDevisi != null ? String(item.NamaDevisi) : '').replace(/"/g, '&quot;');
-      html += '<li><a class="dropdown-item divisi-item" style="cursor:pointer" ' +
-        'data-value="' + item.Devisi + '" data-nama="' + nama + '">' +
-        item.Devisi + ' - ' + (item.NamaDevisi != null ? item.NamaDevisi : '') +
-        ' <span class="checkmark-red" style="display:none">&#10003;</span></a></li>';
+      const nama = (item.NamaDevisi != null ? String(item.NamaDevisi) : '');
+      html += '<option value="' + item.Devisi + '">' + item.Devisi + ' - ' + esc(nama) + '</option>';
     });
-    $("#dropdownDivisi").html(html);
+    $("#modalDivisi").html(html);
 
-    // default: divisi pertama
-    if (list.length) { applyDivisi(list[0].Devisi, list[0].NamaDevisi != null ? list[0].NamaDevisi : ''); }
+    // default: divisi pertama (tidak ada opsi "Semua")
+    if (list.length) { setDivisi(list[0].Devisi); }
   }
 
-  function applyDivisi(kode, nama) {
-    $("#inputDivisi").val(kode);
-    $("#divisiLabel").text(nama || kode);
-    $("#inputDivisiBtn").attr('title', nama || kode);
-    $('#dropdownDivisi .checkmark-red').hide();
-    $(`#dropdownDivisi .divisi-item[data-value='${kode}'] .checkmark-red`).show();
+  function setDivisi(kode) {
+    globalDivisi = kode;
+    $("#modalDivisi").val(kode);
   }
 
-  // Memilih divisi hanya menyetel filter; TIDAK memuat data (tunggu klik "Tampilkan").
-  $(document).on('click', '#dropdownDivisi .divisi-item', function () {
-    applyDivisi($(this).data('value'), $(this).data('nama'));
+  // HTML-escape teks bebas (nama divisi bisa diisi user).
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ── FILTER MODAL ──
+        Perkiraan Awal/Akhir memakai picker modal bersama (buttonSelect di
+        modalAccountingJurnal.blade.php -- selectPerkiraan1/selectPerkiraan2), yang langsung
+        menulis ke #inputPerkiraan1 / #inputPerkiraan2. '-' = tidak dibatasi -> punya nilai
+        netral, jadi DIHITUNG di badge saat diisi. Divisi TIDAK ada opsi "Semua" -> wajib,
+        jadi TIDAK dihitung. ── */
+  const PICK_FIELDS = [
+    { id: 'inputPerkiraan1', label: 'Perkiraan Awal',  modal: 'selectPerkiraan1' },
+    { id: 'inputPerkiraan2', label: 'Perkiraan Akhir', modal: 'selectPerkiraan2' },
+  ];
+
+  function renderPickFields() {
+    let html = '';
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val() || '-';
+      const isSet = (val !== '-' && val !== '');
+      html += '<div>';
+      html += '<label class="rt-field-label">' + f.label + '</label>';
+      html += '<div class="rt-combo">';
+      html += '<div class="rt-combo-input" onclick="pickFromModal(\'' + f.modal + '\')">';
+      if (isSet) {
+        html += '<span class="rt-combo-tag">' + esc(val) +
+          '<button type="button" onclick="event.stopPropagation(); clearPickField(\'' + f.id +
+          '\')">&times;</button></span>';
+      } else {
+        html += '<span class="rt-combo-placeholder">Pilih ' + f.label.toLowerCase() + '...</span>';
+      }
+      html += '<span class="rt-combo-chevron">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</span>';
+      html += '</div></div></div>';
+    });
+    $('#pickFields').html(html);
+  }
+
+  function clearPickField(id) {
+    $('#' + id).val('-');
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  function updateFilterBadge() {
+    let count = 0;
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val();
+      if (val && val !== '-') { count++; }
+    });
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    if ($('#modalDivisi option').length) {
+      $('#modalDivisi').prop('selectedIndex', 0);
+    }
+    PICK_FIELDS.forEach(function (f) { $('#' + f.id).val('-'); });
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () {
+    $('#modalDivisi').val(globalDivisi);
+    renderPickFields();
+    updateFilterBadge();
+  });
+
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
+  function applyModalFilter() {
+    setDivisi($('#modalDivisi').val());
+    $('#modalFilter').modal('hide');
+  }
+
+  // Buka picker Perkiraan (modal bersama) dari dalam modal Filter: BS4/BS5 tidak menumpuk
+  // modal dengan bersih, jadi Filter disembunyikan dulu & dibuka lagi setelah picker ditutup.
+  let g_reopenFilter = false;
+
+  function pickFromModal(idModal) {
+    g_reopenFilter = true;
+    $('#modalFilter').modal('hide');
+    buttonSelect(idModal);   // buka #formSelect (modalAccountingJurnal)
+  }
+
+  $(document).on('hidden.bs.modal', '#formSelect', function () {
+    if (g_reopenFilter) {
+      g_reopenFilter = false;
+      $('#modalFilter').modal('show');
+      renderPickFields();
+      updateFilterBadge();
+    }
   });
 </script>
 @endsection

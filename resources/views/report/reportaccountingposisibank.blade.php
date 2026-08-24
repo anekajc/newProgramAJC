@@ -110,7 +110,7 @@
       }
     });
 
-    setTimeout(() => { makeTable('REPORT'); }, 100);
+    // setTimeout(() => { makeTable('REPORT'); }, 100);
   });
 
   /* ── kolom (gcart_header). Tabel styled DI-RENDER dari sini, jadi hasil
@@ -169,7 +169,7 @@
     // Muat susunan kolom (default atau hasil "Customize Table" tersimpan)
     if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
 
-    document.getElementById('footerLabel').textContent = 'Memuat data...';
+    document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
     $.ajax({
       url: reportUrl, type: 'get', data: { date2: _date2 },
