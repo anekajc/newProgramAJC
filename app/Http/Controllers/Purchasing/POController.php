@@ -338,7 +338,7 @@ where a.Tanggal between @tglawal and @tglakhir
             end As Bit)=1  */     AND TotTotalRp < 200000000
 and B.pJasa= 0
 
-order by NoBukti" , ["tglawal" => $tglawal , "tglakhir" =>$tglakhir]);
+order by Tanggal desc, NoBukti desc" , ["tglawal" => $tglawal , "tglakhir" =>$tglakhir]);
 
 $collection2 = collect($tempOutstanding2)->groupBy('NOBUKTI');
 $tempOutstanding3 = [];
@@ -380,7 +380,9 @@ foreach ($collection2 as $p) {
     if (in_array($orderCol, $allowedOrder, true)) {
       $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
-      $orderBy = 'A.Tanggal, A.NoBukti, A.Urut';
+      // Default: data terbaru di atas. A.Urut sengaja tetap ASC - itu nomor urut
+      // barang di dalam satu No. Bukti, bukan bagian dari "yang terbaru".
+      $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
     $where = 'A.SisaPPL > 0 and A.pjasa = 0';
@@ -493,7 +495,9 @@ foreach ($collection2 as $p) {
     if (in_array($orderCol, $allowedOrder, true)) {
       $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
-      $orderBy = 'A.NoBukti, A.Urut';
+      // sqlOutstandingSO() tidak punya kolom tanggal, jadi "terbaru di atas" di sini
+      // dibalik pakai No. Bukti saja - penomorannya berurut waktu.
+      $orderBy = 'A.NoBukti DESC, A.Urut';
     }
 
     // Penyaring utamanya sudah ada di dalam sqlOutstandingSO(); yang di sini

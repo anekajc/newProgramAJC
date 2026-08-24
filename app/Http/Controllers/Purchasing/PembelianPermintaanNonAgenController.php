@@ -157,7 +157,7 @@ class PembelianPermintaanNonAgenController extends Controller
     // "Qnt"/"QntBatal"/"QntPO") untuk menghitung badge Status "Sudah/Belum/Batal" di
     // pembelianpermintaannonagen.blade.php (prStatusPR()). Ketiganya dikecualikan dari
     // penurunan kolom default di bawah supaya tidak ikut jadi kolom tabel.
-    $outstanding = DB::connection("SML")->select("select NoBukti  , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1, Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi , ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ]);
+    $outstanding = DB::connection("SML")->select("select NoBukti  , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1, Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi . " order by Tanggal desc, NoBukti desc" , ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ]);
     $collection1 = collect($outstanding)->groupBy('NoBukti');
     $tempOutstanding = [];
     foreach ($collection1 as $groupedData) {

@@ -260,6 +260,61 @@
   border-color: #2563eb;
   box-shadow: 0 0 0 3px #e8edff;
 }
+
+/* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
+   po-aksi-hover supaya tabel lain tidak ikut terpengaruh. visibility (bukan display)
+   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
+   :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+table.data-table.po-aksi-hover tbody td:first-child .btn {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
+table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar. Bentuknya disalin dari
+   purchaseOrder.blade.php (meniru .po-filter-wrap milik public/css/po-table-header.css)
+   tapi ditulis di sini supaya perubahan ini cukup mengunggah file blade-nya saja. */
+.po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card);
+  border: 1.5px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
 </style>
 @endsection
 
@@ -292,6 +347,17 @@
           <input type="date" class="po-filter-inp" id="prTglAkhir" value="{!! \Carbon\Carbon::create($periode->tahun, $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
         </div>
         <input type="search" id="prSearch" class="po-search-inp" placeholder="Cari data">
+        {{-- Jumlah baris per halaman - lihat prIkatPanjangHalaman(). --}}
+        <div class="po-len-wrap">
+          <label for="prLen">Tampilkan</label>
+          <select id="prLen" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
         <button class="po-btn-filter" type="button" id="prBtnFilter" onclick="$('#modalFilterPR').modal('show')">
           <i class="bi bi-funnel"></i> Filter
         </button>
@@ -303,7 +369,7 @@
       {{-- #rtBar diisi lewat JS oleh ReportTable.init() - lihat prInitReportTableSekali(). --}}
       <div id="rtBar"></div>
 
-      <table id="tabel2" class="data-table">
+      <table id="tabel2" class="data-table po-aksi-hover">
         <thead id="tabel_header" class="text-center">
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
@@ -1502,6 +1568,24 @@ function prIkatSearch () {
   })
 }
 
+// Jumlah baris per halaman, dikendalikan dropdown #prLen. Disimpan di variabel, bukan
+// hanya dibaca dari elemen select-nya, karena renderTabelPR() melakukan destroy+init
+// tiap kali kolom digeser/disembunyikan - tanpa ini tabel selalu balik ke nilai awal
+// walau dropdownnya masih menunjuk pilihan pengguna. Nilai -1 berarti "semua data".
+let prPanjangHalaman = 10
+function prIkatPanjangHalaman () {
+  let sel = document.getElementById('prLen')
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(prPanjangHalaman)
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    prPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    $('#tabel2').DataTable().page.len(prPanjangHalaman).draw()
+  })
+}
+
 // Ubah salah satu tanggal periode -> muat ulang data.
 function prIkatPeriode () {
   let awal  = document.getElementById('prTglAwal')
@@ -1790,12 +1874,17 @@ function renderTabelPR () {
 
   $('#tabel2').DataTable({
     lengthChange: false,
-    paging: false,
-    dom: "<'po-table-wrap't>"
+    pageLength: prPanjangHalaman,
+    // "order": [] WAJIB - tanpa ini DataTables jatuh ke default [[0,'asc']] (kolom
+    // Actions). Data sudah datang terurut dari server (Tanggal/NoBukti terbaru dulu),
+    // jadi di sini cukup dipertahankan urutan DOM apa adanya.
+    order: [],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
   });
 
   prPindahBar()
   prIkatSearch()
+  prIkatPanjangHalaman()
   prIkatPeriode()
   // Init DataTable di atas mereset filter pencarian - kotak #prSearch sendiri statis
   // di blade dan nilainya tidak ikut hilang, jadi diterapkan ulang di sini.

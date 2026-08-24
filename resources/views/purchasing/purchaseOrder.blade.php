@@ -336,6 +336,22 @@
     max-width: 100%;
   }
 
+  /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
+     po-aksi-hover supaya tabel lain (mis. modalPOAdd) tidak ikut terpengaruh.
+     visibility (bukan display) supaya lebar kolomnya tetap dipesan - tabel tidak
+     melompat saat tombol muncul/hilang. :focus-within supaya tombol tetap bisa
+     dicapai lewat keyboard (Tab), bukan hanya mouse. */
+  table.data-table.po-aksi-hover tbody td:first-child .btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .12s ease;
+  }
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
+  table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+    visibility: visible;
+    opacity: 1;
+  }
+
   /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar tab Outstanding PR.
      Bentuknya sengaja meniru .po-filter-wrap / .po-filter-inp milik
      public/css/po-table-header.css supaya seragam dengan kotak periode di tab
@@ -914,6 +930,18 @@
                       <input type="date" class="po-filter-inp" id="poTglAkhir" value="{!! $poTglAkhir !!}">
                     </div>
                     <input type="search" id="poSearch2" class="po-search-inp" placeholder="Cari data">
+                    {{-- Jumlah baris per halaman. Sama seperti #poLen1/#poLen3 milik tab
+                         Outstanding - lihat poIkatPanjangHalaman(). --}}
+                    <div class="po-len-wrap">
+                      <label for="poLen2">Tampilkan</label>
+                      <select id="poLen2" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
                     <button class="po-btn-filter" type="button" id="poBtnFilter" onclick="$('#modalFilterPO').modal('show')">
                       <i class="bi bi-funnel"></i> Filter
                     </button>
@@ -923,7 +951,7 @@
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat poPindahBar(). --}}
-                  <table id="tabel2" class="data-table">
+                  <table id="tabel2" class="data-table po-aksi-hover">
                     <thead id="tabel2_header" class="text-center ">
                         <tr>
                         <th style="padding: 4px 12px; " scope="col">Actions</th>
@@ -6890,12 +6918,14 @@ const PO_OUT = {
 let poCacheOut = { 1 : null, 3 : null }
 let poPakaiCacheOut = { 1 : false, 3 : false }
 
-// Jumlah baris per halaman tiap tabel outstanding, dikendalikan dropdown #poLen1/#poLen3.
+// Jumlah baris per halaman tiap tabel, dikendalikan dropdown #poLen1/#poLen2/#poLen3.
 // Disimpan di variabel, bukan hanya dibaca dari elemen select-nya, karena
-// initTabelOutstanding() melakukan destroy+init tiap kali kolom digeser/disembunyikan -
-// tanpa ini tabel selalu balik ke nilai awal walau dropdownnya masih menunjuk pilihan
-// pengguna. Nilai -1 berarti "semua data" (dipahami DataTables maupun servernya).
-let poPanjangHalaman = { 1 : 10, 3 : 10 }
+// initTabelOutstanding()/renderTabelPO() melakukan destroy+init tiap kali kolom
+// digeser/disembunyikan - tanpa ini tabel selalu balik ke nilai awal walau
+// dropdownnya masih menunjuk pilihan pengguna. Nilai -1 berarti "semua data"
+// (dipahami DataTables maupun servernya). urut 2 (tab Purchase Order) paging-nya
+// murni di client (data sudah ditarik sekaligus), bukan lewat server seperti 1/3.
+let poPanjangHalaman = { 1 : 10, 2 : 10, 3 : 10 }
 
 // Nomor urut tabel milik tab yang sedang aktif.
 function poUrutTabAktif () {
@@ -7120,18 +7150,20 @@ function poIkatSearch (urut) {
   })
 }
 
-// Ikat dropdown "Tampilkan" (#poLen1/#poLen3) milik tab outstanding. Sama seperti kotak
-// search di atas: elemennya statis di blade dan berada DI LUAR wrapper DataTables, jadi
-// tidak ikut terhapus saat DataTables di-destroy - makanya cukup diikat sekali,
-// ditandai lewat dataset.rtBound.
+// Ikat dropdown "Tampilkan" (#poLen1/#poLen2/#poLen3). Sama seperti kotak search di atas:
+// elemennya statis di blade dan berada DI LUAR wrapper DataTables, jadi tidak ikut
+// terhapus saat DataTables di-destroy - makanya cukup diikat sekali, ditandai lewat
+// dataset.rtBound.
 //
 // page.len(n).draw() sengaja dipakai, BUKAN destroy+init lewat initTabelOutstanding():
 // DataTables sendiri yang menghitung ulang halaman lalu menembak ajax dengan length
-// yang baru, jadi susunan kolom, urutan sort, dan kata pencarian tetap utuh.
+// yang baru, jadi susunan kolom, urutan sort, dan kata pencarian tetap utuh. Untuk urut 2
+// (tab Purchase Order, paging murni di client) page.len().draw() juga aman karena
+// datanya sudah ada semua di tabel - DataTables hanya menghitung ulang halaman tampilnya.
 // .draw() tanpa argumen mengembalikan tampilan ke halaman pertama - memang yang
 // diinginkan, karena nomor halaman lama tidak lagi berarti setelah jumlah baris berubah.
 function poIkatPanjangHalaman (urut) {
-  let sel = document.getElementById(PO_OUT[urut].len)
+  let sel = document.getElementById(urut === 2 ? 'poLen2' : PO_OUT[urut].len)
   if (!sel || sel.dataset.rtBound) { return }
   sel.dataset.rtBound = '1'
   sel.value = String(poPanjangHalaman[urut])
@@ -7139,7 +7171,7 @@ function poIkatPanjangHalaman (urut) {
   sel.addEventListener('change', function () {
     let n = Number(sel.value)
     poPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
-    $('#' + PO_OUT[urut].tabel).DataTable().page.len(poPanjangHalaman[urut]).draw()
+    $('#' + (urut === 2 ? 'tabel2' : PO_OUT[urut].tabel)).DataTable().page.len(poPanjangHalaman[urut]).draw()
   })
 }
 
@@ -7802,11 +7834,18 @@ if (baris2) {
 
   $("#tabel2").DataTable({
     "lengthChange": false,
-    "paging": false,
-    "dom": "<'po-table-wrap't>",
+    "pageLength": poPanjangHalaman[2],
+    // "order": [] WAJIB - tanpa ini DataTables jatuh ke default [[0,'asc']] (kolom
+    // Actions), yang selama ini kebetulan tidak terlihat karena isinya HTML yang
+    // di-strip jadi kunci kosong semua. Data sudah datang terurut dari server
+    // (Tanggal/NoBukti terbaru dulu - lihat POController@loadPurchaseOrder), jadi
+    // di sini cukup dipertahankan urutan DOM apa adanya.
+    "order": [],
+    "dom": "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
   });
 
   poIkatSearch(2)
+  poIkatPanjangHalaman(2)
   poIkatPeriode()
   // Init DataTable di atas mereset filter pencarian - kotak #poSearch2 sendiri statis
   // di blade dan nilainya tidak ikut hilang, jadi diterapkan ulang di sini supaya

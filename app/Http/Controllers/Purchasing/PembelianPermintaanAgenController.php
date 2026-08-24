@@ -127,7 +127,8 @@ class PembelianPermintaanAgenController extends Controller
              WHERE Tanggal BETWEEN :tglawal AND :tglakhir
                AND IsJasa = 0
                AND pAgen = 1
-               $queryOtorisasi",
+               $queryOtorisasi
+             ORDER BY Tanggal DESC, NoBukti DESC",
             [
                 "tglawal"  => $req->tglawal,
                 "tglakhir" => $req->tglakhir
