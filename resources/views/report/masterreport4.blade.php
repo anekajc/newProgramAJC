@@ -1,6 +1,6 @@
-@extends('newmaster')
+@extends('report.newmaster2')
 <!-- Font Awesome CDN -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
 rel="stylesheet">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@ rel="stylesheet">
 @yield('header2')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-6 text-left"> 
+    <div class="col-6 text-left">
       @yield('reportname')
     </div>
   </div>
@@ -39,33 +39,33 @@ rel="stylesheet">
 
                 <div class="row pr-3" style="display: flex; justify-content: right;">
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
                   margin-right: 8px;
-                  font-weight: 600; 
-                  text-transform: uppercase; 
+                  font-weight: 600;
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormFilterData()">Filter Data</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormCustomizeTable()">Customize Table</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="makeTable('REPORT')">Submit</button>
                 </div>
@@ -79,21 +79,21 @@ rel="stylesheet">
           <div id="showTableReport" style="display:none; background-color: white; padding: 10px" class="row mt-4 rounded">
             <div class="col-12 text-right">
               <button type="button" class="btn btn-success" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doExportTableToExcel('tabel')">Export to Excel</button>
               <button type="button" class="btn btn-danger" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doCloseTable()">Close Table</button>
             </div>
@@ -128,10 +128,10 @@ rel="stylesheet">
                 <div class="container-fluid">
                   <div class="row mt-3">
                     <div class="col-12" id="tabelcustomize_data" style="overflow:auto;">
-                      
+
                     </div>
                   </div>
-                  
+
                   <div id="buttonSubtotal" class="row mt-3" style="display: flex; justify-content: center;">
                   </div>
                   <div id="buttonGrandtotal" class="row mt-3" style="display: flex; justify-content: center;">
@@ -279,11 +279,11 @@ rel="stylesheet">
       case gmodal_settingtotal :
                  doSimpanFormSettingTotal();
                  break;
-                    
+
       case gmodal_filterdata :
                  doShowReportFilter();
                  break;
-                              
+
       default :
                  makeTable('REPORT');
                  break;
@@ -299,19 +299,21 @@ rel="stylesheet">
       case gmodal_customizetable :
                  doCloseFormCustomizeTable();
                  break;
-                     
+
       case gmodal_settingtotal :
                  doCloseFormSettingTotal();
                  break;
-                     
+
       case gmodal_filterdata :
                  doCloseFormFilterData();
                  break;
-     
+
       default :
                 return;
     }
   }
+
+
 
   /* ============== START CUSTOMIZE HEADER  ============== */
 
@@ -381,14 +383,14 @@ function doGetHeader(_strHeader) {
   _strHeader.split("||").forEach((item, i) => {
     let temp = [];
     let columnName = item.split(";;")[0];
-    
+
     temp.push(columnName);                      // nama kolom
     temp.push(item.split(";;")[1]);             // nama header
     temp.push(toInteger(item.split(";;")[2]));  // muncul / tidak muncul
     temp.push(item.split(";;")[3]);             // tipe data
     temp.push(toInteger(item.split(";;")[4]));  // 0 = tanpa total, 1 = pakai total
     temp.push(toInteger(item.split(";;")[5]));  // jumlah desimal
-    
+
     // NEW: Parse nested header info [row, colspan, rowspan]
     if (item.split(";;")[6]) {
       let nestedInfo = item.split(";;")[6].split(",");
@@ -400,10 +402,10 @@ function doGetHeader(_strHeader) {
     } else {
       temp.push([1, 1, 1]); // default: single cell
     }
-    
+
     // NEW: Add flag for header-only (no data column)
     temp.push(columnName === '' || item.split(";;")[3] === 'group'); // isHeaderOnly
-    
+
     _cart.push(temp);
   });
 
@@ -520,7 +522,7 @@ function doGetHeader(_strHeader) {
     $("#buttonSubtotal").html(_str);
 
     gsum_issubtotal = _mode;
-    
+
     doSimpanHeader('{!! $akses['href'] !!}', g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
@@ -538,7 +540,7 @@ function doGetHeader(_strHeader) {
     $("#buttonGrandtotal").html(_str);
 
     gsum_isgrandtotal = _mode;
-    
+
     doSimpanHeader('{!! $akses['href'] !!}', g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
@@ -550,7 +552,7 @@ function doGetHeader(_strHeader) {
 
   function doShowFormSettingTotal(_index) {
     g_modeModal = gmodal_settingtotal;
-    
+
     gsettotal_index = _index;
     $("#setTotalDesimal").val(gcart_header[_index][5]);
     doButtonTotal(gcart_header[_index][4]);
@@ -579,7 +581,7 @@ function doGetHeader(_strHeader) {
     }
     $("#buttonSetTotal").html(_str);
 
-    gsettotal_nowtotal = _mode;    
+    gsettotal_nowtotal = _mode;
   }
 
   function doSimpanFormSettingTotal() {
@@ -649,7 +651,7 @@ function doGetHeader(_strHeader) {
 function doShowReport (_res, _reportTitle, _groupby, _date1, _date2 = null, inputPerkiraan1, inputPerkiraan2) {
   let tempcart = gcart_header;
   let _cellcount = 0;
-  
+
   // Count only data columns (exclude header-only)
   tempcart.forEach((item, i) => {
     // item[2] = visible, item[7] = isHeaderOnly
@@ -657,7 +659,7 @@ function doShowReport (_res, _reportTitle, _groupby, _date1, _date2 = null, inpu
       _cellcount += 1;
     }
   });
-  
+
   let rowTable = "";
   gsum_rowSubtotal = 0;
 
@@ -694,18 +696,18 @@ function doShowReport (_res, _reportTitle, _groupby, _date1, _date2 = null, inpu
 
 function doSetRowHeader(_reportTitle, tempcart, _cellcount, _date1, _date2, inputPerkiraan1, inputPerkiraan2) {
   let headerHTML = "";
-  
+
   // Title row
   headerHTML += "<tr>";
   headerHTML += `  <th colspan="${_cellcount}" style="border: 1px solid black;">${_reportTitle}</th>`;
   headerHTML += "</tr>";
-  
+
   if (inputPerkiraan1 && inputPerkiraan1 !== undefined && inputPerkiraan1 !== ''){
     headerHTML += '<tr>';
     headerHTML += '  <th colspan="' + _cellcount + '" style="text-align: left; font-weight: bold;">PERKIRAAN: ' +
     inputPerkiraan1 +
     ((inputPerkiraan2 == null || inputPerkiraan2 === '' || inputPerkiraan2 === 'undefined') ? '' : ' S.D ' + inputPerkiraan2) +
-    '</th>'; 
+    '</th>';
     headerHTML += '</tr>';
   }
 
@@ -718,14 +720,14 @@ function doSetRowHeader(_reportTitle, tempcart, _cellcount, _date1, _date2, inpu
       '</th>';
     headerHTML += '</tr>';
   }
-  
+
   headerHTML += '<tr>';
   headerHTML += '  <th colspan="' + _cellcount + '"  style="text-align: left; font-weight: bold;">Dicetak Oleh :  ' + '  {!! $akses['user'] !!}  //  Tanggal : '+ getDateIndo() +' // Jam : ' + getTimeNow() + '</th>';
   headerHTML += '</tr>';
 
   // Check if we have nested headers (2 rows)
   let hasNestedHeaders = tempcart.some(item => item[6] && item[6][0] === 2);
-  
+
   if (hasNestedHeaders) {
     // ROW 1 - Parent headers
     headerHTML += "<tr>";
@@ -737,7 +739,7 @@ function doSetRowHeader(_reportTitle, tempcart, _cellcount, _date1, _date2, inpu
       }
     });
     headerHTML += "</tr>";
-    
+
     // ROW 2 - Child headers
     headerHTML += "<tr>";
     tempcart.forEach((item, i) => {
@@ -746,7 +748,7 @@ function doSetRowHeader(_reportTitle, tempcart, _cellcount, _date1, _date2, inpu
       }
     });
     headerHTML += "</tr>";
-    
+
   } else {
     // Single row header (original behavior)
     headerHTML += "<tr>";
@@ -757,7 +759,7 @@ function doSetRowHeader(_reportTitle, tempcart, _cellcount, _date1, _date2, inpu
     });
     headerHTML += "</tr>";
   }
-  
+
   return headerHTML;
 }
 
@@ -784,7 +786,7 @@ function doSetRowTable(_res, _tempcart, _groupby) {
       if (itemcart[0] === '' || itemcart[3] === 'group') {
         return; // don't render this cell
       }
-      
+
       if (itemcart[2]) {
         if (itemcart[3] == "index") {
           rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + (i+1) + '</td>';
@@ -829,7 +831,7 @@ function doSetRowSubtotal(_tempcart) {
         if (itemcart[0] === '' || itemcart[3] === 'group') {
           return; // don't render this cell
         }
-        
+
         if (itemcart[2] === 1) {
           _counter++;
           if ((itemcart[4] === 1)) {
@@ -840,7 +842,7 @@ function doSetRowSubtotal(_tempcart) {
               rowTable += '  <td class="st' + _counter + ' cellcompact-right text-right" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; background-color:#dee2e6; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
             } else if (itemcart[3] == "int") {
               rowTable += '  <td class="st' + _counter + ' cellcompact-right text-right" style="border-bottom: 1px solid black; background-color:#dee2e6;   border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _value + '</td>';
-            } 
+            }
           } else {
             rowTable += '  <td class="st' + _counter + ' cellcompact-right text-right" style="border-bottom: 1px solid black; border-right-style: hidden; background-color:#dee2e6;  border-left-style: hidden; font-weight: bold; text-align: right;"></td>';
           }
@@ -855,7 +857,7 @@ function doSetRowSubtotal(_tempcart) {
       if (itemcart[0] === '' || itemcart[3] === 'group') {
         return;
       }
-      
+
       if ((itemcart[4] === 1) && (itemcart[3] == "float" || itemcart[3] == "int")) {
         gsum_colCart["gtot"+itemcart[0]] += gsum_colCart["stot"+itemcart[0]];
       }
@@ -867,7 +869,7 @@ function doSetRowSubtotal(_tempcart) {
       if (itemcart[0] === '' || itemcart[3] === 'group') {
         return;
       }
-      
+
       if ((itemcart[4] === 1) && (itemcart[3] == "float" || itemcart[3] == "int")) {
         gsum_colCart["stot"+itemcart[0]] = 0.00;
       }
@@ -888,7 +890,7 @@ function doSetRowGrandtotal(_tempcart) {
       if (itemcart[0] === '' || itemcart[3] === 'group') {
         return; // don't render this cell
       }
-      
+
       if ((itemcart[2])) {
         _counter++;
         if ((itemcart[4] === 1)) {
@@ -899,7 +901,7 @@ function doSetRowGrandtotal(_tempcart) {
             rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
           } else if (itemcart[3] == "int") {
             rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _value + '</td>';
-          } 
+          }
         } else {
           rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;"></td>';
         }
@@ -983,7 +985,7 @@ function doSetRowGrandtotal(_tempcart) {
       if (_match) {
         cart_filterHeader.push(_match);
       }
-    });    
+    });
 
     // HEADER TABLE FILTER
     let _str = '<tr>';

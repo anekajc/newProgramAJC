@@ -2,9 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Purchasing\PembelianPermintaanNonAgenController;
-// use App\Http\Controllers\Purchasing\PembelianPermintaanAgenController;
-// use App\Http\Controllers\Purchasing\PembelianPermintaanNonStockController;
-// use App\Http\Controllers\Purchasing\PembelianClosingPRController;
+use App\Http\Controllers\Purchasing\PembelianPermintaanAgenController;
+use App\Http\Controllers\Purchasing\PembelianPermintaanNonStockController;
+use App\Http\Controllers\Purchasing\PembelianClosingPRController;
 // use App\Http\Controllers\Purchasing\PembelianPermintaanDebetNoteController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaKreditController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaTunaiController;
@@ -14,8 +14,8 @@ use App\Http\Controllers\Purchasing\PembelianPermintaanNonAgenController;
 // use App\Http\Controllers\Purchasing\NewPOController;
 // use App\Http\Controllers\Purchasing\PerintahReturBeliController;
 use App\Http\Controllers\Purchasing\POController;
-// use App\Http\Controllers\Purchasing\PONonStockController;
-// use App\Http\Controllers\Purchasing\ClosingPOController;
+use App\Http\Controllers\Purchasing\PONonStockController;
+use App\Http\Controllers\Purchasing\ClosingPOController;
 // use App\Http\Controllers\Purchasing\InvoiceReturBeliController;
 // use App\Http\Controllers\Purchasing\ReturPembelianGudangController;
 // use App\Http\Controllers\Purchasing\InvoicePembelianController;
@@ -36,35 +36,44 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembelianpermintaannonagenupdateotorisasi',   [PembelianPermintaanNonAgenController::class, 'updateOtorisasi']);
     Route::post('/pembelianpermintaannonagenupdatebatalotorisasi', [PembelianPermintaanNonAgenController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN PERMINTAAN AGEN ─────────────────────────────────────────
-    // Route::get('/pembelianpermintaanagen',                      [PembelianPermintaanAgenController::class, 'index']);
-    // Route::get('/pembelianpermintaanagenspnobukti',             [PembelianPermintaanAgenController::class, 'getNoBukti']);
-    // Route::get('/pembelianpermintaanagenlistbarang',            [PembelianPermintaanAgenController::class, 'listBarang']);
-    // Route::post('/pembelianpermintaanagenspadd',                [PembelianPermintaanAgenController::class, 'spAdd']);
-    // Route::get('/pembelianpermintaanagenspdetail',              [PembelianPermintaanAgenController::class, 'spDetail']);
-    // Route::get('/pembelianpermintaanagenloadall',               [PembelianPermintaanAgenController::class, 'loadAll']);
-    // Route::post('/pembelianpermintaanagenspdelete',             [PembelianPermintaanAgenController::class, 'spDelete']);
-    // Route::get('/pembelianpermintaanagenlistdepartemen',        [PembelianPermintaanAgenController::class, 'listDepartemen']);
-    // Route::post('/pembelianpermintaanagenupdateotorisasi',      [PembelianPermintaanAgenController::class, 'updateOtorisasi']);
-    // Route::post('/pembelianpermintaanagenupdatebatalotorisasi', [PembelianPermintaanAgenController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN NON STOCK ───────────────────────────────────────────────
-    // Route::get('/pembelianpermintaannonstock',                      [PembelianPermintaanNonStockController::class, 'index']);
-    // Route::get('/pembelianpermintaannonstockspnobukti',             [PembelianPermintaanNonStockController::class, 'getNoBukti']);
-    // Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
-    // Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
-    // Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
-    // Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
-    // Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
-    // Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
-    // Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
-    // Route::post('/pembelianpermintaannonstockupdatebatalotorisasi', [PembelianPermintaanNonStockController::class, 'updateBatalOtorisasi']);
 
-    // // ── PEMBELIAN CLOSING PR ──────────────────────────────────────────────
-    // Route::get('/pembelianclosingpr',       [PembelianClosingPRController::class, 'index']);
-    // Route::get('/pembelianclosingprloadall',[PembelianClosingPRController::class, 'loadAll']);
-    // Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
-    // Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
+    // ── PEMBELIAN PERMINTAAN AGEN ─────────────────────────────────────────
+    Route::get('/pembelianpermintaanagen',                      [PembelianPermintaanAgenController::class, 'index']);
+    Route::get('/pembelianpermintaanagenspnobukti',             [PembelianPermintaanAgenController::class, 'getNoBukti']);
+    Route::get('/pembelianpermintaanagenlistbarang',            [PembelianPermintaanAgenController::class, 'listBarang']);
+    Route::post('/pembelianpermintaanagenspadd',                [PembelianPermintaanAgenController::class, 'spAdd']);
+    Route::get('/pembelianpermintaanagenspdetail',              [PembelianPermintaanAgenController::class, 'spDetail']);
+    Route::get('/pembelianpermintaanagenloadall',               [PembelianPermintaanAgenController::class, 'loadAll']);
+    Route::post('/pembelianpermintaanagenspdelete',             [PembelianPermintaanAgenController::class, 'spDelete']);
+    Route::get('/pembelianpermintaanagenlistdepartemen',        [PembelianPermintaanAgenController::class, 'listDepartemen']);
+    Route::post('/pembelianpermintaanagenupdateotorisasi',      [PembelianPermintaanAgenController::class, 'updateOtorisasi']);
+    Route::post('/pembelianpermintaanagenupdatebatalotorisasi', [PembelianPermintaanAgenController::class, 'updateBatalOtorisasi']);
+
+
+    // ── PEMBELIAN NON STOCK ───────────────────────────────────────────────
+    Route::get('/pembelianpermintaannonstock',                      [PembelianPermintaanNonStockController::class, 'index']);
+    Route::get('/pembelianpermintaannonstockspnobukti',             [PembelianPermintaanNonStockController::class, 'getNoBukti']);
+    Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
+    Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
+    Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
+    Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
+    Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
+    Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
+    Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
+    Route::post('/pembelianpermintaannonstockupdatebatalotorisasi', [PembelianPermintaanNonStockController::class, 'updateBatalOtorisasi']);
+
+    // ── PEMBELIAN CLOSING PR ──────────────────────────────────────────────
+    Route::get('/pembelianclosingpr',       [PembelianClosingPRController::class, 'index']);
+    Route::get('/pembelianclosingprloadall',[PembelianClosingPRController::class, 'loadAll']);
+    Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
+    Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
+
+    Route::post('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
+    Route::post('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
+    Route::post('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
+    Route::post('/pembelianclosingprheadertable',[PembelianClosingPRController::class, 'headerTable']);
+
 
     // // ── PEMBELIAN DEBET NOTE ──────────────────────────────────────────────
     // Route::get('/pembelianpermintaandebetnote',     [PembelianPermintaanDebetNoteController::class, 'index']);
@@ -202,6 +211,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkhargaddd',                    [POController::class, 'CheckHargaAdd']);
     Route::get('/purchaseorderlistrefpr',           [POController::class, 'listRefPr']);
     Route::post('/pospaddtambahso',                 [POController::class, 'spAddTambahSO']);
+    // Barang outstanding dari SEMUA SO sekaligus - dipakai dropdown "+ Dari" = SO di form
+    // Purchase Order. Route terpisah, bukan menumpang polistbarangnosoplus di atas, karena
+    // route itu masih dipakai gudang/transferbarang dan purchasing/perintahreturbeli.
+    Route::get('/polistbarangsoall',                [POController::class, 'listBarangSOAll']);
+    Route::get('/poloadpurchaseorder',              [POController::class, 'loadPurchaseOrder']);
+    Route::get('/podataoutstandingpr',              [POController::class, 'dataOutstandingPR']);
+    Route::get('/podataoutstandingso',              [POController::class, 'dataOutstandingSO']);
+    Route::post('/purchaseorderspaddpr',            [POController::class, 'spAddPr']);
 
     // // ── PURCHASE ORDER NON STOCK ──────────────────────────────────────────
     // Route::get('/pononstock',                       [PONonStockController::class, 'index']);
@@ -215,14 +232,19 @@ Route::middleware('auth')->group(function () {
     // Route::get('/ponslistbarangfoc',                [PONonStockController::class, 'listBarangFOC']);
     // Route::get('/nonstockcheckhargaddd',            [PONonStockController::class, 'CheckHargaAdd']);
 
-    // // ── CLOSING PO ────────────────────────────────────────────────────────
-    // Route::get('/closingpurchaseorder',             [ClosingPOController::class, 'index']);
-    // Route::get('/closingpurchaseorderloadall',      [ClosingPOController::class, 'loadAll']);
-    // Route::post('/closingpospclosebarang',          [ClosingPOController::class, 'updateCloseBarang']);
-    // Route::post('/closingpospcloseheader',          [ClosingPOController::class, 'updateCloseHeader']);
-    // Route::post('/closingpospopenbarang',           [ClosingPOController::class, 'updateOpenBarang']);
-    // Route::post('/closingpospopenheader',           [ClosingPOController::class, 'updateOpenHeader']);
-    // Route::get('/closingpoprint',                   [ClosingPOController::class, 'spCetak']);
+    // ── CLOSING PO ────────────────────────────────────────────────────────
+    Route::get('/closingpurchaseorder',             [ClosingPOController::class, 'index']);
+    Route::get('/closingpurchaseorderloadall',      [ClosingPOController::class, 'loadAll']);
+    Route::get('/closingpodataoutstanding',      [ClosingPOController::class, 'dataOutstanding']);
+    Route::get('/closingpodataclosing',      [ClosingPOController::class, 'dataClosing']);
+    Route::get('/closingpoceksisa',      [ClosingPOController::class, 'cekSisa']);
+    Route::post('/closingpoheadertable',      [ClosingPOController::class, 'headerTable']);
+    Route::post('/closingpoheadertable',      [ClosingPOController::class, 'headerTable']);
+    Route::post('/closingpospclosebarang',          [ClosingPOController::class, 'updateCloseBarang']);
+    Route::post('/closingpospcloseheader',          [ClosingPOController::class, 'updateCloseHeader']);
+    Route::post('/closingpospopenbarang',           [ClosingPOController::class, 'updateOpenBarang']);
+    Route::post('/closingpospopenheader',           [ClosingPOController::class, 'updateOpenHeader']);
+    Route::get('/closingpoprint',                   [ClosingPOController::class, 'spCetak']);
 
     // // ── INVOICE RETUR BELI ────────────────────────────────────────────────
     // Route::get('/invoiceReturBeliCetak',            [InvoiceReturBeliController::class, 'spCetak']);

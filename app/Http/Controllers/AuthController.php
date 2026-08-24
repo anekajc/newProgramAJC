@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class AuthController extends Controller
      */
     public function index(): RedirectResponse
     {
-        return redirect()->route('login');
+        return redirect('/');
     }
 
     /**
@@ -48,6 +49,16 @@ class AuthController extends Controller
     }
 
     /**
+     * Called by the login page on load. Legacy no-op: it used to reset every
+     * user's online status, which would clear the "User sudah login" lock for
+     * all users, so the body stays disabled.
+     */
+    public function updateIdle(): Response
+    {
+        return response()->noContent();
+    }
+
+    /**
      * Determine which field to use for authentication (email or username).
      */
     public function username(Request $request): string
@@ -73,6 +84,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect('/');
     }
 }

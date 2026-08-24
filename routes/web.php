@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\GlobalController;
 use App\Http\Controllers\HeaderTableController;
@@ -16,6 +17,10 @@ Route::get('/test', function () {
 
 // Login
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect('/home');
+    }
+
     return view('welcome');
 });
 
@@ -63,7 +68,7 @@ Route::get('/spgetstockakhir', [GlobalController::class, 'getStockAkhir'])->midd
 
 require __DIR__.'/accounting.php';
 require __DIR__.'/marketing.php';
-// require __DIR__.'/gudang.php';
+require __DIR__.'/gudang.php';
 require __DIR__.'/purchasing.php';
 require __DIR__.'/master.php';
 require __DIR__.'/report.php';

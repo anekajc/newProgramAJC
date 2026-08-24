@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\NewMenu;
-use App\Models\NewAksesMenu;
-use App\Models\DBFLMENU;
-use App\Models\NewPeriode;
-use App\Models\NewUsers;
+use App\Model\NewMenu;
+use App\Model\NewAksesMenu;
+use App\Model\DBFLMENU;
+use App\Model\NewPeriode;
+use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
+
+
+
+
 
 class HeaderTableController extends Controller
 
@@ -16,145 +20,869 @@ class HeaderTableController extends Controller
 {
   public function saveHeaderTable (Request $req) {
     $username = \Auth::user()->username;
-    // DBHEADERTABLE has a real `urut` column (multiple tables/tabs sharing one
-    // href, e.g. purchaseOrder.blade.php's PR/PO/Outstanding-SO = urut 1/2/3),
-    // but this method never filtered by it -- every table saved under the same
-    // href clobbered whichever one saved last. Pages that never send `urut`
-    // (e.g. pembelianpermintaannonagen) already have rows with urut = NULL in
-    // the DB, so missing urut defaults to 0 and the comparison is NULL-safe to
-    // keep matching those existing rows.
-    $urut = $req->urut ?? 0;
+    $res=[];
+    if($req->urut){
+      $res = DB::connection('SML')->select(
+          "select * from  DBHEADERTABLE where username = :username and href = :href and urut = :urut",
+          [
+              "username" => $username,
+              "href" => $req->href,
+              "urut" => $req->urut
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->select(
+          "select * from  DBHEADERTABLE where username = :username and href = :href ",
+          [
+              "username" => $username,
+              "href" => $req->href
+          ]
+      );
+    }
+    // $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    if($req->urut){
+      if ($res) {
 
-    $res = DB::connection('SML')->select(
-        "select * from  DBHEADERTABLE where username = :username and href = :href and ISNULL(urut, 0) = :urut",
-        [
-          "username" => $username,
-          "href" => $req->href,
-          "urut" => $urut
-        ]
-    );
-    if ($res) {
+      $res = DB::connection('SML')->update(
+          "UPDATE DBHEADERTABLE SET header = :header , tipe = :tipe , isnumber = :isnumber , value = :value , isshown = :isshown  where username = :username and href = :href and urut = :urut",
+          [
+            "header" => $req->header ,
+             "tipe" => $req->tipe ,
+              "isnumber" => $req->isnumber ,
+               "value" => $req->value ,
+                "isshown" => $req->isshown ,
+              "username" => \Auth::user()->username,
 
-    $res = DB::connection('SML')->update(
-        "UPDATE DBHEADERTABLE SET header = :header , tipe = :tipe , isnumber = :isnumber , value = :value , isshown = :isshown  where username = :username and href = :href and ISNULL(urut, 0) = :urut",
-        [
-          "header" => $req->header ,
-           "tipe" => $req->tipe ,
-            "isnumber" => $req->isnumber ,
-             "value" => $req->value ,
-              "isshown" => $req->isshown ,
-            "username" => \Auth::user()->username,
+              "href" => $req->href,
+              "urut" => $req->urut
 
-            "href" => $req->href,
-            "urut" => $urut
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->statement(
+          "INSERT INTO DBHEADERTABLE (username, urut , href, header, tipe, isshown , value, isnumber)
+  VALUES (:username , :urut , :href , :header , :tipe , :isshown , :value , :isnumber);",
+          [
+            "header" => $req->header ,
+            "urut" => $req->urut,
+             "tipe" => $req->tipe ,
+              "isnumber" => $req->isnumber ,
+               "value" => $req->value ,
+                "isshown" => $req->isshown ,
+              "username" => \Auth::user()->username,
 
-        ]
-    );
-  } else {
-    $res = DB::connection('SML')->statement(
-        "INSERT INTO DBHEADERTABLE (username, href, header, tipe, isshown , value, isnumber, urut)
-VALUES (:username , :href , :header , :tipe , :isshown , :value , :isnumber, :urut);",
-        [
-          "header" => $req->header ,
-           "tipe" => $req->tipe ,
-            "isnumber" => $req->isnumber ,
-             "value" => $req->value ,
-              "isshown" => $req->isshown ,
-            "username" => \Auth::user()->username,
+              "href" => $req->href
+          ]
+      );
 
-            "href" => $req->href,
-            "urut" => $urut
-        ]
-    );
+    }
 
-  }
+
+    } else {
+      if ($res) {
+
+      $res = DB::connection('SML')->update(
+          "UPDATE DBHEADERTABLE SET header = :header , tipe = :tipe , isnumber = :isnumber , value = :value , isshown = :isshown  where username = :username and href = :href ",
+          [
+            "header" => $req->header ,
+             "tipe" => $req->tipe ,
+              "isnumber" => $req->isnumber ,
+               "value" => $req->value ,
+                "isshown" => $req->isshown ,
+              "username" => \Auth::user()->username,
+
+              "href" => $req->href
+
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->statement(
+          "INSERT INTO DBHEADERTABLE (username, href, header, tipe, isshown , value, isnumber)
+  VALUES (:username , :href , :header , :tipe , :isshown , :value , :isnumber);",
+          [
+            "header" => $req->header ,
+             "tipe" => $req->tipe ,
+              "isnumber" => $req->isnumber ,
+               "value" => $req->value ,
+                "isshown" => $req->isshown ,
+              "username" => \Auth::user()->username,
+
+              "href" => $req->href
+          ]
+      );
+
+    }
+
+    }
+
   return 1;
 
   }
 
+  public function saveSetHeaderTable (Request $req) {
+    // $username = \Auth::user()->username;
+
+    // $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+    if ($req->urut) {
+      $res = DB::connection('SML')->select(
+          "select * from  DBHEADERTABLEALIAS where href = :href and urut = :urut",
+          [
+              "href" => $req->href,
+              "urut" => $req->urut
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->select(
+          "select * from  DBHEADERTABLEALIAS where href = :href ",
+          [
+              "href" => $req->href
+          ]
+      );
+
+    }
+
+    if ($req->urut) {
+      if ($res) {
+
+      $res = DB::connection('SML')->update(
+          "UPDATE DBHEADERTABLEALIAS SET  value = :value   where  href = :href and urut = :urut",
+          [
+            "value" => $req->value ,
+             "href" => $req->href,
+
+              "urut" => $req->urut
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->statement(
+          "INSERT INTO DBHEADERTABLEALIAS (value, href , urut)
+  VALUES (:value , :href , :urut );",
+  [
+    "value" => $req->value ,
+     "href" => $req->href,
+
+      "urut" => $req->urut
+  ]
+      );
+
+    }
+    } else {
+      if ($res) {
+
+      $res = DB::connection('SML')->update(
+          "UPDATE DBHEADERTABLEALIAS SET  value = :value   where  href = :href ",
+          [
+            "value" => $req->value ,
+             "href" => $req->href
+          ]
+      );
+    } else {
+      $res = DB::connection('SML')->statement(
+          "INSERT INTO DBHEADERTABLEALIAS (value, href)
+  VALUES (:value , :href );",
+  [
+    "value" => $req->value ,
+     "href" => $req->href
+  ]
+      );
+
+    }
+
+    }
+
+
+  return 1;
+
+  }
+
+
+
+
   public function getHeaderTable (Request $req) {
+    // $bobIndex = array_find_key($users, fn($user) => $user->name === 'Bob');
     $isnumberheadertable = [];
     $headertablevalue = [];
     $headertableheader = [];
     $headerisshown = [];
-    $headertabletipe = [];
-    $isparsed = 0;
     $username = \Auth::user()->username;
-    // See saveHeaderTable() for why urut defaults to 0 and the comparison is
-    // NULL-safe -- same reasoning applies here so a saved row is actually
-    // found again by the table/tab that saved it, instead of any row for
-    // that href (or none, for hrefs whose other urut already grabbed the
-    // only unfiltered match).
-    $urut = $req->urut ?? 0;
-
+    $statusset = 0;
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $aliasOrdered = [];
+    $isparsed = 0;
+    $headertablealias = [];
 
-    $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username and ISNULL(urut, 0) = :urut"  , ["username" => $username , "href" => $req->href , "urut" => $urut ]);
+    $menuMoreThanOne = ['purchaseorder'];
+    $desimal = [];
+    $desimal2 = [];
+    $aliasOrdered2 = [];
+    $headertablealias2 = [];
+    $isparsed2 = [];
+    $headertableheader2 = [];
+    $isnumberheadertable2 = [];
+    $headertablevalue2 = [];
+    $headerisshown2 = [];
 
-    if (count($headertable) > 0) {
-      // header/tipe/isnumber/value/isshown are stored as JSON strings
-      // (saveHeaderTable() writes them via JS's JSON.stringify()) and
-      // returned as-is here -- pembelianpermintaannonagen's own JS already
-      // does JSON.parse() on these fields itself when isparsed == 0, so
-      // decoding them here would double-decode and break that page. Callers
-      // that want real arrays (e.g. so.blade.php's soBuatCart()) need to
-      // JSON.parse() these on their own side too.
-      $isnumberheadertable = $headertable[0]->isnumber;
-      $headertablevalue = $headertable[0]->value;
-      $headertableheader = $headertable[0]->header;
-      $headerisshown = $headertable[0]->isshown;
-      $headertabletipe = $headertable[0]->tipe;
-      $isparsed = 0;
-    } else if ($req->href == 'pembelianpermintaannonagen') {
-      $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+    // urut 3 = tab "Outstanding SO" di halaman Purchase Order.
+    $desimal3 = [];
+    $aliasOrdered3 = [];
+    $headertablealias3 = [];
+    $isparsed3 = [];
+    $headertableheader3 = [];
+    $isnumberheadertable3 = [];
+    $headertablevalue3 = [];
+    $headerisshown3 = [];
 
-      $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
-      $tempOtorisasi = [];
-      foreach ($otorisasi as $groupedData) {
-          $tempOtorisasi[] = $groupedData;
+    $xxx= [];
+    $isMoreThanOne = 0;
+    if (in_array($req->href , $menuMoreThanOne)) {
+      $isMoreThanOne = 1;
+    } else {
+      $isMoreThanOne = 0;
+    }
+
+    // Tombol "Reset kolom": hapus pengaturan tersimpan milik user untuk tabel ini,
+    // supaya sisa method di bawah jatuh ke cabang "belum ada konfigurasi" dan
+    // menurunkan lagi kolom default dari datanya. Aditif - pemanggilan lama yang
+    // tidak mengirim reset sama sekali tidak berubah.
+    //
+    // Halaman dengan lebih dari satu tabel (mis. purchaseorder) mengirim `urut`, dan
+    // konfigurasinya memang disimpan per urut. Halaman dengan satu tabel saja (mis.
+    // pembelianpermintaannonagen) tidak pernah mengirim `urut`, dan konfigurasinya
+    // disimpan tanpa urut juga - reset di halaman itu perlu cabang terpisah.
+    if ($req->reset) {
+      if ($req->urut) {
+        DB::connection("SML")->update("delete from DBHEADERTABLE where username = :username and href = :href and urut = :urut" , ["username" => $username , "href" => $req->href , "urut" => $req->urut ]);
+      } else {
+        DB::connection("SML")->update("delete from DBHEADERTABLE where username = :username and href = :href" , ["username" => $username , "href" => $req->href ]);
+      }
+    }
+
+    if ($isMoreThanOne ) {
+      $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href and urut = :urut"  , ["href" => $req->href ,"urut" => 1 ]);
+      if ($xxx ) {
+        $headertablealias = json_decode($xxx[0]->value);
+      } else {
+        $headertablealias = [];
       }
 
-      if(!$tempOtorisasi) {
+      $xxx2 = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href and urut = :urut"  , ["href" => $req->href ,"urut" => 2 ]);
+      if ($xxx2 ) {
+        $headertablealias2 = json_decode($xxx2[0]->value);
+      } else {
+        $headertablealias2 = [];
+      }
 
+      $xxx3 = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href and urut = :urut"  , ["href" => $req->href ,"urut" => 3 ]);
+      if ($xxx3 ) {
+        $headertablealias3 = json_decode($xxx3[0]->value);
+      } else {
+        $headertablealias3 = [];
+      }
+    } else {
+      $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->href ]);
+      if ($xxx ) {
+        $headertablealias = json_decode($xxx[0]->value);
+      } else {
+        $headertablealias = [];
+      }
+    }
+
+    // pr non agen
+    if ($req->href == 'pembelianpermintaannonagen') {
+      $statusset = 1;
+      $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+      // $isparsed = 0;
+      $otorisasi = collect($otorisasi)->groupBy('NoBukti');
+      $tempOtorisasi = [];
+      foreach ($otorisasi as $groupedData) {
+        $tempOtorisasi[] = $groupedData;
+      }
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
       } else {
         $isparsed = 1;
         foreach ($tempOtorisasi[0][0] as $key => $value) {
 
-          if (str_contains($key, "Oto")) {
-
-
-          } else {
-
-              array_push($headertablevalue, $key);
-            array_push($headertableheader, $key);
-          array_push($headerisshown, 1);
-
-            if (strtotime($value)) {
-
-                  array_push( $isnumberheadertable , 2);
-            } else if (is_numeric($value)) {
-                array_push( $isnumberheadertable , 1);
+        if(!$tempOtorisasi) {
+        } else {
+          $isparsed = 1;
+          foreach ($tempOtorisasi[0][0] as $key => $value) {
+            if (str_contains($key, "Oto")) {
             } else {
+            array_push($headertablevalue, $key);
+            array_push($headertableheader, $key);
+            array_push($headerisshown, 1);
 
-                  array_push($isnumberheadertable,0);
+              // if (strtotime($value)) {
+              //
+              //       array_push( $isnumberheadertable , 2);
+              // } else if (is_numeric($value)) {
+              //     array_push( $isnumberheadertable , 1);
+              // } else {
+              //
+              //       array_push($isnumberheadertable,0);
+              // }
+
+            $date = \DateTime::createFromFormat('Y-m-d', trim((string) $value));
+
+          if ($date !== false && $date->format('Y-m-d') === trim((string) $value)) {
+            $isnumberheadertable[] = 2;
+          } elseif (is_numeric($value)) {
+            $isnumberheadertable[] = 1;
+          } else {
+            $isnumberheadertable[] = 0;
+          }
+        }
+      }
+    }
+  }
+  $aliasOrdered = [];
+  if ($headertablealias) {
+    foreach ($headertablevalue as $header) {
+        foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      // $parsed = json_decode($headertableheader);
+      // $aliasparsed = json_decode($headertableheader);
+// @dd($headertableheader);
+      // for ($i=0; $i < count($headertableheader) ; $i++) {
+      //   // code...
+      //   if () {
+      //
+      //   }
+      // }
+//       foreach (collect($headertableheader) as $header ) {
+//         // code...
+//         $index = collect($headertablealias)->search(function ($a) use ($header) {
+//     return $a->value === $header;
+// });
+        // $index = array_find_key($alias, fn($a) => $a->value === $header);
+      //   array_push( $aliasOrdered, $alias[$index]);
+      // }
+
+    } 
+    // PR AGEN
+    else if ($req->href == 'pembelianpermintaanagen') {
+      $statusset = 1;
+      $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 0 and pAgen = 1"  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+      // $isparsed = 0;
+      $otorisasi = collect($otorisasi)->groupBy('NoBukti');
+      $tempOtorisasi = [];
+      foreach ($otorisasi as $groupedData) {
+        $tempOtorisasi[] = $groupedData;
+      }
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        // $headertable = [];
+
+        if(!$tempOtorisasi) {
+        } else {
+          $isparsed = 1;
+          foreach ($tempOtorisasi[0][0] as $key => $value) {
+            if (str_contains($key, "Oto")) {
+            } else {
+            array_push($headertablevalue, $key);
+            array_push($headertableheader, $key);
+            array_push($headerisshown, 1);
+
+              // if (strtotime($value)) {
+              //
+              //       array_push( $isnumberheadertable , 2);
+              // } else if (is_numeric($value)) {
+              //     array_push( $isnumberheadertable , 1);
+              // } else {
+              //
+              //       array_push($isnumberheadertable,0);
+              // }
+
+            $date = \DateTime::createFromFormat('Y-m-d', trim((string) $value));
+
+          if ($date !== false && $date->format('Y-m-d') === trim((string) $value)) {
+            $isnumberheadertable[] = 2;
+          } elseif (is_numeric($value)) {
+            $isnumberheadertable[] = 1;
+          } else {
+            $isnumberheadertable[] = 0;
+          }
+        }
+      }
+    }
+  }
+  $aliasOrdered = [];
+  if ($headertablealias) {
+    foreach ($headertablevalue as $header) {
+        foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+  }
+    // PR NON STOCK
+    else if ($req->href == 'pembelianpermintaannonstock') {
+      $statusset = 1;
+      $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 1 and pAgen = 0"  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+      // $isparsed = 0;
+      $otorisasi = collect($otorisasi)->groupBy('NoBukti');
+      $tempOtorisasi = [];
+      foreach ($otorisasi as $groupedData) {
+        $tempOtorisasi[] = $groupedData;
+      }
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        // $headertable = [];
+
+        if(!$tempOtorisasi) {
+        } else {
+          $isparsed = 1;
+          foreach ($tempOtorisasi[0][0] as $key => $value) {
+            if (str_contains($key, "Oto")) {
+            } else {
+            array_push($headertablevalue, $key);
+            array_push($headertableheader, $key);
+            array_push($headerisshown, 1);
+
+            $date = \DateTime::createFromFormat('Y-m-d', trim((string) $value));
+
+          if ($date !== false && $date->format('Y-m-d') === trim((string) $value)) {
+            $isnumberheadertable[] = 2;
+          } elseif (is_numeric($value)) {
+            $isnumberheadertable[] = 1;
+          } else {
+            $isnumberheadertable[] = 0;
+          }
+        }
+      }
+    }
+  }
+  $aliasOrdered = [];
+  if ($headertablealias) {
+    foreach ($headertablevalue as $header) {
+        foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+  }
+    // PO
+    else if ($req->href == 'purchaseorder') {
+      $formats = [
+      'Y-m-d',
+      'Y-m-d H:i:s',
+      'Y-m-d H:i:s.v'];
+
+      $statusset = 1;
+      $isparsed = 0;
+      // Konfigurasi header milik user diambil lebih dulu. Dua query berat di bawah
+      // (vwOutPPL dan union dbPO) hasilnya HANYA dipakai untuk menebak nama & tipe kolom
+      // ketika konfigurasi belum ada, jadi tidak perlu dijalankan kalau konfigurasi sudah tersimpan.
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable3 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 3"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      $otorisasi = [];
+      if (count($headertable) == 0) {
+      $otorisasi = DB::connection("SML")->select("DECLARE @Tahun int, @Bulan int
+      SELECT @Tahun=2018, @Bulan=78
+
+      SET NOCOUNT ON
+      SELECT TOP 1
+      A.Nobukti , A.Tanggal , A.sat , ' ' + CAST(A.kodebrg AS VARCHAR(50)) AS kodebrg  , A.NamaBrg , isnull(A.Qnt , '0.00') Qnt , A.QNTPO , A.SisaPPL , A.Keterangan , A.QntoutSO , A.QntStock
+      from DBO.vwOutPPL A WITH(NOLOCK)
+      where A.SisaPPL>0
+      and A.pjasa=0
+      order by A.Tanggal, A.NoBukti, A.Urut"  );
+      }
+
+      $otorisasi2 = [];
+      if (count($headertable2) == 0) {
+      $otorisasi2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
+
+      select @Tahun= :tahun , @Bulan= :bulan
+      Select  a.NoBukti, CONVERT(varchar(10), a.Tanggal, 23) AS Tanggal,a.KodeSupp, b.NamaCustSupp,  b.FakturSupp,
+        TotDPPRp, TotPPNRp, TotNetRp,
+        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+        NOSO,NOPOCUST ,CONVERT(varchar(10), A.tglKirim, 23) AS tglKirim
+        From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+        where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
+        and  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+        Case when A.IsOtorisasi2=1 then 1 else 0 end+
+        Case when A.IsOtorisasi3=1 then 1 else 0 end+
+        Case when A.IsOtorisasi4=1 then 1 else 0 end+
+        Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+      else 1
+      end As Bit)=1  */    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+        Case when A.IsOtorisasi2=1 then 1 else 0 end+
+        Case when A.IsOtorisasi3=1 then 1 else 0 end+
+        Case when A.IsOtorisasi4=1 then 1 else 0 end+
+        Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+      else 1
+      end As Bit)= 1  AND TotTotalRp>=200000000
+      and B.pJasa= 0
+      UNION ALL
+
+      Select  a.NoBukti,    CONVERT(varchar(10), a.Tanggal, 23) AS Tanggal,a.KodeSupp, b.NamaCustSupp, b.FakturSupp,
+        TotDPPRp, TotPPNRp, TotNetRp,
+        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+
+      NOSO,NOPOCUST ,CONVERT(varchar(10), A.tglKirim, 23) AS tglKirim
+      From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+      where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
+      and  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+        Case when A.IsOtorisasi2=1 then 1 else 0 end+
+        Case when A.IsOtorisasi3=1 then 1 else 0 end+
+        Case when A.IsOtorisasi4=1 then 1 else 0 end+
+        Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+      else 1
+      end As Bit)=1       AND TotTotalRp < 200000000
+      and B.pJasa= 0
+
+      order by NoBukti"  , ["bulan" => 5 , "tahun" => 2026 ]);
+      }
+
+      // Tabel urut 3 = tab "Outstanding SO". Query-nya diambil dari POController supaya
+      // nama kolom di sini tidak pernah berbeda dengan data yang nanti dikirim
+      // dataOutstandingSO(). TOP 1 karena satu baris contoh sudah cukup untuk menurunkan
+      // nama & tipe kolom, dan seperti dua tabel di atas query ini hanya jalan kalau
+      // user memang belum punya konfigurasi tersimpan.
+      $otorisasi3 = [];
+      if (count($headertable3) == 0) {
+        $sqlSO = \App\Http\Controllers\Purchasing\POController::sqlOutstandingSO();
+        $otorisasi3 = DB::connection("SML")->select("
+          SET NOCOUNT ON
+          select top 1 A.* from ( $sqlSO ) A
+        ");
+      }
+
+      // @dd(count($headertable2));
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        // $headertable = [];
+        if(!$otorisasi2) {
+        } else {
+          $isparsed2 = 1;
+          foreach ($otorisasi2[0] as $key => $value) {
+            if (str_contains($key, "Oto")) {
+            } else {
+            array_push($headertablevalue2, $key);
+            array_push($headertableheader2, $key);
+            array_push($headerisshown2, 1);
+            $isDate = false;
+            $checkValue = (string) $value;
+
+            foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $checkValue);
+
+          if ($date !== false && $date->format($format) === $checkValue) {
+              $isDate = true;
+              break;
+          }
+        }
+
+// if ($date !== false && $date->format('Y-m-d') === trim((string) $value)) {
+
+          if ($isDate) {
+            $isnumberheadertable2[] = 2;
+          } else if ($key == 'kodebrg') {
+            $isnumberheadertable2[] = 0;
+          }
+
+          elseif (is_numeric($value)) {
+            $isnumberheadertable2[] = 1;
+          } else {
+            $isnumberheadertable2[] = 0;
+          }
+        }
+      }
+    }
+  }
+
+    if (count($headertable3) > 0) {
+      $isnumberheadertable3 = json_decode($headertable3[0]->isnumber);
+      $headertablevalue3 = json_decode($headertable3[0]->value);
+      $headertableheader3 = json_decode($headertable3[0]->header);
+      $headerisshown3 = json_decode($headertable3[0]->isshown);
+      $isparsed3 = 0;
+    } else {
+      if (!$otorisasi3) {
+      } else {
+        // Kolom teks yang isinya bisa saja terbaca sebagai angka (kode barang / part
+        // number berupa digit semua, no. bukti tertentu). Tanpa daftar ini kolomnya
+        // ikut jadi kolom angka: rata kanan dan diberi pemisah ribuan. Perlakuan yang
+        // sama dipakai tabel urut 1 & 2 lewat pengecualian khusus 'kodebrg' di atas.
+        $kolomTeks3 = ['kodebrg', 'namabrg', 'nobukti', 'sat', 'partnumber'];
+        $isparsed3 = 1;
+        foreach ($otorisasi3[0] as $key => $value) {
+          array_push($headertablevalue3, $key);
+          array_push($headertableheader3, $key);
+          array_push($headerisshown3, 1);
+
+          $isDate = false;
+          $checkValue = (string) $value;
+          foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $checkValue);
+            if ($date !== false && $date->format($format) === $checkValue) {
+              $isDate = true;
+              break;
             }
           }
 
-
-
+          if ($isDate) {
+            $isnumberheadertable3[] = 2;
+          } else if (in_array(strtolower($key), $kolomTeks3, true)) {
+            $isnumberheadertable3[] = 0;
+          } elseif (is_numeric($value)) {
+            $isnumberheadertable3[] = 1;
+          } else {
+            $isnumberheadertable3[] = 0;
+          }
         }
+      }
+    }
+
+    if (count($headertable) > 0) {
+      $isnumberheadertable = json_decode($headertable[0]->isnumber);
+      $headertablevalue = json_decode($headertable[0]->value);
+      $headertableheader = json_decode($headertable[0]->header);
+      $headerisshown = json_decode($headertable[0]->isshown);
+      $isparsed = 0;
+    } else {
+        // $headertable = [];
+    if(!$otorisasi) {
+      } else {
+        $isparsed = 1;
+        foreach ($otorisasi[0] as $key => $value) {
+          if (str_contains($key, "Oto")) {
+          } else {
+            array_push($headertablevalue, $key);
+            array_push($headertableheader, $key);
+            array_push($headerisshown, 1);
+              // if (strtotime($value)) {
+              //
+              //       array_push( $isnumberheadertable , 2);
+              // } else if (is_numeric($value)) {
+              //     array_push( $isnumberheadertable , 1);
+              // } else {
+              //
+              //       array_push($isnumberheadertable,0);
+              // }
+              // $date = \DateTime::createFromFormat('Y-m-d', trim((string) $value));
+
+            $isDate = false;
+            $checkValue = (string) $value;
+            foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $checkValue);
+
+            if ($date !== false && $date->format($format) === $checkValue) {
+              $isDate2 = true;
+              break;
+            }
+          }
+
+            if ($isDate) {
+              $isnumberheadertable[] = 2;
+            } else if ($key == 'kodebrg') {
+              $isnumberheadertable[] = 0;
+            }
+          }
+
+            elseif (is_numeric($value)) {
+              $isnumberheadertable[] = 1;
+            } else {
+              $isnumberheadertable[] = 0;
+            }
+          }
+        }
+      }
+    }
+
+    $aliasOrdered = [];
+    if ($headertablealias) {
+      foreach ($headertablevalue as $header) {
+        foreach ($headertablealias as $item) {
+          if ($item->value === $header) {
+            array_push( $aliasOrdered , $item);
+            break;
+          }
+        }
+      }
+    } else {
+      foreach ($headertablevalue as $header) {
+        array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+      }
+    }
+
+    $aliasOrdered2 = [];
+    if ($headertablealias2) {
+      foreach ($headertablevalue2 as $header) {
+        foreach ($headertablealias2 as $item) {
+          if ($item->value === $header) {
+            array_push( $aliasOrdered2 , $item);
+            break;
+          }
+        }
+      }
+    } else {
+      foreach ($headertablevalue2 as $header) {
+        array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+      }
+    }
+
+    $aliasOrdered3 = [];
+    if ($headertablealias3) {
+      foreach ($headertablevalue3 as $header) {
+        foreach ($headertablealias3 as $item) {
+          if ($item->value === $header) {
+            array_push( $aliasOrdered3 , $item);
+            break;
+          }
+        }
+      }
+    } else {
+      foreach ($headertablevalue3 as $header) {
+        array_push( $aliasOrdered3 , ["value" => $header , "alias" => $header]);
       }
 
     }
 
+    $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+    $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    $desimal3 = $this->desimalHeaderTable($headertable3 , $isnumberheadertable3);
+
+    // desimalHeaderTable() memberi 2 desimal untuk SEMUA kolom angka, sehingga nomor
+    // urut & kode satuan tampil sebagai "2.00". Hanya berlaku sebagai nilai awal:
+    // begitu user mengatur sendiri desimalnya lewat menu roda gigi, konfigurasi
+    // tersimpan itu yang dipakai dan blok ini tidak lagi ikut campur.
+    if (count($headertable3) == 0) {
+      $kolomBulat3 = ['urut', 'nosat', 'tolerate'];
+      foreach ($headertablevalue3 as $i => $namaKolom) {
+        if (in_array(strtolower($namaKolom), $kolomBulat3, true)) {
+          $desimal3[$i] = 0;
+        }
+      }
+    }
+  }
     return [
+      "aliasordered" => $aliasOrdered ,
+      "alias" => $headertablealias ,
+      "statusset" => $statusset ,
       "isparsed" => $isparsed ,
       "headertableheader" => $headertableheader ,
       "isnumeric" => $isnumberheadertable,
       "headertablevalue" => $headertablevalue,
       "isshown" => $headerisshown,
-      "tipe" => $headertabletipe];
+      "aliasordered2" => $aliasOrdered2 ,
+      "alias2" => $headertablealias2 ,
+      "isparsed2" => $isparsed2 ,
+      "headertableheader2" => $headertableheader2 ,
+      "isnumeric2" => $isnumberheadertable2,
+      "headertablevalue2" => $headertablevalue2,
+      "isshown2" => $headerisshown2,
+      "aliasordered3" => $aliasOrdered3 ,
+      "alias3" => $headertablealias3 ,
+      "isparsed3" => $isparsed3 ,
+      "headertableheader3" => $headertableheader3 ,
+      "isnumeric3" => $isnumberheadertable3,
+      "headertablevalue3" => $headertablevalue3,
+      "isshown3" => $headerisshown3,
+      "desimal" => $desimal,
+      "desimal2" => $desimal2,
+      "desimal3" => $desimal3
+    ];
+    //     $req = new Request([
+    //     'href' => 'aaa'
+    // ]);
+    //
+    // $xx = app('App\Http\Controllers\NewMenuController')
+    //     ->saveHeaderTable($req);
+  }
 
+  /**
+   * Jumlah desimal per kolom.
+   *
+   * DBHEADERTABLE tidak punya kolom khusus untuk ini, jadi nilainya dititipkan
+   * di kolom `tipe` dalam bentuk JSON array. Kolom itu memang ditulis oleh
+   * saveHeaderTable() tapi tidak pernah dibaca balik, dan semua halaman yang
+   * memakai sistem ini selalu mengirimnya sebagai string kosong - jadi aman
+   * dipakai tanpa perlu mengubah struktur tabel di SQL Server.
+   *
+   * Kalau isinya kosong / bukan JSON / panjangnya tidak cocok, kolom yang
+   * bersangkutan jatuh ke bawaan: 2 desimal untuk kolom angka, 0 untuk lainnya.
+   */
+  private function desimalHeaderTable ($headertable , $isnumeric) {
+    $tersimpan = [];
+    if (count($headertable) > 0) {
+      $decoded = json_decode($headertable[0]->tipe);
+      if (is_array($decoded)) {
+        $tersimpan = $decoded;
+      }
+    }
+
+    $desimal = [];
+    foreach ($isnumeric as $i => $tipe) {
+      if (isset($tersimpan[$i]) && is_numeric($tersimpan[$i])) {
+        $nilai = (int) $tersimpan[$i];
+        if ($nilai < 0) { $nilai = 0; }
+        if ($nilai > 4) { $nilai = 4; }
+        array_push($desimal , $nilai);
+      } else {
+        array_push($desimal , ((int) $tipe === 1) ? 2 : 0);
+      }
+    }
+
+    return $desimal;
   }
 
 

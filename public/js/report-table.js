@@ -46,7 +46,7 @@
  * CATATAN PENTING soal "Reset kolom": doSetHeader() memuat layout TERSIMPAN dari
  * DBSIMPANHEADER, dan layout itu ikut tersimpan otomatis saat halaman pertama kali
  * dibuka. Akibatnya kolom yang BARU ditambahkan ke setDefaultHeader() TIDAK akan
- * muncul untuk user yang sudah pernah membuka halaman itu � sampai mereka menekan
+ * muncul untuk user yang sudah pernah membuka halaman itu — sampai mereka menekan
  * Reset kolom. Jangan hapus tombol ini saat modal "Atur Kolom" dipensiunkan.
  *
  * Pemakaian di halaman report:
@@ -944,7 +944,7 @@
 
      doSetHeader(mode, true) memaksa _strHeader = "" -> panggil setDefaultHeader()
      -> doSimpanHeader(). Itu primitif reset-nya; doResetHeader() di masterreport2
-     memakai primitif yang sama, tapi tidak me-render ulang tabel utama � di sini
+     memakai primitif yang sama, tapi tidak me-render ulang tabel utama — di sini
      kita render ulang supaya hasilnya langsung terlihat. */
   function resetHeader() {
     if (typeof window.doSetHeader !== "function") { return; }
@@ -960,12 +960,20 @@
     };
 
     if (window.alertify && typeof alertify.confirm === "function") {
-      alertify.confirm(
+      var dlg = alertify.confirm(
         "Reset Kolom",
         "Apakah yakin ingin mengembalikan kolom tabel ke pengaturan awal?",
         apply,
         function () { /* batal */ }
       );
+      /* Kelas 'ajs-app-buttons' menempelkan gaya tombol OK/Cancel dari
+         public/css/report-table.css (lihat blok "gaya bersama" di sana).
+         Tanpa 'is-danger' tombol OK memakai warna biru — reset kolom bukan
+         aksi merusak. Dibungkus guard karena elements baru ada setelah
+         dialog dibangun. */
+      if (dlg && dlg.elements && dlg.elements.root) {
+        dlg.elements.root.classList.add("ajs-app-buttons");
+      }
     } else {
       apply();
     }
@@ -993,7 +1001,7 @@
 
     var html = "";
 
-    // Reset kolom � hanya bila doSetHeader() (masterreport2) tersedia.
+    // Reset kolom — hanya bila doSetHeader() (masterreport2) tersedia.
     if (typeof window.doSetHeader === "function") {
       html += '<button type="button" class="rt-reset-btn" data-rtbar="reset" ' +
               'title="Kembalikan kolom ke pengaturan awal">' +
@@ -1124,14 +1132,6 @@
     headHtml: headHtml,
     refresh:  renderBar,
     reset:    resetHeader,
-    close:    function () { closeMenu(); closeBarMenus(); },
-    // Command-only untuk sekarang (UI stepper-nya dimatikan, lihat RT_DESIMAL_UI_ENABLED
-    // di atas): atur desimal kolom `g` (index di gcart_header, sama dengan atribut
-    // data-gidx di <th>) sebesar `step` (+1/-1) lewat console, mis. ReportTable.setDesimal(3, 1).
-    setDesimal: function (g, step) {
-      if (!applyDesimalStep(g, step)) { return; }
-      fireChange();
-      renderBar();
-    }
+    close:    function () { closeMenu(); closeBarMenus(); }
   };
 })();

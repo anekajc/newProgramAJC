@@ -12,15 +12,12 @@ use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
 use App\Models\DBFLMENU;
 
-// use App\Http\Controllers\NewMenuController;
-
 class PembelianPermintaanNonAgenController extends Controller
 {
 
   public function index(Request $req) {
 
     $kodemenu = '030101';
-    // $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu , $req->path());
     if(!$akses || !$akses->HASACCESS) {
         return redirect('/home');
@@ -44,27 +41,8 @@ class PembelianPermintaanNonAgenController extends Controller
         $tempOutstanding[] = $groupedData;
     }
 
-
-
-
-            // @dd($tempX);
-
-
-
-    // $otorisasi = VwPPL::where('Bulan', $periode->bulan)
-    //                   ->where('Tahun', $periode->tahun)
-    //                   ->where('IsJasa', 0)
-    //                   ->where('pAgen', 0)
-    //                   ->get()
-    //                   ->groupBy('NoBukti');
-    $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  bulan = :bulan and tahun = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
-                      // ->where('isOtorisasi1', 1)
-//                       $timestamp = strtotime($variable);
-//
-// if ($timestamp !== false) {
-//     echo "Valid date string.";
-// }
-$otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
+    $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  month(tanggal) = :bulan and year(tanggal) = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
+    $otorisasi = collect($otorisasi)->groupBy('NoBukti');
     $tempOtorisasi = [];
     foreach ($otorisasi as $groupedData) {
         $tempOtorisasi[] = $groupedData;
@@ -76,16 +54,25 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     $headertablevalue = [];
     $headertableheader = [];
     $headerisshown = [];
-    // $headerisshown = $headertable[0]->isshown;
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $aliasOrdered = [];
+
     $isparsed = 0;
+    $headertablealias = [];
+    $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->path() ]);
+    if ($xxx ) {
+
+      $headertablealias = json_decode($xxx[0]->value);
+    } else {
+
+      $headertablealias = [];
+    }
     if (count($headertable) > 0) {
       $isnumberheadertable = json_decode($headertable[0]->isnumber);
       $headertablevalue = json_decode($headertable[0]->value);
       $headertableheader = json_decode($headertable[0]->header);
       $headerisshown = json_decode($headertable[0]->isshown);
     } else {
-      // $headertable = [];
-
 
       if(!$tempOtorisasi) {
 
@@ -121,9 +108,30 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
 
 
     }
-    // @dd($headertablevalue);
+
+    $aliasOrdered = [];
+    if ($headertablealias) {
+      foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+              if ($item->value === $header) {
+
+                    array_push( $aliasOrdered , $item);
+                  break;
+              }
+          }
+      }
+    } else {
+      foreach ($headertablevalue as $header) {
+
+
+                    array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+
+
+      }
+    }
 
     return view('purchasing.pembelianpermintaannonagen' ,[
+      "aliasordered" => $aliasOrdered,
       "headertableheader" => $headertableheader ,
       "isnumeric" => $isnumberheadertable,
       "headertablevalue" => $headertablevalue,
@@ -145,19 +153,11 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
   };
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    // Ambil data BELUM OTORISASI
-    // $outstanding = VwPPL::where('Bulan', $periode->bulan)
-    //                      ->where('Tahun', $periode->tahun)
-    //                      ->where('IsJasa', 0)
-    //                      ->where('pAgen', 0)
-    //                      ->where(function($query) {
-    //                          $query->whereNull('isOtorisasi1')->orWhere('isOtorisasi1', 0);
-    //                      })
-    //                      ->get()
-    //                      ->groupBy('NoBukti');
-    // return  ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ];
-    // return "select * from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi ;
-    $outstanding = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi , ["tglawal" => $req->tglawal ,"tglakhir" => $req->tglakhir  ]);
+    // Qnt/QntBatal/QntPO ikut diambil (dengan alias eksplisit, supaya key JSON-nya pasti
+    // "Qnt"/"QntBatal"/"QntPO") untuk menghitung badge Status "Sudah/Belum/Batal" di
+    // pembelianpermintaannonagen.blade.php (prStatusPR()). Ketiganya dikecualikan dari
+    // penurunan kolom default di bawah supaya tidak ikut jadi kolom tabel.
+    $outstanding = DB::connection("SML")->select("select NoBukti  , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1, Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO  from vwppl where  Tanggal between :tglawal and :tglakhir and IsJasa = 0 and pAgen = 0 " . $queryOtorisasi . " order by Tanggal desc, NoBukti desc" , ["tglawal" => $req->tglawal , "tglakhir" => $req->tglakhir ]);
     $collection1 = collect($outstanding)->groupBy('NoBukti');
     $tempOutstanding = [];
     foreach ($collection1 as $groupedData) {
@@ -166,15 +166,7 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
 
 
 
-    // Ambil data SUDAH OTORISASI
-    // $otorisasi = VwPPL::where('Bulan', $periode->bulan)
-    //                   ->where('Tahun', $periode->tahun)
-    //                   ->where('IsJasa', 0)
-    //                   ->where('pAgen', 0)
-    //                   ->get()
-    //                   ->groupBy('NoBukti');
     $otorisasi = [];
-                      // ->where('isOtorisasi1', 1)
 
     $tempOtorisasi = [];
     foreach ($otorisasi as $groupedData) {
@@ -182,12 +174,25 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     }
 
     $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href]);
-      // return $headertable;
     $isnumberheadertable = [];
     $headertablevalue = [];
     $headertableheader = [];
     $headerisshown = [];
+    $aliasOrdered = [];
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+
     $isparsed = 0;
+    $headertablealias = [];
+
+    $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->href ]);
+    if ($xxx ) {
+
+      $headertablealias = json_decode($xxx[0]->value);
+    } else {
+
+      $headertablealias = [];
+    }
     if (count($headertable) > 0) {
       $isnumberheadertable = json_decode($headertable[0]->isnumber);
       $headertablevalue = json_decode($headertable[0]->value);
@@ -195,15 +200,17 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
       $isparsed = 0;
       $headerisshown = json_decode($headertable[0]->isshown);
     } else {
-      // $headertable = [];
 
       $isparsed = 1;
+      // Qnt/QntBatal/QntPO dipakai hanya untuk menghitung badge Status di JS, bukan kolom
+      // tabel - lihat komentar di query vwppl di atas.
+      $kolomInternal = ['Qnt', 'QntBatal', 'QntPO'];
       if(!$tempOutstanding) {
 
       } else {
         foreach ($tempOutstanding[0][0] as $key => $value) {
 
-          if (str_contains($key, "Oto")) {
+          if (str_contains($key, "Oto") || in_array($key, $kolomInternal, true)) {
 
 
           } else {
@@ -232,7 +239,29 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
 
     }
 
+    $aliasOrdered = [];
+    if ($headertablealias) {
+      foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+              if ($item->value === $header) {
+
+                    array_push( $aliasOrdered , $item);
+                  break;
+              }
+          }
+      }
+    } else {
+      foreach ($headertablevalue as $header) {
+
+
+                    array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+
+
+      }
+    }
+
     return [
+      "aliasordered" => $aliasOrdered,
       "headertableheader" => $headertableheader ,
       "isnumeric" => $isnumberheadertable,
       "headertablevalue" => $headertablevalue,
@@ -269,7 +298,6 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     );
 
     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PR',$req->nobukti,$req->pket,0,'DBPPL');
-// ($ppemakai, $paktivitas, $psumber, $pnoBukti, $pketerangan)
     return $res;
 }
   public function cekOtorisasi (Request $req) {
@@ -281,17 +309,10 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     $detailOutstanding = VwPPL::all()->where('NoBukti', $req->nobukti )->sortBy('Urut');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
-      // code...
       array_push($tempOutstanding,$do);
     }
     return $tempOutstanding;
   }
-
-
-
-  // public function spNobukti (Request $req) {
-  //   $inisial = DB::connection('SML')->select("SELECT PPL FROM DBNOMOR");
-  // }
 
   public function listDepartemen (Request $req) {
     $listDepartemen = DB::connection("SML")->select('select * from DBDEPART');
@@ -299,35 +320,20 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
   }
 
   public function getNoBukti (Request $req) {
-    // $values = [
-    //   'a'
-    // ];
-    // return 'tes';
-    // $po = DB::connection("SML")->select('exec sp_outstanding_po ?',$values);
-    // $periode = NewPeriode::where('user_id' , \Auth::id())->first();
     $username = \Auth::user()->username;
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $inisial = DB::connection("SML")->select('select PR from DBNOMOR');
-    // $inisial = DB::connection("SML")->select('select SPR from DBNOMOR');
-    // return [$periode->bulan,$inisial[0]->PBL,$username];
     $values = [
         $inisial[0]->PR,
         $periode->bulan,
         $periode->tahun,
         $username,
-        // $periode
-        // $periode
     ];
     $noBukti = DB::connection('SML')->select('exec SP_IsiNobukti ?,?,?,?',$values);
     return $noBukti;
   }
 
   public function listBarang (Request $req) {
-    // $harga = DB::connection('SML')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
-    //     select b.NAMAMERK ,  a.* from dbbarang a
-    // join DBMERK b on a.KodeMerk = b.KODEMERK
-    //  where a.KODEGRP = 'BJ' and a.pAgen = 1
-
     if (!$req->filled('search')) {
         return response()->json([]);
     }
@@ -376,15 +382,12 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
         if ($choice=='I' ){
 
         $purut = DB::connection('SML')->select('select max(urut)+1 xurut from DBPPLdet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
-            // return 'uuu';
         $xurut= $purut[0]->xurut;
         }else {
-            // return 'mmm';
             $xurut = $req->urut;
         }
 
     }else{
-        // return 'ttt';
         $xurut=1;
     }
     if ($choice == "I" && $jmlrecord == 0) {
@@ -420,33 +423,12 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
     DB::connection('SML')->statement('exec sp_PPL ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
 
       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PR',$nobukti,'',$xurut,'DBPPLDET');
-// ($ppemakai, $paktivitas, $psumber, $pnoBukti, $pketerangan,$purut,$ptable)
     return 1;
   }
 
-  // public function updateOtorisasi (Request $req) {
-  //   $username = \Auth::user()->username;
-  //   $nobukti =  $req->nobukti;
-  //   $tanggal = date('Y-m-d H:i:s');
-  //   $otorisasi = $req->otorisasi;
-
-  //   if ($otorisasi == 0 ) {
-  //     $username = '';
-  //     $tanggal = null;
-  //   }
-
-  //   $update = DB::connection('SML')->update('update DBPPL set IsOtorisasi1 = :otorisasi , OtoUser1 = :username , TglOto1 = :tanggal where nobukti = :nobukti', ['otorisasi' => $otorisasi, 'username' => $username, 'tanggal' => $tanggal, 'nobukti' => $nobukti, ] );
-  //   return $update;
-
-  // }
-
-
   public function spDelete (Request $req) {
 
-    // $listData = $req->listData;
-    // foreach ($listData as $d) {
-      // code...
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PR',$req->nobukti,'',$req->urut,'DBPPLDET');
+    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PR',$req->nobukti,'',$req->urut,'DBPPLDET');
       $values = [
         $req->choice,
         $req->nobukti,
@@ -474,15 +456,7 @@ $otorisasi = collect($otorisasi)->groupBy('NOBUKTI');
       ];
       DB::connection('SML')->statement('exec sp_PPL ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
 
-    // }
     return 1;
-    // foreach ($penerimaan as $p) {
-    //   // code...
-    //   array_push($tempPenerimaan, $p);
-    // }
-    //
-    // DB::connection('SML')->statement('exec sp_RSPB ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?' ,$values);
-    // return 1;
   }
 
     public function spCetak (Request $req)

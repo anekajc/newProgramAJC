@@ -1,4 +1,12 @@
 /*
+ * SUPERSEDED — isinya sudah dipindah ke public/js/report-table.js sebagai
+ * window.ReportTable (bukan lagi window.ReportTableV2). File ini TIDAK
+ * dimuat lagi oleh report/masterreport2.blade.php, tetap disimpan di disk
+ * sebagai arsip. Jangan diedit — edit public/js/report-table.js sebagai
+ * gantinya.
+ */
+
+/*
  * report-table-v2.js
  * Header tabel interaktif untuk halaman report yang me-render <thead> dari
  * gcart_header (lihat report/masterreport2.blade.php).

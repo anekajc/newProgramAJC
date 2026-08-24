@@ -4,14 +4,8 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Models\NewMenu;
-use App\Models\NewAksesMenu;
-use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
-use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
-use App\Models\VwPPL;
-use Illuminate\Auth;
 
 
 // use App\Http\Controllers\NewMenuController;
@@ -26,188 +20,198 @@ class POController extends Controller
        return redirect('/home');
     }
 
+
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    // $users = DB::connection("sqlsrv")->select('select * from new_users');
+    // $users = DB::connection("SML")->select('select * from new_users');
     // $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    // $listData = DB::connection('sqlsrv')->select('SELECT * FROM DBMERK');
+    // $listData = DB::connection('SML')->select('SELECT * FROM DBMERK');
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
     // $outstanding = VwPPL::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('IsJasa', 0)->where('pAgen', 1)->groupBy('NoBukti');
-    $tempOutstanding1 = DB::connection("sqlsrv")->select("
-      DECLARE @Tahun int, @Bulan int
-      SELECT @Tahun=2018, @Bulan=78
-
-      SET NOCOUNT ON
-      SELECT  A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-      A.*
-      from DBO.vwOutPPL A WITH(NOLOCK)
-      where A.SisaPPL>0
-      and A.pjasa=0
-      order by A.Tanggal, A.NoBukti, A.Urut
-    ");
-
-    $tempOutstanding3 = DB::connection("sqlsrv")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan
-
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=1  */    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)= 1  AND TotTotalRp>=200000000
-and B.pJasa= 0
-
-
-UNION ALL
-
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=1       AND TotTotalRp < 200000000
-and B.pJasa= 0
-
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-  $tempOutstanding5 = DB::connection("sqlsrv")->select("declare @Tahun int, @Bulan int,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan,@pJasa= 0
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
-			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
-       ELSE NOPOCUST END NOPOCUST,A.TglKirim
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
- /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0*/  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) =0    AND TotTotalRp>=200000000
-and b.pjasa=@pJasa
-
-
-UNION ALL
-
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
-			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
-       ELSE NOPOCUST END NOPOCUST,A.TglKirim
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
- Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0     AND TotTotalRp < 200000000
-and b.pjasa=@pJasa
-
-
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+//     $tempOutstanding1 = DB::connection("SML")->select("
+//       DECLARE @Tahun int, @Bulan int
+//       SELECT @Tahun=2018, @Bulan=78
+//
+//       SET NOCOUNT ON
+//       SELECT  A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
+//       A.*
+//       from DBO.vwOutPPL A WITH(NOLOCK)
+//       where A.SisaPPL>0
+//       and A.pjasa=0
+//       order by A.Tanggal, A.NoBukti, A.Urut
+//     ");
+//
+//     $tempOutstanding3 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
+//
+// select @Tahun= :tahun, @Bulan= :bulan
+//
+//
+// Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+//         b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+//         TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+//         A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+//        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+//        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+//        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+//        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+//        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit) NeedOtorisasi,A.IsOtorisasi2
+//        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+//        A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
+// From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+// where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
+// and  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit)=1  */    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit)= 1  AND TotTotalRp>=200000000
+// and B.pJasa= 0
+//
+//
+// UNION ALL
+//
+//
+// Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+//         b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+//         TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+//         A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+//        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+//        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+//        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+//        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+//        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit) NeedOtorisasi,A.IsOtorisasi2
+//        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+//        A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
+// From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+// where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
+// and  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit)=1       AND TotTotalRp < 200000000
+// and B.pJasa= 0
+//
+// order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+//
+//   $tempOutstanding5 = DB::connection("SML")->select("declare @Tahun int, @Bulan int,@pJasa Bit
+//
+// select @Tahun= :tahun, @Bulan= :bulan,@pJasa= 0
+//
+// Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+//         b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+//         TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+//         A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+//        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+//        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+//        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+//        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+//        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit) NeedOtorisasi,A.IsOtorisasi2
+//        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+//        A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
+// 			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
+//        ELSE NOPOCUST END NOPOCUST,A.TglKirim
+// From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+// where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
+//  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit)=0*/  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit) =0    AND TotTotalRp>=200000000
+// and b.pjasa=@pJasa
+//
+//
+// UNION ALL
+//
+//
+// Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+//         b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+//         TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+//         A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+//        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+//        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+//        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+//        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+//        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit) NeedOtorisasi,A.IsOtorisasi2
+//        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+//        A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
+// 			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
+//        ELSE NOPOCUST END NOPOCUST,A.TglKirim
+// From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+// where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
+//  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
+//                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+//                  else 1
+//             end As Bit)=0     AND TotTotalRp < 200000000
+// and b.pjasa=@pJasa
+//
+//
+// order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+// $req = new Request([
+//     'href' => 'purchaseorder'
+// ]);
+// $xx = app('App\Http\Controllers\HeaderTableController')
+//     ->getHeaderTable($req);
+//     @dd($xx);
+    list($poTglAwal, $poTglAkhir) = $this->periodeRange($periode);
 
     return view('purchasing.purchaseOrder' , [
       "menul0" => $menul0,
       "periode" => $periode,
+      "poTglAwal" => $poTglAwal,
+      "poTglAkhir" => $poTglAkhir,
       // "users"=> $users,
       // "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding1" => $tempOutstanding1,
+      "tempOutstanding1" => [],
       // "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
+      "tempOutstanding3" => [],
       // "tempOutstanding3" => $tempOutstanding3,
-      "tempOutstanding5" => $tempOutstanding5,
+      "tempOutstanding5" => [],
 
       "level" => $akses->OL,
       "listBarangAll" => [] ,
@@ -216,32 +220,71 @@ order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
 }
 
+  // Rentang tanggal default tab Purchase Order = satu bulan penuh periode kerja user.
+  private function periodeRange ($periode) {
+    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
+    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
+  }
+
   public function loadAll () {
+    $req = new Request([
+        'href' => 'purchaseorder'
+    ]);
+    $xx = app('App\Http\Controllers\HeaderTableController')
+        ->getHeaderTable($req);
+        // @dd($xx);
+    // loadAll() sekarang hanya mengembalikan konfigurasi header tabel, jadi ringan.
+    // Data tab "Outstanding PR" diambil per halaman lewat dataOutstandingPR() (server-side paging),
+    // data tab "Purchase Order" diambil lewat loadPurchaseOrder() saat tabnya diklik (lazy load).
+    return [
+      "tempOutstanding1" => [],
+      "tempOutstanding3" => [],
+      "tempOutstanding5" => [],
+      "aliasordered" => $xx['aliasordered'],
+      "headertableheader" => $xx['headertableheader'],
+      "isnumeric" => $xx['isnumeric'],
+      "headertablevalue" => $xx['headertablevalue'],
+      "isparsed" => $xx['isparsed'],
+      "isshown" => $xx['isshown'],
+      "desimal" => $xx['desimal'],
 
+      "aliasordered2" => $xx['aliasordered2'],
+      "headertableheader2" => $xx['headertableheader2'],
+      "isnumeric2" => $xx['isnumeric2'],
+      "headertablevalue2" => $xx['headertablevalue2'],
+      "isparsed2" => $xx['isparsed2'],
+      "isshown2" => $xx['isshown2'],
+      "desimal2" => $xx['desimal2'],
+
+      // Tabel urut 3 = tab "Outstanding SO". Datanya sendiri diambil per halaman
+      // lewat dataOutstandingSO(), sama seperti tab Outstanding PR.
+      "aliasordered3" => $xx['aliasordered3'],
+      "headertableheader3" => $xx['headertableheader3'],
+      "isnumeric3" => $xx['isnumeric3'],
+      "headertablevalue3" => $xx['headertablevalue3'],
+      "isparsed3" => $xx['isparsed3'],
+      "isshown3" => $xx['isshown3'],
+      "desimal3" => $xx['desimal3'],
+    ];
+  }
+
+  /**
+   * Data tab "Purchase Order". Dipanggil lewat AJAX hanya saat tab tersebut dibuka,
+   * supaya tidak ikut memperlambat waktu buka halaman.
+   */
+  public function loadPurchaseOrder (Request $req) {
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    //
-    $tempOutstanding = DB::connection("sqlsrv")->select("
-      DECLARE @Tahun int, @Bulan int
-      SELECT @Tahun=2018, @Bulan=78
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
 
-      SET NOCOUNT ON
-      SELECT  A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-      A.*
-      from DBO.vwOutPPL A WITH(NOLOCK)
-      where A.SisaPPL>0
-      and A.pjasa=0
-      order by A.Tanggal, A.NoBukti, A.Urut
-    ");
+    $inputAwal  = $req->input('tglawal');
+    $inputAkhir = $req->input('tglakhir');
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $inputAwal))  { $tglawal  = $inputAwal; }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $inputAkhir)) { $tglakhir = $inputAkhir; }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
-    $collection1 = collect($tempOutstanding)->groupBy('NOBUKTI');
-    $tempOutstanding1 = [];
-    foreach ($collection1 as $p) {
-      array_push($tempOutstanding1, $p);
-    }
+    $tempOutstanding2 = DB::connection("SML")->select("declare @tglawal date, @tglakhir date  ,@pJasa Bit
 
-    $tempOutstanding2 = DB::connection("sqlsrv")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan
+select @tglawal= :tglawal, @tglakhir= :tglakhir
 
 Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
         b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
@@ -259,16 +302,10 @@ Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.F
                  else 1
             end As Bit) NeedOtorisasi,A.IsOtorisasi2
        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
+       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL,b.qnt as qnt,b.qntbeli as qntbeli
 From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=1  */    ISNULL (A.IsOtorisasi2,0)=0  AND TotTotalRp>=200000000
+where a.Tanggal between @tglawal and @tglakhir
+and  TotTotalRp>=200000000
 and B.pJasa= 0
 
 UNION ALL
@@ -289,19 +326,19 @@ Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.F
                  else 1
             end As Bit) NeedOtorisasi,A.IsOtorisasi2
        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
+       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL,b.qnt as qnt,b.qntbeli as qntbeli
 From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+where a.Tanggal between @tglawal and @tglakhir
+/*and  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
                  else 1
-            end As Bit)=1       AND TotTotalRp < 200000000
+            end As Bit)=1  */     AND TotTotalRp < 200000000
 and B.pJasa= 0
 
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+order by Tanggal desc, NoBukti desc" , ["tglawal" => $tglawal , "tglakhir" =>$tglakhir]);
 
 $collection2 = collect($tempOutstanding2)->groupBy('NOBUKTI');
 $tempOutstanding3 = [];
@@ -310,102 +347,221 @@ foreach ($collection2 as $p) {
   array_push($tempOutstanding3, $p);
 }
 
-  $tempOutstanding4 = DB::connection("sqlsrv")->select("declare @Tahun int, @Bulan int,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan,@pJasa= 0
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
-			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
-       ELSE NOPOCUST END NOPOCUST,A.TglKirim
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
- /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0*/  ISNULL (A.IsOtorisasi2,0)=1    AND TotTotalRp>=200000000
-and b.pjasa=@pJasa
-
-
-UNION ALL
-
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
-			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
-       ELSE NOPOCUST END NOPOCUST,A.TglKirim
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan   and
- Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0     AND TotTotalRp < 200000000
-and b.pjasa=@pJasa
-
-
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-$collection3 = collect($tempOutstanding4)->groupBy('NOBUKTI');
-$tempOutstanding5 = [];
-foreach ($collection3 as $p) {
-  // code...
-  array_push($tempOutstanding5, $p);
-}
-
     return [
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding1" => $tempOutstanding1,
-      "tempOutstanding2" => $tempOutstanding2,
       "tempOutstanding3" => $tempOutstanding3,
-      "tempOutstanding4" => $tempOutstanding4,
-      "tempOutstanding5" => $tempOutstanding5
     ];
 }
 
+  /**
+   * Data tab "Outstanding PR" dengan server-side paging DataTables.
+   * Data tetap lengkap (tidak ada filter tanggal), tapi yang dikirim ke browser
+   * hanya satu halaman, bukan seluruh isi vwOutPPL seperti sebelumnya.
+   */
+  public function dataOutstandingPR (Request $req) {
+    $draw   = (int) $req->input('draw', 1);
+    $start  = (int) $req->input('start', 0);
+    $length = (int) $req->input('length', 10);
+
+    if ($start < 0) { $start = 0; }
+    // length = -1 dikirim DataTables saat dropdown "Tampilkan" di tab Outstanding PR
+    // dipilih "Semua data" - artinya seluruh baris hasil filter dikirim sekaligus,
+    // tanpa batas halaman.
+    $semua = ($length === -1);
+    if (!$semua && ($length < 1 || $length > 500)) { $length = 10; }
+
+    // Nama kolom untuk ORDER BY di-whitelist supaya tidak bisa dipakai untuk SQL injection.
+    $allowedOrder = [
+      'Nobukti', 'Tanggal', 'kodebrg', 'NamaBrg', 'sat', 'Qnt',
+      'QNTPO', 'SisaPPL', 'Keterangan', 'QntoutSO', 'QntStock', 'Urut'
+    ];
+    $orderCol = (string) $req->input('orderCol', '');
+    $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+    if (in_array($orderCol, $allowedOrder, true)) {
+      $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
+    } else {
+      // Default: data terbaru di atas. A.Urut sengaja tetap ASC - itu nomor urut
+      // barang di dalam satu No. Bukti, bukan bagian dari "yang terbaru".
+      $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
+    }
+
+    $where = 'A.SisaPPL > 0 and A.pjasa = 0';
+    $bind  = [];
+    $search = trim((string) $req->input('search', ''));
+    if ($search !== '') {
+      $where .= " and (A.NoBukti like :cari1 or A.kodebrg like :cari2
+                    or A.NamaBrg like :cari3 or A.Keterangan like :cari4)";
+      $like = '%' . $search . '%';
+      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
+    }
+
+    $jml = DB::connection("SML")->select("
+      SET NOCOUNT ON
+      select count(1) as jml
+      from DBO.vwOutPPL A WITH(NOLOCK)
+      where $where
+    ", $bind);
+    $total = count($jml) ? (int) $jml[0]->jml : 0;
+
+    // Paging pakai ROW_NUMBER() (SQL Server 2005+) supaya tidak bergantung pada
+    // sintaks OFFSET/FETCH yang baru ada di SQL Server 2012.
+    // $start dan $batas sudah di-cast ke int di atas, aman ditempel langsung.
+    // Saat "Semua data" dipilih, penyaring baris dilepas sama sekali - ROW_NUMBER()
+    // tetap dipakai supaya urutannya sama persis dengan mode berhalaman.
+    $batasBaris = '';
+    if (!$semua) {
+      $batas = $start + $length;
+      $batasBaris = "where X.NoBaris > $start and X.NoBaris <= $batas";
+    }
+
+    $rows = DB::connection("SML")->select("
+      SET NOCOUNT ON
+      select X.* from (
+        select ROW_NUMBER() over (order by $orderBy) as NoBaris,
+               A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
+               A.*
+        from DBO.vwOutPPL A WITH(NOLOCK)
+        where $where
+      ) X
+      $batasBaris
+      order by X.NoBaris
+    ", $bind);
+
+    return [
+      "draw" => $draw,
+      "recordsTotal" => $total,
+      "recordsFiltered" => $total,
+      "data" => $rows,
+    ];
+  }
+
+  /**
+   * Query dasar tab "Outstanding SO": barang SO yang belum tertutup PO.
+   *
+   * Dipakai sebagai SUB-QUERY (derived table) oleh dataOutstandingSO(), jadi
+   * sengaja tanpa ORDER BY - urutannya ditentukan ROW_NUMBER() di pemanggilnya.
+   * Seluruh kolomnya sudah punya nama/alias sehingga sah dipakai sebagai
+   * derived table: KodeBrg, NamaBrg, Qnt, Qnt2, Sat, SisaPPL, Sisa2PPL,
+   * NoSat, Isi, NoBukti, Urut, Tolerate, PartNumber.
+   *
+   * Kolom yang sama juga dipakai HeaderTableController::getHeaderTable() (urut 3)
+   * untuk menurunkan konfigurasi kolom awal tabel ini.
+   */
+  public static function sqlOutstandingSO () {
+    return "
+      SELECT a.KodeBrg, B.NamaBrg, a.Qnt, a.Qnt2, a.SATUAN Sat, A.Qnt-ISnull(C.Qnt,0) SisaPPL,
+        cast(A.Qnt2- Case When a.NoSAT=2 Then ISnull(C.Qnt2,0) When a.NoSAT=3 Then ISnull(C.Qnt2,0) else ISnull(C.Qnt2,0)*a.ISI end as NUmeric(18,4)) Sisa2PPL,
+        a.NoSat, a.Isi, a.NoBukti, a.Urut, 0 Tolerate, B.PartNumber
+      from DBSODET a WITH(NOLOCK)
+      Left Outer Join Dbbarang B WITH(NOLOCK) on A.kodebrg=B.Kodebrg
+      left Outer Join (select NoPPL,UrutPPL,Sum(case when nosat=1 then Qnt else Qnt*ISI End) - Sum(case when nosat=1 then QntBatal else QntBatal*ISI End) Qnt
+              ,Sum(case when Nosat=2 then Qnt
+              when NOSAT=3 then Qnt
+              when NOSAT=1 then Qnt/ISI  End )-
+              Sum(case when Nosat=2 then QntBatal
+              when NOSAT=3 then QntBatal
+              when NOSAT=1 then QntBatal/ISI  End ) Qnt2
+              from dbPOdet WITH(NOLOCK) group by NoPPL,UrutPPL)
+                C on A.nobukti=C.noppl and A.urut=C.urutPPL
+      where isnull(B.Isjasa,0)=0 and IsCetakKitir=1
+      And A.Qnt-ISnull(C.Qnt,0)>0
+    ";
+  }
+
+  /**
+   * Data tab "Outstanding SO" dengan server-side paging DataTables.
+   * Bentuk respons & cara kerjanya sama persis dengan dataOutstandingPR(),
+   * hanya sumber datanya yang berbeda (lihat sqlOutstandingSO()).
+   */
+  public function dataOutstandingSO (Request $req) {
+    $draw   = (int) $req->input('draw', 1);
+    $start  = (int) $req->input('start', 0);
+    $length = (int) $req->input('length', 10);
+
+    if ($start < 0) { $start = 0; }
+    // length = -1 dikirim DataTables saat dropdown "Tampilkan" dipilih "Semua data" -
+    // artinya seluruh baris hasil filter dikirim sekaligus, tanpa batas halaman.
+    $semua = ($length === -1);
+    if (!$semua && ($length < 1 || $length > 500)) { $length = 10; }
+
+    // Nama kolom untuk ORDER BY di-whitelist supaya tidak bisa dipakai untuk SQL injection.
+    $allowedOrder = [
+      'KodeBrg', 'NamaBrg', 'Qnt', 'Qnt2', 'Sat', 'SisaPPL', 'Sisa2PPL',
+      'NoSat', 'Isi', 'NoBukti', 'Urut', 'Tolerate', 'PartNumber'
+    ];
+    $orderCol = (string) $req->input('orderCol', '');
+    $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+    if (in_array($orderCol, $allowedOrder, true)) {
+      $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
+    } else {
+      // sqlOutstandingSO() tidak punya kolom tanggal, jadi "terbaru di atas" di sini
+      // dibalik pakai No. Bukti saja - penomorannya berurut waktu.
+      $orderBy = 'A.NoBukti DESC, A.Urut';
+    }
+
+    // Penyaring utamanya sudah ada di dalam sqlOutstandingSO(); yang di sini
+    // hanya kotak pencarian.
+    $where = '1 = 1';
+    $bind  = [];
+    $search = trim((string) $req->input('search', ''));
+    if ($search !== '') {
+      $where .= " and (A.NoBukti like :cari1 or A.KodeBrg like :cari2
+                    or A.NamaBrg like :cari3 or A.PartNumber like :cari4)";
+      $like = '%' . $search . '%';
+      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
+    }
+
+    $sql = self::sqlOutstandingSO();
+
+    $jml = DB::connection("SML")->select("
+      SET NOCOUNT ON
+      select count(1) as jml
+      from ( $sql ) A
+      where $where
+    ", $bind);
+    $total = count($jml) ? (int) $jml[0]->jml : 0;
+
+    // Paging pakai ROW_NUMBER() (SQL Server 2005+) supaya tidak bergantung pada
+    // sintaks OFFSET/FETCH yang baru ada di SQL Server 2012.
+    // $start dan $batas sudah di-cast ke int di atas, aman ditempel langsung.
+    // Saat "Semua data" dipilih, penyaring baris dilepas sama sekali - ROW_NUMBER()
+    // tetap dipakai supaya urutannya sama persis dengan mode berhalaman.
+    $batasBaris = '';
+    if (!$semua) {
+      $batas = $start + $length;
+      $batasBaris = "where X.NoBaris > $start and X.NoBaris <= $batas";
+    }
+
+    $rows = DB::connection("SML")->select("
+      SET NOCOUNT ON
+      select X.* from (
+        select ROW_NUMBER() over (order by $orderBy) as NoBaris,
+               A.NoBukti+' '+right('00000000'+cast(A.Urut as varchar(8)),8) KeyUrut,
+               A.*
+        from ( $sql ) A
+        where $where
+      ) X
+      $batasBaris
+      order by X.NoBaris
+    ", $bind);
+
+    return [
+      "draw" => $draw,
+      "recordsTotal" => $total,
+      "recordsFiltered" => $total,
+      "data" => $rows,
+    ];
+  }
+
   public function cekOtorisasi (Request $req) {
-    $res = DB::connection('sqlsrv')->select("select isOtorisasi1 from dbpo where nobukti = :nobukti", ["nobukti" => $req->nobukti ]);
+    $res = DB::connection('SML')->select("select isOtorisasi1 from dbpo where nobukti = :nobukti", ["nobukti" => $req->nobukti ]);
     return $res;
   }
 
   public function onChangeHeader (Request $req) {
     $query = 'update dbpo set ' . $req->field . ' = :value where nobukti = :nobukti';
-    $res = DB::connection('sqlsrv')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
+    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
     return $res;
 
   }
@@ -423,7 +579,7 @@ foreach ($collection3 as $p) {
         $xso = $d['NOSO'];
       }
       // return ["noso" => $d['NOSO'], "kodebrg" => $d['KodeBrg'] ,"nopo" => $d['NoBukti']];
-    $x = DB::connection('sqlsrv')->select("declare @noSO varchaR(30),@KODEBRG VARCHAR(30)
+    $x = DB::connection('SML')->select("declare @noSO varchaR(30),@KODEBRG VARCHAR(30)
     select @noSO= :noso ,@KODEBRG= :kodebrg
 
     SELECT XTABLE.kodebrg ,
@@ -487,8 +643,8 @@ foreach ($collection3 as $p) {
 
   public function updateOtorisasi (Request $req) {
     $username = \Auth::user()->username;
-     $maxOL = DB::connection('sqlsrv')->select("select * from dbmenu where href ='purchaseorder'");
-    $cekOto = DB::connection('sqlsrv')->select("
+     $maxOL = DB::connection('SML')->select("select * from dbmenu where href ='purchaseorder'");
+    $cekOto = DB::connection('SML')->select("
 select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
        case when B.IsOtorisasi1=1 then 1
 	 when B.IsOtorisasi2=1 then 2
@@ -510,7 +666,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
     // diatas 200jt depthead 1 oto
     if($cekOto[0]->nnet > 200000000 && $cekOto[0]->KodeJab == '03') {
 
-      $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
        return 1;
     }
@@ -519,7 +675,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
       if ($req->isoto1oto == 0) {
         return 3;
       } else {
-        $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+        $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
          $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
          return 1;
       }
@@ -532,20 +688,20 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
     if ( $cekOto[0]->nnet > $cekOto[0]->PlafonOtoPO ) {
       // if($cekOto[0]->leveloto == 1) {
       //
-      //   $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
       //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
       //
       // } else {
-      //   $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol, OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      //   $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol, OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
       //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
       //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
       // }
       return 2;
 
     } else {
-      $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+      $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
     }
@@ -557,9 +713,9 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function updateBatalOtorisasi (Request $req) {
     $username = \Auth::user()->username;
-    $maxOL = DB::connection('sqlsrv')->select("select * from dbmenu where href = 'purchaseorder'");
+    $maxOL = DB::connection('SML')->select("select * from dbmenu where href = 'purchaseorder'");
 
-    $cekOto = DB::connection('sqlsrv')->select("
+    $cekOto = DB::connection('SML')->select("
 select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
        case when B.IsOtorisasi1=1 then 1
    when B.IsOtorisasi2=1 then 2
@@ -579,12 +735,12 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
     if ( $cekOto[0]->nnet > $cekOto[0]->PlafonOtoPO ) {
       if($cekOto[0]->leveloto == 1) {
 
-        $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
+        $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,'',0,'DBPO');
 
       } else {
-        $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-        $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
+        $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
+        $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
 
          $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,'',0,'DBPO');
          $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto2','PO',$req->nobukti,'',0,'DBPO');
@@ -593,8 +749,8 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
       }
 
     } else {
-      $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
-      $res = DB::connection('sqlsrv')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
+      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
+      $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
 
        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,'',0,'DBPO');
        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto2','PO',$req->nobukti,'',0,'DBPO');
@@ -610,16 +766,16 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function onChangeHeaderSP (Request $req) {
     $query = 'update dbso set ' . $req->field . ' = :value where nobukti = :nobukti';
-    $res = DB::connection('sqlsrv')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
+    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
 
-    $res2 = DB::connection('sqlsrv')->select('exec Sp_UpdateSO ?', [$req->bukti]);
+    $res2 = DB::connection('SML')->select('exec Sp_UpdateSO ?', [$req->bukti]);
 
     return $res;
 
   }
 
   public function spUpdatePO (Request $req) {
-    $res = DB::connection('sqlsrv')->update('exec Sp_UpdatePO ?', [$req->nobukti]);
+    $res = DB::connection('SML')->update('exec Sp_UpdatePO ?', [$req->nobukti]);
 
     return $res;
   }
@@ -627,8 +783,8 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
   public function getNoBukti (Request $req) {
 
     $username = \Auth::user()->username;
-    $periode = DB::connection("sqlsrv")->select('select TOP 1 * from DBPERIODE where user_id = :username ' , ["username" => $username]);
-    $inisial = DB::connection("sqlsrv")->select('select PO from DBNOMOR');
+    $periode = DB::connection("SML")->select('select TOP 1 * from DBPERIODE where user_id = :username ' , ["username" => $username]);
+    $inisial = DB::connection("SML")->select('select PO from DBNOMOR');
 
     $values = [
         $inisial[0]->PO,
@@ -638,13 +794,13 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
         // $periode
         // $periode
     ];
-    $noBukti = DB::connection('sqlsrv')->select('exec SP_IsiNobukti ?,?,?,?',$values);
+    $noBukti = DB::connection('SML')->select('exec SP_IsiNobukti ?,?,?,?',$values);
     return $noBukti;
   }
 
   public function listPelanggan (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("select Y.KodeCustSupp, Y.NamaCustSupp, Y.Alamat1 Alamat,
+    $listData = DB::connection('SML')->select("select Y.KodeCustSupp, Y.NamaCustSupp, Y.Alamat1 Alamat,
                        Z.namaKota,Y.PPN,Y.HARI,Y.PPN,Y.Kota ,Y.NPPH23  ,Y.NPPH22 NPPH21,Y.HARIHUTPIUT
                        from  DBCUSTSUPP Y
                        Left Outer Join Dbkota Z on Y.kota=Z.KodeKota
@@ -656,19 +812,19 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function listSales (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("SELECT keynik, nama FROM dbkaryawan where IsSales = 1");
+    $listData = DB::connection('SML')->select("SELECT keynik, nama FROM dbkaryawan where IsSales = 1");
     return $listData;
   }
 
   public function listValas (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("SELECT kodevls, namavls, kurs FROM dbvalas");
+    $listData = DB::connection('SML')->select("SELECT kodevls, namavls, kurs FROM dbvalas");
     return $listData;
   }
 
     public function loadOutstandingPPL (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("declare @Tahun int, @Bulan int
+    $listData = DB::connection('SML')->select("declare @Tahun int, @Bulan int
 
               select @Tahun=2018, @Bulan=78
 
@@ -684,19 +840,19 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function listGudang (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("select KODEGDG, NAMA, Alamat from DBGUDANG");
+    $listData = DB::connection('SML')->select("select KODEGDG, NAMA, Alamat from DBGUDANG");
     return $listData;
   }
 
   public function listPIC (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("select kodepic, nama from DBPICCUSTSUPP where KODECUSTSUPP =:kodecustsupp" , ["kodecustsupp" => $req->kodecustsupp]);
+    $listData = DB::connection('SML')->select("select kodepic, nama from DBPICCUSTSUPP where KODECUSTSUPP =:kodecustsupp" , ["kodecustsupp" => $req->kodecustsupp]);
     return $listData;
   }
 
   public function listPWO (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("SELECT A.no_bukti,a.tanggal,a.supplier,d.NAMACUSTSUPP,
+    $listData = DB::connection('SML')->select("SELECT A.no_bukti,a.tanggal,a.supplier,d.NAMACUSTSUPP,
                         b.kode,c.NAMABRG,F.QNT qty,F.nmsat satuan
                         ,F.NOSAT NOsat ,B.harga
                         from penawaran_po A
@@ -717,7 +873,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function listBarangFOC (Request $req)
   {
-    $listData = DB::connection('sqlsrv')->select("select a.Kodebrg, a.NamaBrg,A.partNumber,B.NamaMerk
+    $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,A.partNumber,B.NamaMerk
                                                 from Dbbarang a
                                                 Left Outer join dbmerk B on A.kodemerk=b.KodeMerk
                                                 where a.isaktif=1");
@@ -726,7 +882,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
   public function listBarangNonFOC1 (Request $req)
   {
-    $listData = DB::connection('sqlsrv')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
                                                 from vwOutPPL a
                                                 where Isjasa= 0 and NoBukti = :nobukti and a.sisaPPL > = 0
                                                 order by a.KodeBrg, a.NoSat, a.NoBukti", ["nobukti" => $req->noBukti]);
@@ -735,7 +891,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
     public function listBarangNonFOC1AllSO (Request $req)
   {
-    $listData = DB::connection('sqlsrv')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.QntBatalPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
                                                 from vwOutPPL a
                                                 where Isjasa= 0 and a.sisaPPL > = 0
                                                 order by a.KodeBrg, a.NoSat, a.NoBukti");
@@ -759,13 +915,13 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
         ];
 
 
-        $cnoBukti = DB::connection('sqlsrv')->select('exec SP_IsiNobukti ?,?,?,?',$values);
+        $cnoBukti = DB::connection('SML')->select('exec SP_IsiNobukti ?,?,?,?',$values);
         $nobukti =  $cnoBukti[0]->Nobukti;
 
     foreach ($data as $d) {
       // $values = [$username, $nosj,'2023','4','SPB',$d['inputQntTerima'],$d['URUT']];
 
-      $check = DB::connection('sqlsrv')->update('update TempPR set Pilih = 1 where userid= :username and keyfield = :keyfield and Kodebrg = :kodebrg ' ,
+      $check = DB::connection('SML')->update('update TempPR set Pilih = 1 where userid= :username and keyfield = :keyfield and Kodebrg = :kodebrg ' ,
       [
         "username" => $username ,
         "keyfield" => $d['KeyField'] ,
@@ -774,7 +930,7 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
 
 
     }
-    DB::connection("sqlsrv")->statement('exec SpInsertPR ?,?,?,?,?',[
+    DB::connection("SML")->statement('exec SpInsertPR ?,?,?,?,?',[
 $nobukti,
 $periode->bulan,
 $periode->tahun,
@@ -788,20 +944,20 @@ $username
   public function listRefPr (Request $req) {
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $username = \Auth::user()->username;
-    $listData = DB::connection("sqlsrv")->statement("Exec RefTempPR ?,?,?,?" , [
+    $listData = DB::connection("SML")->statement("Exec RefTempPR ?,?,?,?" , [
       $periode->bulan,
       $periode->tahun,
       $username,
       'x'
     ]);
 
-      $check = DB::connection('sqlsrv')->select('select * from TempPR where userid= :username ' , ["username" => $username]);
+      $check = DB::connection('SML')->select('select * from TempPR where userid= :username ' , ["username" => $username]);
         return $check;
   }
 
   public function listBarangNonFOC2 (Request $req)
   {
-    $listData = DB::connection('sqlsrv')->select("SELECT a.KodeBrg, B.NamaBrg, a.Qnt,a.Qnt2, a.SATUAN Sat,A.Qnt-ISnull(C.Qnt,0) SisaPPL,
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, B.NamaBrg, a.Qnt,a.Qnt2, a.SATUAN Sat,A.Qnt-ISnull(C.Qnt,0) SisaPPL,
 
                        cast(A.Qnt2- Case When a.NoSAT=2 Then ISnull(C.Qnt2,0) When a.NoSAT=3 Then ISnull(C.Qnt2,0) else ISnull(C.Qnt2,0)*a.ISI end as NUmeric(18,4)) Sisa2PPL,
                         a.NoSat, a.Isi, a.NoBukti, a.Urut,0 Tolerate
@@ -822,9 +978,64 @@ $username
     return $listData;
   }
 
+  /**
+   * Daftar barang outstanding dari SELURUH SO sekaligus.
+   *
+   * Dipakai form Purchase Order saat dropdown "+ Dari" dipilih SO. Bedanya dengan
+   * listBarangNonFOC2 di atas: di sana barangnya disaring per satu nomor SO karena
+   * alurnya dua langkah (pilih No. SO dulu, baru barangnya), sedangkan di sini seluruh
+   * SO yang masih boleh di-PO ditampilkan sekaligus dalam satu daftar.
+   *
+   * listBarangNonFOC2 SENGAJA tidak diubah menjadi serbaguna (noSo opsional): route
+   * polistbarangnosoplus yang memakainya masih dipanggil halaman lain, yaitu
+   * gudang/transferbarang.blade.php dan purchasing/perintahreturbeli.blade.php.
+   *
+   * Syarat di level SO - otorisasi sudah lengkap dan pembayarannya tidak terblokir -
+   * disalin dari listNoSo di bawah. Tanpa itu barang dari SO yang belum diotorisasi ikut
+   * muncul, padahal pada alur dua langkah SO semacam itu tidak pernah masuk daftar
+   * pilihan sama sekali.
+   *
+   * NoPesanan ikut diambil karena dipakai mengisi No. PO Cust begitu barangnya dipilih.
+   * Semua kolom diberi alias tabel (A./A1./B.) - tanpa DBSO ikut di-join, listBarangNonFOC2
+   * masih bisa menulis nobukti/IsCetakKitir polos, tapi di sini itu jadi ambigu.
+   */
+  public function listBarangSOAll (Request $req)
+  {
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, B.NamaBrg, a.Qnt,a.Qnt2, a.SATUAN Sat,A.Qnt-ISnull(C.Qnt,0) SisaPPL,
+
+                       cast(A.Qnt2- Case When a.NoSAT=2 Then ISnull(C.Qnt2,0) When a.NoSAT=3 Then ISnull(C.Qnt2,0) else ISnull(C.Qnt2,0)*a.ISI end as NUmeric(18,4)) Sisa2PPL,
+                        a.NoSat, a.Isi, a.NoBukti, a.Urut,0 Tolerate
+                        , B.PartNumber, A1.Tanggal, A1.NoPesanan
+                         from DBSODET a
+                        Left Outer Join Dbbarang B on A.kodebrg=B.Kodebrg
+                        Left Outer Join DBSO A1 on A.NoBukti=A1.NoBukti
+                        left Outer Join (select NoPPL,UrutPPL,Sum(case when nosat=1 then Qnt else Qnt*ISI End) - Sum(case when nosat=1 then QntBatal else QntBatal*ISI End) Qnt
+                        ,Sum(case when Nosat=2 then Qnt
+                        when NOSAT=3 then Qnt
+                        when NOSAT=1 then Qnt/ISI  End )-
+                        Sum(case when Nosat=2 then QntBatal
+                        when NOSAT=3 then QntBatal
+                        when NOSAT=1 then QntBatal/ISI  End ) Qnt2 from dbPOdet group by NoPPL,UrutPPL)
+                        C on A.nobukti=C.noppl and A.urut=C.urutPPL
+                         where  isnull(B.Isjasa,0)=0 and A.IsCetakKitir=1
+                        And A.Qnt-ISnull(C.Qnt,0)>0
+                        and Cast(Case when Case when A1.IsOtorisasi1=1 then 1 else 0 end+
+                        Case when A1.IsOtorisasi2=1 then 1 else 0 end+
+                        Case when A1.IsOtorisasi3=1 then 1 else 0 end+
+                        Case when A1.IsOtorisasi4=1 then 1 else 0 end+
+                        Case when A1.IsOtorisasi5=1 then 1 else 0 end=A1.MaxOL then 0
+                        else 1
+                        end As Bit)=0
+                        and CASE WHEN A1.TIPEBAYAR=0 AND  ISNULL(A1.unblock,0)=1 THEN 1
+                        WHEN A1.TIPEBAYAR=0 AND  ISNULL(A1.unblock,0)=0 THEN 0
+                        WHEN A1.TIPEBAYAR=1 THEN 1 END =1
+                        order by A.NoBukti, A.KodeBrg, A.NoSat");
+    return $listData;
+  }
+
   public function listNoSo (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("SELECT A.NOBUKTI,A1.Tanggal, A1.NoPesanan, A.KODEBRG , b.NAMABRG, A.QNT - isnull( Z.QNT , 0) QNT ,
+    $listData = DB::connection('SML')->select("SELECT A.NOBUKTI,A1.Tanggal, A1.NoPesanan, A.KODEBRG , b.NAMABRG, A.QNT - isnull( Z.QNT , 0) QNT ,
 A.NOSAT , a.SATUAN , A.QNT  QntSO, isnull( Z.QNT , 0) QntPO , A.URUT , a.ISI , 1000 HARGA , '-' CATATAN , 0 HARGAAWAL , 0 discpersen1 , 0 discpersen2 , 0 discpersen3 , 0 discrp , 0 pfoc
 from DBSODET A
 Left Outer join DBSO A1 ON A.NOBUKTI=A1.NOBUKTI
@@ -852,7 +1063,7 @@ WHEN a1.TIPEBAYAR=1 THEN 1 END =1
 
   public function listLokasiPenerima (Request $req)
   {
-    $listData = DB::connection('sqlsrv')->select("SELECT a.KodeCustsupp, a.NamaCustSupp NamaCust, A.Alamat, A.Telpon, A.Kota
+    $listData = DB::connection('SML')->select("SELECT a.KodeCustsupp, a.NamaCustSupp NamaCust, A.Alamat, A.Telpon, A.Kota
                             from vwBrowsExpedisi A
                             where a.isaktif=1
                             Order by a.kodecustsupp");
@@ -861,19 +1072,19 @@ WHEN a1.TIPEBAYAR=1 THEN 1 END =1
 
   public function listBackOffice (Request $req) {
 
-    $listData = DB::connection('sqlsrv')->select("select keynik, fullname from [user] order by keynik" );
+    $listData = DB::connection('SML')->select("select keynik, fullname from [user] order by keynik" );
     return $listData;
   }
 
   public function listBarang (Request $req) {
-    // $harga = DB::connection('sqlsrv')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
+    // $harga = DB::connection('SML')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
 //     select b.NAMAMERK ,  a.* from dbbarang a
 // join DBMERK b on a.KodeMerk = b.KODEMERK
 //  where a.KODEGRP = 'BJ' and a.pAgen = 1
 
 
 
-    $listData = DB::connection('sqlsrv')->select("select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
+    $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
                     A.Sat1,A.Sat2 ,A.Sat3,A.pPPN,Isnull(A.QntMin,0) QntMin ,a.Hrg1_1 , a.Hrg2_1, a.Hrg3_1
                     from DBbarang a
                     left OUter JOin DbSubgroup I on A.KodeSubGRp=I.KodeSUbgrp and A.KodeHdGrp=i.KodeHDGrp
@@ -886,16 +1097,16 @@ WHEN a1.TIPEBAYAR=1 THEN 1 END =1
   }
 
   public function cekKreditHari (Request $req) {
-    // $harga = DB::connection('sqlsrv')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
+    // $harga = DB::connection('SML')->select("select * from dbHARGAJUAL where KODEBRG = :kodebarang" , ['kodebarang' => $req->kodebarang]);
 //     select b.NAMAMERK ,  a.* from dbbarang a
 // join DBMERK b on a.KodeMerk = b.KODEMERK
 //  where a.KODEGRP = 'BJ' and a.pAgen = 1
-    $listData = DB::connection('sqlsrv')->select("select hari,harihutpiut from dbcustsupp where KODECUSTSUPP = :kodepelanggan", ["kodepelanggan" => $req->kodepelanggan]);
+    $listData = DB::connection('SML')->select("select hari,harihutpiut from dbcustsupp where KODECUSTSUPP = :kodepelanggan", ["kodepelanggan" => $req->kodepelanggan]);
     return $listData;
   }
 
   public function getSatuanBarang (Request $req) {
-    return DB::connection('sqlsrv')->select("select SAT1, SAT2,SAT3 , ISI1,ISI2,ISI3 from dbbarang where kodebrg = :kodebarang", ["kodebarang" => $req->kodebarang]);
+    return DB::connection('SML')->select("select SAT1, SAT2,SAT3 , ISI1,ISI2,ISI3 from dbbarang where kodebrg = :kodebarang", ["kodebarang" => $req->kodebarang]);
 
   }
 
@@ -906,7 +1117,7 @@ WHEN a1.TIPEBAYAR=1 THEN 1 END =1
      $xurut=0;
      $tempData = $req->tempData;
 
-     $check = DB::connection('sqlsrv')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
+     $check = DB::connection('SML')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
        if ($check) {
          return 2;
      }
@@ -915,12 +1126,12 @@ WHEN a1.TIPEBAYAR=1 THEN 1 END =1
 foreach ( $tempData as $d ) {
   // code...
 
-     $purut = DB::connection('sqlsrv')->select('select * from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+     $purut = DB::connection('SML')->select('select * from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
     if ($purut){
 
 
 
-        $purut = DB::connection('sqlsrv')->select('select max(urut)+1 xurut from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+        $purut = DB::connection('SML')->select('select max(urut)+1 xurut from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
             // return 'uuu';
         $xurut= $purut[0]->xurut;
 
@@ -937,7 +1148,7 @@ foreach ( $tempData as $d ) {
 
 
     // if ($choice == "I" && $jmlrecord == 0) {
-    //   // $check = DB::connection('sqlsrv')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
+    //   // $check = DB::connection('SML')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
     //   //   if ($check) {
     //   //     return 2;
     //   // }
@@ -1006,8 +1217,8 @@ foreach ( $tempData as $d ) {
         $d['CATATAN'] //UrutPNW
 
       ];
-      DB::connection('sqlsrv')->statement('exec sp_PO ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
-      DB::connection('sqlsrv')->update('exec Sp_UpdatePO ?', [$nobukti]);
+      DB::connection('SML')->statement('exec sp_PO ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+      DB::connection('SML')->update('exec Sp_UpdatePO ?', [$nobukti]);
 
 	// if ($choice !='D'){
       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData($choice,'PO',$nobukti,'',$xurut,'dbpodet');
@@ -1026,12 +1237,12 @@ foreach ( $tempData as $d ) {
 
 
 //  return ["asd" => $nobukti] ;
-     $purut = DB::connection('sqlsrv')->select('select * from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+     $purut = DB::connection('SML')->select('select * from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
     if ($purut){
 
         if ($choice=='I' ){
 
-        $purut = DB::connection('sqlsrv')->select('select max(urut)+1 xurut from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+        $purut = DB::connection('SML')->select('select max(urut)+1 xurut from dbpodet where Nobukti = :nobukti', ['nobukti' => $nobukti]);
             // return 'uuu';
         $xurut= $purut[0]->xurut;
         }else {
@@ -1054,7 +1265,7 @@ foreach ( $tempData as $d ) {
 
 
     if ($choice == "I" && $jmlrecord == 0) {
-      $check = DB::connection('sqlsrv')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
+      $check = DB::connection('SML')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
         if ($check) {
           return 2;
       }
@@ -1123,8 +1334,8 @@ foreach ( $tempData as $d ) {
         $req->KeteranganBarang //UrutPNW
 
       ];
-      DB::connection('sqlsrv')->statement('exec sp_PO ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
-      DB::connection('sqlsrv')->update('exec Sp_UpdatePO ?', [$nobukti]);
+      DB::connection('SML')->statement('exec sp_PO ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+      DB::connection('SML')->update('exec Sp_UpdatePO ?', [$nobukti]);
 
 	if ($choice !='D'){
       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData($choice,'PO',$nobukti,'',$xurut,'dbpodet');
@@ -1133,7 +1344,7 @@ foreach ( $tempData as $d ) {
   }
 
   public function spCekHarga (Request $req) {
-        $harga = DB::connection('sqlsrv')->select("Declare @Kodebrg varchar(15)
+        $harga = DB::connection('SML')->select("Declare @Kodebrg varchar(15)
                                                 Set @Kodebrg=:kodebarang
                                                 select top 4 b.NOBUKTI,b.TANGGAL,a.KODEBRG,c.NAMABRG,
                                                 a.SATUAN,a.QNT,b.KODEVLS,b.KURS,A.HARGA,b.DISCRP,A.NDPP,
@@ -1150,19 +1361,19 @@ foreach ( $tempData as $d ) {
   }
 
   public function cekPoDet (Request $req) {
-        $cekPoDet = DB::connection('sqlsrv')->select("SELECT * FROM DBPODET WHERE NOBUKTI = 'MGL/PO/00001/0625'");
+        $cekPoDet = DB::connection('SML')->select("SELECT * FROM DBPODET WHERE NOBUKTI = 'MGL/PO/00001/0625'");
 
       return $cekPoDet;
   }
 
    public function cekSatuanBarang (Request $req) {
-        $cekSatuanBarang = DB::connection('sqlsrv')->select("select SAT1, ISI1, SAT2, ISI2, SAT3, ISI3 from DBBARANG where KODEBRG = :KodeBrg", ["KodeBrg"=>$req->KodeBrg]);
+        $cekSatuanBarang = DB::connection('SML')->select("select SAT1, ISI1, SAT2, ISI2, SAT3, ISI3 from DBBARANG where KODEBRG = :KodeBrg", ["KodeBrg"=>$req->KodeBrg]);
 
       return $cekSatuanBarang;
   }
 
   public function detailBarangAll (Request $req) {
-    $barang = DB::connection('sqlsrv')->select(" select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
+    $barang = DB::connection('SML')->select(" select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
                                               A.Sat1,A.Sat2 ,A.Sat3,A.pPPN,Isnull(A.QntMin,0) QntMin ,a.Hrg1_1 , a.Hrg2_1, a.Hrg3_1
                                               from DBbarang a
                                               left OUter JOin DbSubgroup I on A.KodeSubGRp=I.KodeSUbgrp and A.KodeHdGrp=i.KodeHDGrp
@@ -1173,7 +1384,7 @@ foreach ( $tempData as $d ) {
                                               order by a.Kodebrg ASC" ,
                                               ["kodebrg" => $req->kodebrg] );
 
-    $harga = DB::connection('sqlsrv')->select("declare @kodebrg varchar(50),@nosat tinyint
+    $harga = DB::connection('SML')->select("declare @kodebrg varchar(50),@nosat tinyint
                                             select @kodebrg= :kodebarang ,@nosat= :nosat
                                             select top 1 B.KODEBRG,b.NOSAT,b.HARGA,c.ISI2,c.ISI3, a.TANGGAL, b.SATUAN,
                                             case when @nosat=1 then              +
@@ -1196,7 +1407,7 @@ foreach ( $tempData as $d ) {
   public function getDetail (Request $req) {
     $nobukti = $req->nobukti;
 
-    $list = DB::connection('sqlsrv')->select("DECLARE @NoBukti varchar(30)
+    $list = DB::connection('SML')->select("DECLARE @NoBukti varchar(30)
 
 select 	@NoBukti= :nobukti
 Select 	b.nosat,E.ISI1,E.ISI2,E.ISI3,E.SAT1,E.SAT2,E.SAT3,A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KodeSupp, C.NamaCustSupp, C.Alamat1, C.Alamat2, C.Kota,
@@ -1249,7 +1460,7 @@ order by B.Urut", ["nobukti" => $nobukti]);
   {
       $noBukti = $req->input('NOBUKTI');
 
-      $cetak = DB::connection("sqlsrv")->select(
+      $cetak = DB::connection("SML")->select(
           "EXEC Sp_CetakPO ?",
           [$noBukti]
       );
@@ -1271,7 +1482,7 @@ order by B.Urut", ["nobukti" => $nobukti]);
   $flagharga='';
 
 // return ['controller =============',$noso,$kodebrg,$harga,$nosat];
-  $checkharga= DB::connection('sqlsrv')->select("
+  $checkharga= DB::connection('SML')->select("
     declare @noSO varchaR(30),@KODEBRG VARCHAR(30),@harga numeric(18,2),@nosat int
 select @noSO=:noso ,@KODEBRG=:kodebrg,@harga =:harga ,@nosat=:nosat
 

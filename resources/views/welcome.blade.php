@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
 <head>
-    
+
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="SemiColonWeb" />
@@ -10,7 +10,7 @@
 
   <title>AnekaJC - Login</title>
 
-    <link rel="stylesheet" href="{{ asset('css/loginpage.css') }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/loginpage.css') !!}">
 
 </head>
 
@@ -42,12 +42,12 @@
         </div>
       </div> --}}
     </div>
-    
+
     <!-- Right: Login Form -->
     <div class="right-panel">
       <p class="form-title">Login</p>
       <p class="form-subtitle">Masukan Username dan Password</p>
-      
+
       <form action="{{ url('checkLogin') }}" method="post">
         {{-- onsubmit="return checkOnline()" --}}
 
@@ -77,12 +77,13 @@
 
   </div>
 
-  <script src="{!! URL::asset('public/js/canvas/jquery.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/canvas/function.js') !!}"></script>
-  <script src="{{ URL::asset('public/js/alertify.js') }}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 
   <script type="text/javascript">
-  
+
     $(document).ready(function(){
       @if($errors->any())
         if(JSON.parse({!! $errors !!}) == "1") {
