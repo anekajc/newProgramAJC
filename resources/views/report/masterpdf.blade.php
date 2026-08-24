@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/bootstrap.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/bootstrap.min.css') !!}">
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/font-awesome.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/font-awesome.css') !!}">
     <!-- Alertify CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/alertify.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/alertify.css') !!}">
     <!-- Semantic CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/semantic.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/semantic.css') !!}">
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/select2.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/select2.min.css') !!}">
 
     <title>Project</title>
     <style type="text/css">
@@ -41,12 +41,12 @@
     @yield('content')
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/select2.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/popper.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/bootstrap.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/alertify.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/autoNumeric.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/select2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/popper.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/bootstrap.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/alertify.js') !!}"></script>
+    <script src="{!! URL::asset('js/autoNumeric.js') !!}"></script>
     @yield('js')
   </body>
 </html>

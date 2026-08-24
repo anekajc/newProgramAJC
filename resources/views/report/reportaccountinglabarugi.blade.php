@@ -12,7 +12,7 @@
      sisi-klien dari lastRows (kolom Persen/Kelompok dari SP, sebelumnya tidak dipakai). --}}
 
 <!-- Chart.js v4 (di-bundle lokal: public/plugins/chart.js/chart.umd.min.js) -->
-<script src="{!! URL::asset('public/plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
 
 <style>
   .checkmark-red { color: red !important; font-weight: bold; margin-left: 6px; }

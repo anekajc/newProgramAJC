@@ -81,30 +81,30 @@
         href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap"
         rel="stylesheet" type="text/css" />
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/semantic.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/select2.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/datatables.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/semantic.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/select2.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/datatables.min.css') !!}">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/jquery-ui.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/jquery-ui.min.css') !!}">
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/bootstrap.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/style.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/dark.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/font-icons.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/animate.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/magnific-popup.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/custom.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/alertify.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/bootstrap.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/style.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/dark.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/font-icons.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/animate.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/magnific-popup.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/custom.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/alertify.css') !!}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/style.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/style.css') !!}">
 
     {{-- Styling untuk tabel interaktif ala report (drag kolom, gear menu, dst) —
          lihat docs/new-slider-table-guide.md. --}}
     <link rel="stylesheet"
-        href="{!! URL::asset('public/css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+        href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
     <link rel="stylesheet"
-        href="{!! URL::asset('public/css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
+        href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
 
     <!-- Sidebar/header design — shared with the report module's layout and the other
          PT.SPL codebase (see references/newmaster.blade.php + report/newmaster2x.blade.php +
@@ -113,7 +113,7 @@
          .logout-link, etc. Loaded LAST so its body{display:flex;height:100vh} wins over
          canvas/style.css. -->
     <link rel="stylesheet"
-        href="{!! URL::asset('public/css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
+        href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -342,26 +342,26 @@
     <!-- External JavaScripts
     ============================================= -->
 
-    <script src="{!! URL::asset('public/js/canvas/jquery.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/select2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/canvas/jquery.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/select2.min.js') !!}"></script>
     {{-- Pinned to Bootstrap 4.6.2 (bundle = Popper 1.16.1 + Bootstrap JS), matching the
          v4.5.0 canvas/bootstrap.css loaded above. This layout is intentionally NOT on the
          shared public/js/bootstrap.min.js (v4.0.0) used elsewhere in the app — see
          docs/bootstrap4-version-alignment-guide.md before touching this. --}}
-    <script src="{!! URL::asset('public/js/bootstrap.bundle-4.6.2.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/alertify.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/autoNumeric.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/datatables.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-ui.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/qrcode.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/bootstrap.bundle-4.6.2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/alertify.js') !!}"></script>
+    <script src="{!! URL::asset('js/autoNumeric.js') !!}"></script>
+    <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/qrcode.min.js') !!}"></script>
 
     <!-- Footer Scripts
  ============================================= -->
-    <script src="{!! URL::asset('public/js/canvas/functions.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/canvas/JsBarcode.all.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/AutoNumeric.js') !!}" type="text/javascript"></script>
+    <script src="{!! URL::asset('js/canvas/functions.js') !!}"></script>
+    <script src="{!! URL::asset('js/canvas/JsBarcode.all.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/AutoNumeric.js') !!}" type="text/javascript"></script>
 
     <script type="text/javascript">
         document.onkeydown = function(e) {
@@ -576,7 +576,7 @@
 
     {{-- window.ReportTable — tabel interaktif ala report (drag kolom, gear menu, dst),
          lihat docs/new-slider-table-guide.md. --}}
-    <script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+    <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
     @yield('js')
 </body>

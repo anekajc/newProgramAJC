@@ -236,7 +236,7 @@ rel="stylesheet">
      sini. Sebelumnya TIDAK dimuat di layout ini, jadi makeTable() di halaman yang sudah dipakaikan
      ReportTable.init()/headHtml() (mis. reportlaporanmarketingspb) gagal duluan di baris
      loadingHtml('Memuat data...') -- ReferenceError sebelum sempat memanggil $.ajax(). --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 @yield('jsreport')
 <script type="text/javascript">
   var g_href = '{!! $akses['href'] !!}';

@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use App\Model\NewMenu;
 use App\Model\NewAksesMenu;
 use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
+use App\Models\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
-use App\Model\VwPPL;
+use App\Models\VwPPL;
 
 
 
@@ -39,7 +39,7 @@ class UbahKemasanBarangController extends Controller {
 
   public function loadAll() {
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    
+
     $query = "
       declare @Tahun int, @Bulan int
 
@@ -47,10 +47,10 @@ class UbahKemasanBarangController extends Controller {
 
       Select * from vwMasterUbahKemasan  where month(tanggal) = @Bulan and year(tanggal) = @Tahun
       ";
-    
+
     $listBBS = DB::connection("SML")->select($query . " and IsOtorisasi1 = 0
       ", ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-    
+
     $listSdhOto = DB::connection("SML")->select($query . " and IsOtorisasi1 = 1
       ", ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
@@ -59,7 +59,7 @@ class UbahKemasanBarangController extends Controller {
       "listSdhOto" => $listSdhOto
     ];
   }
-  
+
   public function listGudang(Request $req) {
     $filter = $req->get('filter');
 
@@ -82,7 +82,7 @@ class UbahKemasanBarangController extends Controller {
 
     return ['table' => $table, 'kolom' => $kolom, 'title' => $title, 'direct' => $direct];
   }
-  
+
   public function listBarang(Request $req) {
     $filter = $req->get('filter');
 
@@ -92,19 +92,19 @@ class UbahKemasanBarangController extends Controller {
       $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
       $query = "
-          Select A.KodeBrg, A.NamaBrg,A.Sat1,A.Sat2, Isnull(b.Qnt,0) QntSaldo, Isnull(b.Qnt2,0) Qnt2Saldo 
+          Select A.KodeBrg, A.NamaBrg,A.Sat1,A.Sat2, Isnull(b.Qnt,0) QntSaldo, Isnull(b.Qnt2,0) Qnt2Saldo
                , A.sat3, A.isi1, A.isi2, A.isi3
           from dbBarang A
-          left Outer Join (select a.KodeGdg,Kodebrg,Sum(SaldoQnt)Qnt,Sum(Saldo2Qnt)Qnt2 
-                  from DBStockBrg a 
-                    Left Outer Join dbGudang b On a.KodeGdg=b.KodeGdg where a.Kodegdg=:gudang and Bulan=:bulan and Tahun=:tahun 
-                  group by a.kodegdg,kodebrg)b On b.kodebrg=a.KodeBrg 
+          left Outer Join (select a.KodeGdg,Kodebrg,Sum(SaldoQnt)Qnt,Sum(Saldo2Qnt)Qnt2
+                  from DBStockBrg a
+                    Left Outer Join dbGudang b On a.KodeGdg=b.KodeGdg where a.Kodegdg=:gudang and Bulan=:bulan and Tahun=:tahun
+                  group by a.kodegdg,kodebrg)b On b.kodebrg=a.KodeBrg
           where A.KodeGrp='BJ'
             and (A.KodeBrg like :filterKode or A.NamaBrg like :filterNama)
-          and a.isAktif=1 
+          and a.isAktif=1
           order by A.KodeBrg
       ";
-      
+
       $params = ["gudang" => $req->kodegdg, "bulan" => $periode->bulan, "tahun" =>$periode->tahun, "filterKode" => "%$filter%", "filterNama" => "%$filter%"];
 
       $table = DB::connection('SML')->select($query, $params);
@@ -142,14 +142,14 @@ $xurut=0;
         $purut = DB::connection('SML')->select('select max(urut)+1 xurut from DBUBAHKEMASANdet where Nobukti = :nobukti', ['nobukti' => $data['nobukti']]);
             // return 'uuu';
         $xurut= $purut[0]->xurut;
-        }else { 
+        }else {
             // return 'mmm';
             $xurut = $req->urut;
         }
-        
+
     }else{
         // return 'ttt';
-        $xurut=1; 
+        $xurut=1;
     }
     // return ["asd" => $xurut] ;
 
@@ -219,7 +219,7 @@ $xurut=0;
     $nobukti = $req->nobukti;
 
     $list = DB::connection('SML')->select("
-      select v.* 
+      select v.*
            , b.sat1 brgSat1, b.sat2 brgSat2, b.sat3 brgSat3
            , b.isi1 brgIsi1, b.isi2 brgIsi2, b.isi3 brgIsi3
       from vwDetailUbahKemasan v
@@ -241,9 +241,9 @@ $xurut=0;
   public function updateOtorisasi (Request $req) {
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update DBUBAHKEMASAN set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-    
+
     // $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','UK',$req->nobukti,'',0,'DBUBAHKEMASAN');
-    
+
     return $res;
   }
 

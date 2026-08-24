@@ -433,8 +433,8 @@
 @endsection
 
 @section('js')
-<script src="{!! URL::asset('public/js/ajc-func-core.js') !!}"></script>
-<script src="{!! URL::asset('public/js/ajc-browsemaster.js') !!}"></script>
+<script src="{!! URL::asset('js/ajc-func-core.js') !!}"></script>
+<script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
 <script>
   const BASE_URL = "{{ url('/') }}";
 

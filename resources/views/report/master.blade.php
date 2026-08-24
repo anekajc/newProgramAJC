@@ -6,19 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="Description" content="Sistem Informasi Akuntansi">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/simple-sidebar.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/bootstrap.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/fontawesome.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/all.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/style.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/simple-sidebar.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/bootstrap.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/fontawesome.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/all.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/style.css') !!}">
     <!-- Font Awesome CSS -->
     <!-- Alertify CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/alertify.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/alertify.css') !!}">
     <!-- Semantic CSS -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/semantic.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/select2.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/datatables.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/jquery-ui.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/semantic.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/select2.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/datatables.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/jquery-ui.min.css') !!}">
     <title></title>
     @yield('css')
     <style>
@@ -132,15 +132,15 @@
     </nav> -->
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="{!! URL::asset('public/js/jquery.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/select2.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/popper.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/bootstrap.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/alertify.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/autoNumeric.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/datatables.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-ui.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/select2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/popper.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/bootstrap.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/alertify.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/autoNumeric.js') !!}"></script>
+    <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
     <script type="text/javascript">
     var g_id = "";
     var g_id2 = "";

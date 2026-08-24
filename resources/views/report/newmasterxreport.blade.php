@@ -11,15 +11,15 @@
 
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/semantic.css') !!}"
+      href="{!! URL::asset('css/semantic.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/select2.min.css') !!}"
+      href="{!! URL::asset('css/select2.min.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/datatables.min.css') !!}"
+      href="{!! URL::asset('css/datatables.min.css') !!}"
     />
     <link
       rel="stylesheet"
@@ -28,48 +28,48 @@
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/jquery-ui.min.css') !!}"
+      href="{!! URL::asset('css/jquery-ui.min.css') !!}"
     />
 
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/bootstrap.css') !!}"
+      href="{!! URL::asset('css/canvas/bootstrap.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/style.css') !!}"
+      href="{!! URL::asset('css/canvas/style.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/dark.css') !!}"
+      href="{!! URL::asset('css/canvas/dark.css') !!}"
     />
     <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/font-icons.css') !!}"
+      href="{!! URL::asset('css/canvas/font-icons.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/animate.css') !!}"
+      href="{!! URL::asset('css/canvas/animate.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/magnific-popup.css') !!}"
+      href="{!! URL::asset('css/canvas/magnific-popup.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/canvas/custom.css') !!}"
+      href="{!! URL::asset('css/canvas/custom.css') !!}"
     />
     <link
       rel="stylesheet"
-      href="{!! URL::asset('public/css/alertify.css') !!}"
+      href="{!! URL::asset('css/alertify.css') !!}"
     />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"
     />
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/style.css') !!}" />
+    <link rel="stylesheet" href="{!! URL::asset('css/style.css') !!}" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -1610,22 +1610,22 @@
       <div class="content" id="content">@yield('content')</div>
     </div>
 
-    <script src="{!! URL::asset('public/js/canvas/jquery.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/select2.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/popper.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/bootstrap.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/alertify.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/autoNumeric.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/datatables.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-ui.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/qrcode.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/canvas/jquery.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/select2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/popper.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/bootstrap.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/alertify.js') !!}"></script>
+    <script src="{!! URL::asset('js/autoNumeric.js') !!}"></script>
+    <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/qrcode.min.js') !!}"></script>
 
     <!-- Footer Scripts
 	============================================= -->
-    <script src="{!! URL::asset('public/js/canvas/functions.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/canvas/JsBarcode.all.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/canvas/functions.js') !!}"></script>
+    <script src="{!! URL::asset('js/canvas/JsBarcode.all.min.js') !!}"></script>
     <!-- <script type="text/javascript" src="http://www.example.co.uk/assets/js/autoNumeric.js"></script> -->
 
     <script type="text/javascript">

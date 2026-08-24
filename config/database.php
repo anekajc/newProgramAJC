@@ -114,6 +114,24 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 
+        // Alias of 'SML' — ~117 controllers read via DB::connection('MGL') (DBSIMPANHEADER,
+        // DBGUDANG, etc.) while the matching writes go through 'SML'. No distinct 'MGL'
+        // database has ever existed in this app's config, so point it at the same server.
+        'MGL' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLNEW'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+        ],
+
         'sqlsrv' => [
             'driver' => 'dblib',
             'host' => env('DB_HOST', 'localhost') . ':' . env('DB_PORT', '1433'),

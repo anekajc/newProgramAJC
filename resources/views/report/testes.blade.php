@@ -236,7 +236,7 @@ rel="stylesheet">
      SEMUA halaman report yang extend masterreport2 — jadi tiap child tak perlu memuat sendiri.
      File berupa IIFE dengan guard `if (typeof window.X !== 'function')`, aman bila child juga
      memuatnya (tidak menimpa). Dimuat sebelum @yield('jsreport') agar global-nya siap dipakai. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 @yield('jsreport')
 <script type="text/javascript">
   var g_href = '{!! $akses['href'] !!}';

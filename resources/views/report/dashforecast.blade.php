@@ -259,7 +259,7 @@
 @endsection
 
 @section('js')
-<script src="{!! URL::asset('public/js/highcharts.js') !!}"></script>
+<script src="{!! URL::asset('js/highcharts.js') !!}"></script>
 <script type="text/javascript">
   var def_kolom = "{!! $col[0] !!}", def_urut = "ASC", kolom = "{!! $col[0] !!}", urut = "ASC";
   var fetch = {!! json_encode($fetch) !!};

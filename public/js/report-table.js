@@ -38,10 +38,16 @@
  * (2) window.ReportTable — an interactive <thead> for report pages that render
  * columns from gcart_header (see report/masterreport2.blade.php): drag judul
  * kolom untuk mengurutkan, plus menu roda gigi per kolom (sembunyikan / desimal
- * / tampilkan total), and a bar above the table listing hidden columns + an
- * optional "Tampilan" view switcher. Merged in from the former
- * public/js/report-table-v2.js (still on disk as an archived copy, no longer
+ * / tampilkan total), and a bar above the table listing hidden columns, a
+ * "Reset kolom" button + an optional "Tampilan" view switcher. Merged in from the
+ * former public/js/report-table-v2.js (still on disk as an archived copy, no longer
  * loaded). Paired with the CSS block of the same origin in report-table.css.
+ *
+ * CATATAN PENTING soal "Reset kolom": doSetHeader() memuat layout TERSIMPAN dari
+ * DBSIMPANHEADER, dan layout itu ikut tersimpan otomatis saat halaman pertama kali
+ * dibuka. Akibatnya kolom yang BARU ditambahkan ke setDefaultHeader() TIDAK akan
+ * muncul untuk user yang sudah pernah membuka halaman itu — sampai mereka menekan
+ * Reset kolom. Jangan hapus tombol ini saat modal "Atur Kolom" dipensiunkan.
  *
  * Pemakaian di halaman report:
  *
@@ -912,6 +918,51 @@
     });
   }
 
+  /* ---------------- reset kolom ---------------- */
+
+  /* Kembalikan susunan kolom ke setDefaultHeader() milik halaman.
+     WAJIB ADA karena doSetHeader() memuat layout TERSIMPAN dari DBSIMPANHEADER:
+     begitu user pernah menyimpan (dan itu terjadi otomatis saat pertama kali buka),
+     kolom yang BARU ditambahkan ke setDefaultHeader() tidak akan pernah muncul
+     sampai layout tersimpannya di-reset.
+
+     doSetHeader(mode, true) memaksa _strHeader = "" -> panggil setDefaultHeader()
+     -> doSimpanHeader(). Itu primitif reset-nya; doResetHeader() di masterreport2
+     memakai primitif yang sama, tapi tidak me-render ulang tabel utama — di sini
+     kita render ulang supaya hasilnya langsung terlihat. */
+  function resetHeader() {
+    if (typeof window.doSetHeader !== "function") { return; }
+
+    var apply = function () {
+      window.doSetHeader(window.g_modeReport, true);
+      closeMenu();
+      fireChange();     // tabel halaman render ulang (headHtml juga menyegarkan bar)
+      renderBar();      // jaga-jaga bila onChange tidak memanggil headHtml
+      if (window.alertify && alertify.success) {
+        alertify.success("Kolom tabel sudah kembali ke pengaturan awal");
+      }
+    };
+
+    if (window.alertify && typeof alertify.confirm === "function") {
+      var dlg = alertify.confirm(
+        "Reset Kolom",
+        "Apakah yakin ingin mengembalikan kolom tabel ke pengaturan awal?",
+        apply,
+        function () { /* batal */ }
+      );
+      /* Kelas 'ajs-app-buttons' menempelkan gaya tombol OK/Cancel dari
+         public/css/report-table.css (lihat blok "gaya bersama" di sana).
+         Tanpa 'is-danger' tombol OK memakai warna biru — reset kolom bukan
+         aksi merusak. Dibungkus guard karena elements baru ada setelah
+         dialog dibangun. */
+      if (dlg && dlg.elements && dlg.elements.root) {
+        dlg.elements.root.classList.add("ajs-app-buttons");
+      }
+    } else {
+      apply();
+    }
+  }
+
   /* ---------------- bar di atas tabel ---------------- */
 
   function renderBar() {
@@ -933,6 +984,15 @@
     }
 
     var html = "";
+
+    // Reset kolom — hanya bila doSetHeader() (masterreport2) tersedia.
+    if (typeof window.doSetHeader === "function") {
+      html += '<button type="button" class="rt-reset-btn" data-rtbar="reset" ' +
+              'title="Kembalikan kolom ke pengaturan awal">' +
+              '<i class="bi bi-arrow-counterclockwise"></i><span>Reset kolom</span>' +
+              "</button>";
+    }
+
     html += '<div class="rt-drop">';
     html += '  <button type="button" class="rt-hidden-btn" data-rtbar="hidden"' + (hidden.length ? "" : " disabled") + ">";
     html += '    <i class="bi bi-plus-lg"></i><span>' +
@@ -980,6 +1040,17 @@
 
   function bindBar(bar) {
     bar.addEventListener("click", function (e) {
+      // Reset ditangani lebih dulu: tombolnya TIDAK punya .rt-drop-menu, jadi kalau
+      // jatuh ke cabang [data-rtbar] di bawah ia akan membuka dropdown milik tombol lain.
+      var reset = closestEl(e.target, '[data-rtbar="reset"]');
+      if (reset) {
+        e.stopPropagation();
+        closeBarMenus();
+        closeMenu();
+        resetHeader();
+        return;
+      }
+
       var btn = closestEl(e.target, "[data-rtbar]");
       if (btn) {
         e.stopPropagation();
@@ -1044,6 +1115,7 @@
     init:     init,
     headHtml: headHtml,
     refresh:  renderBar,
+    reset:    resetHeader,
     close:    function () { closeMenu(); closeBarMenus(); }
   };
 })();

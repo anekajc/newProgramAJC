@@ -221,7 +221,7 @@
 @endsection
 
 @section('js')
-<script src="{!! URL::asset('public/js/highcharts.js') !!}"></script>
+<script src="{!! URL::asset('js/highcharts.js') !!}"></script>
 <script type="text/javascript">
   var new_title = '{!! $tahun !!}', pt = '{!! $pt !!}'; var sales = {!! json_encode($list_kodesls) !!}; var _token = $("#_token").val(); var cek = false;
   $(document).ready(function() {

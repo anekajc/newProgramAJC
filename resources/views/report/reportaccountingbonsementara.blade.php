@@ -107,7 +107,7 @@
 
 @section('jsreport')
     {{-- Shared formatters (fmtRp/fmtN) + helpers live in public/js/report-table.js --}}
-    <script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+    <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
     <script type="text/javascript">
         let globalDate2 = "{!! date('Y-m-d') !!}";
