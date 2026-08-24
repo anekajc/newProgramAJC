@@ -212,7 +212,7 @@ class HeaderTableController extends Controller
     $isparsed = 0;
     $headertablealias = [];
 
-    $menuMoreThanOne = ['purchaseorder'];
+    $menuMoreThanOne = ['purchaseorder', 'pononstock'];
     $desimal = [];
     $desimal2 = [];
     $aliasOrdered2 = [];
@@ -814,6 +814,110 @@ class HeaderTableController extends Controller
       }
     }
   }
+    // PO Non Stock
+    else if ($req->href == 'pononstock') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+      // Sama seperti cabang 'purchaseorder' di atas, hanya urut 1 (Outstanding PR) & urut 2
+      // (Purchase Order) - PO Non Stock tidak punya tab Outstanding SO (urut 3 dibiarkan
+      // kosong, sudah diinisialisasi di awal method). Bedanya cuma filter pjasa/pJasa = 1
+      // (non stock); cabang 'purchaseorder' memakai 0 (stock).
+      //
+      // Kolom default DULU diturunkan dengan mengintip satu baris data (query "TOP 1" /
+      // otorisasi bulan berjalan) - kalau periode/bulan itu kebetulan tidak punya baris
+      // yang cocok (mis. semua PO non stock bulan ini sudah diotorisasi), daftar kolom
+      // jadi kosong dan header tabel tidak tergambar sama sekali (tidak ada yang bisa
+      // diseret). Sekarang daftarnya ditulis eksplisit di bawah - field-nya harus sama
+      // persis dengan field yang dikembalikan dataOutstandingPR() / loadPurchaseOrder()
+      // (PONonStockController.php).
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'Nobukti' => 0, 'Tanggal' => 2, 'kodebrg' => 0, 'NamaBrg' => 0, 'sat' => 0,
+          'Qnt' => 1, 'QNTPO' => 1, 'SisaPPL' => 1, 'Keterangan' => 0,
+          'QntoutSO' => 1, 'QntStock' => 1,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        $isparsed2 = 1;
+        // NOSO/NOPOCUST sengaja tidak ikut - kedua field itu sudah dibuang dari form
+        // PO Non Stock, jadi tidak perlu jadi kolom tabel juga.
+        $default2 = [
+          'NoBukti' => 0, 'Tanggal' => 2, 'KodeSupp' => 0, 'NamaCustSupp' => 0,
+          'FakturSupp' => 0, 'TotDPPRp' => 1, 'TotPPNRp' => 1, 'TotNetRp' => 1,
+          'tglKirim' => 2,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      // Blok ini sebelumnya HANYA ada di cabang 'purchaseorder', padahal halaman ini juga
+      // memakainya: tanpa ini getHeaderTable() mengembalikan aliasordered/aliasordered2 dan
+      // desimal/desimal2 kosong, sehingga nama kolom hasil rename dan jumlah desimal yang
+      // sudah user simpan lewat menu roda gigi tidak pernah dipakai di PO Non Stock.
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
     return [
       "aliasordered" => $aliasOrdered ,
       "alias" => $headertablealias ,

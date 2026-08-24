@@ -86,6 +86,7 @@ class HomeController extends Controller {
 
     public function index() {
       $akses = $this->cekAkses("Home");
+      if ($akses['userLoggedOut']) { return redirect('/'); }
 
       return view('mastercore' , [
         "akses" => $akses

@@ -1,32 +1,10 @@
-@extends('report.masterreport4')
+@extends('report.masterreport2')
 
 {{-- All .tb-report table + toolbar styling lives in public/css/report-table.css (loaded globally via newmaster2).
      This page is self-contained: it carries its own #formSelect modal (below) and loads Perkiraan from
      its own endpoint (laporanaccountingbukubesar_loadperkiraan), so it does NOT include modalAccountingJurnal. --}}
 
 @section('header2')
-    <style>
-        .checkmark-red {
-            color: red !important;
-            font-weight: bold;
-            margin-left: 6px;
-        }
-
-        #inputDivisiBtn {
-            border: 0;
-            background: none;
-            padding: 0;
-            box-shadow: none;
-            color: #495057;
-            font-weight: 600;
-        }
-
-        #inputDivisiBtn:hover,
-        #inputDivisiBtn:focus {
-            color: #0d6efd;
-            box-shadow: none;
-        }
-    </style>
     <!-- Modal -->
     <div class="modal fade" id="formSelect" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
@@ -64,11 +42,9 @@
 
             <!-- TOOLBAR -->
             <div class="toolbar">
-                <div>
+                {{-- <div>
                     <div class="page-title">Buku Tambahan</div>
-                    <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span
-                            id="printTime"></span></div>
-                </div>
+                </div> --}}
 
                 <!-- Periode (date range) -->
                 <div class="filter-wrap">
@@ -78,32 +54,18 @@
                     <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
                 </div>
 
-                <!-- Divisi (DROPDOWN; sumber loadDivisi, default divisi pertama) -->
-                <div class="filter-wrap">
-                    <label>Divisi</label>
-                    <input type="hidden" id="inputDivisi" value="-">
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputDivisiBtn"
-                        data-bs-toggle="dropdown" aria-expanded="false"><span id="divisiLabel">-</span></button>
-                    <ul class="dropdown-menu" id="dropdownDivisi" aria-labelledby="inputDivisiBtn"
-                        style="max-height:320px; overflow:auto;"></ul>
-                </div>
-
-                <!-- Perkiraan range -->
-                <div class="filter-wrap">
-                    <label>Perkiraan</label>
-                    <input type="text" class="filter-inp" id="inputPerkiraan1" value="-" style="width:80px">
-                    <button type="button" class="btn-pick" onclick="loadSelectPerkiraan(1)">+</button>
-                    <span class="filter-sep">s/d</span>
-                    <input type="text" class="filter-inp" id="inputPerkiraan2" value="-" style="width:80px">
-                    <button type="button" class="btn-pick" onclick="loadSelectPerkiraan(2)">+</button>
-                </div>
-
-
-
+                {{-- Divisi & Perkiraan (awal/akhir) pindah ke modal "Filter Laporan" -- lihat
+                     docs/new-filter-modal-ui-guide.md. Nilai sebenarnya: globalDivisi (var JS) +
+                     #inputPerkiraan1 / #inputPerkiraan2 (hidden input di dalam modal). --}}
                 <!-- Actions: second (row-level) search + load + export -->
                 <div class="action-group">
                     <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
                         oninput="applyFilters()" style="width:180px">
+                    {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) --
+                         lihat catatan di modal Filter di bawah. --}}
+                    <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
                     <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i
                             class="fas fa-check"></i> Tampilkan</button>
                     <div class="export-wrap" id="exportWrap">
@@ -123,24 +85,19 @@
                 </div>
             </div>
 
-            <!-- TABLE -->
+            <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+            <div id="rtBar"></div>
+
+            <!-- TABLE (header + rows rendered dynamically from gcart_header) -->
             <div class="table-outer">
                 <div class="table-wrap">
                     <table class="tb" id="mainTable">
                         <thead>
-                            <tr>
-                                <th style="min-width:90px">Tanggal</th>
-                                <th style="min-width:130px">No. Bukti</th>
-                                <th>Keterangan</th>
-                                <th style="min-width:80px">Lawan</th>
-                                <th class="num" style="min-width:130px">Debet</th>
-                                <th class="num" style="min-width:130px">Kredit</th>
-                                <th class="num" style="min-width:150px">Saldo</th>
-                            </tr>
+                            <tr><th>Tanggal</th></tr>
                         </thead>
                         <tbody id="tableBody">
                             <tr class="empty-row">
-                                <td colspan="7">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td>
+                                <td>Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -150,11 +107,80 @@
                 </div>
             </div>
 
+            <div class="rt-hint">
+                <i class="bi bi-info-circle"></i>
+                Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
+            </div>
+
         </div><!-- /content -->
 
         <!-- TOAST -->
         <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
     </div><!-- /tb-report -->
+
+    {{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+         di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
+    <!-- modal filter -->
+    <div class="modal fade rt-filter" id="modalFilter">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-filter"></i> Filter Laporan
+                        <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+                    </h5>
+                    {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+                         $.fn.modal milik BS4 (jQuery baru dimuat SESUDAH bundle BS5 di masterreport2).
+                         data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
+                    <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                            onclick="$('#modalFilter').modal('hide')"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="rt-section">
+                        <div class="rt-group-label">Pengaturan Laporan</div>
+                        <div class="rt-grid-1">
+                            <div>
+                                <label class="rt-field-label" for="modalDivisi">Divisi</label>
+                                {{-- Diisi dari laporanaccountingbukubesar_loaddivisi (loadDivisiDropdown()).
+                                     Selalu punya nilai (tidak ada opsi "Semua") -- pilihan wajib, bukan
+                                     filter yang bisa dimatikan, jadi TIDAK dihitung di badge (lihat
+                                     updateFilterBadge()), sama seperti pola Perkiraan di
+                                     reportaccountingkasharian. --}}
+                                <select class="rt-native" id="modalDivisi"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rt-section">
+                        <div class="rt-group-label">Perkiraan
+                            <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+                        </div>
+                        <div class="rt-grid-2" id="pickFields"></div>
+
+                        {{-- Nilai sebenarnya (dibaca makeTable() & ditulis buttonPilihPerkiraan()) --}}
+                        <input type="hidden" id="inputPerkiraan1" value="-">
+                        <input type="hidden" id="inputPerkiraan2" value="-">
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+                    <div class="rt-footer-buttons">
+                        <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                                onclick="$('#modalFilter').modal('hide')">Batal</button>
+                        <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- modal filter -->
 @endsection
 
 @section('jsreport')
@@ -181,19 +207,25 @@
         // Raw rows from the last successful load — kept so search / export don't refetch.
         let lastRows = [];
 
-        // The shared report engine (masterreport4) is declared globally; provide a minimal
-        // header so its customize/save machinery stays valid even though we render our own table.
+        let globalDivisi = "-";  // diisi loadDivisiDropdown() saat page load (selalu wajib diisi)
+
+        // Report satu mode saja (buku besar tidak punya switcher Detail/Rekap).
         g_modeReport = 0;
 
+        /* ── kolom (gcart_header). Tabel styled DI-RENDER dari sini (lihat renderLedger()),
+              jadi hasil drag/gear (show-hide + urutan kolom) langsung ikut tampil. Saldo
+              adalah saldo BERJALAN (running balance), bukan angka yang dijumlah — makanya
+              total-nya default MATI (item[4]=0); Debet & Kredit dijumlah (item[4]=1) untuk
+              subtotal per akun & grand total. ── */
         function setDefaultHeader() {
             gcart_header = [
-                ['Tanggal', 'Tanggal', 1, 'date', 0, 0, [1, 1, 1], false],
-                ['Nobukti', 'No. Bukti', 1, 'varchar', 0, 0, [1, 1, 1], false],
-                ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0, [1, 1, 1], false],
-                ['Lawan', 'Lawan', 1, 'varchar', 0, 0, [1, 1, 1], false],
-                ['Debet', 'Debet', 1, 'float', 1, 2, [1, 1, 1], false],
-                ['kredit', 'Kredit', 1, 'float', 1, 2, [1, 1, 1], false],
-                ['SaldoAkhir', 'Saldo', 1, 'float', 0, 0, [1, 1, 1], false]
+                ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                ['Nobukti', 'No. Bukti', 1, 'varchar', 0, 0],
+                ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+                ['Lawan', 'Lawan', 1, 'varchar', 0, 0],
+                ['Debet', 'Debet', 1, 'float', 1, 2],
+                ['kredit', 'Kredit', 1, 'float', 1, 2],
+                ['SaldoAkhir', 'Saldo', 1, 'float', 0, 2]
             ];
             gsum_issubtotal = 1;
             gsum_isgrandtotal = 1;
@@ -208,10 +240,32 @@
 
             loadDivisiDropdown(); // isi dropdown Divisi (default: divisi pertama)
 
+            doSetHeader(g_modeReport);   // muat susunan kolom (default / hasil kustomisasi user) + gsum flags
+
+            // Header tabel interaktif: seret kolom, menu roda gigi (sembunyikan/desimal/total).
+            // Tidak ada "Tampilan" switcher -- halaman ini cuma satu mode.
+            ReportTable.init({
+                table: '#mainTable',
+                bar: '#rtBar',
+                onChange: function () {
+                    if (lastRows.length) { applyFilters(); } else { renderLedger(); }
+                }
+            });
+
             // NO auto-load: the table loads only when the "Tampilkan" (check) button is clicked.
         });
 
-        /* ── DROPDOWN DIVISI (sumber loadDivisi; default: divisi pertama) ── */
+        // Setiap baris transaksi membuka voucher sumbernya di panel bawah (report-table.js):
+        // INVC -> Invoice, B* -> Bukti Kas/Bank, sesuai kolom Jenis baris tsb. Delegasi event
+        // (bukan onclick inline per baris) karena renderLedger() membangun tbody lewat innerHTML.
+        $(document).on('click', '#tableBody tr.kas-clickable', function () {
+            openVoucher($(this).data('nobukti'), $(this).data('jenis'));
+        });
+
+        /* ── SELECT DIVISI (modal Filter Laporan) ──
+              Diisi sekali dari laporanaccountingbukubesar_loaddivisi saat page load. Memilih
+              item hanya menyetel globalDivisi; laporan baru dimuat saat klik Tampilkan
+              (konsisten dgn filter Periode/Perkiraan). ── */
         function loadDivisiDropdown() {
             let list = [];
             $.ajax({
@@ -225,31 +279,106 @@
 
             let html = '';
             list.forEach((item) => {
-                const nama = (item.NamaDevisi != null ? String(item.NamaDevisi) : '').replace(/"/g, '&quot;');
-                html += '<li><a class="dropdown-item divisi-item" style="cursor:pointer" ' +
-                    'data-value="' + item.Devisi + '" data-nama="' + nama + '">' +
-                    item.Devisi + ' - ' + (item.NamaDevisi != null ? item.NamaDevisi : '') +
-                    ' <span class="checkmark-red" style="display:none">&#10003;</span></a></li>';
+                const nama = (item.NamaDevisi != null ? String(item.NamaDevisi) : '');
+                html += '<option value="' + item.Devisi + '">' + item.Devisi + ' - ' + esc(nama) + '</option>';
             });
-            $("#dropdownDivisi").html(html);
+            $("#modalDivisi").html(html);
 
-            // default: divisi pertama
-            if (list.length) {
-                applyDivisi(list[0].Devisi, list[0].NamaDevisi != null ? list[0].NamaDevisi : '');
+            // default: divisi pertama (tidak ada opsi "Semua")
+            if (list.length) { setDivisi(list[0].Devisi); }
+        }
+
+        function setDivisi(kode) {
+            globalDivisi = kode;
+            $("#modalDivisi").val(kode);
+        }
+
+        /* ── FILTER MODAL ── */
+        const PICK_FIELDS = [
+            { id: 'inputPerkiraan1', label: 'Perkiraan Awal',  target: 1 },
+            { id: 'inputPerkiraan2', label: 'Perkiraan Akhir', target: 2 },
+        ];
+
+        function renderPickFields() {
+            let html = '';
+            PICK_FIELDS.forEach(function (f) {
+                const val = $('#' + f.id).val() || '-';
+                const isSet = (val !== '-' && val !== '');
+                html += '<div>';
+                html += '<label class="rt-field-label">' + f.label + '</label>';
+                html += '<div class="rt-combo">';
+                html += '<div class="rt-combo-input" onclick="pickFromModal(' + f.target + ')">';
+                if (isSet) {
+                    html += '<span class="rt-combo-tag">' + esc(val) +
+                        '<button type="button" onclick="event.stopPropagation(); clearPickField(\'' + f.id +
+                        '\')">&times;</button></span>';
+                } else {
+                    html += '<span class="rt-combo-placeholder">Pilih ' + f.label.toLowerCase() + '...</span>';
+                }
+                html += '<span class="rt-combo-chevron">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+                    '</span>';
+                html += '</div></div></div>';
+            });
+            $('#pickFields').html(html);
+        }
+
+        function clearPickField(id) {
+            $('#' + id).val('-');
+            renderPickFields();
+            updateFilterBadge();
+        }
+
+        // Perkiraan Awal/Akhir: '-' = tidak dibatasi -> punya nilai netral, jadi DIHITUNG di
+        // badge saat diisi. Divisi TIDAK ada opsi "Semua" -> wajib, jadi TIDAK dihitung.
+        function updateFilterBadge() {
+            let count = 0;
+            PICK_FIELDS.forEach(function (f) {
+                const val = $('#' + f.id).val();
+                if (val && val !== '-') { count++; }
+            });
+            $('#filterBadge').text(count + ' aktif');
+        }
+
+        function resetAllFilters() {
+            if ($('#modalDivisi option').length) {
+                $('#modalDivisi').prop('selectedIndex', 0);
             }
+            PICK_FIELDS.forEach(function (f) { $('#' + f.id).val('-'); });
+            renderPickFields();
+            updateFilterBadge();
         }
 
-        function applyDivisi(kode, nama) {
-            $("#inputDivisi").val(kode);
-            $("#divisiLabel").text(nama || kode);
-            $("#inputDivisiBtn").attr('title', nama || kode);
-            $('#dropdownDivisi .checkmark-red').hide();
-            $(`#dropdownDivisi .divisi-item[data-value='${kode}'] .checkmark-red`).show();
+        $('#modalFilter').on('show.bs.modal', function () {
+            $('#modalDivisi').val(globalDivisi);
+            renderPickFields();
+            updateFilterBadge();
+        });
+
+        $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
+        function applyModalFilter() {
+            setDivisi($('#modalDivisi').val());
+            $('#modalFilter').modal('hide');
         }
 
-        // Memilih divisi hanya menyetel filter; tabel dimuat saat klik "Tampilkan".
-        $(document).on('click', '#dropdownDivisi .divisi-item', function() {
-            applyDivisi($(this).data('value'), $(this).data('nama'));
+        // Buka picker Perkiraan dari dalam modal Filter: BS4/BS5 tidak menumpuk modal dengan
+        // bersih, jadi Filter disembunyikan dulu & dibuka lagi setelah picker ditutup.
+        let g_reopenFilter = false;
+
+        function pickFromModal(target) {
+            g_reopenFilter = true;
+            $('#modalFilter').modal('hide');
+            loadSelectPerkiraan(target);   // buka #formSelect
+        }
+
+        $(document).on('hidden.bs.modal', '#formSelect', function () {
+            if (g_reopenFilter) {
+                g_reopenFilter = false;
+                $('#modalFilter').modal('show');
+                renderPickFields();
+                updateFilterBadge();
+            }
         });
 
         /* ── HELPERS ── */
@@ -268,18 +397,44 @@
             return isNaN(n) ? 0 : n;
         }
 
-        // Debet/Kredit cell value ('-' when zero)
-        function money(v) {
+        // Debet/Kredit cell value ('-' when zero). `col` = gcart_header entry, dipakai untuk
+        // desimal (item[5]) supaya stepper desimal di menu roda gigi benar-benar berpengaruh.
+        function money(v, col) {
             if (!v) return '-';
+            const dec = col ? Number(col[5]) : 2;
             return (v < 0 ? '-' : '') + 'Rp ' + Math.abs(v).toLocaleString('id-ID', {
-                maximumFractionDigits: 2
+                minimumFractionDigits: dec, maximumFractionDigits: dec
             });
         }
         // Running saldo always shows a value (incl. 0)
-        function saldo(v) {
+        function saldo(v, col) {
+            const dec = col ? Number(col[5]) : 2;
             return (v < 0 ? '-' : '') + 'Rp ' + Math.abs(v).toLocaleString('id-ID', {
-                maximumFractionDigits: 2
+                minimumFractionDigits: dec, maximumFractionDigits: dec
             });
+        }
+
+        // HTML-escape teks bebas (Keterangan/Lawan/No. Bukti/nama akun bisa diisi user).
+        function esc(v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Satu <tr> dibangun dari `cols` (gcart_header terlihat, urutan sesuai drag user).
+        // `map` dikunci oleh nama field HURUF KECIL -> { text, style, cls, neg }; kolom yang
+        // tidak ada di map dirender kosong (dipakai baris Subtotal/Grand Total untuk kolom Saldo).
+        function cellsFor(cols, map) {
+            return cols.map(function (c) {
+                const key = String(c[0]).toLowerCase();
+                const cell = map[key] || {};
+                const classes = [];
+                if (c[3] === 'float' || c[3] === 'int') classes.push('num');
+                if (cell.cls) classes.push(cell.cls);
+                if (cell.neg) classes.push('neg');
+                const classAttr = classes.length ? ' class="' + classes.join(' ') + '"' : '';
+                const styleAttr = cell.style ? ' style="' + cell.style + '"' : '';
+                return '<td' + classAttr + styleAttr + '>' + (cell.text !== undefined ? cell.text : '') + '</td>';
+            }).join('');
         }
 
         function setFooter(msg) {
@@ -316,7 +471,7 @@
             const data = {
                 date1: $("#inputDate1").val(),
                 date2: $("#inputDate2").val(),
-                divisi: $("#inputDivisi").val(),
+                divisi: globalDivisi,
                 inputPerkiraan1: $("#inputPerkiraan1").val(),
                 inputPerkiraan2: $("#inputPerkiraan2").val()
             };
@@ -356,16 +511,32 @@
         }
 
         function renderLedger() {
+            const cols  = gcart_header.filter(c => c[2] === 1);
+            const thead = document.querySelector('#mainTable thead');
             const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+
+            // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
+            // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).
+            thead.innerHTML = ReportTable.headHtml(cols);
+
+            // kolom numerik yang ikut ditotal (Debet & Kredit secara default — Saldo TIDAK,
+            // karena isinya saldo berjalan, bukan angka yang dijumlah)
+            const totalCols = cols.filter(c => (c[3] === 'float' || c[3] === 'int') && c[4] === 1);
+            const totalKeys = totalCols.map(c => String(c[0]).toLowerCase());
+            const colByKey  = {};
+            cols.forEach(c => { colByKey[String(c[0]).toLowerCase()] = c; });
+            // kolom label = kolom pertama yang terlihat & bukan angka (tempat teks "Saldo Awal" /
+            // "Subtotal ..." / "TOTAL KESELURUHAN" ditaruh)
+            const labelCol = cols.find(c => c[3] !== 'float' && c[3] !== 'int') || cols[0];
+            const labelKey = labelCol ? String(labelCol[0]).toLowerCase() : null;
 
             const terms = activeTerms();
             const groups = buildGroups(lastRows);
 
-            let visible = 0,
-                shownGroups = 0,
-                grandD = 0,
-                grandK = 0;
+            let visible = 0, shownGroups = 0;
+            const grand = {}; totalKeys.forEach(k => grand[k] = 0);
+
+            let html = '';
 
             groups.forEach(g => {
                 const opening = g.rows.find(isOpening);
@@ -375,95 +546,76 @@
 
                 shownGroups++;
 
-                // group header
-                const gtr = document.createElement('tr');
-                gtr.className = 'group-row';
-                gtr.innerHTML = `<td colspan="7">${g.acc}${g.nama ? ' &mdash; ' + g.nama : ''}</td>`;
-                tbody.appendChild(gtr);
+                // group header (divider bar, selalu penuh selebar kolom yang terlihat)
+                html += '<tr class="group-row"><td colspan="' + cols.length + '">' + esc(g.acc) +
+                    (g.nama ? ' &mdash; ' + esc(g.nama) : '') + '</td></tr>';
 
-                let running = 0,
-                    subD = 0,
-                    subK = 0;
+                let running = 0;
+                const sub = {}; totalKeys.forEach(k => sub[k] = 0);
 
                 // opening "Saldo Awal" seeds the running balance (when the account has one)
                 if (opening) {
                     running += num(opening.saldoakhir);
-                    const tr = document.createElement('tr');
-                    tr.className = 'data-row';
-                    tr.innerHTML =
-                        `<td colspan="4" style="font-style:italic;color:var(--muted)">Saldo Awal</td>
-           <td class="num">-</td><td class="num">-</td>
-           <td class="num ${running < 0 ? 'neg' : ''}" style="font-weight:600">${saldo(running)}</td>`;
-                    tbody.appendChild(tr);
+                    const map = {};
+                    if (labelKey) map[labelKey] = { text: '<span style="font-style:italic;color:var(--muted)">Saldo Awal</span>' };
+                    if (colByKey['debet'])  map['debet']  = { text: '-' };
+                    if (colByKey['kredit']) map['kredit'] = { text: '-' };
+                    if (colByKey['saldoakhir']) map['saldoakhir'] = { text: saldo(running, colByKey['saldoakhir']), style: 'font-weight:600', neg: running < 0 };
+                    html += '<tr class="data-row">' + cellsFor(cols, map) + '</tr>';
                 }
 
                 shownTxns.forEach(r => {
                     running += num(r.saldoakhir); // cumulative over the rows shown
-                    const d = num(r.debet),
-                        k = num(r.kredit);
-                    subD += d;
-                    subK += k;
-                    grandD += d;
-                    grandK += k;
-                    const tgl = (typeof format_date === 'function') ? format_date(r.tanggal) : (r.tanggal ||
-                        '');
+                    totalKeys.forEach(key => {
+                        const v = num(r[key]);
+                        sub[key] += v; grand[key] += v;
+                    });
 
+                    const tgl = (typeof format_date === 'function') ? format_date(r.tanggal) : (r.tanggal || '');
                     // Each transaction row opens its source voucher in the shared bottom panel
                     // (report-table.js): INVC -> Invoice, B* -> Bukti Kas/Bank, by row Jenis.
                     const nb = (r.nobukti != null ? String(r.nobukti) : '');
                     const jn = (r.jenis != null ? String(r.jenis).trim() : '');
 
-                    const tr = document.createElement('tr');
-                    tr.className = 'data-row kas-clickable';
-                    tr.innerHTML =
-                        `<td style="white-space:nowrap">${tgl}</td>
-           <td class="code">${nb}</td>
-           <td class="name">${r.keterangan != null ? r.keterangan : ''}</td>
-           <td class="code">${r.lawan != null ? r.lawan : ''}</td>
-           <td class="num">${money(d)}</td>
-           <td class="num">${money(k)}</td>
-           <td class="num ${running < 0 ? 'neg' : ''}" style="font-weight:600">${saldo(running)}</td>`;
-                    tr.style.cursor = 'pointer';
-                    tr.title = 'Klik untuk lihat ' + (typeof jenisTitle === 'function' ? jenisTitle(jn) :
-                        'voucher') + ' ' + nb;
-                    (function(noBukti, jenis) {
-                        tr.onclick = function() {
-                            openVoucher(noBukti, jenis);
-                        };
-                    })(nb, jn);
-                    tbody.appendChild(tr);
+                    const map = {
+                        tanggal:    { text: tgl, style: 'white-space:nowrap' },
+                        nobukti:    { text: esc(nb), cls: 'code' },
+                        keterangan: { text: esc(r.keterangan), cls: 'name' },
+                        lawan:      { text: esc(r.lawan), cls: 'code' },
+                        debet:      { text: money(num(r.debet), colByKey['debet']) },
+                        kredit:     { text: money(num(r.kredit), colByKey['kredit']) },
+                        saldoakhir: { text: saldo(running, colByKey['saldoakhir']), style: 'font-weight:600', neg: running < 0 }
+                    };
+
+                    const title = 'Klik untuk lihat ' + (typeof jenisTitle === 'function' ? jenisTitle(jn) : 'voucher') + ' ' + nb;
+                    html += '<tr class="data-row kas-clickable" style="cursor:pointer" title="' + esc(title) +
+                        '" data-nobukti="' + esc(nb) + '" data-jenis="' + esc(jn) + '">' + cellsFor(cols, map) + '</tr>';
                     visible++;
                 });
 
                 // per-account subtotal (totals of shown rows + closing balance)
-                const str = document.createElement('tr');
-                str.className = 'subtotal-row';
-                str.innerHTML =
-                    `<td colspan="4">Subtotal ${g.acc}</td>
-         <td class="num">${money(subD)}</td>
-         <td class="num">${money(subK)}</td>
-         <td class="num ${running < 0 ? 'neg' : ''}"></td>`;
-                tbody.appendChild(str);
+                const subMap = {};
+                if (labelKey) subMap[labelKey] = { text: 'Subtotal ' + esc(g.acc), style: 'font-weight:600' };
+                totalKeys.forEach(key => { subMap[key] = { text: money(sub[key], colByKey[key]) }; });
+                if (colByKey['saldoakhir']) subMap['saldoakhir'] = { neg: running < 0 };
+                html += '<tr class="subtotal-row">' + cellsFor(cols, subMap) + '</tr>';
             });
 
             if (!shownGroups) {
                 const msg = lastRows.length ? 'Tidak ada baris yang cocok dengan pencarian.' :
                     'Tidak ada data untuk filter ini.';
-                tbody.innerHTML = `<tr class="empty-row"><td colspan="7">${msg}</td></tr>`;
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">' + msg + '</td></tr>';
                 setFooter(lastRows.length ? 'Tidak ada hasil pencarian' : 'Tidak ada data');
                 return;
             }
 
             // grand total (movement totals across all shown rows)
-            const gt = document.createElement('tr');
-            gt.className = 'grand-total';
-            gt.innerHTML =
-                `<td colspan="4" style="font-weight:800">TOTAL KESELURUHAN</td>
-       <td class="num">${money(grandD)}</td>
-       <td class="num">${money(grandK)}</td>
-       <td class="num"></td>`;
-            tbody.appendChild(gt);
+            const grandMap = {};
+            if (labelKey) grandMap[labelKey] = { text: 'TOTAL KESELURUHAN', style: 'font-weight:800' };
+            totalKeys.forEach(key => { grandMap[key] = { text: money(grand[key], colByKey[key]) }; });
+            html += '<tr class="grand-total">' + cellsFor(cols, grandMap) + '</tr>';
 
+            tbody.innerHTML = html;
             setFooter(`Menampilkan ${visible} transaksi - ${shownGroups} akun`);
         }
 
@@ -536,6 +688,19 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
+        // Picker gaya baru (new-cust-supp-modal-guide.md): TANPA kolom Actions / tombol "+",
+        // baris langsung diklik. #formSelect di halaman ini bukan modal bersama (tidak ada
+        // halaman lain yang menyertakannya) jadi ungated aman -- tidak ada halaman lain yang
+        // ikut berubah.
+        function pickerHeadHtml(cols) {
+            return '<tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+        }
+
+        function pickerRowHtml(target, kode, cellsHtml) {
+            return '<tr class="pick-row" onclick="buttonPilihPerkiraan(' + target + ',\'' + kode + '\')">' +
+                cellsHtml + '</tr>';
+        }
+
         // Buka modal pilih Perkiraan (rentang: target 1 = awal → #inputPerkiraan1,
         // target 2 = akhir → #inputPerkiraan2). Sumber khusus Buku Besar:
         // laporanaccountingbukubesar_loadperkiraan (parameter beda dari modal bersama).
@@ -560,29 +725,26 @@
             });
 
             document.getElementById('exampleModalLabel').innerHTML = "Select Perkiraan";
-            document.getElementById("tabelHeader").innerHTML =
-                `<tr>
-        <th>Actions</th>
-        <th>Perkiraan</th>
-        <th>Keterangan</th>
-        </tr>`;
+            document.getElementById("tabelHeader").innerHTML = pickerHeadHtml(['Perkiraan', 'Keterangan']);
 
             let rowTable = "";
             dataRefresh.forEach((item) => {
                 const kodeJs = String(item.Perkiraan).replace(/'/g, "\\'");
-                rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraan(${target},'${kodeJs}')">+</button>
-      </td>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-    </tr>`;
+                rowTable += pickerRowHtml(target, kodeJs,
+                    `<td>${esc(item.Perkiraan)}</td><td>${esc(item.Keterangan)}</td>`);
             });
 
             document.getElementById("tabel_dataSelect").innerHTML = rowTable;
+            $("#formSelect").addClass('rt-picker-v2');
             $("#tabelSelect").DataTable({
                 "lengthChange": false,
                 "paging": true,
+                // Sebelum konversi, kolom Actions (isinya tombol identik di tiap baris) ada di
+                // index 0, jadi sort default DataTables ("order": [[0,'asc']]) adalah no-op
+                // stabil -> baris tampil sesuai urutan API. Setelah Actions dihapus, Perkiraan
+                // jadi kolom 0 dan sort default itu betulan mengurutkan -- matikan biar urutan
+                // sama seperti sebelumnya (klik header masih tetap bisa sort manual).
+                "order": [],
             });
 
             $("#formSelect").modal('toggle'); // <-- tampilkan modalnya

@@ -35,7 +35,7 @@ class FunctionGlobalController extends Controller {
 
 		foreach ($menuUpdates as $kodemenu => $href) {
 		    DB::connection('SML')->update(
-		        'update DBMENUREPORT set href = :href where KODEMENU = :kodemenu',
+		        'update DBMENUREPORTweb set href = :href where KODEMENU = :kodemenu',
 		        ['href' => $href, 'kodemenu' => $kodemenu]
 		    );
 		}
@@ -73,9 +73,9 @@ class FunctionGlobalController extends Controller {
 
 	public function doSimpanHeader(Request $req) {
 		// sementara pakai ini sampai sistem login databasenya benar
-		
+
 		DB::connection('SML')->update('delete from DBSIMPANHEADER where username = :user and href = :href and reportmode = :mode' , ['user' => \Auth::User()->username, 'href' => $req->href, 'mode' => $req->mode]);
-		
+
 		DB::connection('MGL')->update('insert into DBSIMPANHEADER (username, href, reportmode, header, issubtotal, isgrandtotal) values (:user, :href, :mode, :header, :issubtotal, :isgrandtotal)' , ['user' => \Auth::User()->username, 'href' => $req->href, 'mode' => $req->mode, 'header' => $req->header, 'issubtotal' => $req->issubtotal, 'isgrandtotal' => $req->isgrandtotal]);
 
 		return;
@@ -89,5 +89,5 @@ class FunctionGlobalController extends Controller {
 
 		return $res;
 	}
-  
+
 }
