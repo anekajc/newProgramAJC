@@ -1000,6 +1000,109 @@
                       </tr>
                     </thead>
                     <tbody id="tabel2_data" class="text-left">
+                      {{-- @foreach( $tempOutstanding3 as $PurchaseOrderData)
+                      <tr>
+                        <td class="text-center"style=''>
+                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $PurchaseOrderData->NoBukti }}')">
+                              <i class="bi bi-info"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $PurchaseOrderData->NoBukti }}')">
+                              <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $PurchaseOrderData->NoBukti }}' , {{ $PurchaseOrderData->IsOtorisasi1 }})">
+                              <i class="bi bi-key-fill"></i>
+                            </button>
+                        </td>
+                        <td style=''>{{ $PurchaseOrderData->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->tglKirim)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOSO }}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
+                          <!-- @if($PurchaseOrderData->IsOtorisasi1 == 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td style=''>
+                          @if($PurchaseOrderData->TglOto1 === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglOto1)->format("d/m/Y H:i:s") }}
+                          @endif
+                        </td> -->
+                        @if ($PurchaseOrderData->IsOtorisasi1 )
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto1 ?  date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto1)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        @if ($level > 1)
+                        @if ($PurchaseOrderData->IsOtorisasi2 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto2 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto2)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser2 }}</td>
+                        @if ($level > 2)
+                        @if ($PurchaseOrderData->IsOtorisasi3 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto3 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto3)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser3 }}</td>
+                        @if ($level > 3)
+                        @if ($PurchaseOrderData->IsOtorisasi4 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto4 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto4)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser4 }}</td>
+                        @if ($level > 4)
+                        @if ($PurchaseOrderData->IsOtorisasi5 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto5 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto5)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser5 }}</td>
+
+                        @endif
+                        @endif
+                        @endif
+                        @endif
+
+                          @if($PurchaseOrderData->Isbatal== 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $PurchaseOrderData->UserBatal }}</td>
+                        <td style=''>
+                          @if($PurchaseOrderData->TglBatal === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglBatal)->format("d/m/Y - H:i:s") }}
+                          @endif
+                        </td>
+                      </tr>
+                      @endforeach --}}
                     </tbody>
                   </table>
                   <div class="po-rt-hint">
@@ -1037,6 +1140,54 @@
                       </tr>
                     </thead>
                     <tbody id="tabel3_data" class="text-left">
+                      {{-- @foreach ($tempOutstanding5 as $POOtorisasi)
+                      <tr>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $POOtorisasi->NoBukti }}')">
+                              <i class="bi bi-info"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $POOtorisasi->NoBukti }}')">
+                              <i class="bi bi-key-fill"></i>
+                            </button>
+                        </td>
+                        <td style=''>{{ $POOtorisasi->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->Tanggal)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->TglKirim)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NOSO }}</td>
+                        <td style=''>{{ $POOtorisasi->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
+                        @if($POOtorisasi->IsOtorisasi1 == 1)
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td style=''>{{ $POOtorisasi->OtoUser1 }}</td>
+                        <td style=''>
+                          @if($POOtorisasi->TglOto1 === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($POOtorisasi->TglOto1)->format('d/m/Y - H:i:s') }}
+                          @endif
+                        </td>
+                          @if($POOtorisasi->Isbatal == 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $POOtorisasi->UserBatal }}</td>
+                        <td style=''>
+                          @if($POOtorisasi->TglBatal === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($POOtorisasi->TglBatal)->format('d/m/Y - H:i:s') }}
+                          @endif
+                        </td>
+                      </tr>
+                      @endforeach --}}
                     </tbody>
                   </table>
 

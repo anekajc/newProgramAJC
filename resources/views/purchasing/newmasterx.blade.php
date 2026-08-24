@@ -54,7 +54,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>@yield('title', 'Purchasing')</title>
+    <title>@yield('title')</title>
     @yield('css')
     <style>
         * {
@@ -1566,12 +1566,10 @@
                 <div class="page-title">
                     @yield('page-title')
                 </div>
-
                 <div class="breadcrumb" id="breadcrumb">
                     <span style="cursor: pointer; color: var(--blue)"
                         onclick="navModuleClick('accounting')">Beranda</span>
                     <span class="bc-sep">›</span>
-
                     <span style="cursor: pointer; color: var(--blue)"
                         onclick="window.location.href = 'homepurchasing'">Purchasing</span>
                     <span class="bc-sep">›</span>

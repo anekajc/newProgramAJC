@@ -1,5 +1,5 @@
 /* ============================================================================
- * report-table.js — reusable voucher drill + interactive table header for
+ * report-table.js � reusable voucher drill + interactive table header for
  * report* pages
  *
  * Two concerns live in this file:
@@ -35,7 +35,7 @@
  * Globals exposed: openVoucher, openKasharian, openInvoice, closeKasharian,
  * jenisTitle, jenisFromNo, loadingHtml, and the helpers num / fmtRp / invDate / fmtDMY.
  *
- * (2) window.ReportTable — an interactive <thead> for report pages that render
+ * (2) window.ReportTable � an interactive <thead> for report pages that render
  * columns from gcart_header (see report/masterreport2.blade.php): drag judul
  * kolom untuk mengurutkan, plus menu roda gigi per kolom (sembunyikan / desimal
  * / tampilkan total), and a bar above the table listing hidden columns, a
@@ -71,7 +71,7 @@
 
   function cfg() { return window.ReportTableConfig || {}; }
 
-  /* ── formatting helpers (exposed globally so report pages can reuse them) ── */
+  /* -- formatting helpers (exposed globally so report pages can reuse them) -- */
   if (typeof window.num !== 'function') {
     window.num = function (v) {
       if (v === null || v === undefined || v === '') return 0;
@@ -117,7 +117,7 @@
   }
   // Inline "loading" label with a small Bootstrap spinner, e.g. for a report footer
   // while data is fetched. Assign via innerHTML (NOT textContent) so the spinner
-  // markup renders:  el.innerHTML = loadingHtml('Memuat data…')
+  // markup renders:  el.innerHTML = loadingHtml('Memuat data�')
   if (typeof window.loadingHtml !== 'function') {
     window.loadingHtml = function (text) {
       var msg = (text != null && text !== '') ? text : 'Memuat data...';
@@ -125,7 +125,7 @@
     };
   }
 
-  /* ── running "saldo berjalan" for kartu-style reports (Hutang/Piutang) ──
+  /* -- running "saldo berjalan" for kartu-style reports (Hutang/Piutang) --
      Recomputes the Saldo Rp / Saldo $ columns as a per-group running balance,
      like the Trial Balance "Saldo Berjalan" drill: the first row of each group
      seeds from that column's existing value (Saldo Awal from the SP); each later
@@ -164,7 +164,7 @@
     window.assignRunningSaldo = function (rows, opts) {
       opts = opts || {};
       var saldo    = opts.saldo || RUNNING_SALDO_DEFAULT;
-      var groupKey = ('groupKey' in opts) ? opts.groupKey : 'nama';   // null/false → one sequence
+      var groupKey = ('groupKey' in opts) ? opts.groupKey : 'nama';   // null/false ? one sequence
       var prop     = opts.prop  || '_run';
       var keys = Object.keys(saldo);
       var acc = {};   // group value -> { saldoCol: running balance }
@@ -189,7 +189,7 @@
     };
   }
 
-  /* ── voucher title per transaction type (Jenis) ── */
+  /* -- voucher title per transaction type (Jenis) -- */
   // Pages may override/extend via window.ReportTableConfig.jenisTitle.
   var JENIS_TITLE = {
     BBK: 'BUKTI BANK KELUAR',
@@ -209,12 +209,12 @@
   };
 
   // Map a document-number prefix to the voucher Jenis code openVoucher dispatches on.
-  // Most prefixes equal their Jenis (BBK, BKK, BKM, …); the purchase-receipt number
+  // Most prefixes equal their Jenis (BBK, BKK, BKM, �); the purchase-receipt number
   // prefixes "LPB" and "PBJ" are both the "BPL" voucher type (Faktur Pembelian).
   // Pages may extend via window.ReportTableConfig.noJenisAlias = { PREFIX: 'JENIS' }.
   var NO_JENIS_ALIAS = { LPB: 'BPL', PBJ: 'BPL' };
   // Derive the voucher Jenis from a document number like "SML/LPB/00018/0426" (its
-  // 2nd slash-segment), applying known aliases. Returns '' if not derivable — pass
+  // 2nd slash-segment), applying known aliases. Returns '' if not derivable � pass
   // the result to openVoucher(no, jenisFromNo(no)).
   if (typeof window.jenisFromNo !== 'function') {
     window.jenisFromNo = function (no) {
@@ -225,7 +225,7 @@
     };
   }
 
-  /* ── panel plumbing ── */
+  /* -- panel plumbing -- */
   // Build the bottom panel if the page didn't ship its own #kasPanel markup.
   function ensurePanel() {
     var panel = document.getElementById('kasPanel');
@@ -254,7 +254,7 @@
       '<div style="margin:18px;padding:12px;background:#FEF2F2;border:1px solid #FECACA;' +
       'border-radius:8px;color:#B91C1C;font-size:12.5px">' + msg + '</div>';
   }
-  // Lowercase every key of a row (the procs mix casing: Debet/kredit/Nobukti…).
+  // Lowercase every key of a row (the procs mix casing: Debet/kredit/Nobukti�).
   // Tolerate a non-array payload (e.g. an error page / single object) so the
   // voucher degrades to "no data" instead of throwing ".map is not a function".
   function lc(rows) {
@@ -264,8 +264,8 @@
     });
   }
 
-  /* ── dispatch: INVC -> invoice, BPL -> faktur pembelian, BP -> bukti pemakaian,
-        else -> Bukti Kas/Bank/etc. ── */
+  /* -- dispatch: INVC -> invoice, BPL -> faktur pembelian, BP -> bukti pemakaian,
+        else -> Bukti Kas/Bank/etc. -- */
   window.openVoucher = function (nobukti, jenis) {
     var key = (jenis != null ? String(jenis).trim().toUpperCase() : '');
     if (key === 'INVC') { window.openInvoice(nobukti); }
@@ -337,7 +337,7 @@
       '</tbody></table>';
   }
 
-  /* ── INVOICE PENJUALAN ── */
+  /* -- INVOICE PENJUALAN -- */
   window.openInvoice = function (nobukti) {
     var panel = ensurePanel();
     showLoading(panel, 'INVOICE - ' + nobukti);
@@ -445,7 +445,7 @@
       '</div>';
   }
 
-  /* ── FAKTUR PEMBELIAN (BPL) ── */
+  /* -- FAKTUR PEMBELIAN (BPL) -- */
   window.openLpb = function (nobukti) {
     var title = window.jenisTitle('BPL');
     var panel = ensurePanel();
@@ -544,7 +544,7 @@
       '</div>';
   }
 
-  /* ── BUKTI PEMAKAIAN INTERNAL ACC (BP) ── */
+  /* -- BUKTI PEMAKAIAN INTERNAL ACC (BP) -- */
   window.openBp = function (nobukti) {
     var title = window.jenisTitle('BP');
     var panel = ensurePanel();
@@ -620,7 +620,7 @@
   };
 
   // Close the voucher when clicking outside it. Clicks on a voucher opener are
-  // ignored so they switch the voucher instead of closing the panel — this covers
+  // ignored so they switch the voucher instead of closing the panel � this covers
   // both a clickable cell (`.kas-clickable`) and a whole clickable row whose
   // onclick calls openVoucher (single-column pages make the entire <tr> clickable).
   document.addEventListener('click', function (e) {
@@ -634,7 +634,7 @@
 })();
 
 /* ============================================================================
- * window.ReportTable — interactive table header (merged from the former
+ * window.ReportTable � interactive table header (merged from the former
  * public/js/report-table-v2.js). See the file-top comment for usage.
  * ==========================================================================*/
 (function () {
@@ -646,6 +646,11 @@
   var openGidx = -1;   // index kolom (di gcart_header) yang menunya terbuka
   var dragGidx = -1;   // index kolom yang sedang diseret
   var menuEl   = null; // elemen .rt-colmenu di <body>
+
+  // Stepper "Desimal" di menu roda gigi kolom numerik DIMATIKAN sementara atas
+  // permintaan - fiturnya tetap ada di kode, hanya dipindah jadi command-only lewat
+  // ReportTable.setDesimal(g, step) di console, belum dipakai user biasa lewat UI.
+  var RT_DESIMAL_UI_ENABLED = false;
 
   /* ---------------- helper ---------------- */
 
@@ -674,7 +679,7 @@
     return (cfg && cfg.bar) ? document.querySelector(cfg.bar) : null;
   }
 
-  // Simpan langsung — hanya dipakai bila fungsi masterreport2 tidak tersedia.
+  // Simpan langsung � hanya dipakai bila fungsi masterreport2 tidak tersedia.
   function saveHeader() {
     if (typeof window.doSimpanHeader !== "function" || typeof window.g_href === "undefined") { return; }
     window.doSimpanHeader(window.g_href, window.g_modeReport, cart(), window.gsum_issubtotal, window.gsum_isgrandtotal);
@@ -812,12 +817,14 @@
 
     if (isNumeric(col)) {
       html += '<div class="rt-colmenu-divider"></div>';
-      html += '<div class="rt-colmenu-item is-static"><span>Desimal</span>' +
-              '<span class="rt-stepper">' +
-              '<button type="button" data-rtact="dec-minus">&minus;</button>' +
-              "<b>" + Number(col[5]) + "</b>" +
-              '<button type="button" data-rtact="dec-plus">+</button>' +
-              "</span></div>";
+      if (RT_DESIMAL_UI_ENABLED) {
+        html += '<div class="rt-colmenu-item is-static"><span>Desimal</span>' +
+                '<span class="rt-stepper">' +
+                '<button type="button" data-rtact="dec-minus">&minus;</button>' +
+                "<b>" + Number(col[5]) + "</b>" +
+                '<button type="button" data-rtact="dec-plus">+</button>' +
+                "</span></div>";
+      }
       html += '<div class="rt-colmenu-item is-static"><span>Tampilkan total</span>' +
               '<button type="button" class="rt-miniswitch' + (Number(col[4]) === 1 ? " on" : "") +
               '" data-rtact="total"></button></div>';
@@ -853,6 +860,23 @@
     menuEl.style.top  = top + "px";
   }
 
+  // Mutasi jumlah desimal kolom `g` sebesar `step` (+1/-1), lalu simpan. Dipakai oleh
+  // menuAction() (kalau RT_DESIMAL_UI_ENABLED dinyalakan lagi) dan oleh
+  // ReportTable.setDesimal(), command-only console entry point-nya untuk sekarang.
+  function applyDesimalStep(g, step) {
+    var all = cart();
+    if (!all[g]) { return false; }
+    if (typeof window.doSetDesimal === "function") {
+      window.doSetDesimal(g, step);
+      return true;
+    }
+    var next = Number(all[g][5]) + step;
+    if (next < 0 || next > 4) { return false; }
+    all[g][5] = next;
+    saveHeader();
+    return true;
+  }
+
   function menuAction(act, g) {
     var all = cart();
     if (!all[g]) { return; }
@@ -866,15 +890,7 @@
     }
 
     if (act === "dec-minus" || act === "dec-plus") {
-      var step = (act === "dec-plus") ? 1 : -1;
-      if (typeof window.doSetDesimal === "function") {
-        window.doSetDesimal(g, step);
-      } else {
-        var next = Number(all[g][5]) + step;
-        if (next < 0 || next > 4) { return; }
-        all[g][5] = next;
-        saveHeader();
-      }
+      if (!applyDesimalStep(g, act === "dec-plus" ? 1 : -1)) { return; }
     } else if (act === "total") {
       if (typeof window.doButtonTotal === "function") {
         window.doButtonTotal(g);

@@ -212,25 +212,25 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/retursuratjalanloadheader', [ReturSuratJalanController::class, 'loadHeader']);
   Route::get('/retursuratjalansimpanheader', [ReturSuratJalanController::class, 'simpanHeader']);
 
-//   // Invoice Penjualan
-//   Route::get('/invoicepenjualan', [InvoicePenjualanController::class, 'index']);
-//   Route::post('/invoicepenjualanlistso', [InvoicePenjualanController::class, 'getListSO']);
-//   Route::post('/invoicepenjualanspadd', [InvoicePenjualanController::class, 'spAdd']);
-//   Route::post('/invoicepenjualanspdetailkoreksi', [InvoicePenjualanController::class, 'spDetailKoreksi']);
-//   Route::post('/invoicepenjualanspdelete', [InvoicePenjualanController::class, 'spDelete']);
-//   Route::get('/invoicepenjualanloadall', [InvoicePenjualanController::class, 'loadAll']);
-//   Route::post('/invoicepenjualanspotorisasi', [InvoicePenjualanController::class, 'spOtorisasi']);
-//   Route::post('/invoicepenjualanspbatalotorisasi', [InvoicePenjualanController::class, 'spBatalOtorisasi']);
-//   Route::post('/invoicepenjualanonchangeheader', [InvoicePenjualanController::class, 'onChangeHeader']);
-//   Route::post('/invoicepenjualanonchangedetail', [InvoicePenjualanController::class, 'onChangeDetail']);
-//   Route::post('/invoicepenjualandetailCetak', [InvoicePenjualanController::class, 'getDetailCetak']);
-//   Route::post('/invoicepenjualandetailCetakJBG', [InvoicePenjualanController::class, 'getDetailCetak']);
-//   Route::post('/invoicepenjualandetailCetak3', [InvoicePenjualanController::class, 'getDetailCetak']);
-//   Route::post('/ambilNomorSPB', [InvoicePenjualanController::class, 'getDetailCetakSPB']);
-//   Route::post('/invoicePenjualanPrintSPB', [InvoicePenjualanController::class, 'getDetailPenerimaancetak']);
-//   Route::post('/invoicepenjualangetdetail', [InvoicePenjualanController::class, 'spDetailKoreksi']);
-//   Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
-//   Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
+  // Invoice Penjualan
+  Route::get('/invoicepenjualan', [InvoicePenjualanController::class, 'index']);
+  Route::post('/invoicepenjualanlistso', [InvoicePenjualanController::class, 'getListSO']);
+  Route::post('/invoicepenjualanspadd', [InvoicePenjualanController::class, 'spAdd']);
+  Route::post('/invoicepenjualanspdetailkoreksi', [InvoicePenjualanController::class, 'spDetailKoreksi']);
+  Route::post('/invoicepenjualanspdelete', [InvoicePenjualanController::class, 'spDelete']);
+  Route::get('/invoicepenjualanloadall', [InvoicePenjualanController::class, 'loadAll']);
+  Route::post('/invoicepenjualanspotorisasi', [InvoicePenjualanController::class, 'spOtorisasi']);
+  Route::post('/invoicepenjualanspbatalotorisasi', [InvoicePenjualanController::class, 'spBatalOtorisasi']);
+  Route::post('/invoicepenjualanonchangeheader', [InvoicePenjualanController::class, 'onChangeHeader']);
+  Route::post('/invoicepenjualanonchangedetail', [InvoicePenjualanController::class, 'onChangeDetail']);
+  Route::post('/invoicepenjualandetailCetak', [InvoicePenjualanController::class, 'getDetailCetak']);
+  Route::post('/invoicepenjualandetailCetakJBG', [InvoicePenjualanController::class, 'getDetailCetak']);
+  Route::post('/invoicepenjualandetailCetak3', [InvoicePenjualanController::class, 'getDetailCetak']);
+  Route::post('/ambilNomorSPB', [InvoicePenjualanController::class, 'getDetailCetakSPB']);
+  Route::post('/invoicePenjualanPrintSPB', [InvoicePenjualanController::class, 'getDetailPenerimaancetak']);
+  Route::post('/invoicepenjualangetdetail', [InvoicePenjualanController::class, 'spDetailKoreksi']);
+  Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
+  Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
 
 //   // Invoice Jasa
 //   Route::get('/invoicejasa', [InvoiceJasaController::class, 'index']);

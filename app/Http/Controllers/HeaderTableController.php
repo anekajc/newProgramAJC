@@ -298,8 +298,6 @@ class HeaderTableController extends Controller
       foreach ($otorisasi as $groupedData) {
         $tempOtorisasi[] = $groupedData;
       }
-      $isparsed = 0;
-      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
 
       if (count($headertable) > 0) {
         $isnumberheadertable = json_decode($headertable[0]->isnumber);
@@ -308,7 +306,8 @@ class HeaderTableController extends Controller
         $headerisshown = json_decode($headertable[0]->isshown);
         $isparsed = 0;
       } else {
-        // $headertable = [];
+        $isparsed = 1;
+        foreach ($tempOtorisasi[0][0] as $key => $value) {
 
         if(!$tempOtorisasi) {
         } else {
@@ -737,6 +736,7 @@ class HeaderTableController extends Controller
             } else if ($key == 'kodebrg') {
               $isnumberheadertable[] = 0;
             }
+          }
 
             elseif (is_numeric($value)) {
               $isnumberheadertable[] = 1;
@@ -794,6 +794,7 @@ class HeaderTableController extends Controller
       foreach ($headertablevalue3 as $header) {
         array_push( $aliasOrdered3 , ["value" => $header , "alias" => $header]);
       }
+
     }
 
     $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
