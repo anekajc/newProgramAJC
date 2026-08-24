@@ -336,6 +336,22 @@
     max-width: 100%;
   }
 
+  /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
+     po-aksi-hover supaya tabel lain (mis. modalPOAdd) tidak ikut terpengaruh.
+     visibility (bukan display) supaya lebar kolomnya tetap dipesan - tabel tidak
+     melompat saat tombol muncul/hilang. :focus-within supaya tombol tetap bisa
+     dicapai lewat keyboard (Tab), bukan hanya mouse. */
+  table.data-table.po-aksi-hover tbody td:first-child .btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .12s ease;
+  }
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
+  table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+    visibility: visible;
+    opacity: 1;
+  }
+
   /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar tab Outstanding PR.
      Bentuknya sengaja meniru .po-filter-wrap / .po-filter-inp milik
      public/css/po-table-header.css supaya seragam dengan kotak periode di tab
@@ -914,6 +930,18 @@
                       <input type="date" class="po-filter-inp" id="poTglAkhir" value="{!! $poTglAkhir !!}">
                     </div>
                     <input type="search" id="poSearch2" class="po-search-inp" placeholder="Cari data">
+                    {{-- Jumlah baris per halaman. Sama seperti #poLen1/#poLen3 milik tab
+                         Outstanding - lihat poIkatPanjangHalaman(). --}}
+                    <div class="po-len-wrap">
+                      <label for="poLen2">Tampilkan</label>
+                      <select id="poLen2" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
                     <button class="po-btn-filter" type="button" id="poBtnFilter" onclick="$('#modalFilterPO').modal('show')">
                       <i class="bi bi-funnel"></i> Filter
                     </button>
@@ -923,7 +951,7 @@
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat poPindahBar(). --}}
-                  <table id="tabel2" class="data-table">
+                  <table id="tabel2" class="data-table po-aksi-hover">
                     <thead id="tabel2_header" class="text-center ">
                         <tr>
                         <th style="padding: 4px 12px; " scope="col">Actions</th>
@@ -972,6 +1000,109 @@
                       </tr>
                     </thead>
                     <tbody id="tabel2_data" class="text-left">
+                      {{-- @foreach( $tempOutstanding3 as $PurchaseOrderData)
+                      <tr>
+                        <td class="text-center"style=''>
+                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $PurchaseOrderData->NoBukti }}')">
+                              <i class="bi bi-info"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $PurchaseOrderData->NoBukti }}')">
+                              <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $PurchaseOrderData->NoBukti }}' , {{ $PurchaseOrderData->IsOtorisasi1 }})">
+                              <i class="bi bi-key-fill"></i>
+                            </button>
+                        </td>
+                        <td style=''>{{ $PurchaseOrderData->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($PurchaseOrderData->tglKirim)) !!}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOSO }}</td>
+                        <td style=''>{{ $PurchaseOrderData->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
+                          <!-- @if($PurchaseOrderData->IsOtorisasi1 == 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td style=''>
+                          @if($PurchaseOrderData->TglOto1 === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglOto1)->format("d/m/Y H:i:s") }}
+                          @endif
+                        </td> -->
+                        @if ($PurchaseOrderData->IsOtorisasi1 )
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto1 ?  date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto1)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        <td>{{ $PurchaseOrderData->OtoUser1 }}</td>
+                        @if ($level > 1)
+                        @if ($PurchaseOrderData->IsOtorisasi2 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto2 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto2)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser2 }}</td>
+                        @if ($level > 2)
+                        @if ($PurchaseOrderData->IsOtorisasi3 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto3 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto3)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser3 }}</td>
+                        @if ($level > 3)
+                        @if ($PurchaseOrderData->IsOtorisasi4 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto4 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto4)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser4 }}</td>
+                        @if ($level > 4)
+                        @if ($PurchaseOrderData->IsOtorisasi5 )
+                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td>{!! $PurchaseOrderData->TglOto5 ? date("d/m/Y H:i:s", strtotime($PurchaseOrderData->TglOto5)) : '' !!}</td>
+
+                        <td>{{ $PurchaseOrderData->OtoUser5 }}</td>
+
+                        @endif
+                        @endif
+                        @endif
+                        @endif
+
+                          @if($PurchaseOrderData->Isbatal== 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $PurchaseOrderData->UserBatal }}</td>
+                        <td style=''>
+                          @if($PurchaseOrderData->TglBatal === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglBatal)->format("d/m/Y - H:i:s") }}
+                          @endif
+                        </td>
+                      </tr>
+                      @endforeach --}}
                     </tbody>
                   </table>
                   <div class="po-rt-hint">
@@ -1009,6 +1140,54 @@
                       </tr>
                     </thead>
                     <tbody id="tabel3_data" class="text-left">
+                      {{-- @foreach ($tempOutstanding5 as $POOtorisasi)
+                      <tr>
+                        <td class="text-center">
+                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $POOtorisasi->NoBukti }}')">
+                              <i class="bi bi-info"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $POOtorisasi->NoBukti }}')">
+                              <i class="bi bi-key-fill"></i>
+                            </button>
+                        </td>
+                        <td style=''>{{ $POOtorisasi->NoBukti }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->Tanggal)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NamaCustSupp }}</td>
+                        <td style=''>{!! date("d/m/Y", strtotime($POOtorisasi->TglKirim)) !!}</td>
+                        <td style=''>{{ $POOtorisasi->NOSO }}</td>
+                        <td style=''>{{ $POOtorisasi->NOPOCUST }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
+                        <td style='' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
+                        @if($POOtorisasi->IsOtorisasi1 == 1)
+                          <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                        @else
+                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                        @endif
+                        <td style=''>{{ $POOtorisasi->OtoUser1 }}</td>
+                        <td style=''>
+                          @if($POOtorisasi->TglOto1 === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($POOtorisasi->TglOto1)->format('d/m/Y - H:i:s') }}
+                          @endif
+                        </td>
+                          @if($POOtorisasi->Isbatal == 1)
+                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
+                          @else
+                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
+                          @endif
+                        <td style=''>{{ $POOtorisasi->UserBatal }}</td>
+                        <td style=''>
+                          @if($POOtorisasi->TglBatal === null)
+                            -
+                          @else
+                            {{ \Carbon\Carbon::parse($POOtorisasi->TglBatal)->format('d/m/Y - H:i:s') }}
+                          @endif
+                        </td>
+                      </tr>
+                      @endforeach --}}
                     </tbody>
                   </table>
 
@@ -5689,7 +5868,7 @@ function buttonAddEditItem (i) {
   document.getElementById("input_add_add_noPPL").value = tempAddEdit.NoPPL
   document.getElementById("input_add_add_urutPPL").value = tempAddEdit.UrutPPL
   document.getElementById("input_add_add_keteranganbarang").value = tempAddEdit.KeteranganBarang
-  document.getElementById("input_add_add_hargaAwal").value = formatAngka(tempAddEdit.Hrgawal || 0)
+  document.getElementById("input_add_add_hargaAwal").value = Number(tempAddEdit.Hrgawal) ? formatAngka(parseFloat(tempAddEdit.Hrgawal).toFixed(2)) : '0.00'
   poKunciHargaAwal()
 
   // No. PR/No. SO di layar = asal barang milik ITEM ini (NoPPL-nya sendiri), bukan lagi
@@ -6890,12 +7069,14 @@ const PO_OUT = {
 let poCacheOut = { 1 : null, 3 : null }
 let poPakaiCacheOut = { 1 : false, 3 : false }
 
-// Jumlah baris per halaman tiap tabel outstanding, dikendalikan dropdown #poLen1/#poLen3.
+// Jumlah baris per halaman tiap tabel, dikendalikan dropdown #poLen1/#poLen2/#poLen3.
 // Disimpan di variabel, bukan hanya dibaca dari elemen select-nya, karena
-// initTabelOutstanding() melakukan destroy+init tiap kali kolom digeser/disembunyikan -
-// tanpa ini tabel selalu balik ke nilai awal walau dropdownnya masih menunjuk pilihan
-// pengguna. Nilai -1 berarti "semua data" (dipahami DataTables maupun servernya).
-let poPanjangHalaman = { 1 : 10, 3 : 10 }
+// initTabelOutstanding()/renderTabelPO() melakukan destroy+init tiap kali kolom
+// digeser/disembunyikan - tanpa ini tabel selalu balik ke nilai awal walau
+// dropdownnya masih menunjuk pilihan pengguna. Nilai -1 berarti "semua data"
+// (dipahami DataTables maupun servernya). urut 2 (tab Purchase Order) paging-nya
+// murni di client (data sudah ditarik sekaligus), bukan lewat server seperti 1/3.
+let poPanjangHalaman = { 1 : 10, 2 : 10, 3 : 10 }
 
 // Nomor urut tabel milik tab yang sedang aktif.
 function poUrutTabAktif () {
@@ -7120,18 +7301,20 @@ function poIkatSearch (urut) {
   })
 }
 
-// Ikat dropdown "Tampilkan" (#poLen1/#poLen3) milik tab outstanding. Sama seperti kotak
-// search di atas: elemennya statis di blade dan berada DI LUAR wrapper DataTables, jadi
-// tidak ikut terhapus saat DataTables di-destroy - makanya cukup diikat sekali,
-// ditandai lewat dataset.rtBound.
+// Ikat dropdown "Tampilkan" (#poLen1/#poLen2/#poLen3). Sama seperti kotak search di atas:
+// elemennya statis di blade dan berada DI LUAR wrapper DataTables, jadi tidak ikut
+// terhapus saat DataTables di-destroy - makanya cukup diikat sekali, ditandai lewat
+// dataset.rtBound.
 //
 // page.len(n).draw() sengaja dipakai, BUKAN destroy+init lewat initTabelOutstanding():
 // DataTables sendiri yang menghitung ulang halaman lalu menembak ajax dengan length
-// yang baru, jadi susunan kolom, urutan sort, dan kata pencarian tetap utuh.
+// yang baru, jadi susunan kolom, urutan sort, dan kata pencarian tetap utuh. Untuk urut 2
+// (tab Purchase Order, paging murni di client) page.len().draw() juga aman karena
+// datanya sudah ada semua di tabel - DataTables hanya menghitung ulang halaman tampilnya.
 // .draw() tanpa argumen mengembalikan tampilan ke halaman pertama - memang yang
 // diinginkan, karena nomor halaman lama tidak lagi berarti setelah jumlah baris berubah.
 function poIkatPanjangHalaman (urut) {
-  let sel = document.getElementById(PO_OUT[urut].len)
+  let sel = document.getElementById(urut === 2 ? 'poLen2' : PO_OUT[urut].len)
   if (!sel || sel.dataset.rtBound) { return }
   sel.dataset.rtBound = '1'
   sel.value = String(poPanjangHalaman[urut])
@@ -7139,7 +7322,7 @@ function poIkatPanjangHalaman (urut) {
   sel.addEventListener('change', function () {
     let n = Number(sel.value)
     poPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
-    $('#' + PO_OUT[urut].tabel).DataTable().page.len(poPanjangHalaman[urut]).draw()
+    $('#' + (urut === 2 ? 'tabel2' : PO_OUT[urut].tabel)).DataTable().page.len(poPanjangHalaman[urut]).draw()
   })
 }
 
@@ -7802,11 +7985,18 @@ if (baris2) {
 
   $("#tabel2").DataTable({
     "lengthChange": false,
-    "paging": false,
-    "dom": "<'po-table-wrap't>",
+    "pageLength": poPanjangHalaman[2],
+    // "order": [] WAJIB - tanpa ini DataTables jatuh ke default [[0,'asc']] (kolom
+    // Actions), yang selama ini kebetulan tidak terlihat karena isinya HTML yang
+    // di-strip jadi kunci kosong semua. Data sudah datang terurut dari server
+    // (Tanggal/NoBukti terbaru dulu - lihat POController@loadPurchaseOrder), jadi
+    // di sini cukup dipertahankan urutan DOM apa adanya.
+    "order": [],
+    "dom": "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
   });
 
   poIkatSearch(2)
+  poIkatPanjangHalaman(2)
   poIkatPeriode()
   // Init DataTable di atas mereset filter pencarian - kotak #poSearch2 sendiri statis
   // di blade dan nilainya tidak ikut hilang, jadi diterapkan ulang di sini supaya

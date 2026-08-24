@@ -89,8 +89,6 @@
     border-color: var(--border) !important;
   }
 
-  /* Dropdown "Tampilkan" di toolbar, meniru .po-len-wrap milik so.blade.php/
-     purchaseOrder.blade.php 1:1. */
   .po-len-wrap {
     display: flex;
     align-items: center;
@@ -549,10 +547,7 @@
       </div>
       <div class="po-table-wrap">
         <table id="tabel" class="tb data-table">
-          {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
-               renderTabelRows(), which runs on page load via reinitTabel()) replaces
-               this <thead>'s contents based on gcart_header before the user ever sees
-               it -- the tag itself is just a placeholder for that selector. --}}
+          
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel_data" class="text-left"></tbody>
         </table>

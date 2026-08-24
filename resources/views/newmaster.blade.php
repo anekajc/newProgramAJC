@@ -748,14 +748,6 @@
     }
   }
 
-  // ── Render sidebar nav (3 levels: module -> card -> submenu flyout) ───
-  // Flyout panels are NOT nested inside .nav-child in the DOM — they're
-  // rendered into a separate container appended to <body> and positioned
-  // with JS on hover. This is required because the sidebar's accordion
-  // uses overflow:hidden/max-height on .nav-group/.nav-children to drive
-  // its expand-collapse animation; any descendant of those gets clipped
-  // regardless of its own position/z-index. Living outside that tree
-  // (position:fixed, appended to body) sidesteps the clipping entirely.
   function renderNav() {
     const nav = document.getElementById('nav');
     nav.innerHTML = modules.map(m => `

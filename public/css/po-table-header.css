@@ -13,15 +13,21 @@
  * halaman-halaman purchasing, jadi yang disalin hanya bagian yang dipakai
  * komponen, dengan scope khusus halaman ini:
  *
- *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 thead th.rt-th
- *   .tb-report .rt-bar              ->  #rtBar (satu elemen, dipindah lewat JS
- *                                       antara tabel yang sedang aktif - lihat
- *                                       poPindahBar() di purchaseOrder.blade.php)
+ *   .tb-report .tb thead th.rt-th   ->  #tabel / #tabel2 / #tabel7 thead th.rt-th
+ *   .tb-report .rt-bar              ->  .rt-bar (class saja, bukan id - report-table.js
+ *                                       menambahkan class "rt-bar" ke elemen manapun yang
+ *                                       jadi target opsi `bar`, jadi selector di sini tidak
+ *                                       boleh mensyaratkan id="rtBar" tertentu. purchaseOrder
+ *                                       memakai satu elemen id="rtBar" yang dipindah lewat JS
+ *                                       antara tabel aktif (poPindahBar()); halaman lain boleh
+ *                                       punya bar sendiri per tabel dengan id apa saja, mis.
+ *                                       #rtBarTabel/#rtBarTabel7 di marketing/so.blade.php.
  *   .tb-report .rt-hint             ->  .po-rt-hint
  *   .rt-colmenu                     ->  disalin apa adanya (menunya memang
  *                                       di-appendChild ke <body>)
  *
- * Dipakai oleh: resources/views/purchasing/purchaseOrder.blade.php
+ * Dipakai oleh: resources/views/purchasing/purchaseOrder.blade.php,
+ *               resources/views/marketing/so.blade.php
  * ============================================================ */
 
 /* Hanya variabel --rt-* yang benar-benar dipakai aturan di bawah.
@@ -48,12 +54,14 @@
 
 /* Padding pindah ke .th-inner supaya area drag mengisi penuh sel. */
 #tabel thead th.rt-th,
+#tabel7 thead th.rt-th,
 #tabel2 thead th.rt-th {
   padding: 0;
   vertical-align: middle;
 }
 
 #tabel thead th.rt-th .th-inner,
+#tabel7 thead th.rt-th .th-inner,
 #tabel2 thead th.rt-th .th-inner {
   display: flex;
   align-items: center;
@@ -63,12 +71,15 @@
 }
 
 #tabel thead th.rt-th .th-inner.dragging,
+#tabel7 thead th.rt-th .th-inner.dragging,
 #tabel2 thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabel thead th.rt-th.drag-over .th-inner,
+#tabel7 thead th.rt-th.drag-over .th-inner,
 #tabel2 thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabel thead th.rt-th .th-label,
+#tabel7 thead th.rt-th .th-label,
 #tabel2 thead th.rt-th .th-label {
   flex: 1 1 auto;
   min-width: 0;
@@ -77,10 +88,12 @@
 
 /* kolom numerik: judul rata kanan seperti angkanya */
 #tabel thead th.rt-th.num .th-label,
+#tabel7 thead th.rt-th.num .th-label,
 #tabel2 thead th.rt-th.num .th-label { text-align: right; }
 
 /* pegangan drag */
 #tabel thead th.rt-th .th-grip,
+#tabel7 thead th.rt-th .th-grip,
 #tabel2 thead th.rt-th .th-grip {
   display: grid;
   grid-template-columns: repeat(2, 3px);
@@ -91,6 +104,7 @@
 }
 
 #tabel thead th.rt-th .th-grip i,
+#tabel7 thead th.rt-th .th-grip i,
 #tabel2 thead th.rt-th .th-grip i {
   width: 3px;
   height: 3px;
@@ -99,10 +113,12 @@
 }
 
 #tabel thead th.rt-th:hover .th-grip,
+#tabel7 thead th.rt-th:hover .th-grip,
 #tabel2 thead th.rt-th:hover .th-grip { opacity: 1; }
 
 /* tombol roda gigi */
 #tabel thead th.rt-th .th-gear,
+#tabel7 thead th.rt-th .th-gear,
 #tabel2 thead th.rt-th .th-gear {
   display: flex;
   align-items: center;
@@ -123,11 +139,14 @@
 }
 
 #tabel thead th.rt-th:hover .th-gear,
+#tabel7 thead th.rt-th:hover .th-gear,
 #tabel2 thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabel thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear.active,
+#tabel7 thead th.rt-th .th-gear:hover,
 #tabel2 thead th.rt-th .th-gear:hover,
+#tabel7 thead th.rt-th .th-gear.active,
 #tabel2 thead th.rt-th .th-gear.active {
   opacity: 1;
   background: var(--rt-indigo-soft);
@@ -138,6 +157,7 @@
    Dengan .th-inner yang mengisi penuh sel, ikon itu bertabrakan dengan roda
    gigi, jadi digeser sedikit ke kiri. */
 #tabel thead th.rt-th,
+#tabel7 thead th.rt-th,
 #tabel2 thead th.rt-th { background-position: right 26px center; }
 
 /* ============ Menu kolom (dipasang di <body>, position:fixed) ============
@@ -225,7 +245,7 @@
 
 /* ============ Bar di atas tabel (kolom tersembunyi + Reset kolom) ============ */
 
-#rtBar.rt-bar {
+.rt-bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -236,11 +256,11 @@
   z-index: 45;
 }
 
-#rtBar .rt-drop { position: relative; }
+.rt-bar .rt-drop { position: relative; }
 
-#rtBar .rt-hidden-btn,
-#rtBar .rt-view-btn,
-#rtBar .rt-reset-btn {
+.rt-bar .rt-hidden-btn,
+.rt-bar .rt-view-btn,
+.rt-bar .rt-reset-btn {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -256,23 +276,23 @@
   white-space: nowrap;
 }
 
-#rtBar .rt-hidden-btn { color: var(--rt-ink-soft); }
+.rt-bar .rt-hidden-btn { color: var(--rt-ink-soft); }
 
-#rtBar .rt-hidden-btn:hover:not(:disabled) { color: var(--rt-ink); border-color: #D6D8E4; }
+.rt-bar .rt-hidden-btn:hover:not(:disabled) { color: var(--rt-ink); border-color: #D6D8E4; }
 
-#rtBar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
+.rt-bar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
 
 /* Reset kolom ï¿½ aksi destruktif (menghapus pengaturan kolom tersimpan user),
    jadi diberi warna merah saat hover supaya beda dari tombol lain di bar. */
-#rtBar .rt-reset-btn { color: var(--rt-ink-soft); }
+.rt-bar .rt-reset-btn { color: var(--rt-ink-soft); }
 
-#rtBar .rt-reset-btn:hover {
+.rt-bar .rt-reset-btn:hover {
   color: var(--rt-red);
   border-color: var(--rt-red);
   background: #FEF2F2;
 }
 
-#rtBar .rt-drop-menu {
+.rt-bar .rt-drop-menu {
   display: none;
   position: absolute;
   top: calc(100% + 6px);
@@ -287,9 +307,9 @@
   z-index: 60;
 }
 
-#rtBar .rt-drop-menu.open { display: block; }
+.rt-bar .rt-drop-menu.open { display: block; }
 
-#rtBar .rt-drop-item {
+.rt-bar .rt-drop-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -301,17 +321,17 @@
   cursor: pointer;
 }
 
-#rtBar .rt-drop-item:last-child { border-bottom: none; }
+.rt-bar .rt-drop-item:last-child { border-bottom: none; }
 
-#rtBar .rt-drop-item:hover { background: var(--rt-bg); }
+.rt-bar .rt-drop-item:hover { background: var(--rt-bg); }
 
-#rtBar .rt-drop-item small {
+.rt-bar .rt-drop-item small {
   color: var(--rt-ink-soft);
   font-weight: 500;
   font-size: 11.5px;
 }
 
-#rtBar .rt-drop-empty {
+.rt-bar .rt-drop-empty {
   padding: 10px 12px;
   font-size: 12.5px;
   font-style: italic;
@@ -333,7 +353,7 @@
 
 /* ============ Toolbar di atas tabel (kotak search + tombol Add/Tambah PR) ============
    Statis di blade (di luar #tabelN_wrapper), jadi tidak ikut terhapus saat
-   .DataTable().destroy() menulis ulang wrapper - lihat catatan #rtBar di atas. */
+   .DataTable().destroy() menulis ulang wrapper - lihat catatan .rt-bar di atas. */
 
 .po-toolbar {
   display: flex;
@@ -465,12 +485,14 @@
    selector diganti ke #modalFilterPO dan var(--rt-blue*) diganti var(--rt-indigo*)
    karena file ini tidak mendefinisikan --rt-blue. */
 
+#modalFilter.rt-filter .modal-header,
 #modalFilterPO.rt-filter .modal-header {
   padding: 20px 24px;
   align-items: center;
   gap: 12px;
 }
 
+#modalFilter.rt-filter .modal-title,
 #modalFilterPO.rt-filter .modal-title {
   font-size: 17px;
   font-weight: 700;
@@ -480,11 +502,13 @@
   gap: 8px;
 }
 
+#modalFilter.rt-filter .modal-title i,
 #modalFilterPO.rt-filter .modal-title i {
   color: var(--rt-indigo);
   font-size: 14px;
 }
 
+#modalFilter .rt-active-badge,
 #modalFilterPO .rt-active-badge {
   font-size: 11px;
   font-weight: 700;
@@ -495,18 +519,22 @@
   margin-left: 10px;
 }
 
+#modalFilter.rt-filter .modal-body,
 #modalFilterPO.rt-filter .modal-body {
   padding: 20px 24px;
 }
 
+#modalFilter.rt-filter .rt-section,
 #modalFilterPO.rt-filter .rt-section {
   margin-bottom: 22px;
 }
 
+#modalFilter.rt-filter .rt-section:last-child,
 #modalFilterPO.rt-filter .rt-section:last-child {
   margin-bottom: 0;
 }
 
+#modalFilter.rt-filter .rt-group-label,
 #modalFilterPO.rt-filter .rt-group-label {
   font-size: 11px;
   font-weight: 700;
@@ -516,16 +544,19 @@
   margin: 0 0 10px;
 }
 
+#modalFilter.rt-filter .rt-grid-2,
 #modalFilterPO.rt-filter .rt-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
+#modalFilter.rt-filter .rt-grid-2 + .rt-grid-2,
 #modalFilterPO.rt-filter .rt-grid-2 + .rt-grid-2 {
   margin-top: 10px;
 }
 
+#modalFilter.rt-filter .rt-field-label,
 #modalFilterPO.rt-filter .rt-field-label {
   display: block;
   font-size: 11px;
@@ -536,6 +567,7 @@
   margin-bottom: 6px;
 }
 
+#modalFilter.rt-filter select.rt-native,
 #modalFilterPO.rt-filter select.rt-native {
   width: 100%;
   padding: 11px 12px;
@@ -552,12 +584,14 @@
   cursor: pointer;
 }
 
+#modalFilter.rt-filter select.rt-native:focus,
 #modalFilterPO.rt-filter select.rt-native:focus {
   outline: none;
   border-color: var(--rt-indigo);
   box-shadow: 0 0 0 3px var(--rt-indigo-soft);
 }
 
+#modalFilter.rt-filter .modal-footer,
 #modalFilterPO.rt-filter .modal-footer {
   padding: 16px 24px 20px;
   border-top: 1px solid var(--rt-border-soft);
@@ -566,6 +600,7 @@
   justify-content: space-between;
 }
 
+#modalFilter.rt-filter .rt-reset-link,
 #modalFilterPO.rt-filter .rt-reset-link {
   font-size: 13px;
   font-weight: 700;
@@ -576,15 +611,18 @@
   padding: 6px 4px;
 }
 
+#modalFilter.rt-filter .rt-reset-link:hover,
 #modalFilterPO.rt-filter .rt-reset-link:hover {
   text-decoration: underline;
 }
 
+#modalFilter.rt-filter .rt-footer-buttons,
 #modalFilterPO.rt-filter .rt-footer-buttons {
   display: flex;
   gap: 10px;
 }
 
+#modalFilter.rt-filter .rt-btn,
 #modalFilterPO.rt-filter .rt-btn {
   font-size: 13.5px;
   font-weight: 700;
@@ -595,25 +633,30 @@
   font-family: inherit;
 }
 
+#modalFilter.rt-filter .rt-btn-ghost,
 #modalFilterPO.rt-filter .rt-btn-ghost {
   background: var(--rt-bg);
   color: var(--rt-ink-soft);
 }
 
+#modalFilter.rt-filter .rt-btn-ghost:hover,
 #modalFilterPO.rt-filter .rt-btn-ghost:hover {
   background: var(--rt-border);
 }
 
+#modalFilter.rt-filter .rt-btn-primary,
 #modalFilterPO.rt-filter .rt-btn-primary {
   background: var(--rt-indigo);
   color: #fff;
 }
 
+#modalFilter.rt-filter .rt-btn-primary:hover,
 #modalFilterPO.rt-filter .rt-btn-primary:hover {
   opacity: .92;
 }
 
 @media (max-width: 520px) {
+  #modalFilter.rt-filter .rt-grid-2,
   #modalFilterPO.rt-filter .rt-grid-2 {
     grid-template-columns: 1fr;
   }
@@ -621,7 +664,7 @@
 
 /* ============ Kotak scroll tabel ============
    Header (th) menempel (sticky) di atas kotak ini; hanya isi tabel yang bergerak
-   saat discroll, sehingga toolbar dan #rtBar di atasnya selalu terlihat. */
+   saat discroll, sehingga toolbar dan .rt-bar di atasnya selalu terlihat. */
 
 .po-table-wrap {
   max-height: 65vh;
@@ -639,6 +682,7 @@
 }
 
 #tabel thead th,
+#tabel7 thead th,
 #tabel2 thead th {
   position: sticky;
   top: 0;
@@ -646,7 +690,7 @@
 }
 
 @media (max-width: 767.98px) {
-  #rtBar.rt-bar { justify-content: flex-start; flex-wrap: wrap; }
+  .rt-bar { justify-content: flex-start; flex-wrap: wrap; }
   .po-toolbar { flex-wrap: wrap; }
   .po-toolbar-act { margin-left: 0; }
   .po-filter-wrap { flex: 1 1 100%; justify-content: space-between; }
