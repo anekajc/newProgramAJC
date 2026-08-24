@@ -117,7 +117,8 @@ class PembelianPermintaanNonStockController extends Controller
          WHERE Tanggal BETWEEN :tglawal AND :tglakhir
            AND IsJasa = 1
            AND pAgen = 0
-           $queryOtorisasi",
+           $queryOtorisasi
+         ORDER BY Tanggal DESC, NoBukti DESC",
         [
             "tglawal"  => $req->tglawal,
             "tglakhir" => $req->tglakhir

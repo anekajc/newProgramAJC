@@ -14,8 +14,8 @@ use App\Http\Controllers\Purchasing\PembelianClosingPRController;
 // use App\Http\Controllers\Purchasing\NewPOController;
 // use App\Http\Controllers\Purchasing\PerintahReturBeliController;
 use App\Http\Controllers\Purchasing\POController;
-// use App\Http\Controllers\Purchasing\PONonStockController;
-// use App\Http\Controllers\Purchasing\ClosingPOController;
+use App\Http\Controllers\Purchasing\PONonStockController;
+use App\Http\Controllers\Purchasing\ClosingPOController;
 // use App\Http\Controllers\Purchasing\InvoiceReturBeliController;
 // use App\Http\Controllers\Purchasing\ReturPembelianGudangController;
 // use App\Http\Controllers\Purchasing\InvoicePembelianController;
@@ -232,14 +232,19 @@ Route::middleware('auth')->group(function () {
     // Route::get('/ponslistbarangfoc',                [PONonStockController::class, 'listBarangFOC']);
     // Route::get('/nonstockcheckhargaddd',            [PONonStockController::class, 'CheckHargaAdd']);
 
-    // // ── CLOSING PO ────────────────────────────────────────────────────────
-    // Route::get('/closingpurchaseorder',             [ClosingPOController::class, 'index']);
-    // Route::get('/closingpurchaseorderloadall',      [ClosingPOController::class, 'loadAll']);
-    // Route::post('/closingpospclosebarang',          [ClosingPOController::class, 'updateCloseBarang']);
-    // Route::post('/closingpospcloseheader',          [ClosingPOController::class, 'updateCloseHeader']);
-    // Route::post('/closingpospopenbarang',           [ClosingPOController::class, 'updateOpenBarang']);
-    // Route::post('/closingpospopenheader',           [ClosingPOController::class, 'updateOpenHeader']);
-    // Route::get('/closingpoprint',                   [ClosingPOController::class, 'spCetak']);
+    // ── CLOSING PO ────────────────────────────────────────────────────────
+    Route::get('/closingpurchaseorder',             [ClosingPOController::class, 'index']);
+    Route::get('/closingpurchaseorderloadall',      [ClosingPOController::class, 'loadAll']);
+    Route::get('/closingpodataoutstanding',      [ClosingPOController::class, 'dataOutstanding']);
+    Route::get('/closingpodataclosing',      [ClosingPOController::class, 'dataClosing']);
+    Route::get('/closingpoceksisa',      [ClosingPOController::class, 'cekSisa']);
+    Route::post('/closingpoheadertable',      [ClosingPOController::class, 'headerTable']);
+    Route::post('/closingpoheadertable',      [ClosingPOController::class, 'headerTable']);
+    Route::post('/closingpospclosebarang',          [ClosingPOController::class, 'updateCloseBarang']);
+    Route::post('/closingpospcloseheader',          [ClosingPOController::class, 'updateCloseHeader']);
+    Route::post('/closingpospopenbarang',           [ClosingPOController::class, 'updateOpenBarang']);
+    Route::post('/closingpospopenheader',           [ClosingPOController::class, 'updateOpenHeader']);
+    Route::get('/closingpoprint',                   [ClosingPOController::class, 'spCetak']);
 
     // // ── INVOICE RETUR BELI ────────────────────────────────────────────────
     // Route::get('/invoiceReturBeliCetak',            [InvoiceReturBeliController::class, 'spCetak']);

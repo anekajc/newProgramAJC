@@ -166,7 +166,9 @@ class PembelianClosingPRController extends Controller
     if (in_array($orderCol, $allowedOrder, true)) {
       $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
-      $orderBy = 'A.Tanggal, A.NoBukti, A.Urut';
+      // Default: data terbaru di atas. A.Urut sengaja tetap ASC - itu nomor urut
+      // barang di dalam satu No. Bukti, bukan bagian dari "yang terbaru".
+      $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
     $where = 'A.SisaPPL > 0 and ISNULL(A.QntBatal, 0) = 0';
@@ -232,7 +234,7 @@ class PembelianClosingPRController extends Controller
     if (in_array($orderCol, $allowedOrder, true)) {
       $orderBy = 'X.[' . $orderCol . '] ' . $orderDir . ', X.Nobukti, X.Urut';
     } else {
-      $orderBy = 'X.Tanggal, X.Nobukti, X.Urut';
+      $orderBy = 'X.Tanggal DESC, X.Nobukti DESC, X.Urut';
     }
 
     $where = '1 = 1';

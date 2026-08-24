@@ -160,6 +160,21 @@
   min-width: 100%;
 }
 
+/* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
+   po-aksi-hover supaya tabel lain tidak ikut terpengaruh. visibility (bukan display)
+   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
+   :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+table.data-table.po-aksi-hover tbody td:first-child .btn {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
+table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+  visibility: visible;
+  opacity: 1;
+}
+
 /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar kedua tab. Bentuknya meniru
    .po-filter-wrap milik public/css/po-table-header.css tapi ditulis di sini supaya
    perubahan ini cukup mengunggah file blade-nya saja. */
@@ -329,7 +344,7 @@
                        Satu elemen dipakai bersama #tabel dan #tabel2, dipindah lewat JS
                        (clPindahBar) saat tab berganti. --}}
                   <div id="rtBar"></div>
-                  <table id="tabel" class="data-table">
+                  <table id="tabel" class="data-table po-aksi-hover">
                     <thead id="tabel_header" class="text-center"></thead>
                     <tbody id="tabel_data" class="text-left"></tbody>
                   </table>
@@ -361,7 +376,7 @@
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat clPindahBar(). --}}
-                  <table id="tabel2" class="data-table">
+                  <table id="tabel2" class="data-table po-aksi-hover">
                     <thead id="tabel2_header" class="text-center"></thead>
                     <tbody id="tabel2_data" class="text-left"></tbody>
                   </table>
