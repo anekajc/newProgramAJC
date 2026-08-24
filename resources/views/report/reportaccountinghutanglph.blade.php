@@ -9,7 +9,7 @@
      di panel kanan; kolom No Bukti di ledger → buka Faktur Pembelian (BPL) di panel bawah. --}}
 
 <!-- Chart.js v4 (di-bundle lokal: public/plugins/chart.js/chart.umd.min.js) -->
-<script src="{!! URL::asset('public/plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
 
 <style>
   #inputReportMode, #inputPerkiraanBtn {

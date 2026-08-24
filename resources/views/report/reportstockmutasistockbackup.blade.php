@@ -166,7 +166,7 @@
 
 
 @section('jsreport')
-<script src="{!! URL::asset('public/js/ajc-browsemaster.js') !!}"></script>
+<script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
 <script type="text/javascript">
   var modereport_qty = 0, modereport_rp = 1, modereport_qtyrp = 2, modereport_periode = 3;
   g_modeReport = modereport_qty;

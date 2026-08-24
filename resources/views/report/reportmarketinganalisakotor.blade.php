@@ -2,7 +2,7 @@
 
 <!-- Chart.js v4 (di-bundle lokal: public/plugins/chart.js/chart.umd.min.js).
      BUKAN Chart.min.js di folder yang sama -- itu Chart.js v2 (2019), API-nya beda. -->
-<script src="{!! URL::asset('public/plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('plugins/chart.js/chart.umd.min.js') !!}?v={{ @filemtime(base_path('public/plugins/chart.js/chart.umd.min.js')) ?: '1' }}"></script>
 
 <style>
   .tb-report .table-wrap { min-height: 10vh; }

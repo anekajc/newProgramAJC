@@ -219,7 +219,7 @@ rel="stylesheet">
      child juga memuatnya (tidak menimpa). Dimuat sebelum @yield('jsreport') agar global-nya
      siap dipakai. public/js/report-table-v2.js masih ada di disk sebagai arsip, tapi TIDAK
      dimuat lagi — isinya sudah digabung ke sini. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 @yield('jsreport')
 <script type="text/javascript">
   var g_href = '{!! $akses['href'] !!}';

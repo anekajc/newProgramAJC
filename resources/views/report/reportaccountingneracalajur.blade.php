@@ -122,7 +122,7 @@
 @section('jsreport')
 
 {{-- Reusable voucher drill (Bukti Kas/Bank + Invoice). Reads window.ReportTableConfig set below. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
   let globalReportMode = "0"; // default: Detail

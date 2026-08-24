@@ -249,6 +249,7 @@ private function buildReportTree($rows, $parentKode, $depth)
             'href'       => $row->href,
             'ACCESS'     => $row->ACCESS,
             'icon'       => $row->icon ?? null,
+            'color'      => $row->color ?? null,
             'child'      => $this->buildReportTree($rows, $row->KODEMENU, $depth + 1),
         ];
     }

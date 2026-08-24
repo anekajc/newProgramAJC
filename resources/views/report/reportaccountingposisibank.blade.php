@@ -9,9 +9,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title">Posisi Bank</div>
-      </div>
+      </div> --}}
 
       <!-- Posisi Tanggal (snapshot date) -->
       <div class="filter-wrap">
@@ -19,10 +19,14 @@
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
+      <!-- Search -->
+      <div>
+          <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
+      </div>
+
       <!-- Actions: row-level search + customize + tampilkan + export -->
       <div class="action-group">
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
-        <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
+        {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -34,6 +38,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
 
     <!-- TABLE (header + rows rendered dynamically from gcart_header) -->
     <div class="table-outer">
@@ -52,6 +59,11 @@
       </div>
     </div>
 
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
+    </div>
+
   </div><!-- /content -->
 
   <!-- TOAST -->
@@ -63,7 +75,7 @@
 
 @section('jsreport')
 {{-- Shared formatters (fmtRp/fmtN) + helpers live in public/js/report-table.js --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
   let globalDate2 = "{!! date('Y-m-d') !!}";
@@ -87,6 +99,16 @@
   $(document).ready(function () {
     setDefaultHeader();
     doSetHeader(g_modeReport);   // muat susunan kolom (default / hasil kustomisasi user) + gsum flags
+
+    // Header tabel interaktif: seret kolom, menu roda gigi (sembunyikan/desimal/total).
+    // Tidak ada "Tampilan" switcher -- halaman ini cuma satu mode (snapshot per tanggal).
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: function () {
+        if (lastRows.length) { applyFilters(); } else { renderRows([], currentGroupby); }
+      }
+    });
 
     setTimeout(() => { makeTable('REPORT'); }, 100);
   });
@@ -178,11 +200,9 @@
     const showSub   = hasTotal && (gsum_issubtotal === 1);
     const showGrand = hasTotal && (gsum_isgrandtotal === 1);
 
-    // HEADER dinamis
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
+    // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';

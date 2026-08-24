@@ -11,7 +11,7 @@
        dengan scope diganti ke #tabel/#tabel2/#rtBar (satu bar dipakai bersama,
        dipindah lewat JS - lihat poPindahBar()), supaya reset ganas
        `.tb-report * { margin:0; padding:0 }` di file aslinya tidak ikut terbawa. --}}
-  <link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
   <style>
   {{-- Tampilan disamakan dengan gudang/permintaanpemakaian.blade.php (tab-toggle,
        toolbar + page-title, tombol aksi bulat) - hanya CSS, id/class yang dipakai
@@ -3515,7 +3515,7 @@
      tersembunyi, tombol "Reset kolom"). Dimuat di halaman ini saja, bukan di layout
      purchasing/newmasterx, supaya halaman purchasing yang lain tidak ikut terpengaruh.
      File-nya berupa IIFE ber-guard, jadi aman meski dimuat lebih dari sekali. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let urutHeaderTable = 0

@@ -1,6 +1,6 @@
-@extends('report.newmaster2')
+@extends('report.newmaster2x')
 <!-- Font Awesome CDN -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
 rel="stylesheet">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@ rel="stylesheet">
 @yield('header2')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-6 text-left"> 
+    <div class="col-6 text-left">
       @yield('reportname')
     </div>
   </div>
@@ -39,33 +39,33 @@ rel="stylesheet">
 
                 <div class="row pr-3" style="display: flex; justify-content: right;">
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
                   margin-right: 8px;
-                  font-weight: 600; 
-                  text-transform: uppercase; 
+                  font-weight: 600;
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormFilterData()">Filter Data</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormCustomizeTable()">Customize Table</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="makeTable('REPORT')">Submit</button>
                 </div>
@@ -79,21 +79,21 @@ rel="stylesheet">
           <div id="showTableReport" style="display:none; background-color: white; padding: 10px" class="row mt-4 rounded">
             <div class="col-12 text-right">
               <button type="button" class="btn btn-success" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doExportTableToExcel('tabel')">Export to Excel</button>
               <button type="button" class="btn btn-danger" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doCloseTable()">Close Table</button>
             </div>
@@ -128,10 +128,10 @@ rel="stylesheet">
                 <div class="container-fluid">
                   <div class="row mt-3">
                     <div class="col-12" id="tabelcustomize_data" style="overflow:auto;">
-                      
+
                     </div>
                   </div>
-                  
+
                   <div id="buttonSubtotal" class="row mt-3" style="display: flex; justify-content: center;">
                   </div>
                   <div id="buttonGrandtotal" class="row mt-3" style="display: flex; justify-content: center;">
@@ -304,11 +304,11 @@ rel="stylesheet">
       case gmodal_settingtotal :
                  doSimpanFormSettingTotal();
                  break;
-                    
+
       case gmodal_filterdata :
                  doShowReportFilter();
                  break;
-                              
+
       default :
                  return;
     }
@@ -323,15 +323,15 @@ rel="stylesheet">
       case gmodal_customizetable :
                  doCloseFormCustomizeTable();
                  break;
-                     
+
       case gmodal_settingtotal :
                  doCloseFormSettingTotal();
                  break;
-                     
+
       case gmodal_filterdata :
                  doCloseFormFilterData();
                  break;
-     
+
       default :
                 return;
     }
@@ -530,7 +530,7 @@ rel="stylesheet">
     $("#buttonSubtotal").html(_str);
 
     gsum_issubtotal = _mode;
-    
+
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
@@ -548,7 +548,7 @@ rel="stylesheet">
     $("#buttonGrandtotal").html(_str);
 
     gsum_isgrandtotal = _mode;
-    
+
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
@@ -560,7 +560,7 @@ rel="stylesheet">
 
   function doShowFormSettingTotal(_index) {
     g_modeModal = gmodal_settingtotal;
-    
+
     gsettotal_index = _index;
     if (gcart_header[_index][3] == "float" || gcart_header[_index][3].startsWith("float")) {
       $("#setTotalDesimalPanel").show();
@@ -594,7 +594,7 @@ rel="stylesheet">
     }
     $("#buttonSetTotal").html(_str);
 
-    gsettotal_nowtotal = _mode;    
+    gsettotal_nowtotal = _mode;
   }
 
   function doSimpanFormSettingTotal() {
@@ -668,7 +668,7 @@ rel="stylesheet">
     tempcart.forEach((item, i) => {
       _cellcount += item[2];
     });
-    
+
     let rowTable = "";
     gsum_rowSubtotal = 0;
 
@@ -691,7 +691,7 @@ rel="stylesheet">
     rowTable += ($.isFunction(window.setRowFooter)) ? setRowFooter() : "";
 
     $("#tabel_data").html(rowTable);
-      
+
 
     // POSISI TULISAN TOTAL & GRAND TOTAL
     if (_res.length > 0) { doSetPosisiTulisanTotal(_cellcount); }
@@ -770,7 +770,7 @@ rel="stylesheet">
           rowHeader += '  <th scope="col" style="border: 1px solid black;">No</th>';
         } else {
           rowHeader += '  <th scope="col" style="border: 1px solid black;">' + item[1] + '</th>';
-          if ((item[4] === 1) && (item[3] == "float" || item[3] == "int" || item[3].startsWith("float"))) { 
+          if ((item[4] === 1) && (item[3] == "float" || item[3] == "int" || item[3].startsWith("float"))) {
             gsum_posArray.push(posCount);
           }
         }
@@ -884,7 +884,7 @@ rel="stylesheet">
                 rowTable += '  <td class="st' + _counter + ' cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
               } else if (itemcart[3] == "int") {
                 rowTable += '  <td class="st' + _counter + ' cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;">' + _value + '</td>';
-              } 
+              }
             } else {
               rowTable += '  <td class="st' + _counter + ' cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;"></td>';
             }
@@ -928,7 +928,7 @@ rel="stylesheet">
               rowTable += '  <td id="gt' + _counter + ' cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
             } else if (itemcart[3] == "int") {
               rowTable += '  <td id="gt' + _counter + ' cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;">' + _value + '</td>';
-            } 
+            }
           } else {
             rowTable += '  <td id="gt' + _counter + '" class="cellcompact-right" style="border: 1px solid black; font-weight: bold; text-align: right;"></td>';
           }
@@ -1230,7 +1230,7 @@ rel="stylesheet">
     tds.forEach(function(td) {
         td.setAttribute('style', "mso-number-format:'\\@';");
     });
-    
+
     var tableHTML = tableClone.outerHTML.replace(/ /g, '%20').replace(/#/g, encodeURIComponent('#'));
     var _name = '{!! $akses['xlsfilename'] !!}';
     var _date = getDateNow();

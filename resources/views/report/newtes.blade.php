@@ -12,18 +12,18 @@
       type="text/css"
     />
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/jquery-ui.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/datatables.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/jquery-ui.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/datatables.min.css') !!}">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
 
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/bootstrap.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/style.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/dark.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/font-icons.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/animate.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/magnific-popup.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/canvas/custom.css') !!}">
-    <link rel="stylesheet" href="{{ URL::asset('public/css/alertify.css') }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/bootstrap.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/style.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/dark.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/font-icons.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/animate.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/magnific-popup.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/canvas/custom.css') !!}">
+    <link rel="stylesheet" href="{{ URL::asset('css/alertify.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"> -->
 
 
@@ -353,18 +353,18 @@
 
     <!-- External JavaScripts
 	============================================= -->
-  <script src="{!! URL::asset('public/js/canvas/jquery.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/jquery.min.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/datatables.min.js') !!}"></script>
-  <script src="{!! URL::asset('public/js/jquery-ui.min.js') !!}"></script>
-  <script src="{{ URL::asset('public/js/alertify.js') }}"></script>
+  <script src="{!! URL::asset('js/canvas/jquery.js') !!}"></script>
+  <script src="{!! URL::asset('js/jquery.min.js') !!}"></script>
+  <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+  <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
+  <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
+  <script src="{{ URL::asset('js/alertify.js') }}"></script>
     <!-- <script src="js/jquery.js"></script> -->
 
     <!-- Footer Scripts
 	============================================= -->
 
-  <script src="{!! URL::asset('public/js/canvas/functions.js') !!}"></script>
+  <script src="{!! URL::asset('js/canvas/functions.js') !!}"></script>
     <!-- <script src="js/functions.js"></script> -->
   </body>
 </html>

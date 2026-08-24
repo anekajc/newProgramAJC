@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\GlobalController;
 use App\Http\Controllers\HeaderTableController;
@@ -16,6 +17,10 @@ Route::get('/test', function () {
 
 // Login
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect('/home');
+    }
+
     return view('welcome');
 });
 

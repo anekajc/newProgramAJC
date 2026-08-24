@@ -112,7 +112,7 @@
 
 
 @section('jsreport')
-<script src="{!! URL::asset('public/js/ajc-browsemaster.js') !!}"></script>
+<script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
 <script type="text/javascript">
   g_modeReport = 0;
 
