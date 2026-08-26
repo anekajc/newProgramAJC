@@ -1,13 +1,22 @@
 @extends('newmasterTest')
 @section('buttons')
 
+@section('page-title', 'Cetak Tanda Terima')
+@section('title', 'SML - Cetak Tanda Terima')
+
 @endsection
 
+{{-- Rerouted to match Purchase Order's UI 1:1 via so.blade.php's own pattern,
+     same as invoicepenjualan/suratjalan/invoicejasa/fakturpajak before it. Only
+     layout/toolbar/column-header interactivity changed -- all business logic
+     (loadAll, buttonAdd/buttonAldok, submitPrint/previewPrint print-string builders,
+     the DPP-receipt add/edit workflow on #page2/#page3) is untouched. --}}
 @section('css')
 <div id="imagecontainer" class="d-none" style="">
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
- 
+
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
 <style>
 /* Chrome, Safari, Edge, Opera */
@@ -25,115 +34,213 @@ input[type=number] {
 </style>
 
 <style>
-
-#tabel_add_list_customer_filter{
+.toolbar {
   display: flex;
-  align-items: flex-end;
-  margin-bottom: -10px;
+  align-items: center;
+  gap: 10px;
 }
 
-#tabel_add_list_customer_filter label input {
-  width: 150px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  box-shadow: none;
-  font-size: 0.65rem;
+.page-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #1f2430;
 }
 
-#tabel_add_list_noinvoice_filter{
+.custom-tabs {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  padding: 3px;
+}
+
+.custom-tabs .nav-link {
+  display: inline-block !important;
+  padding: 5px 16px !important;
+  font-size: 0.75rem !important;
+  border: none;
+  border-radius: 17px;
+  color: #495057;
+  background: transparent;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  background: transparent;
+  color: #007bff;
+}
+
+.custom-tabs .nav-link.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+}
+
+#content { padding-top: 12px; }
+
+.tab-card {
+  display: block !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  border: none !important;
+  margin-bottom: 6px !important;
+}
+
+.tab-card .card-body {
+  padding: 5px 10px !important;
+}
+
+#page1 .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+
+#page1 .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border) !important;
+}
+
+.po-len-wrap {
   display: flex;
-  align-items: flex-end;
-  margin-bottom: -10px;
-}
-#tabel_add_list_noinvoice_filter label input {
-  width: 150px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  box-shadow: none;
-  font-size: 0.65rem;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card);
+  border: 1.5px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 5px 12px;
 }
 
-#tabel_add_list_barang_filter{
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+/* {{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied and
+     rescoped to this page's own #tabel/#tabel2 from so.blade.php's @section('css'). --}} */
+#tabel td:first-child,
+#tabel2 td:first-child {
   display: flex;
-  align-items: flex-end;
-  margin-bottom: -10px;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
 }
-#tabel_add_list_barang_filter label input {
-  width: 150px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+
+#tabel td:first-child .btn,
+#tabel2 td:first-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
   box-shadow: none;
-  font-size: 0.65rem;
+  transition: all .12s ease;
 }
 
-#tabel_add_list_nobeli_filter{
-  display: flex;
-  align-items: flex-end;
-  margin-bottom: -10px;
-}
-#tabel_add_list_nobeli_filter label input {
-  width: 150px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  box-shadow: none;
-  font-size: 0.65rem;
+#tabel td:first-child .btn:hover,
+#tabel2 td:first-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
 }
 
-#tabel_filter {
-    display: flex;
-    align-items: flex-end;
-    margin-top: 8px;
-    margin-right: 10px;
-    margin-bottom: -10px;
-  }
+#tabel td:first-child .btn-primary,
+#tabel2 td:first-child .btn-primary {
+  color: #2563eb; border-color: #cfdcff; background: #e8edff;
+}
 
+#tabel td:first-child .btn-warning,
+#tabel2 td:first-child .btn-warning {
+  color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+}
 
-#tabel_filter label input {
-    width: 150px;
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+#tabel2 td:first-child .btn-success {
+  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+}
 
-#tabel_filter label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #333;
-  }
-</style>
-{{-- end tampilan search bar 1 --}}
+#tabel2 td:first-child .btn-danger {
+  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+}
 
-{{-- tampilan search bar 2 --}}
-<style>
-#tabel2_filter {
-    display: flex;
-    align-items: flex-end;
-    margin-top: 8px;
-    margin-right: 10px;
-    margin-bottom: -10px;
-  }
+#tabel thead th,
+#tabel2 thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
 
-#tabel2_filter label input {
-    width: 150px;
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+#tabel tbody tr:nth-of-type(odd),
+#tabel2 tbody tr:nth-of-type(odd) {
+  background-color: #fbfbfc;
+}
 
-#tabel2_filter label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #333;
-  }
+#tabel tbody tr:hover,
+#tabel2 tbody tr:hover {
+  background-color: #f5f3ff;
+}
 
-#tabel2_filter input:focus {
-    border-color: #007bff;
-    outline: none;
-  }
+#tabel_wrapper,
+#tabel2_wrapper {
+  position: relative;
+}
+
+#tabel_wrapper > .dataTables_processing,
+#tabel2_wrapper > .dataTables_processing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, .62);
+  z-index: 40;
+  animation: ctMunculLoading .34s ease-out both;
+}
+
+@keyframes ctMunculLoading {
+  0%, 45% { opacity: 0; }
+  100% { opacity: 1; }
+}
 </style>
 @endsection
 
@@ -142,75 +249,47 @@ input[type=number] {
 
 
 <div id="page1" class="container-fluid mainpage">
-  <!--mulai-->
-  <div class="modal fade" id="formAldok" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered"  role="document">
-    <div id="" class="modal-content ">
+  <!--mulai--><div class="modal fade" id="formAldok" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
       <div id="modalListCustomer" class="showhideform">
 
-      <div class="modal-header">
-          <h5 class="modal-title" id="">Data alamat dan penerima dokumen</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="modal-header">
+          <h5 class="modal-title" id="">Data Alamat dan Penerima Dokumen</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
-            </button>
-      </div>
-
-
-      <div id="" class="">
-      <div class="modal-body">
-
-
-
-
-
-      <div class="col-md-4">
-          <div class="form-group">
-            <label>Tanggal terima</label>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="form-group">
-            <input type="date" class="form-control text-left" id="input_add_tglterima" placeholder="" >
-          </div>
+          </button>
         </div>
 
-      <div class="col-md-4">
-          <div class="form-group">
-            <label>Nama Penerima</label>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label>Tanggal terima</label>
+                <input type="date" class="form-control text-left" id="input_add_tglterima" placeholder="">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-group">
+                <label>Nama Penerima</label>
+                <input type="text" class="form-control" id="input_add_nama" placeholder="Penerima">
+              </div>
+            </div>
+
+            <div class="col-12 text-right">
+              <button type="button" class="btn btn-primary btn-lg"
+                      style="height: 40px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase"
+                      onclick="updatealdok()">Simpan</button>
+            </div>
           </div>
         </div>
-
-        <div class="col-md-8">
-          <div class="form-group">
-            <input type="text" class="form-control" id="input_add_nama" placeholder="Penerima" >
-          </div>
-        </div>
-
-
-        <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase "
-      onclick="updatealdok()"  >Simpan</button>
-       </div>
-
-
-
-
-
-
 
       </div>
     </div>
   </div>
 </div>
-
-
-    </div>
-  </div>
-  <!--end-->
-
-
-
-
+<!--end-->
 
 
 <div class="container-fluid" >
@@ -218,14 +297,14 @@ input[type=number] {
 
 
   <!-- <div id="qrcode"></div> -->
-  <div class="row" style="margin-top: -80px">
+  {{-- <div class="row">
     <div class="col-6 text-left">
       <h2>Cetak Tanda Terima Invoice</h2>
     </div>
     <div class="col-6 text-right">
       <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="buttonAdd()"  >+ Cetak DPH</button> -->
     </div>
-  </div>
+  </div> --}}
 <!-- <button onclick="loadAll()">tes</button>
 <button onclick="tesConcat()">tes</button> -->
 
@@ -250,145 +329,95 @@ input[type=number] {
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
+
+  {{-- Tab bar: PO's exact card.tab-card + custom-tabs anchor pattern, same as
+       so.blade.php/invoicejasa.blade.php/fakturpajak.blade.php. --}}
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+          Nota belum cetak tanda terima
+        </a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+          Nota sudah cetak tanda terima
+        </a>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
-<div class="card-header">
-<div class="row">
-  <nav style="width: 100%;">
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; text-align: left;">Nota belum cetak tanda terima</a>
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Nota sudah cetak tanda terima
-      </a>
-    </div>
-  </nav>
-</div>
-</div>
-<div class="card-body" style="padding:0;">
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="table-responsive">
+    <div class="card-body" style="padding:0;">
+      <div class="tab-content" id="myTabContent">
 
-              <table id="tabel" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;"  scope="col">No. Bukti</th>
-                    <th style="padding: 4px 12px;"  scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;"  scope="col">Customer</th>
-                    <th style="padding: 4px 12px;"  scope="col">Actions</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding); $i++)
-                <tr>
-                  <td>{{ $tempOutstanding[$i][0]->nobukti }}</td>
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i][0]->tanggal)) !!}</td>
-                  <td>{{ $tempOutstanding[$i][0]->namacustsupp }}</td>
-
-                  <td class='text-center'>
-                    <button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd('{{ $tempOutstanding[$i][0]->kodecustsupp }}')"><i class="bi bi-plus"></i></button>
-
-                  </td>
-                </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
+        {{-- Belum cetak tab: PO's toolbar + #rtBarTabel + bare data-table + hint skeleton. --}}
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="ctSearch1" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="ctLen1">Tampilkan</label>
+                    <select id="ctLen1" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="rtBarTabel"></div>
+                <table id="tabel" class="data-table">
+                  <thead style="white-space:nowrap;"></thead>
+                  <tbody id="tabel_data" class="text-left"></tbody>
+                </table>
+                <div class="po-rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {{-- Sudah cetak tab. --}}
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="ctSearch2" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="ctLen2">Tampilkan</label>
+                    <select id="ctLen2" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="rtBarTabel2"></div>
+                <table id="tabel2" class="data-table">
+                  <thead style="white-space:nowrap;"></thead>
+                  <tbody id="tabel2_data" class="text-left"></tbody>
+                </table>
+                <div class="po-rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
-
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="table-responsive">
-          <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
-
-              <tr>
-                <th style="padding: 4px 12px;"  scope="col">Action</th>
-                <th style="padding: 4px 12px;"  scope="col">No. Tanda Terima</th>
-                <th style="padding: 4px 12px;"  scope="col">Nobukti</th>
-                <th style="padding: 4px 12px;"  scope="col">Tgl Cetak</th>
-                <th style="padding: 4px 12px;"  scope="col">Tanggal</th>
-                <th style="padding: 4px 12px;"  scope="col">Nama Customer</th>
-                <th style="padding: 4px 12px;"  scope="col">Tgl Terima</th>
-                <th style="padding: 4px 12px;"  scope="col">Nama Penerima</th>
-                <th style="padding: 4px 12px;"  scope="col">Oto</th>
-                <th style="padding: 4px 12px;"  scope="col">OtoUser</th>
-                <th style="padding: 4px 12px;"  scope="col">TglOto</th>
-                <th style="padding: 4px 12px;"  scope="col">User Cetak</th>
-                <th style="padding: 4px 12px;"  scope="col">Nama Dok</th>
-                <th style="padding: 4px 12px;"  scope="col">Alamat Dok</th>
-
-
-                <!-- <th style="padding: 4px 12px;"  scope="col">Actions</th> -->
-              </tr>
-            </thead>
-
-            <tbody id="tabel2_data" class="text-left">
-              @for ($i = 0; $i < count($tempPenerimaan); $i++)
-              <tr>
-                <td class='text-center'>
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonAldok('{{ $tempPenerimaan[$i][0]->nocetak }}','{!! date("Y/m/d", strtotime($tempPenerimaan[$i][0]->tglterima)) !!}','{{ $tempPenerimaan[$i][0]->namapenerima }}')"><i class="bi bi-pen"></i></button>
-                     <button style="" class="btn btn-primary btn-sm" type="button"   onclick="submitPrintUlang('{{ $tempPenerimaan[$i][0]->nocetak }}')" ><i class="bi bi-printer"></i></button>
-
-                  </td>
-           
-                <td>{{ $tempPenerimaan[$i][0]->nocetak }}</td>
-                <td>{{ $tempPenerimaan[$i][0]->nobukti }}</td>
-                <td>{!! date("Y/m/d", strtotime($tempPenerimaan[$i][0]->tglcetak)) !!}</td>
-                <td>{!! date("Y/m/d", strtotime($tempPenerimaan[$i][0]->tanggal)) !!}</td>
-                <td>{{ $tempPenerimaan[$i][0]->namacustsupp }}</td>
-                <td>{!! date("Y/m/d", strtotime($tempPenerimaan[$i][0]->tglterima)) !!}</td>
-                <td>{{ $tempPenerimaan[$i][0]->namapenerima }}</td>
-                 @if ($tempPenerimaan[$i][0]->IsOtorisasi1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                @else
-                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                @endif
-                <td>{{ $tempPenerimaan[$i][0]->OtoUser1 }}</td>
-                <td>{!! $tempPenerimaan[$i][0]->TglOto1 ? date("Y/m/d", strtotime($tempPenerimaan[$i][0]->TglOto1))  : '' !!}</td>
-
-                <td>{{ $tempPenerimaan[$i][0]->usercetak }}</td>
-
-
-                <td>{{ $tempPenerimaan[$i][0]->namadok }}</td>
-                <td>{{ $tempPenerimaan[$i][0]->alamatdok }}</td>
-
-
-
-
-
-
-
-
-
-
-
-              </tr>
-              @endfor
-            </tbody>
-          </table>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
-
-</div>
-</div>
-</div>
-
 
 </div>
 </div>
@@ -397,12 +426,12 @@ input[type=number] {
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
       <h2>Cetak Tanda Terima Invoice</h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
     </div>
   </div>
 
@@ -647,8 +676,8 @@ text-transform: uppercase;" >+ Cetak</button>
 
   <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-        <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="addTable" class="data-table">
+          <thead class="text-center">
             <tr><th style="padding: 4px 12px;" scope="col">v</th>
               <th style="padding: 4px 12px;" scope="col">No. Invoice</th>
               <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -714,8 +743,8 @@ text-transform: uppercase;" >+ Cetak</button>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-60px;">
               <!-- <div class="container-fluid"> -->
-              <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
-                <thead class="text-center bg-primary text-white">
+              <table id="tabel_add_list_pelanggan" class="data-table">
+                <thead class="text-center">
                   <tr>
                   <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
@@ -1232,8 +1261,8 @@ text-transform: uppercase;" >+ Cetak</button>
 
       <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-            <table id="detailTable" class="table table-bordered table-striped"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="detailTable" class="data-table">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">No.invoice</th>
                   <th style="padding: 4px 12px;" scope="col">Supplier</th>
@@ -1420,8 +1449,8 @@ text-transform: uppercase;" >+ Cetak</button>
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_modal" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white" style="position: sticky;
+            <table id="tabel_add_list_modal" class="data-table" style="overflow:auto; " >
+              <thead class="text-center" style="position: sticky;
             top: 0;
             z-index: 1;">
                 <tr>
@@ -1811,8 +1840,8 @@ text-transform: uppercase;" >+ Cetak</button>
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_modalx" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white" style="position: sticky;
+            <table id="tabel_add_list_modalx" class="data-table" style="overflow:auto; " >
+              <thead class="text-center" style="position: sticky;
             top: 0;
             z-index: 1;">
                 <tr>
@@ -1919,14 +1948,13 @@ text-transform: uppercase;" >+ Cetak</button>
                 <!-- <div class="container-fluid"> -->
 
 
-                <table id="tabel_add_list_perkiraan" class="table table-bordered table-striped" style="overflow:auto; " >
-                  <thead class="text-center bg-primary text-white" style="position: sticky;
+                <table id="tabel_add_list_perkiraan" class="data-table" style="overflow:auto; " >
+                  <thead class="text-center" style="position: sticky;
                 top: 0;
                 z-index: 1;">
                     <tr>
                       <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
                       <th style="padding: 4px 12px;" scope="col">Nama</th>
-                      <th style="padding: 4px 12px;" scope="col">Actions</th>
 
                     </tr>
                   </thead>
@@ -1935,15 +1963,9 @@ text-transform: uppercase;" >+ Cetak</button>
                   <tbody id="tabel_data_add_list_perkiraan" class="text-left" >
 
                     @for ($i = 0; $i < count($tempListPerkiraan); $i++)
-                    <tr>
+                    <tr class="pick-row" onclick="buttonAddPickPerkiraanLebihBayar('{{ $tempListPerkiraan[$i]->Perkiraan }}' , '{{ $tempListPerkiraan[$i]->Keterangan }}')">
                       <td>{{ $tempListPerkiraan[$i]->Perkiraan }}</td>
                       <td>{{ $tempListPerkiraan[$i]->Keterangan }}</td>
-
-
-                        <td class="text-center">
-                          <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                          <button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraanLebihBayar('{{ $tempListPerkiraan[$i]->Perkiraan }}' , '{{ $tempListPerkiraan[$i]->Keterangan }}')" type="button" ><i class="bi bi-plus"></i></button>
-                        </td>
                   </tr>
                   @endfor
                   </tbody>
@@ -2018,6 +2040,7 @@ text-transform: uppercase;" >+ Cetak</button>
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let listData = []
 let listOutstanding = []
@@ -2038,35 +2061,406 @@ let toId = ''
 let urutTrans = 0
 let dataEdit = {}
 
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Port 1:1 dari poCart/poAktifkanTabel/poInitReportTableSekali milik
+ * purchaseOrder.blade.php, sama seperti so.blade.php/invoicejasa.blade.php/
+ * fakturpajak.blade.php. Endpoint persistensinya saveheadertable/getheadertable
+ * (HeaderTableController) -- halaman ini tidak punya endpoint loadHeader/
+ * simpanHeader sendiri sebelumnya, jadi tidak ada kontrak lama yang perlu
+ * dipertahankan.
+ *
+ * Catatan bentuk data: baris tabel/tabel2 di halaman ini bukan objek datar --
+ * setiap baris adalah array dan field aslinya ada di row[0] (mis. row[0].nobukti),
+ * baik dari render Blade awal ($tempOutstanding[$i][0]->...) maupun dari
+ * loadAll() (res.tempOutstanding[i][0].nobukti). ctPickCI() karena itu selalu
+ * dipanggil dengan row[0], bukan row.
+ */
+let ctCart = { 1 : [], 2 : [] }
+let ctActiveUrut = 0
+const CT_HREF = 'cetaktandaterima'
+const CT_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+const CT_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
+let ctPerluGambar = { 1 : false, 2 : false }
+
+function activeVisibleTabKeyCT () {
+  return $('#nav-profile-tab').hasClass('active') ? 2 : 1
+}
+
+function ctPickCI (row, key) {
+  if (!row) { return undefined; }
+  if (row[key] !== undefined) { return row[key]; }
+  let lower = key.toLowerCase();
+  for (let k in row) {
+    if (k.toLowerCase() === lower) { return row[k]; }
+  }
+  return undefined;
+}
+
+function ctDefaultCart (urut) {
+  if (urut === 2) {
+    return [
+      ['nocetak',      'No. Tanda Terima', 1, 'varchar', 0, 0],
+      ['nobukti',      'Nobukti',          1, 'varchar', 0, 0],
+      ['tglcetak',     'Tgl Cetak',        1, 'date',    0, 0],
+      ['tanggal',      'Tanggal',          1, 'date',    0, 0],
+      ['namacustsupp', 'Nama Customer',    1, 'varchar', 0, 0],
+      ['tglterima',    'Tgl Terima',       1, 'date',    0, 0],
+      ['namapenerima', 'Nama Penerima',    1, 'varchar', 0, 0],
+      ['IsOtorisasi1', 'Oto',              1, 'bool',    0, 0],
+      ['OtoUser1',     'OtoUser',          1, 'varchar', 0, 0],
+      ['TglOto1',      'TglOto',           1, 'date',    0, 0],
+      ['usercetak',    'User Cetak',       1, 'varchar', 0, 0],
+      ['namadok',      'Nama Dok',         1, 'varchar', 0, 0],
+      ['alamatdok',    'Alamat Dok',       1, 'varchar', 0, 0],
+    ]
+  }
+  return [
+    ['nobukti',      'No. Bukti', 1, 'varchar', 0, 0],
+    ['tanggal',      'Tanggal',   1, 'date',    0, 0],
+    ['namacustsupp', 'Customer',  1, 'varchar', 0, 0],
+  ]
+}
+
+function ctBuatCart (headers, values, isnumerics, isshowns, desimals) {
+  headers = headers || []
+  let cart = []
+  headers.forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+    cart.push([
+      values[i],
+      h,
+      Number(isshowns[i]) === 1 ? 1 : 0,
+      CT_TIPE_NAMA[tipe] || 'varchar',
+      0,
+      isNaN(des) ? 0 : des,
+    ])
+  });
+  return cart
+}
+
+function ctAktifkanTabel (urut) {
+  ctActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = ctCart[urut]
+}
+
+function ctOnChangeAktif () {
+  if (ctActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
+}
+
+window.g_href = CT_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = mode === 2 ? 2 : 1
+  let cart = ctCart[urut] || []
+
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[1])
+    value.push(c[0])
+    isnumber.push(CT_TIPE_KODE[c[3]] ?? 0)
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : CT_HREF,
+      urut     : urut
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+window.doSetHeader = function (mode, reset) {
+  let urut = mode === 2 ? 2 : 1
+
+  $.ajax({
+    url   : "{!! url('getheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val(),
+      href   : CT_HREF,
+      urut   : urut,
+      reset  : reset ? 1 : 0
+    },
+    success : function (res) {
+      if (!reset && res && res.headertableheader && res.headertableheader.length) {
+        let header = res.headertableheader
+        let value = res.headertablevalue
+        let isnumeric = res.isnumeric
+        let isshown = res.isshown
+        let tipe = res.desimal || []
+        ctCart[urut] = ctBuatCart(header, value, isnumeric, isshown, tipe)
+      } else {
+        ctCart[urut] = ctDefaultCart(urut)
+        window.gcart_header = ctCart[urut]
+        window.doSimpanHeader(CT_HREF, urut)
+      }
+      window.gcart_header = ctCart[urut]
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+      ctCart[urut] = ctDefaultCart(urut)
+      window.gcart_header = ctCart[urut]
+    }
+  })
+}
+
+const CT_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
+const CT_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
+
+let ctRtSudahInit = false
+function ctInitReportTableSekali () {
+  if (ctRtSudahInit || typeof ReportTable === 'undefined') { return }
+  ctRtSudahInit = true
+
+  let urutAktif = activeVisibleTabKeyCT()
+  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
+  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
+  Object.keys(idTabel).forEach((u) => {
+    if (Number(u) === urutAktif) { return }
+    ReportTable.init({ table : idTabel[u], bar : idBar[u], onChange : ctOnChangeAktif })
+  });
+
+  ReportTable.init({
+    table    : CT_SELEKTOR_TABEL_AKTIF,
+    bar      : CT_SELEKTOR_BAR_AKTIF,
+    onChange : ctOnChangeAktif
+  })
+
+  let ctGuardUlangKlik = false;
+  ['#tabel', '#tabel2'].forEach((sel) => {
+    let thead = document.querySelector(sel + ' thead')
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (ctGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+      e.stopPropagation()
+      e.preventDefault()
+      ctGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      ctGuardUlangKlik = false
+    }, true)
+  });
+}
+
+function tulisTheadHeaderCT (tableSel, cols) {
+  let thead = document.querySelector(tableSel + ' thead')
+  if (!thead || !window.ReportTable) { return; }
+  let headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+  thead.setAttribute('style', 'white-space:nowrap;');
+  thead.innerHTML = headRowHtml;
+}
+
+function ctValueCell (row, col) {
+  let raw = ctPickCI(row, col[0]);
+  let type = col[3];
+
+  if (type === 'date') {
+    if (!raw) { return '<td></td>'; }
+    return '<td>' + formatDate(raw, '/') + '</td>';
+  }
+  if (type === 'float') {
+    let dp = Number(col[5]) || 0;
+    let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+    return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+  }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+function tabelActionsCell (row) {
+  let r = row[0];
+  let nobukti = ctPickCI(r, 'nobukti');
+  let kodecustsupp = ctPickCI(r, 'kodecustsupp');
+  let html = '<td class="text-center">';
+  html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + kodecustsupp + '\')"><i class="bi bi-plus"></i></button>';
+  html += '</td>';
+  return html;
+}
+
+function tabel2ActionsCell (row) {
+  let r = row[0];
+  let nocetak = ctPickCI(r, 'nocetak');
+  let tglterima = ctPickCI(r, 'tglterima');
+  let namapenerima = ctPickCI(r, 'namapenerima');
+  let html = '<td class="text-center">';
+  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonAldok(\'' + nocetak + '\',\'' + (tglterima ? formatDate(tglterima, '/') : '') + '\',\'' + (namapenerima || '') + '\')"><i class="bi bi-pen"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitPrintUlang(\'' + nocetak + '\')"><i class="bi bi-printer"></i></button>';
+  html += '</td>';
+  return html;
+}
+
+function renderTabelRows (rows) {
+  if (ctActiveUrut !== 1 && ctCart[1].length === 0) { ctAktifkanTabel(1); }
+  let cols = (ctCart[1].length ? ctCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabelActionsCell(row);
+    cols.forEach(function (col) { html += ctValueCell(row[0], col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel_data').innerHTML = html;
+  tulisTheadHeaderCT('#tabel', cols);
+}
+
+function renderTabel2Rows (rows) {
+  let cols = (ctCart[2].length ? ctCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabel2ActionsCell(row);
+    cols.forEach(function (col) { html += ctValueCell(row[0], col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel2_data').innerHTML = html;
+  tulisTheadHeaderCT('#tabel2', cols);
+}
+
+let lastTabelRows = []
+let lastTabel2Rows = []
+let ctPanjangHalaman = { 1 : 10, 2 : 10 }
+
+function ctIkatSearch (urut) {
+  let ids = { 1 : ['ctSearch1', 'tabel'], 2 : ['ctSearch2', 'tabel2'] }
+  let input = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  let timer = null
+  input.addEventListener('input', function () {
+    let nilai = input.value
+    if (timer) { clearTimeout(timer) }
+    timer = setTimeout(function () {
+      if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+        $('#' + idTabel).DataTable().search(nilai).draw()
+      }
+    }, 400)
+  })
+}
+
+function ctIkatPanjangHalaman (urut) {
+  let ids = { 1 : ['ctLen1', 'tabel'], 2 : ['ctLen2', 'tabel2'] }
+  let sel = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(ctPanjangHalaman[urut])
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    ctPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+      $('#' + idTabel).DataTable().page.len(ctPanjangHalaman[urut]).draw()
+    }
+  })
+}
+
+const CT_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+
+function reinitTabel () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
+    renderTabelRows(lastTabelRows);
+    $('#tabel').DataTable({
+      dom: CT_DOM_STRING,
+      lengthChange: false,
+      pageLength: ctPanjangHalaman[1],
+      paging: true,
+      order: [[1, 'asc']],
+      ordering: false,
+    });
+    ctIkatSearch(1);
+    ctIkatPanjangHalaman(1);
+    ctPerluGambar[1] = false;
+  } catch (e) {
+    console.error('reinitTabel failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabel2 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(lastTabel2Rows);
+    $('#tabel2').DataTable({
+      dom: CT_DOM_STRING,
+      lengthChange: false,
+      pageLength: ctPanjangHalaman[2],
+      paging: true,
+      order: [[1, 'asc']],
+      ordering: false,
+    });
+    ctIkatSearch(2);
+    ctIkatPanjangHalaman(2);
+    ctPerluGambar[2] = false;
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function buttonHeaderTable (key) {
+  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
+    let urut = key === 'tabel2' ? 2 : 1
+    ctAktifkanTabel(urut)
+    window.doSetHeader(urut, true)
+    ;(urut === 2 ? reinitTabel2 : reinitTabel)()
+    alertify.success('Kolom telah direset ke tampilan default')
+  }, function () {})
+}
+
 $(document).ready(function(){
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-          {  "className": "text-right", "targets": [] },
-        ]
-        });
+      ctAktifkanTabel(1);
+      window.doSetHeader(1, false);
+      lastTabelRows = @json($tempOutstanding);
+      reinitTabel();
 
+      ctAktifkanTabel(2);
+      window.doSetHeader(2, false);
+      lastTabel2Rows = @json($tempPenerimaan);
+      reinitTabel2();
 
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "columnDefs": [
-            {  "className": "text-right", "targets": [] },
-          ]
-          });
+      ctInitReportTableSekali();
 
-      //   $("#tabel_add_list_modal").DataTable({
-      //     "lengthChange": false,
-      //       "paging": false ,'order': [[1, 'asc']],
-      //       "searching" : false,
-      //       "columnDefs": [
-      //     {"targets" :[0] , 'orderable' : false}
-      //  ]
-      // });
-
-      // $('#page1').hide()
-      // $('#page2').show()
+      $('#nav-home-tab').on('shown.bs.tab', function () {
+        ctAktifkanTabel(1);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+        if (ctPerluGambar[1]) { reinitTabel(); }
+      });
+      $('#nav-profile-tab').on('shown.bs.tab', function () {
+        ctAktifkanTabel(2);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+        if (ctPerluGambar[2]) { reinitTabel2(); }
+      });
 
         $("#tabel_add_list_custsupp").DataTable({
           "lengthChange": false,
@@ -4214,7 +4608,7 @@ function buttonAdd (kodecustsupp) {
         <td>${item.NoBukti }</td>
         <td>${item.Tanggal ? formatDate(item.Tanggal,'/') : ''  }</td>
         <td>${item.pono? item.pono : '' }</td>
-        <td>${item.penerima }</td>
+        <td>${item.NamaCustSupp }</td>
       </tr>
         `
       });
@@ -4329,107 +4723,11 @@ function loadAll () {
     },
     success: function(res) {
       console.log(res)
-      let rowTable = ""
-      let rowTable2 = ""
 
-
-
-
-
-      res.tempOutstanding.forEach((item, i) => {
-
-        rowTable += `
-        <tr>
-          <td>${item[0].nobukti}</td>
-          <td>${formatDate(item[0].tanggal,'/')}</td>
-          <td>${item[0].namacustsupp}</td>
-          <td class='text-center'>
-
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd('${item[0].nobukti}')"><i class="bi bi-plus"></i></button>
-
-          </td>
-        </tr>
-
-        `
-
-
-
-
-
-
-
-      });
-
-
-      res.tempPenerimaan.forEach((item, i) => {
-          rowTable2 += `
-          <tr>
-          <td class="text-center">
-                <button class="btn btn-warning btn-sm" type="button" title="isi terima" onclick="buttonAldok('${item[0].nocetak}')">
-                  <i class="bi bi-pen"></i>
-                </button>
-                <button class="btn btn-primary btn-sm" title="Print" onclick="submitPrintUlang('${item.nobukti}')"><i class="bi bi-printer"></i>
-                </button>
-
-
-
-            </td>
-
-
-
-
-
-
-            <td>${item[0].nocetak}</td>
-            <td>${item[0].nobukti}</td>
-            <td>${item[0].tglcetak ? formatDate(item[0].tglcetak, '/') : ''}</td>
-            <td>${item[0].tanggal ? formatDate(item[0].tanggal, '/') : ''}</td>
-            <td>${item[0].namacustsupp}</td>
-            <td>${item[0].tglterima ? formatDate(item[0].tglterima, '/') : ''}</td>
-            <td>${item[0].namapenerima}</td>
-            ${item[0].IsOtorisasi1 == 1 ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
-
-            <td>${item[0].OtoUser1}</td>
-            <td>${item[0].TglOto1 ? formatDate(item[0].TglOto1, '/')  : '' }</td>
-            <td>${item[0].usercetak}</td>
-            <td>${item[0].namadok}</td>
-            <td>${item[0].alamatdok}</td>
-
-
-
-
-
-
-
-
-          </tr>
-          `
-      });
-
-
-      $('#tabel').DataTable().destroy();
-      $('#tabel2').DataTable().destroy();
-
-      document.getElementById("tabel2_data").innerHTML = rowTable2
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-          {  "className": "text-right", "targets": [] },
-        ]
-        });
-
-
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "columnDefs": [
-            {  "className": "text-right", "targets": [] },
-          ]
-          });
-
-
+      lastTabelRows = res.tempOutstanding;
+      lastTabel2Rows = res.tempPenerimaan;
+      reinitTabel();
+      reinitTabel2();
 
     }})
 
@@ -6744,39 +7042,5 @@ function formatAngka (angkaString) {
 
 
 </script>
-
-<script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-
-    function setActiveTab(homeActive) {
-      if (homeActive) {
-        tabHome.style.backgroundColor = '#007bff';
-        tabHome.style.color = '#fff';
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-      } else {
-        tabProfile.style.backgroundColor = '#007bff';
-        tabProfile.style.color = '#fff';
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-      }
-    }
-
-    // Default warna tab
-    setActiveTab(true);
-
-    // buat ganti tab
-    tabHome.addEventListener('click', function () {
-      setActiveTab(true);
-    });
-
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(false);
-    });
-  </script>
-
-
-
 
 @endsection

@@ -2368,11 +2368,11 @@ window.doSetHeader = function (mode, reset) {
       // see HeaderTableController::getHeaderTable(), pembelianpermintaannonagen
       // already does the same JSON.parse() itself), not arrays.
       if (!reset && res && res.headertableheader && res.headertableheader.length) {
-        let header = JSON.parse(res.headertableheader)
-        let value = JSON.parse(res.headertablevalue)
-        let isnumeric = JSON.parse(res.isnumeric)
-        let isshown = JSON.parse(res.isshown)
-        let tipe = res.tipe ? JSON.parse(res.tipe) : []
+        let header = res.headertableheader
+        let value = res.headertablevalue
+        let isnumeric = res.isnumeric
+        let isshown = res.isshown
+        let tipe = res.desimal || []
         soCart[urut] = soBuatCart(header, value, isnumeric, isshown, tipe)
       } else {
         soCart[urut] = soDefaultCart(urut)
