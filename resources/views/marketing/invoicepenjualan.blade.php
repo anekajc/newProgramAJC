@@ -2,6 +2,7 @@
 @section('buttons')
 
 @section('page-title', 'Invoice Penjualan')
+@section('title', 'SML - Invoice Penjualan')
 
 @endsection
 
@@ -62,7 +63,7 @@
 }
 
 #content { padding-top: 12px; }
-
+/* 
 {{-- Everything below this line, up to the closing style tag, is copied verbatim
      from marketing/so.blade.php's own @section('css') (which itself copied it
      from purchaseOrder.blade.php) -- only the id list was retargeted from
@@ -70,7 +71,7 @@
      (#tabel/#tabel2/#tabel3), the same widening pattern so.blade.php used.
      po-table-header.css only hardcodes its .rt-th drag/gear + header styling
      for #tabel/#tabel2/#tabel7, so #tabel3 ("Invoice Sudah Diotorisasi") was
-     rendering completely unstyled -- these rules restore the same look. --}}
+     rendering completely unstyled -- these rules restore the same look. --}} */
 #tabel2 td:first-child,
 #tabel3 td:first-child {
   display: flex;

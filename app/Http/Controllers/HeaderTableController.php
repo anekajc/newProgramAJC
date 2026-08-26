@@ -298,6 +298,8 @@ class HeaderTableController extends Controller
       foreach ($otorisasi as $groupedData) {
         $tempOtorisasi[] = $groupedData;
       }
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
 
       if (count($headertable) > 0) {
         $isnumberheadertable = json_decode($headertable[0]->isnumber);
@@ -306,9 +308,6 @@ class HeaderTableController extends Controller
         $headerisshown = json_decode($headertable[0]->isshown);
         $isparsed = 0;
       } else {
-        $isparsed = 1;
-        foreach ($tempOtorisasi[0][0] as $key => $value) {
-
         if(!$tempOtorisasi) {
         } else {
           $isparsed = 1;
@@ -358,25 +357,7 @@ class HeaderTableController extends Controller
         }
       }
 
-      // $parsed = json_decode($headertableheader);
-      // $aliasparsed = json_decode($headertableheader);
-// @dd($headertableheader);
-      // for ($i=0; $i < count($headertableheader) ; $i++) {
-      //   // code...
-      //   if () {
-      //
-      //   }
-      // }
-//       foreach (collect($headertableheader) as $header ) {
-//         // code...
-//         $index = collect($headertablealias)->search(function ($a) use ($header) {
-//     return $a->value === $header;
-// });
-        // $index = array_find_key($alias, fn($a) => $a->value === $header);
-      //   array_push( $aliasOrdered, $alias[$index]);
-      // }
-
-    } 
+    }
     // PR AGEN
     else if ($req->href == 'pembelianpermintaanagen') {
       $statusset = 1;
@@ -735,10 +716,7 @@ class HeaderTableController extends Controller
               $isnumberheadertable[] = 2;
             } else if ($key == 'kodebrg') {
               $isnumberheadertable[] = 0;
-            }
-          }
-
-            elseif (is_numeric($value)) {
+            } elseif (is_numeric($value)) {
               $isnumberheadertable[] = 1;
             } else {
               $isnumberheadertable[] = 0;
