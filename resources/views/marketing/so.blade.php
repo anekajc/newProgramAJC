@@ -3856,7 +3856,6 @@ function buttonOtorisasi (nobukti) {
   console.log(nobukti)
 
 
-
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
     alertify.warning('No access')

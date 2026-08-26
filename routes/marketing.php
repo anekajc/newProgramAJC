@@ -232,44 +232,44 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
   Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
 
-//   // Invoice Jasa
-//   Route::get('/invoicejasa', [InvoiceJasaController::class, 'index']);
-//   Route::get('/invoicejasaspnobukti', [InvoiceJasaController::class, 'getNoBukti']);
-//   Route::get('/invoicejasalistcustomer', [InvoiceJasaController::class, 'listCustomer']);
-//   Route::get('/invoicejasalistsales', [InvoiceJasaController::class, 'listSales']);
-//   Route::post('/invoicejasalistlokasipenerima', [InvoiceJasaController::class, 'listLokasiPenerima']);
-//   Route::post('/invoicejasaspadd', [InvoiceJasaController::class, 'spAdd']);
-//   Route::post('/invoicejasaspdetail', [InvoiceJasaController::class, 'spDetail']);
-//   Route::post('/invoicejasaonchangeheader', [InvoiceJasaController::class, 'onChangeHeader']);
-//   Route::post('/invoicejasaonchangedetail', [InvoiceJasaController::class, 'onChangeDetail']);
+  // Invoice Jasa
+  Route::get('/invoicejasa', [InvoiceJasaController::class, 'index']);
+  Route::get('/invoicejasaspnobukti', [InvoiceJasaController::class, 'getNoBukti']);
+  Route::get('/invoicejasalistcustomer', [InvoiceJasaController::class, 'listCustomer']);
+  Route::get('/invoicejasalistsales', [InvoiceJasaController::class, 'listSales']);
+  Route::post('/invoicejasalistlokasipenerima', [InvoiceJasaController::class, 'listLokasiPenerima']);
+  Route::post('/invoicejasaspadd', [InvoiceJasaController::class, 'spAdd']);
+  Route::post('/invoicejasaspdetail', [InvoiceJasaController::class, 'spDetail']);
+  Route::post('/invoicejasaonchangeheader', [InvoiceJasaController::class, 'onChangeHeader']);
+  Route::post('/invoicejasaonchangedetail', [InvoiceJasaController::class, 'onChangeDetail']);
 
-//   Route::get('/invoicejasaloadall', [InvoiceJasaController::class, 'loadAll']);
+  Route::get('/invoicejasaloadall', [InvoiceJasaController::class, 'loadAll']);
 
 
 
-//   // Faktur Pajak
+  // Faktur Pajak
 
-//   Route::get('/fakturpajak', [FakturPajakController::class, 'index']);
-//   Route::post('/fakturpajakspadd', [FakturPajakController::class, 'spAdd']);
-//   Route::post('/fakturpajakspdelete', [FakturPajakController::class, 'spDelete']);
-//   Route::post('/fakturpajakloadall', [FakturPajakController::class, 'loadAll']);
-//   Route::post('/fakturpajakimportexcel', [FakturPajakController::class, 'importExcel']);
-//   Route::get('/fakturpajakexportexcel', [FakturPajakController::class, 'spExport']);
+  Route::get('/fakturpajak', [FakturPajakController::class, 'index']);
+  Route::post('/fakturpajakspadd', [FakturPajakController::class, 'spAdd']);
+  Route::post('/fakturpajakspdelete', [FakturPajakController::class, 'spDelete']);
+  Route::post('/fakturpajakloadall', [FakturPajakController::class, 'loadAll']);
+  Route::post('/fakturpajakimportexcel', [FakturPajakController::class, 'importExcel']);
+  Route::get('/fakturpajakexportexcel', [FakturPajakController::class, 'spExport']);
 
-//   // Perintah Retur Jual
-//   Route::get('/perintahreturjualcetak', [PerintahReturJualController::class, 'spCetak']);
-//   Route::get('/perintahreturjual', [PerintahReturJualController::class, 'index']);
-//   Route::get('/perintahreturjualspnobukti', [PerintahReturJualController::class, 'getNoBukti']);
-//   // Route::post('/newsetupperiodekerjaupdate', [PerintahReturJualMinusController::class, 'updatePeriodeKerja']);
-//   Route::get('/perintahreturjuallistcustomer', [PerintahReturJualController::class, 'listCustomer']);
-//   Route::post('/perintahreturjuallistnoinvoice', [PerintahReturJualController::class, 'listNoInvoice']);
-//   Route::post('/perintahreturjuallistbarang', [PerintahReturJualController::class, 'listBarang']);
-//   Route::post('/perintahreturjuallistnobeli', [PerintahReturJualController::class, 'listNoBeli']);
-//   Route::post('/perintahreturjualgetdetail', [PerintahReturJualController::class, 'getDetail']);
-//   Route::post('/perintahreturjualspadd', [PerintahReturJualController::class, 'spAdd']);
-//   Route::get('/perintahreturjualloadall', [PerintahReturJualController::class, 'loadAll']);
-//   Route::post('/perintahreturjualspotorisasi', [PerintahReturJualController::class, 'spOtorisasi']);
-//   Route::post('/perintahreturjualspbatalotorisasi', [PerintahReturJualController::class, 'spBatalOtorisasi']);
+  // // Perintah Retur Jual
+  // Route::get('/perintahreturjualcetak', [PerintahReturJualController::class, 'spCetak']);
+  // Route::get('/perintahreturjual', [PerintahReturJualController::class, 'index']);
+  // Route::get('/perintahreturjualspnobukti', [PerintahReturJualController::class, 'getNoBukti']);
+  // // Route::post('/newsetupperiodekerjaupdate', [PerintahReturJualMinusController::class, 'updatePeriodeKerja']);
+  // Route::get('/perintahreturjuallistcustomer', [PerintahReturJualController::class, 'listCustomer']);
+  // Route::post('/perintahreturjuallistnoinvoice', [PerintahReturJualController::class, 'listNoInvoice']);
+  // Route::post('/perintahreturjuallistbarang', [PerintahReturJualController::class, 'listBarang']);
+  // Route::post('/perintahreturjuallistnobeli', [PerintahReturJualController::class, 'listNoBeli']);
+  // Route::post('/perintahreturjualgetdetail', [PerintahReturJualController::class, 'getDetail']);
+  // Route::post('/perintahreturjualspadd', [PerintahReturJualController::class, 'spAdd']);
+  // Route::get('/perintahreturjualloadall', [PerintahReturJualController::class, 'loadAll']);
+  // Route::post('/perintahreturjualspotorisasi', [PerintahReturJualController::class, 'spOtorisasi']);
+  // Route::post('/perintahreturjualspbatalotorisasi', [PerintahReturJualController::class, 'spBatalOtorisasi']);
 
 
 
