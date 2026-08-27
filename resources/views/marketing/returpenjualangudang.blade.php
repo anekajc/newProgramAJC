@@ -1252,6 +1252,24 @@ function rpgInitReportTableSekali () {
     ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: rpgOnChangeAktif })
   });
   ReportTable.init({ table: RPG_SELEKTOR_TABEL_AKTIF, bar: RPG_SELEKTOR_BAR_AKTIF, onChange: rpgOnChangeAktif })
+
+  let rpgGuardUlangKlik = false;
+  ['#tabel', '#tabel2', '#tabel3'].forEach((sel) => {
+    let thead = document.querySelector(sel + ' thead')
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (rpgGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+      e.stopPropagation()
+      e.preventDefault()
+      rpgGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      rpgGuardUlangKlik = false
+    }, true)
+  });
 }
 
 function tulisTheadHeaderRPG (tableSel, cols, withActions) {
