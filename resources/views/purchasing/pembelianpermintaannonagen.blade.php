@@ -2926,7 +2926,7 @@ function formatAngka (angkaString) {
       if (!Number(angkaString)) {
         return '0.00'
       }
-      angkastring = parseFloat(angkaString).toFixed(2)
+      angkaString = parseFloat(angkaString).toFixed(2)
 
       let tempAngka = angkaString.split('.')
 

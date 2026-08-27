@@ -13,7 +13,7 @@ use App\Traits\ReportVoucherTrait;
 class LaporanAccountingPiutangUmurController extends Controller {
   use AksesTrait;
   use GlobalTrait;
-  use ReportVoucherTrait;   // doKasharian / doInvoice / doLpb / doBp (bottom voucher panel)
+  use ReportVoucherTrait;   // doLedger / doKasharian / doInvoice / doLpb (bottom voucher panel)
 
   public function index() {
     $akses = $this->cekAkses("reportaccountingpiutangumur");
@@ -30,16 +30,16 @@ class LaporanAccountingPiutangUmurController extends Controller {
 
   public function doReport(Request $req)
   {
-      $tanggal    = $req->get('date1');
-      $tipe       = (int) $req->get('inputOrd');
+      $tanggal    = $req->query('date1');
+      $tipe       = (int) $req->query('inputOrd');
       $devisi     = '01';
-      $perkiraan  = $req->get('inputPerkiraan');
-      $KodeVls    = $req->get('valas_value');
+      $perkiraan  = $req->query('inputPerkiraan');
+      $KodeVls    = $req->query('valas_value');
 
-      $awal  = $req->get('inputSuppAwal');
-      $akhir = $req->get('inputSuppAkhir');
+      $awal  = $req->query('inputSuppAwal');
+      $akhir = $req->query('inputSuppAkhir');
 
-      $selectedCust = $req->get('selectedCust', []);
+      $selectedCust = $req->query('selectedCust', []);
 
       $db = DB::connection('SML');
 
@@ -86,55 +86,13 @@ class LaporanAccountingPiutangUmurController extends Controller {
       return response()->json($result);
   }
 
-  public function doFilter(Request $req)
-  {
-      $listData = DB::connection('MGL')->select("
-          SELECT 
-              X.KodeCustSupp,
-              X.NamaCustSupp,
-              X.AGent,
-              Y.NAMAGROUPCUSTSUPP AS NamaGroup,
-              RTRIM(LTRIM(
-                  ISNULL(X.Alamat1,'') +
-                  CASE 
-                      WHEN ISNULL(X.Alamat2,'') = '' 
-                      THEN '' 
-                      ELSE ' ' + X.Alamat2 
-                  END
-              )) AS Alamat,
-              X.Kota
-          FROM DBCUSTSUPP X
-          LEFT OUTER JOIN DBGROUPCUSTSUPP Y 
-              ON Y.KODEGROUPCUSTSUPP = X.AGent
-          WHERE X.jenis = 1
-          ORDER BY X.KodeCustSupp
-      ");
-
-      return response()->json($listData);
-  }
-
-  // public function doReportFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-  //   $res = [];
-
-  //   for ($i=0; $i < count($req->listdata); $i++) {
-  //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
-  //     for ($j=0; $j < count($row); $j++) {
-  //       $res = array_add($res, $i+$j, $row[$j]);
-  //     }
-  //   }
-    
-  //   return $res;
-  // }
-
     public function loadPerkiraan()
   {
-      $kode = 'PT';
-      $userid = auth()->user()->username;
+      $user = auth()->user();
+      if (! $user) { return response()->json([], 401); }
 
-      // $kode = $request->input('kode');
-      // $userid = $request->input('userid');
+      $kode = 'PT';
+      $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
           SELECT a.Perkiraan, b.Keterangan 

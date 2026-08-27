@@ -1081,7 +1081,6 @@ $iconMap = [
                     <button class="report-back-btn" id="report-back-btn" onclick="reportGoBack()">
                         ${icon('arrow-left')} Kembali
                     </button>
-                    <div class="page-title">Report</div>
                     <div id="report-crumb" class="page-subtitle"></div>
                     <div id="report-categories-container" class="text-muted">Memuat data laporan...</div>
                 </div>
