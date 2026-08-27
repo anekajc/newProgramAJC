@@ -4,14 +4,8 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewPeriode;
 use Illuminate\Support\Facades\DB;
-use App\Model\VwPPL;
-use Illuminate\Auth;
 
 
 // use App\Http\Controllers\NewMenuController;

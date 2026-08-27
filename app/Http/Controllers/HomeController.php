@@ -120,8 +120,10 @@ class HomeController extends Controller
     }
 
      public function reportIndex() {
-      $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
       $akses = $this->cekAkses("Home");
+      if ($akses['userLoggedOut']) { return redirect('/'); }
+
+      $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
       $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
 
@@ -134,8 +136,10 @@ class HomeController extends Controller
     }
 
      public function berkasIndex() {
-      $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
       $akses = $this->cekAkses("Home");
+      if ($akses['userLoggedOut']) { return redirect('/'); }
+
+      $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
       $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
 
@@ -153,7 +157,7 @@ class HomeController extends Controller
     if ($headermenu == 2) {
         $tempAngka += 1;
     }
- 
+
     $menul0 = NewMenu::where('L0', $tempAngka)
         ->join('DBFLMENUWEB', 'DBFLMENUWEB.L1', '=', 'DBMENUWEB.KODEMENU')
         ->where('DBFLMENUWEB.USERID', \Auth::user()->username)
@@ -162,7 +166,7 @@ class HomeController extends Controller
         ->orderBy('KODEMENU')
         ->get();
     $tempAngka += 1;
- 
+
     $menul1 = NewMenu::where('L0', $tempAngka)
         ->join('DBFLMENUWEB', 'DBFLMENUWEB.L1', '=', 'DBMENUWEB.KODEMENU')
         ->where('DBFLMENUWEB.USERID', \Auth::user()->username)
@@ -171,7 +175,7 @@ class HomeController extends Controller
         ->orderBy('KODEMENU')
         ->get();
     $tempAngka += 1;
- 
+
     $menul2 = NewMenu::where('L0', 2)
         ->join('DBFLMENUWEB', 'DBFLMENUWEB.L1', '=', 'DBMENUWEB.KODEMENU')
         ->where('DBFLMENUWEB.USERID', \Auth::user()->username)
@@ -179,7 +183,7 @@ class HomeController extends Controller
         ->whereNotNull('DBMENUWEB.HeaderMenu')
         ->orderBy('KODEMENU')
         ->get();
- 
+
     foreach ($menul1 as $menu1) {
         $array1 = [];
         $kodecheck = $menu1['KODEMENU'];
@@ -190,7 +194,7 @@ class HomeController extends Controller
         }
         $menu1->child = $array1;
     }
- 
+
     foreach ($menul0 as $menu0) {
         $array = [];
         $kodecheck = $menu0['KODEMENU'];
@@ -201,7 +205,7 @@ class HomeController extends Controller
         }
         $menu0->child = $array;
     }
- 
+
     return response()->json($menul0);
 }
 
@@ -249,6 +253,7 @@ private function buildReportTree($rows, $parentKode, $depth)
             'href'       => $row->href,
             'ACCESS'     => $row->ACCESS,
             'icon'       => $row->icon ?? null,
+            'color'      => $row->color ?? null,
             'child'      => $this->buildReportTree($rows, $row->KODEMENU, $depth + 1),
         ];
     }

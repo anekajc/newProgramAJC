@@ -11,6 +11,12 @@ use Carbon\Carbon;use Illuminate\Support\Arr;
 
 trait AksesTrait {
 	public function cekAkses($href) {
+		// Sesi habis / user sudah logout: jangan sentuh Auth::user() (null),
+		// cukup kembalikan flag supaya controller me-redirect ke halaman login.
+		if (!\Auth::check()) {
+			return array('userLoggedOut' => true);
+		}
+
 		$akses = array('userLoggedOut' => false);
 
     	// $periode = NewPeriode::where('USERID' , \Auth::User()->username)->first();
@@ -32,10 +38,21 @@ trait AksesTrait {
 			$aksesmenu = $this->getAksesMenu($href);
 			$akses = Arr::add($akses, 'akses', $aksesmenu[0]);
 			$akses = Arr::add($akses, 'namamenu', $menu->Keterangan);
+
+			// Dikirim bersama halaman supaya doLoadHeader() di masterreport2/2x/Gudang
+			// tidak perlu lagi AJAX sinkron ke globalfunctions_doLoadHeader saat page
+			// load (dulu terjadi 2x per halaman -- sekali dari ready halaman, sekali
+			// lagi dari ready master layout -- masing-masing mengunci main thread).
+			$simpanheader = DB::connection('SML')->select(
+				'select reportmode, header, issubtotal, isgrandtotal from DBSIMPANHEADER where username = ? and href = ?',
+				[\Auth::user()->username, $href]
+			);
 		} else {
 			$akses = Arr::add($akses, 'namamenu', "Home");
+			$simpanheader = [];
 		}
-		
+
+		$akses = Arr::add($akses, 'simpanheader', $simpanheader);
 		$akses = Arr::add($akses, 'periode', $periode);
 		$akses = Arr::add($akses, 'menul0' , $menul0);
 
@@ -52,6 +69,10 @@ trait AksesTrait {
 	}
 
 	public function getAksesMenu($href) {
+		if (!\Auth::check()) {
+			return array();
+		}
+
 		return DB::connection('SML')->select('select fl.* from DBFLMENUREPORT fl left outer join DBMENUREPORT m on (fl.L1 = m.KODEMENU) where fl.UserID = :user and m.href = :href' , ['user' => \Auth::User()->username, 'href' => $href]);
 	}
 

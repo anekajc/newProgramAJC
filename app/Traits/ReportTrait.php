@@ -185,7 +185,7 @@ trait ReportTrait
 		$pdf = PDF::loadView("/templatepdf", compact('table'))->setPaper($paper)->setOrientation($orientation);
     $perusahaan = DB::table('perusahaan')->where('id', 1)->first();
 		$pdf->setOption('title', $title)
-        ->setOption('header-html', URL::asset('public/header_laporan.html'))
+        ->setOption('header-html', URL::asset('header_laporan.html'))
         ->setOption('replace', array('perusahaan' => $perusahaan->nama, 'judul' => $title, 'periode' => $periode, 'perkiraan' => $perkiraan))
         ->setOption('header-spacing', 4)
         ->setOption('margin-top', 22)
@@ -201,8 +201,8 @@ trait ReportTrait
     $table = '<table class="table table-bordered" style="width: 100%;">'.$table.'</table>';
 		$pdf = PDF::loadView("/templatepdf", compact('table'))->setPaper($paper)->setOrientation($orientation);
     $perusahaan = DB::table('perusahaan')->where('id', 1)->first();
-    if ($perkiraan == "") { $pdf->setOption('header-html', URL::asset('public/header_laporan.html'))->setOption('margin-top', 20); }
-    else { $pdf->setOption('header-html', URL::asset('public/header_laporan_akun.html'))->setOption('margin-top', 26); }
+    if ($perkiraan == "") { $pdf->setOption('header-html', URL::asset('header_laporan.html'))->setOption('margin-top', 20); }
+    else { $pdf->setOption('header-html', URL::asset('header_laporan_akun.html'))->setOption('margin-top', 26); }
 		$pdf->setOption('title', $title)
         ->setOption('replace', array('perusahaan' => $perusahaan->nama, 'judul' => $title, 'periode' => $periode, 'perkiraan' => $perkiraan))
         ->setOption('header-spacing', 4)

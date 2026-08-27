@@ -254,6 +254,50 @@ $(document).on('hidden.bs.modal', '#formSelect', function () {
 });
 ```
 
+> ⚠️ **This automatic reopen also fires `show.bs.modal`** — the same event the repaint in §6 binds
+> to. If that handler resyncs any `select.rt-native` from a committed/applied global (as in §6's
+> `$('#modalOtorisasi').val(globalOtorisasi)`, or a page-specific "pending until Terapkan" field
+> such as an account/Perkiraan select), that resync fires on the automatic reopen too — **silently
+> discarding whatever the user just changed in that select before opening the picker.**
+>
+> Concretely: user picks a new Perkiraan (pending, not yet Terapkan) → opens the Supp Awal picker
+> → picks a supplier → the Filter modal reopens → `show.bs.modal` fires → Perkiraan snaps back to
+> whatever was last Terapkan'd. The Perkiraan choice is gone and nothing looked wrong on screen in
+> between. This really happened in `reportaccountinghutangkartu.blade.php`, where Perkiraan/Urut/
+> mode selects are pending-until-Terapkan (unlike the PICK_FIELDS combos, which commit to their
+> hidden input immediately on pick and so aren't affected).
+>
+> **Fix — only if the page has a pending-until-Terapkan select:** track that the reopen is
+> automatic, and skip the resync-from-committed-globals step only on that path. Still re-render the
+> pick fields/badge either way — those reflect live DOM state, not the pending selects.
+>
+> ```js
+> let g_reopeningFilter = false;   // true only while the modal is being reopened after a picker
+>
+> $('#modalFilter').on('show.bs.modal', function () {
+>     if (!g_reopeningFilter) {
+>         $('#modalOtorisasi').val(globalOtorisasi);   // ...and any other pending-until-Terapkan select
+>     }
+>     g_reopeningFilter = false;
+>     renderPickFields();
+>     updateFilterBadge();
+> });
+>
+> $(document).on('hidden.bs.modal', '#formSelect', function () {
+>     if (g_reopenFilter) {
+>         g_reopenFilter = false;
+>         g_reopeningFilter = true;
+>         $('#modalFilter').modal('show');
+>         renderPickFields();
+>         updateFilterBadge();
+>     }
+> });
+> ```
+>
+> A page with only PICK_FIELDS-style combos (immediate commit on pick, like the original
+> `buttonPilih()`) doesn't need this — the bug only bites selects the page deliberately holds
+> pending until "Terapkan".
+
 ---
 
 ## 7. Gotchas
@@ -267,6 +311,7 @@ $(document).on('hidden.bs.modal', '#formSelect', function () {
 | Two modals stacked / backdrop stuck | `pickFromModal()` didn't hide the Filter modal first — check the open/close API matches (all-guide) |
 | Badge never updates when a select changes | missing the `change` delegate on `select.rt-native` |
 | A filter silently stops being sent to the SP | **Reading `.val()` on an element that doesn't exist returns `undefined` and corrupts the global.** This really happened with `#modalOrder` in `reportmarketingso.blade.php` when the Order By block was commented out. Guard it: `if ($('#modalOrder').length) { setOrderBy($('#modalOrder').val()); }` |
+| A pending select (e.g. Perkiraan/account) snaps back to its old value after picking an entity | `show.bs.modal` resynced it from a committed global on every open, including the automatic reopen after a picker closes. Guard the resync with a `g_reopeningFilter` flag — see "Opening a picker from inside the Filter modal" above. This really happened in `reportaccountinghutangkartu.blade.php`. |
 
 ---
 
@@ -281,4 +326,8 @@ $(document).on('hidden.bs.modal', '#formSelect', function () {
 - [ ] Badge counts only selects that have a neutral option
 - [ ] Footer: Reset semua + Batal + Terapkan
 - [ ] Every `$('#x').val()` read is guarded if `#x` might not exist
+- [ ] If the page has a pending-until-Terapkan select (not just PICK_FIELDS combos), the
+      `show.bs.modal` resync is guarded with `g_reopeningFilter` so it survives opening a picker
 - [ ] Tested: open, change filters, badge count, pick an entity, tag ×, Reset semua, Terapkan closes
+- [ ] Tested: change a pending select (e.g. Perkiraan), then pick an entity from a picker opened
+      inside the modal — confirm the pending select's value is still there when the modal reopens

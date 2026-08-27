@@ -48,11 +48,19 @@
   --sp-red:   #dc2626;  --sp-red-bg:   #fdeaea;
 }
 
-/* ============ Judul kolom (#tabel, #tabel2, #tabelso) ============ */
+/* ============ Judul kolom (#tabel, #tabel2, #tabel3, #tabel7, #tabelso) ============
+   Setiap halaman memakai subset id-nya sendiri untuk tabel interaktif (drag +
+   roda gigi) -- #tabel/#tabel7 di so.blade.php, #tabel/#tabel2/#tabelso di
+   purchaseOrder.blade.php, #tabel/#tabel2/#tabel3 di invoicepenjualan.blade.php
+   dan halaman marketing sejenis. Semua id itu didaftarkan di tiap aturan di
+   bawah supaya tidak ada halaman yang kehilangan styling saat salah satu id
+   ditambah/diganti nama. */
 
 /* Padding pindah ke .th-inner supaya area drag mengisi penuh sel. */
 #tabel thead th.rt-th,
 #tabel2 thead th.rt-th,
+#tabel3 thead th.rt-th,
+#tabel7 thead th.rt-th,
 #tabelso thead th.rt-th {
   padding: 0;
   vertical-align: middle;
@@ -60,6 +68,8 @@
 
 #tabel thead th.rt-th .th-inner,
 #tabel2 thead th.rt-th .th-inner,
+#tabel3 thead th.rt-th .th-inner,
+#tabel7 thead th.rt-th .th-inner,
 #tabelso thead th.rt-th .th-inner {
   display: flex;
   align-items: center;
@@ -70,14 +80,20 @@
 
 #tabel thead th.rt-th .th-inner.dragging,
 #tabel2 thead th.rt-th .th-inner.dragging,
+#tabel3 thead th.rt-th .th-inner.dragging,
+#tabel7 thead th.rt-th .th-inner.dragging,
 #tabelso thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabel thead th.rt-th.drag-over .th-inner,
 #tabel2 thead th.rt-th.drag-over .th-inner,
+#tabel3 thead th.rt-th.drag-over .th-inner,
+#tabel7 thead th.rt-th.drag-over .th-inner,
 #tabelso thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabel thead th.rt-th .th-label,
 #tabel2 thead th.rt-th .th-label,
+#tabel3 thead th.rt-th .th-label,
+#tabel7 thead th.rt-th .th-label,
 #tabelso thead th.rt-th .th-label {
   flex: 1 1 auto;
   min-width: 0;
@@ -87,11 +103,15 @@
 /* kolom numerik: judul rata kanan seperti angkanya */
 #tabel thead th.rt-th.num .th-label,
 #tabel2 thead th.rt-th.num .th-label,
+#tabel3 thead th.rt-th.num .th-label,
+#tabel7 thead th.rt-th.num .th-label,
 #tabelso thead th.rt-th.num .th-label { text-align: right; }
 
 /* pegangan drag */
 #tabel thead th.rt-th .th-grip,
 #tabel2 thead th.rt-th .th-grip,
+#tabel3 thead th.rt-th .th-grip,
+#tabel7 thead th.rt-th .th-grip,
 #tabelso thead th.rt-th .th-grip {
   display: grid;
   grid-template-columns: repeat(2, 3px);
@@ -103,6 +123,8 @@
 
 #tabel thead th.rt-th .th-grip i,
 #tabel2 thead th.rt-th .th-grip i,
+#tabel3 thead th.rt-th .th-grip i,
+#tabel7 thead th.rt-th .th-grip i,
 #tabelso thead th.rt-th .th-grip i {
   width: 3px;
   height: 3px;
@@ -112,11 +134,15 @@
 
 #tabel thead th.rt-th:hover .th-grip,
 #tabel2 thead th.rt-th:hover .th-grip,
+#tabel3 thead th.rt-th:hover .th-grip,
+#tabel7 thead th.rt-th:hover .th-grip,
 #tabelso thead th.rt-th:hover .th-grip { opacity: 1; }
 
 /* tombol roda gigi */
 #tabel thead th.rt-th .th-gear,
 #tabel2 thead th.rt-th .th-gear,
+#tabel3 thead th.rt-th .th-gear,
+#tabel7 thead th.rt-th .th-gear,
 #tabelso thead th.rt-th .th-gear {
   display: flex;
   align-items: center;
@@ -138,12 +164,18 @@
 
 #tabel thead th.rt-th:hover .th-gear,
 #tabel2 thead th.rt-th:hover .th-gear,
+#tabel3 thead th.rt-th:hover .th-gear,
+#tabel7 thead th.rt-th:hover .th-gear,
 #tabelso thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabel thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear.active,
 #tabel2 thead th.rt-th .th-gear:hover,
 #tabel2 thead th.rt-th .th-gear.active,
+#tabel3 thead th.rt-th .th-gear:hover,
+#tabel3 thead th.rt-th .th-gear.active,
+#tabel7 thead th.rt-th .th-gear:hover,
+#tabel7 thead th.rt-th .th-gear.active,
 #tabelso thead th.rt-th .th-gear:hover,
 #tabelso thead th.rt-th .th-gear.active {
   opacity: 1;
@@ -156,6 +188,8 @@
    gigi, jadi digeser sedikit ke kiri. */
 #tabel thead th.rt-th,
 #tabel2 thead th.rt-th,
+#tabel3 thead th.rt-th,
+#tabel7 thead th.rt-th,
 #tabelso thead th.rt-th { background-position: right 26px center; }
 
 /* ============ Menu kolom (dipasang di <body>, position:fixed) ============
@@ -243,7 +277,7 @@
 
 /* ============ Bar di atas tabel (kolom tersembunyi + Reset kolom) ============ */
 
-#rtBar.rt-bar {
+.rt-bar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -254,11 +288,11 @@
   z-index: 45;
 }
 
-#rtBar .rt-drop { position: relative; }
+.rt-bar .rt-drop { position: relative; }
 
-#rtBar .rt-hidden-btn,
-#rtBar .rt-view-btn,
-#rtBar .rt-reset-btn {
+.rt-bar .rt-hidden-btn,
+.rt-bar .rt-view-btn,
+.rt-bar .rt-reset-btn {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -274,23 +308,23 @@
   white-space: nowrap;
 }
 
-#rtBar .rt-hidden-btn { color: var(--rt-ink-soft); }
+.rt-bar .rt-hidden-btn { color: var(--rt-ink-soft); }
 
-#rtBar .rt-hidden-btn:hover:not(:disabled) { color: var(--rt-ink); border-color: #D6D8E4; }
+.rt-bar .rt-hidden-btn:hover:not(:disabled) { color: var(--rt-ink); border-color: #D6D8E4; }
 
-#rtBar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
+.rt-bar .rt-hidden-btn:disabled { opacity: .6; cursor: default; }
 
 /* Reset kolom � aksi destruktif (menghapus pengaturan kolom tersimpan user),
    jadi diberi warna merah saat hover supaya beda dari tombol lain di bar. */
-#rtBar .rt-reset-btn { color: var(--rt-ink-soft); }
+.rt-bar .rt-reset-btn { color: var(--rt-ink-soft); }
 
-#rtBar .rt-reset-btn:hover {
+.rt-bar .rt-reset-btn:hover {
   color: var(--rt-red);
   border-color: var(--rt-red);
   background: #FEF2F2;
 }
 
-#rtBar .rt-drop-menu {
+.rt-bar .rt-drop-menu {
   display: none;
   position: absolute;
   top: calc(100% + 6px);
@@ -305,9 +339,9 @@
   z-index: 60;
 }
 
-#rtBar .rt-drop-menu.open { display: block; }
+.rt-bar .rt-drop-menu.open { display: block; }
 
-#rtBar .rt-drop-item {
+.rt-bar .rt-drop-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -319,17 +353,17 @@
   cursor: pointer;
 }
 
-#rtBar .rt-drop-item:last-child { border-bottom: none; }
+.rt-bar .rt-drop-item:last-child { border-bottom: none; }
 
-#rtBar .rt-drop-item:hover { background: var(--rt-bg); }
+.rt-bar .rt-drop-item:hover { background: var(--rt-bg); }
 
-#rtBar .rt-drop-item small {
+.rt-bar .rt-drop-item small {
   color: var(--rt-ink-soft);
   font-weight: 500;
   font-size: 11.5px;
 }
 
-#rtBar .rt-drop-empty {
+.rt-bar .rt-drop-empty {
   padding: 10px 12px;
   font-size: 12.5px;
   font-style: italic;
@@ -351,7 +385,7 @@
 
 /* ============ Toolbar di atas tabel (kotak search + tombol Add/Tambah PR) ============
    Statis di blade (di luar #tabelN_wrapper), jadi tidak ikut terhapus saat
-   .DataTable().destroy() menulis ulang wrapper - lihat catatan #rtBar di atas. */
+   .DataTable().destroy() menulis ulang wrapper - lihat catatan .rt-bar di atas. */
 
 .po-toolbar {
   display: flex;
@@ -640,7 +674,7 @@
 
 /* ============ Kotak scroll tabel ============
    Header (th) menempel (sticky) di atas kotak ini; hanya isi tabel yang bergerak
-   saat discroll, sehingga toolbar dan #rtBar di atasnya selalu terlihat. */
+   saat discroll, sehingga toolbar dan .rt-bar di atasnya selalu terlihat. */
 
 .po-table-wrap {
   max-height: 65vh;
@@ -659,6 +693,8 @@
 
 #tabel thead th,
 #tabel2 thead th,
+#tabel3 thead th,
+#tabel7 thead th,
 #tabelso thead th {
   position: sticky;
   top: 0;
@@ -666,7 +702,7 @@
 }
 
 @media (max-width: 767.98px) {
-  #rtBar.rt-bar { justify-content: flex-start; flex-wrap: wrap; }
+  .rt-bar { justify-content: flex-start; flex-wrap: wrap; }
   .po-toolbar { flex-wrap: wrap; }
   .po-toolbar-act { margin-left: 0; }
   .po-filter-wrap { flex: 1 1 100%; justify-content: space-between; }

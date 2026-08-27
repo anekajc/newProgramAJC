@@ -1,5 +1,5 @@
 /* ============================================================================
- * report-table.js — reusable voucher drill + interactive table header for
+ * report-table.js � reusable voucher drill + interactive table header for
  * report* pages
  *
  * Two concerns live in this file:
@@ -35,13 +35,19 @@
  * Globals exposed: openVoucher, openKasharian, openInvoice, closeKasharian,
  * jenisTitle, jenisFromNo, loadingHtml, and the helpers num / fmtRp / invDate / fmtDMY.
  *
- * (2) window.ReportTable — an interactive <thead> for report pages that render
+ * (2) window.ReportTable � an interactive <thead> for report pages that render
  * columns from gcart_header (see report/masterreport2.blade.php): drag judul
  * kolom untuk mengurutkan, plus menu roda gigi per kolom (sembunyikan / desimal
- * / tampilkan total), and a bar above the table listing hidden columns + an
- * optional "Tampilan" view switcher. Merged in from the former
- * public/js/report-table-v2.js (still on disk as an archived copy, no longer
+ * / tampilkan total), and a bar above the table listing hidden columns, a
+ * "Reset kolom" button + an optional "Tampilan" view switcher. Merged in from the
+ * former public/js/report-table-v2.js (still on disk as an archived copy, no longer
  * loaded). Paired with the CSS block of the same origin in report-table.css.
+ *
+ * CATATAN PENTING soal "Reset kolom": doSetHeader() memuat layout TERSIMPAN dari
+ * DBSIMPANHEADER, dan layout itu ikut tersimpan otomatis saat halaman pertama kali
+ * dibuka. Akibatnya kolom yang BARU ditambahkan ke setDefaultHeader() TIDAK akan
+ * muncul untuk user yang sudah pernah membuka halaman itu — sampai mereka menekan
+ * Reset kolom. Jangan hapus tombol ini saat modal "Atur Kolom" dipensiunkan.
  *
  * Pemakaian di halaman report:
  *
@@ -65,7 +71,7 @@
 
   function cfg() { return window.ReportTableConfig || {}; }
 
-  /* ── formatting helpers (exposed globally so report pages can reuse them) ── */
+  /* -- formatting helpers (exposed globally so report pages can reuse them) -- */
   if (typeof window.num !== 'function') {
     window.num = function (v) {
       if (v === null || v === undefined || v === '') return 0;
@@ -111,7 +117,7 @@
   }
   // Inline "loading" label with a small Bootstrap spinner, e.g. for a report footer
   // while data is fetched. Assign via innerHTML (NOT textContent) so the spinner
-  // markup renders:  el.innerHTML = loadingHtml('Memuat data…')
+  // markup renders:  el.innerHTML = loadingHtml('Memuat data�')
   if (typeof window.loadingHtml !== 'function') {
     window.loadingHtml = function (text) {
       var msg = (text != null && text !== '') ? text : 'Memuat data...';
@@ -119,7 +125,7 @@
     };
   }
 
-  /* ── running "saldo berjalan" for kartu-style reports (Hutang/Piutang) ──
+  /* -- running "saldo berjalan" for kartu-style reports (Hutang/Piutang) --
      Recomputes the Saldo Rp / Saldo $ columns as a per-group running balance,
      like the Trial Balance "Saldo Berjalan" drill: the first row of each group
      seeds from that column's existing value (Saldo Awal from the SP); each later
@@ -158,7 +164,7 @@
     window.assignRunningSaldo = function (rows, opts) {
       opts = opts || {};
       var saldo    = opts.saldo || RUNNING_SALDO_DEFAULT;
-      var groupKey = ('groupKey' in opts) ? opts.groupKey : 'nama';   // null/false → one sequence
+      var groupKey = ('groupKey' in opts) ? opts.groupKey : 'nama';   // null/false ? one sequence
       var prop     = opts.prop  || '_run';
       var keys = Object.keys(saldo);
       var acc = {};   // group value -> { saldoCol: running balance }
@@ -183,7 +189,7 @@
     };
   }
 
-  /* ── voucher title per transaction type (Jenis) ── */
+  /* -- voucher title per transaction type (Jenis) -- */
   // Pages may override/extend via window.ReportTableConfig.jenisTitle.
   var JENIS_TITLE = {
     BBK: 'BUKTI BANK KELUAR',
@@ -203,12 +209,12 @@
   };
 
   // Map a document-number prefix to the voucher Jenis code openVoucher dispatches on.
-  // Most prefixes equal their Jenis (BBK, BKK, BKM, …); the purchase-receipt number
+  // Most prefixes equal their Jenis (BBK, BKK, BKM, �); the purchase-receipt number
   // prefixes "LPB" and "PBJ" are both the "BPL" voucher type (Faktur Pembelian).
   // Pages may extend via window.ReportTableConfig.noJenisAlias = { PREFIX: 'JENIS' }.
   var NO_JENIS_ALIAS = { LPB: 'BPL', PBJ: 'BPL' };
   // Derive the voucher Jenis from a document number like "SML/LPB/00018/0426" (its
-  // 2nd slash-segment), applying known aliases. Returns '' if not derivable — pass
+  // 2nd slash-segment), applying known aliases. Returns '' if not derivable � pass
   // the result to openVoucher(no, jenisFromNo(no)).
   if (typeof window.jenisFromNo !== 'function') {
     window.jenisFromNo = function (no) {
@@ -219,7 +225,7 @@
     };
   }
 
-  /* ── panel plumbing ── */
+  /* -- panel plumbing -- */
   // Build the bottom panel if the page didn't ship its own #kasPanel markup.
   function ensurePanel() {
     var panel = document.getElementById('kasPanel');
@@ -248,7 +254,7 @@
       '<div style="margin:18px;padding:12px;background:#FEF2F2;border:1px solid #FECACA;' +
       'border-radius:8px;color:#B91C1C;font-size:12.5px">' + msg + '</div>';
   }
-  // Lowercase every key of a row (the procs mix casing: Debet/kredit/Nobukti…).
+  // Lowercase every key of a row (the procs mix casing: Debet/kredit/Nobukti�).
   // Tolerate a non-array payload (e.g. an error page / single object) so the
   // voucher degrades to "no data" instead of throwing ".map is not a function".
   function lc(rows) {
@@ -258,8 +264,8 @@
     });
   }
 
-  /* ── dispatch: INVC -> invoice, BPL -> faktur pembelian, BP -> bukti pemakaian,
-        else -> Bukti Kas/Bank/etc. ── */
+  /* -- dispatch: INVC -> invoice, BPL -> faktur pembelian, BP -> bukti pemakaian,
+        else -> Bukti Kas/Bank/etc. -- */
   window.openVoucher = function (nobukti, jenis) {
     var key = (jenis != null ? String(jenis).trim().toUpperCase() : '');
     if (key === 'INVC') { window.openInvoice(nobukti); }
@@ -331,7 +337,7 @@
       '</tbody></table>';
   }
 
-  /* ── INVOICE PENJUALAN ── */
+  /* -- INVOICE PENJUALAN -- */
   window.openInvoice = function (nobukti) {
     var panel = ensurePanel();
     showLoading(panel, 'INVOICE - ' + nobukti);
@@ -439,7 +445,7 @@
       '</div>';
   }
 
-  /* ── FAKTUR PEMBELIAN (BPL) ── */
+  /* -- FAKTUR PEMBELIAN (BPL) -- */
   window.openLpb = function (nobukti) {
     var title = window.jenisTitle('BPL');
     var panel = ensurePanel();
@@ -538,7 +544,7 @@
       '</div>';
   }
 
-  /* ── BUKTI PEMAKAIAN INTERNAL ACC (BP) ── */
+  /* -- BUKTI PEMAKAIAN INTERNAL ACC (BP) -- */
   window.openBp = function (nobukti) {
     var title = window.jenisTitle('BP');
     var panel = ensurePanel();
@@ -614,7 +620,7 @@
   };
 
   // Close the voucher when clicking outside it. Clicks on a voucher opener are
-  // ignored so they switch the voucher instead of closing the panel — this covers
+  // ignored so they switch the voucher instead of closing the panel � this covers
   // both a clickable cell (`.kas-clickable`) and a whole clickable row whose
   // onclick calls openVoucher (single-column pages make the entire <tr> clickable).
   document.addEventListener('click', function (e) {
@@ -628,7 +634,7 @@
 })();
 
 /* ============================================================================
- * window.ReportTable — interactive table header (merged from the former
+ * window.ReportTable � interactive table header (merged from the former
  * public/js/report-table-v2.js). See the file-top comment for usage.
  * ==========================================================================*/
 (function () {
@@ -640,6 +646,11 @@
   var openGidx = -1;   // index kolom (di gcart_header) yang menunya terbuka
   var dragGidx = -1;   // index kolom yang sedang diseret
   var menuEl   = null; // elemen .rt-colmenu di <body>
+
+  // Stepper "Desimal" di menu roda gigi kolom numerik DIMATIKAN sementara atas
+  // permintaan - fiturnya tetap ada di kode, hanya dipindah jadi command-only lewat
+  // ReportTable.setDesimal(g, step) di console, belum dipakai user biasa lewat UI.
+  var RT_DESIMAL_UI_ENABLED = false;
 
   /* ---------------- helper ---------------- */
 
@@ -668,7 +679,7 @@
     return (cfg && cfg.bar) ? document.querySelector(cfg.bar) : null;
   }
 
-  // Simpan langsung — hanya dipakai bila fungsi masterreport2 tidak tersedia.
+  // Simpan langsung � hanya dipakai bila fungsi masterreport2 tidak tersedia.
   function saveHeader() {
     if (typeof window.doSimpanHeader !== "function" || typeof window.g_href === "undefined") { return; }
     window.doSimpanHeader(window.g_href, window.g_modeReport, cart(), window.gsum_issubtotal, window.gsum_isgrandtotal);
@@ -806,12 +817,14 @@
 
     if (isNumeric(col)) {
       html += '<div class="rt-colmenu-divider"></div>';
-      html += '<div class="rt-colmenu-item is-static"><span>Desimal</span>' +
-              '<span class="rt-stepper">' +
-              '<button type="button" data-rtact="dec-minus">&minus;</button>' +
-              "<b>" + Number(col[5]) + "</b>" +
-              '<button type="button" data-rtact="dec-plus">+</button>' +
-              "</span></div>";
+      if (RT_DESIMAL_UI_ENABLED) {
+        html += '<div class="rt-colmenu-item is-static"><span>Desimal</span>' +
+                '<span class="rt-stepper">' +
+                '<button type="button" data-rtact="dec-minus">&minus;</button>' +
+                "<b>" + Number(col[5]) + "</b>" +
+                '<button type="button" data-rtact="dec-plus">+</button>' +
+                "</span></div>";
+      }
       html += '<div class="rt-colmenu-item is-static"><span>Tampilkan total</span>' +
               '<button type="button" class="rt-miniswitch' + (Number(col[4]) === 1 ? " on" : "") +
               '" data-rtact="total"></button></div>';
@@ -847,6 +860,23 @@
     menuEl.style.top  = top + "px";
   }
 
+  // Mutasi jumlah desimal kolom `g` sebesar `step` (+1/-1), lalu simpan. Dipakai oleh
+  // menuAction() (kalau RT_DESIMAL_UI_ENABLED dinyalakan lagi) dan oleh
+  // ReportTable.setDesimal(), command-only console entry point-nya untuk sekarang.
+  function applyDesimalStep(g, step) {
+    var all = cart();
+    if (!all[g]) { return false; }
+    if (typeof window.doSetDesimal === "function") {
+      window.doSetDesimal(g, step);
+      return true;
+    }
+    var next = Number(all[g][5]) + step;
+    if (next < 0 || next > 4) { return false; }
+    all[g][5] = next;
+    saveHeader();
+    return true;
+  }
+
   function menuAction(act, g) {
     var all = cart();
     if (!all[g]) { return; }
@@ -860,15 +890,7 @@
     }
 
     if (act === "dec-minus" || act === "dec-plus") {
-      var step = (act === "dec-plus") ? 1 : -1;
-      if (typeof window.doSetDesimal === "function") {
-        window.doSetDesimal(g, step);
-      } else {
-        var next = Number(all[g][5]) + step;
-        if (next < 0 || next > 4) { return; }
-        all[g][5] = next;
-        saveHeader();
-      }
+      if (!applyDesimalStep(g, act === "dec-plus" ? 1 : -1)) { return; }
     } else if (act === "total") {
       if (typeof window.doButtonTotal === "function") {
         window.doButtonTotal(g);
@@ -912,6 +934,51 @@
     });
   }
 
+  /* ---------------- reset kolom ---------------- */
+
+  /* Kembalikan susunan kolom ke setDefaultHeader() milik halaman.
+     WAJIB ADA karena doSetHeader() memuat layout TERSIMPAN dari DBSIMPANHEADER:
+     begitu user pernah menyimpan (dan itu terjadi otomatis saat pertama kali buka),
+     kolom yang BARU ditambahkan ke setDefaultHeader() tidak akan pernah muncul
+     sampai layout tersimpannya di-reset.
+
+     doSetHeader(mode, true) memaksa _strHeader = "" -> panggil setDefaultHeader()
+     -> doSimpanHeader(). Itu primitif reset-nya; doResetHeader() di masterreport2
+     memakai primitif yang sama, tapi tidak me-render ulang tabel utama — di sini
+     kita render ulang supaya hasilnya langsung terlihat. */
+  function resetHeader() {
+    if (typeof window.doSetHeader !== "function") { return; }
+
+    var apply = function () {
+      window.doSetHeader(window.g_modeReport, true);
+      closeMenu();
+      fireChange();     // tabel halaman render ulang (headHtml juga menyegarkan bar)
+      renderBar();      // jaga-jaga bila onChange tidak memanggil headHtml
+      if (window.alertify && alertify.success) {
+        alertify.success("Kolom tabel sudah kembali ke pengaturan awal");
+      }
+    };
+
+    if (window.alertify && typeof alertify.confirm === "function") {
+      var dlg = alertify.confirm(
+        "Reset Kolom",
+        "Apakah yakin ingin mengembalikan kolom tabel ke pengaturan awal?",
+        apply,
+        function () { /* batal */ }
+      );
+      /* Kelas 'ajs-app-buttons' menempelkan gaya tombol OK/Cancel dari
+         public/css/report-table.css (lihat blok "gaya bersama" di sana).
+         Tanpa 'is-danger' tombol OK memakai warna biru — reset kolom bukan
+         aksi merusak. Dibungkus guard karena elements baru ada setelah
+         dialog dibangun. */
+      if (dlg && dlg.elements && dlg.elements.root) {
+        dlg.elements.root.classList.add("ajs-app-buttons");
+      }
+    } else {
+      apply();
+    }
+  }
+
   /* ---------------- bar di atas tabel ---------------- */
 
   function renderBar() {
@@ -933,6 +1000,15 @@
     }
 
     var html = "";
+
+    // Reset kolom — hanya bila doSetHeader() (masterreport2) tersedia.
+    if (typeof window.doSetHeader === "function") {
+      html += '<button type="button" class="rt-reset-btn" data-rtbar="reset" ' +
+              'title="Kembalikan kolom ke pengaturan awal">' +
+              '<i class="bi bi-arrow-counterclockwise"></i><span>Reset kolom</span>' +
+              "</button>";
+    }
+
     html += '<div class="rt-drop">';
     html += '  <button type="button" class="rt-hidden-btn" data-rtbar="hidden"' + (hidden.length ? "" : " disabled") + ">";
     html += '    <i class="bi bi-plus-lg"></i><span>' +
@@ -980,6 +1056,17 @@
 
   function bindBar(bar) {
     bar.addEventListener("click", function (e) {
+      // Reset ditangani lebih dulu: tombolnya TIDAK punya .rt-drop-menu, jadi kalau
+      // jatuh ke cabang [data-rtbar] di bawah ia akan membuka dropdown milik tombol lain.
+      var reset = closestEl(e.target, '[data-rtbar="reset"]');
+      if (reset) {
+        e.stopPropagation();
+        closeBarMenus();
+        closeMenu();
+        resetHeader();
+        return;
+      }
+
       var btn = closestEl(e.target, "[data-rtbar]");
       if (btn) {
         e.stopPropagation();
@@ -1044,6 +1131,7 @@
     init:     init,
     headHtml: headHtml,
     refresh:  renderBar,
+    reset:    resetHeader,
     close:    function () { closeMenu(); closeBarMenus(); }
   };
 })();

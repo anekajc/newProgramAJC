@@ -9,11 +9,11 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/datatables.min.css') !!}">
-    <link rel="stylesheet" href="{!! URL::asset('public/css/jquery-ui.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/datatables.min.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/jquery-ui.min.css') !!}">
     <title>AnekaJC</title>
     <!-- jQuery -->
-    <link rel="stylesheet" href="{!! URL::asset('public/css/alertify.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/alertify.css') !!}">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <!-- Bootstrap files (jQuery first, then Popper.js, then Bootstrap JS) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
@@ -237,15 +237,15 @@
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script src="{!! URL::asset('public/js/jquery.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-3.3.1.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/select2.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/popper.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/bootstrap.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/alertify.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/autoNumeric.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/datatables.min.js') !!}"></script>
-    <script src="{!! URL::asset('public/js/jquery-ui.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-3.3.1.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/select2.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/popper.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/bootstrap.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/alertify.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/autoNumeric.js') !!}"></script>
+    <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
+    <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
 
 
   </body>

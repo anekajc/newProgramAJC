@@ -1,5 +1,8 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
+
+@section('page-title', 'Surat Jalan')
+@section('title', 'SML - Surat Jalan')
 
 @endsection
 
@@ -13,10 +16,115 @@
      out elsewhere in this file, so it's unreachable in the UI. --}}
 <link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
 
+{{-- Page1 rebuilt 1:1 against so.blade.php's own page1 (itself rebuilt from
+     purchaseOrder.blade.php): same card-wrapped pill tab bar, shared toolbar
+     (search + Tampilkan) in its own card, po-table-wrap sticky-header scroll box, and
+     Reset-kolom bar -- copied verbatim, rescoped from SO's #tabel/#tabel7 to this
+     page's five live tables (#tabel/#tabel2/#tabel3/#tabel5/#tabel6). Data/business
+     logic (loadAll, HeaderEngine persistence, tabelXActionsCell) is untouched -- this
+     only changes how the page is built and how it looks. --}}
+<link rel="stylesheet" href="{{ asset('css/sj-table-header.css') }}?v={{ filemtime(public_path('css/sj-table-header.css')) }}">
+
 <style>
-  /* Holds the pagination element JS relocates here (see moveDataTablePagination()) so it
-     lives outside .table-responsive's horizontal scroll. Matches so.blade.php's
-     .tb-pagination-outside treatment. */
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff !important;
+    border-color: #007bff !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+  }
+
+  #page1 .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border) !important;
+  }
+
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink);
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+</style>
+
+<style>
   .tb-pagination-outside {
     overflow: hidden;
     margin-top: 8px;
@@ -50,18 +158,9 @@
     background: var(--sp-bg, #f4f5f7);
   }
 
-  /* report-table.css's .filter-wrap/.toolbar classes (the "Tampilkan" control) are
-     designed to sit directly above a .tb-report table -- give them the same small
-     bottom margin so.blade.php's toolbar has. */
   .tb-report .toolbar {
     margin-bottom: 10px;
   }
-
-  /* "Reset kolom" pill + the row that holds it alongside the hidden-columns bar.
-     Not part of report-table.css itself (so.blade.php declares these page-locally
-     too) -- kept OUTSIDE #rtBarTabelX as a flex sibling, not a child, because
-     report-table.js's renderBar() fully overwrites that div's innerHTML on every
-     drag/hide/decimal change; a button placed inside it would vanish on re-render. */
   .rt-bar-row {
     display: flex;
     align-items: center;
@@ -93,8 +192,6 @@
   }
 </style>
 
-{{-- tampilan search bar 1 --}}
-  @section('css')
   <style>
   #tabel_filter {
       display: flex;
@@ -119,9 +216,7 @@
       color: #333;
     }
   </style>
-{{-- end tampilan search bar 1 --}}
 
-{{-- tampilan search bar 2 --}}
   <style>
   #tabel2_filter {
       display: flex;
@@ -152,9 +247,7 @@
       outline: none;
     }
   </style>
-{{-- end tampilan search bar 2 --}}
 
-{{-- tampilan search bar 3 --}}
   <style>
   #tabel3_filter {
       display: flex;
@@ -184,7 +277,7 @@
       outline: none;
     }
   </style>
-{{-- end tampilan search bar 3 --}}
+
 
 <style>
 #tabel6_filter {
@@ -277,9 +370,6 @@
   }
 </style>
 
-{{-- end tampilan search bar 2 --}}
-
-{{-- tampilan search bar modal add pelanggan --}}
 <style>
   #tabel_add_list_pelanggan_filter{
     display: flex;
@@ -295,9 +385,7 @@
     font-size: 0.65rem;
   }
 </style>
-{{-- end tampilan search bar modal add pelanggan --}}
 
-{{-- tampilan search sales --}}
 <style>
   #tabel_add_list_sales_filter{
     display: flex;
@@ -312,9 +400,7 @@
     font-size: 0.65rem;
   }
 </style>
-{{-- end tampilan search sales --}}
 
-{{-- tampilan search modal barang all --}}
 <style>
   #input_search_barang_all {
     width: 150px;
@@ -335,27 +421,11 @@
   vertical-align: middle;
   }
 </style>
-{{-- end tampilan search modal barang all --}}
-@endsection
 
+@endsection
 
 @section('content')
 <div id="page1" class="container-fluid">
-<div class="container-fluid">
-
-  <!-- <div id="qrcode"></div> -->
-  <div class="row">
-    <div class="col-6 text-left">
-      <h2 style="margin-top:-85px;">Outstanding SO</h2>
-    </div>
-    <div class="col-6 text-right" >
-
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-<!-- <button onclick="buttonAdd()">tes</button> -->
-</div>
-
 
 <div id="printContainer" style="display:none">
 
@@ -373,223 +443,151 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card" style="margin-top: -30px">
-<div class="card-header" >
-<div class="row">
-  <nav style="width: 100%;">
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
- 
-  <a class="nav-item nav-link" id="nav-profile3-tab" data-toggle="tab" href="#profile3" role="tab" aria-controls="nav-profile3" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Out SO Prioritas
-      </a>
 
-  <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        SO Siap Kirim
-      </a>
+  {{-- Tab bar: so.blade.php's own card.tab-card + custom-tabs pattern, copied 1:1.
+       Same five tabs/targets as before (data-toggle, not so.blade.php's data-bs-toggle --
+       this page's tabs still run on the Bootstrap 4 tab plugin, matching the existing
+       markup's own convention; changing it isn't part of this restyle). The commented-out
+       "Out SO Booking" tab stays commented -- unreachable before this rebuild, unreachable
+       after it. --}} 
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
 
+        <a class="nav-item nav-link" id="nav-profile3-tab" data-toggle="tab" href="#profile3" role="tab" aria-controls="nav-profile3" aria-selected="false">
+          Out SO Prioritas
+        </a>
 
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true"
-         style="color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left; ">
-        SO Belum Siap Kirim
-      </a>
-    
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+          SO Siap Kirim
+        </a>
 
-      <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Surat Jalan Belum Otorisasi
-      </a>
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+          SO Belum Siap Kirim
+        </a>
 
-      <a class="nav-item nav-link" id="nav-profile4-tab" data-toggle="tab" href="#profile4" role="tab" aria-controls="nav-profile4" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Surat Jalan Sudah Otorisasi
-      </a>
+        <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false">
+          Surat Jalan Belum Otorisasi
+        </a>
 
-      
-   <!--   <a class="nav-item nav-link" id="nav-profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="nav-profile2" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Out SO Booking
-      </a> -->
-    
+        <a class="nav-item nav-link" id="nav-profile4-tab" data-toggle="tab" href="#profile4" role="tab" aria-controls="nav-profile4" aria-selected="false">
+          Surat Jalan Sudah Otorisasi
+        </a>
 
+        <!--   <a class="nav-item nav-link" id="nav-profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="nav-profile2" aria-selected="false">
+          Out SO Booking
+        </a> -->
+
+      </div>
     </div>
-  </nav>
-</div>
-</div>
-<div class="card-body" style="padding:0;" >
-<div class="tab-content" id="myTabContent">
+  </div>
+
+  {{-- Toolbar shared by all five tabs: one search/length control drives whichever tab is
+       visible, same as so.blade.php's shared toolbar. --}}
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+  <div class="po-toolbar">
+
+    <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
+
+    <div class="po-len-wrap">
+      <label for="tabel_length_visual">Tampilkan</label>
+      <select id="tabel_length_visual" class="po-len-inp">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="-1">Semua</option>
+      </select>
+    </div>
+
+  </div>
+    </div>
+  </div>
+
+  <div class="card">
+  <div class="card-body" style="padding:0;">
+  <div class="tab-content" id="myTabContent">
 
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="row">
-      <div class="col-12">
-        {{-- .tb-report scopes report-table.css's gear-menu/drag-column styling (and the
-             "Tampilkan" toolbar below) to just this table. --}}
-        <div class="tb-report main">
-        <div class="toolbar">
-          <div class="filter-wrap">
-            <label for="tabel_length_visual">Tampilkan</label>
-            <select id="tabel_length_visual" class="filter-inp" style="cursor:pointer;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="-1">Semua</option>
-            </select>
-          </div>
-        </div>
-        <div class="rt-bar-row">
-          <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
-          </button>
-          <div id="rtBarTabel"></div>
-        </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel" class="tb">
-              {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
-                   renderTabelRows(), which runs on page load via reinitTabel()) replaces
-                   this <thead>'s contents based on gcart_header before the user ever sees
-                   it -- the tag itself is just a placeholder for that selector. --}}
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel_data" class="text-left"></tbody>
-            </table>
-          </div>
-          <div id="tabelPaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
-        </div>
-        </div>
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel"></div>
       </div>
-    </div>
+      <div class="po-table-wrap">
+        <table id="tabel" class="tb data-table">
+          
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
   </div>
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="tb-report main">
-        <div class="toolbar">
-          <div class="filter-wrap">
-            <label for="tabel2_length_visual">Tampilkan</label>
-            <select id="tabel2_length_visual" class="filter-inp" style="cursor:pointer;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="-1">Semua</option>
-            </select>
-          </div>
-        </div>
-        <div class="rt-bar-row">
-          <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
-          </button>
-          <div id="rtBarTabel2"></div>
-        </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel2" class="tb">
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel2_data" class="text-left"></tbody>
-            </table>
-          </div>
-          <div id="tabel2PaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
-        </div>
-        </div>
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel2"></div>
       </div>
-    </div>
+      <div class="po-table-wrap">
+        <table id="tabel2" class="tb data-table">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel2_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
   </div>
   <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="tb-report main">
-        <div class="toolbar">
-          <div class="filter-wrap">
-            <label for="tabel3_length_visual">Tampilkan</label>
-            <select id="tabel3_length_visual" class="filter-inp" style="cursor:pointer;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="-1">Semua</option>
-            </select>
-          </div>
-        </div>
-        <div class="rt-bar-row">
-          <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel3')">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
-          </button>
-          <div id="rtBarTabel3"></div>
-        </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel3" class="tb">
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel3_data" class="text-left"></tbody>
-            </table>
-          </div>
-          <div id="tabel3PaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
-        </div>
-        </div>
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel3')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel3"></div>
       </div>
-    </div>
+      <div class="po-table-wrap">
+        <table id="tabel3" class="tb data-table">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel3_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
   </div>
   <div class="tab-pane fade" id="profile4" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="tb-report main">
-        <div class="toolbar">
-          <div class="filter-wrap">
-            <label for="tabel6_length_visual">Tampilkan</label>
-            <select id="tabel6_length_visual" class="filter-inp" style="cursor:pointer;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="-1">Semua</option>
-            </select>
-          </div>
-        </div>
-        <div class="rt-bar-row">
-          <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
-          </button>
-          <div id="rtBarTabel6"></div>
-        </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel6" class="tb">
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel6_data" class="text-left"></tbody>
-            </table>
-          </div>
-          <div id="tabel6PaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
-        </div>
-        </div>
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel6"></div>
       </div>
-    </div>
+      <div class="po-table-wrap">
+        <table id="tabel6" class="tb data-table">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel6_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
   </div>
   <div class="tab-pane fade" id="profile2" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="table-responsive">
+    <div class="po-table-wrap">
 
               <table id="tabel4" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center bg-primary text-white">
@@ -639,49 +637,26 @@
                     @endfor
                 </tbody>
               </table>
-        </div>
-      </div>
     </div>
   </div>
   <div class="tab-pane fade" id="profile3" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12">
-        <div class="tb-report main">
-        <div class="toolbar">
-          <div class="filter-wrap">
-            <label for="tabel5_length_visual">Tampilkan</label>
-            <select id="tabel5_length_visual" class="filter-inp" style="cursor:pointer;">
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-              <option value="-1">Semua</option>
-            </select>
-          </div>
-        </div>
-        <div class="rt-bar-row">
-          <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel5')">
-            <i class="bi bi-arrow-clockwise"></i> Reset kolom
-          </button>
-          <div id="rtBarTabel5"></div>
-        </div>
-        <div class="table-outer">
-          <div class="table-wrap">
-            <table id="tabel5" class="tb">
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel5_data" class="text-left"></tbody>
-            </table>
-          </div>
-          <div id="tabel5PaginationOutside" class="tb-pagination-outside"></div>
-          <div class="rt-hint">
-            <i class="bi bi-info-circle"></i>
-            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-            untuk menyembunyikan kolom atau mengatur jumlah desimal.
-          </div>
-        </div>
-        </div>
+      <div class="rt-bar-row">
+        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel5')">
+          <i class="bi bi-arrow-clockwise"></i> Reset kolom
+        </button>
+        <div id="rtBarTabel5"></div>
       </div>
-    </div>
+      <div class="po-table-wrap">
+        <table id="tabel5" class="tb data-table">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel5_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
+      </div>
   </div>
 </div>
 </div>
@@ -3115,7 +3090,6 @@
 
 @section('js')
 <script src="{{ asset('js/report-table.js') }}"></script>
-<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
 <script type="text/javascript">
 
 let dataTableAdd = []
@@ -3144,15 +3118,37 @@ let tempEditEdit = {}
 let tipeform = ''
 let tipeformitem = ''
 
-// -- #tabel/#tabel2/#tabel3/#tabel5/#tabel6 interactive column engine --
-// Same shared drag/hide/decimal-column engine so.blade.php uses for #tabel/#tabel7.
-// Persistence goes through SuratJalanController::loadHeader/simpanHeader (SML-backed),
-// keyed by a href unique to each of this page's tables. #tabel4 ("Out SO Booking") is
-// left out -- its nav-tab link is already commented out elsewhere in this file.
-HeaderEngine.configure({
-  loadUrl: "{!! url('suratjalanloadheader') !!}",
-  simpanUrl: "{!! url('suratjalansimpanheader') !!}"
-});
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Port 1:1 dari poCart/poAktifkanTabel milik purchaseOrder.blade.php (sama
+ * seperti so.blade.php/invoicepenjualan.blade.php), MENGGANTIKAN HeaderEngine
+ * -- tapi endpoint penyimpanannya TETAP loadHeader/simpanHeader milik
+ * SuratJalanController (bukan pindah ke saveheadertable/getheadertable
+ * milik PO): itu "core function" yang sudah ada, dan layout kolom yang
+ * sudah tersimpan user di endpoint lama harus tetap kebaca. hrefnya juga
+ * dibiarkan sama persis (suratjalan_tabel, suratjalan_tabel2, dst) supaya
+ * baris yang sudah tersimpan tetap cocok.
+ *
+ * report-table.js membaca window.gcart_header/g_href/g_modeReport/
+ * gsum_issubtotal/gsum_isgrandtotal langsung dan memanggil
+ * window.doMoveHeader/doButtonVisibility/doSetDesimal/doButtonTotal/
+ * doSimpanHeader BY THESE EXACT NAMES -- kontrak itu tidak berubah,
+ * sjCart{} di bawah cuma checkpoint tempat gcart_header disimpan sebelum
+ * pindah ke tabel lain, sama seperti poCart/soCart/ipCart.
+ */
+var g_href = '';
+var g_modeReport = 1;
+var gcart_header = [];
+var gsum_issubtotal = 0, gsum_isgrandtotal = 0;
+
+var sjCart = { tabel: [], tabel2: [], tabel3: [], tabel5: [], tabel6: [] };
+var sjActiveKey = null;
+var SJ_TABLE_INFO = {
+  tabel:  { href: 'suratjalan_tabel',  setDefault: setDefaultHeaderTabel  },
+  tabel2: { href: 'suratjalan_tabel2', setDefault: setDefaultHeaderTabel2 },
+  tabel3: { href: 'suratjalan_tabel3', setDefault: setDefaultHeaderTabel3 },
+  tabel5: { href: 'suratjalan_tabel5', setDefault: setDefaultHeaderTabel5 },
+  tabel6: { href: 'suratjalan_tabel6', setDefault: setDefaultHeaderTabel6 }
+};
 
 var lastTabelRows = [];
 var lastTabel2Rows = [];
@@ -3160,41 +3156,109 @@ var lastTabel3Rows = [];
 var lastTabel5Rows = [];
 var lastTabel6Rows = [];
 
-HeaderEngine.registerTable('tabel', {
-  href: 'suratjalan_tabel',
-  tableSel: '#tabel',
-  barSel: '#rtBarTabel',
-  setDefault: function () { setDefaultHeaderTabel(); },
-  onChange: function () { reinitTabel(); }
-});
-HeaderEngine.registerTable('tabel2', {
-  href: 'suratjalan_tabel2',
-  tableSel: '#tabel2',
-  barSel: '#rtBarTabel2',
-  setDefault: function () { setDefaultHeaderTabel2(); },
-  onChange: function () { reinitTabel2(); }
-});
-HeaderEngine.registerTable('tabel3', {
-  href: 'suratjalan_tabel3',
-  tableSel: '#tabel3',
-  barSel: '#rtBarTabel3',
-  setDefault: function () { setDefaultHeaderTabel3(); },
-  onChange: function () { reinitTabel3(); }
-});
-HeaderEngine.registerTable('tabel5', {
-  href: 'suratjalan_tabel5',
-  tableSel: '#tabel5',
-  barSel: '#rtBarTabel5',
-  setDefault: function () { setDefaultHeaderTabel5(); },
-  onChange: function () { reinitTabel5(); }
-});
-HeaderEngine.registerTable('tabel6', {
-  href: 'suratjalan_tabel6',
-  tableSel: '#tabel6',
-  barSel: '#rtBarTabel6',
-  setDefault: function () { setDefaultHeaderTabel6(); },
-  onChange: function () { reinitTabel6(); }
-});
+// Dua sumber data di halaman ini kadang mengembalikan field logis yang sama
+// dengan casing berbeda -- cari case-insensitive. Port dari HeaderEngine.pickCI.
+function sjPickCI(row, key) {
+  if (row[key] !== undefined) { return row[key]; }
+  var lower = key.toLowerCase();
+  for (var k in row) {
+    if (k.toLowerCase() === lower) { return row[k]; }
+  }
+  return undefined;
+}
+
+// Checkpoint gcart_header/g_href/dst milik tabel yang sedang aktif keluar,
+// lalu arahkan ke tabel `key`. Data-only, aman dipanggil sebelum DataTables
+// destroy()/rebuild. Port dari HeaderEngine.activateEngineData().
+function sjAktifkanTabel(key) {
+  if (sjActiveKey && sjCart[sjActiveKey]) {
+    sjCart[sjActiveKey] = gcart_header;
+  }
+  sjActiveKey = key;
+  g_href = SJ_TABLE_INFO[key].href;
+  gcart_header = sjCart[key];
+}
+
+function sjDoGetHeader(_str) {
+  var arr = [];
+  _str.split('||').forEach(function (part) {
+    var f = part.split(';;');
+    arr.push([f[0], f[1], Number(f[2]), f[3], Number(f[4]), Number(f[5])]);
+  });
+  return arr;
+}
+
+// Bare global -- report-table.js's saveHeader() fallback checks for this exact name.
+window.doSimpanHeader = function (_hrefArg, _mode, _cart, _issubtotal, _isgrandtotal) {
+  var _strHeader = "";
+  _cart.forEach(function (item, i) {
+    if (i != 0) { _strHeader += '||'; }
+    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
+  });
+  $.ajax({
+    url: "{!! url('suratjalansimpanheader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _hrefArg,
+      mode: _mode,
+      header: _strHeader,
+      issubtotal: _issubtotal,
+      isgrandtotal: _isgrandtotal
+    },
+    success: function (res) {}
+  });
+};
+
+function sjDoSetHeader(key, isReset) {
+  isReset = isReset || false;
+  var _strHeader = "";
+  if (!isReset) {
+    $.ajax({
+      url: "{!! url('suratjalanloadheader') !!}",
+      type: "get",
+      async: false,
+      data: { href: SJ_TABLE_INFO[key].href, mode: 1 },
+      success: function (res) {
+        if (res && res[0]) {
+          _strHeader = res[0].header;
+          gsum_issubtotal = Number(res[0].issubtotal) || 0;
+          gsum_isgrandtotal = Number(res[0].isgrandtotal) || 0;
+        }
+      }
+    });
+  }
+  if (_strHeader != "") {
+    gcart_header = sjDoGetHeader(_strHeader);
+  } else {
+    SJ_TABLE_INFO[key].setDefault();
+    window.doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+  sjCart[key] = gcart_header;
+}
+
+// Bare globals -- report-table.js's moveColumn()/menuAction() fallbacks check
+// for these exact names.
+window.doMoveHeader = function (_from, _to) {
+  var moved = gcart_header.splice(_from, 1)[0];
+  gcart_header.splice(_to, 0, moved);
+  window.doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+};
+window.doButtonVisibility = function (_id) {
+  gcart_header[_id][2] = gcart_header[_id][2] ? 0 : 1;
+  window.doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+};
+window.doSetDesimal = function (_index, _step) {
+  var v = (gcart_header[_index][5] || 0) + _step;
+  if (v < 0) { v = 0; }
+  if (v > 4) { v = 4; }
+  gcart_header[_index][5] = v;
+  window.doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+};
+window.doButtonTotal = function (_index) {
+  gcart_header[_index][4] = gcart_header[_index][4] ? 0 : 1;
+  window.doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+};
 
 function setDefaultHeaderTabel() {
   gcart_header = [
@@ -3299,12 +3363,12 @@ function setDefaultHeaderTabel6() {
 // Fixed, non-draggable Actions cell for #tabel6 -- same buttons/onclick args the old
 // static markup and loadAll() row-builder both used, just read via pickCI() now.
 function tabel6ActionsCell(row) {
-  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
-  var namaCustSupp = HeaderEngine.pickCI(row, 'NamaCustSupp');
-  var tglKirim = HeaderEngine.pickCI(row, 'TGLKIRIM');
-  var tglTerimaBrg = HeaderEngine.pickCI(row, 'TglTerimaBRG');
-  var tglTerima = HeaderEngine.pickCI(row, 'TGLTERIMA');
-  var tglSpbInvc = HeaderEngine.pickCI(row, 'TglSPBINVC');
+  var nobukti = sjPickCI(row, 'NOBUKTI');
+  var namaCustSupp = sjPickCI(row, 'NamaCustSupp');
+  var tglKirim = sjPickCI(row, 'TGLKIRIM');
+  var tglTerimaBrg = sjPickCI(row, 'TglTerimaBRG');
+  var tglTerima = sjPickCI(row, 'TGLTERIMA');
+  var tglSpbInvc = sjPickCI(row, 'TglSPBINVC');
   var html = '<td class="text-center">';
   html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
   html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonTerimaAcc(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglSpbInvc + '\')"><i class="bi bi-calendar4-range"></i></button>';
@@ -3325,7 +3389,7 @@ function suratjalanFormatTanggal(raw) {
 }
 
 function tabelValueCell(row, col) {
-  var raw = HeaderEngine.pickCI(row, col[0]);
+  var raw = sjPickCI(row, col[0]);
   var type = col[3];
 
   if (type === 'date') {
@@ -3362,19 +3426,35 @@ function suratjalanReplaceThead(tableSel, cols, leadingThHtml) {
   oldThead.parentNode.replaceChild(newThead, oldThead);
 }
 
-// DataTables names its auto-generated wrapper <tableId>_wrapper and puts
-// .dataTables_paginate inside it, alongside the table -- meaning it's part of
-// .table-wrap's horizontally-scrolling content. Physically relocating the pagination
-// element into a container placed outside .table-wrap keeps it out of that scroll and
-// always visible below the table. Empty the target first so each reinit replaces last
-// time's pagination instead of stacking a new one on top of it.
-function moveDataTablePagination(tableId, targetSel) {
-  $(targetSel).empty();
-  $('#' + tableId + '_wrapper .dataTables_paginate').appendTo(targetSel);
+// Kotak scroll tabel dibuat setinggi sisa ruang di #content supaya halaman TIDAK perlu
+// scrollbar sendiri - port 1:1 dari soAturTinggiTabel()/poAturTinggiTabel() milik
+// so.blade.php/purchaseOrder.blade.php.
+function sjAturTinggiTabel() {
+  var area = document.getElementById('content');
+  var pane = document.querySelector('#myTabContent .tab-pane.active');
+  if (!area || !pane) { return; }
+  var wrap = pane.querySelector('.po-table-wrap');
+  if (!wrap) { return; }
+
+  wrap.style.maxHeight = 'none';
+
+  var padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+  var batasBawah = area.getBoundingClientRect().bottom - padBawah;
+  var kotak = wrap.getBoundingClientRect();
+  var bawah = pane.getBoundingClientRect().bottom - kotak.bottom;
+
+  var sisa = batasBawah - kotak.top - bawah - 4;
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
 }
 
+// dom string disamakan 1:1 dengan so.blade.php: 'po-table-wrap't membungkus HANYA isi
+// tabelnya dalam kotak scroll, sedangkan info+pagination ('i'/'p') ada DI LUAR kotak itu
+// supaya tidak ikut tergulung -- menggantikan moveDataTablePagination()/
+// .tb-pagination-outside yang dipakai sebelumnya untuk menyelesaikan masalah yang sama.
+const SJ_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+
 function renderTabelRows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
+  if (sjActiveKey !== 'tabel') { sjAktifkanTabel('tabel'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
   var html = '';
   (rows || []).forEach(function (row) {
@@ -3387,7 +3467,7 @@ function renderTabelRows(rows) {
 }
 
 function renderTabel2Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel2') { HeaderEngine.activateEngineData('tabel2'); }
+  if (sjActiveKey !== 'tabel2') { sjAktifkanTabel('tabel2'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
@@ -3400,7 +3480,7 @@ function renderTabel2Rows(rows) {
 }
 
 function renderTabel3Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel3') { HeaderEngine.activateEngineData('tabel3'); }
+  if (sjActiveKey !== 'tabel3') { sjAktifkanTabel('tabel3'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
@@ -3413,7 +3493,7 @@ function renderTabel3Rows(rows) {
 }
 
 function renderTabel5Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel5') { HeaderEngine.activateEngineData('tabel5'); }
+  if (sjActiveKey !== 'tabel5') { sjAktifkanTabel('tabel5'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
@@ -3426,7 +3506,7 @@ function renderTabel5Rows(rows) {
 }
 
 function renderTabel6Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel6') { HeaderEngine.activateEngineData('tabel6'); }
+  if (sjActiveKey !== 'tabel6') { sjAktifkanTabel('tabel6'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
@@ -3442,9 +3522,9 @@ function reinitTabel() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
-    $('#tabel').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel', '#tabelPaginationOutside');
-    HeaderEngine.bindEngineDom('tabel');
+    $('#tabel').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
+    sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -3455,9 +3535,9 @@ function reinitTabel2() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
     renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel2', '#tabel2PaginationOutside');
-    HeaderEngine.bindEngineDom('tabel2');
+    $('#tabel2').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
+    sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel2 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -3468,9 +3548,9 @@ function reinitTabel3() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
     renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel3', '#tabel3PaginationOutside');
-    HeaderEngine.bindEngineDom('tabel3');
+    $('#tabel3').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    ReportTable.init({ table: '#tabel3', bar: '#rtBarTabel3', onChange: reinitTabel3 });
+    sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel3 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -3481,9 +3561,9 @@ function reinitTabel5() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel5')) { $('#tabel5').DataTable().destroy(); }
     renderTabel5Rows(lastTabel5Rows);
-    $('#tabel5').DataTable({ dom: 'ftip', lengthChange: false, paging: true, ordering: false });
-    moveDataTablePagination('tabel5', '#tabel5PaginationOutside');
-    HeaderEngine.bindEngineDom('tabel5');
+    $('#tabel5').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
+    sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel5 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -3494,9 +3574,9 @@ function reinitTabel6() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel6')) { $('#tabel6').DataTable().destroy(); }
     renderTabel6Rows(lastTabel6Rows);
-    $('#tabel6').DataTable({ dom: 'ftip', lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false });
-    moveDataTablePagination('tabel6', '#tabel6PaginationOutside');
-    HeaderEngine.bindEngineDom('tabel6');
+    $('#tabel6').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    ReportTable.init({ table: '#tabel6', bar: '#rtBarTabel6', onChange: reinitTabel6 });
+    sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel6 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
@@ -3505,8 +3585,8 @@ function reinitTabel6() {
 
 function buttonHeaderTable(key) {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    HeaderEngine.activateEngineData(key);
-    HeaderEngine.doSetHeader(1, true);
+    sjAktifkanTabel(key);
+    sjDoSetHeader(key, true);
     ({ tabel: reinitTabel, tabel2: reinitTabel2, tabel3: reinitTabel3, tabel5: reinitTabel5, tabel6: reinitTabel6 })[key]();
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
@@ -3514,62 +3594,86 @@ function buttonHeaderTable(key) {
 
 $(document).ready(function(){
 
+      document.getElementById('breadcrumb').innerHTML = "Surat Jalan"
+
       // #home/#tabel ("SO Belum Siap Kirim") is the tab shown by default, so
       // initialize it last -- reinitTabelX() each end by binding ReportTable to their
       // own table, and whichever runs last wins, so this order leaves the actually-
       // visible tab interactive.
-      HeaderEngine.activateEngineData('tabel3');
-      HeaderEngine.doSetHeader(1);
+      sjAktifkanTabel('tabel3');
+      sjDoSetHeader('tabel3', false);
       lastTabel3Rows = @json($tempOutstanding3);
       reinitTabel3();
 
-      HeaderEngine.activateEngineData('tabel6');
-      HeaderEngine.doSetHeader(1);
+      sjAktifkanTabel('tabel6');
+      sjDoSetHeader('tabel6', false);
       lastTabel6Rows = @json($tempOutstanding6);
       reinitTabel6();
 
-      HeaderEngine.activateEngineData('tabel2');
-      HeaderEngine.doSetHeader(1);
+      sjAktifkanTabel('tabel2');
+      sjDoSetHeader('tabel2', false);
       lastTabel2Rows = @json($tempOutstanding2);
       reinitTabel2();
 
-      HeaderEngine.activateEngineData('tabel5');
-      HeaderEngine.doSetHeader(1);
+      sjAktifkanTabel('tabel5');
+      sjDoSetHeader('tabel5', false);
       lastTabel5Rows = @json($tempOutstanding5);
       reinitTabel5();
 
-      HeaderEngine.activateEngineData('tabel');
-      HeaderEngine.doSetHeader(1);
+      sjAktifkanTabel('tabel');
+      sjDoSetHeader('tabel', false);
       lastTabelRows = @json($tempOutstanding);
       reinitTabel();
 
       // Re-bind the interactive engine whenever the user switches tabs -- ReportTable's
-      // listeners are bound to one table's DOM at a time.
+      // listeners are bound to one table's DOM at a time. Just re-runs ReportTable.init()
+      // (same call reinitTabelX() itself makes) WITHOUT the DataTables destroy+rebuild --
+      // matches exactly what HeaderEngine.bindEngineDom() used to do, so switching tabs
+      // doesn't lose the table's current search/sort/page state like a full reinit would.
       $('#nav-home-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel');
-        HeaderEngine.bindEngineDom('tabel');
+        sjAktifkanTabel('tabel');
+        ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
+        sjAturTinggiTabel();
       });
       $('#nav-profile-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel2');
-        HeaderEngine.bindEngineDom('tabel2');
+        sjAktifkanTabel('tabel2');
+        ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
+        sjAturTinggiTabel();
       });
       $('#nav-profile1-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel3');
-        HeaderEngine.bindEngineDom('tabel3');
+        sjAktifkanTabel('tabel3');
+        ReportTable.init({ table: '#tabel3', bar: '#rtBarTabel3', onChange: reinitTabel3 });
+        sjAturTinggiTabel();
       });
       $('#nav-profile3-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel5');
-        HeaderEngine.bindEngineDom('tabel5');
+        sjAktifkanTabel('tabel5');
+        ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
+        sjAturTinggiTabel();
       });
       $('#nav-profile4-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel6');
-        HeaderEngine.bindEngineDom('tabel6');
+        sjAktifkanTabel('tabel6');
+        ReportTable.init({ table: '#tabel6', bar: '#rtBarTabel6', onChange: reinitTabel6 });
+        sjAturTinggiTabel();
       });
 
-      ['tabel', 'tabel2', 'tabel3', 'tabel5', 'tabel6'].forEach(function (key) {
-        $('#' + key + '_length_visual').on('change', function () {
-          var len = Number(this.value);
-          $('#' + key).DataTable().page.len(len).draw();
+      // Shared toolbar controls (one search box + one Tampilkan dropdown for all five
+      // tabs, matching so.blade.php's shared-toolbar pattern) instead of the old
+      // per-tab ones.
+      var page1Tables = ['#tabel', '#tabel2', '#tabel3', '#tabel5', '#tabel6'];
+      var tabelFilterVisualTimeout;
+      $('#tabel_filter_visual').on('keyup', function () {
+        var value = this.value;
+        clearTimeout(tabelFilterVisualTimeout);
+        tabelFilterVisualTimeout = setTimeout(function () {
+          page1Tables.forEach(function (id) {
+            if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().search(value).draw(); }
+          });
+        }, 400);
+      });
+      $('#tabel_length_visual').on('change', function () {
+        var len = Number(this.value);
+        page1Tables.forEach(function (id) {
+          if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().page.len(len).draw(); }
         });
       });
 
@@ -5301,67 +5405,12 @@ function submitKirimTerimaAcc () {
 
 
 <script>
-  // const tabHome = document.getElementById('nav-home-tab');
-  // const tabProfile = document.getElementById('nav-profile-tab');
-
-  //function setActiveTab(idNav) {
-    //$(".nav-item").css("background-color", "#f8f9fa");
-    //$(".nav-item").css("color", "#007bff");
-    //console.log(idNav)
-    //document.getElementById(idNav).style.backgroundColor = '#007bff';
-    //document.getElementById(idNav).style.color = '#fff';
-
-  //}
-
-  // Default warna tab
-  //setActiveTab("nav-home-tab");
-
-  // buat ganti tab
-  //document.getElementById('nav-home-tab').addEventListener('click', function () {
-    //setActiveTab("nav-home-tab");
-  //});
-
-  //document.getElementById('nav-profile-tab').addEventListener('click', function () {
-    //setActiveTab("nav-profile-tab");
-  //});
-
-  //document.getElementById('nav-profile1-tab').addEventListener('click', function () {
-    //setActiveTab("nav-profile1-tab");
-  //});
-
-  //document.getElementById('nav-profile2-tab').addEventListener('click', function () {
-    //setActiveTab("nav-profile2-tab");
-  //});
-
-  //document.getElementById('nav-profile3-tab').addEventListener('click', function () {
-    //setActiveTab("nav-profile3-tab");
-  //});
-  //document.getElementById('nav-profile4-tab').addEventListener('click', function () {
-    //setActiveTab("nav-profile4-tab");
-  //});
-
-function setActiveTab(idNav) {
-  // reset semua tab
-  $(".nav-link").css({
-    "background-color": "#f8f9fa",
-    "color": "#007bff",
-    "border": "2px solid #007bff"
-  });
-
-  // aktifkan tab yang diklik
-  $("#" + idNav).css({
-    "background-color": "#007bff",
-    "color": "#fff"
-  });
-}
-
-// default tab aktif
-setActiveTab("nav-home-tab");
-
-$(".nav-link").on("click", function () {
-  let id = $(this).attr("id");
-  setActiveTab(id);
-});
+{{-- setActiveTab()/its $(".nav-link").css({...}) reset+click-handler removed: it
+     manually forced inline background-color/color/border on every .nav-link, which
+     fought with (and beat, since inline style wins) the .custom-tabs/.nav-link.active
+     CSS this page's tab bar was already restyled to use -- exact same leftover
+     as invoicepenjualan.blade.php had. Bootstrap's own data-toggle="tab" already
+     toggles the .active class on click, so the CSS handles this natively now. --}}
 
 let kodeInvoiceTemp = ''
 let kodeCustTemp = ''

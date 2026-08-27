@@ -1,6 +1,6 @@
-@extends('report.newmaster2')
+@extends('report.newmaster2x')
 <!-- Font Awesome CDN -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
 rel="stylesheet">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,7 +13,7 @@ rel="stylesheet">
 @yield('header2')
 <div class="container-fluid">
   <div class="row">
-    <div class="col-6 text-left"> 
+    <div class="col-6 text-left">
       @yield('reportname')
     </div>
   </div>
@@ -39,33 +39,33 @@ rel="stylesheet">
 
                 <div class="row pr-3" style="display: flex; justify-content: right;">
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
                   margin-right: 8px;
-                  font-weight: 600; 
-                  text-transform: uppercase; 
+                  font-weight: 600;
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormFilterData()">Filter Data</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doShowFormCustomizeTable()">Customize Table</button>
                   <button type="button" class="btn btn-primary" style="
-                  height: 30px; 
-                  padding: 4px 12px; 
-                  border-radius: 20px; 
-                  font-size: 0.75rem; 
-                  font-weight: 600; 
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
                   margin-right: 8px;
-                  text-transform: uppercase; 
+                  text-transform: uppercase;
                   transition: background-color 0.3s, box-shadow 0.3s;
                   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="makeTable('REPORT')">Submit</button>
                 </div>
@@ -79,21 +79,21 @@ rel="stylesheet">
           <div id="showTableReport" style="display:none; background-color: white; padding: 10px" class="row mt-4 rounded">
             <div class="col-12 text-right">
               <button type="button" class="btn btn-success" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doExportTableToExcel('tabel')">Export to Excel</button>
               <button type="button" class="btn btn-danger" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="doCloseTable()">Close Table</button>
             </div>
@@ -219,7 +219,7 @@ rel="stylesheet">
      child juga memuatnya (tidak menimpa). Dimuat sebelum @yield('jsreport') agar global-nya
      siap dipakai. public/js/report-table-v2.js masih ada di disk sebagai arsip, tapi TIDAK
      dimuat lagi — isinya sudah digabung ke sini. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 @yield('jsreport')
 <script type="text/javascript">
   var g_href = '{!! $akses['href'] !!}';
@@ -227,10 +227,10 @@ rel="stylesheet">
   var g_modeModal = "";
   var gmodal_customizetable = "customizetable";
   var gmodal_filterdata = "filterdata";
-  
+
   // === GRAND TOTAL FINAL  ===
   var gsum_isfinalgrandtotal = 1;
-  var gsum_colFinal = {}; 
+  var gsum_colFinal = {};
 
   var g_modeReport;
   var gcart_header = [];
@@ -252,9 +252,7 @@ rel="stylesheet">
 
 
   $(document).ready(function(){
-    doSetHeader(g_modeReport);
-    doButtonSubtotal(gsum_issubtotal);
-    doButtonGrandtotal(gsum_isgrandtotal);
+    doSetHeader(g_modeReport);   // doSetHeader() sudah memanggil doButtonSubtotal/doButtonGrandtotal sendiri
 
     $("#tabelfilter").DataTable({
       "lengthChange": false,
@@ -273,7 +271,7 @@ rel="stylesheet">
       case gmodal_filterdata :
                  doShowReportFilter();
                  break;
-                              
+
       default :
                  makeTable('REPORT');
                  break;
@@ -295,7 +293,7 @@ rel="stylesheet">
       case gmodal_filterdata :
                  doCloseFormFilterData();
                  break;
-     
+
       default :
                 return;
     }
@@ -350,28 +348,39 @@ rel="stylesheet">
   }
 
   function doLoadHeader(_href, _mode) {
-    let _header = "";
+    // window.g_headerStore (diisi newmaster2x dari $akses['simpanheader']) memuat
+    // seluruh baris DBSIMPANHEADER milik user+href ini -- baca dari situ dulu
+    // supaya tidak perlu AJAX sinkron (yang mengunci main thread) tiap kali
+    // doSetHeader() dipanggil, termasuk panggilan kedua dari ready master layout.
+    let _key = String(_mode);
+    let _row = window.g_headerStore ? window.g_headerStore[_key] : undefined;
 
-    $.ajax({
-      url     : "{!! url('globalfunctions_doLoadHeader') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        href : _href,
-        mode : _mode
-      },
-      success: function(res) {
-        _header = (res.length > 0) ? res[0].header : "";
-        if (res.length > 0) {
+    if (_row === undefined) {   // undefined = belum pernah dicek -> baru ambil dari server
+      $.ajax({
+        url     : "{!! url('globalfunctions_doLoadHeader') !!}",
+        type    : "get",
+        async   : false,
+        data    : {
+          href : _href,
+          mode : _mode
+        },
+        success: function(res) {
           // Number(), bukan toInteger(): kolom int dari DBSIMPANHEADER dikirim
           // sebagai angka di JSON, sedangkan toInteger() memanggil .replace().
-          gsum_issubtotal = Number(res[0].issubtotal);
-          gsum_isgrandtotal = Number(res[0].isgrandtotal);
+          _row = (res.length > 0)
+            ? { header: res[0].header, issubtotal: Number(res[0].issubtotal), isgrandtotal: Number(res[0].isgrandtotal) }
+            : null;   // null = sudah dicek ke server, memang tidak ada baris tersimpan
         }
-      }
-    })
+      })
 
-    return _header;
+      if (window.g_headerStore) { window.g_headerStore[_key] = _row; }
+    }
+
+    if (!_row) { return ""; }
+
+    gsum_issubtotal = Number(_row.issubtotal);
+    gsum_isgrandtotal = Number(_row.isgrandtotal);
+    return _row.header;
   }
 
   function doGetHeader(_strHeader) {
@@ -399,6 +408,19 @@ rel="stylesheet">
       _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
     });
 
+    // Lewati request kalau isinya sama persis dengan yang terakhir diketahui
+    // tersimpan (dari g_headerStore) -- doSetHeader() memanggil ini tiap page
+    // load walau tidak ada perubahan sama sekali, jadi ini menghapus AJAX
+    // sinkron yang percuma.
+    let _key = String(_mode), _store = window.g_headerStore;
+    let _prev = _store ? _store[_key] : undefined;
+
+    if (_prev && _prev.header === _strHeader
+        && Number(_prev.issubtotal) === Number(_issubtotal)
+        && Number(_prev.isgrandtotal) === Number(_isgrandtotal)) {
+      return;
+    }
+
     $.ajax({
       url     : "{!! url('globalfunctions_doSimpanHeader') !!}",
       type    : "get",
@@ -414,6 +436,10 @@ rel="stylesheet">
         // nothing to do
       }
     })
+
+    if (_store) {
+      _store[_key] = { header: _strHeader, issubtotal: Number(_issubtotal), isgrandtotal: Number(_isgrandtotal) };
+    }
   }
 
   // Dipanggil tanpa argumen dari banyak halaman report (mis. setelah doReportMode),
@@ -722,7 +748,7 @@ rel="stylesheet">
         if (v === "float" || v === "double" || v === "decimal") return "float";
         if (v === "varchar" || v === "string" || v === "text") return "varchar";
     }
-    return "varchar"; 
+    return "varchar";
   }
 
   function doSetRowTableWithGrouping(data, tempcart) {
@@ -843,7 +869,7 @@ rel="stylesheet">
 
     let needGrouping = (typeof g_needGrouping !== "undefined") ? g_needGrouping : false;
 
-    let avgCol = getAverageColumn(tempcart); 
+    let avgCol = getAverageColumn(tempcart);
     let needAverage = avgCol !== null;
     let avgSum = 0;
     let avgCnt = 0;
@@ -1100,7 +1126,7 @@ rel="stylesheet">
         rowHeader += '  <th scope="col" style="border: 1px solid black;">No</th>';
       } else {
         rowHeader += '  <th scope="col" style="border: 1px solid black;">' + item[1] + '</th>';
-        if ((item[4] === 1) && (item[3] == "float" || item[3] == "int")) { 
+        if ((item[4] === 1) && (item[3] == "float" || item[3] == "int")) {
           gsum_posArray.push(posCount);
         }
       }
@@ -1261,7 +1287,7 @@ rel="stylesheet">
               rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + format_number(_value,_decimal) + '</td>';
             } else if (itemcart[3] == "int") {
               rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _value + '</td>';
-            } 
+            }
           } else {
             rowTable += '  <td id="gt' + _counter + '" style="border-bottom: 1px solid black; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;"></td>';
           }
@@ -1420,7 +1446,7 @@ rel="stylesheet">
       if (_match) {
         cart_filterHeader.push(_match);
       }
-    });    
+    });
 
     // HEADER TABLE FILTER
     let _str = '<tr>';

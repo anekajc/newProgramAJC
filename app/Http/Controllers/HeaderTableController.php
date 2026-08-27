@@ -308,8 +308,6 @@ class HeaderTableController extends Controller
         $headerisshown = json_decode($headertable[0]->isshown);
         $isparsed = 0;
       } else {
-        // $headertable = [];
-
         if(!$tempOtorisasi) {
         } else {
           $isparsed = 1;
@@ -359,25 +357,7 @@ class HeaderTableController extends Controller
         }
       }
 
-      // $parsed = json_decode($headertableheader);
-      // $aliasparsed = json_decode($headertableheader);
-// @dd($headertableheader);
-      // for ($i=0; $i < count($headertableheader) ; $i++) {
-      //   // code...
-      //   if () {
-      //
-      //   }
-      // }
-//       foreach (collect($headertableheader) as $header ) {
-//         // code...
-//         $index = collect($headertablealias)->search(function ($a) use ($header) {
-//     return $a->value === $header;
-// });
-        // $index = array_find_key($alias, fn($a) => $a->value === $header);
-      //   array_push( $aliasOrdered, $alias[$index]);
-      // }
-
-    } 
+    }
     // PR AGEN
     else if ($req->href == 'pembelianpermintaanagen') {
       $statusset = 1;
@@ -736,9 +716,7 @@ class HeaderTableController extends Controller
               $isnumberheadertable[] = 2;
             } else if ($key == 'kodebrg') {
               $isnumberheadertable[] = 0;
-            }
-
-            elseif (is_numeric($value)) {
+            } elseif (is_numeric($value)) {
               $isnumberheadertable[] = 1;
             } else {
               $isnumberheadertable[] = 0;
@@ -794,6 +772,7 @@ class HeaderTableController extends Controller
       foreach ($headertablevalue3 as $header) {
         array_push( $aliasOrdered3 , ["value" => $header , "alias" => $header]);
       }
+
     }
 
     $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
@@ -1045,6 +1024,25 @@ class HeaderTableController extends Controller
 
       $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
       $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+    // Generic fallback for every page ported to the "changeable headers"
+    // (window.ReportTable) pattern that isn't one of the hardcoded branches above
+    // (so/invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual, etc.). Those
+    // pages call doSimpanHeader() on first load via saveHeaderTable() (generic,
+    // works for any href already), but without this branch getHeaderTable() never
+    // read a saved config back for them -- headertableheader stayed permanently
+    // empty, so doSetHeader() always fell into its "no saved config" branch and
+    // re-applied the page's own default column set on every reload, silently
+    // discarding any column reorder/hide/show the user made in a previous visit.
+//     else if ($req->href) {
+//       $headertable = $req->urut
+//         ? DB::connection("SML")->select(
+//             "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
+//             ["username" => $username, "href" => $req->href, "urut" => $req->urut]
+//           )
+//         : DB::connection("SML")->select(
+//             "select * from DBHEADERTABLE where username = :username and href = :href",
+//             ["username" => $username, "href" => $req->href]
+//           );
 
       if (count($headertable) > 0) {
         $isnumberheadertable = json_decode($headertable[0]->isnumber);

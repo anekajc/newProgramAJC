@@ -19,17 +19,17 @@ class PembelianPermintaanAgenController extends Controller
     public function index(Request $req)
     {
         $kodemenu = '030102';
-    
+
         $akses = app('App\Http\Controllers\GlobalController')
             ->getAkses($kodemenu, $req->path());
-    
+
         if (!$akses || !$akses->HASACCESS) {
             return redirect('/home');
         }
-    
+
         $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
         $menul0  = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
-    
+
         // =========================
         // Belum Otorisasi
         // =========================
@@ -43,12 +43,12 @@ class PembelianPermintaanAgenController extends Controller
             })
             ->get()
             ->groupBy('NoBukti');
-    
+
         $tempOutstanding = [];
         foreach ($outstanding as $groupedData) {
             $tempOutstanding[] = $groupedData;
         }
-    
+
         // =========================
         // Data Otorisasi
         // =========================
@@ -64,32 +64,32 @@ class PembelianPermintaanAgenController extends Controller
                 "tahun" => $periode->tahun
             ]
         );
-    
+
         $otorisasi = collect($otorisasi)->groupBy('NoBukti');
-    
+
         $tempOtorisasi = [];
         foreach ($otorisasi as $groupedData) {
             $tempOtorisasi[] = $groupedData;
         }
-    
+
         // =========================
         // Header Table
         // =========================
         $reqHeader = new Request([
             'href' => 'pembelianpermintaanagen'
         ]);
-    
+
         $header = app('App\Http\Controllers\HeaderTableController')
             ->getHeaderTable($reqHeader);
-    
+
         return view('purchasing.pembelianpermintaanagen', [
-    
+
             "aliasordered"      => $header['aliasordered'],
             "headertableheader" => $header['headertableheader'],
             "isnumeric"         => $header['isnumeric'],
             "headertablevalue"  => $header['headertablevalue'],
             "isshown"           => $header['isshown'],
-    
+
             "menul0"            => $menul0,
             "periode"           => $periode,
             "akses"             => $akses,
@@ -102,21 +102,21 @@ class PembelianPermintaanAgenController extends Controller
     public function loadAll(Request $req)
     {
         $queryOtorisasi = '';
-    
+
         if ($req->isoto != 2) {
             $queryOtorisasi = ' AND IsOtorisasi1 = ' . $req->isoto;
         }
-    
+
         // =========================
         // Header Table
         // =========================
         $reqHeader = new Request([
             'href' => 'pembelianpermintaanagen'
         ]);
-    
+
         $header = app('App\Http\Controllers\HeaderTableController')
             ->getHeaderTable($reqHeader);
-    
+
         // =========================
         // Data Pembelian Agen
         // =========================
@@ -134,21 +134,21 @@ class PembelianPermintaanAgenController extends Controller
                 "tglakhir" => $req->tglakhir
             ]
         );
-    
+
         $collection = collect($outstanding)->groupBy('NoBukti');
-    
+
         $tempOutstanding = [];
         foreach ($collection as $groupedData) {
             $tempOutstanding[] = $groupedData;
         }
-    
+
         // Mengikuti pola Non Agen
         $tempOtorisasi = [];
-    
+
         return [
             "listData1" => $tempOutstanding,
             "listData2" => $tempOtorisasi,
-    
+
             "aliasordered"      => $header['aliasordered'],
             "headertableheader" => $header['headertableheader'],
             "isnumeric"         => $header['isnumeric'],

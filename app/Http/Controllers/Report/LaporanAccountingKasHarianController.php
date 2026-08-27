@@ -28,38 +28,29 @@ class LaporanAccountingKasHarianController extends Controller {
 
   public function doReport(Request $req) {
 
-    $TglAw = $req->get('date1');
-    $TglAk = $req->get('date2');
-    $Perkiraan    = $req->get('inputPerkiraan');
+    $TglAw = $req->query('date1');
+    $TglAk = $req->query('date2');
+    $Perkiraan    = $req->query('inputPerkiraan');
     $IDuser = '';
     $TipeTrans = '';
-    $Valas = $req->get('detOrRekap');
+    $Valas = $req->query('detOrRekap');
     $Divisi = '01';
 
     $values  = [$Perkiraan, $TglAw, $TglAk, $Divisi, $IDuser, $TipeTrans, $Valas];
-    
+
     $res = DB::connection('SML')->select('exec Sp_LapKasHarian ?,?,?,?,?,?,?',
       $values);
-
-    // $values2  = [$Perkiraan, $TglAw, $TglAk, $Divisi];
-    
-    // $res2 = DB::connection('SML')->select(
-    //     "EXEC Sp_LapSaldoAwal ?,?,?,?",
-    //     $values2
-    // );
 
     return response()->json([
         "res1" => $res
     ]);
-
-    // return $res;
   }
 
   public function doReportSaldoAwal(Request $req)
   {
-      $TglAw = $req->get('date1');
-      $TglAk = $req->get('date2');
-      $Perkiraan = $req->get('inputPerkiraan');
+      $TglAw = $req->query('date1');
+      $TglAk = $req->query('date2');
+      $Perkiraan = $req->query('inputPerkiraan');
       $Divisi = '01';
 
       $values2  = [$Perkiraan, $TglAw, $TglAk, $Divisi];
@@ -72,46 +63,24 @@ class LaporanAccountingKasHarianController extends Controller {
       return response()->json([
           "res2" => $res2
       ]);
-      // return $res2;
-  }
-
-  public function doFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-    $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-    return $listData;
-  }
-
-  public function doReportFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-    $res = [];
-
-    for ($i=0; $i < count($req->listdata); $i++) {
-      $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
-      for ($j=0; $j < count($row); $j++) {
-        $res = array_add($res, $i+$j, $row[$j]);
-      }
-    }
-    
-    return $res;
   }
 
   public function loadPerkiraan()
   {
-      $kode = 'KAS';
-      $userid = auth()->user()->username;
+      $user = auth()->user();
+      if (! $user) { return response()->json([], 401); }
 
-      // $kode = $request->input('kode');
-      // $userid = $request->input('userid');
+      $kode = 'KAS';
+      $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
-                SELECT Perkiraan 
-                FROM DBAKSESPERKIRAANR 
+                SELECT Perkiraan
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -121,5 +90,3 @@ class LaporanAccountingKasHarianController extends Controller {
   }
 
 }
-
-
