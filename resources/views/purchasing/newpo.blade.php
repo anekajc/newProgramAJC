@@ -8,7 +8,7 @@
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
        "Reset kolom"), disamakan dengan resources/views/purchasing/purchaseOrder.blade.php /
        uangmukabeli.blade.php. --}}
-  <link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
   <style>
   .custom-tabs {
     display: inline-flex;
@@ -1119,7 +1119,7 @@
 @section('js')
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
      "Reset kolom"), disamakan dengan purchaseOrder.blade.php / uangmukabeli.blade.php. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
   <script type="text/javascript">
 
     let row_id = "";

@@ -5,7 +5,7 @@
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/pembelianclosingpr.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
-<link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <style>
 /* Halaman ini dirancang mengisi tinggi layar (lihat cpoAturTinggiTabel()), jadi padding
    atas #content layout dikecilkan supaya tab tidak menggantung jauh dari header. */
@@ -454,7 +454,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
 {{-- window.ReportTable: header tabel interaktif (drag kolom, roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
