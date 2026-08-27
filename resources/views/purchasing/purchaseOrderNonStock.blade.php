@@ -131,6 +131,34 @@
   #tabel2 td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
   #tabel2 td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
+  /* ---------- Kolom Action tabel item (#tabel_add) - tombol bulat kecil, sama seperti
+     #tabel2 di atas, disamakan dengan menu Purchase Order (stock). Di #tabel_add kolom
+     Actions ada di paling kanan, bukan paling kiri. */
+  #tabel_add td:last-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel_add td:last-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel_add td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel_add td:last-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel_add td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel_add td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel_add td:last-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
   /* ---------- Header & baris tabel - bersih, uppercase abu-abu ---------- */
   #tabel thead th,
   #tabel2 thead th,
@@ -622,7 +650,7 @@
        dengan #page2 milik purchaseOrder.blade.php: tanpa margin negatif. --}}
   <div class="row">
     <div class="col-6 text-left">
-      <h2>Form PO (Non-Stock)</h2>
+      <!-- <h2>Form PO (Non-Stock)</h2> -->
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -685,8 +713,6 @@
                 <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
-
-
 
           </div>
         </div>
@@ -1124,7 +1150,7 @@
 
         <div class="row">
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" id='buttonTambahItem' class="btn btn-primary btn-lg" style="
+            <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1133,7 +1159,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
           </div>
         </div>
 
@@ -1741,7 +1767,7 @@
     <div class="col">
       <div class="form-group">
         <label>DiscRp</label>
-        <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
+        <input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
       </div>
     </div>
 
@@ -2748,7 +2774,7 @@ function onChangeInputAddDiscRp () {
     // document.getElementById("input_add_disc").value = '0.00'
     console.log('onChangeDiscRp')
       if (tipeform == 'edit') {
-        let value = $("#input_add_discrp").val()
+        let value = formatAngkaVal($("#input_add_discrp").val())
         console.log(dataHeaderAdd)
         let x = Number(value) / Number(dataHeaderAdd.TOtSubtotalRP) * 100
         console.log(x)
@@ -5188,7 +5214,7 @@ function renderTabelPO () {
 
   if (dataTampil2.length > 0) {
     dataTampil2.forEach((item, i) => {
-      let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info-circle-fill"></i></button>`
+      let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>`
       if (Number(item.IsOtorisasi1)) {
         tombolAksiPO += `
           <button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key-fill"></i></button>
@@ -6021,6 +6047,11 @@ function lockFormAdd () {
 
   document.getElementById("input_add_disc").disabled = true
   document.getElementById("input_add_discrp").disabled = true
+
+  document.getElementById("input_add_perkiraan").disabled = true
+  document.getElementById("buttonAddListPerkiraan").hidden = true
+  document.getElementById("input_add_pph23").disabled = true
+  document.getElementById("input_add_pph21").disabled = true
 }
 
 function buttonShowHideHeader ()
@@ -6078,6 +6109,11 @@ function unlockFormAdd () {
 
   document.getElementById("input_add_disc").disabled = false
   document.getElementById("input_add_discrp").disabled = false
+
+  document.getElementById("input_add_perkiraan").disabled = false
+  document.getElementById("buttonAddListPerkiraan").hidden = false
+  document.getElementById("input_add_pph23").disabled = false
+  document.getElementById("input_add_pph21").disabled = false
 }
 
 function cleanFormAdd () {
@@ -6456,7 +6492,8 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
           document.getElementById("input_add_perkiraan").value = dataHeaderAdd.perkiraan
 
-          document.getElementById("input_add_discrp").value = formatAngka(dataHeaderAdd.DISC ? parseFloat(dataHeaderAdd.DISC).toFixed(2) : '0.00')
+          document.getElementById("input_add_disc").value = dataHeaderAdd.Disc ? parseFloat(dataHeaderAdd.Disc).toFixed(2) : '0.00'
+          document.getElementById("input_add_discrp").value = formatAngka(dataHeaderAdd.TotDiskon ? parseFloat(dataHeaderAdd.TotDiskon).toFixed(2) : '0.00')
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
@@ -6646,7 +6683,7 @@ function formatAngkaRupiah(angka) {
 
 function reverseCalculateDiscPercent() {
   let harga = formatAngkaVal($('#input_add_add_harga').val()) || 0;
-  let discRp = parseFloat(document.getElementById('input_add_add_discrp').value) || 0;
+  let discRp = formatAngkaVal(document.getElementById('input_add_add_discrp').value) || 0;
 
   // Clear all discount percentage fields first
   document.getElementById('input_add_add_discpersen1').value = 0;
@@ -6664,7 +6701,7 @@ function reverseCalculateDiscPercent() {
   // Validate that discount doesn't exceed 100%
   if (discPercent > 100) {
     alert("Diskon tidak boleh melebihi harga");
-    document.getElementById('input_add_add_discrp').value = "";
+    document.getElementById('input_add_add_discrp').value = '0.00';
     return;
   }
 
@@ -6721,7 +6758,7 @@ function calculateDiscRp() {
     totalDiscount += afterDiskon3
   }
 
-  document.getElementById('input_add_add_discrp').value = totalDiscount
+  document.getElementById('input_add_add_discrp').value = formatAngka(parseFloat(totalDiscount).toFixed(2))
 }
 
 

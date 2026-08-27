@@ -212,7 +212,7 @@ class HeaderTableController extends Controller
     $isparsed = 0;
     $headertablealias = [];
 
-    $menuMoreThanOne = ['purchaseorder', 'pononstock'];
+    $menuMoreThanOne = ['purchaseorder', 'pononstock', 'newpo', 'newpojasa'];
     $desimal = [];
     $desimal2 = [];
     $aliasOrdered2 = [];
@@ -792,6 +792,123 @@ class HeaderTableController extends Controller
       }
     }
   }
+    // Uang Muka Beli
+    else if ($req->href == 'uangmukabeli') {
+      $statusset = 1;
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Kolom default DITULIS EKSPLISIT, tidak lagi diturunkan dengan mengintip satu baris
+        // data ("select top 1"): kalau periode berjalan belum punya UMB sama sekali, sample
+        // row-nya kosong dan daftar kolom ikut kosong - tabel cuma menyisakan
+        // Actions/Oto/User Oto/Tgl Oto. Sama seperti cabang 'pononstock' di bawah.
+        //
+        // Nama field HARUS sama persis dengan alias kolom di UangMukaBeliController@loadAll
+        // (spasi dan besar-kecil huruf ikut dihitung) - alias itu juga dipakai sebagai nama
+        // field data di JS (lihat umbBuatCart()/umbRenderNilai() di uangmukabeli.blade.php).
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default = [
+          'No Bukti' => 0,
+          'Tanggal'  => 2,
+          'No PO'    => 0,
+          'Supplier' => 0,
+          'Valas'    => 0,
+          'DPP'      => 1,
+          'PPN'      => 1,
+          'Persen'   => 1,
+          'Tgl Est'  => 2,
+          'Bayar'    => 0,
+        ];
+        foreach ($default as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
+    }
+    // Penerimaan ACC (gabungan Acc Tunai/Kredit + Jasa Acc Tunai/Kredit)
+    else if ($req->href == 'newpobeliacc') {
+      $statusset = 1;
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Sama seperti cabang 'uangmukabeli' - kolom default DITULIS EKSPLISIT supaya
+        // tabel tetap punya header meski periode berjalan belum punya data sama sekali.
+        // Nama field HARUS sama persis dengan alias kolom di NewPOBeliAccController@loadAll.
+        $default = [
+          'Jenis'         => 0,
+          'No Bukti'      => 0,
+          'Tanggal'       => 2,
+          'Nama Supplier' => 0,
+          'Keterangan'    => 0,
+          'No PO'         => 0,
+          'Gudang'        => 0,
+          'Faktur Supp'   => 0,
+          'DPP'           => 1,
+          'PPN'           => 1,
+          'Total'         => 1,
+        ];
+        foreach ($default as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
+    }
     // PO Non Stock
     else if ($req->href == 'pononstock') {
       $statusset = 1;
@@ -896,6 +1013,17 @@ class HeaderTableController extends Controller
       $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
       $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
     }
+    // Penerimaan Gudang (newpo). urut 1 = tab "Outstanding PO", urut 2 = tab
+    // "Penerimaan Barang" - sama pola dengan cabang 'pononstock' di atas. Daftar
+    // kolom default DITULIS EKSPLISIT supaya seluruh kolom tampil sejak kunjungan
+    // pertama, tanpa perlu menyiapkan baris apa pun di DBHEADERTABLE/DBHEADERTABLEALIAS.
+    else if ($req->href == 'newpo') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
     // Generic fallback for every page ported to the "changeable headers"
     // (window.ReportTable) pattern that isn't one of the hardcoded branches above
     // (so/invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual, etc.). Those
@@ -905,24 +1033,183 @@ class HeaderTableController extends Controller
     // empty, so doSetHeader() always fell into its "no saved config" branch and
     // re-applied the page's own default column set on every reload, silently
     // discarding any column reorder/hide/show the user made in a previous visit.
-    else if ($req->href) {
-      $headertable = $req->urut
-        ? DB::connection("SML")->select(
-            "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
-            ["username" => $username, "href" => $req->href, "urut" => $req->urut]
-          )
-        : DB::connection("SML")->select(
-            "select * from DBHEADERTABLE where username = :username and href = :href",
-            ["username" => $username, "href" => $req->href]
-          );
+//     else if ($req->href) {
+//       $headertable = $req->urut
+//         ? DB::connection("SML")->select(
+//             "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
+//             ["username" => $username, "href" => $req->href, "urut" => $req->urut]
+//           )
+//         : DB::connection("SML")->select(
+//             "select * from DBHEADERTABLE where username = :username and href = :href",
+//             ["username" => $username, "href" => $req->href]
+//           );
 
       if (count($headertable) > 0) {
         $isnumberheadertable = json_decode($headertable[0]->isnumber);
         $headertablevalue = json_decode($headertable[0]->value);
         $headertableheader = json_decode($headertable[0]->header);
         $headerisshown = json_decode($headertable[0]->isshown);
-        $desimal = $this->desimalHeaderTable($headertable, $isnumberheadertable);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Nama field HARUS sama persis dengan field data di JS setelah item[0] diratakan
+        // (lihat npoBuatCart() di newpo.blade.php). field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'NoBukti' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0, 'NAMAGDG' => 0, 'NAMAEXP' => 0,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
       }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        $isparsed2 = 1;
+        // Field dari dbo.fnc_masterbeli (lihat NewPOController@getAllPembelian).
+        $default2 = [
+          'NoBukti' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0, 'NoPO' => 0,
+          'NAMAGUDANG' => 0, 'FAKTURSUPP' => 0,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
+    // Penerimaan Non Stock (newpojasa). urut 1 = tab "Outstanding PO Non Stock", urut 2 =
+    // tab "Penerimaan Non Stock" - sama pola persis dengan cabang 'newpo' di atas. Daftar
+    // kolom default DITULIS EKSPLISIT supaya seluruh kolom tampil sejak kunjungan pertama,
+    // tanpa perlu menyiapkan baris apa pun di DBHEADERTABLE/DBHEADERTABLEALIAS.
+    else if ($req->href == 'newpojasa') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Nama field HARUS sama persis dengan field data di JS setelah item[0] diratakan
+        // (lihat npoBuatCart() di newpojasa.blade.php). field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'NoBukti' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0, 'NAMAGDG' => 0, 'NAMAEXP' => 0,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        $isparsed2 = 1;
+        // NewPOJasaController@getAllPembelian sekarang memakai dbo.fnc_masterbeli sama seperti
+        // cabang 'newpo' (beda hanya pjasa=1), jadi daftar field defaultnya identik.
+        $default2 = [
+          'NoBukti' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0, 'NoPO' => 0,
+          'NAMAGUDANG' => 0, 'FAKTURSUPP' => 0,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
     }
     return [
       "aliasordered" => $aliasOrdered ,
