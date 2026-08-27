@@ -46,6 +46,26 @@ if ($currentHref !== '') {
     }
 }
 
+// A node is worth showing in the sidebar only if it — or something underneath it —
+// actually has a real href. Without this, placeholder categories whose entire
+// subtree is still href="#" (e.g. "Daftar Deposito", "Daftar Giro diterima") show
+// up as dead labels/flyouts that go nowhere. Same rule, same name, as the
+// hasLeafDescendant() used by the sidebar-footer Report card grid's JS
+// (showReportPage()'s rendering below) — kept in sync deliberately so the sidebar
+// and the Report page always expose the same reachable set.
+$hasLeafDescendant = function ($node) use (&$hasLeafDescendant) {
+    $href = trim($node->href ?? '', '/');
+    if ($href !== '' && $href !== '#') {
+        return true;
+    }
+    foreach ($node->child ?? [] as $child) {
+        if ($hasLeafDescendant($child)) {
+            return true;
+        }
+    }
+    return false;
+};
+
 // Icon dictionary keyed by Keterangan — shared vocabulary with the purchasing
 // sidebar (docs/sidebar-navigation-migration.md §3.4): DBMENUREPORT's top-level
     // Keterangan values are the same module names as DBMENU's.
@@ -123,6 +143,16 @@ $iconMap = [
 
     @yield('css')
     <style>
+        /* newmaster.css's body rule (loaded above) sets background: var(--bg), a light
+           gray (#F3F4F6), while .header keeps background: var(--white) -- that split
+           read as two disconnected panels (white header bar, gray page below). This
+           block loads after newmaster.css in the cascade, so a plain `body` selector
+           (same specificity) overrides it without !important, making the header and
+           the content area one continuous white surface. */
+        body {
+            background: var(--white);
+        }
+
         table,
         th,
         td {
@@ -272,10 +302,318 @@ $iconMap = [
         #sidebar.flyout-pinned .nav-group.flyout-owner>.nav-item .nav-chevron {
             transform: rotate(90deg);
         }
+
+        /* Sidebar-footer "Report" widget + in-page Report browser (ported from
+           resources/views/newmaster.blade.php so this layout has the same footer
+           button and card-grid drill-down behavior). */
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 4px;
+        }
+
+        .nav-report-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.85);
+            transition: background 0.12s ease;
+        }
+
+        .nav-report-item:hover,
+        .nav-report-item.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-report-item .nav-icon {
+            display: flex;
+            width: 18px;
+            height: 18px;
+        }
+
+        .report-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #ff0000;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 0;
+            transition: color 0.4s ease
+        }
+
+        .report-back-btn:hover {
+            color: #730202;
+        }
+
+        .report-back-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .report-category {
+            margin-bottom: 28px;
+        }
+
+        .report-category-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .report-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: box-shadow 0.12s ease, transform 0.12s ease;
+        }
+
+        .report-card:hover {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .report-card-icon {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .report-card-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #222;
+        }
+
+        .report-card-has-sub {
+            position: relative;
+            padding-right: 34px;
+        }
+
+        .report-card-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            opacity: 0.5;
+        }
+
+        /* ── LAYAR LOADING SAAT HALAMAN DIBUKA (#app-loader) ─────────────────────
+           Hampir semua halaman report memanggil AJAX `async: false` di dalam
+           $(document).ready -- doLoadHeader()/doSimpanHeader() milik masterreport2
+           dan loader-loader dropdown milik tiap halaman (mis. loadPerkiraanDropdown()
+           di reportaccountingkasharian). XHR sinkron MENGUNCI main thread sampai
+           SQL Server menjawab: halaman tidak bisa repaint dan tidak menerima klik,
+           jadi terlihat seperti hang / halaman kosong.
+
+           Overlay ini ditulis sebagai MARKUP STATIS di awal <body> (bukan dibuat
+           lewat JS) supaya sudah ikut ter-paint sebelum blok sinkron itu dimulai,
+           lalu disembunyikan pada window 'load' -- saat semua handler ready
+           (beserta XHR sinkronnya) sudah selesai. Semua nilai warna diberi
+           fallback literal agar tetap benar walau var() dari newmaster.css belum
+           ada. Ditaruh di layout ROOT supaya seluruh halaman turunan
+           (masterreport2, masterreport2x, masterreportGudang) dapat otomatis --
+           tidak perlu menyentuh tiap Blade halaman. */
+        /* offset ditulis panjang (bukan `inset: 0`) agar aman di browser lama yang
+           masih dipakai di kantor. */
+        #app-loader {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100000;
+            /* di atas .nav-flyout (9999) & modal Bootstrap */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white, #fff);
+            font-family: 'Poppins', 'Lato', sans-serif;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        #app-loader.is-done {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .app-loader-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .app-loader-mark {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+
+        .app-loader-ring {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            border-radius: 50%;
+            border: 3px solid var(--border, #E5E7EB);
+            border-top-color: var(--blue, #1A73E8);
+            animation: app-loader-spin 0.8s linear infinite;
+        }
+
+        /* Kotak logo sama seperti .logo-icon di sidebar, hanya lebih besar. */
+        .app-loader-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--blue, #1A73E8);
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-loader-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main, #1F2937);
+        }
+
+        .app-loader-sub {
+            margin-top: 6px;
+            font-size: 12.5px;
+            color: var(--text-muted, #6B7280);
+        }
+
+        .app-loader-bar {
+            margin-top: 18px;
+            width: 180px;
+            height: 3px;
+            border-radius: 99px;
+            background: var(--border, #E5E7EB);
+            overflow: hidden;
+        }
+
+        .app-loader-bar>span {
+            display: block;
+            width: 40%;
+            height: 100%;
+            border-radius: 99px;
+            background: var(--blue, #1A73E8);
+            animation: app-loader-slide 1.1s ease-in-out infinite;
+        }
+
+        @keyframes app-loader-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes app-loader-slide {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .app-loader-ring,
+            .app-loader-bar>span { animation: none; }
+        }
+
+        /* doExport('Print') memanggil window.print() -- overlay sudah hilang saat
+           itu, tapi jaga-jaga supaya tidak pernah ikut tercetak. */
+        @media print {
+            #app-loader { display: none !important; }
+        }
     </style>
 </head>
 
 <body>
+    {{-- Layar loading halaman. HARUS berupa markup statis paling atas di <body>,
+         bukan dibuat lewat JavaScript: XHR `async: false` di $(document).ready
+         (doLoadHeader/doSimpanHeader + dropdown loader tiap halaman) mengunci main
+         thread, jadi apa pun yang baru dibuat saat itu tidak akan sempat ter-paint.
+         Styling-nya ada di blok <style> pada <head> di atas. --}}
+    <div id="app-loader" role="status" aria-live="polite" aria-label="Memuat halaman">
+        <div class="app-loader-box">
+            <div class="app-loader-mark">
+                <span class="app-loader-ring" aria-hidden="true"></span>
+                <span class="app-loader-logo">AJC</span>
+            </div>
+            <div class="app-loader-title">Memuat halaman&hellip;</div>
+            <div class="app-loader-sub">Mengambil data dari server, mohon tunggu.</div>
+            <div class="app-loader-bar" aria-hidden="true"><span></span></div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // Sengaja vanilla JS & inline di sini: jQuery baru dimuat di akhir <body>,
+        // sedangkan listener ini harus terpasang sebelum apa pun sempat berjalan.
+        (function () {
+            var el = document.getElementById('app-loader');
+            if (!el) { return; }
+
+            var done = false;
+
+            function hideAppLoader() {
+                if (done) { return; }
+                done = true;
+                el.classList.add('is-done');
+                // dibuang setelah transisi selesai supaya tidak menyisakan elemen
+                // position:fixed yang menutupi halaman bila transisi tidak jalan
+                setTimeout(function () {
+                    if (el.parentNode) { el.parentNode.removeChild(el); }
+                }, 300);
+            }
+
+            // Pakai event 'load', BUKAN DOMContentLoaded: seluruh handler
+            // $(document).ready -- termasuk AJAX async:false-nya -- dijalankan
+            // sebelum 'load', jadi di titik ini halaman benar-benar sudah siap
+            // dipakai (tidak lagi ter-freeze).
+            if (document.readyState === 'complete') {
+                hideAppLoader();
+            } else {
+                window.addEventListener('load', hideAppLoader);
+            }
+
+            // Jaring pengaman: kalau ada resource yang menggantung sehingga 'load'
+            // tak pernah terjadi, halaman tetap tidak boleh terkunci selamanya.
+            setTimeout(hideAppLoader, 30000);
+        })();
+    </script>
+
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo" onclick="window.location.href='{{ url('home') }}'">
             <div class="logo-icon">AJC</div>
@@ -283,15 +621,24 @@ $iconMap = [
         </div>
         <nav class="sidebar-nav" id="nav">
             @foreach ($akses['menul0'] as $menu0)
+                @continue(!$hasLeafDescendant($menu0))
                 @include('report.partials.sidebar-nav-node', [
                     'node' => $menu0,
                     'depth' => 0,
                     'activePath' => $activePath,
                     'currentHref' => $currentHref,
                     'iconMap' => $iconMap,
+                    'hasLeafDescendant' => $hasLeafDescendant,
                 ])
             @endforeach
         </nav>
+
+        <div class="sidebar-footer" id="sidebar-footer">
+            <div class="nav-report-item" id="nav-report-item" onclick="showReportPage()">
+                <span class="nav-icon">{!! $iconMap['Report'] !!}</span>
+                <span class="nav-label">Report</span>
+            </div>
+        </div>
     </aside>
 
     {{-- Flyout panels for menu depth 3/4 — deliberately rendered OUTSIDE <aside>,
@@ -303,26 +650,38 @@ $iconMap = [
          opening a second nested flyout. --}}
     <div id="flyout-root">
         @foreach ($akses['menul0'] as $m0)
-            @foreach ($m0->child ?? [] as $m1)
-                @if (count($m1->child ?? []) > 0)
+            @continue(!$hasLeafDescendant($m0))
+            {{-- Same "hide unreachable branches" filtering as sidebar-nav-node.blade.php
+                 and the Report card grid's hasLeafDescendant(), applied at every level
+                 here so a depth-1 row is marked .has-sub (see the partial) if and only
+                 if this panel actually has content, and a depth-2 node gets the
+                 captioned-sublist treatment if and only if it has a visible depth-3
+                 child — placeholder branches (all descendants href="#") are dropped
+                 entirely rather than shown as dead flyout rows. --}}
+            @php $m1Visible = array_values(array_filter($m0->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+            @foreach ($m1Visible as $m1)
+                @php $m2Visible = array_values(array_filter($m1->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+                @if (count($m2Visible) > 0)
                     <div class="nav-flyout" id="flyout-{{ $m1['KODEMENU'] }}">
-                        @foreach ($m1->child as $m2)
-                            @if (count($m2->child ?? []) > 0)
+                        @foreach ($m2Visible as $m2)
+                            @php $m3Visible = array_values(array_filter($m2->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+                            @if (count($m3Visible) > 0)
                                 <div class="nav-flyout-caption">{{ $m2['Keterangan'] }}</div>
-                                @foreach ($m2->child as $m3)
+                                @foreach ($m3Visible as $m3)
                                     {{-- Same href handling as report/partials/sidebar-nav-node.blade.php:
-                                         DBMENUREPORT.href is a bare route slug, so resolve it through
-                                         url(); "#" placeholder rows stay non-clickable rather than
-                                         resolving to the app home. --}}
+                                         DBMENUREPORT.href is a bare route slug, resolved client-side by
+                                         goTo() (same helper the report-card grid uses) rather than baking
+                                         a pre-resolved url() in here; "#" placeholder rows stay
+                                         non-clickable rather than resolving to the app home. --}}
                                     @php $m3Href = trim($m3->href ?? '', '/'); @endphp
                                     <div class="nav-flyout-item"
-                                        @if ($m3Href !== '' && $m3Href !== '#') onclick="window.location.href='{{ url($m3Href) }}'" @endif>
+                                        @if ($m3Href !== '' && $m3Href !== '#') onclick="goTo('{{ rawurlencode($m3Href) }}')" @endif>
                                         {{ $m3['Keterangan'] }}</div>
                                 @endforeach
                             @else
                                 @php $m2Href = trim($m2->href ?? '', '/'); @endphp
                                 <div class="nav-flyout-item"
-                                    @if ($m2Href !== '' && $m2Href !== '#') onclick="window.location.href='{{ url($m2Href) }}'" @endif>
+                                    @if ($m2Href !== '' && $m2Href !== '#') onclick="goTo('{{ rawurlencode($m2Href) }}')" @endif>
                                     {{ $m2['Keterangan'] }}</div>
                             @endif
                         @endforeach
@@ -350,7 +709,8 @@ $iconMap = [
         <!-- Content
     ============================================= -->
         <section id="content" class="mt-3 mb-6">
-            <div class="content-wrap">
+            <div id="content-report" class="nm-ui" style="display:none;"></div>
+            <div class="content-wrap" id="content-blade">
                 <div class="container-fluid px-5 clearfix">
                     <div class="row gutter-40 col-mb-80">
                         @yield('content')
@@ -381,6 +741,10 @@ $iconMap = [
   ============================================= -->
     <script src="{!! URL::asset('js/canvas/functions.js') !!}"></script>
     <script src="{!! URL::asset('js/canvas/JsBarcode.all.min.js') !!}"></script>
+
+    <!-- Sidebar/card icon dictionary (icons object + icon() helper) — needed by the
+         sidebar-footer Report browser below. -->
+    <script src="{!! URL::asset('js/sidebar-icons.js') !!}?v={{ @filemtime(public_path('js/sidebar-icons.js')) ?: '1' }}"></script>
 
     <script type="text/javascript">
         document.onkeydown = function(e) {
@@ -533,6 +897,289 @@ $iconMap = [
             // listener would force-close the flyout the moment you tried to enter it.
         }
         attachFlyoutHoverHandlers();
+
+        // ── Sidebar-footer "Report" widget (ported from resources/views/newmaster.blade.php)
+        // Renders an in-page card-grid browser (category sections -> cards -> drill into
+        // folder cards -> "Kembali" back) fed by /getmenureport/1 (dbmenureportweb), which
+        // is intentionally a DIFFERENT tree than this layout's own $akses['menul0']
+        // sidebar (DBMENUREPORT) -- this keeps the footer's Report page identical to the
+        // one on newmaster.blade.php. ──────────────────────────────────────────────────
+
+        const cardColors = ['c-blue', 'c-green', 'c-orange', 'c-purple', 'c-teal', 'c-pink', 'c-yellow', 'c-red', 'c-indigo', 'c-cyan'];
+
+        const childIconMap = [
+            ['valas', 'dollar'],
+            ['devisi', 'layers'],
+            ['perkiraan', 'layers'],
+            ['aktiva', 'package'],
+            ['hutang', 'credit-card'],
+            ['piutang', 'credit-card'],
+            ['giro', 'repeat'],
+            ['laba', 'trending-up'],
+            ['neraca', 'bar-chart'],
+            ['costing', 'sliders'],
+            ['posting', 'send'],
+            ['supplier', 'truck'],
+            ['gudang', 'warehouse'],
+            ['group', 'grid'],
+            ['merk', 'tag'],
+            ['bahan', 'package'],
+            ['barang', 'box'],
+            ['jasa', 'clipboard'],
+            ['lokasi', 'map-pin'],
+            ['satuan', 'sliders'],
+            ['area', 'map-pin'],
+            ['kota', 'map-pin'],
+            ['customer', 'users'],
+            ['sales', 'trending-up'],
+            ['expedisi', 'truck'],
+            ['departemen', 'grid'],
+            ['jabatan', 'layers'],
+            ['karyawan', 'users'],
+            ['biaya', 'dollar'],
+            ['pajak', 'percent'],
+            ['kendaraan', 'truck'],
+            ['sopir', 'truck'],
+            ['periode', 'settings'],
+            ['kunci', 'lock'],
+            ['nomor', 'settings'],
+            ['pemakai', 'users'],
+            ['password', 'lock'],
+            ['kalkulator', 'sliders'],
+            ['log', 'file-text'],
+            ['jurnal', 'file-text'],
+            ['kas', 'dollar'],
+            ['bank', 'credit-card'],
+            ['bon', 'clipboard'],
+            ['memorial', 'file-text'],
+            ['koreksi', 'rotate-ccw'],
+            ['pelunasan', 'check-square'],
+            ['permintaan', 'clipboard'],
+            ['penerimaan', 'package'],
+            ['inspeksi', 'check-square'],
+            ['invoice', 'file-text'],
+            ['retur', 'rotate-ccw'],
+            ['debet', 'dollar'],
+            ['penawaran', 'tag'],
+            ['verifikasi', 'check-square'],
+            ['uang muka', 'dollar'],
+            ['surat jalan', 'send'],
+            ['closing', 'lock'],
+            ['performance', 'trending-up'],
+            ['opname', 'check-square'],
+            ['transfer', 'repeat'],
+            ['sample', 'package'],
+            ['konsinyasi', 'package'],
+            ['kasir', 'dollar'],
+            ['laporan', 'bar-chart'],
+            ['dashboard', 'bar-chart'],
+            ['hitung', 'sliders'],
+            ['proses', 'zap'],
+            ['aktivitas', 'file-text'],
+            ['cascade', 'layers'],
+            ['tile', 'grid'],
+            ['arrange', 'grid'],
+            ['po', 'clipboard'],
+            ['so', 'clipboard'],
+            ['faktur', 'file-text'],
+            ['nota', 'file-text'],
+            ['kredit', 'credit-card'],
+            ['pemakaian', 'package'],
+            ['informasi', 'layers'],
+            ['cetak', 'printer'],
+        ];
+
+        function getChildIcon(label, dbIcon) {
+            if (dbIcon && icons[dbIcon]) return dbIcon;
+            const l = (label || '').toLowerCase();
+            for (const [kw, ic] of childIconMap) {
+                if (l.includes(kw)) return ic;
+            }
+            return 'box';
+        }
+
+        function getCardColor(dbColor, index) {
+            if (dbColor && cardColors.includes(dbColor)) return dbColor;
+            return cardColors[index % cardColors.length];
+        }
+
+        function mapMenuNode(row) {
+            return {
+                key: row.KODEMENU,
+                label: row.Keterangan,
+                href: row.href,
+                access: row.ACCESS,
+                icon: row.icon || null,
+                color: row.color || null,
+                children: (row.child || []).map(mapMenuNode)
+            };
+        }
+
+        function buildMenu(rows) {
+            return (rows || []).map(mapMenuNode);
+        }
+
+        function goTo(encodedHref) {
+            const href = decodeURIComponent(encodedHref);
+            if (href && href !== 'undefined' && href !== '') {
+                window.location.href = '{{ url('') }}/' + href.replace(/^\//, '');
+            }
+        }
+
+        function openReport(encodedHref) {
+            goTo(encodedHref);
+        }
+
+        // A node is worth showing only if it -- or something underneath it -- actually
+        // has a real href. Pure "#" folders with no working leaf anywhere below them get
+        // filtered out entirely.
+        function hasLeafDescendant(node) {
+            if (node.href && node.href !== '#' && node.href !== '') return true;
+            return (node.children || []).some(hasLeafDescendant);
+        }
+
+        let reportCategories = [];
+        let reportViewStack = []; // breadcrumb trail of nodes drilled into
+
+        // Snapshot the server-rendered breadcrumb and active sidebar group ONCE, before
+        // the Report page ever touches them, so closeReportPage() can restore exactly
+        // what the Blade template rendered for this page (this layout derives both from
+        // $akses/$activePath server-side -- there is no client-side "Beranda" concept
+        // like newmaster.blade.php's goHome() to fall back on).
+        const originalBreadcrumbHtml = document.getElementById('breadcrumb').innerHTML;
+        const originalActiveGroups = Array.from(document.querySelectorAll('.nav-group.active'));
+
+        function loadReportMenu(callback) {
+            $.get('{{ url("getmenureport/1") }}', function(data) {
+                const tree = buildMenu(data);
+                reportCategories = tree.filter(hasLeafDescendant);
+                if (callback) callback();
+            }).fail(function() {
+                console.error('Failed to load report menu from /getmenureport');
+                reportCategories = [];
+                if (callback) callback();
+            });
+        }
+
+        function showReportPage() {
+            reportViewStack = [];
+
+            document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('active'));
+            const reportItem = document.getElementById('nav-report-item');
+            if (reportItem) reportItem.classList.add('active');
+
+            document.getElementById('breadcrumb').innerHTML = `<span class="bc-sep"></span><b>Report</b>`;
+
+            const blade = document.getElementById('content-blade');
+            const report = document.getElementById('content-report');
+
+            if (blade) blade.style.display = 'none';
+
+            report.style.display = 'block';
+            report.innerHTML = `
+                <div class="container-fluid clearfix">
+                    <button class="report-back-btn" id="report-back-btn" onclick="reportGoBack()">
+                        ${icon('arrow-left')} Kembali
+                    </button>
+                    <div class="page-title">Report</div>
+                    <div id="report-crumb" class="page-subtitle"></div>
+                    <div id="report-categories-container" class="text-muted">Memuat data laporan...</div>
+                </div>
+            `;
+
+            loadReportMenu(renderReportView);
+        }
+
+        // Drill into a folder node -- stays on the Report page, just changes what's shown.
+        function reportDrillInto(node) {
+            reportViewStack.push(node);
+            renderReportView();
+        }
+
+        // One level up. If already at the root, exit the Report page entirely.
+        function reportGoBack() {
+            if (reportViewStack.length > 0) {
+                reportViewStack.pop();
+                renderReportView();
+            } else {
+                closeReportPage();
+            }
+        }
+
+        function renderReportView() {
+            const container = document.getElementById('report-categories-container');
+            const crumbEl = document.getElementById('report-crumb');
+            if (!container) return;
+
+            if (crumbEl) {
+                const trail = reportViewStack.map(n => n.label);
+                crumbEl.innerHTML = trail.length
+                    ? trail.map((label, i) => i === trail.length - 1 ? `<b>${label}</b>` : `${label} <span class="bc-sep"></span> `).join('')
+                    : '';
+            }
+
+            const currentNode = reportViewStack[reportViewStack.length - 1] || null;
+
+            if (currentNode) {
+                const children = (currentNode.children || []).filter(hasLeafDescendant);
+                container.className = '';
+                container.innerHTML = `<div class="report-grid">${renderReportCards(children)}</div>`;
+                return;
+            }
+
+            if (!reportCategories.length) {
+                container.className = 'text-muted';
+                container.innerHTML = `Tidak ada laporan tersedia.`;
+                return;
+            }
+
+            container.className = '';
+            container.innerHTML = reportCategories.map(cat => {
+                const children = (cat.children || []).filter(hasLeafDescendant);
+                return `
+                    <div class="report-category">
+                        <div class="report-category-title">${cat.label}</div>
+                        <div class="report-grid">${renderReportCards(children)}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderReportCards(nodes) {
+            return nodes.map((node, i) => {
+                const color = getCardColor(node.color, i);
+                const iconName = getChildIcon(node.label, node.icon);
+                const subChildren = (node.children || []).filter(hasLeafDescendant);
+                const hasSub = subChildren.length > 0;
+
+                if (hasSub) {
+                    return `
+                        <div class="report-card report-card-has-sub" onclick='reportDrillInto(${JSON.stringify(node).replace(/'/g, "&#39;")})'>
+                            <div class="report-card-icon ${color}">${icon(iconName)}</div>
+                            <div class="report-card-label">${node.label}</div>
+                            <span class="report-card-arrow">${icon('chevron')}</span>
+                        </div>`;
+                }
+
+                return `
+                    <div class="report-card" onclick="openReport('${encodeURIComponent(node.href)}')">
+                        <div class="report-card-icon ${color}">${icon(iconName)}</div>
+                        <div class="report-card-label">${node.label}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        function closeReportPage() {
+            const reportItem = document.getElementById('nav-report-item');
+            if (reportItem) reportItem.classList.remove('active');
+
+            reportViewStack = [];
+
+            document.getElementById('content-report').style.display = 'none';
+            document.getElementById('content-blade').style.display = 'block';
+
+            document.getElementById('breadcrumb').innerHTML = originalBreadcrumbHtml;
+            originalActiveGroups.forEach(g => g.classList.add('active'));
+        }
 
         function doAdminMenu() {
             doUpdateDBMENUREPORT();
@@ -828,6 +1475,26 @@ $iconMap = [
             return '<tr id="' + id_kode + '-tr' + _name + '" onclick="select' + _name + '(\'' + id_kode + '\', ' +
                 _addition_str + ')">';
         }
+    </script>
+
+    {{-- Header tabel tersimpan (DBSIMPANHEADER), dikirim bersama halaman lewat
+         $akses['simpanheader'] (lihat AksesTrait::cekAkses). doLoadHeader()/
+         doSimpanHeader() di masterreport2/2x/Gudang membaca peta ini dulu sebelum
+         jatuh ke AJAX sinkron -- ditulis di sini (sebelum @yield('js')) supaya
+         window.g_headerStore sudah ada saat @section('js') tiap layout berjalan. --}}
+    <script type="text/javascript">
+        window.g_headerStore = (function () {
+            var rows = @json($akses['simpanheader'] ?? []);
+            var map = {};
+            for (var i = 0; i < rows.length; i++) {
+                map[String(rows[i].reportmode)] = {
+                    header: rows[i].header == null ? '' : String(rows[i].header),
+                    issubtotal: Number(rows[i].issubtotal),
+                    isgrandtotal: Number(rows[i].isgrandtotal)
+                };
+            }
+            return map;
+        })();
     </script>
     @yield('js')
 </body>

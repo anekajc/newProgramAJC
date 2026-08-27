@@ -660,6 +660,9 @@ Route::get('/reportaccountinghutangkartu_loadvalas', [LaporanAccountingHutangKar
 Route::get('/reportaccountinghutangkartu_loadsuppawal', [LaporanAccountingHutangKartuController::class, 'loadSuppAwal']);
 Route::get('/reportaccountinghutangkartu_loadperkiraan', [LaporanAccountingHutangKartuController::class, 'loadPerkiraan']);
 Route::get('/reportaccountinghutangkartu_doReport', [LaporanAccountingHutangKartuController::class, 'doReport']);
+Route::get('/reportaccountinghutangkartu_doKasharian', [LaporanAccountingHutangKartuController::class, 'doKasharian']);
+Route::get('/reportaccountinghutangkartu_doInvoice', [LaporanAccountingHutangKartuController::class, 'doInvoice']);
+Route::get('/reportaccountinghutangkartu_doLpb', [LaporanAccountingHutangKartuController::class, 'doLpb']);
 
 // Hutang - Outstanding JT
 Route::get('/reportaccountinghutangoutstandingJT', [LaporanAccountingHutangOutstandingJTController::class, 'index']);
@@ -667,6 +670,10 @@ Route::get('/reportaccountinghutangoutstandingJT_loadvalas', [LaporanAccountingH
 Route::get('/reportaccountinghutangoutstandingJT_loadsuppawal', [LaporanAccountingHutangOutstandingJTController::class, 'loadSuppAwal']);
 Route::get('/reportaccountinghutangoutstandingJT_loadperkiraan', [LaporanAccountingHutangOutstandingJTController::class, 'loadPerkiraan']);
 Route::get('/reportaccountinghutangoutstandingJT_doReport', [LaporanAccountingHutangOutstandingJTController::class, 'doReport']);
+Route::get('/reportaccountinghutangoutstandingJT_doKasharian', [LaporanAccountingHutangOutstandingJTController::class, 'doKasharian']);
+Route::get('/reportaccountinghutangoutstandingJT_doInvoice', [LaporanAccountingHutangOutstandingJTController::class, 'doInvoice']);
+Route::get('/reportaccountinghutangoutstandingJT_doLpb', [LaporanAccountingHutangOutstandingJTController::class, 'doLpb']);
+Route::get('/reportaccountinghutangoutstandingJT_doBp', [LaporanAccountingHutangOutstandingJTController::class, 'doBp']);
 
 // Hutang - Pelunasan
 Route::get('/reportaccountinghutangpelunasan', [LaporanAccountingHutangPelunasanController::class, 'index']);
@@ -720,6 +727,9 @@ Route::get('/reportaccountingpiutangkartu_loadvalas', [LaporanAccountingPiutangK
 Route::get('/reportaccountingpiutangkartu_loadsuppawal', [LaporanAccountingPiutangKartuController::class, 'loadSuppAwal']);
 Route::get('/reportaccountingpiutangkartu_loadperkiraan', [LaporanAccountingPiutangKartuController::class, 'loadPerkiraan']);
 Route::get('/reportaccountingpiutangkartu_doReport', [LaporanAccountingPiutangKartuController::class, 'doReport']);
+Route::get('/reportaccountingpiutangkartu_doKasharian', [LaporanAccountingPiutangKartuController::class, 'doKasharian']);
+Route::get('/reportaccountingpiutangkartu_doInvoice', [LaporanAccountingPiutangKartuController::class, 'doInvoice']);
+Route::get('/reportaccountingpiutangkartu_doLpb', [LaporanAccountingPiutangKartuController::class, 'doLpb']);
 
 // Piutang - Outstanding JT
 Route::get('/reportaccountingpiutangoutstandingJT', [LaporanAccountingPiutangOutstandingJTController::class, 'index']);
@@ -729,6 +739,10 @@ Route::get('/reportaccountingpiutangoutstandingJT_loadlokasi', [LaporanAccountin
 Route::get('/reportaccountingpiutangoutstandingJT_loadcustomer', [LaporanAccountingPiutangOutstandingJTController::class, 'loadCustomer']);
 Route::get('/reportaccountingpiutangoutstandingJT_loadperkiraan', [LaporanAccountingPiutangOutstandingJTController::class, 'loadPerkiraan']);
 Route::get('/reportaccountingpiutangoutstandingJT_doReport', [LaporanAccountingPiutangOutstandingJTController::class, 'doReport']);
+Route::get('/reportaccountingpiutangoutstandingJT_doKasharian', [LaporanAccountingPiutangOutstandingJTController::class, 'doKasharian']);
+Route::get('/reportaccountingpiutangoutstandingJT_doInvoice', [LaporanAccountingPiutangOutstandingJTController::class, 'doInvoice']);
+Route::get('/reportaccountingpiutangoutstandingJT_doLpb', [LaporanAccountingPiutangOutstandingJTController::class, 'doLpb']);
+Route::get('/reportaccountingpiutangoutstandingJT_doBp', [LaporanAccountingPiutangOutstandingJTController::class, 'doBp']);
 
 // Piutang - Pelunasan
 Route::get('/reportaccountingpiutangpelunasan', [LaporanAccountingPiutangPelunasanController::class, 'index']);

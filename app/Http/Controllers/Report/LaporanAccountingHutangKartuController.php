@@ -13,7 +13,7 @@ use App\Traits\ReportVoucherTrait;
 class LaporanAccountingHutangKartuController extends Controller {
   use AksesTrait;
   use GlobalTrait;
-  // doKasharian / doInvoice / doLpb / doBp for the bottom voucher panel.
+  // doLedger / doKasharian / doInvoice / doLpb for the bottom voucher panel.
   use ReportVoucherTrait;
 
   public function index() {
@@ -31,15 +31,15 @@ class LaporanAccountingHutangKartuController extends Controller {
 
   public function doReport(Request $req) {
 
-    $awal = $req->get('date1');
-    $akhir = $req->get('date2');
-    $kodesupp = $req->get('inputSuppAwal');
-    $kodesupp1 = $req->get('inputSuppAkhir');
+    $awal = $req->query('date1');
+    $akhir = $req->query('date2');
+    $kodesupp = $req->query('inputSuppAwal');
+    $kodesupp1 = $req->query('inputSuppAkhir');
     $devisi = '01';
-    $Urut = $req->get('inputOrd');
-    $Perkiraan = $req->get('inputPerkiraan');
+    $Urut = $req->query('inputOrd');
+    $Perkiraan = $req->query('inputPerkiraan');
     $rekap = '0';
-    $KodeVls = $req->get('valas_value');
+    $KodeVls = $req->query('valas_value');
 
     $values  = [$awal, $akhir, $kodesupp, $kodesupp1, $devisi, $Urut, $Perkiraan, $rekap, $KodeVls];
 
@@ -49,34 +49,13 @@ class LaporanAccountingHutangKartuController extends Controller {
     return $res;
   }
 
-  // public function doFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-  //   $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-  //   return $listData;
-  // }
-
-  // public function doReportFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-  //   $res = [];
-
-  //   for ($i=0; $i < count($req->listdata); $i++) {
-  //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-
-  //     for ($j=0; $j < count($row); $j++) {
-  //       $res = array_add($res, $i+$j, $row[$j]);
-  //     }
-  //   }
-
-  //   return $res;
-  // }
-
     public function loadPerkiraan()
   {
-      $kode = 'HT';
-      $userid = auth()->user()->username;
+      $user = auth()->user();
+      if (! $user) { return response()->json([], 401); }
 
-      // $kode = $request->input('kode');
-      // $userid = $request->input('userid');
+      $kode = 'HT';
+      $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
           SELECT a.Perkiraan, b.Keterangan
