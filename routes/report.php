@@ -879,9 +879,8 @@ Route::get('/laporanaccountingneracalajur_doLpb', [LaporanAccountingNeracaLajurC
 // LABA RUGI
 Route::get('/laporanaccountinglabarugi', [LaporanAccountingLabaRugiController::class, 'index']);
 Route::get('/laporanaccountinglabarugi_doReport', [LaporanAccountingLabaRugiController::class, 'doReport']);
-Route::get('/laporanaccountinglabarugi_doFilter', [LaporanAccountingLabaRugiController::class, 'doFilter']);
-Route::get('/laporanaccountinglabarugi_doReportFilter',[LaporanAccountingLabaRugiController::class, 'doReportFilter']);
 Route::get('/laporanaccountinglabarugi_triggerSp',[LaporanAccountingLabaRugiController::class, 'triggerSp']);
+Route::get('/laporanaccountinglabarugi_loaddivisi',[LaporanAccountingLabaRugiController::class, 'loadDivisi']);
 
 // LABA RUGI TAHUNAN
 Route::get('/laporanaccountinglabarugitahunan', [LaporanAccountingLabaRugiTahunanController::class, 'index']);
@@ -907,3 +906,5 @@ Route::get('/laporanaccountinghpp', [LaporanAccountingHPPController::class, 'ind
 Route::get('/laporanaccountinghpp_doReport', [LaporanAccountingHPPController::class, 'doReport']);
 Route::get('/laporanaccountinghpp_doFilter', [LaporanAccountingHPPController::class, 'doFilter']);
 Route::get('/laporanaccountinghpp_doReportFilter',[LaporanAccountingHPPController::class, 'doReportFilter']);
+Route::get('/laporanaccountinghpp_triggerSp',[LaporanAccountingHPPController::class, 'triggerSp']);
+Route::get('/laporanaccountinghpp_loaddivisi',[LaporanAccountingHPPController::class, 'loadDivisi']);
