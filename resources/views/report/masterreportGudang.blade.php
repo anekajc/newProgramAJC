@@ -267,9 +267,7 @@ rel="stylesheet">
 
 
   $(document).ready(function(){
-    doSetHeader(g_modeReport);
-    doButtonSubtotal(gsum_issubtotal);
-    doButtonGrandtotal(gsum_isgrandtotal);
+    doSetHeader(g_modeReport);   // doSetHeader() sudah memanggil doButtonSubtotal/doButtonGrandtotal sendiri
 
     $("#tabelfilter").DataTable({
       "lengthChange": false,
@@ -381,26 +379,38 @@ rel="stylesheet">
   }
 
   function doLoadHeader(_href, _mode) {
-    let _header = "";
+    // window.g_headerStore (diisi newmaster2x dari $akses['simpanheader']) memuat
+    // seluruh baris DBSIMPANHEADER milik user+href ini -- baca dari situ dulu
+    // supaya tidak perlu AJAX sinkron (yang mengunci main thread) tiap kali
+    // doSetHeader() dipanggil, termasuk panggilan kedua dari ready master layout.
+    let _key = String(_mode);
+    let _row = window.g_headerStore ? window.g_headerStore[_key] : undefined;
 
-    $.ajax({
-      url     : "{!! url('functionglobal_doLoadHeader') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        href : _href,
-        mode : _mode
-      },
-      success: function(res) {
-        _header = (res.length > 0) ? res[0].header : "";
-        if (_header != "") {
-          gsum_issubtotal = toInteger(res[0].issubtotal);
-          gsum_isgrandtotal = toInteger(res[0].isgrandtotal);
+    if (_row === undefined) {   // undefined = belum pernah dicek -> baru ambil dari server
+      $.ajax({
+        url     : "{!! url('functionglobal_doLoadHeader') !!}",
+        type    : "get",
+        async   : false,
+        data    : {
+          href : _href,
+          mode : _mode
+        },
+        success: function(res) {
+          let _h = (res.length > 0) ? res[0].header : "";
+          _row = (_h != "")
+            ? { header: _h, issubtotal: toInteger(res[0].issubtotal), isgrandtotal: toInteger(res[0].isgrandtotal) }
+            : null;   // null = sudah dicek ke server, memang tidak ada header tersimpan
         }
-      }
-    })
+      })
 
-    return _header;
+      if (window.g_headerStore) { window.g_headerStore[_key] = _row; }
+    }
+
+    if (!_row) { return ""; }
+
+    gsum_issubtotal = Number(_row.issubtotal);
+    gsum_isgrandtotal = Number(_row.isgrandtotal);
+    return _row.header;
   }
 
   function doGetHeader(_strHeader) {
@@ -428,6 +438,19 @@ rel="stylesheet">
       _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
     });
 
+    // Lewati request kalau isinya sama persis dengan yang terakhir diketahui
+    // tersimpan (dari g_headerStore) -- doSetHeader() memanggil ini tiap page
+    // load walau tidak ada perubahan sama sekali, jadi ini menghapus AJAX
+    // sinkron yang percuma.
+    let _key = String(_mode), _store = window.g_headerStore;
+    let _prev = _store ? _store[_key] : undefined;
+
+    if (_prev && _prev.header === _strHeader
+        && Number(_prev.issubtotal) === Number(_issubtotal)
+        && Number(_prev.isgrandtotal) === Number(_isgrandtotal)) {
+      return;
+    }
+
     $.ajax({
       url     : "{!! url('functionglobal_doSimpanHeader') !!}",
       type    : "get",
@@ -443,6 +466,10 @@ rel="stylesheet">
         // nothing to do
       }
     })
+
+    if (_store) {
+      _store[_key] = { header: _strHeader, issubtotal: Number(_issubtotal), isgrandtotal: Number(_isgrandtotal) };
+    }
   }
 
   function doShowCustomize() {

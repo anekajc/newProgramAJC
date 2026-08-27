@@ -116,14 +116,10 @@
           <div class="action-group">
             <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
             <!-- <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="bi bi-filter-left"></i> Filter Data</button> -->
-            {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5).
-                 Halaman ini memuat dua Bootstrap; jQuery dimuat SESUDAH bundle BS5, jadi
-                 $.fn.modal dipegang BS4. applyModalFilter() menutup modal ini dengan
-                 $('#modalFilter').modal('hide'), jadi pembukanya harus API yang sama. --}}
             <button
               class="btn-load"
-              type="button"
-              onclick="$('#modalFilter').modal('show')">
+              data-bs-toggle="modal"
+              data-bs-target="#modalFilter">
               <i class="fas fa-filter"></i> Filter
             </button>
             <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
@@ -188,10 +184,7 @@
                 <button
                     type="button"
                     class="btn-close"
-                    aria-label="Close"
-                    data-dismiss="modal"
-                    data-bs-dismiss="modal"
-                    onclick="$('#modalFilter').modal('hide')">
+                    data-bs-dismiss="modal">
                 </button>
             </div>
 
@@ -427,7 +420,7 @@
       data   : data,
       success: function (res) {
         lastRows = res || [];
-
+        
         if (globalOtorisasi == "3") {
           // Belum PO
           lastRows = lastRows.filter(r => currencyNormalizer(r.QNTPO || 0) == 0);
@@ -652,4 +645,3 @@
 </script>
 
 @endsection
-

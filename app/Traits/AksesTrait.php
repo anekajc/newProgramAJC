@@ -38,10 +38,21 @@ trait AksesTrait {
 			$aksesmenu = $this->getAksesMenu($href);
 			$akses = Arr::add($akses, 'akses', $aksesmenu[0]);
 			$akses = Arr::add($akses, 'namamenu', $menu->Keterangan);
+
+			// Dikirim bersama halaman supaya doLoadHeader() di masterreport2/2x/Gudang
+			// tidak perlu lagi AJAX sinkron ke globalfunctions_doLoadHeader saat page
+			// load (dulu terjadi 2x per halaman -- sekali dari ready halaman, sekali
+			// lagi dari ready master layout -- masing-masing mengunci main thread).
+			$simpanheader = DB::connection('SML')->select(
+				'select reportmode, header, issubtotal, isgrandtotal from DBSIMPANHEADER where username = ? and href = ?',
+				[\Auth::user()->username, $href]
+			);
 		} else {
 			$akses = Arr::add($akses, 'namamenu', "Home");
+			$simpanheader = [];
 		}
-		
+
+		$akses = Arr::add($akses, 'simpanheader', $simpanheader);
 		$akses = Arr::add($akses, 'periode', $periode);
 		$akses = Arr::add($akses, 'menul0' , $menul0);
 

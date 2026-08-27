@@ -28,9 +28,18 @@
                    (not including) the current page — groups on this path start open
     - $currentHref trimmed href of the page currently being viewed, for leaf highlight
     - $iconMap     ['Keterangan' => svg markup], only used at depth 0
+    - $hasLeafDescendant  recursive closure: does this node (or something under it)
+                   have a real, non-"#" href? Rows that fail this check are skipped
+                   entirely (not rendered even as a disabled label) — the same rule,
+                   same name, as the Report card grid's own hasLeafDescendant(), kept
+                   in sync so the sidebar and the Report page always show the same
+                   reachable set. Callers (newmaster2x.blade.php) must pre-filter with
+                   it before @include'ing a top-level node; this partial applies it
+                   itself when recursing into $node->child.
 --}}
 @php
-    $hasChildren = count($node->child ?? []) > 0;
+    $visibleChildren = array_values(array_filter($node->child ?? [], fn ($c) => $hasLeafDescendant($c)));
+    $hasChildren = count($visibleChildren) > 0;
     $nodeHref = trim($node->href ?? '', '/');
     // Matched by KODEMENU (unique per row), not href — several category-header nodes
     // can share a blank href, and href-based matching would let those collide.
@@ -38,20 +47,19 @@
     $isCurrent = $nodeHref !== '' && strcasecmp($nodeHref, $currentHref) === 0;
 
     // DBMENUREPORT.href holds a BARE route slug ("reportaccountinghutangkartu"), never
-    // an absolute path, so it has to be resolved through url() -- the same base-URL
-    // prefixing newmaster.blade.php's goTo() applies to the sidebar it builds from
-    // /getmenu. Emitting the raw slug only happens to work while the app is served
-    // from the domain root; under a subdirectory deploy every one of these links 404s.
-    // ($nodeHref is already trimmed of leading slashes above, matching goTo()'s
-    // href.replace(/^\//, '').)
+    // an absolute path. Resolution now happens client-side via the page's goTo()
+    // JS helper (the same one the report-card grid uses) instead of baking a
+    // pre-resolved url() into the markup here — one JS-side implementation of the
+    // "prefix with the app base URL, strip a leading slash" rule instead of two.
+    // rawurlencode(), not urlencode(): goTo() decodes with decodeURIComponent() on
+    // the JS side, and rawurlencode's %20-for-space (vs urlencode's '+') is the
+    // encoding decodeURIComponent expects.
     //
     // 238 DBMENUREPORT rows use "#" as a placeholder href (category headers, plus a
-    // number of childless rows that therefore render as leaves here). Raw-href markup
-    // made those harmless no-ops -- clicking just set the fragment -- but url('#')
-    // resolves to the app home, which would turn every placeholder into a surprise
-    // navigation away from the page. Keep them non-clickable instead: null $navUrl
-    // means the onclick attribute is omitted entirely.
-    $navUrl = ($nodeHref !== '' && $nodeHref !== '#') ? url($nodeHref) : null;
+    // number of childless rows that therefore render as leaves here). Keep those
+    // non-clickable — null $navHrefEncoded means the onclick attribute is omitted
+    // entirely, same guard as before.
+    $navHrefEncoded = ($nodeHref !== '' && $nodeHref !== '#') ? rawurlencode($nodeHref) : null;
 @endphp
 
 @if ($depth === 0)
@@ -67,13 +75,14 @@
                 </span>
             </div>
             <div class="nav-children">
-                @foreach ($node->child as $child)
+                @foreach ($visibleChildren as $child)
                     @include('report.partials.sidebar-nav-node', [
                         'node' => $child,
                         'depth' => 1,
                         'activePath' => $activePath,
                         'currentHref' => $currentHref,
                         'iconMap' => $iconMap,
+                        'hasLeafDescendant' => $hasLeafDescendant,
                     ])
                 @endforeach
             </div>
@@ -81,7 +90,7 @@
     @else
         {{-- Top-level entry with no children: a single clickable row, no chevron/children. --}}
         <div class="nav-group {{ $isCurrent ? 'active' : '' }}">
-            <div class="nav-item" @if ($navUrl) onclick="window.location.href='{{ $navUrl }}'" @endif>
+            <div class="nav-item" @if ($navHrefEncoded) onclick="goTo('{{ $navHrefEncoded }}')" @endif>
                 <span class="nav-icon">{!! $iconMap[$node['Keterangan']] ?? '' !!}</span>
                 <span class="nav-label">{{ $node['Keterangan'] }}</span>
             </div>
@@ -102,7 +111,7 @@
         </div>
     @else
         <div class="nav-child {{ $isCurrent ? 'active-child' : '' }}"
-            @if ($navUrl) onclick="window.location.href='{{ $navUrl }}'" @endif>
+            @if ($navHrefEncoded) onclick="goTo('{{ $navHrefEncoded }}')" @endif>
             {{ $node['Keterangan'] }}
         </div>
     @endif

@@ -42,6 +42,23 @@
         }
     }
 
+    // A node is worth showing in the sidebar only if it — or something underneath it —
+    // actually has a real href. Same rule, same name, as report/newmaster2x.blade.php's
+    // hasLeafDescendant() and the Report card grid's JS version — kept in sync so this
+    // page's sidebar and the Report page always show the same reachable set.
+    $hasLeafDescendant = function ($node) use (&$hasLeafDescendant) {
+        $href = trim($node->href ?? '', '/');
+        if ($href !== '' && $href !== '#') {
+            return true;
+        }
+        foreach ($node->child ?? [] as $child) {
+            if ($hasLeafDescendant($child)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     // Icon dictionary keyed by Keterangan — shared vocabulary with the purchasing and
     // report sidebars (docs/sidebar-navigation-migration.md §3.4).
     $iconMap = [
@@ -249,12 +266,14 @@
         </div>
         <nav class="sidebar-nav" id="nav">
             @foreach ($akses['menul0'] as $menu0)
+                @continue(!$hasLeafDescendant($menu0))
                 @include('report.partials.sidebar-nav-node', [
                     'node' => $menu0,
                     'depth' => 0,
                     'activePath' => $activePath,
                     'currentHref' => $currentHref,
                     'iconMap' => $iconMap,
+                    'hasLeafDescendant' => $hasLeafDescendant,
                 ])
             @endforeach
         </nav>
@@ -265,26 +284,36 @@
          docs/sidebar-navigation-migration.md §8). --}}
     <div id="flyout-root">
         @foreach ($akses['menul0'] as $m0)
-            @foreach ($m0->child ?? [] as $m1)
-                @if (count($m1->child ?? []) > 0)
+            @continue(!$hasLeafDescendant($m0))
+            {{-- Same "hide unreachable branches" filtering as sidebar-nav-node.blade.php
+                 and the Report card grid's hasLeafDescendant(): a depth-1 row is marked
+                 .has-sub if and only if this panel has content, and a depth-2 node gets
+                 the captioned-sublist treatment if and only if it has a visible
+                 depth-3 child. --}}
+            @php $m1Visible = array_values(array_filter($m0->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+            @foreach ($m1Visible as $m1)
+                @php $m2Visible = array_values(array_filter($m1->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+                @if (count($m2Visible) > 0)
                     <div class="nav-flyout" id="flyout-{{ $m1['KODEMENU'] }}">
-                        @foreach ($m1->child as $m2)
-                            @if (count($m2->child ?? []) > 0)
+                        @foreach ($m2Visible as $m2)
+                            @php $m3Visible = array_values(array_filter($m2->child ?? [], fn($c) => $hasLeafDescendant($c))); @endphp
+                            @if (count($m3Visible) > 0)
                                 <div class="nav-flyout-caption">{{ $m2['Keterangan'] }}</div>
-                                @foreach ($m2->child as $m3)
+                                @foreach ($m3Visible as $m3)
                                     {{-- Same href handling as report/partials/sidebar-nav-node.blade.php:
-                                         DBMENUREPORT.href is a bare route slug, so resolve it through
-                                         url(); "#" placeholder rows stay non-clickable rather than
-                                         resolving to the app home. --}}
+                                         DBMENUREPORT.href is a bare route slug, resolved client-side by
+                                         goTo() rather than baking a pre-resolved url() in here; "#"
+                                         placeholder rows stay non-clickable rather than resolving to the
+                                         app home. --}}
                                     @php $m3Href = trim($m3->href ?? '', '/'); @endphp
                                     <div class="nav-flyout-item"
-                                        @if ($m3Href !== '' && $m3Href !== '#') onclick="window.location.href='{{ url($m3Href) }}'" @endif>
+                                        @if ($m3Href !== '' && $m3Href !== '#') onclick="goTo('{{ rawurlencode($m3Href) }}')" @endif>
                                         {{ $m3['Keterangan'] }}</div>
                                 @endforeach
                             @else
                                 @php $m2Href = trim($m2->href ?? '', '/'); @endphp
                                 <div class="nav-flyout-item"
-                                    @if ($m2Href !== '' && $m2Href !== '#') onclick="window.location.href='{{ url($m2Href) }}'" @endif>
+                                    @if ($m2Href !== '' && $m2Href !== '#') onclick="goTo('{{ rawurlencode($m2Href) }}')" @endif>
                                     {{ $m2['Keterangan'] }}</div>
                             @endif
                         @endforeach
@@ -368,6 +397,17 @@
       $(document).on('hidden.bs.modal', '.modal', function () { $('.modal:visible').length && $(document.body).addClass('modal-open'); });
       $('.modal').modal({ show: false, keyboard: false, backdrop: 'static' }); $("title").html($("#title_page").html());
       $(function () { $('[data-toggle="tooltip"]').tooltip() }); $("[rel='tooltip']").tooltip();
+
+      // Resolves a menu href client-side at click time — same helper
+      // report/newmaster2x.blade.php uses (both for its own sidebar and the
+      // sidebar-footer Report card grid) and shared by
+      // report/partials/sidebar-nav-node.blade.php, which this page also includes.
+      function goTo(encodedHref) {
+          const href = decodeURIComponent(encodedHref);
+          if (href && href !== 'undefined' && href !== '') {
+              window.location.href = '{{ url('') }}/' + href.replace(/^\//, '');
+          }
+      }
 
       // Sidebar accordion: open the clicked group and close whichever sibling group
       // (at the SAME nesting level only) was open before — reports nest up to 4

@@ -7,47 +7,164 @@
       font-weight: bold;
       margin-left: 6px;
     }
+
+    #inputReportMode{
+      border: 0;
+      background: none;
+      padding: 0;
+      box-shadow: none;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    #inputReportMode:hover,
+    #inputReportMode:focus{
+      color: #0d6efd;
+      box-shadow: none;
+    }
+
   </style>
 <!-- Warna centang -->
 
 @section('header2')
-  <div class="w-100 bg-light shadow-sm py-3 px-4 border-bottom d-flex align-items-center justify-content-between" style="margin-top:-20px; margin-bottom:150px;">
-    <!-- Kiri: ikon -->
-    <div class="d-flex" style="gap: 10px;">
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="btnPeriode" data-bs-toggle="dropdown" aria-expanded="false" title="Periode">
-          <i class="fas fa-calendar-alt"></i>
-        </button>
-        <div class="dropdown-menu p-3" style="min-width: 350px;">
-          <input type="date" class="form-control mb-2" id="inputDate1" value="{!! date('Y-m-d') !!}">
-          <label for="inputDate2" class="mb-0">s/d</label>
-          <input type="date" class="form-control mt-1" id="inputDate2" value="{!! date('Y-m-d') !!}">
-        </div>
-      </div> 
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputReportMode" data-bs-toggle="dropdown" aria-expanded="false" title="Report Mode" style="cursor: pointer;">
-          <i class="fas fa-book"></i>
-        </button>
-        <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setReportMode('1')">Rekap</a></li>
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setReportMode('0')">Detail</a></li>
-        </ul>
-      </div>
-    </div>
+  <div class="tb-report main">
+      <div class="content">
 
-    <!-- Kanan: tombol aksi menempel ke ujung kanan layar -->
-    <div class="d-flex ms-auto" style="gap: 8px;">
-      <button type="button" class="btn btn-outline-primary" onclick="doShowFormFilterData()" title="Filter Data">
-        <i class="fas fa-magnifying-glass"></i>
-      </button>
-      <button type="button" class="btn btn-outline-primary" onclick="doShowFormCustomizeTable()" title="Customize Table">
-        <i class="fas fa-cog"></i>
-      </button>
-      <button type="button" class="btn btn-outline-primary" onclick="makeTable('REPORT')" title="Submit">
-        <i class="fas fa-check"></i>
-      </button>
-    </div>
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <div>
+            <div class="page-title">Rekap Invoice Pembelian</div>
+            <!-- <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div> -->
+          </div>
+
+          <!-- Periode (date range) -->
+          <div class="filter-wrap">
+            <label>Periode</label>
+            <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+            <span class="filter-sep">s/d</span>
+            <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
+          </div>
+
+          <!-- mode report -->
+          <!-- <div class="filter-wrap">
+          <button
+                class="btn btn-outline-primary dropdown-toggle"
+                type="button"
+                id="inputReportMode"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Report
+            </button>
+            <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
+              <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setReportMode('0')">Detail
+              <span class="checkmark-red" style="display:none;">&#10003</span>
+              </a></li>
+              <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setReportMode('1')">Rekap
+              <span class="checkmark-red" style="display:none;">&#10003</span>
+              </a></li>
+            </ul>
+          </div> -->
+
+          <!-- Actions: second (row-level) search + load + export -->
+          <div class="action-group">
+            <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
+            <!-- <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="bi bi-filter-left"></i> Filter Data</button> -->
+            <button
+              class="btn-load"
+              data-bs-toggle="modal"
+              data-bs-target="#modalFilter">
+              <i class="fas fa-filter"></i> Filter
+            </button>
+            <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
+            <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
+            <div class="export-wrap" id="exportWrap">
+              <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
+              <div class="export-drop" id="exportDrop">
+                <div class="export-opt" onclick="doExport('Excel')"><i class="bi bi-journals text-success"></i> Ekspor ke <span class="ext">XLSX</span></div>
+                <div class="export-opt" onclick="doExport('CSV')"><i class="bi bi-clipboard"></i> Ekspor ke <span class="ext">CSV</span></div>
+                <div class="export-opt" onclick="doExport('Print')"><i class="bi bi-printer-fill text-warning"></i> Cetak Laporan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-outer">
+          <div class="table-wrap">
+            <table class="tb" id="mainTable">
+              <thead>
+                <tr>
+                  <th style="min-width:130px">No. Bukti</th>
+                  <th style="min-width:90px">Tanggal</th>
+                  <th style="min-width:90px">No PO</th>
+                  <th style="min-width:130px">Nama Cust Supp</th>
+                  <th class="num" style="min-width:10px">No FPJ</th>
+                  <th class="num" style="min-width:10px">Tgl FPJ</th>
+                  <th class="num" style="min-width:10px">DPP</th>
+                  <th class="num" style="min-width:10px">PPN</th>
+                  <th class="num" style="min-width:10px">Net</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr class="empty-row"><td colspan="9">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="footerLabel">Belum ada data dimuat</span>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+
+      <!-- TOAST -->
+      <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
+    </div><!-- /tb-report -->
+
+    <!-- modal filter -->
+  <div class="modal fade" id="modalFilter">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-filter"></i>
+                    Filter Laporan
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label>Report</label>
+                    <select class="form-select" id="modalReport">
+                        <option value="0">Detail</option>
+                        <option value="1">Rekap</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-primary"
+                    onclick="applyModalFilter()">
+                    Terapkan
+                </button>
+
+            </div>
+
+          </div>
+      </div>
   </div>
+<!-- modal filter -->
 
 @endsection
 
@@ -56,61 +173,111 @@
   let globalDate1 = "{!! date('Y-m-d') !!}";
   let globalDate2 = "{!! date('Y-m-d') !!}";
   let globalReportMode = "0"; // default: Detail
+  let lastRows = [];         // hasil fetch terakhir (dipakai renderRows / export / search)
+  let currentGroupby = 'NoBukti'; // groupby aktif untuk render ulang saat search
+  let DetOrRekap = 0;
 
-  $(document).ready(function() {
-    $("#btnFilterData").on("click", function() {
-      if (typeof doShowFormFilterData === "function") doShowFormFilterData();
-      else alert(" Fungsi doShowFormFilterData belum tersedia.");
-    });
-
-    $("#btnCustomizeTable").on("click", function() {
-      if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-      else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-    });
-
-    $("#btnSubmitReport").on("click", function() {
-      makeTable('REPORT');
-    });
-
-    setReportMode(globalReportMode);
-    showPeriode();
-
-    setDefaultHeader();
-
-    setTimeout(() => {
-      makeTable('REPORT');
-    }, 100);
+  $(document).ready(function () {
+      setReportMode(globalReportMode);
   });
-  
 
-  // periode
-  function showPeriode() {
+  $('#modalFilter').on('show.bs.modal', function () {
+    $("#modalReport").val(globalReportMode);
+  });
+
+  function applyModalFilter() {
+
+    setReportMode($("#modalReport").val());
+
+    $('#modalFilter').modal('hide');
+  }
+
+  // $(document).ready(function() {
+  //   $("#btnFilterData").on("click", function() {
+  //     if (typeof doShowFormFilterData === "function") doShowFormFilterData();
+  //     else alert(" Fungsi doShowFormFilterData belum tersedia.");
+  //   });
+
+  //   $("#btnCustomizeTable").on("click", function() {
+  //     if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
+  //     else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
+  //   });
+
+  //   $("#btnSubmitReport").on("click", function() {
+  //     makeTable('REPORT');
+  //   });
+
+  //   setReportMode(globalReportMode);
+  //   showPeriode();
+
+  //   setDefaultHeader();
+
+  //   setTimeout(() => {
+  //     makeTable('REPORT');
+  //   }, 100);
+  // });
+  
+   // periode
+   function showPeriode() {
     globalDate1 = $('#inputDate1').val();
     globalDate2 = $('#inputDate2').val();
     // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
   }
 
-  // mode report
+  /* -- EXPORT -- */
+  function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }
+  document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('exportWrap');
+    if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
+  });
+
+  // reportmode
   function setReportMode(val) {
     globalReportMode = val;
-    jenisreport = Number(val);   // 0 = Detail, 1 = Rekap
-    DetOrRekap = Number(val);    // samakan dengan variabel yang ada di setModeReport
+    DetOrRekap = Number(val);
 
-    // hapus centang dulu
-    $('#dropdownReportMode .dropdown-item').each(function() {
-      let itemText = $(this).text().replace(' ✔', '').trim();
-      $(this).text(itemText);
-    });
+    // $('#dropdownReportMode .checkmark-red').hide();
+    // $(`#dropdownReportMode .dropdown-item[data-value='${val}'] .checkmark-red`).show();
 
-    // tambah centang di item terpilih
-    $(`#dropdownReportMode .dropdown-item[data-value='${val}']`).each(function() {
-      $(this).html(`${$(this).text()} <span class="checkmark-red">✔</span>`);
-    });
+    // // Ubah tulisan tombol
+    // const text = {
+    //     "0": "Detail",
+    //     "1": "Rekap"
+    // };
 
-    // update g_modeReport sesuai pilihan order & detail/rekap
-    // setModeReport() sudah mengatur g_modeReport berdasarkan $("#inputOrder").val() dan jenisreport/DetOrRekap
-    setModeReport();
+    // $("#inputReportMode").html(
+    //     `Report : ${text[val]}`
+    // );
   }
+
+  // // periode
+  // function showPeriode() {
+  //   globalDate1 = $('#inputDate1').val();
+  //   globalDate2 = $('#inputDate2').val();
+  //   // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
+  // }
+
+  // // mode report
+  // function setReportMode(val) {
+  //   globalReportMode = val;
+  //   jenisreport = Number(val);   // 0 = Detail, 1 = Rekap
+  //   DetOrRekap = Number(val);    // samakan dengan variabel yang ada di setModeReport
+
+  //   // hapus centang dulu
+  //   $('#dropdownReportMode .dropdown-item').each(function() {
+  //     let itemText = $(this).text().replace(' ?', '').trim();
+  //     $(this).text(itemText);
+  //   });
+
+  //   // tambah centang di item terpilih
+  //   $(`#dropdownReportMode .dropdown-item[data-value='${val}']`).each(function() {
+  //     $(this).html(`${$(this).text()} <span class="checkmark-red">?</span>`);
+  //   });
+
+  //   // update g_modeReport sesuai pilihan order & detail/rekap
+  //   // setModeReport() sudah mengatur g_modeReport berdasarkan $("#inputOrder").val() dan jenisreport/DetOrRekap
+  //   setModeReport();
+  // }
 
   var modereport_detailnobukti = 0;
   var modereport_rekapnobukti = 1;
@@ -126,9 +293,9 @@
         ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
         ['NoFakturPajak', 'No. FPJ', 1, 'varchar', 0, 0],
         ['TglFakturPajak', 'Tgl. FPJ', 1, 'date', 0, 0],
-        ['NDPP', 'Nilai DPP', 1, 'float', 1, 2],
-        ['NPPN', 'Nilai PPN', 1, 'float', 1, 2],
-        ['NNET', 'Nilai Net', 1, 'float', 1, 2]
+        ['NDPP', 'DPP', 1, 'float', 1, 2],
+        ['NPPN', 'PPN', 1, 'float', 1, 2],
+        ['NNET', 'Net', 1, 'float', 1, 2]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 1;
 
@@ -140,14 +307,15 @@
         ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
         ['NoFakturPajak', 'No. FPJ', 1, 'varchar', 0, 0],
         ['TglFakturPajak', 'Tgl. FPJ', 1, 'date', 0, 0],
-        ['NDPP', 'Nilai DPP', 1, 'float', 1, 2],
-        ['NPPN', 'Nilai PPN', 1, 'float', 1, 2],
-        ['NNET', 'Nilai Net', 1, 'float', 1, 2]
+        ['NDPP', 'DPP', 1, 'float', 1, 2],
+        ['NPPN', 'PPN', 1, 'float', 1, 2],
+        ['NNET', 'Net', 1, 'float', 1, 2]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 1;
     }
   }
 
+  const reportUrl = "{{ url('laporanpengadaanrekapinvoicepembelian_doReport') }}"
   function makeTable(_mode) {
     console.log(" makeTable jalankan mode:", _mode);
 
@@ -164,7 +332,6 @@
       groupby = 'NoBukti';
     }
 
-    setDefaultHeader();
     if (typeof doSetHeader === 'function') {
       doSetHeader(g_modeReport);
     }
@@ -175,9 +342,144 @@
       inputDetOrRekap: DetOrRekap,
     };
 
-    console.log("Data terkirim ke server:", data);
+  // Ambil data SEKALI, lalu render langsung ke tabel styled baru (#tableBody).
+  $.ajax({
+      url    : reportUrl,
+      type   : 'get',
+      data   : data,
+      success: function (res) {
+        lastRows = res || [];
+        currentGroupby = groupby;        // simpan utk render ulang saat search
+        $('#searchBox2').val('');        // reset kotak cari tiap muat data baru
+        renderRows(lastRows, groupby);   // <-- render ke .tb-report #tableBody
+      },
+      error  : function () {
+        lastRows = [];
+        currentGroupby = groupby;
+        renderRows([], groupby);
+      }
+    });
 
-    doMakeTable(_mode, groupby, data, "REPORT REKAP INVOICE PEMBELIAN", _date1, _date2, DetOrRekap);
+    // console.log("Data terkirim ke server:", data);
+
+    // doMakeTable(_mode, groupby, data, "REPORT REKAP INVOICE PEMBELIAN", _date1, _date2, DetOrRekap);
+  }
+
+  // === RENDER KE TABEL STYLED (.tb-report #mainTable) ===
+  // Kolom dibangun DINAMIS dari gcart_header (hanya kolom yang terlihat /
+  // item[2]===1, sesuai urutan simpanan). Jadi hasil "Customize Table"
+  // (show/hide + urutan kolom) langsung tampil. <thead> ditulis ulang tiap
+  // render. Subtotal/Grand Total = jumlah kolom Qnt, dikelompokkan per `groupby`.
+  // (Data sudah terurut dari proc sesuai inputOrd, jadi cukup deteksi pergantian
+  // nilai grup. Jika kolom Qnt disembunyikan, baris total tidak ditampilkan.)
+  function renderRows(rows, groupby) {
+    const cols  = gcart_header.filter(c => c[2] === 1); // kolom terlihat, terurut
+    const thead = document.querySelector('#mainTable thead');
+    const tbody = document.getElementById('tableBody');
+    const qntVisible = cols.some(c => c[0] === 'NDPP');
+    // Baris Subtotal & Grand Total mengikuti toggle di modal Customize Table
+    // (#buttonSubtotal -> gsum_issubtotal, #buttonGrandtotal -> gsum_isgrandtotal).
+    // gsum_* dimuat oleh doSetHeader() saat klik Tampilkan, jadi pilihan user
+    // (sudah tersimpan) langsung berlaku. Total hanya tampil bila kolom Qnt ada.
+    const showSub   = qntVisible && (gsum_issubtotal === 1);
+    const showGrand = qntVisible && (gsum_isgrandtotal === 1);
+
+    // HEADER dinamis dari gcart_header
+    thead.innerHTML = '<tr>' + cols.map(function (c) {
+      const isNum = (c[3] === 'float' || c[3] === 'int');
+      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
+    }).join('') + '</tr>';
+
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
+      document.getElementById('footerLabel').textContent = 'Tidak ada data';
+      return;
+    }
+
+    let html = '', prev = null, sub = { NDPP: 0, NPPN: 0, NNET: 0 }, grand = { NDPP: 0, NPPN: 0, NNET: 0 };
+
+    rows.forEach(function (r, i) {
+      const now = r[groupby];
+
+      // subtotal saat nilai grup berganti (kalau toggle Subtotal aktif)
+      if (showSub && i !== 0 && prev !== now) { html += totalRowTotal('Subtotal', sub, cols, 'subtotal-row'); sub = { NDPP: 0, NPPN: 0, NNET: 0 };
+      }
+
+      sub.NDPP += currencyNormalizer(r.NDPP);
+      sub.NPPN += currencyNormalizer(r.NPPN);
+      sub.NNET += currencyNormalizer(r.NNET);
+
+      grand.NDPP += currencyNormalizer(r.NDPP);
+      grand.NPPN += currencyNormalizer(r.NPPN);
+      grand.NNET += currencyNormalizer(r.NNET);
+
+      // satu sel per kolom terlihat, format menurut tipe (item[3]) & desimal (item[5])
+      html += '<tr class="data-row">' + cols.map(function (c) {
+        const key = c[0], type = c[3];
+        if (type === 'date') return '<td>' + format_date(r[key]) + '</td>';
+        if (type === 'float' || type === 'int') return '<td class="num">' + format_number(currencyNormalizer(r[key]), c[5]) + '</td>';
+        return '<td>' + nullToEmpty(r[key]) + '</td>';
+      }).join('') + '</tr>';
+
+      prev = now;
+    });
+
+    // subtotal grup terakhir + grand total   mengikuti toggle di modal
+    if (showSub)   html += totalRowTotal('Subtotal', sub, cols, 'subtotal-row');
+    if (showGrand) html += totalRowTotal('GRAND TOTAL', grand, cols, 'grand-total');
+
+    tbody.innerHTML = html;
+    document.getElementById('footerLabel').textContent = 'Menampilkan ' + rows.length + ' baris';
+  }
+
+  // Baris total (Qnt saja): nilai di kolom Qnt, label di kolom pertama (bukan Qnt),
+  // sel lain dikosongkan   mengikuti urutan kolom terlihat saat ini.
+  function totalRowTotal(label, total, cols, cls) {
+    const labelIdx = cols.findIndex(c =>
+        !['NDPP', 'NPPN', 'NNET'].includes(c[0])
+    );
+
+    const tds = cols.map(function(c, idx) {
+        if (c[0] === 'NDPP')
+            return '<td class="num">' + format_number(total.NDPP, 2) + '</td>';
+        if (c[0] === 'NPPN')
+            return '<td class="num">' + format_number(total.NPPN, 2) + '</td>';
+        if (c[0] === 'NNET')
+            return '<td class="num">' + format_number(total.NNET, 2) + '</td>';
+        if (idx === labelIdx)
+            return '<td>' + label + '</td>';
+        return '<td></td>';
+    });
+
+    return '<tr class="' + cls + '">' + tds.join('') + '</tr>';
+  }
+
+  // === PENCARIAN SISI-KLIEN ===
+  // Menyaring data yang SUDAH dimuat (lastRows) berdasarkan teks pencarian,
+  // dicocokkan ke semua kolom yang sedang terlihat, lalu render ulang tabel
+  // styled (renderRows menghitung ulang subtotal/grand total untuk hasil saring).
+  function applyFilters() {
+    if (!lastRows.length) return;        // belum ada data dimuat
+
+    const term = ($('#searchBox2').val() || '').trim().toLowerCase();
+    if (!term) { renderRows(lastRows, currentGroupby); return; }   // kosong -> tampilkan semua
+
+    const cols = gcart_header.filter(c => c[2] === 1); // kolom yang terlihat
+    const filtered = lastRows.filter(function (r) {
+      return rowSearchText(r, cols).indexOf(term) !== -1;
+    });
+
+    renderRows(filtered, currentGroupby);
+  }
+
+  // Gabungan teks satu baris dari kolom terlihat (tanggal pakai format tampil
+  // dd/mm/yyyy) supaya pencarian cocok dengan apa yang user lihat di tabel.
+  function rowSearchText(r, cols) {
+    return cols.map(function (c) {
+      const v = r[c[0]];
+      if (c[3] === 'date') return format_date(v);
+      return (v == null ? '' : String(v));
+    }).join(' ').toLowerCase();
   }
 
   function getKolomFilter() {
@@ -219,620 +521,3 @@
 </script>
 
 @endsection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{-- @extends('newmaster')
-@section('buttons')
-
-@endsection
-@section('content')
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-6 text-left">
-      <h3>Report Pengadaan - Rekap Invoice Pembelian</h1>
-    </div>
-  </div>
-</div>
-
-<div id="printContainer" style="display:none">
-
-</div>
-<div id="contentContainer" class="container-fluid">
-
-        <div class="row">
-
-        </div>
-        <div class="row justify-content-center">
-          <div class="card w-75">
-            <div class="card-body">
-              <div class="container-fluid">
-
-                <div class="row" style="display: flex; justify-content: center;">
-                  <div class="col-6 btn-primary text-center tombol-toggle" id="buttonMode0" onclick="reportMode(0)">Detail</div>
-                  <div class="col-6 btn-outline-primary text-center tombol-toggle" id="buttonMode1" onclick="reportMode(1)">Rekap</div>
-                </div>
-
-                <br>
-
-                <div class="row rounded" style="background-color: #E8E8E8; padding: 10px; display: flex; justify-content: center;">
-                  <div class="col-2" style="padding: 0 7px; flex-basis: 0;">
-                    <label for="inputDate1" style="">Periode</label>
-                  </div>
-                  <div class="col-3" style="padding: 0 7px; flex-basis: 0;">
-                    <input type="date" class="form-control" id="inputDate1" value="{!! date('Y-m-d') !!}">
-                  </div>
-                  <div class="col-2" style="padding: 0 7px; flex-basis: 0;">
-                    <label for="inputDate2">s/d</label>
-                  </div>
-                  <div class="col-3" style="padding: 0 7px; flex-basis: 0;">
-                    <input type="date" class="form-control" id="inputDate2" value="{!! date('Y-m-d') !!}">
-                  </div>
-                </div>
-
-                <div class="row text-center mt-4" hidden>
-                  <div class="col-2">
-                    <label for="inputOtorisasi">Otorisasi</label>
-                  </div>
-                  <div class="col-4">
-                    <select id="inputOtorisasi" class="form-control" aria-label="Default select example">
-                      <option value=0>Otorisasi</option>
-                      <option value=1>Non Otorisasi</option>
-                      <option value=2>Semua</option>
-                    </select>
-                  </div>
-
-                </div>
-
-                <br>
-                <br>
-
-                <div class="row pr-3" style="display: flex; justify-content: right;">
-                  <button type="button" class="btn btn-primary" style="font-size: 16px; margin: 0 5px;" onclick="showFormFilterData()">Filter Data</button>
-                  <button type="button" class="btn btn-primary" style="font-size: 16px; margin: 0 5px;" onclick="showFormCustomizeTable()">Customize Table</button>
-                  <button type="button" class="btn btn-primary" style="font-size: 16px; margin: 0 5px;" onclick="makeTable()">Submit</button>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="container-fluid mt-6">
-          <div id="showTableReport" style="display:none; background-color: white; padding: 10px" class="row mt-4 rounded">
-            <div class="col-12 text-right">
-              <button type="button" class="btn btn-success" onclick="exportTableToExcel('tabel')">Export to Excel</button>
-              <button type="button" class="btn btn-secondary" onclick="closeTable()">Close Table</button>
-            </div>
-            <div class="col-12 mt-4" style="overflow:auto;">
-              <div class="">
-                <table id="tabel" class="table table-bordered">
-
-                  <thead id="tabel_header" class="text-left" >
-                  </thead>
-
-                  <tbody id="tabel_data" class="text-center"  style="border: 1px solid black; text-align: center;">
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-@endsection
-
-@section('js')
-<script type="text/javascript">
-
-  var modereport_detail = 0, modereport_rekap = 1;
-  var report_mode = modereport_detail;
-
-  var cart_headerDetail = [], cart_headerRekap = [];
-
-  var cart_filter = [];
-
-
-  $(document).ready(function(){
-    setHeaderDetail();
-    setHeaderRekap();
-  });
-
-  function reportMode(_mode) {
-    if (report_mode != _mode) {
-      let prev_mode = report_mode;
-      report_mode = _mode;
-
-      $("#buttonMode" + prev_mode).removeClass("btn-primary");
-      $("#buttonMode" + prev_mode).addClass("btn-outline-primary");
-
-      $("#buttonMode" + report_mode).removeClass("btn-outline-primary");
-      $("#buttonMode" + report_mode).addClass("btn-primary");
-    }
-  }
-
-  function closeTable () {
-    document.getElementById("showTableReport").style.display = "none"
-  }
-
-  function showReport(res) {
-    let date1    = $("#inputDate1").val();
-    let date2    = $("#inputDate2").val();
-
-    let tempcart = (report_mode == modereport_detail) ? cart_headerDetail : cart_headerRekap;
-    let _cellcount = 0;
-    tempcart.forEach((item, i) => {
-      _cellcount += item[2];
-    });
-
-    let rowTable = "";
-    let _qnt = 0.00, _hpp = 0;
-    let showQnt = false, showHPP = false;
-    let posArray = [], posCount = 0;
-
-    let orderByText = "";
-    let inputOrd = $("#inputOrder").val();
-
-    if (inputOrd === "N") {
-        orderByText = "PER NOMOR BUKTI";
-    } else if (inputOrd === "B") {
-        orderByText = "PER NOMOR BARANG";
-    } else if (inputOrd === "S") {
-        orderByText = "PER NOMOR CUSTOMER";
-    } else {
-        orderByText = "";
-    }
-
-    // TABLE HEADER
-    rowTable += '<tr>';
-    rowTable += '  <th colspan="' + _cellcount + '" style="text-align: left; font-weight: bold;">PT. MITRA GLOBALINDO LESTARI<br/> REPORT PENGADAAN - PR<br/>'+ orderByText+ '</th>';
-    rowTable += '</tr>';
-    rowTable += '<tr>';
-    rowTable += '  <th colspan="' + _cellcount + '"  style="text-align: left; font-weight: bold;">PERIODE: ' + format_date(date1, true) + ' S.D ' + format_date(date2, true) + '</th>';
-    rowTable += '</tr>';
-    rowTable += '<tr>';
-    rowTable += '  <th colspan="' + _cellcount + '"  style="text-align: left; font-weight: bold;">Dicetak Oleh :  ' + '  {!! \Auth::user()->username !!}  //  Tanggal : '+ (dateIndo) +' // Jam : ' + padZero(dateHours) + ':' + padZero(dateMinutes) + ':' + padZero(dateSeconds) + '</th>';
-    rowTable += '</tr>';
-    rowTable += '<tr>';
-    rowTable += '  <th colspan="' + _cellcount + '"></th>';
-    rowTable += '</tr>';
-
-    rowTable += '<tr style="height: 45px; padding: 20px; " class="text-center bg-dark text-light">';
-    tempcart.forEach((item, i) => {
-      if (item[2]) {
-        posCount += 1;
-        if (item[0] == "Nomor") {
-          rowTable += '  <th scope="col" style="border: 1px solid black;">No</th>';
-        } else {
-          rowTable += '  <th scope="col" style="border: 1px solid black;">' + item[1] + '</th>';
-          if (item[0] == "Qnt")      { showQnt = true; posArray.push(posCount); }
-          if (item[0] == "NilaiHPP") { showHPP = true; posArray.push(posCount); }
-        }
-      }
-    });
-    rowTable += '</tr>';
-    $("#tabel_header").html(rowTable);
-
-    // TABLE DATA
-    let _prevnb = "", _nownb = "";
-    rowTable = '';
-    if (res.length > 0) {
-      res.forEach((item, i) => {
-        // _nownb = (_prevnb == item.NoBukti) ? "" : item.NoBukti;
-        _nownb = item.NoBukti;
-
-        rowTable += "<tr style='text-align: center'>";
-        tempcart.forEach((itemcart, j) => {
-          if (itemcart[2]){
-            if (itemcart[0] == "NoBukti") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + _nownb + '</td>';
-            } else if (itemcart[0] == "TANGGAL") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + format_date(item.TANGGAL) + '</td>';
-            } else if (itemcart[0] == "Qnt") {
-              _qnt += toFloat(item.Qnt);
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black; text-align: right;">' + item.Qnt + '</td>';
-            } else if (itemcart[0] == "TglFakturPajak") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + format_date(item.TglFakturPajak) + '</td>';
-            } else if (itemcart[0] == "NOPO") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + nullToEmpty(item.NOPO) + '</td>';
-            } else if (itemcart[0] == "NDPP") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + nullToEmpty(item.NDPP) + '</td>';
-            } else if (itemcart[0] == "NPPN") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + nullToEmpty(item.NPPN) + '</td>';
-            } else if (itemcart[0] == "NNET") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + nullToEmpty(item.NNET) + '</td>';
-            } else if (itemcart[0] == "NilaiHPP") {
-              _hpp = toFloat(numberNoDecimals(item.NilaiHPP));
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black; text-align: right;">' + numberNoDecimals(item.NilaiHPP) + '</td>';
-            } else if (itemcart[0] == "NamaBrg") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black; text-align: center; white-space: nowrap;">' + item.NamaBrg + '</td>';
-            } else if (itemcart[0] == "NAMACUSTSUPP") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + nullToEmpty(item.NAMACUSTSUPP) + '</td>';
-            } else if (itemcart[0] == "Nomor") {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + (i+1) + '</td>';
-            } else {
-              rowTable += '  <td class="cellcompact-left" style="border: 1px solid black;">' + item[itemcart[0]] + '</td>';
-            }
-          }
-        });
-        rowTable += "</tr>";
-
-        _prevnb = item.NoBukti;
-      })
-
-      // TABLE FOOTER
-      if (showQnt || showHPP) {
-        let _counter = 0;
-        rowTable += '<tr id="gtrow" style="text-align: center">';
-        tempcart.forEach((item, i) => {
-          if (item[2]) {
-            _counter++;
-            if (item[0] == "Qnt") {
-              rowTable += '  <td id="gt' + _counter + '" style="border-bottom-style: hidden; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _qnt.toFixed(2) + '</td>';
-            } else if (item[0] == "NilaiHPP") {
-              rowTable += '  <td id="gt' + _counter + '" style="border-bottom-style: hidden; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;">' + _hpp + '</td>';
-            } else {
-              rowTable += '  <td id="gt' + _counter + '" style="border-bottom-style: hidden; border-right-style: hidden; border-left-style: hidden; font-weight: bold; text-align: right;"></td>';
-            }
-          }
-        });
-        rowTable += "</tr>";
-      }
-
-    } else {
-        rowTable += "<tr style='text-align: center'>";
-        rowTable += '  <td colspan="' + _cellcount + '" style="border: 1px solid black;">Tidak ada data ditemukan</td>';
-        for (let i = 0; i < (_cellcount-1); i++) {
-          rowTable += '  <td style="display: none;"></td>';
-        }
-        rowTable += "</tr>";
-    }
-
-    $("#tabel_data").html(rowTable);
-
-    // TABLE FOOTER - POSISI TULISAN TOTAL
-    if (res.length > 0) {
-      let posStrTotal = (posArray.length > 0) ? Math.min(...posArray)-2 : 0;
-      if (posStrTotal < 0) {
-        // nothing to do
-      } else if (posStrTotal == 0) {
-        $("#gt1").html("Total :");
-      } else if (posStrTotal == (_cellcount-1)) {
-        $("#gt" + posStrTotal).html("Total :");
-      } else {
-        let _row = document.getElementById("gtrow");
-        _row.deleteCell(posStrTotal);
-        $("#gt" + posStrTotal).attr('colspan',2);
-        $("#gt" + posStrTotal).html("Total :");
-      }
-    }
-
-    godown();
-  }
-
-  function makeTable() {
-    let date1    = $("#inputDate1").val();
-    let date2    = $("#inputDate2").val();
-    let inputOto = $("#inputOtorisasi").val();
-    let inputOrd = $("#inputOrder").val();
-
-    document.getElementById("showTableReport").style.display = "block"
-    $.ajax({
-      url     : "{!! url('laporanpengadaanrekapinvoicepembelian_doReport') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        date1,
-        date2,
-        inputOto,
-        inputOrd
-      },
-      success: function(res) {
-        showReport(res);
-        alertify.success("Report ditampilkan");
-      }
-    })
-  }
-
-  //======== CUSTOMIZE TABLE FORM ========================
-
-  function setHeaderDetail(_isReset = false) {
-    let _strHeader = (!_isReset) ? doLoadHeader('{!! $akses['href'] !!}', modereport_detail) : "";
-
-    if (_strHeader != "") {
-      cart_headerDetail = doGetHeader(_strHeader);
-    } else {
-      cart_headerDetail = [
-        ['Nomor', 'Nomor (No)', 1],
-        ['NoBukti', 'Nobukti', 1],
-        ['TANGGAL', 'Tanggal', 1],
-        ['NOPO', 'No. PO', 1],
-        ['NAMACUSTSUPP', 'Nama Cust Supp', 1],
-        ['NoFakturPajak', 'No. FPJ', 1],
-        ['TglFakturPajak', 'Tgl. FPJ', 1],
-        ['NDPP', 'Nilai DPP', 1],
-        ['NPPN', 'Nilai PPN', 1],
-        ['NNET', 'Nilai Net', 1]
-      ];
-
-      doSimpanHeader('{!! $akses['href'] !!}', modereport_detail, cart_headerDetail);
-    }
-  }
-
-  function setHeaderRekap(_isReset = false) {
-    let _strHeader = (!_isReset) ? doLoadHeader('{!! $akses['href'] !!}', modereport_rekap) : "";
-
-    if (_strHeader != "") {
-      cart_headerRekap = doGetHeader(_strHeader);
-    } else {
-      cart_headerRekap = [
-        ['Nomor', 'Nomor (No)', 1],
-        ['NoBukti', 'Nobukti', 1],
-        ['TANGGAL', 'Tanggal', 1],
-        ['NOPO', 'No. PO', 1],
-        ['NAMACUSTSUPP', 'Nama Cust Supp', 1],
-        ['NoFakturPajak', 'No. FPJ', 1],
-        ['TglFakturPajak', 'Tgl. FPJ', 1],
-        ['NDPP', 'Nilai DPP', 1],
-        ['NPPN', 'Nilai PPN', 1],
-        ['NNET', 'Nilai Net', 1]
-      ];
-
-      doSimpanHeader('{!! $akses['href'] !!}', modereport_rekap, cart_headerRekap);
-    }
-  }
-
-  function resetHeader() {
-    switch (report_mode) {
-      case modereport_detail :
-            setHeaderDetail(true);
-            break;
-
-      case modereport_rekap :
-            setHeaderRekap(true);
-            break;
-
-      default :
-                return;
-    }
-
-    showCustomize();
-  }
-
-  function showCustomize() {
-    let str = "";
-    let tempcart = (report_mode == modereport_detail) ? cart_headerDetail : cart_headerRekap;
-
-    tempcart.forEach((item, i) => {
-      let _checked = (item[2]) ? 'btn-success' : 'btn-outline-danger';
-      let _icon_eye = (item[2]) ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-      str += '<div class="row justify-content-center text-center">';
-      str += '  <div class="col-2 ' + _checked + ' text-center header-toggle" id="buttonHeader' + i + '" onclick="buttonVisibility(' + i + ')">' + _icon_eye + '</div>';
-      str += '  <div class="col-5 btn-outline-dark text-center header-toggle disabled" draggable="true">' + item[1] + '</div>';
-      str += '  <div class="col-2 btn-primary text-center header-toggle" id="buttonUp' + i + '" onclick="buttonUpDown(' + i + ', 0)"><i class="bi bi-arrow-up"></i></div>';
-      str += '  <div class="col-2 btn-primary text-center header-toggle" id="buttonDown' + i + '" onclick="buttonUpDown(' + i + ', 1)"><i class="bi bi-arrow-down"></i></div>';
-      str += '</div>';
-    });
-
-    $("#tabelcustomize_data").html(str);
-
-  }
-
-  function buttonVisibility(_id) {
-    if (report_mode == modereport_detail) {
-      if (cart_headerDetail[_id][2] == 1) {
-        $("#buttonHeader" + _id).removeClass("btn-success");
-        $("#buttonHeader" + _id).addClass("btn-outline-danger");
-        $("#buttonHeader" + _id).html('<i class="bi bi-eye-slash"></i>');
-        cart_headerDetail[_id][2] = 0;
-      } else {
-        $("#buttonHeader" + _id).removeClass("btn-outline-danger");
-        $("#buttonHeader" + _id).addClass("btn-success");
-        $("#buttonHeader" + _id).html('<i class="bi bi-eye"></i>');
-        cart_headerDetail[_id][2] = 1;
-      }
-      doSimpanHeader('{!! $akses['href'] !!}', modereport_detail, cart_headerDetail);
-    } else {
-      if (cart_headerRekap[_id][2] == 1) {
-        $("#buttonHeader" + _id).removeClass("btn-success");
-        $("#buttonHeader" + _id).addClass("btn-outline-danger");
-        $("#buttonHeader" + _id).html('<i class="bi bi-eye-slash"></i>');
-        cart_headerRekap[_id][2] = 0;
-      } else {
-        $("#buttonHeader" + _id).removeClass("btn-outline-danger");
-        $("#buttonHeader" + _id).addClass("btn-success");
-        $("#buttonHeader" + _id).html('<i class="bi bi-eye"></i>');
-        cart_headerRekap[_id][2] = 1;
-      }
-      doSimpanHeader('{!! $akses['href'] !!}', modereport_rekap, cart_headerRekap);
-    }
-  }
-
-  function buttonUpDown(_id, _mode) {
-    // mode = 0 UP, 1 DOWN
-    let temp = [];
-    let _idx = (_mode == 0) ? _id-1 : _id+1;
-
-    if (report_mode == modereport_detail) {
-      let _isNotEdge = (_mode == 0) ? (_id > 0) : (_id < cart_headerDetail.length-1);
-
-      if (_isNotEdge) {
-        temp.push(cart_headerDetail[_idx][0]);
-        temp.push(cart_headerDetail[_idx][1]);
-        temp.push(cart_headerDetail[_idx][2]);
-
-        cart_headerDetail[_idx][0] = cart_headerDetail[_id][0];
-        cart_headerDetail[_idx][1] = cart_headerDetail[_id][1];
-        cart_headerDetail[_idx][2] = cart_headerDetail[_id][2];
-
-        cart_headerDetail[_id] = temp;
-        doSimpanHeader('{!! $akses['href'] !!}', modereport_detail, cart_headerDetail);
-        showCustomize();
-      }
-    } else {
-      let _isNotEdge = (_mode == 0) ? (_id > 0) : (_id < cart_headerDetail.length-1);
-
-      if (_isNotEdge) {
-        temp.push(cart_headerRekap[_idx][0]);
-        temp.push(cart_headerRekap[_idx][1]);
-        temp.push(cart_headerRekap[_idx][2]);
-
-        cart_headerRekap[_idx][0] = cart_headerRekap[_id][0];
-        cart_headerRekap[_idx][1] = cart_headerRekap[_id][1];
-        cart_headerRekap[_idx][2] = cart_headerRekap[_id][2];
-
-        cart_headerRekap[_id] = temp;
-        doSimpanHeader('{!! $akses['href'] !!}', modereport_rekap, cart_headerRekap);
-        showCustomize();
-      }
-    }
-  }
-
-  //======== FILTER DATA FORM ========================
-
-  function showFilter() {
-    let date1    = $("#inputDate1").val();
-    let date2    = $("#inputDate2").val();
-    let inputOrd = $("#inputOrder").val();
-
-    var str = "";
-    $.ajax({
-      url     : "{!! url('laporanpengadaanrekapinvoicepembelian_doFilter') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        date1,
-        date2,
-        inputOrd
-      },
-      success: function(res) {
-        cart_filter = [];
-
-        let _head1 = (inputOrd == "N") ? "Nomor Bukti" : "Kode Barang";
-        let _head2 = (inputOrd == "N") ? "Tanggal" : "Nama Barang";
-        $("#tabelfilter_header").html('<tr><th>' + _head1 + '</th><th>' + _head2 + '</th></tr>');
-
-        if (res.length > 0) {
-          res.forEach((item, i) => {
-            let _data1 = (inputOrd == "N") ? item.NoBukti : item.KodeBrg;
-            let _data2 = (inputOrd == "N") ? format_date(item.Tanggal) : item.NamaBrg;
-
-            str += '<tr id="' + i + '-trrowfilter" draggable="true" onclick="selectrowfilter(' + i + ')">';
-            str += '  <td>' + _data1 + '</td>';
-            str += '  <td>' + _data2 + '</td>';
-            str += '</tr>';
-
-            let temp = [];
-            temp.push(_data1);
-            temp.push(false);
-            cart_filter.push(temp);
-          });
-        } else {
-            str += '<tr>';
-            str += '  <td colspan="2" class="text-center">Tidak ada transaksi ditemukan.</td>';
-            str += '  <td style="display: none;"></td>';
-            str += '</tr>';
-        }
-      }
-    })
-
-    $("#tabelfilter_data").html(str);
-  }
-
-  function selectrowfilter(_row) {
-    let _row_start, _row_end;
-
-    if (!event.shiftKey) {
-      _row_start = _row;
-      _row_end = _row;
-    } else {
-      if (_row > g_lastrowfilter) {
-        _row_start = g_lastrowfilter + 1;
-        _row_end = _row;
-      } else if (_row < g_lastrowfilter) {
-        _row_start = _row;
-        _row_end = g_lastrowfilter - 1;
-      } else {
-        _row_start = _row;
-        _row_end = _row;
-      }
-    }
-
-    while (_row_start <= _row_end) {
-      if (cart_filter[_row_start][1]) {
-        // unselect
-        $("#"+_row_start+"-trrowfilter").css('background-color', '');
-        $("#"+_row_start+"-trrowfilter").css('color', '');
-      } else {
-        // select
-        $("#"+_row_start+"-trrowfilter").css('background-color', '#0069d9');
-        $("#"+_row_start+"-trrowfilter").css('color', 'white');
-      }
-
-      cart_filter[_row_start][1] = !cart_filter[_row_start][1];
-      _row_start++;
-    }
-
-    g_lastrowfilter = _row;
-  }
-
-  function showReportFilter() {
-    if (cart_filter.length <= 0) { closeFormFilterData(); return; }
-
-    let inputOrd = $("#inputOrder").val();
-    let _listdata = [];
-    cart_filter.forEach((item, i) => {
-      if (item[1]) {
-        _listdata.push(item[0]);
-      }
-    });
-
-    document.getElementById("showTableReport").style.display = "block"
-    $.ajax({
-      url     : "{!! url('laporanpengadaanrekapinvoicepembelian_doReportFilter') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        listdata : _listdata,
-        inputOrd
-      },
-      success: function(res) {
-        showReport(res);
-        alertify.success("Report ditampilkan");
-      }
-    })
-
-    closeFormFilterData();
-  }
-
-</script>
-
-
-
-
-@endsection --}}
