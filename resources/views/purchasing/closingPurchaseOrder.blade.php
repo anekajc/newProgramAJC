@@ -337,6 +337,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="cpoTglAwal1" value="{!! $cpoTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="cpoTglAkhir1" value="{!! $cpoTglAkhir !!}">
+                    </div>
                     <input type="search" id="cpoSearch1" class="po-search-inp" placeholder="Cari data">
                     {{-- Jumlah baris per halaman. Nilai -1 = tampilkan semua data - lihat
                          ClosingPOController@dataOutstanding. --}}
@@ -374,6 +380,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="cpoTglAwal2" value="{!! $cpoTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="cpoTglAkhir2" value="{!! $cpoTglAkhir !!}">
+                    </div>
                     <input type="search" id="cpoSearch2" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap">
                       <label for="cpoLen2">Tampilkan</label>
@@ -634,6 +646,29 @@ function cpoIkatPanjangHalaman (urut) {
   })
 }
 
+// Ubah salah satu tanggal periode -> kosongkan cache tab ini lalu reload, supaya
+// halaman pertama tidak menampilkan hasil rentang lama (lihat cpoCacheOut/cpoPakaiCacheOut).
+function cpoIkatPeriode (urut) {
+  let awal  = document.getElementById('cpoTglAwal' + urut)
+  let akhir = document.getElementById('cpoTglAkhir' + urut)
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    cpoCacheOut[urut] = null
+    cpoPakaiCacheOut[urut] = false
+    $('#' + CPO_TAB[urut].tabel).DataTable().ajax.reload()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
 function cpoAturTinggiTabel () {
   let area = document.getElementById('content')
   let pane = document.querySelector('#myTabContent .tab-pane.active')
@@ -865,7 +900,9 @@ function initTabelClosingPO (urut, pakaiCache) {
           length : data.length,
           search : data.search ? data.search.value : '',
           orderCol : kolom,
-          orderDir : arah
+          orderDir : arah,
+          tglawal : $('#cpoTglAwal' + urut).val(),
+          tglakhir : $('#cpoTglAkhir' + urut).val()
         },
         success : function (res) {
           cpoCacheOut[urut] = res
@@ -890,6 +927,7 @@ function initTabelClosingPO (urut, pakaiCache) {
 
   cpoIkatSearch(urut)
   cpoIkatPanjangHalaman(urut)
+  cpoIkatPeriode(urut)
   let inputSearch = document.getElementById(cfg.search)
   if (inputSearch) { inputSearch.value = posisi ? posisi.search : '' }
   cpoAturTinggiTabel()

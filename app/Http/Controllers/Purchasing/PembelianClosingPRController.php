@@ -4,11 +4,8 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewMenu;
+use App\Models\NewPeriode;
 use Illuminate\Support\Facades\DB;
 
 class PembelianClosingPRController extends Controller
@@ -44,6 +41,12 @@ class PembelianClosingPRController extends Controller
     ['field' => 'KetBatal',  'label' => 'Keterangan Batal', 'tipe' => 0],
   ];
 
+  // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Purchase Order).
+  private function periodeRange ($periode) {
+    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
+    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
+  }
+
   public function index(Request $req) {
     $kodemenu = '030110';
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path);
@@ -54,11 +57,15 @@ class PembelianClosingPRController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
+    list($clTglAwal, $clTglAkhir) = $this->periodeRange($periode);
+
     // Konfigurasi kolom kedua tabel diambil AJAX lewat loadAll() saat halaman siap -
     // sejajar POController@index, yang juga tidak mem-pre-fetch header tabel di sini.
     return view('purchasing.pembelianclosingpr', [
         "menul0" => $menul0,
         "periode" => $periode,
+        "clTglAwal" => $clTglAwal,
+        "clTglAkhir" => $clTglAkhir,
         "akses" => $akses,
     ]);
   }
@@ -151,6 +158,12 @@ class PembelianClosingPRController extends Controller
   // Data tab "Outstanding PR" dengan server-side paging DataTables - sejajar
   // POController@dataOutstandingPR.
   public function dataOutstanding (Request $req) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+
     $draw   = (int) $req->input('draw', 1);
     $start  = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
@@ -171,13 +184,13 @@ class PembelianClosingPRController extends Controller
       $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
-    $where = 'A.SisaPPL > 0 and ISNULL(A.QntBatal, 0) = 0';
-    $bind  = [];
+    $where = 'A.SisaPPL > 0 and ISNULL(A.QntBatal, 0) = 0 and A.Tanggal between :tglawal and :tglakhir';
+    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
       $where .= " and (A.NoBukti like :cari1 or A.kodebrg like :cari2 or A.NamaBrg like :cari3 or A.Keterangan like :cari4)";
       $like = '%' . $search . '%';
-      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
+      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like]);
     }
 
     $jml = DB::connection("SML")->select("
@@ -219,6 +232,12 @@ class PembelianClosingPRController extends Controller
   // loadAll() lama (DBPPLDET+DBPPL+subquery DBPODET), dibungkus jadi derived table supaya
   // bisa diberi ROW_NUMBER().
   public function dataClosing (Request $req) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+
     $draw   = (int) $req->input('draw', 1);
     $start  = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
@@ -237,13 +256,13 @@ class PembelianClosingPRController extends Controller
       $orderBy = 'X.Tanggal DESC, X.Nobukti DESC, X.Urut';
     }
 
-    $where = '1 = 1';
-    $bind  = [];
+    $where = '1 = 1 and X.Tanggal between :tglawal and :tglakhir';
+    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
       $where .= " and (X.Nobukti like :cari1 or X.Kodebrg like :cari2 or X.NamaBrg like :cari3 or X.KetBatal like :cari4)";
       $like = '%' . $search . '%';
-      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
+      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like]);
     }
 
     $sqlDasar = "

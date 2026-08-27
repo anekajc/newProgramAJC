@@ -10,201 +10,165 @@ use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
 use Illuminate\Auth;
 
-class ClosingPOController extends Controller
+
+// use App\Http\Controllers\NewMenuController;
+
+class PONonStockController extends Controller
 {
-  // Href penyimpanan pengaturan kolom di DBHEADERTABLE. Nilainya tidak boleh berubah, karena
-  // pengaturan kolom milik tiap user disimpan per href.
-  const CPO_HREF = 'closingpurchaseorder';
-
-  // Kolom default tab "Outstanding PO" (urut 1), sumber vwOutPOBatal. Casing nama field harus
-  // persis sama dengan yang dikembalikan dataOutstanding(): SQL Server tidak peduli casing,
-  // tapi PHP (dan JS) peduli - lihat catatan casing di CPO_KOLOM_2.
-  const CPO_KOLOM_1 = [
-    ['field' => 'Nobukti',      'label' => 'No. Bukti',   'tipe' => 0],
-    ['field' => 'TANGGAL',      'label' => 'Tanggal',     'tipe' => 2],
-    ['field' => 'NAMACUSTSUPP', 'label' => 'Supplier',    'tipe' => 0],
-    ['field' => 'kodebrg',      'label' => 'Kode Barang', 'tipe' => 0],
-    ['field' => 'NamaBrg',      'label' => 'Nama Barang', 'tipe' => 0],
-    ['field' => 'Satuan',       'label' => 'Satuan',      'tipe' => 0],
-    ['field' => 'Qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
-    ['field' => 'QntBatal',     'label' => 'Qty Batal',   'tipe' => 1],
-    ['field' => 'QntSisa',      'label' => 'Qty Sisa',    'tipe' => 1],
-  ];
-
-  // Kolom default tab "Closing PO" (urut 2), sumber dbPO + vwMasterPOOut. Casing field-nya
-  // berbeda dari urut 1 ('NoBukti', 'satuan') karena sumber tabelnya memang berbeda - lihat
-  // SELECT eksplisit di dataClosing().
-  const CPO_KOLOM_2 = [
-    ['field' => 'NoBukti',      'label' => 'No. Bukti',   'tipe' => 0],
-    ['field' => 'Tanggal',      'label' => 'Tanggal',     'tipe' => 2],
-    ['field' => 'NamaCustSupp', 'label' => 'Supplier',    'tipe' => 0],
-    ['field' => 'kodebrg',      'label' => 'Kode Barang', 'tipe' => 0],
-    ['field' => 'namabrg',      'label' => 'Nama Barang', 'tipe' => 0],
-    ['field' => 'satuan',       'label' => 'Satuan',      'tipe' => 0],
-    ['field' => 'qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
-    ['field' => 'qntbatal',     'label' => 'Qty Batal',   'tipe' => 1],
-    ['field' => 'qntsisa',      'label' => 'Qty Sisa',    'tipe' => 1],
-    ['field' => 'UserBatal',    'label' => 'User Close',  'tipe' => 0],
-    ['field' => 'TglBatal',     'label' => 'Tgl. Close',  'tipe' => 2],
-    ['field' => 'KetBatal',     'label' => 'Ket. Close',  'tipe' => 0],
-  ];
-
-  // Baris yang boleh muncul di tab "Outstanding PO". Sengaja dipisah jadi konstanta karena
-  // dipakai dua kali: untuk daftarnya (dataOutstanding) dan untuk mencari sisa saat menutup
-  // per No. Bukti (cekSisa/updateCloseHeader), supaya keduanya tidak bisa berbeda aturan.
-  const CPO_FILTER_OUTSTANDING = 'A.QntSisa > 0 and A.Qnt - ISNULL(A.QntBatal, 0) > 0';
-
-  // Sumber tab "Closing PO". Sama dengan query lama di loadAll(), tapi hanya kolom yang benar
-  // benar dipakai (dulu ikut menarik seluruh kolom otorisasi dan total-total dbPO yang tidak
-  // pernah ditampilkan), dan qntbatal ikut diambil supaya Qty Batal bisa dilihat.
-  private function sqlDasarClosing () {
-    return "
-      select
-          A.NoBukti,
-          A.Tanggal,
-          B.NamaCustSupp,
-          B.kodebrg,
-          B.namabrg,
-          B.satuan,
-          B.qnt,
-          B.qntterima,
-          B.qntbatal,
-          B.qntsisa,
-          B.UserBatal,
-          B.TglBatal,
-          B.KetBatal,
-          B.Urut
-      from dbPO A
-      Left Outer Join vwMasterPOOut B on A.NoBukti = B.NoBukti
-      where ISNULL(B.qntbatal, 0) <> 0
-    ";
-  }
-
-  // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Purchase Order).
-  private function periodeRange ($periode) {
-    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
-    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
-  }
 
   public function index(Request $req) {
     $kodemenu = '04101';
-    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path);
-    // $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
+    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
     }
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
-    list($cpoTglAwal, $cpoTglAkhir) = $this->periodeRange($periode);
+    list($ponsTglAwal, $ponsTglAkhir) = $this->periodeRange($periode);
 
-    // Isi kedua tabel tidak lagi ditarik di sini. Dulu halaman ini menarik SELURUH isi
-    // vwOutPOBatal dan seluruh dbPO+vwMasterPOOut sekali jalan (dua kali malah: sekali di
-    // index() untuk @foreach blade, sekali lagi lewat loadAll() dari JS). Sekarang datanya
-    // diambil per halaman lewat dataOutstanding()/dataClosing(), dan loadAll() hanya
-    // mengirim konfigurasi kolom - sejajar PembelianClosingPRController.
-    return view('purchasing.closingPurchaseOrder' , [
+    // Data tab "Outstanding PR" & "Purchase Order" sekarang diambil lewat AJAX
+    // (dataOutstandingPR/loadPurchaseOrder) - lihat memory tab-outstanding-pr-hanya-informasi
+    // dan pola yang sama di POController@index.
+    return view('purchasing.purchaseOrderNonStock' , [
       "menul0" => $menul0,
       "periode" => $periode,
-      "cpoTglAwal" => $cpoTglAwal,
-      "cpoTglAkhir" => $cpoTglAkhir,
+      "ponsTglAwal" => $ponsTglAwal,
+      "ponsTglAkhir" => $ponsTglAkhir,
+      "tempOutstanding1" => [],
+      "tempOutstanding3" => [],
+      "tempOutstanding5" => [],
+
+      "level" => $akses->OL,
+      "listBarangAll" => [] ,
       "akses" => $akses
     ]);
 
 }
 
-  // Dipanggil AJAX sinkron sekali di awal halaman untuk mengambil konfigurasi kolom kedua
-  // tabel. Tidak membawa data sama sekali.
-  public function loadAll (Request $req) {
-    return response()->json([
-      "kolom1" => $this->ambilKolom(1),
-      "kolom2" => $this->ambilKolom(2),
+  // Rentang tanggal default tab Purchase Order = satu bulan penuh periode kerja user.
+  // Sama persis dengan POController::periodeRange().
+  private function periodeRange ($periode) {
+    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
+    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
+  }
+
+  public function loadAll () {
+    $req = new Request([
+        'href' => 'pononstock'
     ]);
-  }
-
-  // Konfigurasi kolom mandiri untuk halaman ini - tidak lewat HeaderTableController supaya
-  // file bersama itu tidak perlu disentuh. Penyimpanan tetap lewat endpoint generik
-  // saveheadertable/DBHEADERTABLE, hanya pengambilannya yang khusus di sini.
-  public function headerTable (Request $req) {
-    $urut = (int) $req->input('urut', 1);
-    if ($urut !== 2) { $urut = 1; }
-
-    if ($req->input('reset')) {
-      DB::connection('SML')->update(
-        "delete from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
-        ["username" => \Auth::user()->username, "href" => self::CPO_HREF, "urut" => $urut]
-      );
-    }
-
-    return response()->json($this->ambilKolom($urut));
-  }
-
-  private function ambilKolom ($urut) {
-    $default = $urut === 2 ? self::CPO_KOLOM_2 : self::CPO_KOLOM_1;
-    $username = \Auth::user()->username;
-
-    $saved = DB::connection('SML')->select(
-      "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
-      ["username" => $username, "href" => self::CPO_HREF, "urut" => $urut]
-    );
-
-    if (count($saved) > 0) {
-      $valueSaved = json_decode($saved[0]->value);
-
-      // aliasordered HARUS sejajar indeksnya dengan headertablevalue (yang bisa sudah digeser
-      // urutannya oleh user), jadi label dicari per nilai lewat $labelByField - BUKAN diambil
-      // dari $default apa adanya (urutan $default selalu tetap, labelnya akan salah pasang
-      // begitu user pernah menggeser kolom).
-      $labelByField = [];
-      foreach ($default as $k) { $labelByField[$k['field']] = $k['label']; }
-
-      $aliasordered = [];
-      foreach ($valueSaved as $v) {
-        array_push($aliasordered, ["value" => $v, "alias" => isset($labelByField[$v]) ? $labelByField[$v] : $v]);
-      }
-
-      return [
-        "headertableheader" => json_decode($saved[0]->header),
-        "headertablevalue"  => $valueSaved,
-        "isnumeric"         => json_decode($saved[0]->isnumber),
-        "isshown"           => json_decode($saved[0]->isshown),
-        // DBHEADERTABLE tidak punya kolom desimal tersendiri - kolom `tipe` dipakai untuk itu.
-        "desimal"           => json_decode($saved[0]->tipe),
-        "aliasordered"      => $aliasordered,
-      ];
-    }
-
-    $header = []; $value = []; $isnumeric = []; $isshown = []; $desimal = []; $aliasordered = [];
-    foreach ($default as $k) {
-      array_push($header, $k['field']);
-      array_push($value, $k['field']);
-      array_push($isnumeric, $k['tipe']);
-      array_push($isshown, 1);
-      array_push($desimal, $k['tipe'] === 1 ? 2 : 0);
-      array_push($aliasordered, ["value" => $k['field'], "alias" => $k['label']]);
-    }
-
+    $xx = app('App\Http\Controllers\HeaderTableController')
+        ->getHeaderTable($req);
+    // loadAll() sekarang hanya mengembalikan konfigurasi header tabel, sama seperti
+    // POController@loadAll. Data tab "Outstanding PR" diambil per halaman lewat
+    // dataOutstandingPR() (server-side paging), data tab "Purchase Order" diambil lewat
+    // loadPurchaseOrder() saat tabnya diklik (lazy load).
     return [
-      "headertableheader" => $header,
-      "headertablevalue"  => $value,
-      "isnumeric"         => $isnumeric,
-      "isshown"           => $isshown,
-      "desimal"           => $desimal,
-      "aliasordered"      => $aliasordered,
+      "tempOutstanding1" => [],
+      "tempOutstanding3" => [],
+      "tempOutstanding5" => [],
+      "aliasordered" => $xx['aliasordered'],
+      "headertableheader" => $xx['headertableheader'],
+      "isnumeric" => $xx['isnumeric'],
+      "headertablevalue" => $xx['headertablevalue'],
+      "isparsed" => $xx['isparsed'],
+      "isshown" => $xx['isshown'],
+      "desimal" => $xx['desimal'],
+
+      "aliasordered2" => $xx['aliasordered2'],
+      "headertableheader2" => $xx['headertableheader2'],
+      "isnumeric2" => $xx['isnumeric2'],
+      "headertablevalue2" => $xx['headertablevalue2'],
+      "isparsed2" => $xx['isparsed2'],
+      "isshown2" => $xx['isshown2'],
+      "desimal2" => $xx['desimal2'],
     ];
   }
 
-  // Data tab "Outstanding PO" dengan server-side paging DataTables.
-  public function dataOutstanding (Request $req) {
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+  /**
+   * Data tab "Purchase Order". Dipanggil lewat AJAX hanya saat tab tersebut dibuka,
+   * sama persis dengan POController@loadPurchaseOrder - bedanya cuma B.pJasa = 1.
+   */
+  public function loadPurchaseOrder (Request $req) {
+    $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
     list($tglawal, $tglakhir) = $this->periodeRange($periode);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+
+    $inputAwal  = $req->input('tglawal');
+    $inputAkhir = $req->input('tglakhir');
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $inputAwal))  { $tglawal  = $inputAwal; }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $inputAkhir)) { $tglakhir = $inputAkhir; }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
+    $tempOutstanding2 = DB::connection("SML")->select("declare @tglawal date, @tglakhir date  ,@pJasa Bit
+
+select @tglawal= :tglawal, @tglakhir= :tglakhir
+
+Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                 else 1
+            end As Bit) NeedOtorisasi,A.IsOtorisasi2
+       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL,b.qnt as qnt,b.qntbeli as qntbeli
+From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+where a.Tanggal between @tglawal and @tglakhir
+and  TotTotalRp>=200000000
+and B.pJasa= 1
+
+UNION ALL
+
+Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
+        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
+        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
+        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                 else 1
+            end As Bit) NeedOtorisasi,A.IsOtorisasi2
+       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL,b.qnt as qnt,b.qntbeli as qntbeli
+From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
+where a.Tanggal between @tglawal and @tglakhir
+and  TotTotalRp < 200000000
+and B.pJasa= 1
+
+order by Tanggal desc, NoBukti desc" , ["tglawal" => $tglawal , "tglakhir" =>$tglakhir]);
+
+$collection2 = collect($tempOutstanding2)->groupBy('NOBUKTI');
+$tempOutstanding3 = [];
+foreach ($collection2 as $p) {
+  array_push($tempOutstanding3, $p);
+}
+
+    return [
+      "tempOutstanding3" => $tempOutstanding3,
+    ];
+}
+
+  /**
+   * Data tab "Outstanding PR" dengan server-side paging DataTables - sama persis dengan
+   * POController@dataOutstandingPR, bedanya cuma filter pjasa (non stock = 1, stock = 0).
+   */
+  public function dataOutstandingPR (Request $req) {
     $draw   = (int) $req->input('draw', 1);
     $start  = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
@@ -213,31 +177,33 @@ class ClosingPOController extends Controller
     $semua = ($length === -1);
     if (!$semua && ($length < 1 || $length > 500)) { $length = 10; }
 
-    $allowedOrder = ['Nobukti', 'TANGGAL', 'NAMACUSTSUPP', 'kodebrg', 'NamaBrg', 'Satuan', 'Qnt', 'qntterima', 'QntBatal', 'QntSisa', 'urut'];
+    $allowedOrder = [
+      'Nobukti', 'Tanggal', 'kodebrg', 'NamaBrg', 'sat', 'Qnt',
+      'QNTPO', 'SisaPPL', 'Keterangan', 'QntoutSO', 'QntStock', 'Urut'
+    ];
     $orderCol = (string) $req->input('orderCol', '');
     $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
 
     if (in_array($orderCol, $allowedOrder, true)) {
       $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
-      // Default: data terbaru di atas. A.Urut sengaja tetap ASC - itu nomor urut
-      // barang di dalam satu No. Bukti, bukan bagian dari "yang terbaru".
       $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
-    $where = self::CPO_FILTER_OUTSTANDING . " and A.Tanggal between :tglawal and :tglakhir";
-    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
+    $where = 'A.SisaPPL > 0 and isnull(A.pjasa,0) = 1';
+    $bind  = [];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
-      $where .= " and (A.NoBukti like :cari1 or A.kodebrg like :cari2 or A.NamaBrg like :cari3 or A.NAMACUSTSUPP like :cari4)";
+      $where .= " and (A.NoBukti like :cari1 or A.kodebrg like :cari2
+                    or A.NamaBrg like :cari3 or A.Keterangan like :cari4)";
       $like = '%' . $search . '%';
-      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like]);
+      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
     }
 
     $jml = DB::connection("SML")->select("
       SET NOCOUNT ON
       select count(1) as jml
-      from vwOutPOBatal A WITH(NOLOCK)
+      from DBO.vwOutPPL A WITH(NOLOCK)
       where $where
     ", $bind);
     $total = count($jml) ? (int) $jml[0]->jml : 0;
@@ -254,7 +220,7 @@ class ClosingPOController extends Controller
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
                A.*
-        from vwOutPOBatal A WITH(NOLOCK)
+        from DBO.vwOutPPL A WITH(NOLOCK)
         where $where
       ) X
       $batasBaris
@@ -267,123 +233,6 @@ class ClosingPOController extends Controller
       "recordsFiltered" => $total,
       "data" => $rows,
     ];
-  }
-
-  // Data tab "Closing PO" dengan server-side paging DataTables.
-  public function dataClosing (Request $req) {
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    list($tglawal, $tglakhir) = $this->periodeRange($periode);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
-    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
-
-    $draw   = (int) $req->input('draw', 1);
-    $start  = (int) $req->input('start', 0);
-    $length = (int) $req->input('length', 10);
-
-    if ($start < 0) { $start = 0; }
-    $semua = ($length === -1);
-    if (!$semua && ($length < 1 || $length > 500)) { $length = 10; }
-
-    $allowedOrder = ['NoBukti', 'Tanggal', 'NamaCustSupp', 'kodebrg', 'namabrg', 'satuan', 'qnt', 'qntterima', 'qntbatal', 'qntsisa', 'UserBatal', 'TglBatal', 'KetBatal', 'Urut'];
-    $orderCol = (string) $req->input('orderCol', '');
-    $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
-
-    if (in_array($orderCol, $allowedOrder, true)) {
-      $orderBy = 'X.[' . $orderCol . '] ' . $orderDir . ', X.NoBukti, X.Urut';
-    } else {
-      // sqlDasarClosing() sudah menyertakan X.Tanggal (lihat select-nya), jadi
-      // default di sini juga bisa dibalik pakai tanggal, bukan cuma No. Bukti.
-      $orderBy = 'X.Tanggal DESC, X.NoBukti DESC, X.Urut';
-    }
-
-    $where = '1 = 1 and X.Tanggal between :tglawal and :tglakhir';
-    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
-    $search = trim((string) $req->input('search', ''));
-    if ($search !== '') {
-      $where .= " and (X.NoBukti like :cari1 or X.kodebrg like :cari2 or X.namabrg like :cari3 or X.NamaCustSupp like :cari4 or X.KetBatal like :cari5)";
-      $like = '%' . $search . '%';
-      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like, "cari5" => $like]);
-    }
-
-    $sqlDasar = $this->sqlDasarClosing();
-
-    $jml = DB::connection("SML")->select("
-      SET NOCOUNT ON
-      select count(1) as jml from ( $sqlDasar ) X where $where
-    ", $bind);
-    $total = count($jml) ? (int) $jml[0]->jml : 0;
-
-    $batasBaris = '';
-    if (!$semua) {
-      $batas = $start + $length;
-      $batasBaris = "where Y.NoBaris > $start and Y.NoBaris <= $batas";
-    }
-
-    $rows = DB::connection("SML")->select("
-      SET NOCOUNT ON
-      select Y.* from (
-        select ROW_NUMBER() over (order by $orderBy) as NoBaris, X.*
-        from ( $sqlDasar ) X
-        where $where
-      ) Y
-      $batasBaris
-      order by Y.NoBaris
-    ", $bind);
-
-    return [
-      "draw" => $draw,
-      "recordsTotal" => $total,
-      "recordsFiltered" => $total,
-      "data" => $rows,
-    ];
-  }
-
-  // Dipanggil sebelum modal alasan dibuka, supaya user tahu berapa Qty Sisa yang akan
-  // dibatalkan sebelum mengisi alasan - dan supaya baris yang sisanya sudah 0 ditolak lebih
-  // awal, bukan baru ketahuan setelah alasan diketik.
-  public function cekSisa (Request $req) {
-    $nobukti = $req->input('nobukti');
-    $mode    = $req->input('mode', 'item');
-    $urut    = $req->input('urut');
-
-    $rows = $this->barisOutstanding($nobukti, $mode === 'item' ? $urut : null);
-
-    $rowsSisa  = array_filter($rows, [$this, 'bisaDiclose']);
-    $totalSisa = array_sum(array_map(function ($r) { return (float) $r->QntSisa; }, $rowsSisa));
-
-    return response()->json([
-      'jml' => count($rows),
-      'jmlSisa' => count($rowsSisa),
-      'totalSisa' => $totalSisa,
-    ]);
-  }
-
-  // Syarat sebuah baris PO masih boleh diclose. Sengaja sama persis dengan
-  // CPO_FILTER_OUTSTANDING (aturan tab Outstanding), supaya tidak mungkin ada baris yang
-  // tidak tampil di tab Outstanding tapi tetap ikut tertutup lewat Close per No. Bukti.
-  // Sisi PHP, bukan SQL, karena pemanggilnya juga perlu menghitung baris yang dilewati.
-  public function bisaDiclose ($r) {
-    return (float) $r->QntSisa > 0 && ((float) $r->Qnt - (float) $r->QntBatal) > 0;
-  }
-
-  // Baris PO yang jadi bahan penguncian, dibaca dari vwOutPOBatal. $urut null berarti seluruh
-  // barang pada No. Bukti tersebut. Sengaja TIDAK memakai CPO_FILTER_OUTSTANDING: yang dipanggil
-  // butuh melihat juga baris yang Qty Sisa-nya sudah 0, supaya bisa menghitung berapa item yang
-  // dilewati dan melaporkannya ke user.
-  private function barisOutstanding ($nobukti, $urut = null) {
-    $where = "A.NoBukti = :nobukti";
-    $bind  = ["nobukti" => $nobukti];
-
-    if ($urut !== null && $urut !== '') {
-      $where .= " and A.Urut = :urut";
-      $bind["urut"] = $urut;
-    }
-
-    return DB::connection('SML')->select("
-      SET NOCOUNT ON
-      select A.* from vwOutPOBatal A WITH(NOLOCK) where $where
-    ", $bind);
   }
 
   public function cekOtorisasi (Request $req) {
@@ -401,12 +250,15 @@ class ClosingPOController extends Controller
   public function updateOtorisasi (Request $req) {
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
+
     return $res;
   }
   
   public function updateBatalOtorisasi (Request $req) {
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
+    // $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,$req->pket,0,'DBPPL');
     return $res;
   }
 
@@ -425,24 +277,6 @@ class ClosingPOController extends Controller
     
     return $res;
   }
-
- public function spCetak (Request $req)
-  {
-      $noBukti = $req->input('NOBUKTI');
-
-      $cetak = DB::connection("SML")->select(
-          "EXEC Sp_CetakPO ?",
-          [$noBukti]
-      );
-
-      $tempCetak1 = [];
-      foreach ($cetak as $p) {
-          array_push($tempCetak1, $p);
-      }
-
-      return $tempCetak1;
-  }
-
 
   public function getNoBukti (Request $req) {
 
@@ -474,11 +308,37 @@ class ClosingPOController extends Controller
     return $listData;
   }
 
+    public function listPerkiraan (Request $req) {
+
+    $listData = DB::connection('SML')->select("select Perkiraan,Keterangan from dbPerkiraan where  tipe=1 
+                                               and perkiraan in (select perkiraan from DBAKSESPERKIRAAN where userid='sa')
+                                               order by Perkiraan");
+    return $listData;
+  }
+
   public function listSales (Request $req) {
 
     $listData = DB::connection('SML')->select("SELECT keynik, nama FROM dbkaryawan where IsSales = 1");
     return $listData;
   }
+
+  public function listCosting (Request $req) {
+
+    $listData = DB::connection('SML')->select("select a.KodeCost, a.NamaCost from dbCost a, dbPerkCost b 
+where a.KodeCost=b.KodeCost and b.Perkiraan= :perkiraan
+  group by a.KodeCost, a.NamaCost 
+ order by a.KodeCost",["perkiraan"=>$req->perkiraan]);
+    return $listData;
+  }
+
+    public function listSubCosting (Request $req) {
+
+    $listData = DB::connection('SML')->select(" select a.KodeSubCost, a.NamaSubCost from vwSubCost a 
+                where a.KodeCost= :kodeCost
+                order by a.KodeSubCost",["kodeCost"=>$req->kodeCost]);
+    return $listData;
+  }
+
 
   public function listValas (Request $req) {
 
@@ -540,20 +400,49 @@ class ClosingPOController extends Controller
     $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,A.partNumber,B.NamaMerk 
                                                 from Dbbarang a 
                                                 Left Outer join dbmerk B on A.kodemerk=b.KodeMerk
-                                                where a.isaktif=1");
+                                                where a.isaktif=1 and a.IsJasa = 1");
     return $listData;
   }
 
-  public function listBarangNonFOC1 (Request $req) 
+  public function listBarangJasa () 
   {
-    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust 
-                                                from vwOutPPL a  
-                                                where Isjasa= 0
+    $listData = DB::connection('SML')->select("Select A.KodeBrg, A.NamaBrg,B.NamaMerk,A.PartNumber 
+                                                , 0 Stock
+                                                from dbBarang A 
+                                                Left Outer Join DbMerk B on A.kodeMerk = B.KodeMerk
+                                                where a.isAktif=1 
+                                                and Isnull(A.isJasa,0)=1  and isnull(A.pagen,0)=0 
+                                                order by A.KodeBrg ");
+    return $listData;
+  }
+
+  public function listBarangJasaNoBukti (Request $req)
+  {
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
+                                                from vwOutPPL a
+                                                where Isjasa= 1 and NoBukti = :nobukti and a.sisaPPL > = 0
+                                                order by a.KodeBrg, a.NoSat, a.NoBukti", ["nobukti" => $req->noBukti]);
+    return $listData;
+  }
+
+  /**
+   * Daftar barang outstanding dari SELURUH PR Non Stock sekaligus - dipakai form
+   * PO Non Stock saat "+ Dari" browsing barang (sebelumnya menembak listBarangJasa()
+   * yang membaca seluruh master barang jasa, tanpa hubungan ke PR sama sekali).
+   * Meniru POController@listBarangNonFOC1AllSO, tapi memakai `pjasa` (bukan `Isjasa`)
+   * dan `SisaPPL > 0` (bukan `>= 0`) supaya konsisten dengan query tab Outstanding PR
+   * (dataOutstandingPR) - barang yang PR-nya sudah habis tidak ikut muncul.
+   */
+  public function listBarangJasaAll (Request $req)
+  {
+    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
+                                                from vwOutPPL a
+                                                where isnull(a.pjasa,0) = 1 and a.SisaPPL > 0
                                                 order by a.KodeBrg, a.NoSat, a.NoBukti");
     return $listData;
   }
 
-  public function listBarangNonFOC2 (Request $req) 
+  public function listBarangNonFOC2 (Request $req)
   {
     $listData = DB::connection('SML')->select("SELECT a.KodeBrg, B.NamaBrg, a.Qnt,a.Qnt2, a.SATUAN Sat,A.Qnt-ISnull(C.Qnt,0) SisaPPL,
                         A.Qnt2- Case When a.NoSAT=2 Then ISnull(C.Qnt2,0) When a.NoSAT=3 Then ISnull(C.Qnt2,0) else ISnull(C.Qnt2,0)*a.ISI end  Sisa2PPL, 
@@ -620,6 +509,8 @@ class ClosingPOController extends Controller
 // join DBMERK b on a.KodeMerk = b.KODEMERK
 //  where a.KODEGRP = 'BJ' and a.pAgen = 1
 
+
+
     $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
                     A.Sat1,A.Sat2 ,A.Sat3,A.pPPN,Isnull(A.QntMin,0) QntMin ,a.Hrg1_1 , a.Hrg2_1, a.Hrg3_1
                     from DBbarang a
@@ -646,163 +537,63 @@ class ClosingPOController extends Controller
 
   }
 
-  // Close satu barang. Qty Batal TIDAK lagi diambil dari kiriman browser: nilainya dibaca
-  // ulang dari vwOutPOBatal di sini, supaya yang tersimpan pasti Qty Sisa baris itu apa adanya
-  // dan tidak bisa dikarang dari sisi klien.
-  public function updateCloseBarang (Request $req) {
-    $nobukti = $req->Nobukti;
-    $urut    = $req->Urut;
-    $reason  = trim((string) $req->KetBatal);
-    $tanggal = $req->TglBatal ?: date('Y-m-d H:i:s');
-
-    if (!$reason) {
-      return response()->json(['success' => false, 'message' => 'Keterangan batal tidak boleh kosong.'], 422);
-    }
-
-    if ($urut === null || $urut === '') {
-      return response()->json(['success' => false, 'message' => 'Urut wajib dikirim untuk close per barang.'], 422);
-    }
-
-    // Validasi dilakukan SEBELUM beginTransaction(), supaya jalur penolakan tidak pernah
-    // meninggalkan transaksi menggantung tanpa commit/rollback.
-    $baris = $this->barisOutstanding($nobukti, $urut);
-    if (!count($baris)) {
-      return response()->json(['success' => false, 'message' => 'Data tidak ditemukan di vwOutPOBatal.'], 422);
-    }
-
-    $data = $baris[0];
-    if (!$this->bisaDiclose($data)) {
-      return response()->json(['success' => false, 'message' => 'Qty Sisa sudah 0, barang ini tidak bisa diclose.'], 422);
-    }
-
-    DB::connection('SML')->beginTransaction();
-    try {
-      DB::connection('SML')->update("
-        Update DBPODET set QntBatal = :QntBatal, UserBatal = :UserBatal, TglBatal = :TglBatal,
-                           isbatal = 1, Ketbatal = :KetBatal
-        where Nobukti = :Nobukti and Urut = :Urut
-      ", [
-        "QntBatal"  => $data->QntSisa,
-        "UserBatal" => \Auth::User()->username,
-        "TglBatal"  => $tanggal,
-        "KetBatal"  => $reason,
-        "Nobukti"   => $nobukti,
-        "Urut"      => $urut,
-      ]);
-
-      DB::connection('SML')->commit();
-      return response()->json(['success' => true, 'diclose' => 1, 'dilewati' => 0]);
-    } catch (\Throwable $e) {
-      DB::connection('SML')->rollBack();
-      return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-    }
-  }
-
-  // Close seluruh barang pada satu No. Bukti. Versi lama menjalankan satu UPDATE massal
-  // "QntBatal = QNT WHERE Nobukti = ?" tanpa filter apa pun - barang yang sudah diterima
-  // sebagian ikut dibatalkan sebesar Qty PO penuh, dan barang yang Qty Sisa-nya sudah 0 pun
-  // ikut ditandai batal. Sekarang tiap baris dibatalkan sebesar Qty Sisa-nya sendiri, dan
-  // baris bersisa 0 dilewati lalu dilaporkan jumlahnya ke user.
-  public function updateCloseHeader (Request $req) {
-    $nobukti = $req->Nobukti;
-    $reason  = trim((string) $req->KetBatal);
-    $tanggal = $req->TglBatal ?: date('Y-m-d H:i:s');
-
-    if (!$reason) {
-      return response()->json(['success' => false, 'message' => 'Keterangan batal tidak boleh kosong.'], 422);
-    }
-
-    $baris = $this->barisOutstanding($nobukti);
-    if (!count($baris)) {
-      return response()->json(['success' => false, 'message' => 'Data tidak ditemukan di vwOutPOBatal.'], 422);
-    }
-
-    $bisaDiclose = array_filter($baris, [$this, 'bisaDiclose']);
-    if (!count($bisaDiclose)) {
-      return response()->json(['success' => false, 'message' => 'Semua barang pada No. Bukti ini Qty Sisa-nya sudah 0.'], 422);
-    }
-
-    DB::connection('SML')->beginTransaction();
-    try {
-      foreach ($bisaDiclose as $data) {
-        DB::connection('SML')->update("
-          Update DBPODET set QntBatal = :QntBatal, UserBatal = :UserBatal, TglBatal = :TglBatal,
-                             isbatal = 1, Ketbatal = :KetBatal
-          where Nobukti = :Nobukti and Urut = :Urut
-        ", [
-          "QntBatal"  => $data->QntSisa,
-          "UserBatal" => \Auth::User()->username,
-          "TglBatal"  => $tanggal,
-          "KetBatal"  => $reason,
-          // vwOutPOBatal menamai kolomnya 'urut' huruf kecil - PHP peduli casing walau SQL
-          // Server tidak, jadi jangan diganti jadi $data->Urut.
-          "Nobukti"   => $nobukti,
-          "Urut"      => $data->urut,
-        ]);
-      }
-
-      DB::connection('SML')->commit();
-      return response()->json([
-        'success'  => true,
-        'diclose'  => count($bisaDiclose),
-        'dilewati' => count($baris) - count($bisaDiclose),
-      ]);
-    } catch (\Throwable $e) {
-      DB::connection('SML')->rollBack();
-      return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-    }
-  }
-
-  public function updateOpenHeader (Request $req) {
-    return $this->bukaKunci($req->Nobukti, null);
-  }
-
-  public function updateOpenBarang (Request $req) {
-    if ($req->Urut === null || $req->Urut === '') {
-      return response()->json(['success' => false, 'message' => 'Urut wajib dikirim untuk open per barang.'], 422);
-    }
-    return $this->bukaKunci($req->Nobukti, $req->Urut);
-  }
-
-  private function bukaKunci ($nobukti, $urut) {
-    if (!$nobukti) {
-      return response()->json(['success' => false, 'message' => 'No. Bukti tidak boleh kosong.'], 422);
-    }
-
-    DB::connection('SML')->beginTransaction();
-    try {
-      $where = "Nobukti = :Nobukti";
-      $bind  = ["Nobukti" => $nobukti];
-      if ($urut !== null) {
-        $where .= " and Urut = :Urut";
-        $bind["Urut"] = $urut;
-      }
-
-      $affected = DB::connection('SML')->update("
-        Update DBPODET set QntBatal = 0, isbatal = 0, UserBatal = '', TglBatal = Null, Ketbatal = ''
-        where $where
-      ", $bind);
-
-      if ($affected === 0) {
-        throw new \Exception("Tidak ada data yang diupdate. Pastikan No. Bukti dan Urut sesuai.");
-      }
-
-      DB::connection('SML')->commit();
-      return response()->json(['success' => true]);
-    } catch (\Throwable $e) {
-      DB::connection('SML')->rollBack();
-      return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-    }
-  }
-
   public function spAdd (Request $req) {
     $choice = $req->Choice;
     $jmlrecord = $req->Jmlrecord;
     $nobukti = $req->NoBukti;
+$xurut=0;
+//  return ["asd" => $nobukti] ;
+     $purut = DB::connection('SML')->select('select * from DBPODET where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+    // Dipakai di bawah untuk memastikan sp_PO benar-benar menambah baris detail.
+    $jmlDetSebelum = count($purut);
+    if ($purut){
+
+        if ($choice=='I' ){
+
+        $purut = DB::connection('SML')->select('select max(urut)+1 xurut from DBPODET where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+            // return 'uuu';
+        $xurut= $purut[0]->xurut;
+        }else { 
+            // return 'mmm';
+            // Blade mengirim field bernama "Urut" (huruf besar) - $req->urut selalu null,
+            // sehingga urut yang dicatat ke log aktivitas ikut kosong.
+            $xurut = $req->Urut;
+        }
+        
+    }else{
+        // return 'ttt';
+        $xurut=1; 
+    }
+    // return ["asd" => $xurut] ;
+
+
+
+if ($choice =='D'){
+      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $choice,'PO',$nobukti,'',$xurut,'DBPODET');
+      }
+
+
     if ($choice == "I" && $jmlrecord == 0) {
       $check = DB::connection('SML')->select('select * from dbpo where NOBUKTI = :nobukti',["nobukti" => $nobukti]);
         if ($check) {
           return 2;
+      }
+    }
+
+    // dbPODET punya foreign key FK_DBPODET_DBBARANG ke DBBARANG.KODEBRG. Kalau kode barang
+    // yang dikirim tidak ada di master, INSERT detail di dalam sp_PO ditolak SQL Server -
+    // TAPI kegagalannya tidak pernah sampai ke PHP: SQL Server hanya membatalkan statement
+    // itu, isi prosedurnya jalan terus sampai "Commit tran", jadi header dbPO tetap
+    // tersimpan tanpa satu pun baris dbPODET. Akibatnya dokumen tidak muncul di tab
+    // Purchase Order (vwMasterPO.TotTotalRp NULL -> tidak lolos filter >=/< 200 juta) dan
+    // detailnya terbaca null di form. Dicegat di sini supaya user dapat pesan yang jelas.
+    if ($choice != 'D') {
+      $cekBrg = DB::connection('SML')->select(
+        'select top 1 KODEBRG from DBBARANG where KODEBRG = :kodebrg',
+        ["kodebrg" => (string) $req->KodeBrg]
+      );
+      if (!$cekBrg) {
+        return 3;
       }
     }
 
@@ -812,63 +603,93 @@ class ClosingPOController extends Controller
         $req->NoUrut, //NoUrut
         $req->Tanggal, //Tanggal
         $req->TglJatuhTempo, //TglJatuhTempo
+
         $req->KodeSupp, //KodeSupp
         0, //Handling
         $req->KodeExp, //KodeExp
         $req->Keterangan, //Keterangan
         '', // FakturSupp
+
         $req->KodeVls, //KodeVls
         $req->Kurs, //Kurs
         $req->PPn, //PPn
         $req->TipeBayar, //TipeBayar
         $req->Hari, //Hari
+
         0, //TipeDisc
-        0,//Disc
+        0, //Disc
         0, //DiscRp
         $req->Urut, //Urut
         $req->KodeBrg, // KodeBrg
+        
         $req->Qnt, //Qnt
         $req->NoSat, //NoSat
         $req->Satuan, //Satuan
         $req->Isi, //Isi
         $req->Harga, //Harga
+        
         $req->DiscP, //DiscP
         $req->DiscTot, //DiscTot
         $req->NoPPL, //NoPPL
         0,  //IsClose
         0,  //IsCloseD
+        
         '', //Catatan
         0, //IsExp
         0, //Tolerate
         $req->UrutPPL, //UrutPPL
         $req->Kodegdg, //Kodegdg 
+
         $req->Discpdet2, //Discpdet2
         $req->Discpdet3, //Discpdet3
         0, //Discpdet4
         0, //Discpdet5
         1, //FlagTipe
+
         $req->NamaBrg, //Namabrg
         0, //IsJasa
         0, //pFirst
         $req->pFOC, //pFOC
         $req->Noso, //Noso
-        $req->Jmlrecord, //Jmlrecord
+
+        $jmlrecord, //Jmlrecord
         $req->NOPOCUST, //NOPOCUST
         \Auth::User()->username, //IdUser
-        0,  //pJasa
-        0,  //NPPH23
-        '', //PERKIRAAN
-        '', //SatX 
-        '', //COST
-        '', //SUBCOST
+        1,  //pJasa
+        $req->NPPH23,  //NPPH23
+
+        $req->PERKIRAAN, //PERKIRAAN
+        $req->SatX, //SatX 
+        $req->COST, //COST
+        $req->SUBCOST, //SUBCOST
         $req->TglKirim, //Tglkirim
-        0, //PPH21
+
+        $req->PPH21, //PPH21
         $req->NOPNw, //NOPNw
         $req->UrutPNW //UrutPNW
 
       ];
       DB::connection('SML')->statement('exec sp_PO ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+
+      // Jaring pengaman untuk kegagalan diam-diam di dalam sp_PO (lihat catatan pada
+      // pengecekan DBBARANG di atas): kalau jumlah baris detail tidak bertambah, item
+      // memang tidak tersimpan - jangan laporkan berhasil.
+      if ($choice == 'I') {
+        $cekDet = DB::connection('SML')->select(
+          'select count(1) jml from DBPODET where Nobukti = :nobukti', ['nobukti' => $nobukti]);
+        $jmlDetSesudah = count($cekDet) ? (int) $cekDet[0]->jml : 0;
+        if ($jmlDetSesudah <= $jmlDetSebelum) {
+          return 4;
+        }
+      }
+
       DB::connection('SML')->update('exec Sp_UpdatePO ?', [$nobukti]);
+     
+      if ($choice !='D'){
+      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $choice,'PO',$nobukti,'',$xurut,'DBPODET');
+      }
+
+
       return 1;
   }
 

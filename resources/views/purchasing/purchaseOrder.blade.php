@@ -2416,7 +2416,7 @@
     <div class="col">
       <div class="form-group">
         <label>DiscRp</label>
-        <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value ="0.00" >
+        <input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
       </div>
     </div>
 
@@ -4347,7 +4347,7 @@ function onChangeInputAddDiscRp () {
     // document.getElementById("input_add_disc").value = '0.00'
     console.log('onChangeDiscRp')
       if (tipeform == 'edit') {
-        let value = $("#input_add_discrp").val()
+        let value = formatAngkaVal($("#input_add_discrp").val())
         console.log(dataHeaderAdd)
         let x = Number(value) / Number(dataHeaderAdd.TOtSubtotalRP) * 100
         console.log(x)
@@ -4949,7 +4949,7 @@ function submitAddAdd () {
       xppn= Harga * 0.1
   }
 
- xharga= Harga -  $("#input_add_discrp").val() - xppn
+ xharga= Harga -  formatAngkaVal($("#input_add_discrp").val()) - xppn
 
 
   // console.log(kodebarang,tanggal,xharga,nosat,choice)
@@ -5435,7 +5435,7 @@ function submitAddEdit () {
   if  ( $("#input_add_tipeppn").val()==2) {
       xppn= Harga * 0.1
   }
- xharga= Harga -  $("#input_add_discrp").val() - xppn
+ xharga= Harga -  formatAngkaVal($("#input_add_discrp").val()) - xppn
   // console.log(kodebarang,tanggal,xharga,nosat,choice)
    console.log(KodeBrg,Noso,xharga,NoSat)
 
@@ -9482,7 +9482,7 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
-          document.getElementById("input_add_discrp").value = parseFloat(dataHeaderAdd.TotDiskon).toFixed(2)
+          document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
@@ -9607,7 +9607,7 @@ function refreshDataTableEdit (NOBUKTI) {
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
-          document.getElementById("input_add_discrp").value = parseFloat(dataHeaderAdd.TotDiskon).toFixed(2)
+          document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
@@ -9724,7 +9724,7 @@ function refreshDataTableDetail (NOBUKTI) {
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
-          document.getElementById("input_add_discrp").value = parseFloat(dataHeaderAdd.TotDiskon).toFixed(2)
+          document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
@@ -11437,7 +11437,7 @@ function generateInputNumber (id , style, classes, onchange) {
 
 function reverseCalculateDiscPercent() {
   let harga = formatAngkaVal($('#input_add_add_harga').val()) || 0;
-  let discRp = parseFloat(document.getElementById('input_add_add_discrp').value) || 0;
+  let discRp = formatAngkaVal(document.getElementById('input_add_add_discrp').value) || 0;
 
   // Clear all discount percentage fields first
   document.getElementById('input_add_add_discpersen1').value = 0;
@@ -11455,7 +11455,7 @@ function reverseCalculateDiscPercent() {
   // Validate that discount doesn't exceed 100%
   if (discPercent > 100) {
     alert("Diskon tidak boleh melebihi harga");
-    document.getElementById('input_add_add_discrp').value = "";
+    document.getElementById('input_add_add_discrp').value = '0.00';
     return;
   }
 
@@ -11512,7 +11512,7 @@ function calculateDiscRp() {
     totalDiscount += afterDiskon3
   }
 
-  document.getElementById('input_add_add_discrp').value = totalDiscount
+  document.getElementById('input_add_add_discrp').value = formatAngka(parseFloat(totalDiscount).toFixed(2))
 }
 
 // Dropdown "Outstanding" di form Add Item.
@@ -11586,9 +11586,9 @@ function LockFreeOfCharge(){
     document.getElementById('input_add_add_discpersen2').disabled = true;
     document.getElementById('input_add_add_discpersen3').disabled = true;
 
-    document.getElementById('input_add_add_harga').value = 0,00 ;
+    document.getElementById('input_add_add_harga').value = '0.00' ;
     document.getElementById('input_add_add_hargaAwal').value = 0.00 ;
-    document.getElementById('input_add_add_discrp').value = 0,00 ;
+    document.getElementById('input_add_add_discrp').value = '0.00' ;
     document.getElementById('input_add_add_discpersen1').value = 0 ;
     document.getElementById('input_add_add_discpersen2').value = 0 ;
     document.getElementById('input_add_add_discpersen3').value = 0 ;

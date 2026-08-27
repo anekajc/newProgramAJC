@@ -4,14 +4,11 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewMenu;
+use App\Models\NewPeriode;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use App\Model\VwPPL;
+use App\Models\VwPPL;
 
 
 // use App\Http\Controllers\NewMenuController;
@@ -124,7 +121,7 @@ class PembelianPermintaanAgenController extends Controller
         // Data Pembelian Agen
         // =========================
         $outstanding = DB::connection("SML")->select(
-            "SELECT NoBukti, Tanggal, IsOtorisasi1, TglOto1, OtoUser1,
+            "SELECT NoBukti, CONVERT(varchar(10), Tanggal, 23) AS Tanggal, IsOtorisasi1, TglOto1, OtoUser1,
                     Qnt AS Qnt, QntBatal AS QntBatal, QntPO AS QntPO
              FROM vwPPL
              WHERE Tanggal BETWEEN :tglawal AND :tglakhir
