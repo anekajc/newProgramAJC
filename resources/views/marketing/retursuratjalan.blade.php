@@ -1,13 +1,22 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
+
+
+@section('page-title', 'Retur Surat Jalan')
+@section('title', 'SML - Retur Surat Jalan')
 
 @endsection
 
+{{-- Rerouted from the shared report-table.css/rsj-table-header.css/headerEngine.js
+     implementation to the same self-contained po-table-header.css + inline-engine
+     pattern used by so.blade.php/invoicejasa/fakturpajak/cetaktandaterima/
+     perintahreturjual/returpenjualangudang/kreditnote/notareturpenjualan/
+     perintahreturjualminus, for source-level consistency across the marketing
+     folder -- the resulting UI is unchanged (this page's tab bar/toolbar/table
+     skeleton already matched the target 1:1), only the underlying mechanism. --}}
 @section('css')
 
-<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
-
-<link rel="stylesheet" href="{{ asset('css/rsj-table-header.css') }}?v={{ filemtime(public_path('css/rsj-table-header.css')) }}">
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
 <style>
   .custom-tabs {
@@ -135,85 +144,76 @@
 </style>
 
 <style>
-  /* Holds the pagination element JS relocates here (see moveDataTablePagination()) so it
-     lives outside .table-wrap's horizontal scroll -- .dataTables_paginate still floats
-     right per DataTables' own CSS, but now within this container's width (the visible
-     viewport, not the wide table), so it lands at a reachable spot instead of the
-     table's far edge. overflow:hidden clears the float so this container doesn't
-     collapse to zero height. Matches so.blade.php's .tb-pagination-outside 1:1. */
-  .tb-pagination-outside {
-    overflow: hidden;
-    margin-top: 8px;
-    padding: 0 14px 10px;
-  }
-  .tb-pagination-outside .dataTables_paginate {
-    float: right;
-  }
-  .tb-pagination-outside .paginate_button {
-    box-sizing: border-box;
-    display: inline-block;
-    padding: 0.4em 0.9em;
-    margin-left: 4px;
-    border-radius: 6px;
-    border: 1px solid var(--sp-border, #e7e9ee);
-    color: var(--sp-text, #1f2430);
-    text-decoration: none !important;
-    cursor: pointer;
-  }
-  .tb-pagination-outside .paginate_button.current {
-    background: var(--sp-primary, #6f42f3);
-    border-color: var(--sp-primary, #6f42f3);
-    color: #fff;
-  }
-  .tb-pagination-outside .paginate_button.disabled {
-    cursor: default;
-    color: var(--sp-text-soft, #6b7280);
-    opacity: .6;
-  }
-  .tb-pagination-outside .paginate_button:hover:not(.disabled):not(.current) {
-    background: var(--sp-bg, #f4f5f7);
+  {{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied and
+       rescoped to this page's own #tabel/#tabel2 from so.blade.php's @section('css'). --}}
+  #tabel td:first-child,
+  #tabel2 td:first-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
   }
 
-  /* report-table.css's .filter-wrap/.toolbar classes (the "Tampilkan" control) are
-     designed to sit directly above a .tb-report table -- give them the same small
-     bottom margin so.blade.php's toolbar has. */
-  .tb-report .toolbar {
-    margin-bottom: 10px;
-  }
-
-  /* "Reset kolom" pill + the row that holds it alongside the hidden-columns bar. Not
-     part of report-table.css itself (so.blade.php declares these page-locally too) --
-     kept OUTSIDE #rtBarTabelX as a flex sibling, not a child, because report-table.js's
-     renderBar() fully overwrites those divs' innerHTML on every drag/hide/decimal
-     change; a button placed inside them would vanish on the first re-render. */
-  .rt-bar-row {
-    display: flex;
+  #tabel td:first-child .btn,
+  #tabel2 td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .rt-bar-row .rt-bar { margin-bottom: 0; }
-  .rt-reset-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 12px;
-    border: 1px solid var(--rt-border);
-    border-radius: var(--rt-radius);
-    background: var(--rt-card);
+    justify-content: center;
+    border-radius: 7px;
     font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    cursor: pointer;
-    white-space: nowrap;
-    color: var(--rt-ink-soft);
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
   }
-  .rt-reset-btn:hover {
-    color: #D64550;
-    border-color: #D64550;
-    background: #FEF2F2;
+
+  #tabel td:first-child .btn:hover,
+  #tabel2 td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel td:first-child .btn-warning,
+  #tabel2 td:first-child .btn-warning {
+    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+  }
+
+  #tabel td:first-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #tabel td:first-child .btn-primary,
+  #tabel2 td:first-child .btn-primary {
+    color: #2563eb; border-color: #cfdcff; background: #e8edff;
+  }
+
+  #tabel td:first-child .btn-danger,
+  #tabel2 td:first-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  #tabel thead th,
+  #tabel2 thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee;
+    border-top: none;
+  }
+
+  #tabel tbody tr:nth-of-type(odd),
+  #tabel2 tbody tr:nth-of-type(odd) {
+    background-color: #fbfbfc;
+  }
+
+  #tabel tbody tr:hover,
+  #tabel2 tbody tr:hover {
+    background-color: #f5f3ff;
   }
 </style>
 
@@ -365,11 +365,6 @@
 </style>
 {{-- end tampilan search modal barang all --}}
 
-{{-- Header restyle to match Sales Order's page1 (see SalesOrder.blade.php):
-     tableMaster2.css is what defines .btn-action-primary, used below on the
-     + RSPB button in place of the old inline-styled pill button. --}}
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
-
 @endsection
 
 
@@ -431,7 +426,7 @@
     </div>
 
     <div class="po-toolbar-act">
-      <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">+ RSPB</button>
+      <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ RSPB</button>
     </div>
 
   </div>
@@ -442,14 +437,9 @@
   <div class="card-body" style="padding:0;">
   <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-      <div class="rt-bar-row">
-        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
-          <i class="bi bi-arrow-clockwise"></i> Reset kolom
-        </button>
-        <div id="rtBarTabel"></div>
-      </div>
+      <div id="rtBarTabel"></div>
       <div class="po-table-wrap">
-        <table id="tabel" class="tb data-table">
+        <table id="tabel" class="data-table">
           {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
                renderTabelRows(), which runs on page load via reinitTabel()) replaces
                this <thead>'s contents based on gcart_header before the user ever sees
@@ -466,14 +456,9 @@
     </div>
 
     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="rt-bar-row">
-        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
-          <i class="bi bi-arrow-clockwise"></i> Reset kolom
-        </button>
-        <div id="rtBarTabel2"></div>
-      </div>
+      <div id="rtBarTabel2"></div>
       <div class="po-table-wrap">
-        <table id="tabel2" class="tb data-table">
+        <table id="tabel2" class="data-table">
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel2_data" class="text-left"></tbody>
         </table>
@@ -721,8 +706,8 @@
 
   <div class="container-fluid mt-4" style="overflow-x: auto;">
 
-        <table id="addTable" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="addTable" class="data-table">
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
               <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
@@ -1281,8 +1266,8 @@
 
     <div class="container-fluid" style="overflow-x: auto;">
 
-          <table id="detailTable" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="detailTable" class="data-table">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
@@ -1362,10 +1347,9 @@
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_barang" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_barang" class="data-table">
+              <thead class="text-center">
                 <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
 
@@ -1379,7 +1363,7 @@
 
               <tbody id="tabel_data_add_list_barang" class="text-left" >
 
-                <tr >
+                <tr class="pick-row">
 
                   <td>-</td>
                   <td>-</td>
@@ -1387,10 +1371,6 @@
                   <td>-</td>
 
 
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
 
@@ -1419,11 +1399,10 @@
           <!-- <div class="container-fluid"> -->
 
 
-          <table id="tabel_add_list_nosj" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="tabel_add_list_nosj" class="data-table">
+            <thead class="text-center">
               <tr>
 
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">No SPB</th>
                 <th style="padding: 4px 12px;" scope="col">Tgl</th>
 
@@ -1437,11 +1416,7 @@
 
             <tbody id="tabel_data_add_list_nosj" class="text-left" >
 
-              <tr >
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
+              <tr class="pick-row">
                 <td>-</td>
                 <td>-</td>
 
@@ -1481,11 +1456,10 @@
         <!-- <div class="container-fluid"> -->
 
 
-        <table id="tabel_add_list_custsupp" class="table table-bordered table-hover table-striped table-responsive-lg"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="tabel_add_list_custsupp" class="data-table">
+          <thead class="text-center">
             <tr>
 
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
               <th style="padding: 4px 12px;" scope="col">Kode Cust</th>
               <th style="padding: 4px 12px;" scope="col">Cust</th>
 
@@ -1495,11 +1469,7 @@
 
           <tbody id="tabel_data_add_list_custsupp" class="text-left" >
 
-            <tr >
-              <td class="text-center">
-                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-              </td>
+            <tr class="pick-row">
               <td>-</td>
               <td>-</td>
 
@@ -1545,8 +1515,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/report-table.js') }}"></script>
-<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let listSJ = []
@@ -1564,61 +1533,134 @@ let dataFormDetail = {}
 let dataBarangAdd = {}
 let dataBarangEdit = {}
 
-// -- #tabel/#tabel2 interactive column engine -- same shared drag/hide/decimal-column
-// engine so.blade.php uses for #tabel/#tabel7 (copied 1:1). Persistence goes through
-// ReturSuratJalanController::loadHeader/simpanHeader (SML-backed), keyed by a href
-// unique to each of this page's tables.
-HeaderEngine.configure({
-  loadUrl: "{!! url('retursuratjalanloadheader') !!}",
-  simpanUrl: "{!! url('retursuratjalansimpanheader') !!}"
-});
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Rerouted from the shared HeaderEngine.js (loadHeader/simpanHeader, its own
+ * dedicated retursuratjalanloadheader/simpanheader endpoints) to the same
+ * self-contained saveheadertable/getheadertable (HeaderTableController)
+ * inline pattern used by so/invoicejasa/fakturpajak/cetaktandaterima/
+ * perintahreturjual/returpenjualangudang/kreditnote/notareturpenjualan/
+ * perintahreturjualminus. tabelActionsCell/tabel2ActionsCell/tabelValueCell/
+ * replaceTheadWithHeader/renderTabelRows/renderTabel2Rows/reinitTabel/
+ * reinitTabel2/rsjAturTinggiTabel below are otherwise untouched -- only the
+ * HeaderEngine.* calls they made are rerouted to the inline equivalents here.
+ */
+let rsjCart = { tabel : [], tabel2 : [] }
+let rsjActiveKey = null
+const RSJ_HREF = 'retursuratjalan'
+const RSJ_URUT = { tabel : 1, tabel2 : 2 }
+const RSJ_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+const RSJ_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
 
 var lastTabelRows = [];
 var lastTabel2Rows = [];
 
-HeaderEngine.registerTable('tabel', {
-  href: 'retursuratjalan_tabel',
-  tableSel: '#tabel',
-  barSel: '#rtBarTabel',
-  setDefault: function () { setDefaultHeaderTabel(); },
-  onChange: function () { reinitTabel(); }
-});
-HeaderEngine.registerTable('tabel2', {
-  href: 'retursuratjalan_tabel2',
-  tableSel: '#tabel2',
-  barSel: '#rtBarTabel2',
-  setDefault: function () { setDefaultHeaderTabel2(); },
-  onChange: function () { reinitTabel2(); }
-});
-
-function setDefaultHeaderTabel() {
-  gcart_header = [
-    ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
-    ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
-    ['NOSPB',        'No SPB',    1, 'varchar', 0, 0],
-    ['TglSPB',       'Tgl SPB',   1, 'date',    0, 0],
-    ['NamaCustSupp', 'Customer',  1, 'varchar', 0, 0]
-  ];
+function rsjPickCI (row, key) {
+  if (!row) { return undefined; }
+  if (row[key] !== undefined) { return row[key]; }
+  let lower = key.toLowerCase();
+  for (let k in row) { if (k.toLowerCase() === lower) { return row[k]; } }
+  return undefined;
 }
 
-function setDefaultHeaderTabel2() {
-  gcart_header = [
+function rsjDefaultCart (key) {
+  let cart = [
     ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
     ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
     ['NOSPB',        'No SPB',    1, 'varchar', 0, 0],
     ['TglSPB',       'Tgl SPB',   1, 'date',    0, 0],
     ['NamaCustSupp', 'Customer',  1, 'varchar', 0, 0],
-    ['OtoUser1',     'User Oto1', 1, 'varchar', 0, 0],
-    ['TglOto1',      'Tgl Oto1',  1, 'date',    0, 0]
-  ];
+  ]
+  if (key === 'tabel2') {
+    cart.push(['OtoUser1', 'User Oto1', 1, 'varchar', 0, 0])
+    cart.push(['TglOto1',  'Tgl Oto1',  1, 'date',    0, 0])
+  }
+  return cart
+}
+
+function rsjBuatCart (headers, values, isnumerics, isshowns, desimals) {
+  headers = headers || []
+  let cart = []
+  headers.forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+      ? Number(desimals[i]) : (tipe === 1 ? 2 : 0)
+    cart.push([values[i], h, Number(isshowns[i]) === 1 ? 1 : 0, RSJ_TIPE_NAMA[tipe] || 'varchar', 0, isNaN(des) ? 0 : des])
+  });
+  return cart
+}
+
+window.g_href = RSJ_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = mode === 2 ? 2 : 1
+  let key = urut === 2 ? 'tabel2' : 'tabel'
+  let cart = rsjCart[key] || []
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[1]); value.push(c[0]); isnumber.push(RSJ_TIPE_KODE[c[3]] ?? 0)
+    isshown.push(Number(c[2]) === 1 ? 1 : 0); desimal.push(Number(c[5]) || 0)
+  });
+  $.ajax({
+    url: "{!! url('saveheadertable') !!}", type: "post", async: false,
+    data: {
+      _token: $("#_token").val(), header: JSON.stringify(header), isnumber: JSON.stringify(isnumber),
+      tipe: JSON.stringify(desimal), value: JSON.stringify(value), isshown: JSON.stringify(isshown),
+      href: RSJ_HREF, urut: urut
+    },
+    error: function (err) { console.log(err); alertify.warning('Gagal menyimpan pengaturan kolom') }
+  })
+}
+
+window.doSetHeader = function (mode, reset) {
+  let urut = mode === 2 ? 2 : 1
+  let key = urut === 2 ? 'tabel2' : 'tabel'
+  $.ajax({
+    url: "{!! url('getheadertable') !!}", type: "post", async: false,
+    data: { _token: $("#_token").val(), href: RSJ_HREF, urut: urut, reset: reset ? 1 : 0 },
+    success: function (res) {
+      if (!reset && res && res.headertableheader && res.headertableheader.length) {
+        rsjCart[key] = rsjBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
+      } else {
+        rsjCart[key] = rsjDefaultCart(key)
+        window.gcart_header = rsjCart[key]
+        window.doSimpanHeader(RSJ_HREF, urut)
+      }
+      window.gcart_header = rsjCart[key]
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+      rsjCart[key] = rsjDefaultCart(key)
+      window.gcart_header = rsjCart[key]
+    }
+  })
+}
+
+// Swaps which table's column state the bare gcart_header/g_modeReport globals
+// point to (report-table.js's ReportTable reads those exact bare names).
+function rsjActivateEngineData (key) {
+  rsjActiveKey = key
+  window.g_modeReport = RSJ_URUT[key]
+  window.gcart_header = rsjCart[key]
+}
+
+// Re-binds ReportTable's drag/gear listeners to the given table's current DOM.
+// Safe to call every time (even repeatedly): replaceTheadWithHeader() always
+// swaps in a brand-new <thead> node first, so each bindHead() call attaches to
+// a node that has never been bound before -- no duplicate-listener buildup.
+function rsjBindEngineDom (key) {
+  let sel = key === 'tabel2' ? { table : '#tabel2', bar : '#rtBarTabel2' } : { table : '#tabel', bar : '#rtBarTabel' }
+  ReportTable.init({ table : sel.table, bar : sel.bar, onChange : key === 'tabel2' ? reinitTabel2 : reinitTabel })
 }
 
 // Fixed, non-draggable Actions cell for #tabel (Retur SJ Belum Otorisasi) -- same
 // buttons/onclick args the old static markup and loadAll() row-builder both used,
 // just read via pickCI() now.
 function tabelActionsCell(row) {
-  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
-  var isOto1 = HeaderEngine.pickCI(row, 'IsOtorisasi1');
+  var nobukti = rsjPickCI(row, 'NOBUKTI');
+  var isOto1 = rsjPickCI(row, 'IsOtorisasi1');
   var html = '<td class="text-center">';
   html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
   html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + isOto1 + '\')"><i class="bi bi-pen"></i></button> ';
@@ -1632,8 +1674,8 @@ function tabelActionsCell(row) {
 // Fixed Actions cell for #tabel2 (Retur SJ Sudah Otorisasi) -- no Koreksi button here,
 // matching the old markup/loadAll() exactly.
 function tabel2ActionsCell(row) {
-  var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
-  var isOto1 = HeaderEngine.pickCI(row, 'IsOtorisasi1');
+  var nobukti = rsjPickCI(row, 'NOBUKTI');
+  var isOto1 = rsjPickCI(row, 'IsOtorisasi1');
   var html = '<td class="text-center">';
   html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
   html += (Number(isOto1) === 1)
@@ -1656,7 +1698,7 @@ function retursuratjalanFormatTanggal(raw) {
 }
 
 function tabelValueCell(row, col) {
-  var raw = HeaderEngine.pickCI(row, col[0]);
+  var raw = rsjPickCI(row, col[0]);
   var type = col[3];
 
   if (type === 'date') {
@@ -1713,7 +1755,7 @@ function rsjAturTinggiTabel() {
 const RSJ_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
 
 function renderTabelRows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel') { HeaderEngine.activateEngineData('tabel'); }
+  if (rsjActiveKey !== 'tabel') { rsjActivateEngineData('tabel'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
   var html = '';
   (rows || []).forEach(function (row) {
@@ -1726,7 +1768,7 @@ function renderTabelRows(rows) {
 }
 
 function renderTabel2Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel2') { HeaderEngine.activateEngineData('tabel2'); }
+  if (rsjActiveKey !== 'tabel2') { rsjActivateEngineData('tabel2'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
@@ -1743,7 +1785,7 @@ function reinitTabel() {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
     $('#tabel').DataTable({ dom: RSJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(rsjAturTinggiTabel, 0); } });
-    HeaderEngine.bindEngineDom('tabel');
+    rsjBindEngineDom('tabel');
     rsjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel failed:', e);
@@ -1756,7 +1798,7 @@ function reinitTabel2() {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
     renderTabel2Rows(lastTabel2Rows);
     $('#tabel2').DataTable({ dom: RSJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(rsjAturTinggiTabel, 0); } });
-    HeaderEngine.bindEngineDom('tabel2');
+    rsjBindEngineDom('tabel2');
     rsjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel2 failed:', e);
@@ -1766,8 +1808,8 @@ function reinitTabel2() {
 
 function buttonHeaderTable(key) {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    HeaderEngine.activateEngineData(key);
-    HeaderEngine.doSetHeader(1, true);
+    rsjActivateEngineData(key);
+    window.doSetHeader(window.g_modeReport, true);
     (key === 'tabel' ? reinitTabel : reinitTabel2)();
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
@@ -1781,26 +1823,26 @@ $(document).ready(function(){
       // initialize it last -- reinitTabel()/reinitTabel2() each end by binding
       // ReportTable to their own table, and whichever runs last wins, so this order
       // leaves the actually-visible tab interactive.
-      HeaderEngine.activateEngineData('tabel2');
-      HeaderEngine.doSetHeader(1);
+      rsjActivateEngineData('tabel2');
+      window.doSetHeader(2, false);
       lastTabel2Rows = @json($tempOutstanding2);
       reinitTabel2();
 
-      HeaderEngine.activateEngineData('tabel');
-      HeaderEngine.doSetHeader(1);
+      rsjActivateEngineData('tabel');
+      window.doSetHeader(1, false);
       lastTabelRows = @json($tempOutstanding);
       reinitTabel();
 
       // Re-bind the interactive engine whenever the user switches tabs -- ReportTable's
       // listeners are bound to one table's DOM at a time.
       $('#nav-home-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel');
-        HeaderEngine.bindEngineDom('tabel');
+        rsjActivateEngineData('tabel');
+        rsjBindEngineDom('tabel');
         rsjAturTinggiTabel();
       });
       $('#nav-profile-tab').on('shown.bs.tab', function () {
-        HeaderEngine.activateEngineData('tabel2');
-        HeaderEngine.bindEngineDom('tabel2');
+        rsjActivateEngineData('tabel2');
+        rsjBindEngineDom('tabel2');
         rsjAturTinggiTabel();
       });
 
@@ -1827,19 +1869,13 @@ $(document).ready(function(){
         $("#tabel_add_list_nosj").DataTable({
           "lengthChange": false,
             "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
+            "order": [[0, 'asc']],
         });
 
         $("#tabel_add_list_custsupp").DataTable({
           "lengthChange": false,
             "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
+            "order": [[0, 'asc']],
         });
 
 });
@@ -2701,8 +2737,7 @@ function buttonAddListBarang () {
       let rowTable = ``
       listBarang.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBarang(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickBarang(${i})">
 
         <td>${item.kodebrg}</td>
         <td>${item.Namabrg}</td>
@@ -2716,7 +2751,7 @@ function buttonAddListBarang () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
       loadAll()
@@ -2756,8 +2791,7 @@ function buttonAddListCustSupp () {
       let rowTable = ``
       listCust.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCust(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickCust(${i})">
 
         <td>${item.KodeCustSupp}</td>
         <td>${item.NAMACUSTSUPP}</td>
@@ -2775,10 +2809,7 @@ function buttonAddListCustSupp () {
       $("#tabel_add_list_custsupp").DataTable({
           "lengthChange": false,
             "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
+            "order": [[0, 'asc']],
         });
 
       $('.showhidemodalbodyadd').hide();
@@ -2825,8 +2856,7 @@ function buttonAddListNoSJ () {
       let rowTable = ``
       listSJ.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoSJ(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickNoSJ(${i})">
 
         <td>${item.NoSPB}</td>
         <td>${formatDate(item.TglSPB , '/')}</td>
@@ -2847,10 +2877,7 @@ function buttonAddListNoSJ () {
       $("#tabel_add_list_nosj").DataTable({
           "lengthChange": false,
             "paging": false ,
-            "order": [[1, 'asc']],
-            "columnDefs": [
-                 {"targets" :[0] , 'orderable' : false}
-              ]
+            "order": [[0, 'asc']],
         });
 
       $('.showhidemodalbodyadd').hide();

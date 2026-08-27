@@ -766,11 +766,11 @@ window.doSetHeader = function (mode, reset) {
     },
     success : function (res) {
       if (!reset && res && res.headertableheader && res.headertableheader.length) {
-        let header = JSON.parse(res.headertableheader)
-        let value = JSON.parse(res.headertablevalue)
-        let isnumeric = JSON.parse(res.isnumeric)
-        let isshown = JSON.parse(res.isshown)
-        let tipe = res.tipe ? JSON.parse(res.tipe) : []
+        let header = res.headertableheader
+        let value = res.headertablevalue
+        let isnumeric = res.isnumeric
+        let isshown = res.isshown
+        let tipe = res.desimal || []
         fpCart = fpBuatCart(header, value, isnumeric, isshown, tipe)
       } else {
         fpCart = fpDefaultCart()
