@@ -69,9 +69,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
     Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
 
-    Route::post('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
-    Route::post('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
-    Route::post('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
+    Route::get('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
+    Route::get('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
+    Route::get('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
     Route::post('/pembelianclosingprheadertable',[PembelianClosingPRController::class, 'headerTable']);
 
 
