@@ -1,45 +1,9 @@
 @extends('report.masterreport2')
 
-<!-- Warna centang -->
-  <style>
-    .checkmark-red {
-      color: red !important;
-      font-weight: bold;
-      margin-left: 6px;
-    }
-
-    #inputOtorisasi{
-      border: 0;
-      background: none;
-      padding: 0;
-      box-shadow: none;
-      color: #495057;
-      font-weight: 600;
-    }
-
-    #inputOtorisasi:hover,
-    #inputOtorisasi:focus{
-      color: #0d6efd;
-      box-shadow: none;
-    }
-
-    #inputOrder{
-      border: 0;
-      background: none;
-      padding: 0;
-      box-shadow: none;
-      color: #495057;
-      font-weight: 600;
-    }
-
-    #inputOrder:hover,
-    #inputOrder:focus{
-      color: #0d6efd;
-      box-shadow: none;
-    }
-
-  </style>
-<!-- Warna centang -->
+<style>
+  /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
+  .tb-report .table-wrap { min-height: 10vh; }
+</style>
 
 @section('header2')
 <div class="tb-report main">
@@ -47,10 +11,10 @@
 
         <!-- TOOLBAR -->
         <div class="toolbar">
-          <div>
+          {{-- <div>
             <div class="page-title">Pengadaan PR</div>
             <!-- <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div> -->
-          </div>
+          </div> --}}
 
           <!-- Periode (date range) -->
           <div class="filter-wrap">
@@ -60,69 +24,23 @@
             <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
           </div>
 
-          <!-- otorisasi -->
-          <!-- <div class="filter-wrap">
-          <button
-                class="btn btn-outline-primary dropdown-toggle"
-                type="button"
-                id="inputOtorisasi"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Filter
-            </button>
-            <ul class="dropdown-menu" id="dropdownOtorisasi" aria-labelledby="inputOtorisasi">
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="2" onclick="setOtorisasi('2')">Semua
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setOtorisasi('1')">Belum Otorisasi
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setOtorisasi('0')">Sudah Otorisasi
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="3" onclick="setOtorisasi('3')">Belum PO
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="4" onclick="setOtorisasi('4')">Sudah PO
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-            </ul>
-          </div> -->
-
-          <!-- order by -->
-          <!-- <div class="filter-wrap">
-            <button
-                class="btn btn-outline-primary dropdown-toggle"
-                type="button"
-                id="inputOrder"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Order By
-            </button>
-            <ul class="dropdown-menu" id="dropdownOrder" aria-labelledby="inputOrder">
-                <li><a class="dropdown-item" data-value="N" onclick="setOrderBy('N')">No Bukti
-                <span class="checkmark-red" style="display:none;">&#10003</span>
-                </a></li>
-                <li><a class="dropdown-item" data-value="B" onclick="setOrderBy('B')">Barang
-                <span class="checkmark-red" style="display:none;">&#10003</span>
-                </a></li>
-                <li><a class="dropdown-item" data-value="S" onclick="setOrderBy('S')">Supplier
-                <span class="checkmark-red" style="display:none;">&#10003</span>
-                </a></li>
-            </ul>
-          </div> -->
-
-          <!-- Actions: second (row-level) search + load + export -->
-          <div class="action-group">
+          {{-- Search --}}
+          <div>
             <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
-            <!-- <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="bi bi-filter-left"></i> Filter Data</button> -->
-            <button
-              class="btn-load"
-              data-bs-toggle="modal"
-              data-bs-target="#modalFilter">
+          </div>
+
+          {{-- Otorisasi pindah ke modal "Filter Laporan" (lihat docs/new-filter-modal-ui-guide.md).
+               Order By (No Bukti/Barang/Customer) jadi "Tampilan" switcher di bar tabel (diisi
+               ReportTable.init({ views: ... }), lihat docs/new-slider-table-guide.md §Step 5) --
+               keduanya sebelumnya dropdown toolbar yang di-comment total, tidak pernah terpasang. --}}
+
+          <!-- Actions: search + filter + tampilkan + export -->
+          <div class="action-group">
+            {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) —
+                 lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+            <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
               <i class="fas fa-filter"></i> Filter
             </button>
-            <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
             <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
             <div class="export-wrap" id="exportWrap">
               <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -135,7 +53,11 @@
           </div>
         </div>
 
-        <!-- TABLE -->
+        <!-- Bar kolom tersembunyi + Tampilan (Order By) (diisi oleh report-table.js / ReportTable) -->
+        <div id="rtBar"></div>
+
+        <!-- TABLE — header satu tingkat (tanpa band), dibangun oleh ReportTable.headHtml() di
+             renderRows() (drag-reorder + gear aktif seperti biasa). -->
         <div class="table-outer">
           <div class="table-wrap">
             <table class="tb" id="mainTable">
@@ -164,6 +86,11 @@
           </div>
         </div>
 
+        <div class="rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> untuk sembunyikan kolom atau atur total.
+        </div>
+
       </div><!-- /content -->
 
       <!-- TOAST -->
@@ -171,50 +98,56 @@
     </div><!-- /tb-report -->
 
 <!-- modal filter -->
-<div class="modal fade" id="modalFilter">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content">
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-filter"></i>
-                    Filter Laporan
-                </h5>
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal">
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Filter</label>
-                    <select class="form-select" id="modalOtorisasi">
-                        <option value="2">Semua</option>
-                        <option value="1">Belum Otorisasi</option>
-                        <option value="0">Sudah Otorisasi</option>
-                        <option value="3">Belum PO</option>
-                        <option value="4">Sudah PO</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button
-                    class="btn btn-primary"
-                    onclick="applyModalFilter()">
-                    Terapkan
-                </button>
-
-            </div>
-
-          </div>
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i> Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        {{-- data-dismiss (BS4) = jaga-jaga; BS5 (data-bs-dismiss) yang benar-benar menutup di
+             halaman Class A ini -- lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+        <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')"></button>
       </div>
+
+      <div class="modal-body">
+
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-1">
+            <div>
+              {{-- Gabungan status Otorisasi + PO dalam satu pilihan (bukan dua field terpisah) --
+                   ini bentuk aslinya, tidak diubah. Selalu punya opsi "Semua" -> DIHITUNG di
+                   badge saat ≠ '2' (lihat updateFilterBadge()). --}}
+              <label class="rt-field-label" for="modalOtorisasi">Filter</label>
+              <select class="rt-native" id="modalOtorisasi">
+                <option value="2">Semua</option>
+                <option value="1">Belum Otorisasi</option>
+                <option value="0">Sudah Otorisasi</option>
+                <option value="3">Belum PO</option>
+                <option value="4">Sudah PO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                  onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
   </div>
+</div>
 <!-- modal filter -->
 @endsection
 
@@ -232,43 +165,61 @@
   $(document).ready(function () {
       setOtorisasi(globalOtorisasi);
       setOrderBy(globalOrderBy);
+
+      // Header tabel interaktif standar (drag-reorder + gear per kolom + bar "kolom
+      // tersembunyi"/"Reset kolom"), plus "Tampilan" switcher untuk Order By -- halaman ini
+      // SUDAH punya mode yang menukar susunan kolom (g_modeReport/setDefaultHeader(), lihat
+      // makeTable()), cuma dropdown pemicunya dulu di-comment total dan tidak pernah terpasang.
+      // "Order By" di sini menukar SUSUNAN KOLOM (gcart_header) & harus di-query ulang ke server
+      // (inputOrd menentukan urutan sortir dari SP, dipakai deteksi pergantian grup di
+      // renderRows()) -- makanya set() di bawah memanggil makeTable('REPORT'), bukan render().
+      ReportTable.init({
+        table: '#mainTable',
+        bar: '#rtBar',
+        onChange: function () { applyFilters(); },
+        views: {
+          label: 'Order By',
+          options: [
+            { value: 'N', label: 'No Bukti', desc: 'Dikelompokkan per No Bukti' },
+            { value: 'B', label: 'Barang',   desc: 'Dikelompokkan per Kode Barang' },
+            { value: 'S', label: 'Customer', desc: 'Dikelompokkan per Customer' }
+          ],
+          get: function () { return globalOrderBy; },
+          set: function (v) {
+            setOrderBy(String(v));
+            if (lastRows.length) { makeTable('REPORT'); }
+          }
+        }
+      });
   });
 
   $('#modalFilter').on('show.bs.modal', function () {
     $("#modalOtorisasi").val(globalOtorisasi);
+    updateFilterBadge();
   });
 
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
   function applyModalFilter() {
-
     setOtorisasi($("#modalOtorisasi").val());
-
     $('#modalFilter').modal('hide');
   }
-  // $(document).ready(function() {
-  //   $("#btnFilterData").on("click", function() {
-  //     if (typeof doShowFormFilterData === "function") doShowFormFilterData();
-  //     else alert(" Fungsi doShowFormFilterData belum tersedia.");
-  //   });
 
-  //   $("#btnCustomizeTable").on("click", function() {
-  //     if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-  //     else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-  //   });
+  /* ── FILTER MODAL ──
+        Otorisasi punya opsi "Semua" -> DIHITUNG di badge saat nilainya ≠ '2' (aturan sama
+        seperti Otorisasi di reportmarketingso, lihat docs/new-filter-modal-ui-guide.md §5).
+        Order By TIDAK dihitung -- itu jadi "Tampilan" switcher di bar tabel, bukan field
+        filter modal, dan lagipula forced-choice (tidak ada opsi netral). ── */
+  function updateFilterBadge() {
+    let count = 0;
+    if ($('#modalOtorisasi').val() !== '2') { count++; }
+    $('#filterBadge').text(count + ' aktif');
+  }
 
-  //   $("#btnSubmitReport").on("click", function() {
-  //     makeTable('REPORT');
-  //   });
-
-  //   // Default inisialisasi
-  //   setOtorisasi(globalOtorisasi);
-  //   setOrderBy(globalOrderBy);
-  //   showPeriode();
-  //   setDefaultHeader();
-
-  //   setTimeout(() => {
-  //     makeTable('REPORT');
-  //   }, 100);
-  // });
+  function resetAllFilters() {
+    $('#modalOtorisasi').val('2');
+    updateFilterBadge();
+  }
 
   // periode
   function showPeriode() {
@@ -277,28 +228,9 @@
     // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
   }
 
-  // otorisasi
+  // otorisasi (nilai sebenarnya -- tidak ada UI toolbar terpisah untuk ini lagi, hanya modal Filter Laporan)
   function setOtorisasi(val) {
     globalOtorisasi = val;
-
-    // // sembunyikan semua centang
-    // $('#dropdownOtorisasi .checkmark-red').hide();
-
-    // // tampilkan centang yang dipilih
-    // $(`#dropdownOtorisasi .dropdown-item[data-value='${val}'] .checkmark-red`).show();
-
-    // // ubah tulisan tombol
-    // const text = {
-    //     "2": "Semua",
-    //     "1": "Belum Otorisasi",
-    //     "0": "Sudah Otorisasi",
-    //     "3": "Belum PO",
-    //     "4": "Sudah PO"
-    // };
-
-    // $("#inputOtorisasi").html(
-    //     `Filter : ${text[val]}`
-    // );
   }
 
   /* -- EXPORT -- */
@@ -308,22 +240,14 @@
     if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
   });
 
-  // order by
+  // order by (nilai sebenarnya -- UI-nya "Tampilan" switcher di #rtBar, lihat ReportTable.init() di atas)
   function setOrderBy(val) {
     globalOrderBy = val;
-
-    // sembunyikan semua centang
-    $('#dropdownOrder .checkmark-red').hide();
-
-    // tampilkan centang yang dipilih
-    $(`#dropdownOrder .dropdown-item[data-value='${val}'] .checkmark-red`).show();
   }
 
 
   var modereport_nobukti = 0, modereport_barang = 1, modereport_customer = 2;
   g_modeReport = modereport_nobukti;
-
-  var jenisreport = 0; // ini untuk detail dan rekap
 
   function setDefaultHeader() {
     if (g_modeReport == modereport_nobukti) {
@@ -468,11 +392,9 @@
     const showSub   = qntVisible && (gsum_issubtotal === 1);
     const showGrand = qntVisible && (gsum_isgrandtotal === 1);
 
-    // HEADER dinamis dari gcart_header
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis dari gcart_header — ReportTable.headHtml() (drag-reorder + gear per
+    // kolom), bukan lagi <th> polos manual.
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
@@ -498,7 +420,6 @@
       // satu sel per kolom terlihat, format menurut tipe (item[3]) & desimal (item[5])
       html += '<tr class="data-row">' + cols.map(function (c) {
         const key = c[0], type = c[3];
-        console.log(key, r[key]);
         // Status Otorisasi
         if (key === 'NeedOtorisasi') {
           return `<td> ${r.NeedOtorisasi == 1 ? '<span class="sp-badge is-inactive">Belum</span>' : '<span class="sp-badge is-active">Sudah</span>'} </td>`;
@@ -575,73 +496,10 @@
     }).join(' ').toLowerCase();
   }
 
-  // ====================================================================
-  // CATATAN:
-  // - setDefaultHeader() + gcart_header  -> DIPAKAI. gcart_header jadi sumber
-  //   kolom tabel styled, dan modal "Customize Table" (doShowFormCustomizeTable)
-  //   mengubah show/hide + urutannya. doSetHeader(g_modeReport) di makeTable
-  //   memuatnya (default atau hasil simpanan kustomisasi user).
-  // - getKolomFilter / reportMode / setModeReport -> milik ENGINE LAMA, khusus
-  //   modal "Filter Data" (doShowFormFilterData). Belum dipakai tabel styled;
-  //   boleh dihapus/diubah manual kalau fitur Filter Data tidak diperlukan.
-  // ====================================================================
-  function getKolomFilter() {
-    // tentukan kolom (sesuai database & gcart_header) yang mau ditampilkan
-    // mode report menentukan kolom yang dipakai
-    // berapa pun bisa asal dalam bentuk array
-
-    let data = [];
-    if ($("#inputOrder").val() == "N"){
-      data = ['NoBukti', 'Tanggal'];
-    } else if ($("#inputOrder").val() == "B"){
-      data = ['KodeBrg', 'NamaBrg'];
-    } else {
-      data = ['NoBukti', 'Tanggal'];
-    }
-
-    return data;
-  }
-
-  function reportMode(_mode) {
-    if (jenisreport != _mode) {
-      let prev_mode = jenisreport;
-      jenisreport = _mode;
-
-      $("#buttonMode" + prev_mode).removeClass("btn-primary");
-      $("#buttonMode" + prev_mode).addClass("btn-outline-primary");
-
-      $("#buttonMode" + jenisreport).removeClass("btn-outline-primary");
-      $("#buttonMode" + jenisreport).addClass("btn-primary");
-
-      setModeReport();
-    }
-  }
-
-  function setModeReport() {
-    if ($("#inputOrder").val() == "N") {
-      if (jenisreport === 0) {
-        g_modeReport = modereport_nobukti;
-      } else {
-        g_modeReport = modereport_rekapnobukti;
-      }
-    } else if ($("#inputOrder").val() == "B") {
-      if (jenisreport === 0) {
-        g_modeReport = modereport_barang;
-      } else {
-        g_modeReport = modereport_rekapbarang;
-      }
-    } else {
-      if (jenisreport === 0) {
-        g_modeReport = modereport_customer;
-      } else {
-        g_modeReport = modereport_rekapcustomer;
-      }
-    }
-
-    doSetHeader(g_modeReport);
-    doShowCustomize();
-  }
-
+  // getKolomFilter() milik ENGINE LAMA (modal "Filter Data" / doShowFormFilterData()), yang
+  // TIDAK dipakai halaman ini (Filter Laporan sendiri sudah punya modal #modalFilter). Stub ini
+  // cuma jaga-jaga supaya base script masterreport2 tidak error kalau memanggilnya.
+  function getKolomFilter() { return []; }
 </script>
 
 @endsection
