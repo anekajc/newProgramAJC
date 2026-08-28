@@ -220,6 +220,14 @@ class PembelianClosingPRController extends Controller
       order by X.NoBaris
     ", $bind);
 
+    // QNTPO dari view belum dikurangi QntBatalPO (qty PO yang dibatalkan) - dikurangi
+    // di sini biar Qty PO yang tampil sudah bersih dari yang dibatalkan, tanpa mengubah
+    // definisi view. Catatan: ini beda dengan QntBatal (batal di level PR), yang sudah
+    // difilter = 0 lewat $where di atas.
+    foreach ($rows as $r) {
+      $r->QNTPO = (float) $r->QNTPO - (float) ($r->QntBatalPO ?? 0);
+    }
+
     return [
       "draw" => $draw,
       "recordsTotal" => $total,

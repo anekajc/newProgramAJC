@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('page-title', 'Pembelian Closing PR')
 
 @section('css')

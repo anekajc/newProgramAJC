@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 
 @section('page-title', 'Purchase Order Non Stock')
@@ -615,6 +615,16 @@
             <div class="rt-section">
               <div class="rt-group-label">Penyaringan Data</div>
               <div class="rt-grid-2">
+                <div>
+                  <label class="rt-field-label" for="ponsModalStatus">Status</label>
+                  <select class="rt-native" id="ponsModalStatus">
+                    <option value="SEMUA">Semua</option>
+                    <option value="Sudah">Sudah</option>
+                    <option value="Belum">Belum</option>
+                    <option value="Sebagian">Sebagian</option>
+                    <option value="Batal">Batal</option>
+                  </select>
+                </div>
                 <div>
                   <label class="rt-field-label" for="ponsModalOtorisasi">Otorisasi</label>
                   <select class="rt-native" id="ponsModalOtorisasi">
@@ -5095,21 +5105,51 @@ function initTabelOutstandingPons (urut, pakaiCache) {
   ponsAturTinggiTabel()
 }
 
-// Filter Otorisasi tab "Purchase Order" - client-side, mengikuti pola purchaseOrder.blade.php
-// (kolom Status sengaja belum dikerjakan, dibahas terpisah).
+// Filter Status & Otorisasi tab "Purchase Order" - client-side, mengikuti pola purchaseOrder.blade.php.
 function ponsOtorisasiPO (item) {
   return Number(item.IsOtorisasi1) ? 'Sudah' : 'Belum'
 }
 
+function ponsAngka (v) {
+  let n = Number(v)
+  return isNaN(n) ? 0 : n
+}
+
+function ponsStatusPO (item) {
+  let qnt   = ponsAngka(item.qnt)
+  let qbeli = ponsAngka(item.qntbeli)
+  if (qnt === 0)    { return 'Batal' }
+  if (qbeli === 0)  { return 'Belum' }
+  if (qbeli < qnt)  { return 'Sebagian' }
+  return 'Sudah'
+}
+
+const PONS_BADGE_STATUS = {
+  'Sudah'    : 'is-active',
+  'Belum'    : 'is-user',
+  'Sebagian' : 'is-supervisor',
+  'Batal'    : 'is-inactive'
+}
+
+function ponsBadgeStatus (item) {
+  let status = ponsStatusPO(item)
+  let kelas = PONS_BADGE_STATUS[status] || ''
+  return `<span class="sp-badge ${kelas}">${status}</span>`
+}
+
+let ponsFilterStatus = 'SEMUA'
 let ponsFilterOtorisasi = 'SEMUA'
 
 function ponsUpdateFilterBadge () {
-  let jml = (ponsFilterOtorisasi !== 'SEMUA') ? 1 : 0
+  let jml = 0
+  if (ponsFilterStatus !== 'SEMUA') { jml++ }
+  if (ponsFilterOtorisasi !== 'SEMUA') { jml++ }
   let badge = document.getElementById('ponsFilterBadge')
   if (badge) { badge.textContent = jml + ' aktif' }
 }
 
 function ponsTerapkanFilter () {
+  ponsFilterStatus = $('#ponsModalStatus').val() || 'SEMUA'
   ponsFilterOtorisasi = $('#ponsModalOtorisasi').val() || 'SEMUA'
   ponsUpdateFilterBadge()
   $('#modalFilterPONS').modal('hide')
@@ -5117,7 +5157,9 @@ function ponsTerapkanFilter () {
 }
 
 function ponsResetFilter () {
+  ponsFilterStatus = 'SEMUA'
   ponsFilterOtorisasi = 'SEMUA'
+  $('#ponsModalStatus').val('SEMUA')
   $('#ponsModalOtorisasi').val('SEMUA')
   ponsUpdateFilterBadge()
   $('#modalFilterPONS').modal('hide')
@@ -5196,7 +5238,8 @@ function renderTabelPO () {
 
   headerTable2 += `<th style="padding: 4px 12px;" scope="col">Batal</th>
 <th style="padding: 4px 12px;" scope="col">User Batal</th>
-<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>`
+<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>
+<th style="padding: 4px 12px;" scope="col">Status</th>`
 
   thead2.innerHTML = ponsHeadHtml(cols2)
   let baris2 = thead2.querySelector('tr')
@@ -5208,6 +5251,9 @@ function renderTabelPO () {
   let rowTable2 = ""
 
   let dataTampil2 = (dataRefreshOutstanding2 && dataRefreshOutstanding2[0]) ? dataRefreshOutstanding2[0] : []
+  if (ponsFilterStatus !== 'SEMUA') {
+    dataTampil2 = dataTampil2.filter(function (r) { return ponsStatusPO(r) === ponsFilterStatus })
+  }
   if (ponsFilterOtorisasi !== 'SEMUA') {
     dataTampil2 = dataTampil2.filter(function (r) { return ponsOtorisasiPO(r) === ponsFilterOtorisasi })
   }
@@ -5308,6 +5354,7 @@ function renderTabelPO () {
         }
       <td>${item.UserBatal || ''}</td>
       <td>${tglBatalTampil}</td>
+      <td class="text-center">${ponsBadgeStatus(item)}</td>
       </tr>
       `
     });
@@ -5379,6 +5426,7 @@ function loadAll () {
 
 $(function () {
   $('#modalFilterPONS').on('show.bs.modal', function () {
+    $('#ponsModalStatus').val(ponsFilterStatus)
     $('#ponsModalOtorisasi').val(ponsFilterOtorisasi)
     ponsUpdateFilterBadge()
   })
