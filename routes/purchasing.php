@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
     Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
     Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
-    Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
+    Route::post('/pembelianpermintaannonstockloadall',              [PembelianPermintaanNonStockController::class, 'loadAll']);
     Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
     Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
     Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
