@@ -171,8 +171,6 @@ Route::get('/laporanpengadaanpr_doReportFilter', [LaporanPengadaanPRController::
 // Purchase Order OSP
 Route::get('/laporanpurchaseorderosp', [LaporanPurchaseOrderOSPController::class, 'index']);
 Route::get('/laporanpurchaseorderosp_doReport', [LaporanPurchaseOrderOSPController::class, 'doReport']);
-Route::get('/laporanpurchaseorderosp_doFilter', [LaporanPurchaseOrderOSPController::class, 'doFilter']);
-Route::get('/laporanpurchaseorderosp_doReportFilter', [LaporanPurchaseOrderOSPController::class, 'doReportFilter']);
 
 // Purchase Order PO
 Route::get('/laporanpurchaseorderpo', [LaporanPurchaseOrderPOController::class, 'index']);
@@ -189,32 +187,23 @@ Route::get('/laporanpurchaseorderclosepo_doReportFilter', [LaporanPurchaseOrderC
 // Penerimaan Gudang Out Standing PO
 Route::get('/laporanpenerimaangudangospo', [LaporanPenerimaanGudangOSPOController::class, 'index']);
 Route::get('/laporanpenerimaangudangospo_doReport', [LaporanPenerimaanGudangOSPOController::class, 'doReport']);
-Route::get('/laporanpenerimaangudangospo_doFilter', [LaporanPenerimaanGudangOSPOController::class, 'doFilter']);
-Route::get('/laporanpenerimaangudangospo_doReportFilter', [LaporanPenerimaanGudangOSPOController::class, 'doReportFilter']);
 
 // Penerimaan Gudang
 Route::get('/laporanpenerimaangudang', [LaporanPenerimaanGudangController::class, 'index']);
 Route::get('/laporanpenerimaangudang_doReport', [LaporanPenerimaanGudangController::class, 'doReport']);
-Route::get('/laporanpenerimaangudang_doFilter', [LaporanPenerimaanGudangController::class, 'doFilter']);
-Route::get('/laporanpenerimaangudang_doReportFilter', [LaporanPenerimaanGudangController::class, 'doReportFilter']);
 
 // Register Pembelian
 Route::get('/laporanregisterpembelian', [LaporanRegisterPembelianController::class, 'index']);
 Route::get('/laporanregisterpembelian_doReport', [LaporanRegisterPembelianController::class, 'doReport']);
-Route::get('/laporanregisterpembelian_doFilter', [LaporanRegisterPembelianController::class, 'doFilter']);
-Route::get('/laporanregisterpembelian_doReportFilter', [LaporanRegisterPembelianController::class, 'doReportFilter']);
+Route::get('/laporanregisterpembelian_doGrafik', [LaporanRegisterPembelianController::class, 'doGrafik']);
 
 // Retur Pembelian ACC
 Route::get('/laporanreturpembelianacc', [LaporanReturPembelianACCController::class, 'index']);
 Route::get('/laporanreturpembelianacc_doReport', [LaporanReturPembelianACCController::class, 'doReport']);
-Route::get('/laporanreturpembelianacc_doFilter', [LaporanReturPembelianACCController::class, 'doFilter']);
-Route::get('/laporanreturpembelianacc_doReportFilter', [LaporanReturPembelianACCController::class, 'doReportFilter']);
 
 // Retur Pembelian GDG
 Route::get('/laporanreturpembeliangdg', [LaporanReturPembelianGDGController::class, 'index']);
 Route::get('/laporanreturpembeliangdg_doReport', [LaporanReturPembelianGDGController::class, 'doReport']);
-Route::get('/laporanreturpembeliangdg_doFilter', [LaporanReturPembelianGDGController::class, 'doFilter']);
-Route::get('/laporanreturpembeliangdg_doReportFilter', [LaporanReturPembelianGDGController::class, 'doReportFilter']);
 
 // Oustanding UM BELI
 Route::get('/laporanpengadaanoutstandingumbeli', [LaporanPengadaanOutStandingUMBeliController::class, 'index']);
@@ -225,6 +214,7 @@ Route::get('/laporanpengadaanoutstandingumbeli_doReportFilter', [LaporanPengadaa
 // Oustanding UM BELI 2
 Route::get('/laporanpengadaanoutstandingum2', [LaporanPengadaanOutStandingUM2Controller::class, 'index']);
 Route::get('/laporanpengadaanoutstandingum2_doReport', [LaporanPengadaanOutStandingUM2Controller::class, 'doReport']);
+Route::get('/laporanpengadaanoutstandingum2_doKasharian', [LaporanPengadaanOutStandingUM2Controller::class, 'doKasharian']);
 Route::get('/laporanpengadaanoutstandingum2_doFilter', [LaporanPengadaanOutStandingUM2Controller::class, 'doFilter']);
 Route::get('/laporanpengadaanoutstandingum2_doReportFilter', [LaporanPengadaanOutStandingUM2Controller::class, 'doReportFilter']);
 
@@ -233,32 +223,22 @@ Route::get('/laporanhispo', [LaporanHisPoController::class, 'index']);
 Route::get('/laporanhispo_loadcustomer', [LaporanHisPoController::class, 'loadCustomer']);
 Route::get('/laporanhispo_loadlokasi', [LaporanHisPoController::class, 'loadLokasi']);
 Route::get('/laporanhispo_doReport', [LaporanHisPoController::class, 'doReport']);
-Route::get('/laporanhispo_doFilter', [LaporanHisPoController::class, 'doFilter']);
-Route::get('/laporanhispo_doReportFilter', [LaporanHisPoController::class, 'doReportFilter']);
 
 // Invoice Pembelian
 Route::get('/laporanpengadaaninvoicepembelian', [LaporanPengadaanInvoicePembelianController::class, 'index']);
 Route::get('/laporanpengadaaninvoicepembelian_doReport', [LaporanPengadaanInvoicePembelianController::class, 'doReport']);
-Route::get('/laporanpengadaaninvoicepembelian_doFilter', [LaporanPengadaanInvoicePembelianController::class, 'doFilter']);
-Route::get('/laporanpengadaaninvoicepembelian_doReportFilter', [LaporanPengadaanInvoicePembelianController::class, 'doReportFilter']);
 
 // Debet Note
 Route::get('/laporanpengadaandebetnote', [LaporanPengadaanDebetNoteController::class, 'index']);
 Route::get('/laporanpengadaandebetnote_doReport', [LaporanPengadaanDebetNoteController::class, 'doReport']);
-Route::get('/laporanpengadaandebetnote_doFilter', [LaporanPengadaanDebetNoteController::class, 'doFilter']);
-Route::get('/laporanpengadaandebetnote_doReportFilter', [LaporanPengadaanDebetNoteController::class, 'doReportFilter']);
 
 // Rekap Invoice Pembelian
 Route::get('/laporanpengadaanrekapinvoicepembelian', [LaporanPengadaanRekapInvoicePembelianController::class, 'index']);
 Route::get('/laporanpengadaanrekapinvoicepembelian_doReport', [LaporanPengadaanRekapInvoicePembelianController::class, 'doReport']);
-Route::get('/laporanpengadaanrekapinvoicepembelian_doFilter', [LaporanPengadaanRekapInvoicePembelianController::class, 'doFilter']);
-Route::get('/laporanpengadaanrekapinvoicepembelian_doReportFilter', [LaporanPengadaanRekapInvoicePembelianController::class, 'doReportFilter']);
 
 // Register Rekap Oustanding Invoice
 Route::get('/laporanpengadaanregisteroutstandinginvoice', [LaporanPengadaanRegisterRekapOSInvoiceController::class, 'index']);
 Route::get('/laporanpengadaanregisteroutstandinginvoice_doReport', [LaporanPengadaanRegisterRekapOSInvoiceController::class, 'doReport']);
-Route::get('/laporanpengadaanregisteroutstandinginvoice_doFilter', [LaporanPengadaanRegisterRekapOSInvoiceController::class, 'doFilter']);
-Route::get('/laporanpengadaanregisteroutstandinginvoice_doReportFilter', [LaporanPengadaanRegisterRekapOSInvoiceController::class, 'doReportFilter']);
 
 // ======================= MARKETING =================== //
 
@@ -900,6 +880,7 @@ Route::get('/laporanaccountingneracapenunjang', [LaporanAccountingNeracaPenunjan
 Route::get('/laporanaccountingneracapenunjang_doReport', [LaporanAccountingNeracaPenunjangController::class, 'doReport']);
 Route::get('/laporanaccountingneracapenunjang_doFilter', [LaporanAccountingNeracaPenunjangController::class, 'doFilter']);
 Route::get('/laporanaccountingneracapenunjang_doReportFilter',[LaporanAccountingNeracaPenunjangController::class, 'doReportFilter']);
+Route::get('/laporanaccountingneracapenunjang_loaddivisi',[LaporanAccountingNeracaPenunjangController::class, 'loadDivisi']);
 
 // HPP
 Route::get('/laporanaccountinghpp', [LaporanAccountingHPPController::class, 'index']);

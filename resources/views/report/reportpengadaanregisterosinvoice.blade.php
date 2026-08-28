@@ -1,41 +1,16 @@
 @extends('report.masterreport2')
 
-<!-- Warna centang -->
-  <style>
-    .checkmark-red {
-      color: red !important;
-      font-weight: bold;
-      margin-left: 6px;
-    }
-
-    #inputReportMode{
-      border: 0;
-      background: none;
-      padding: 0;
-      box-shadow: none;
-      color: #495057;
-      font-weight: 600;
-    }
-
-    #inputReportMode:hover,
-    #inputReportMode:focus{
-      color: #0d6efd;
-      box-shadow: none;
-    }
-
-  </style>
-<!-- Warna centang -->
+<style>
+  .tb-report .table-wrap { min-height: 10vh; }
+</style>
 
 @section('header2')
   <div class="tb-report main">
       <div class="content">
+        {{-- <div class="page-title" style="margin-bottom:8px;">Register Outstanding Invoice</div> --}}
 
         <!-- TOOLBAR -->
         <div class="toolbar">
-          <div>
-            <div class="page-title">Rekap Invoice Pembelian</div>
-            <!-- <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div> -->
-          </div>
 
           <!-- Periode (date range) -->
           <div class="filter-wrap">
@@ -45,37 +20,20 @@
             <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
           </div>
 
-          <!-- mode report -->
-          <!-- <div class="filter-wrap">
-          <button
-                class="btn btn-outline-primary dropdown-toggle"
-                type="button"
-                id="inputReportMode"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Report
-            </button>
-            <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setReportMode('0')">Detail
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-              <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setReportMode('1')">Rekap
-              <span class="checkmark-red" style="display:none;">&#10003</span>
-              </a></li>
-            </ul>
-          </div> -->
-
-          <!-- Actions: second (row-level) search + load + export -->
-          <div class="action-group">
+          {{-- Search --}}
+          <div>
             <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
-            <!-- <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="bi bi-filter-left"></i> Filter Data</button> -->
-            <button
-              class="btn-load"
-              data-bs-toggle="modal"
-              data-bs-target="#modalFilter">
+          </div>
+
+          {{-- Tidak ada Order By di halaman ini: controller doReport() men-hardcode Ordr="N"
+               (tidak pernah membaca inputOrd sama sekali), jadi tidak ada apa pun untuk
+               di-switch. Otorisasi juga tidak difilter -- NeedOto di-hardcode ke 2 (Semua). --}}
+
+          <!-- Actions: filter modal + tampilkan + export -->
+          <div class="action-group">
+            <button class="btn-load" type="button" data-bs-toggle="modal" data-bs-target="#modalFilter" title="Filter Laporan">
               <i class="fas fa-filter"></i> Filter
             </button>
-            <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
             <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
             <div class="export-wrap" id="exportWrap">
               <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -88,7 +46,11 @@
           </div>
         </div>
 
-        <!-- TABLE -->
+        <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+        <div id="rtBar"></div>
+
+        <!-- TABLE — header satu tingkat (tanpa band), dibangun oleh ReportTable.headHtml() di
+             renderRows() (drag-reorder + gear aktif seperti biasa). -->
         <div class="table-outer">
           <div class="table-wrap">
             <table class="tb" id="mainTable">
@@ -96,17 +58,18 @@
                 <tr>
                   <th style="min-width:130px">No. Bukti</th>
                   <th style="min-width:90px">Tanggal</th>
-                  <th style="min-width:90px">No PO</th>
-                  <th style="min-width:130px">Nama Cust Supp</th>
-                  <th class="num" style="min-width:10px">No FPJ</th>
-                  <th class="num" style="min-width:10px">Tgl FPJ</th>
+                  <th style="min-width:110px">No. PO</th>
+                  <th style="min-width:150px">Nama Cust Supp</th>
+                  <th style="min-width:110px">No. FPJ</th>
+                  <th style="min-width:90px">Tgl. FPJ</th>
                   <th class="num" style="min-width:10px">DPP</th>
                   <th class="num" style="min-width:10px">PPN</th>
                   <th class="num" style="min-width:10px">Net</th>
+                  <th class="num" style="min-width:10px">Outstanding</th>
                 </tr>
               </thead>
               <tbody id="tableBody">
-                <tr class="empty-row"><td colspan="9">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+                <tr class="empty-row"><td colspan="10">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
               </tbody>
             </table>
           </div>
@@ -115,113 +78,111 @@
           </div>
         </div>
 
+        <div class="rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> untuk sembunyikan kolom atau atur total.
+        </div>
+
       </div><!-- /content -->
 
       <!-- TOAST -->
       <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
     </div><!-- /tb-report -->
 
-    <!-- modal filter -->
-  <div class="modal fade" id="modalFilter">
+  {{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+       di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
+  <!-- modal filter -->
+  <div class="modal fade rt-filter" id="modalFilter">
     <div class="modal-dialog modal-md">
-        <div class="modal-content">
+      <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-filter"></i>
-                    Filter Laporan
-                </h5>
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-filter"></i>
+            Filter Laporan
+            <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+          </h5>
+          <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+        </div>
 
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal">
-                </button>
+        <div class="modal-body">
+
+          <div class="rt-section">
+            <div class="rt-group-label">Filter Data</div>
+            <div class="rt-grid-1">
+              {{-- "Report" (Detail/Rekap) DIHAPUS: file lama meng-copy toggle ini dari halaman
+                   Rekap Invoice Pembelian, tapi doReport() controller halaman ini (Sp_OUTreportInvoicedet)
+                   tidak pernah membaca inputDetOrRekap sama sekali -- toggle tidak mengubah apa pun.
+                   PPN dihidupkan sebagai gantinya: controller genuinely membaca inputPpn, tapi
+                   sebelumnya tidak ada UI ataupun payload untuk itu sama sekali. --}}
+              <div class="mb-3">
+                <label class="rt-field-label">PPN</label>
+                <select class="rt-native" id="modalPPN">
+                  <option value="2">Semua</option>
+                  <option value="1">Non PPN</option>
+                  <option value="0">PPN</option>
+                </select>
+              </div>
             </div>
-
-            <div class="modal-body">
-
-                <div class="mb-3">
-                    <label>Report</label>
-                    <select class="form-select" id="modalReport">
-                        <option value="0">Detail</option>
-                        <option value="1">Rekap</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button
-                    class="btn btn-primary"
-                    onclick="applyModalFilter()">
-                    Terapkan
-                </button>
-
-            </div>
-
           </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+          <div class="rt-footer-buttons">
+            <button type="button" class="rt-btn rt-btn-ghost" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+          </div>
+        </div>
+
       </div>
+    </div>
   </div>
-<!-- modal filter -->
+  <!-- modal filter -->
 
 @endsection
 
 @section('jsreport')
 <script type="text/javascript">
-  let globalDate1 = "{!! date('Y-m-d') !!}";
-  let globalDate2 = "{!! date('Y-m-d') !!}";
-  let globalReportMode = "0"; // default: Detail
+  let globalPPN = "2";       // default: Semua
   let lastRows = [];         // hasil fetch terakhir (dipakai renderRows / export / search)
   let currentGroupby = 'NoBukti'; // groupby aktif untuk render ulang saat search
-  let DetOrRekap = 0;
 
   $(document).ready(function () {
-      setReportMode(globalReportMode);
+      // Header tabel interaktif standar (drag-reorder + gear per kolom + bar "kolom
+      // tersembunyi"/"Reset kolom"). Tidak ada "Tampilan" switcher di halaman ini -- hanya satu
+      // mode/urutan yang genuinely ada (lihat catatan di makeTable()).
+      ReportTable.init({
+        table: '#mainTable',
+        bar: '#rtBar',
+        onChange: function () { applyFilters(); }
+      });
   });
 
+  /* -- FILTER MODAL -- */
   $('#modalFilter').on('show.bs.modal', function () {
-    $("#modalReport").val(globalReportMode);
+    $("#modalPPN").val(globalPPN);
+    updateFilterBadge();
   });
 
-  function applyModalFilter() {
-
-    setReportMode($("#modalReport").val());
-
-    $('#modalFilter').modal('hide');
+  // PPN punya "Semua" (value "2") sebagai nilai netral, jadi ikut dihitung ke badge saat
+  // diubah dari situ.
+  function updateFilterBadge() {
+    let count = 0;
+    if ($("#modalPPN").val() !== "2") count++;
+    $('#filterBadge').text(count + ' aktif');
   }
 
-  // $(document).ready(function() {
-  //   $("#btnFilterData").on("click", function() {
-  //     if (typeof doShowFormFilterData === "function") doShowFormFilterData();
-  //     else alert(" Fungsi doShowFormFilterData belum tersedia.");
-  //   });
+  function resetAllFilters() {
+    $("#modalPPN").val("2");
+    updateFilterBadge();
+  }
 
-  //   $("#btnCustomizeTable").on("click", function() {
-  //     if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-  //     else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-  //   });
-
-  //   $("#btnSubmitReport").on("click", function() {
-  //     makeTable('REPORT');
-  //   });
-
-  //   setReportMode(globalReportMode);
-  //   showPeriode();
-
-  //   setDefaultHeader();
-
-  //   setTimeout(() => {
-  //     makeTable('REPORT');
-  //   }, 100);
-  // });
-  
-   // periode
-   function showPeriode() {
-    globalDate1 = $('#inputDate1').val();
-    globalDate2 = $('#inputDate2').val();
-    // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
+  function applyModalFilter() {
+    globalPPN = $("#modalPPN").val();
+    $('#modalFilter').modal('hide');
   }
 
   /* -- EXPORT -- */
@@ -231,119 +192,48 @@
     if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
   });
 
-  // reportmode
-  function setReportMode(val) {
-    globalReportMode = val;
-    DetOrRekap = Number(val);
-
-    // $('#dropdownReportMode .checkmark-red').hide();
-    // $(`#dropdownReportMode .dropdown-item[data-value='${val}'] .checkmark-red`).show();
-
-    // // Ubah tulisan tombol
-    // const text = {
-    //     "0": "Detail",
-    //     "1": "Rekap"
-    // };
-
-    // $("#inputReportMode").html(
-    //     `Report : ${text[val]}`
-    // );
-  }
-
-  // // periode
-  // function showPeriode() {
-  //   globalDate1 = $('#inputDate1').val();
-  //   globalDate2 = $('#inputDate2').val();
-  //   // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
-  // }
-
-  // // mode report
-  // function setReportMode(val) {
-  //   globalReportMode = val;
-  //   jenisreport = Number(val);   // 0 = Detail, 1 = Rekap
-  //   DetOrRekap = Number(val);    // samakan dengan variabel yang ada di setModeReport
-
-  //   // hapus centang dulu
-  //   $('#dropdownReportMode .dropdown-item').each(function() {
-  //     let itemText = $(this).text().replace(' ?', '').trim();
-  //     $(this).text(itemText);
-  //   });
-
-  //   // tambah centang di item terpilih
-  //   $(`#dropdownReportMode .dropdown-item[data-value='${val}']`).each(function() {
-  //     $(this).html(`${$(this).text()} <span class="checkmark-red">?</span>`);
-  //   });
-
-  //   // update g_modeReport sesuai pilihan order & detail/rekap
-  //   // setModeReport() sudah mengatur g_modeReport berdasarkan $("#inputOrder").val() dan jenisreport/DetOrRekap
-  //   setModeReport();
-  // }
-
-  var modereport_detailnobukti = 0;
-  var modereport_rekapnobukti = 1;
-  g_modeReport = modereport_detailnobukti;
-  var jenisreport = 0; // ini untuk detail dan rekap
+  g_modeReport = 0;
 
   function setDefaultHeader() {
-    if (g_modeReport == modereport_detailnobukti) {
-      gcart_header = [
-        ['NoBukti', 'Nobukti', 1, 'varchar', 0, 0],
-        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-        ['NOPO', 'No. PO', 1, 'varchar', 0, 0],
-        ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
-        ['NoFakturPajak', 'No. FPJ', 1, 'varchar', 0, 0],
-        ['TglFakturPajak', 'Tgl. FPJ', 1, 'date', 0, 0],
-        ['NDPP', 'DPP', 1, 'float', 1, 2],
-        ['NPPN', 'PPN', 1, 'float', 1, 2],
-        ['NNET', 'Net', 1, 'float', 1, 2]
-      ];
-      gsum_issubtotal = 1; gsum_isgrandtotal = 1;
-
-    } else if (g_modeReport == modereport_rekapnobukti){
-      gcart_header = [
-        ['NoBukti', 'Nobukti', 1, 'varchar', 0, 0],
-        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-        ['NOPO', 'No. PO', 1, 'varchar', 0, 0],
-        ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
-        ['NoFakturPajak', 'No. FPJ', 1, 'varchar', 0, 0],
-        ['TglFakturPajak', 'Tgl. FPJ', 1, 'date', 0, 0],
-        ['NDPP', 'DPP', 1, 'float', 1, 2],
-        ['NPPN', 'PPN', 1, 'float', 1, 2],
-        ['NNET', 'Net', 1, 'float', 1, 2]
-      ];
-      gsum_issubtotal = 1; gsum_isgrandtotal = 1;
-    }
+    gcart_header = [
+      ['NoBukti', 'Nobukti', 1, 'varchar', 0, 0],
+      ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+      ['NOPO', 'No. PO', 1, 'varchar', 0, 0],
+      ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
+      ['NoFakturPajak', 'No. FPJ', 1, 'varchar', 0, 0],
+      ['TglFakturPajak', 'Tgl. FPJ', 1, 'date', 0, 0],
+      ['NDPP', 'DPP', 1, 'float', 1, 2],
+      ['NPPN', 'PPN', 1, 'float', 1, 2],
+      ['NNET', 'Net', 1, 'float', 1, 2],
+      // NAMA FIELD TEBAKAN -- Sp_OUTreportInvoicedet belum bisa diverifikasi dari kode (proc
+      // ada di SQL Server, bukan repo ini). Setelah dites di browser, cocokkan 'OUTSTANDING' di
+      // bawah ini dengan nama field yang benar-benar dikembalikan proc (lihat tab Network).
+      ['OUTSTANDING', 'Outstanding', 1, 'float', 1, 2]
+    ];
+    gsum_issubtotal = 1; gsum_isgrandtotal = 1;
   }
 
-  const reportUrl = "{{ url('laporanpengadaanrekapinvoicepembelian_doReport') }}"
+  const reportUrl = "{{ url('laporanpengadaanregisteroutstandinginvoice_doReport') }}"
   function makeTable(_mode) {
-    console.log(" makeTable jalankan mode:", _mode);
-
-    let groupby = '';
+    let groupby = 'NoBukti';
     let _date1 = $("#inputDate1").val();
     let _date2 = $("#inputDate2").val();
 
-    // mode report 
-    if (DetOrRekap === 0) {
-      g_modeReport = modereport_detailnobukti;
-      groupby = 'NoBukti';
-    } else {
-      g_modeReport = modereport_rekapnobukti;
-      groupby = 'NoBukti';
-    }
-
+    setDefaultHeader();
     if (typeof doSetHeader === 'function') {
       doSetHeader(g_modeReport);
     }
 
+    document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
+
     let data = {
       date1: _date1,
       date2: _date2,
-      inputDetOrRekap: DetOrRekap,
+      inputPpn: globalPPN,
     };
 
-  // Ambil data SEKALI, lalu render langsung ke tabel styled baru (#tableBody).
-  $.ajax({
+    // Ambil data SEKALI, lalu render langsung ke tabel styled baru (#tableBody).
+    $.ajax({
       url    : reportUrl,
       type   : 'get',
       data   : data,
@@ -359,19 +249,14 @@
         renderRows([], groupby);
       }
     });
-
-    // console.log("Data terkirim ke server:", data);
-
-    // doMakeTable(_mode, groupby, data, "REPORT REKAP INVOICE PEMBELIAN", _date1, _date2, DetOrRekap);
   }
 
   // === RENDER KE TABEL STYLED (.tb-report #mainTable) ===
   // Kolom dibangun DINAMIS dari gcart_header (hanya kolom yang terlihat /
   // item[2]===1, sesuai urutan simpanan). Jadi hasil "Customize Table"
   // (show/hide + urutan kolom) langsung tampil. <thead> ditulis ulang tiap
-  // render. Subtotal/Grand Total = jumlah kolom Qnt, dikelompokkan per `groupby`.
-  // (Data sudah terurut dari proc sesuai inputOrd, jadi cukup deteksi pergantian
-  // nilai grup. Jika kolom Qnt disembunyikan, baris total tidak ditampilkan.)
+  // render lewat ReportTable.headHtml() (drag-reorder + gear per kolom).
+  // Subtotal/Grand Total = jumlah kolom DPP/PPN/Net/Outstanding, dikelompokkan per NoBukti.
   function renderRows(rows, groupby) {
     const cols  = gcart_header.filter(c => c[2] === 1); // kolom terlihat, terurut
     const thead = document.querySelector('#mainTable thead');
@@ -380,15 +265,11 @@
     // Baris Subtotal & Grand Total mengikuti toggle di modal Customize Table
     // (#buttonSubtotal -> gsum_issubtotal, #buttonGrandtotal -> gsum_isgrandtotal).
     // gsum_* dimuat oleh doSetHeader() saat klik Tampilkan, jadi pilihan user
-    // (sudah tersimpan) langsung berlaku. Total hanya tampil bila kolom Qnt ada.
+    // (sudah tersimpan) langsung berlaku.
     const showSub   = qntVisible && (gsum_issubtotal === 1);
     const showGrand = qntVisible && (gsum_isgrandtotal === 1);
 
-    // HEADER dinamis dari gcart_header
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
@@ -396,22 +277,28 @@
       return;
     }
 
-    let html = '', prev = null, sub = { NDPP: 0, NPPN: 0, NNET: 0 }, grand = { NDPP: 0, NPPN: 0, NNET: 0 };
+    let html = '', prev = null,
+        sub   = { NDPP: 0, NPPN: 0, NNET: 0, OUTSTANDING: 0 },
+        grand = { NDPP: 0, NPPN: 0, NNET: 0, OUTSTANDING: 0 };
 
     rows.forEach(function (r, i) {
       const now = r[groupby];
 
       // subtotal saat nilai grup berganti (kalau toggle Subtotal aktif)
-      if (showSub && i !== 0 && prev !== now) { html += totalRowTotal('Subtotal', sub, cols, 'subtotal-row'); sub = { NDPP: 0, NPPN: 0, NNET: 0 };
+      if (showSub && i !== 0 && prev !== now) {
+        html += totalRowTotal('Subtotal', sub, cols, 'subtotal-row');
+        sub = { NDPP: 0, NPPN: 0, NNET: 0, OUTSTANDING: 0 };
       }
 
       sub.NDPP += currencyNormalizer(r.NDPP);
       sub.NPPN += currencyNormalizer(r.NPPN);
       sub.NNET += currencyNormalizer(r.NNET);
+      sub.OUTSTANDING += currencyNormalizer(r.OUTSTANDING);
 
       grand.NDPP += currencyNormalizer(r.NDPP);
       grand.NPPN += currencyNormalizer(r.NPPN);
       grand.NNET += currencyNormalizer(r.NNET);
+      grand.OUTSTANDING += currencyNormalizer(r.OUTSTANDING);
 
       // satu sel per kolom terlihat, format menurut tipe (item[3]) & desimal (item[5])
       html += '<tr class="data-row">' + cols.map(function (c) {
@@ -432,20 +319,15 @@
     document.getElementById('footerLabel').textContent = 'Menampilkan ' + rows.length + ' baris';
   }
 
-  // Baris total (Qnt saja): nilai di kolom Qnt, label di kolom pertama (bukan Qnt),
-  // sel lain dikosongkan   mengikuti urutan kolom terlihat saat ini.
+  // Baris total: nilai di kolomnya masing-masing, label di kolom pertama non-total, sel lain
+  // dikosongkan   mengikuti urutan kolom terlihat saat ini.
   function totalRowTotal(label, total, cols, cls) {
-    const labelIdx = cols.findIndex(c =>
-        !['NDPP', 'NPPN', 'NNET'].includes(c[0])
-    );
+    const totalKeys = ['NDPP', 'NPPN', 'NNET', 'OUTSTANDING'];
+    const labelIdx = cols.findIndex(c => !totalKeys.includes(c[0]));
 
     const tds = cols.map(function(c, idx) {
-        if (c[0] === 'NDPP')
-            return '<td class="num">' + format_number(total.NDPP, 2) + '</td>';
-        if (c[0] === 'NPPN')
-            return '<td class="num">' + format_number(total.NPPN, 2) + '</td>';
-        if (c[0] === 'NNET')
-            return '<td class="num">' + format_number(total.NNET, 2) + '</td>';
+        if (totalKeys.includes(c[0]))
+            return '<td class="num">' + format_number(total[c[0]], 2) + '</td>';
         if (idx === labelIdx)
             return '<td>' + label + '</td>';
         return '<td></td>';
@@ -482,42 +364,10 @@
     }).join(' ').toLowerCase();
   }
 
-  function getKolomFilter() {
-    // tentukan kolom (sesuai database & gcart_header) yang mau ditampilkan
-    // mode report menentukan kolom yang dipakai
-    // berapa pun bisa asal dalam bentuk array
-
-    return ['NoBukti', 'TANGGAL'];
-  }
-
-  function reportMode(_mode) {
-    if (jenisreport != _mode) {
-      let prev_mode = jenisreport;
-      jenisreport = _mode;
-
-      $("#tombolMode" + prev_mode).removeClass("btn-primary");
-      $("#tombolMode" + prev_mode).addClass("btn-outline-primary");
-
-      $("#tombolMode" + jenisreport).removeClass("btn-outline-primary");
-      $("#tombolMode" + jenisreport).addClass("btn-primary");
-
-      setModeReport();
-
-    }
-  }
-
-  function setModeReport() {
-    if (jenisreport === 0) {
-      g_modeReport = modereport_detailnobukti;
-    } else {
-      g_modeReport = modereport_rekapnobukti;
-    }
-
-    doSetHeader(g_modeReport);
-    doShowCustomize();
-  }
-
-
+  // getKolomFilter() milik ENGINE LAMA (modal "Filter Data" / doShowFormFilterData()), yang
+  // TIDAK dipakai lagi di halaman ini (tombolnya sudah dihapus dari toolbar). Stub ini cuma
+  // jaga-jaga supaya base script masterreport2 tidak error kalau memanggilnya.
+  function getKolomFilter() { return []; }
 </script>
 
 @endsection

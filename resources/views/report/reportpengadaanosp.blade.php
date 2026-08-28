@@ -1,30 +1,9 @@
 @extends('report.masterreport2')
 
-<!-- Warna centang -->
-  <style>
-    .checkmark-red {
-      color: red !important;
-      font-weight: bold;
-      margin-left: 6px;
-    }
-
-    #inputOrder{
-      border: 0;
-      background: none;
-      padding: 0;
-      box-shadow: none;
-      color: #495057;
-      font-weight: 600;
-    }
-
-    #inputOrder:hover,
-    #inputOrder:focus{
-      color: #0d6efd;
-      box-shadow: none;
-    }
-
-  </style>
-<!-- Warna centang -->
+<style>
+  /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
+  .tb-report .table-wrap { min-height: 10vh; }
+</style>
 
 @section('header2')
 
@@ -33,44 +12,31 @@
 
         <!-- TOOLBAR -->
         <div class="toolbar">
-          <div>
+          {{-- <div>
             <div class="page-title">Pengadaan Outstanding PR</div>
             <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div>
-          </div>
+          </div> --}}
 
-          <!-- Periode (date range) -->
-          <!-- <div class="filter-wrap">
+          <!-- Periode (date range) -- dikonsumsi Sp_reportoutStandingPR (tgl1/tgl2), sebelumnya
+               di-comment total sehingga makeTable() mengirim date1/date2 undefined tiap kali. -->
+          <div class="filter-wrap">
             <label>Periode</label>
             <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
             <span class="filter-sep">s/d</span>
             <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
-          </div> -->
-
-          <!-- order by -->
-          <div class="filter-wrap">
-            <button
-                class="btn btn-outline-primary dropdown-toggle"
-                type="button"
-                id="inputOrder"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
-                Order By
-            </button>
-            <ul class="dropdown-menu" id="dropdownOrder" aria-labelledby="inputOrder">
-                <li><a class="dropdown-item" data-value="N" onclick="setOrderBy('N')">No Bukti
-                <span class="checkmark-red" style="display:none;">&#10003</span>
-                </a></li>
-                <li><a class="dropdown-item" data-value="B" onclick="setOrderBy('B')">Barang
-                <span class="checkmark-red" style="display:none;">&#10003</span>
-                </a></li>
-            </ul>
           </div>
 
-          <!-- Actions: second (row-level) search + load + export -->
-          <div class="action-group">
+          {{-- Search --}}
+          <div>
             <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
-            <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="bi bi-filter-left"></i> Filter Data</button>
-            <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
+          </div>
+
+          {{-- Order By (No Bukti/Barang) jadi "Tampilan" switcher di bar tabel (diisi
+               ReportTable.init({ views: ... }), lihat docs/new-slider-table-guide.md §Step 5) --
+               dropdown lama di sini sudah dihapus. --}}
+
+          <!-- Actions: search + tampilkan + export -->
+          <div class="action-group">
             <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
             <div class="export-wrap" id="exportWrap">
               <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -83,7 +49,11 @@
           </div>
         </div>
 
-        <!-- TABLE -->
+        <!-- Bar kolom tersembunyi + Tampilan (Order By) (diisi oleh report-table.js / ReportTable) -->
+        <div id="rtBar"></div>
+
+        <!-- TABLE — header satu tingkat (tanpa band), dibangun oleh ReportTable.headHtml() di
+             renderRows() (drag-reorder + gear aktif seperti biasa). -->
         <div class="table-outer">
           <div class="table-wrap">
             <table class="tb" id="mainTable">
@@ -101,13 +71,18 @@
                 </tr>
               </thead>
               <tbody id="tableBody">
-                <tr class="empty-row"><td colspan="7">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+                <tr class="empty-row"><td colspan="9">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
               </tbody>
             </table>
           </div>
           <div class="table-footer">
             <span id="footerLabel">Belum ada data dimuat</span>
           </div>
+        </div>
+
+        <div class="rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> untuk sembunyikan kolom atau atur total.
         </div>
 
       </div><!-- /content -->
@@ -120,55 +95,41 @@
 
 @section('jsreport')
 <script type="text/javascript">
-  let globalDate1 = "{!! date('Y-m-d') !!}";
-  let globalDate2 = "{!! date('Y-m-d') !!}";
   let globalOrderBy = "N";   // default: Nomor Bukti
   let lastRows = [];         // hasil fetch terakhir (dipakai renderRows / export / search)
   let currentGroupby = 'NoBukti'; // groupby aktif untuk render ulang saat search
-  
+
   $(document).ready(function () {
       setOrderBy(globalOrderBy);
+
+      // Header tabel interaktif standar (drag-reorder + gear per kolom + bar "kolom
+      // tersembunyi"/"Reset kolom"), plus "Tampilan" switcher untuk Order By -- halaman ini
+      // SUDAH punya mode yang menukar susunan kolom (g_modeReport/setDefaultHeader(), lihat
+      // makeTable()); dropdown lamanya sekarang jadi switcher ini. Order By menukar urutan
+      // sortir dari SP (inputOrd, dipakai deteksi pergantian grup di renderRows()) -- makanya
+      // set() di bawah memanggil makeTable('REPORT'), bukan render().
+      ReportTable.init({
+        table: '#mainTable',
+        bar: '#rtBar',
+        onChange: function () { applyFilters(); },
+        views: {
+          label: 'Order By',
+          options: [
+            { value: 'N', label: 'No Bukti', desc: 'Dikelompokkan per No Bukti' },
+            { value: 'B', label: 'Barang',   desc: 'Dikelompokkan per Kode Barang' }
+          ],
+          get: function () { return globalOrderBy; },
+          set: function (v) {
+            setOrderBy(String(v));
+            if (lastRows.length) { makeTable('REPORT'); }
+          }
+        }
+      });
   });
-  // $(document).ready(function() {
-  //   console.log("Script sudah jalan. Coba klik tombol untuk tes fungsi.");
-  //   $("#btnFilterData").on("click", function() {
-  //     if (typeof doShowFormFilterData === "function") doShowFormFilterData();
-  //     else alert(" Fungsi doShowFormFilterData belum tersedia.");
-  //   });
 
-  //   $("#btnCustomizeTable").on("click", function() {
-  //     if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-  //     else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-  //   });
-
-  //   $("#btnSubmitReport").on("click", function() {
-  //     makeTable('REPORT');
-  //   });
-
-  //   setOrderBy(globalOrderBy);
-  //   setDefaultHeader();
-
-  //   setTimeout(() => {
-  //     makeTable('REPORT');
-  //   }, 100);
-  // });
-
-  // periode
-  function showPeriode() {
-    globalDate1 = $('#inputDate1').val();
-    globalDate2 = $('#inputDate2').val();
-    // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
-  }
-
-  // order by
+  // order by (nilai sebenarnya -- UI-nya "Tampilan" switcher di #rtBar, lihat ReportTable.init() di atas)
   function setOrderBy(val) {
     globalOrderBy = val;
-
-    // sembunyikan semua centang
-    $('#dropdownOrder .checkmark-red').hide();
-
-    // tampilkan centang yang dipilih
-    $(`#dropdownOrder .dropdown-item[data-value='${val}'] .checkmark-red`).show();
   }
 
   /* -- EXPORT -- */
@@ -214,7 +175,6 @@
 
   const reportUrl = "{{ url('laporanpurchaseorderosp_doReport') }}"
   function makeTable(_mode) {
-    console.log(" makeTable dijalankan mode:", _mode);
     let groupby = '';
     let _date1  = $("#inputDate1").val();
     let _date2  = $("#inputDate2").val();
@@ -231,6 +191,8 @@
     if (typeof doSetHeader === 'function') {
       doSetHeader(g_modeReport);
     }
+
+    document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
     let data = {
       date1    : _date1,
@@ -255,12 +217,6 @@
         renderRows([], groupby);
       }
     });
-    
-    // if (typeof doMakeTable === 'function') {
-    //   doMakeTable(_mode, groupby, data, "REPORT PENGADAAN OUTSTANDING PR", _date1, _date2);
-    // } else {
-    //   console.warn(" Fungsi doMakeTable belum tersedia!");
-    // }
   }
 
   // === RENDER KE TABEL STYLED (.tb-report #mainTable) ===
@@ -282,11 +238,9 @@
     const showSub   = qntVisible && (gsum_issubtotal === 1);
     const showGrand = qntVisible && (gsum_isgrandtotal === 1);
 
-    // HEADER dinamis dari gcart_header
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis dari gcart_header — ReportTable.headHtml() (drag-reorder + gear per
+    // kolom), bukan lagi <th> polos manual.
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
@@ -380,21 +334,10 @@
     }).join(' ').toLowerCase();
   }
 
-  function getKolomFilter() {
-    // tentukan kolom (sesuai database & gcart_header) yang mau ditampilkan
-    // mode report menentukan kolom yang dipakai
-    // berapa pun bisa asal dalam bentuk array
-
-    let data = [];
-    if (g_modeReport == modereport_detail) {
-      data = ['Nobukti', 'Tanggal'];
-    } else {
-      data = ['kodebrg', 'NamaBrg'];
-    }
-
-    return data;
-  }
-
+  // getKolomFilter() milik ENGINE LAMA (modal "Filter Data" / doShowFormFilterData()), yang
+  // TIDAK dipakai lagi di halaman ini (tombolnya sudah dihapus dari toolbar). Stub ini cuma
+  // jaga-jaga supaya base script masterreport2 tidak error kalau memanggilnya.
+  function getKolomFilter() { return []; }
 </script>
 
 @endsection
