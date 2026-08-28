@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 @section('page-title', 'PR Non-Stock')
 

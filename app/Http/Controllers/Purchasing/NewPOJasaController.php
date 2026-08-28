@@ -90,12 +90,13 @@ class NewPOJasaController extends Controller
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
-    $poGroup = vwOUtPOWMSNONSTOCK::whereBetween('TANGGAL', [$tglawal, $tglakhir])->get()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
+    $tglakhirPlus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
+    $poGroup = vwOUtPOWMSNONSTOCK::where('TANGGAL', '>=', $tglawal)->where('TANGGAL', '<', $tglakhirPlus)->get()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
 
     $tempPo = [];
     foreach ($poGroup as $pG) {
       // code...
-      array_push($tempPo, $pG);
+      array_push($tempPo, $pG->values());
     }
     return $tempPo;
   }
@@ -106,6 +107,7 @@ class NewPOJasaController extends Controller
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+    $tglakhirplus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
 
     // Sama dengan NewPOController@getAllPembelian, beda hanya pjasa = 1. JANGAN memakai
     // VWtampilbeli::all() - itu memuat seluruh view (semua bulan/tahun) ke memori PHP baru
@@ -120,9 +122,9 @@ class NewPOJasaController extends Controller
     while ($cursor <= $batas) {
       $rows = DB::connection("SML")->select(
         "select * from dbo.fnc_masterbeli ( :bulan , :tahun, :pjasa)
-         where TANGGAL between :tglawal and :tglakhir",
+         where TANGGAL >= :tglawal and TANGGAL < :tglakhirplus",
         ["bulan" => (int) date('n', strtotime($cursor)), "tahun" => (int) date('Y', strtotime($cursor)),
-         "pjasa" => 1, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
+         "pjasa" => 1, "tglawal" => $tglawal, "tglakhirplus" => $tglakhirplus]);
       $pembelian = array_merge($pembelian, $rows);
       $cursor = date('Y-m-01', strtotime($cursor . ' +1 month'));
     }
@@ -130,10 +132,20 @@ class NewPOJasaController extends Controller
   }
 
 public function getDetailPembelian (Request $req) {
-  // $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-  $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+  $nobukti = $req->NoBukti;
+  // Bulan/tahun HARUS diambil dari tanggal dokumennya sendiri, bukan periode kerja user
+  // yang sedang aktif - kalau tidak, dokumen dari bulan lain selalu kembali kosong.
+  $header = DB::connection('SML')->select('select TANGGAL from dbBeli where NOBUKTI = :nobukti', ['nobukti' => $nobukti]);
+  if ($header) {
+    $bulan = (int) date('n', strtotime($header[0]->TANGGAL));
+    $tahun = (int) date('Y', strtotime($header[0]->TANGGAL));
+  } else {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $bulan = $periode->bulan;
+    $tahun = $periode->tahun;
+  }
 
-  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_Tampilbeli ( :bulan , :tahun, :pjasa) where NoBukti = :NoBukti" , ["bulan" => $periode->bulan, "tahun" => $periode->tahun , "pjasa" => 0, "NoBukti" => $req->NoBukti]);
+  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_Tampilbeli ( :bulan , :tahun, :pjasa) where NoBukti = :NoBukti" , ["bulan" => $bulan, "tahun" => $tahun , "pjasa" => 1, "NoBukti" => $nobukti]);
    
   $tempPembelian1 = [];
   foreach ($pembelian as $p) {

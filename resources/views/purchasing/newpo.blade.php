@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 @section('page-title', 'Penerimaan Gudang')
 
@@ -426,8 +426,7 @@
         <input type="hidden" name="noUrut" id="input_add_noUrut" value="{!! csrf_token() !!}" />
 
         <div class="form-card">
-          <div class="form-card-title">Informasi LPB</div>
-          <div class="form-grid">
+          <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="form-field">
               <label for="input_add_nobukti">No Bukti</label>
               <input type="text" class="form-control bg-light" id="input_add_nobukti" disabled>
@@ -448,12 +447,6 @@
                 @endforeach
               </select>
             </div>
-          </div>
-        </div>
-
-        <div class="form-card">
-          <div class="form-card-title">Pengiriman</div>
-          <div class="form-grid">
             <div class="form-field">
               <label for="input_add_suratjalansupp">Surat Jln Supp</label>
               <input type="text" autocomplete="off" class="form-control" id="input_add_suratjalansupp" required>
@@ -519,7 +512,6 @@
         </div>
         <div class="modal-body">
           <div class="form-card">
-            <div class="form-card-title">Informasi PO</div>
             <div class="form-grid">
               <div class="form-field">
                 <label>Tanggal</label>
@@ -586,7 +578,6 @@
         </div>
         <div class="modal-body">
           <div class="form-card">
-            <div class="form-card-title">Informasi LPB</div>
             <div class="form-grid">
               <div class="form-field">
                 <label>No PO</label>
@@ -664,7 +655,6 @@
       </div>
       <div class="modal-body">
         <div class="form-card">
-          <div class="form-card-title">Informasi LPB</div>
           <div class="form-grid">
             <div class="form-field">
               <label for="editPembelianNoPO">No PO</label>
@@ -687,11 +677,11 @@
               <input type="text" autocomplete="off" class="form-control" id="editPembelianKeterangan" disabled>
             </div>
           </div>
-          <div class="mt-3 text-right">
-            <button type="button" class="btn btn-sm btn-chip-biru" onclick="showPembelianAdd()">Add Item</button>
-            <!-- <button type="button" class="btn btn-primary" onclick="resetDetailPembelian('SML/LPB/00197/0323','SML/PO/00302/0223')" class="btn btn-secondary"  >reset</button> -->
-            <button type="button" class="btn btn-sm btn-chip-biru" onclick="saveKetFaktur()">Save Faktur & Ket</button>
-          </div>
+        </div>
+        <div class="mt-3 text-right">
+          <button type="button" class="btn btn-sm btn-chip-biru" onclick="showPembelianAdd()">Add Item</button>
+          <!-- <button type="button" class="btn btn-primary" onclick="resetDetailPembelian('SML/LPB/00197/0323','SML/PO/00302/0223')" class="btn btn-secondary"  >reset</button> -->
+          <button type="button" class="btn btn-sm btn-chip-biru" onclick="saveKetFaktur()">Save Faktur & Ket</button>
         </div>
       </div>
 
@@ -750,7 +740,7 @@
                     {{-- <select onchange="changeSelectBarang()" id="editPembelianAddSelect" class="form-control form-select"></select> --}}
                     <div class="input-group">
                       <input id="editPembelianAddSelect" type="text" class="form-control text-center" placeholder="Kode Barang" onkeypress="onKeyPressBarang(event)" disabled>
-                      <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-end shadow-sm">
+                      <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;">
                         <i class="bi bi-plus"></i>
                       </button>
                     </div>
@@ -954,7 +944,6 @@
       </div>
       <div class="modal-body">
         <div class="form-card">
-          <div class="form-card-title">Informasi LPB</div>
           <div class="form-grid">
             <div class="form-field">
               <label>No PO</label>
@@ -1166,6 +1155,11 @@
 
       console.log("ID :", detail_pembelian_row_id);
     console.log("DATA :", detail_pembelian_row_data);
+
+      if (!detail_pembelian_row_data || !detail_pembelian_row_data.length) {
+        alertify.warning('Detail penerimaan tidak ditemukan');
+        return
+      }
 
       let date = new Date(detail_pembelian_row_data[0].TANGGAL);
       // let date = new Date(detail_row_data[0].TANGGAL);

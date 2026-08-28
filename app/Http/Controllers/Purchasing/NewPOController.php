@@ -76,12 +76,13 @@ class NewPOController extends Controller
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
-    $poGroup = vwOUtPOWMS::whereBetween('TANGGAL', [$tglawal, $tglakhir])->get()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
+    $tglakhirPlus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
+    $poGroup = vwOUtPOWMS::where('TANGGAL', '>=', $tglawal)->where('TANGGAL', '<', $tglakhirPlus)->get()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
 
     $tempPo = [];
     foreach ($poGroup as $pG) {
       // code...
-      array_push($tempPo, $pG);
+      array_push($tempPo, $pG->values());
     }
     return $tempPo;
   }
@@ -92,6 +93,7 @@ class NewPOController extends Controller
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+    $tglakhirplus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
 
     // fnc_masterbeli hanya menerima bulan/tahun, jadi rentang bebas dilayani dengan
     // memanggilnya per bulan yang tersentuh rentang lalu disaring per tanggal (TANGGAL).
@@ -100,10 +102,14 @@ class NewPOController extends Controller
     $batas  = date('Y-m-01', strtotime($tglakhir));
     while ($cursor <= $batas) {
       $rows = DB::connection("SML")->select(
+        // TANGGAL dari fnc_masterbeli untuk barang non-jasa ikut syarat QC (NULL kalau
+        // belum di-QC) - modul ini tidak memakai QC, jadi fallback ke TglBeli (tanggal
+        // dokumen apa adanya) supaya dokumen yang belum di-QC tidak hilang dari daftar.
         "select * from dbo.fnc_masterbeli ( :bulan , :tahun, :pjasa)
-         where TANGGAL between :tglawal and :tglakhir",
+         where ISNULL(TANGGAL, TglBeli) >= :tglawal and ISNULL(TANGGAL, TglBeli) < :tglakhirplus",
         ["bulan" => (int) date('n', strtotime($cursor)), "tahun" => (int) date('Y', strtotime($cursor)),
-         "pjasa" => 0, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
+         "pjasa" => 0, "tglawal" => $tglawal, "tglakhirplus" => $tglakhirplus]);
+      foreach ($rows as $r) { if (empty($r->TANGGAL)) { $r->TANGGAL = $r->TglBeli; } }
       $pembelian = array_merge($pembelian, $rows);
       $cursor = date('Y-m-01', strtotime($cursor . ' +1 month'));
     }
@@ -138,9 +144,21 @@ public function getOutstandingPODetail(Request $req)
 
 
 public function getDetailPembelian (Request $req) {
-  // $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-  $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_tampilbeli ( :bulan , :tahun, :pjasa) where nobukti = :nobukti" , ["bulan" => $periode->bulan, "tahun" => $periode->tahun , "pjasa" => 0 , "nobukti" => $req->input('NoBukti')]);
+  $nobukti = $req->input('NoBukti');
+  // Bulan/tahun HARUS diambil dari tanggal dokumennya sendiri, bukan periode kerja user
+  // yang sedang aktif - kalau tidak, dokumen dari bulan lain selalu kembali kosong.
+  $header = DB::connection('SML')->select('select TANGGAL from dbBeli where NOBUKTI = :nobukti', ['nobukti' => $nobukti]);
+  if ($header) {
+    $bulan = (int) date('n', strtotime($header[0]->TANGGAL));
+    $tahun = (int) date('Y', strtotime($header[0]->TANGGAL));
+  } else {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $bulan = $periode->bulan;
+    $tahun = $periode->tahun;
+  }
+  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_tampilbeli ( :bulan , :tahun, :pjasa) where nobukti = :nobukti" , ["bulan" => $bulan, "tahun" => $tahun , "pjasa" => 0 , "nobukti" => $nobukti]);
+  // Sama seperti getAllPembelian - TANGGAL bisa NULL kalau barang belum di-QC, fallback ke tanggal dbBeli.
+  if ($header) { foreach ($pembelian as $p) { if (empty($p->TANGGAL)) { $p->TANGGAL = $header[0]->TANGGAL; } } }
  
   
   $tempPembelian1 = [];

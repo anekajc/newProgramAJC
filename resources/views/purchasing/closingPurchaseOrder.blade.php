@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('page-title', 'Closing Purchase Order')
 
 @section('css')
