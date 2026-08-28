@@ -1,715 +1,553 @@
-@extends('report.masterreportNeraca')
+@extends('report.masterreport2')
 
-<!-- Warna centang -->
-  <style>
-    .checkmark-red {
-      color: red !important;
-      font-weight: bold;
-      margin-left: 6px;
-    }
-  </style>
-<!-- Warna centang -->
+{{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php).
+     Laporan Neraca (balance sheet): styled .tb-report dengan header DUA TINGKAT — dua band
+     "AKTIVA" & "PASIVA" (masing-masing 3 kolom: Uraian/Bulan Ini/Bulan Lalu), tiap kolom tetap
+     punya menu roda gigi (sembunyikan/desimal/total) lewat buildGroupedThead(), sama seperti
+     reportaccountinglabarugi.blade.php/reportaccountingaktiva.blade.php. Halaman ini sebelumnya
+     @extends('report.masterreportNeraca') — layout khusus (bukan masterreport2/masterreport4)
+     dengan engine render() bespoke sendiri (dua sumber data digabung jadi satu tabel dua-panel).
+     Diganti total ke masterreport2 + report-table.js supaya gear-nya identik dengan laporan lain,
+     TAPI badan tabel (render()) tetap ditulis manual karena bukan daftar baris flat: Aktiva &
+     Pasiva adalah DUA SUMBER TERPISAH (res1/res2 dari doReport), masing-masing dikelompokkan per
+     rentang kode (grupAP2/grupAP2Pasiva → getGroupTitle()) dan dirender berdampingan per baris
+     (lihat render()), dengan Subtotal per grup + baris "JUMLAH ASET"/"JUMLAH KEWAJIBAN DAN
+     EKUITAS" mengikuti toggle Customize Table (gsum_issubtotal/gsum_isgrandtotal) — TIDAK ada
+     UI lain untuk toggle itu, makanya tombol "Customize Table" tetap ada di toolbar (pola sama
+     dengan reportaccountingaktiva.blade.php).
+     Mode "Valas" (Debet/Kredit jurnal) dan filter Tolakan/Perkiraan yang lama SUDAH DIHAPUS —
+     semuanya berupa dropdown `hidden` yang tidak pernah bisa dicapai user, tidak ada kode yang
+     meng-unhide-nya. Fetch "saldo awal" (dulu di doMakeTableSaldoAwal) juga dihapus karena nilainya
+     tidak pernah dipakai oleh footer mode Rp (window.resSaldoAwal diambil tapi tidak pernah dibaca
+     di setRowFooterRp yang lama) — itu hanya dipakai footer mode Valas yang sudah tidak ada.
+     Filter: Bulan/Tahun tetap di toolbar; Divisi dipindah ke modal "Filter Laporan" (dropdown
+     polos, bukan entity-picker modalAccountingJurnal lagi — endpoint loadDivisi controller ini
+     sendiri, sebelumnya tidak pernah di-routing).
+     TIDAK ada search box: filter sisi-klien akan membuat sisi Aktiva & Pasiva ter-filter berbeda
+     (teks yang cocok belum tentu sama di kedua sisi), sehingga "JUMLAH ASET" bisa berhenti sama
+     dengan "JUMLAH KEWAJIBAN DAN EKUITAS" padahal datanya memang seimbang — halaman lama juga
+     tidak punya search. Export: Excel (dump HTML tabel apa adanya, sama seperti sebelumnya, lewat
+     doExportTableToExcel() bawaan masterreport2) + Print. Tanpa CSV — struktur dua-panel
+     berkelompok tidak punya representasi CSV yang jujur tanpa kerja tambahan yang tidak diminta.
+     Sumber: sp_ReportNeracaAktiva (res1) + sp_ReportNeracaPasivaWeb (res2) :divisi,:bulan,:tahun.
+     Data hanya dimuat setelah klik "Tampilkan". --}}
 
-@include('report.modalAccountingJurnal')
+<style>
+  /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
+  .tb-report .table-wrap { min-height: 10vh; }
 
-<!-- warna header -->
-  <style>
-    table, th, td {
-      border: 1px solid black !important;
-      border-collapse: collapse !important;
-    }
-
-    /* Override semua TH header dari kedua function */
-    tr.text-center.bg-dark.text-light th {
-      background-color: #646668 !important; /* warna abu muda */
-      color: white !important;
-      text-align: center !important;
-      font-weight: bold !important;
-    }
-
-    /* Untuk memastikan nested header juga ikut ke-style */
-    .tabel_header_kolom th,
-    .tabel_header_kolom tr.text-center.bg-dark.text-light th {
-      background-color: #646668 !important;
-      color: white !important;
-      font-weight: bold !important;
-    }
-  </style>
-<!-- warna header -->
+  /* Tidak ada drag-reorder di halaman ini (header dua tingkat/grouped tidak bisa
+     menoleransi kolom pindah band) -- timpa cursor:grab bawaan .th-inner supaya
+     tidak menyiratkan kolom bisa diseret. Gear (hide/desimal/total) tetap aktif. */
+  .tb-report .tb thead th.rt-th .th-inner { cursor: default; }
+</style>
 
 @section('header2')
-  <div class="w-100 bg-light shadow-sm py-3 px-4 border-bottom d-flex align-items-center justify-content-between" style="margin-top:-20px; margin-bottom:150px;">
-    <!-- Kiri: ikon -->
-    <div class="d-flex" style="gap: 10px;">
+<div class="tb-report main">
+  <div class="content">
 
-      <div class="dropdown" hidden>
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="btnPeriode" data-bs-toggle="dropdown" aria-expanded="false" title="Periode">
-          <i class="fas fa-calendar-alt"></i>
-        </button>
-        <div class="dropdown-menu p-3" style="min-width: 350px;">
-          <input type="date" class="form-control mb-2" id="inputDate1" value="{!! date('Y-m-d') !!}">
-          <label for="inputDate2" class="mb-0">s/d</label>
-          <input type="date" class="form-control mt-1" id="inputDate2" value="{!! date('Y-m-d') !!}">
-        </div>
-      </div> 
+    <!-- TOOLBAR -->
+    <div class="toolbar">
 
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="btnPeriode" data-bs-toggle="dropdown" aria-expanded="false" title="Periode">
-          <i class="fas fa-calendar-alt"></i>
-        </button>
-        <div class="dropdown-menu p-3" style="min-width: 350px;">
-          <input type="text" class="form-control mb-2" id="inputBulan" onblur ="changeBulan()">
-          <label for="inputDate2" class="mb-0">Bulan/Tahun</label>
-          <input type="text" class="form-control mt-1" id="inputTahun" onblur ="changeTahun()">
-          {{-- <button class="btn btn-primary btn-sm mt-2 w-100" onclick="showPeriode()">Terapkan</button> --}}
-        </div>
-      </div> 
-
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputDataPilih" data-bs-toggle="dropdown" aria-expanded="false" title="Order By">
-          <i class="fa-solid fa-filter" style="cursor: pointer;"></i>
-        </button>
-        <ul class="dropdown-menu" id="dropdownOrder" aria-labelledby="inputDataPilih" style="min-width: 300px; padding: 10px;">
-          <li onclick="event.stopPropagation();">
-            <!-- Your filter form here -->
-
-            <div class="row text-center">
-              <div class="col-4">
-                <label for="inputlokasi">Divisi</label>
-              </div>
-              
-              <div class="col-8 input-group">
-                <input type="text" class="form-control" id="inputDivisi" placeholder="Divisi" value='-'>
-                  <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" style='height:31px;' onclick="buttonSelect('selectDivisi')">+</button>
-                  </div>
-              </div>
-
-            </div>
-
-
-          </li>
-        </ul>
+      <!-- Period selector (populated dynamically by populatePeriodSelectors) -->
+      <div class="period-select-wrap">
+        <label>Periode</label>
+        <select class="period-select" id="periodBulan" onchange="changePeriodParts()"></select>
+        <select class="period-select" id="periodTahun" onchange="changePeriodParts()"></select>
       </div>
 
-      <div class="dropdown" hidden>
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputDataPilih" data-bs-toggle="dropdown" aria-expanded="false" title="Perkiraan">
-          <i class="fa-solid fa-filter" style="cursor: pointer;"></i>
+      {{-- Divisi pindah ke modal "Filter Laporan" -- lihat docs/new-filter-modal-ui-guide.md.
+           Nilai sebenarnya: globalDivisi (var JS). --}}
+
+      <!-- Actions: filter + customize table + tampilkan + export -->
+      <div class="action-group">
+        {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) --
+             lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="fas fa-filter"></i> Filter
         </button>
-        <ul class="dropdown-menu" id="dropdownOrder" aria-labelledby="inputDataPilih" style="min-width: 300px; padding: 10px;">
-          <li onclick="event.stopPropagation();">
-            <!-- Your filter form here -->
-            <div class="row text-center">
-              <div class="col-4">
-                <label for="inputPerkiraan">Perkiraan</label>
-              </div>
-              <div class="col-8 input-group">
-                <input type="text" class="form-control" id="inputPerkiraan" placeholder="Group" value='-'>
-                  <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" style='height:31px;' onclick="buttonSelectPerkiraan()">+</button>
-                  </div>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <div class="dropdown" hidden>
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputReportMode" data-bs-toggle="dropdown" aria-expanded="false" title="Report Mode" style="cursor: pointer;">
-          <i class="fas fa-book"></i>
-        </button>
-        <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setReportMode('1')">Rp</a></li>
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="2" onclick="setReportMode('2')">Valas</a></li>
-        </ul>
-      </div>
-
-      <div class="dropdown" hidden>
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputTolakan" data-bs-toggle="dropdown" aria-expanded="false" title="Tolakan" style="cursor: pointer;">
-          <i class="fas fa-key"></i>
-        </button>
-        <ul class="dropdown-menu" id="dropdownTolakan" aria-labelledby="inputTolakan">
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="2" onclick="setTolakan('2')">Semua</a></li>
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setTolakan('1')">Non Tolakan</a></li>
-          <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setTolakan('0')">Tolakan</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Kanan: tombol aksi menempel ke ujung kanan layar -->
-    <div class="d-flex ms-auto" style="gap: 8px;">
-      {{-- <button type="button" class="btn btn-outline-primary" onclick="doShowFormFilterData()" title="Filter Data">
-        <i class="fas fa-magnifying-glass"></i>
-      </button> --}}
-      <button type="button" class="btn btn-outline-primary" onclick="doShowFormCustomizeTable()" title="Customize Table">
-        <i class="fas fa-cog"></i>
-      </button>
-      <button type="button" class="btn btn-outline-primary" onclick="makeTable('REPORT')" title="Submit">
-        <i class="fas fa-check"></i>
-      </button>
-    </div>
-  </div>
-
-<!-- start modal aktiva select perkiraan -->
-  <div class="modal fade"  id="formSelectPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Select Perkiraan</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <table id="tabelSelectPerkiraan" class="table table-bordered table-striped"  >
-            <thead class="text-center">
-              <tr>
-                <th scope="col">Perkiraan</th>
-                <th scope="col">Keterangan</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="tabel_dataSelectPerkiraan" class="text-left" >
-              {{-- <tr>
-
-                <td></td>
-                <td></td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button type="button" onclick="buttonPilihLokasi()"><i class="bi bi-pen">Select</i></button>
-                  </td>
-            </tr> --}}
-            </tbody>
-
-
-          </table>
-
-
-      </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+        {{-- Satu-satunya UI untuk toggle Subtotal/Grand Total (gsum_issubtotal/gsum_isgrandtotal) --
+             tidak ada switch lain untuk itu, sama seperti reportaccountingaktiva.blade.php. --}}
+        {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
+        <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
+        <div class="export-wrap" id="exportWrap">
+          <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
+          <div class="export-drop" id="exportDrop">
+            <div class="export-opt" onclick="doExport('Excel')"><i class="bi bi-journals text-success"></i> Ekspor ke <span class="ext">XLSX</span></div>
+            <div class="export-opt" onclick="doExport('Print')"><i class="bi bi-printer-fill text-warning"></i> Cetak Laporan</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
+
+    <!-- TABLE — header dua tingkat (band AKTIVA/PASIVA) dibangun oleh buildGroupedThead();
+         badan tabel (dua panel berkelompok) di-render oleh render() -->
+    <div class="table-outer">
+      <div class="table-wrap">
+        <table class="tb" id="mainTable">
+          <thead>
+            <tr>
+              <th colspan="3" class="th-group">AKTIVA</th>
+              <th colspan="3" class="th-group">PASIVA</th>
+            </tr>
+            <tr>
+              <th style="min-width:220px">Uraian</th>
+              <th class="num" style="min-width:130px">Bulan Ini</th>
+              <th class="num" style="min-width:130px">Bulan Lalu</th>
+              <th style="min-width:220px">Uraian</th>
+              <th class="num" style="min-width:130px">Bulan Ini</th>
+              <th class="num" style="min-width:130px">Bulan Lalu</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="empty-row"><td colspan="6">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="footerLabel">Belum ada data dimuat</span>
+      </div>
+    </div>
+
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
+      Subtotal/Grand Total diatur lewat <b>Customize Table</b>.
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
+
+</div><!-- /tb-report -->
+
+{{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
+<!-- modal filter -->
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i> Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+             $.fn.modal milik BS4 (jQuery baru dimuat SESUDAH bundle BS5 di masterreport2).
+             data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
+        <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-1">
+            <div>
+              <label class="rt-field-label" for="modalDivisi">Divisi</label>
+              {{-- Diisi dari laporanaccountingneraca_loaddivisi (loadDivisiDropdown()). Selalu
+                   punya nilai (tidak ada opsi "Semua") -- pilihan wajib, bukan filter yang bisa
+                   dimatikan, jadi TIDAK dihitung di badge (lihat updateFilterBadge()). --}}
+              <select class="rt-native" id="modalDivisi"></select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                  onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
     </div>
   </div>
-  </div>
-<!-- End modal aktiva select perkiraan-->
+</div>
 @endsection
+
 
 @section('jsreport')
 <script type="text/javascript">
-
-  let globalDate1 = "{!! date('Y-m-d') !!}";
-  let globalDate2 = "{!! date('Y-m-d') !!}";
-  let globalTolakan = "2"; // default: Semua
-  let globalReportMode = "1"; // default: Rp
-  let g_reportTitle = "";
-  let g_date1 = "";
-  let g_date2 = "";
-  let g_cellcount = 0;
-  let g_inputPerkiraan = "";
-  let g_inputKeterangan = "";
-
-  let defaultBulan = new Date().getMonth() + 1;  // +1 because getMonth() returns 0-11
+  let defaultBulan = new Date().getMonth() + 1;  // 1–12
   let defaultTahun = new Date().getFullYear();
 
+  let g_reportTitle = "";
+  let lastAktiva = [];   // res1 (sp_ReportNeracaAktiva) hasil fetch terakhir
+  let lastPasiva = [];   // res2 (sp_ReportNeracaPasivaWeb) hasil fetch terakhir
+
+  let globalDivisi = "-";  // diisi loadDivisiDropdown() saat page load (selalu wajib diisi)
+
+  // Report mode dipakai engine masterreport2 (doSetHeader) — cukup satu int, halaman ini
+  // cuma satu mode (mode "Valas" yang lama sudah dihapus, tidak pernah bisa dicapai user).
+  g_modeReport = 26;
+
+  const reportUrl = "{{ url('laporanaccountingneraca_doReport') }}";
+
+  // Susunan kolom tabel: dua band (AKTIVA/PASIVA), masing-masing 3 kolom (Uraian/Bulan Ini/
+  // Bulan Lalu). Urutan mengikuti header dua tingkat di markup dan TETAP -- tidak ada drag di
+  // halaman ini. `band` menandai sisi kolom (dipakai buildGroupedThead() DAN render() untuk
+  // memilah kolom yang terlihat per sisi -- lihat bandCols()). Kolom Uraian tidak ditotal
+  // (varchar); jumlah1/jumlah2 (kedua sisi) ditotal.
+  const COLS = [
+    { key: 'keterangan',        label: 'Aktiva - Uraian',      type: 'str', dec: 0, total: false, band: 'aktiva', short: 'Uraian' },
+    { key: 'jumlah1',           label: 'Aktiva - Bulan Ini',   type: 'num', dec: 2, total: true,  band: 'aktiva', short: 'Bulan Ini' },
+    { key: 'jumlah2',           label: 'Aktiva - Bulan Lalu',  type: 'num', dec: 2, total: true,  band: 'aktiva', short: 'Bulan Lalu' },
+    { key: 'keteranganPasiva',  label: 'Pasiva - Uraian',      type: 'str', dec: 0, total: false, band: 'pasiva', short: 'Uraian' },
+    { key: 'jumlah1Pasiva',     label: 'Pasiva - Bulan Ini',   type: 'num', dec: 2, total: true,  band: 'pasiva', short: 'Bulan Ini' },
+    { key: 'jumlah2Pasiva',     label: 'Pasiva - Bulan Lalu',  type: 'num', dec: 2, total: true,  band: 'pasiva', short: 'Bulan Lalu' },
+  ];
+
+  function bandLabel(band) {
+    return band === 'aktiva' ? 'AKTIVA' : 'PASIVA';
+  }
+
   $(document).ready(function () {
-    $("#btnCustomizeTable").on("click", function () {
-      if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-      else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-    });
-    
-    $("#btnSubmitReport").on("click", function () {
-      makeTable("REPORT");
+    doSetHeader(g_modeReport);   // muat gcart_header + gsum flags (default / hasil Customize Table tersimpan)
+    populatePeriodSelectors();
+    loadDivisiDropdown();   // isi dropdown Divisi (default: divisi pertama)
+
+    // Header tabel interaktif TANPA drag (lihat komentar di atas file): gear per kolom untuk
+    // sembunyikan/desimal/total, + bar "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan"
+    // switcher -- halaman ini cuma satu mode.
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: function () { render(); }
     });
 
-    setReportMode(globalReportMode);
-    setTolakan(globalTolakan);
-    showPeriode();
-    
-    document.getElementById('inputBulan').value = defaultBulan;
-    document.getElementById('inputTahun').value = defaultTahun;
-
-    setTimeout(() => {
-      makeTable('REPORT');
-    }, 100);
+    // Sengaja TIDAK memuat data saat halaman dibuka — laporan hanya dimuat setelah
+    // pengguna klik tombol "Tampilkan".
   });
 
-  function buttonPilihPerkiraan(selectedPerkiraan) {
-    $("#inputPerkiraan").val(selectedPerkiraan);
-    $("#formSelectPerkiraan").modal("hide");
-  }
-
-  // periode
-  function showPeriode() {
-    globalDate1 = $('#inputDate1').val();
-    globalDate2 = $('#inputDate2').val();
-    // alertify.success(`Periode: ${globalDate1} s/d ${globalDate2}`);
-  }
-
-  function changeBulan(){
-  defaultBulan = document.getElementById('inputBulan').value
-  }
-
-  function changeTahun(){
-    defaultTahun = document.getElementById('inputTahun').value
-  }
-
-  // tolakan
-  function setTolakan(val) {
-    globalTolakan = val;
-    let text = (val == '0') ? 'Semua' : (val == '1') ? 'Tolakan' : 'Non Tolakan';
-    // alertify.success(`Tolakan: ${text}`);
-
-    // hapus semua centang
-    $('#dropdownTolakan .dropdown-item').each(function() {
-      let itemText = $(this).text().replace(' ?', '').trim(); 
-      $(this).text(itemText);
-    });
-
-    // tambah centang di item yg di pilih
-    $(`#dropdownTolakan .dropdown-item[data-value='${val}']`).each(function() {
-      $(this).html(`${$(this).text()} <span class="checkmark-red">?</span>`);
-    });
-  }
-
-  // mode report
-  function setReportMode(val) {
-    globalReportMode = val;
-    jenisreport = Number(val);   // 1 = Rp, 2 = Valas
-    DetOrRekap = Number(val);    
-
-    $('#dropdownReportMode .dropdown-item').each(function() {
-      let itemText = $(this).text().replace(' ?', '').trim();
-      $(this).text(itemText);
-    });
-
-    $(`#dropdownReportMode .dropdown-item[data-value='${val}']`).each(function() {
-      $(this).html(`${$(this).text()} <span class="checkmark-red">?</span>`);
-    });
-
-    // update g_modeReport sesuai pilihan order & detail/rekap
-    // setModeReport() sudah mengatur g_modeReport berdasarkan $("#inputOrder").val() dan jenisreport/DetOrRekap
-    setModeReport();
-  }
-
-  var modereport_detail = 1, modereport_rekap = 2;
-  g_modeReport = modereport_detail;
-
+  // Header sederhana untuk menjaga engine masterreport2 tetap terinisialisasi
+  // (doSetHeader memanggil ini bila belum ada header tersimpan). Tabel styled
+  // di-render sendiri oleh render() dari COLS.
   function setDefaultHeader() {
-    if (g_modeReport == modereport_detail) {
-      gcart_header = [
-        ['keterangan', 'Ket', 1, 'varchar', 0, 0],
-        ['jumlah1', 'No Bukti', 1, 'float', 1, 2],
-        ['jumlah2', 'Uraian', 1, 'float', 1, 2],
-        ['keteranganPasiva', 'Perkiraan', 1, 'varchar', 0, 0],
-        ['jumlah1Pasiva', 'Uraian Perkiraan', 1, 'float', 1, 2],
-        ['jumlah2Pasiva', 'Penerimaan', 1, 'float', 1, 2]
-      ];
-      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
-    } else {
-      gcart_header = [
-        ['tanggal', 'Tanggal', 1, 'date', 0, 0],
-        ['nobukti', 'No Bukti', 1, 'varchar', 0, 0],
-        ['keterangan', 'Uraian', 1, 'varchar', 0, 0],
-        ['Perkiraan', 'Perkiraan', 1, 'varchar', 0, 0],
-        ['NamaPerkiraan', 'Uraian Perkiraan', 1, 'varchar', 0, 0],
-        ['DebetRp', 'Penerimaan', 1, 'float', 1, 2],
-        ['DebetD', 'Penerimaan', 1, 'float', 1, 2],
-        ['kreditRp', 'Pengeluaran', 1, 'float', 1, 2],
-        ['kreditD', 'Pengeluaran', 1, 'float', 1, 2],
-      ];
-      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
-    }
+    gcart_header = COLS.map(c => [c.key, c.label, 1, (c.type === 'num' ? 'float' : c.type), (c.total ? 1 : 0), c.dec]);
+    gsum_issubtotal = 1; gsum_isgrandtotal = 1;
   }
 
-  function doMakeTableSaldoAwal (_data, callback) {
+  /* ── PERIODE (Bulan / Tahun) ── */
+  const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  function populatePeriodSelectors() {
+    const selB = document.getElementById('periodBulan');
+    const selT = document.getElementById('periodTahun');
+    selB.innerHTML = NAMA_BULAN.map((nama, i) =>
+      `<option value="${i + 1}" ${(i + 1) == defaultBulan ? 'selected' : ''}>${nama}</option>`).join('');
+    const thisYear = new Date().getFullYear();
+    let years = '';
+    for (let y = thisYear; y >= thisYear - 6; y--) {
+      years += `<option value="${y}" ${y == defaultTahun ? 'selected' : ''}>${y}</option>`;
+    }
+    selT.innerHTML = years;
+  }
+  // Hanya perbarui nilai periode; TIDAK memuat data (tunggu klik "Tampilkan").
+  function changePeriodParts() {
+    defaultBulan = parseInt(document.getElementById('periodBulan').value, 10);
+    defaultTahun = parseInt(document.getElementById('periodTahun').value, 10);
+  }
+
+  /* ── EXPORT (Excel = dump HTML tabel apa adanya, sama seperti sebelumnya; Print = window.print).
+     Tanpa CSV -- lihat catatan di atas file. doExportTableToExcel() disediakan oleh
+     masterreport2.blade.php (dipakai $akses['xlsfilename'] sebagai nama file). ── */
+  function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }
+  document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('exportWrap');
+    if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
+  });
+  function doExport(fmt) {
+    document.getElementById('exportDrop').classList.remove('open');
+    if (fmt === 'Print') { window.print(); return; }
+    doExportTableToExcel('mainTable');
+    showToast('📄', 'Data diekspor sebagai Excel');
+  }
+
+  /* ── LOAD DATA: sp_ReportNeracaAktiva (res1) + sp_ReportNeracaPasivaWeb (res2), digabung sisi
+     klien jadi tabel dua-panel oleh render(). ── */
+  function makeTable(_mode) {
+    g_reportTitle = 'REPORT ACCOUNTING NERACA';
+    let _divisi = globalDivisi || '-';
+
+    // muat gcart_header + gsum flags (default / hasil Customize Table tersimpan)
+    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
+
+    document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
+
+    const data = { inputBulan: defaultBulan, inputTahun: defaultTahun, divisi: _divisi };
+
     $.ajax({
-        url: "{{ url('/laporanaccountingneraca_saldoawal') }}",
-        type: "get",
-        data: _data,
-        success: function(res) {
-            window.resSaldoAwal = res.res2?.[0] || {};
-            console.log("Saldo Awal Ready", window.resSaldoAwal);
-
-            if (typeof callback === "function") callback();
-        }
+      url: reportUrl, type: 'get', data: data,
+      success: function (res) {
+        lastAktiva = (res && res.res1) ? res.res1 : [];
+        lastPasiva = (res && res.res2) ? res.res2 : [];
+        render();
+      },
+      error: function () { lastAktiva = []; lastPasiva = []; render(); }
     });
   }
 
-
-  function getRowFooter1(_col) {
-    let _sum = gcart_res.reduce((sum, item) => sum + currencyNormalizer(item[_col]), 0);
-    let _decimal = (gcart_header.find(row => row[0] === _col) || [])[5];
-
-    return '  <td class="cellcompact-right" style="border: 1px solid black; white-space:nowrap; font-weight: bold;">' + format_number(_sum, _decimal) + '</td>';
+  /* ── helpers ── */
+  function str(v) { return (v == null ? '' : String(v)).trim(); }
+  function pickCI(r, key) {
+    if (r[key] !== undefined) return r[key];
+    const lk = String(key).toLowerCase();
+    for (const k in r) { if (k.toLowerCase() === lk) return r[k]; }
+    return undefined;
   }
-  
-  function getRowFooter2(_col, _colspanRow2) {
-    let _sum = gcart_res.filter(item => currencyNormalizer(item[_col]) !== 0).length;
-    let _str = '  <td colspan="' + _colspanRow2 + '" class="cellcompact-right" style="border: 1px solid black; white-space:nowrap; font-weight: bold;">' + _sum + '</td>'
-
-    return { _sum, _str };
+  function groupBy(rows, keyFn) {
+    const out = {};
+    (rows || []).forEach(r => { const k = keyFn(r); (out[k] = out[k] || []).push(r); });
+    return out;
+  }
+  // Judul grup dari rentang kode grupAP2/grupAP2Pasiva (A1/A2/A3 = Aset, P1/P2 = Kewajiban,
+  // P3+ = Ekuitas) -- logika sama persis dengan engine lama (masterreportNeraca).
+  function getGroupTitle(kode) {
+    if (!kode) return '';
+    if (kode >= 'A1' && kode < 'A2') return 'ASSET LANCAR';
+    if (kode >= 'A2' && kode < 'A3') return 'ASSET TIDAK LANCAR';
+    if (kode >= 'A3' && kode < 'P1') return 'ASSET LAIN-LAIN';
+    if (kode >= 'P1' && kode < 'P2') return 'KEWAJIBAN JK PENDEK';
+    if (kode >= 'P2' && kode < 'P3') return 'KEWAJIBAN JK PANJANG';
+    if (kode >= 'P3') return 'EKUITAS';
+    return '';
+  }
+  // HTML-escape teks bebas (nama divisi bisa diisi user).
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function setRowFooter(res2 = {}, res1 = [], res3 = []) {
-    let isRupiah = String(globalReportMode) === "1";
+  /* ── HEADER DUA TINGKAT (band AKTIVA/PASIVA), TANPA drag ──
+     ReportTable.headHtml() cuma bisa satu baris flat, jadi header dibangun manual di sini --
+     tapi tiap kolom tetap dapat tombol roda gigi (data-rtgear) yang didengarkan oleh listener
+     yang sama dipasang ReportTable.init() (event delegation di elemen <thead>, lihat
+     docs/new-slider-table-guide.md). Kolom TIDAK bisa diseret (tidak ada .th-inner[draggable]/
+     .th-grip di markup) supaya band AKTIVA/PASIVA tidak pernah pecah. Index (idx) yang dipakai
+     `data-rtgear`/`data-gidx` adalah posisi di gcart_header, yang urutannya SELALU sama dengan
+     COLS karena tidak ada drag yang bisa mengubahnya. ── */
+  function leafTh(idx, label, col) {
+    const isNum = (col[3] === 'float' || col[3] === 'int');
+    return '<th class="rt-th' + (isNum ? ' num' : '') + '" data-gidx="' + idx + '">' +
+      '<div class="th-inner">' +
+      '<span class="th-label">' + label + '</span>' +
+      '<button type="button" class="th-gear" data-rtgear="' + idx + '" title="Setting kolom"><i class="bi bi-gear"></i></button>' +
+      '</div></th>';
+  }
 
-    if (isRupiah) {
-        return setRowFooterRp(res2, res1, res3);   // MODE RP - pass res3 (SP2 data)
-    } else {
-        return setRowFooterValas(res2, res1); // MODE VALAS 
+  function buildGroupedThead() {
+    let row1 = '', row2 = '';
+    let i = 0;
+    while (i < COLS.length) {
+      // kumpulkan run kolom berurutan dalam band yang sama (band SELALU kontigu karena tidak ada drag)
+      const band = COLS[i].band;
+      let j = i, count = 0;
+      while (j < COLS.length && COLS[j].band === band) {
+        const bcol = gcart_header[j];
+        if (Number(bcol[2]) === 1) { count++; row2 += leafTh(j, COLS[j].short || COLS[j].label, bcol); }
+        j++;
+      }
+      if (count > 0) { row1 += '<th colspan="' + count + '" class="th-group">' + bandLabel(band) + '</th>'; }
+      i = j;
     }
+    return '<tr>' + row1 + '</tr><tr>' + row2 + '</tr>';
   }
 
-  function setRowFooterRp(res2 = {}, res1 = [], res3 = []) {
-
-    if (!res2 || Object.keys(res2).length === 0) {
-        res2 = window.resSaldoAwal || {};
-    }
-
-    let r2 = Array.isArray(res2) ? (res2[0] || {}) : res2;
-
-    // ========== AKTIVA (SP1) - LEFT SIDE ==========
-    let totalAktivaBulanIni = 0;
-    let totalAktivaBulanLalu = 0;
-
-    res1.forEach(r => {
-        totalAktivaBulanIni += Number(r.jumlah1 ?? 0);
-        totalAktivaBulanLalu += Number(r.jumlah2 ?? 0);
+  // Kolom yang terlihat (gcart_header[i][2]===1) untuk satu sisi (band), berurut sesuai COLS.
+  function bandCols(band) {
+    const out = [];
+    COLS.forEach((c, i) => {
+      if (c.band === band && Number(gcart_header[i][2]) === 1) { out.push({ def: c, col: gcart_header[i] }); }
     });
+    return out;
+  }
 
-    // ========== PASIVA (SP2) - RIGHT SIDE ==========
-    // NOTE: SP2 uses different column names!
-    let totalPasivaBulanIni = 0;
-    let totalPasivaBulanLalu = 0;
+  // Sel data satu sisi untuk satu baris item (item null = sisi lain lebih panjang, isi kosong).
+  function sideCells(item, visCols) {
+    if (!visCols.length) { return ''; }
+    if (!item) { return '<td colspan="' + visCols.length + '">&nbsp;</td>'; }
+    return visCols.map(function (o) {
+      const v = pickCI(item, o.def.key);
+      if (o.def.type === 'num') {
+        const n = currencyNormalizer(v);
+        return '<td class="num">' + (n === 0 ? '' : format_number(n, o.def.dec)) + '</td>';
+      }
+      return '<td>' + nullToEmpty(v) + '</td>';
+    }).join('');
+  }
 
-    res3.forEach(r => {
-        totalPasivaBulanIni += Number(r.jumlah1Pasiva ?? 0);
-        totalPasivaBulanLalu += Number(r.jumlah2Pasiva ?? 0);
-    });
+  // Sel judul grup satu sisi (colspan = jumlah kolom terlihat di sisi itu).
+  function sideGroupHeader(title, visCols) {
+    if (!visCols.length) { return ''; }
+    return '<td colspan="' + visCols.length + '">' + (title || '&nbsp;') + '</td>';
+  }
 
-    // Format angka
-    let f = (v) => Number(v).toLocaleString("id-ID", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+  // Sel subtotal/grand total satu sisi: kolom Uraian → label, kolom numerik bertotal → jumlah,
+  // kolom lain → kosong.
+  function sideTotalCells(visCols, sums, label) {
+    if (!visCols.length) { return ''; }
+    return visCols.map(function (o) {
+      if (o.def.type === 'str') { return '<td>' + (label || '') + '</td>'; }
+      if (o.def.total) { return '<td class="num">' + format_number(sums[o.def.key] || 0, o.def.dec) + '</td>'; }
+      return '<td></td>';
+    }).join('');
+  }
 
-    let spacing = `
-        <tr>
-            <td colspan="6" style="height:8px;"></td>
-        </tr>
-    `;
+  /* ── RENDER: Aktiva (res1) & Pasiva (res2) adalah DUA SUMBER TERPISAH -- masing-masing
+     dikelompokkan per rentang kode (grupAP2/grupAP2Pasiva → getGroupTitle()), lalu dirender
+     BERDAMPINGAN per baris (grup ke-N Aktiva sejajar dengan grup ke-N Pasiva, bukan dicocokkan
+     berdasarkan isi). Subtotal per grup + baris "JUMLAH ASET"/"JUMLAH KEWAJIBAN DAN EKUITAS"
+     mengikuti toggle Customize Table (gsum_issubtotal/gsum_isgrandtotal). Kolom terlihat & urutan
+     dari gcart_header (item[2]===1) supaya show/hide lewat gear benar-benar berpengaruh per sisi
+     (lihat bandCols()); urutan itu sendiri tetap sama dengan COLS karena tidak ada drag. ── */
+  function render() {
+    const thead = document.querySelector('#mainTable thead');
+    const tbody = document.getElementById('tableBody');
 
-    let footerRow = `
-        <tr style="font-weight: bold;">
-            <td style="border:1px solid black; padding:4px;">JUMLAH ASSET</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(totalAktivaBulanIni)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(totalAktivaBulanLalu)}</td>
-            
-            <td style="border:1px solid black; padding:4px;">JUMLAH KEWAJIBAN DAN EKUITAS</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(totalPasivaBulanIni)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(totalPasivaBulanLalu)}</td>
-        </tr>
-    `;
+    thead.innerHTML = buildGroupedThead();
+    ReportTable.refresh();   // segarkan #rtBar (biasanya efek samping headHtml(), tapi di sini header dibangun manual)
 
-    return spacing + footerRow;
-}
+    const visA = bandCols('aktiva');
+    const visP = bandCols('pasiva');
+    const showSub = (gsum_issubtotal === 1);
+    const showGrand = (gsum_isgrandtotal === 1);
 
-  function setRowFooterValas(res2 = {}, res1 = []) {
-
-    if (!res2 || Object.keys(res2).length === 0) {
-        res2 = window.resSaldoAwal || {};
+    if (!lastAktiva.length && !lastPasiva.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + Math.max(visA.length + visP.length, 1) + '">Tidak ada data ditemukan.</td></tr>';
+      document.getElementById('footerLabel').textContent = 'Tidak ada data';
+      return;
     }
 
-    let r2 = Array.isArray(res2) ? (res2[0] || {}) : res2;
+    const groupsA = groupBy(lastAktiva, r => str(pickCI(r, 'grupAP2')) || str(pickCI(r, 'grupAP2Aktiva')));
+    const groupsP = groupBy(lastPasiva, r => str(pickCI(r, 'grupAP2Pasiva')));
+    const keysA = Object.keys(groupsA).sort();
+    const keysP = Object.keys(groupsP).sort();
+    const maxGroups = Math.max(keysA.length, keysP.length);
 
-    let SaldoAwal   = Number(r2.SaldoAwal   || 0);
-    let SaldoAwalD  = Number(r2.SaldoAwalD  || 0);
+    const grandA = {}, grandP = {};
+    visA.forEach(o => { if (o.def.total) { grandA[o.def.key] = 0; } });
+    visP.forEach(o => { if (o.def.total) { grandP[o.def.key] = 0; } });
 
-    let DebetRp  = 0;
-    let DebetD  = 0;
-    let kreditRp = 0;
-    let kreditD = 0;
+    let html = '';
+    for (let g = 0; g < maxGroups; g++) {
+      const kA = keysA[g] || null, kP = keysP[g] || null;
+      const itemsA = kA ? groupsA[kA] : [];
+      const itemsP = kP ? groupsP[kP] : [];
+      const titleA = kA ? getGroupTitle(kA) : '';
+      const titleP = kP ? getGroupTitle(kP) : '';
 
-    res1.forEach(row => {
-        DebetRp  += Number(row.DebetRp  || 0);
-        DebetD   += Number(row.DebetD   || 0);
-        kreditRp += Number(row.kreditRp || 0);
-        kreditD  += Number(row.kreditD  || 0);
-    });
+      html += '<tr class="group-row">' + sideGroupHeader(titleA, visA) + sideGroupHeader(titleP, visP) + '</tr>';
 
-    // hitungan saldo akhir
-    let saldoAkhir  = (DebetRp  + SaldoAwal) - kreditRp;
-    let saldoAkhirD = (DebetD + SaldoAwalD ) - kreditD;
+      const subA = {}, subP = {};
+      visA.forEach(o => { if (o.def.total) { subA[o.def.key] = 0; } });
+      visP.forEach(o => { if (o.def.total) { subP[o.def.key] = 0; } });
 
-    let f = (v) => Number(v).toLocaleString("id-ID", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
+      const maxItems = Math.max(itemsA.length, itemsP.length);
+      for (let i = 0; i < maxItems; i++) {
+        const itemA = itemsA[i] || null;
+        const itemP = itemsP[i] || null;
 
-    let spacing = `<tr><td colspan="15" style="height:8px;"></td></tr>`;
+        if (itemA) { visA.forEach(o => { if (o.def.total) { const v = currencyNormalizer(pickCI(itemA, o.def.key)); subA[o.def.key] += v; grandA[o.def.key] += v; } }); }
+        if (itemP) { visP.forEach(o => { if (o.def.total) { const v = currencyNormalizer(pickCI(itemP, o.def.key)); subP[o.def.key] += v; grandP[o.def.key] += v; } }); }
 
-    let block = `
-        <tr>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-
-            <td colspan="2" style="border:1px solid black; padding:4px;">Sub. Jumlah</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(DebetRp)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(DebetD)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(kreditRp)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(kreditD)}</td>
-        </tr>
-
-        <tr>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-
-            <td colspan="2" style="border:1px solid black; padding:4px;">Saldo Awal</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(SaldoAwal)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(SaldoAwalD)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-            <td style="border:1px solid black;"></td>
-        </tr>
-
-        <tr>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; padding:4px;"></td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-
-            <td colspan="2" style="border:1px solid black; padding:4px;">Saldo Akhir</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-            <td style="border:1px solid black; text-align:right; padding:4px;"></td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(saldoAkhir)}</td>
-            <td style="border:1px solid black; text-align:right; padding:4px;">${f(saldoAkhirD)}</td>
-        </tr>
-    `;
-
-    let signature = `
-        <tr>
-            <td colspan="3" style="border:1px solid black; height:90px; text-align:center;">Pimpinan</td>
-            <td colspan="2" style="border:1px solid black; text-align:center;">Kontrol</td>
-            <td colspan="2" style="border:1px solid black; text-align:center;">Kasir</td>
-        </tr>
-    `;
-
-    return spacing + block + signature;
-  }
-
-  function setRowHeader() {
-    let rowHeader = "";
-    rowHeader += '<tr>';
-    rowHeader += '<th colspan="9" style="text-align: left; font-weight: bold">' +
-      '{!! $akses["program"] !!}<br/>' + g_reportTitle +
-    '</th>';
-    rowHeader += '</tr>';
-    
-    if (g_date1 && g_date1 !== 'undefined' && g_date1 !== '') {
-      rowHeader += '<tr>';
-      rowHeader += '  <th colspan="9" style="text-align: left; font-weight: bold;">PERIODE: ' +
-        format_date(g_date1, true) +
-        ((g_date2 == null || g_date2 === '' || g_date2 === 'undefined')
-            ? ''
-            : ' S.D ' + format_date(g_date2, true)) +
-      '</th>';
-      rowHeader += '</tr>';}
-
-    rowHeader += '<tr>';
-    rowHeader +=
-      '  <th colspan="9" style="text-align: left; font-weight: bold;">Dicetak Oleh : {!! $akses["user"] !!} // Tanggal : '
-      + getDateIndo() +
-      ' // Jam : ' + getTimeNow() +
-      '</th>';
-    rowHeader += '</tr>';
-    rowHeader += '<tr><th colspan="9"></th></tr>';
-
-    if (g_modeReport == modereport_detail) {
-      rowHeader = setRowHeaderQtyOrRp(rowHeader);
-    } else {
-      rowHeader = setRowHeaderQtyRp(rowHeader);
-    }
-
-    return rowHeader;
-  }
-
-  function setRowHeaderQtyOrRp(_rowHeader) {
-
-    _rowHeader += '<tr style="height: 45px; padding: 20px; " class="text-center bg-dark text-light">';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Uraian</th>';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Bulan Ini</th>';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Bulan Lalu</th>';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Uraian</th>';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Bulan Ini</th>';
-    _rowHeader += '  <th scope="col" style="border: 1px solid black; white-space:nowrap;">Bulan Lalu</th>';
-    _rowHeader += '</tr>';
-
-    return _rowHeader;
-  }
-
-  function setRowHeaderQtyRp(_rowHeader) {
-    let _thopen = "", _thclose = "</th>";
-
-    // FIRST ROW
-    _rowHeader += '<tr style="height: 45px; padding: 20px;" class="text-center bg-dark text-light">';
-    _thopen = '<th rowspan="2" scope="col" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">';
-    _rowHeader += _thopen + 'Tanggal' + _thclose;
-    _rowHeader += _thopen + 'No Bukti' + _thclose;
-    _rowHeader += _thopen + 'Uraian' + _thclose;
-    _rowHeader += _thopen + 'Perkiraan' + _thclose;
-    _rowHeader += _thopen + 'Uraian Perkiraan' + _thclose;
-
-    _rowHeader += '<th colspan="2" rowspan="1" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">Penerimaan</th>';
-    _rowHeader += '<th colspan="2" rowspan="1" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">Pengeluaran</th>';
-    _rowHeader += '</tr>';
-
-    // SECOND ROW
-    _rowHeader += '<tr class="text-center bg-dark text-light">';
-
-    let _qtyrp = '<th scope="col" style="border: 1px solid black; white-space:nowrap; width:80px;">Rp.</th>';
-    _qtyrp += '<th scope="col" style="border: 1px solid black; white-space:nowrap; width:80px;">$</th>';
-    _rowHeader += _qtyrp.repeat(1 + 1);
-
-    _rowHeader += '</tr>';
-
-    return _rowHeader;
-  }
-  
-  function makeTable (_mode) {
-    // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
-    // mode report menentukan kolom yang dipakai
-    let groupby = (DetOrRekap === 1) ? "nobukti" : "perkiraan";    
-    let _date1  = $("#inputDate1").val();
-    let _date2  = $("#inputDate2").val();
-    let _inputPerkiraan = $("#inputPerkiraan").val();
-    let inputBulan    = defaultBulan;
-    let inputTahun    = defaultTahun;
-    let divisi    = $("#inputDivisi").val();
-    
-    if (!_inputPerkiraan){
-      _inputPerkiraan = '-'
-    }
-
-    g_reportTitle = "REPORT ACCOUNTING NERACA";
-    g_date1 = _date1;
-    g_date2 = _date2;
-    g_inputPerkiraan = _inputPerkiraan;
-
-    let data = {
-      date1    : _date1,
-      date2    : _date2,
-      inputBulan  : inputBulan,
-      inputTahun  : inputTahun,
-      divisi   : divisi
-    };
-    console.log(data);
-
-    let dataSP2 = {
-      date1    : _date1,
-      date2    : _date2,
-      inputBulan  : inputBulan,
-      inputTahun  : inputTahun,
-      divisi   : divisi
-    };
-
-    doMakeTableSaldoAwal(dataSP2, function() {
-      doMakeTable(_mode, groupby, data, _date1, _date2, _inputPerkiraan);
-    });
-  }
-
-  function getKolomFilter() {
-    // tentukan kolom (sesuai database & gcart_header) yang mau ditampilkan
-    // mode report menentukan kolom yang dipakai
-    // berapa pun bisa asal dalam bentuk array
-
-    let data = [];
-    if (g_modeReport == modereport_detail) {
-      data = ['nobukti', 'tanggal'];
-    } else {
-      data = ['nobukti', 'tanggal'];
-    }
-    
-    return data;
-  }
-
-  function reportMode(_mode) {
-    if (jenisreport != _mode) {
-      let prev_mode = jenisreport;
-      jenisreport != _mode;
-
-      $('#tombolmode' + prev_mode). removeClass ('btn-primary');
-      $('#tombolmode' + prev_mode). addClass ('btn-outline-primary');
-
-      $('#tombolmode' + prev_mode). removeClass ('btn-outline-primary');
-      $('#tombolmode' + prev_mode). addClass ('btn-primary');
-
-      setModeReport();
-    }
-  }
-
-  function setModeReport() {
-      if (jenisreport === 1) {
-        g_modeReport = modereport_detail;
-      } else {
-        g_modeReport = modereport_rekap;
+        html += '<tr class="data-row">' + sideCells(itemA, visA) + sideCells(itemP, visP) + '</tr>';
       }
 
-    doSetHeader(g_modeReport);
-    doShowCustomize();  
+      if (showSub) {
+        html += '<tr class="subtotal-row">' +
+          sideTotalCells(visA, subA, kA ? ('JML ' + titleA) : '') +
+          sideTotalCells(visP, subP, kP ? ('JML ' + titleP) : '') +
+          '</tr>';
+      }
+    }
+
+    if (showGrand) {
+      html += '<tr class="grand-total">' +
+        sideTotalCells(visA, grandA, 'JUMLAH ASET') +
+        sideTotalCells(visP, grandP, 'JUMLAH KEWAJIBAN DAN EKUITAS') +
+        '</tr>';
+    }
+
+    tbody.innerHTML = html;
+    document.getElementById('footerLabel').textContent =
+      'Menampilkan ' + lastAktiva.length + ' baris Aktiva, ' + lastPasiva.length + ' baris Pasiva';
   }
 
-// js modal perkiraan
-  function buttonSelectPerkiraan () {
-    loadSelectPerkiraan()
-    $("#formSelectPerkiraan").modal('toggle')
+  /* ── TOAST ── */
+  function showToast(icon, msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('ti').textContent = icon;
+    document.getElementById('tm').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  function buttonPilihPerkiraan(selectedPerkiraan) {
-    $("#inputPerkiraan").val(selectedPerkiraan);
-    $("#formSelectPerkiraan").modal("hide");
+  function getKolomFilter() { return ['keterangan']; }
 
-  }
-
-  function loadSelectPerkiraan() {
-    console.log('asd');
-    let _token = $("#_token").val();
-
-    $('#tabelSelectPerkiraan').DataTable().destroy();
-
+  /* ── SELECT DIVISI (modal Filter Laporan) ──
+        Diisi sekali dari laporanaccountingneraca_loaddivisi saat page load. Memilih item hanya
+        menyetel globalDivisi; laporan baru dimuat saat klik Tampilkan (konsisten dgn filter
+        Periode). ── */
+  function loadDivisiDropdown() {
+    let list = [];
     $.ajax({
-      url: "{!! url('reportaccountingkasharian_loadperkiraan') !!}",
-      type: "get",
-      async: false,
-      data: {
-        _token: _token,
-      },
-      success: function (res) {
-        console.log(res);
-        dataRefresh = res;
-      },
+      url: "{!! url('laporanaccountingneraca_loaddivisi') !!}",
+      type: "get", async: false,
+      success: function (res) { list = res || []; }
     });
 
-    let rowTable = "";
-    dataRefresh.forEach((item, i) => {
-      let temp = "";
-
-      rowTable += `<tr>
-        <td>${item.Perkiraan}</td>
-        <td>${item.Keterangan}</td>
-        <td class="text-center">
-          <button class="btn btn-primary btn-sm" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')">+</button>
-        </td>
-      </tr>`;
+    let html = '';
+    list.forEach((item) => {
+      const nama = (item.NamaDevisi != null ? String(item.NamaDevisi) : '');
+      html += '<option value="' + item.Devisi + '">' + item.Devisi + ' - ' + esc(nama) + '</option>';
     });
+    $("#modalDivisi").html(html);
 
-    document.getElementById("tabel_dataSelectPerkiraan").innerHTML = rowTable;
-    $("#tabelSelectPerkiraan").DataTable({
-      "lengthChange": false,
-      "paging": true,
-    });
+    // default: divisi pertama (tanpa memuat ulang — laporan dimuat saat klik "Tampilkan")
+    if (list.length) { setDivisi(list[0].Devisi); }
   }
-// end js
 
+  function setDivisi(kode) {
+    globalDivisi = kode;
+    $("#modalDivisi").val(kode);
+  }
+
+  /* ── FILTER MODAL ──
+        Satu-satunya field di sini adalah Divisi. Ia TIDAK ikut dihitung di badge karena
+        tidak punya opsi "Semua" — wajib selalu diisi, jadi bukan "filter yang dinyalakan"
+        (aturan sama seperti Divisi di reportaccountinglabarugi). ── */
+  function updateFilterBadge() {
+    $('#filterBadge').text('0 aktif');
+  }
+
+  function resetAllFilters() {
+    if ($('#modalDivisi option').length) {
+      $('#modalDivisi').prop('selectedIndex', 0);
+    }
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () {
+    $('#modalDivisi').val(globalDivisi);
+    updateFilterBadge();
+  });
+
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
+  function applyModalFilter() {
+    setDivisi($('#modalDivisi').val());
+    $('#modalFilter').modal('hide');
+  }
 </script>
-
 @endsection

@@ -885,8 +885,7 @@ Route::get('/laporanaccountinglabarugi_loaddivisi',[LaporanAccountingLabaRugiCon
 // LABA RUGI TAHUNAN
 Route::get('/laporanaccountinglabarugitahunan', [LaporanAccountingLabaRugiTahunanController::class, 'index']);
 Route::get('/laporanaccountinglabarugitahunan_doReport', [LaporanAccountingLabaRugiTahunanController::class, 'doReport']);
-Route::get('/laporanaccountinglabarugitahunan_doFilter', [LaporanAccountingLabaRugiTahunanController::class, 'doFilter']);
-Route::get('/laporanaccountinglabarugitahunan_doReportFilter',[LaporanAccountingLabaRugiTahunanController::class, 'doReportFilter']);
+Route::get('/laporanaccountinglabarugitahunan_loaddivisi',[LaporanAccountingLabaRugiTahunanController::class, 'loadDivisi']);
 
 // NERACA
 Route::get('/laporanaccountingneraca', [LaporanAccountingNeracaController::class, 'index']);
@@ -894,6 +893,7 @@ Route::get('/laporanaccountingneraca_doReport', [LaporanAccountingNeracaControll
 Route::get('/laporanaccountingneraca_doFilter', [LaporanAccountingNeracaController::class, 'doFilter']);
 Route::get('/laporanaccountingneraca_doReportFilter',[LaporanAccountingNeracaController::class, 'doReportFilter']);
 Route::get('/laporanaccountingneraca_saldoawal',[LaporanAccountingNeracaController::class, 'doReportSaldoAwal']);
+Route::get('/laporanaccountingneraca_loaddivisi',[LaporanAccountingNeracaController::class, 'loadDivisi']);
 
 // NERACA PENUNJANG
 Route::get('/laporanaccountingneracapenunjang', [LaporanAccountingNeracaPenunjangController::class, 'index']);
