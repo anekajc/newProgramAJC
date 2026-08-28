@@ -38,6 +38,16 @@ RUN docker-php-ext-install \
         bcmath \
         zip
 
+RUN docker-php-ext-enable opcache
+
+RUN { \
+    echo 'opcache.memory_consumption=128'; \
+    echo 'opcache.interned_strings_buffer=8'; \
+    echo 'opcache.max_accelerated_files=4000'; \
+    echo 'opcache.revalidate_freq=0'; \
+    echo 'opcache.validate_timestamps=0'; \
+    } > /usr/local/etc/php/conf.d/opcache-recommended.ini
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -46,6 +56,10 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
