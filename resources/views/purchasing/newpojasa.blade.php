@@ -245,7 +245,61 @@
     color: #343a40 !important;
   }
 
+  /* Tombol close (x) di kanan atas semua modal - border kotak abu biar target klik jelas. */
+  .modal-header {
+    align-items: center;
+  }
+
+  .modal-header .close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 0 auto;
+    border: 1px solid #d5d9e0;
+    border-radius: 6px;
+    background: #f8f9fb;
+    color: #6b7280;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 1;
+    opacity: 1;
+    transition: background-color .12s, border-color .12s;
+  }
+
+  .modal-header .close:hover {
+    background: #eceef1;
+    border-color: #adb5bd;
+  }
+
   /* Tabel di dalam modal (Pilih Barang, dst) - header bersih, baris diklik langsung. */
+  #formAddListItem tbody tr.pick-row {
+    cursor: pointer;
+    transition: background-color .12s;
+  }
+
+  #formAddListItem tbody tr.pick-row:hover td {
+    background-color: #eef2ff;
+  }
+
+  #formAddListItem #input_search_barang_all {
+    width: 260px;
+    max-width: 100%;
+    font-size: 13px;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+
+  #formAddListItem #input_search_barang_all:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #e8edff;
+  }
+
   #formAddListItem thead th {
     background: #f8f9fb !important;
     color: #6b7280 !important;
@@ -718,7 +772,7 @@
       <div id="formPembelianAdd" class="container-fluid showhide mt-3">
           <div class="row mb-3">
             <div class="col-12">
-              <h4>Add Item 1212121212</h4>
+              <h4>Add Item</h4>
             </div>
           </div>
 
@@ -1042,6 +1096,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered" style=""  role="document" >
       <div class="modal-content">
         <div class="modal-header">
+          <h5 class="modal-title">Pilih Barang</h5>
           <button type="button" class="close" onclick="closeFormList()" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -1050,7 +1105,7 @@
           <div class="container-fluid p-0 mt-2">
             <div class="row">
               <div class="col-12 text-right">
-                <input id="input_search_barang_all" type="text" class="form-control" style="max-width:260px; display:inline-block;" placeholder="Cari kode/nama barang" onkeypress="searchBarangAll(event)">
+                <input id="input_search_barang_all" type="text" class="form-control" style="display:inline-block;" placeholder="Cari Data, lalu tekan Enter" onkeypress="searchBarangAll(event)">
               </div>
             </div>
             <div class="container-fluid p-0 mt-2" style="overflow-x:auto;">
@@ -1058,7 +1113,6 @@
               <table id="tabel_add_list_item" class="data-table">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Kode Barang</th>
                     <th scope="col">Nama Barang</th>
                   </tr>
@@ -3115,15 +3169,7 @@ for (let f = 0; f < fillerCount; f++) {
           let rowTable = "";
           listBarang.forEach((item, i) => {
             rowTable += `
-              <tr>
-                <td class="text-center">
-                  <button
-                    class="btn btn-primary btn-sm"
-                    type="button"
-                    onclick="buttonAddAddInsertItem(${i})">
-                    <i class="bi bi-plus"></i>
-                  </button>
-                </td>
+              <tr class="pick-row" onclick="buttonAddAddInsertItem(${i})">
                 <td>${item.KodeBrg}</td>
                 <td>${item.namaBrg}</td>
               </tr>
@@ -3136,10 +3182,7 @@ for (let f = 0; f < fillerCount; f++) {
             lengthChange: false,
             paging: false,
             searching: false,
-            order: [[1, 'asc']],
-            columnDefs: [
-              { targets: [0], orderable: false }
-            ]
+            order: [[0, 'asc']]
           });
         }
       });
