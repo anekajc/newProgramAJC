@@ -9,7 +9,7 @@ use App\Http\Controllers\Purchasing\PembelianClosingPRController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaKreditController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaTunaiController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccTunaiController;
-// use App\Http\Controllers\Purchasing\NewPOBeliAccController;
+use App\Http\Controllers\Purchasing\NewPOBeliAccController;
 use App\Http\Controllers\Purchasing\NewPOJasaController;
 use App\Http\Controllers\Purchasing\NewPOController;
 // use App\Http\Controllers\Purchasing\PerintahReturBeliController;
@@ -128,18 +128,25 @@ Route::middleware('auth')->group(function () {
     // Route::post('/sp_beligudangACCtunai',           [NewPOBeliAccTunaiController::class, 'spBeliGudang']);
     // Route::get('/invoicepembelianprint',            [NewPOBeliAccTunaiController::class, 'spCetak']);
 
-    // // ── NEW PO BELI ACC ───────────────────────────────────────────────────
-    // Route::get('/newpobeliacc',                     [NewPOBeliAccController::class, 'index']);
-    // Route::post('/addDBBeli',                       [NewPOBeliAccController::class, 'addDBBeli']);
-    // Route::post('/detailPOBeli',                    [NewPOBeliAccController::class, 'getDetailPO']);
-    // Route::post('/detailPembelianACC',              [NewPOBeliAccController::class, 'getDetailPembelian']);
-    // Route::get('/getNoBuktibeliacc',                [NewPOBeliAccController::class, 'getNoBukti']);
-    // Route::get('/getAksesNewPOAcc',                 [NewPOBeliAccController::class, 'getAkses']);
-    // Route::post('/spotorisasiBeliAcc',              [NewPOBeliAccController::class, 'spOtorisasi1']);
-    // Route::post('/spUnotorisasiBeliAcc',            [NewPOBeliAccController::class, 'spUnOtorisasi1']);
-    // Route::get('/getAllPOBeliAcc',                   [NewPOBeliAccController::class, 'getAllPO']);
-    // Route::get('/getAllPembelianAcc',                [NewPOBeliAccController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudangACC',                [NewPOBeliAccController::class, 'spBeliGudang']);
+    //NewPOBeliAcc (gabungan: Acc Tunai/Kredit + Jasa Acc Tunai/Kredit)
+    Route::get ('/newpobeliacc',            [NewPOBeliAccController::class, 'index'])->middleware('auth');
+    Route::get ('/newpobeliaccloadall',     [NewPOBeliAccController::class, 'loadAll'])->middleware('auth');
+    Route::get ('/getAksesNewPOAcc',        [NewPOBeliAccController::class, 'getAkses'])->middleware('auth');
+    Route::get ('/getNoBukti',              [NewPOBeliAccController::class, 'getNoBukti'])->middleware('auth');
+    Route::post('/addDBBeli',               [NewPOBeliAccController::class, 'addDBBeli'])->middleware('auth');
+    Route::post('/detailPOBeli',            [NewPOBeliAccController::class, 'getDetailPO'])->middleware('auth');
+    Route::post('/detailPembelianACC',      [NewPOBeliAccController::class, 'getDetailPembelian'])->middleware('auth');
+    Route::post('/sp_beligudangACC',        [NewPOBeliAccController::class, 'spBeliGudang'])->middleware('auth');
+    Route::post('/spotorisasiBeliAcc',      [NewPOBeliAccController::class, 'spOtorisasi1'])->middleware('auth');
+    Route::post('/spUnotorisasiBeliAcc',    [NewPOBeliAccController::class, 'spUnOtorisasi1'])->middleware('auth');
+    Route::post('/acconchangeheader',       [NewPOBeliAccController::class, 'onChangeHeader'])->middleware('auth');
+    Route::post('/accspupdateso',           [NewPOBeliAccController::class, 'spUpdateSO'])->middleware('auth');
+    Route::get ('/invoicepembelianprint',   [NewPOBeliAccController::class, 'spCetak'])->middleware('auth');
+
+    // Menu lama - entri di database masih menunjuk ke sini, diarahkan ke halaman gabungan.
+    Route::get('/newpobeliacctunai',       function () { return redirect('/newpobeliacc'); })->middleware('auth');
+    Route::get('/newpobeliaccbiayatunai',  function () { return redirect('/newpobeliacc'); })->middleware('auth');
+    Route::get('/newpobeliaccbiayakredit', function () { return redirect('/newpobeliacc'); })->middleware('auth');
 
     // ── NEW PO JASA NON STOCK ─────────────────────────────────────────────
     Route::get('/newpojasa',            [NewPOJasaController::class, 'index']);
