@@ -29,13 +29,13 @@ class LaporanStockStockKartuDanOpnameController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $TANGGAL        = $req->get('date1');
-    $kodegdg        = $req->get('inputGudang');
-    $TGLBATASOPNAME = $req->get('date2');
+    $TANGGAL        = $req->query('date1');
+    $kodegdg        = $req->query('inputGudang');
+    $TGLBATASOPNAME = $req->query('date2');
 
     $values  = [$TANGGAL, $kodegdg, $TGLBATASOPNAME];
-    
-    $res = DB::connection('MGL')->select('exec SP_REPORTKARTUOPNAME ?,?,?',
+
+    $res = DB::connection('SML')->select('exec SP_REPORTKARTUOPNAME ?,?,?',
       $values);
 
     return $res;

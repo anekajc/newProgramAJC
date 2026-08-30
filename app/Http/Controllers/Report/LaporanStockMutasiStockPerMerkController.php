@@ -30,19 +30,19 @@ class LaporanStockMutasiStockPerMerkController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $date = $req->get('date1');
+    $date = $req->query('date1');
     $dateParts = explode('-', $date);
 
     $Bulan = (int)$dateParts[1];
     $Tahun = $dateParts[0];
     $isi = "";
-    $Kodegdg = $req->get('inputGudang');
-    $KodeMerk = $req->get('inputMerk');
-    $PrEKAP = $req->get('inputTampil');
+    $Kodegdg = $req->query('inputGudang');
+    $KodeMerk = $req->query('inputMerk');
+    $PrEKAP = $req->query('inputTampil');
 
     $values  = [$Bulan, $Tahun, $isi, $Kodegdg, $KodeMerk, $PrEKAP];
-    
-    $res = DB::connection('MGL')->select('exec Sp_reportmERK ?,?,?,?,?,?',
+
+    $res = DB::connection('SML')->select('exec Sp_reportmERK ?,?,?,?,?,?',
       $values);
 
     return $res;

@@ -1,5 +1,9 @@
 @extends('report.masterreportGudang')
-@include('report.modalBrowseMaster')
+{{-- @include('report.modalBrowseMaster') dihapus: (1) sudah tidak dipakai -- halaman ini
+     punya picker sendiri (#modalPickMaster / openBarangPicker()), tidak ada satu pun
+     pemanggilan doBrowseMaster; (2) nama filenya di disk modalbrowsemaster.blade.php
+     (huruf kecil semua), jadi ejaan "modalBrowseMaster" cuma jalan di Windows dan akan
+     gagal "View not found" di server Linux. --}}
 
 @section('header2')
 <style>
@@ -41,7 +45,7 @@
 
       <!-- toolbar -->
       <div class="toolbar">
-        <div>
+        {{-- <div>
           <div class="page-title">
             @if ($mode_menu == 'QTY')
               Kartu Stok (Qty)
@@ -49,14 +53,17 @@
               Kartu Stok (Qty + Rp)
             @endif
           </div>
-        </div>
+        </div> --}}
 
-        <!-- periode -->
+        {{-- Periode: tanggal penuh. Sp_reportkartuStock cuma menerima bulan+tahun
+             (controller memecah string ini dan hanya memakai bagian [0] tahun & [1]
+             bulan), jadi query tetap mengambil satu bulan penuh; pemangkasan sampai
+             level HARI dilakukan di sisi client lewat filterByDateRange(). --}}
         <div class="filter-wrap">
           <label>Periode</label>
-          <input type="month" class="filter-inp" id="inputDate1" value="{!! date('Y-m') !!}">
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
           <span class="filter-sep">s/d</span>
-          <input type="month" class="filter-inp" id="inputDate2" value="{!! date('Y-m') !!}">
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
         </div>
 
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()">
@@ -79,6 +86,12 @@
         </div>
       </div>
 
+      {{-- Bar kolom tersembunyi + Reset kolom (diisi report-table.js / ReportTable).
+           Hanya aktif di mode QTY -- mode QTY+Rp memakai header grouping rowspan/colspan
+           (buildTheadQtyRp) yang tidak bisa diwakili satu <th> per kolom, lihat
+           docs/new-slider-table-guide.md #1. --}}
+      <div id="rtBar"></div>
+
       <!-- tabel -->
       <div class="table-outer">
         <div class="table-wrap">
@@ -94,6 +107,12 @@
           <span id="footerLabel">Belum ada data dimuat</span>
         </div>
       </div>
+
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+        sembunyikan kolom atau atur total.
+      </div>
     </div>
 
     <!-- toast -->
@@ -101,7 +120,7 @@
   </div>
 
   <!-- modal filter: Gudang, Barang, No Satuan -->
-  <div class="modal fade" id="modalFilter">
+  <div class="modal fade rt-filter" id="modalFilter">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
 
@@ -109,58 +128,61 @@
           <h5 class="modal-title">
             <i class="fas fa-filter"></i>
             Filter Laporan
+            <span class="rt-active-badge" id="filterBadge">0 aktif</span>
           </h5>
 
           <button
             type="button"
             class="btn-close"
+            aria-label="Close"
             data-bs-dismiss="modal">
           </button>
         </div>
 
         <div class="modal-body">
 
-          <div class="mb-3">
-            <label for="inputGudang" class="mb-1">Gudang</label>
-            <select id="inputGudang" class="form-control form-select">
-              <option value="-" selected>-- Semua Gudang --</option>
-            </select>
-          </div>
+          <div class="rt-section">
+            <div class="rt-group-label">Filter Data
+              <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+            </div>
 
-          <div class="mb-3">
-            <label for="inputBarang" class="mb-1">Barang</label>
-            <div class="input-group">
-              <input type="text"
-                     id="inputBarang"
-                     class="form-control"
-                     placeholder="Kode Barang"
-                     value="-"
-                     onkeypress="onKeyPressBarang(event)">
-              <button type="button" class="btn btn-primary"
-                      onclick="buttonAddListBarang()">
-                <i class="bi bi-plus"></i>
-              </button>
+            {{-- Combo Barang diisi renderPickFields() -- lihat
+                 docs/new-filter-modal-ui-guide.md #4. Combo hanya tampilan di atas input
+                 hidden di bawah; yang menyimpan nilai asli tetap input hidden-nya. --}}
+            <div class="rt-grid-2" id="pickFields"></div>
+
+            <input type="hidden" id="inputBarang" value="-">
+
+            <div class="rt-grid-2">
+              <div>
+                {{-- Punya opsi netral ("-- Semua Gudang --"), jadi IKUT dihitung di badge
+                     begitu diubah dari netral (new-filter-modal-ui-guide.md #5). --}}
+                <label class="rt-field-label" for="inputGudang">Gudang</label>
+                <select id="inputGudang" class="rt-native" onchange="updateFilterBadge()">
+                  <option value="-" selected>-- Semua Gudang --</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="inputIsi" class="mb-1">No Satuan</label>
-            <input type="number"
-                   id="inputIsi"
-                   class="form-control"
-                   value="1">
+          <div class="rt-section">
+            <div class="rt-group-label">Pengaturan Lain</div>
+            <div class="rt-grid-2">
+              <div>
+                <label class="rt-field-label" for="inputIsi">No Satuan</label>
+                <input type="number" id="inputIsi" class="form-control" value="1">
+              </div>
+            </div>
           </div>
 
         </div>
 
         <div class="modal-footer">
-
-          <button
-            class="btn btn-primary"
-            onclick="applyModalFilter()">
-            Terapkan
-          </button>
-
+          <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+          <div class="rt-footer-buttons">
+            <button type="button" class="rt-btn rt-btn-ghost" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="rt-btn rt-btn-primary" data-bs-dismiss="modal">Terapkan</button>
+          </div>
         </div>
 
       </div>
@@ -200,16 +222,24 @@
 
 
 @section('jsreport')
-<script src="{!! URL::asset('public/js/ajc-browsemaster.js') !!}"></script>
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+{{-- Dua <script> lama di sini dihapus:
+     - ajc-browsemaster.js: tidak dipakai (picker halaman ini punya sendiri);
+     - report-table.js: sudah dimuat masterreportGudang (baris 233) dan report-table.js
+       memang menolak inisialisasi kedua (if (window.ReportTable) return).
+     Keduanya juga salah path -- memakai URL::asset('public/js/...') padahal URL::asset
+     sudah menunjuk ke folder public, sehingga hasilnya 404. --}}
 
 <script type="text/javascript">
   var modereport_qty = 0, modereport_qtyrp = 1;
   g_modeReport = ("{!! $mode_menu !!}" == "QTY") ? modereport_qty : modereport_qtyrp;
 
-  let globalDate1 = "{!! date('Y-m') !!}";
-  let globalDate2 = "{!! date('Y-m') !!}";
-  let lastRows = [];
+  let globalDate1 = "{!! date('Y-m-d') !!}";
+  let globalDate2 = "{!! date('Y-m-d') !!}";
+
+  let lastRows = [];        // hasil query yang sudah dipangkas ke rentang tanggal
+  let gRowsShown = null;    // hasil pencarian yang sedang tampil; null = tampil semua
+
+  function rowsShown() { return gRowsShown || lastRows; }
 
   if (typeof loadingHtml !== 'function') {
     window.loadingHtml = function (msg) {
@@ -220,10 +250,66 @@
   let currentGroupby = 'NoBukti';
 
   const reportUrl = "{{ url('laporanstockkartustock_doReport') }}";
-  const urlLoadBarang = "{{ url('functionbrowse_doLoadBarang') }}";
   const urlListGudang = "{!! $gudang !!}";
 
-  let gInfoGudang = "-", gInfoBarang = "-", gInfoLokasi = "-";
+  /* ---------- combo Barang di modal Filter (new-filter-modal-ui-guide.md #4) ---------- */
+
+  function htmlEscape(_val) {
+    return String(_val)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderPickFields() {
+    const val = $('#inputBarang').val() || '-';
+    const isSet = (val !== '-' && val !== '');
+
+    let html = '<div>';
+    html += '<label class="rt-field-label">Barang</label>';
+    html += '<div class="rt-combo">';
+    html += '<div class="rt-combo-input" onclick="openBarangPicker(\'\')">';
+    if (isSet) {
+      html += '<span class="rt-combo-tag">' + htmlEscape(val) +
+              '<button type="button" onclick="event.stopPropagation(); clearBarang()">&times;</button></span>';
+    } else {
+      html += '<span class="rt-combo-placeholder">Pilih barang...</span>';
+    }
+    html += '<span class="rt-combo-chevron">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+            '</span>';
+    html += '</div></div></div>';
+
+    $('#pickFields').html(html);
+  }
+
+  function clearBarang() {
+    $('#inputBarang').val('-');
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  // Badge "N aktif". Gudang punya opsi netral ("-"), jadi ikut dihitung saat diubah;
+  // No Satuan dianggap netral di "1" (tidak ada konversi satuan).
+  function updateFilterBadge() {
+    let count = 0;
+    if (($('#inputGudang').val() || '-') !== '-') { count++; }
+    const _brg = $('#inputBarang').val();
+    if (_brg && _brg !== '-') { count++; }
+    if (($('#inputIsi').val() || '1') !== '1') { count++; }
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    $('#inputGudang').val('-');
+    $('#inputBarang').val('-');
+    $('#inputIsi').val('1');
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () { renderPickFields(); updateFilterBadge(); });
+  $('#modalFilter').on('input', '#inputIsi', updateFilterBadge);
 
   /* gudang (pakai dropdown) */
   function loadGudangDropdown() {
@@ -251,7 +337,6 @@
 
   let barangTableDT = null;
   let barangCacheAll = null;
-  let barangLookupBusy = false;
 
   function normalizeBarangList(res) {
     if (Array.isArray(res)) {
@@ -346,49 +431,15 @@
     }
   });
 
-  function resolveBarang(term) {
-    term = (term || '').trim();
-
-    if (!term || term === '-') {
-      openBarangPicker('');
-      return;
-    }
-
-    if (barangLookupBusy) { return; }
-
-    const findExact = function (list) {
-      const needle = term.toLowerCase();
-      return list.find(function (b) { return String(b.KODEBRG || '').trim().toLowerCase() === needle; });
-    };
-
-    if (barangCacheAll) {
-      const hit = findExact(barangCacheAll);
-      if (hit) { applyBarangSelection(hit); } else { openBarangPicker(term); }
-      return;
-    }
-
-    barangLookupBusy = true;
-    fetchBarangList(function (list) {
-      barangLookupBusy = false;
-      barangCacheAll = list;
-      const hit = findExact(list);
-      if (hit) { applyBarangSelection(hit); } else { openBarangPicker(term); }
-    });
-  }
-
-  function onKeyPressBarang(e) {
-    if (e.which === 13) {
-      e.preventDefault();
-      resolveBarang($('#inputBarang').val());
-    }
-  }
-
-  function buttonAddListBarang() {
-    resolveBarang($('#inputBarang').val());
-  }
+  // resolveBarang() / onKeyPressBarang() / buttonAddListBarang() dihapus bersama input
+  // teks lamanya: field Barang sekarang berupa .rt-combo yang langsung membuka picker.
+  // Pencarian dengan mengetik tidak hilang -- kotak search bawaan DataTables di dalam
+  // picker mencari kode DAN nama barang.
 
   function applyBarangSelection(item) {
     $('#inputBarang').val(item.KODEBRG);
+    renderPickFields();
+    updateFilterBadge();
   }
 
   function buttonPickBarangInsert(index) {
@@ -405,10 +456,26 @@
     setDefaultHeader();
     setEmptyColspan();
     loadGudangDropdown();
+    renderPickFields();
+    updateFilterBadge();
 
-    setTimeout(() => {
-      makeTable('REPORT');
-    }, 100);
+    // Header interaktif hanya untuk mode QTY. Mode QTY+Rp memakai header grouping
+    // rowspan/colspan (buildTheadQtyRp) yang tidak bisa diwakili satu <th> per kolom,
+    // jadi bar & hint-nya disembunyikan -- sama seperti reportstockmutasistock.
+    if (g_modeReport == modereport_qty) {
+      ReportTable.init({
+        table: '#mainTable',
+        bar: '#rtBar',
+        onChange: renderCachedReport
+      });
+    } else {
+      $('#rtBar').hide();
+      $('.rt-hint').hide();
+    }
+
+    // setTimeout(() => {
+    //   makeTable('REPORT');
+    // }, 100);
   });
 
   function setEmptyColspan() {
@@ -450,64 +517,26 @@
     gsum_isgrandtotal = 1;
   }
 
-  function applyModalFilter() {
-    $('#modalFilter').modal('hide');
-  }
+  // applyModalFilter() dihapus: tombol Batal & Terapkan sekarang memakai data-bs-dismiss.
+  // Modal ini dibuka lewat data-bs-toggle (Bootstrap 5), jadi menutupnya juga harus lewat
+  // data-api Bootstrap 5 -- lihat docs/new-design-all-guide.md #5.1.
 
-  function loadInfoHeader() {
-    let _kodeBarang = $("#inputBarang").val();
-    let _barangRes  = null;
-
-    gInfoGudang = "-";
-    gInfoBarang = "-";
-    gInfoLokasi = "-";
-
-    const _selGudangText = $("#inputGudang option:selected").text();
-    if ($("#inputGudang").val() !== '-') { gInfoGudang = _selGudangText; }
-
-    $.ajax({
-      url: urlLoadBarang,
-      type: "get",
-      async: false,
-      data: { kode: _kodeBarang },
-      success: function (res) {
-        if (res && res.length > 0) {
-          _barangRes  = res;
-          gInfoBarang = res[0].KODEBRG + ' - ' + res[0].NAMABRG;
-        }
-      }
-    });
-
-    if (_barangRes && _barangRes.length > 0) {
-      $.ajax({
-        url: urlLoadBarang,
-        type: "get",
-        async: false,
-        data: { kode: _barangRes[0].KODEBRG },
-        success: function (res) {
-          if (res && res.length > 0) { gInfoLokasi = nullToEmpty(res[0].KETERANGAN) || "-"; }
-        }
-      });
-    }
-  }
-
-  function buildInfoRows(colspan) {
-    return '<tr class="info-row"><th colspan="' + colspan + '" style="text-align:left;">Gudang : ' + gInfoGudang + '</th></tr>' +
-           '<tr class="info-row"><th colspan="' + colspan + '" style="text-align:left;">Barang : ' + gInfoBarang + ' &nbsp;&nbsp;&nbsp; Lokasi : ' + gInfoLokasi + '</th></tr>';
-  }
+  // loadInfoHeader() dan buildInfoRows() dihapus: dua baris "Gudang : ..." /
+  // "Barang : ... Lokasi : ..." di atas judul kolom sudah tidak dipakai lagi. Ikut hilang
+  // pula dua request AJAX SINKRON (async:false) ke functionbrowse_doLoadBarang yang dulu
+  // dijalankan tiap kali Tampilkan ditekan dan membekukan UI. Pilihan gudang/barang tetap
+  // terlihat sebagai tag di combo modal Filter.
 
   function buildTheadQty(cols) {
-    let html = buildInfoRows(cols.length);
-    html += '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int' || c[3] === 'sumfloat');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
-    return html;
+    // Header interaktif (drag / gigi / sembunyikan kolom) -- docs/new-slider-table-guide.md.
+    // cols datang dari gcart_header.filter(...) di renderRows(), bukan salinan, supaya
+    // ReportTable.headHtml() bisa memetakan tiap kolom balik ke index globalnya.
+    return ReportTable.headHtml(cols);
   }
 
   function buildTheadQtyRp(cols) {
-    let html = buildInfoRows(cols.length);
     let _thopen = '<th rowspan="2" class="text-center">', _thclose = '</th>';
+    let html = '';
 
     html += '<tr>';
     html += _thopen + 'Tanggal' + _thclose;
@@ -530,6 +559,36 @@
     return html;
   }
 
+  // Ambil "YYYY-MM-DD" dari nilai tanggal apa pun yang dikirim SP. Bentuk ISO ditangani
+  // lewat regex (bukan new Date()) supaya tidak tergeser zona waktu.
+  function toYmd(_val) {
+    if (!_val) { return ''; }
+    const s = String(_val);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) { return m[1] + '-' + m[2] + '-' + m[3]; }
+
+    const d = new Date(s);
+    if (isNaN(d.getTime())) { return ''; }
+    return d.getFullYear() + '-' +
+           String(d.getMonth() + 1).padStart(2, '0') + '-' +
+           String(d.getDate()).padStart(2, '0');
+  }
+
+  // Sp_reportkartuStock cuma bisa menyaring per bulan, jadi hasilnya dipangkas ke rentang
+  // HARI yang dipilih di sini. Perbandingan string aman karena formatnya YYYY-MM-DD.
+  function filterByDateRange(rows) {
+    const d1 = globalDate1, d2 = globalDate2;
+    if (!d1 && !d2) { return rows; }
+
+    return rows.filter(function (r) {
+      const t = toYmd(pickCI(r, 'Tanggal'));
+      if (!t) { return true; }            // baris tanpa tanggal tetap ditampilkan
+      if (d1 && t < d1) { return false; }
+      if (d2 && t > d2) { return false; }
+      return true;
+    });
+  }
+
   function makeTable(_mode) {
     globalDate1 = $('#inputDate1').val();
     globalDate2 = $('#inputDate2').val();
@@ -546,19 +605,20 @@
       inputIsi    : $("#inputIsi").val()
     };
 
-    loadInfoHeader();
-
     $.ajax({
       url: reportUrl,
       type: 'get',
       data: filterData,
       success: function (res) {
-        lastRows = Array.isArray(res) ? res : ((res && res.res1) ? res.res1 : []);
+        const raw = Array.isArray(res) ? res : ((res && res.res1) ? res.res1 : []);
+        lastRows = filterByDateRange(raw);
+        gRowsShown = null;
         $('#searchBox2').val('');
         renderRows(lastRows, currentGroupby);
       },
       error: function () {
         lastRows = [];
+        gRowsShown = null;
         renderRows([], currentGroupby);
       }
     });
@@ -576,6 +636,18 @@
     const showGrand = hasTotal && (gsum_isgrandtotal === 1);
 
     thead.innerHTML = (g_modeReport == modereport_qty) ? buildTheadQty(cols) : buildTheadQtyRp(cols);
+
+    // report-table.js hanya menandai kolom bertipe "float"/"int" sebagai .num (judul rata
+    // kanan); kolom Saldo di sini bertipe "sumfloat", jadi ditandai sendiri. Dipakai
+    // data-gidx (index global kolom) yang tidak berubah walau kolom di-drag.
+    if (g_modeReport == modereport_qty) {
+      gcart_header.forEach(function (c, i) {
+        if (c[3] === 'sumfloat') {
+          const th = thead.querySelector('th.rt-th[data-gidx="' + i + '"]');
+          if (th) { th.classList.add('num'); }
+        }
+      });
+    }
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
@@ -637,11 +709,22 @@
   function applyFilters() {
     if (!lastRows.length) return;
     const term = ($('#searchBox2').val() || '').trim().toLowerCase();
-    if (!term) { renderRows(lastRows, currentGroupby); return; }
 
-    const cols = gcart_header.filter(c => c[2] === 1);
-    const filtered = lastRows.filter(r => rowSearchText(r, cols).indexOf(term) !== -1);
-    renderRows(filtered, currentGroupby);
+    if (!term) {
+      gRowsShown = null;
+    } else {
+      const cols = gcart_header.filter(c => c[2] === 1);
+      gRowsShown = lastRows.filter(r => rowSearchText(r, cols).indexOf(term) !== -1);
+    }
+
+    renderRows(rowsShown(), currentGroupby);
+  }
+
+  // Dipakai sebagai onChange ReportTable saat kolom di-drag / disembunyikan / direset.
+  // Hasil pencarian yang sedang aktif ikut dipertahankan.
+  function renderCachedReport() {
+    if (!lastRows.length) { return; }
+    renderRows(rowsShown(), currentGroupby);
   }
 
   function rowSearchText(r, cols) {

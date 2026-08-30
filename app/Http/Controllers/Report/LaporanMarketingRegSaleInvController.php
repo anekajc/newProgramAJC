@@ -34,22 +34,22 @@ class LaporanMarketingRegSaleInvController extends Controller
     public function doReport(Request $req)
     {
         $SReport = "T";
-        $Choice  = $req->get('inputOrd');
-        $Tgl1    = $req->get('date1');
-        $Tgl2    = $req->get('date2');
+        $Choice  = $req->query('inputOrd');
+        $Tgl1    = $req->query('date1');
+        $Tgl2    = $req->query('date2');
         $isiList = "";
-        $NeedOto = $req->get('inputOto');
+        $NeedOto = $req->query('inputOto');
         $Iduser = "";
         $Tipe = "";
-        $KodeCust = $req->get('inputCustomer');
-        $group = $req->get('inputGroup');
-        $PIC = $req->get('inputPIC');
-        $kategori = $req->get('inputKategori');
-        $subkategori = $req->get('inputSubKategori');
-        $KodeMerk = $req->get('inputMerk');
+        $KodeCust = $req->query('inputCustomer');
+        $group = $req->query('inputGroup');
+        $PIC = $req->query('inputPIC');
+        $kategori = $req->query('inputKategori');
+        $subkategori = $req->query('inputSubKategori');
+        $KodeMerk = $req->query('inputMerk');
         $KodeAgen = "";
         $KodeJenis = "";
-        $pagen = $req->get('inputAgen');
+        $pagen = $req->query('inputAgen');
 
 
         $values  = [$SReport, $Choice, $Tgl1, $Tgl2, $isiList, $NeedOto, $Iduser, $Tipe, $KodeCust, $group, $PIC, $kategori, $subkategori, $KodeMerk, $KodeAgen, $KodeJenis, $pagen];
@@ -59,29 +59,6 @@ class LaporanMarketingRegSaleInvController extends Controller
             // $res = DB::connection('SML')->select('exec Sp_ReportInvoicePenjualanRek ?,?,?,?,?,?,?,?,?',
             $values
         );
-
-        return $res;
-    }
-
-    public function doFilter(Request $req)
-    {
-        $kolom = ($req->get('inputOrd') == "N") ? 'NoBukti, Tanggal' : 'KodeBrg, NamaBrg';
-        $listData = DB::connection('MGL')->select('select ' . $kolom . ' from Vwreportinvoicepenjualandet where tanggal between :tgl1 and :tgl2 group by ' . $kolom, ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-        return $listData;
-    }
-
-    public function doReportFilter(Request $req)
-    {
-        $kolom = ($req->get('inputOrd') == "N") ? 'NoBukti' : 'KodeBrg';
-        $res = [];
-
-        for ($i = 0; $i < count($req->listdata); $i++) {
-            $row = DB::connection('MGL')->select('select * from Vwreportpurchasingreqdetclose where ' . $kolom . ' = :list', ['list' => $req->listdata[$i]]);
-
-            for ($j = 0; $j < count($row); $j++) {
-                $res = array_add($res, $i + $j, $row[$j]);
-            }
-        }
 
         return $res;
     }

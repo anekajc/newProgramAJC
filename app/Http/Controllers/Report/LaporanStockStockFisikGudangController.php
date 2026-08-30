@@ -30,13 +30,13 @@ class LaporanStockStockFisikGudangController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $tanggal = $req->get('date1');
-    $KOdegdg = $req->get('inputGudang');
-    $KodeHdGrp = $req->get('inputGrup');
+    $tanggal = $req->query('date1');
+    $KOdegdg = $req->query('inputGudang');
+    $KodeHdGrp = $req->query('inputGrup');
 
     $values  = [$tanggal, $KOdegdg, $KodeHdGrp];
-    
-    $res = DB::connection('MGL')->select('exec Sp_ReportStockFisikGudang ?,?,?',
+
+    $res = DB::connection('SML')->select('exec Sp_ReportStockFisikGudang ?,?,?',
       $values);
 
     return $res;

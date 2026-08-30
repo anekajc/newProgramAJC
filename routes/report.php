@@ -175,8 +175,6 @@ Route::get('/laporanpurchaseorderosp_doReport', [LaporanPurchaseOrderOSPControll
 // Purchase Order PO
 Route::get('/laporanpurchaseorderpo', [LaporanPurchaseOrderPOController::class, 'index']);
 Route::get('/laporanpurchaseorderpo_doReport', [LaporanPurchaseOrderPOController::class, 'doReport']);
-Route::get('/laporanpurchaseorderpo_doFilter', [LaporanPurchaseOrderPOController::class, 'doFilter']);
-Route::get('/laporanpurchaseorderpo_doReportFilter', [LaporanPurchaseOrderPOController::class, 'doReportFilter']);
 
 // Purchase Order Close PO
 Route::get('/laporanpurchaseorderclosepo', [LaporanPurchaseOrderClosePOController::class, 'index']);
@@ -276,24 +274,21 @@ Route::get('/laporanmarketinghistoryoutso_loadcustsupp', [LaporanMarketingHistor
 //REPOSRTEVALUASISOLUNAS
 Route::get('/laporanmarketingevalsolunas', [LaporanMarketingEvalSoLunasController::class, 'index']);
 Route::get('/laporanmarketingevalsolunas_doReport', [LaporanMarketingEvalSoLunasController::class, 'doReport']);
+Route::get('/laporanmarketingevalsolunas_doKasharian', [LaporanMarketingEvalSoLunasController::class, 'doKasharian']);
+Route::get('/laporanmarketingevalsolunas_doInvoice', [LaporanMarketingEvalSoLunasController::class, 'doInvoice']);
+Route::get('/laporanmarketingevalsolunas_doLpb', [LaporanMarketingEvalSoLunasController::class, 'doLpb']);
 
 //LAPORAN SO OUTSTANDING SO
 Route::get('/laporanmarketinglaporanoutso', [LaporanMarketingLaporanOutSoController::class, 'index']);
 Route::get('/laporanmarketinglaporanoutso_doReport', [LaporanMarketingLaporanOutSoController::class, 'doReport']);
-Route::get('/laporanmarketinglaporanoutso_doFilter', [LaporanMarketingLaporanOutSoController::class, 'doFilter']);
-Route::get('/laporanmarketinglaporanoutso_doReportFilter', [LaporanMarketingLaporanOutSoController::class, 'doReportFilter']);
 
 // Marketing Laporan SPB
 Route::get('/laporanmarketingspb', [LaporanMarketingSPBController::class, 'index']);
 Route::get('/laporanmarketingspb_doReport', [LaporanMarketingSPBController::class, 'doReport']);
-Route::get('/laporanmarketingspb_doFilter', [LaporanMarketingSPBController::class, 'doFilter']);
-Route::get('/laporanmarketingspb_doReportFilter',[LaporanMarketingSPBController::class, 'doReportFilter']);
 
 // Marketing Laporan SPB LT
 Route::get('/laporanmarketingspbLT', [LaporanMarketingSPBLTController::class, 'index']);
 Route::get('/laporanmarketingspbLT_doReport', [LaporanMarketingSPBLTController::class, 'doReport']);
-Route::get('/laporanmarketingspbLT_doFilter', [LaporanMarketingSPBLTController::class, 'doFilter']);
-Route::get('/laporanmarketingspbLT_doReportFilter',[LaporanMarketingSPBLTController::class, 'doReportFilter']);
 
 // Marketing Laporan SPB ACC
 Route::get('/laporanmarketingspbacc', [LaporanMarketingSPBACCController::class, 'index']);
@@ -316,14 +311,10 @@ Route::get('/laporansuratjalan_doReportFilter',[LaporanSuratJalanController::cla
 // Laporan Marketing Invoice Retur Penjualan
 Route::get('/laporanmarketingreturpenjualan', [LaporanMarketingReturPenjualanController::class, 'index']);
 Route::get('/laporanmarketingreturpenjualan_doReport', [LaporanMarketingReturPenjualanController::class, 'doReport']);
-Route::get('/laporanmarketingreturpenjualan_doFilter', [LaporanMarketingReturPenjualanController::class, 'doFilter']);
-Route::get('/laporanmarketingreturpenjualan_doReportFilter',[LaporanMarketingReturPenjualanController::class, 'doReportFilter']);
 
 // Laporan Marketing Sales Analisa
 Route::get('/laporanmarketingsalesanalisa', [LaporanMarketingSalesAnalisaController::class, 'index']);
 Route::get('/laporanmarketingsalesanalisa_doReport', [LaporanMarketingSalesAnalisaController::class, 'doReport']);
-Route::get('/laporanmarketingsalesanalisa_doFilter', [LaporanMarketingSalesAnalisaController::class, 'doFilter']);
-Route::get('/laporanmarketingsalesanalisa_doReportFilter',[LaporanMarketingSalesAnalisaController::class, 'doReportFilter']);
 
 //Laporan Analisa Laba Kotor
 Route::get('/laporanmarketinganalisakotor', [LaporanMarketingAnalisaKotorController::class, 'index']);
@@ -334,8 +325,6 @@ Route::get('/laporanmarketinganalisakotor_doReportFilter',[LaporanMarketingAnali
 // Laporan Marketing Oustanding Uang Muka
 Route::get('/laporanmarketinguangmukaout', [LaporanMarketingUangMukaOutController::class, 'index']);
 Route::get('/laporanmarketinguangmukaout_doReport', [LaporanMarketingUangMukaOutController::class, 'doReport']);
-Route::get('/laporanmarketinguangmukaout_doFilter', [LaporanMarketingUangMukaOutController::class, 'doFilter']);
-Route::get('/laporanmarketinguangmukaout_doReportFilter',[LaporanMarketingUangMukaOutController::class, 'doReportFilter']);
 Route::get('/laporanmarketinguangmukaout_loadsales', [LaporanMarketingUangMukaOutController::class, 'loadSales']);
 
 //Laporan Marketing Register Uang Muka
@@ -379,8 +368,6 @@ Route::get('/laporanmarketingpos_doReportFilter',[LaporanMarketingPOSController:
 //Laporan Marketing Register Sales Invoice
 Route::get('/laporanmarketingregsaleinv', [LaporanMarketingRegSaleInvController::class, 'index']);
 Route::get('/laporanmarketingregsaleinv_doReport', [LaporanMarketingRegSaleInvController::class, 'doReport']);
-Route::get('/laporanmarketingregsaleinv_doFilter', [LaporanMarketingRegSaleInvController::class, 'doFilter']);
-Route::get('/laporanmarketingregsaleinv_doReportFilter',[LaporanMarketingRegSaleInvController::class, 'doReportFilter']);
 
 
 // ========== GUDANG ========== //
@@ -443,14 +430,10 @@ Route::get('/laporanclosingperintahopname_doReportFilter', [LaporanClosingPerint
 // OPNAME
 Route::get('/laporanopname', [LaporanOpnameController::class, 'index']);
 Route::get('/laporanopname_doReport', [LaporanOpnameController::class, 'doReport']);
-Route::get('/laporanopname_doFilter', [LaporanOpnameController::class, 'doFilter']);
-Route::get('/laporanopname_doReportFilter', [LaporanOpnameController::class, 'doReportFilter']);
 
 // CLOSING OPNAME
 Route::get('/laporanclosingopname', [LaporanClosingOpnameController::class, 'index']);
 Route::get('/laporanclosingopname_doReport', [LaporanClosingOpnameController::class, 'doReport']);
-Route::get('/laporanclosingopname_doFilter', [LaporanClosingOpnameController::class, 'doFilter']);
-Route::get('/laporanclosingopname_doReportFilter', [LaporanClosingOpnameController::class, 'doReportFilter']);
 
 
 // SELISIH PERINTAH OPNAME
@@ -462,8 +445,6 @@ Route::get('/laporanselisihperintahopname_doReportFilter', [LaporanSelisihPerint
 // UBAH KEMASAN
 Route::get('/laporanubahkemasan', [LaporanUbahKemasanController::class, 'index']);
 Route::get('/laporanubahkemasan_doReport', [LaporanUbahKemasanController::class, 'doReport']);
-Route::get('/laporanubahkemasan_doFilter', [LaporanUbahKemasanController::class, 'doFilter']);
-Route::get('/laporanubahkemasan_doReportFilter', [LaporanUbahKemasanController::class, 'doReportFilter']);
 
 // PERMINTAAN SAMPLE
 Route::get('/laporanpermintaansample', [LaporanPermintaanSampleController::class, 'index']);
@@ -494,8 +475,6 @@ Route::get('/laporangudangretursample_doReport', [LaporanGudangReturSampleContro
 // HISTORI PENEYERAHAN SAMPLE
 Route::get('/laporanhistoripenyerahansample', [LaporanHistoriPenyerahanSampleController::class, 'index']);
 Route::get('/laporanhistoripenyerahansample_doReport', [LaporanHistoriPenyerahanSampleController::class, 'doReport']);
-Route::get('/laporanhistoripenyerahansample_doFilter', [LaporanHistoriPenyerahanSampleController::class, 'doFilter']);
-Route::get('/laporanhistoripenyerahansample_doReportFilter', [LaporanHistoriPenyerahanSampleController::class, 'doReportFilter']);
 
 // KOREKSI STOCK
 Route::get('/laporankoreksistock', [LaporanKoreksiStockController::class, 'index']);
@@ -542,8 +521,6 @@ Route::get('/laporangudangkonsin_doReportFilter', [LaporanGudangKonsinController
 // GUDANG OUTSTANDING KONSINYASI
 Route::get('/laporangudangoutkonsin', [LaporanGudangOutKonsinsController::class, 'index']);
 Route::get('/laporangudangoutkonsin_doReport', [LaporanGudangOutKonsinsController::class, 'doReport']);
-Route::get('/laporangudangoutkonsin_doFilter', [LaporanGudangOutKonsinsController::class, 'doFilter']);
-Route::get('/laporangudangoutkonsin_doReportFilter', [LaporanGudangOutKonsinsController::class, 'doReportFilter']);
 
 // ========== STOCK ========== //
 

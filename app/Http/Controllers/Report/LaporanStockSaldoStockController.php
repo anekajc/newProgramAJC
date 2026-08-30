@@ -33,17 +33,17 @@ class LaporanStockSaldoStockController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $Nosat = $req->get('inputIsi');
-    $tanggal = $req->get('date1');
-    $KOdegdg = $req->get('inputGudang');
-    $KodeHDGroup = $req->get('inputGrup');
-    $Kategori = $req->get('inputKategori');
-    $SubKategori = $req->get('inputSubKategori');
-    $KodeMerk = $req->get('inputMerk');
+    $Nosat = $req->query('inputIsi');
+    $tanggal = $req->query('date1');
+    $KOdegdg = $req->query('inputGudang');
+    $KodeHDGroup = $req->query('inputGrup');
+    $Kategori = $req->query('inputKategori');
+    $SubKategori = $req->query('inputSubKategori');
+    $KodeMerk = $req->query('inputMerk');
 
     $values  = [$Nosat, $tanggal, $KOdegdg, $KodeHDGroup, $Kategori, $SubKategori, $KodeMerk];
-    
-    $res = DB::connection('MGL')->select('exec Sp_ReportStockAkhir ?,?,?,?,?,?,?',
+
+    $res = DB::connection('SML')->select('exec Sp_ReportStockAkhir ?,?,?,?,?,?,?',
       $values);
 
     return $res;
