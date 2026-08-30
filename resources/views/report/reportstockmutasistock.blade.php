@@ -1,5 +1,7 @@
 @extends('report.masterreportGudang')
-@include('report.modalBrowseMaster')
+{{-- @include('report.modalBrowseMaster') dihapus: sudah tidak dipakai, halaman ini punya
+     picker sendiri (.modal-picker / openPickMaster()) yang menggantikan popup #formBrowseMaster
+     bawaan -- lihat komentar di dalam <script> jsreport. --}}
 
 <!-- Chart.js v4 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -142,12 +144,12 @@
       <div class="action-group">
         <button
           class="btn-load"
-          data-bs-toggle="modal"
-          data-bs-target="#modalFilter">
+          type="button"
+          onclick="$('#modalFilter').modal('show')">
           <i class="fas fa-filter"></i> Filter
         </button>
         <button class="btn-load" onclick="doShowFormFilterData()" title="Filter Data"><i class="fas fa-magnifying-glass"></i> Filter Data</button>
-        <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
+        {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -204,6 +206,11 @@
       </div>
     </div>
 
+    <!-- Bar kolom tersembunyi + Reset kolom (diisi report-table.js / ReportTable).
+         Hanya aktif untuk mode QTY & RP -- mode QTYRP/PERIODE pakai header grouping
+         rowspan/colspan manual yang tidak kompatibel, lihat ready() di jsreport. -->
+    <div id="rtBar"></div>
+
     <div class="table-outer">
       <div class="table-wrap" id="showTableReport">
         <table class="tb" id="tabel">
@@ -243,11 +250,17 @@
 
     </div>
 
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+      sembunyikan kolom atau atur total.
+    </div>
+
   </div>
 </div>
 
 <!-- modal filter -->
-<div class="modal fade" id="modalFilter">
+<div class="modal fade rt-filter" id="modalFilter">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
 
@@ -255,84 +268,92 @@
         <h5 class="modal-title">
           <i class="fas fa-filter"></i>
           Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
         </h5>
 
         <button
           type="button"
           class="btn-close"
+          aria-label="Close"
           data-bs-dismiss="modal">
         </button>
       </div>
 
       <div class="modal-body">
 
-        <div class="mb-3">
-          <label>Gudang</label>
-          <div class="input-group input-group-sm">
-            <input type="text" id="inputGudang" class="form-control" placeholder="-" value="-" readonly>
-            <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGudang', '{!! $gudang !!}', 'Pilih Gudang')"><i class="bi bi-search"></i></button>
+        <div class="rt-section">
+          <div class="rt-group-label">Filter Data
+            <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+          </div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label">Gudang</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputGudang" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGudang', '{!! $gudang !!}', 'Pilih Gudang')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="rt-field-label">Grup</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputGrup" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGrup', '{!! $grup !!}', 'Pilih Grup')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="rt-field-label">Kategori</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputKategori" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputKategori', '{!! $kategori !!}', 'Pilih Kategori')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="rt-field-label">Sub Kategori</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputSubKategori" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputSubKategori', '{!! $subkategori !!}', 'Pilih Sub Kategori')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="rt-field-label">Merk</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputMerk" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputMerk', '{!! $merk !!}', 'Pilih Merk')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="mb-3">
-          <label>No Satuan</label>
-          <input type="number" id="inputIsi" class="form-control" value="1">
-        </div>
-
-        <div class="mb-3 d-flex align-items-center" style="gap:8px;">
-          <input type="checkbox" id="inputStockMinus" style="width:18px;height:18px;cursor:pointer;">
-          <label for="inputStockMinus" style="cursor:pointer;margin:0;">Stock Minus?</label>
-        </div>
-
-        <div class="mb-3">
-          <label>Grup</label>
-          <div class="input-group input-group-sm">
-            <input type="text" id="inputGrup" class="form-control" placeholder="-" value="-" readonly>
-            <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGrup', '{!! $grup !!}', 'Pilih Grup')"><i class="bi bi-search"></i></button>
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Lain</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="inputAgenSelect">Status Agen</label>
+              <select id="inputAgenSelect" class="rt-native" onchange="setAgen(this.value)">
+                <option value="0">Agen</option>
+                <option value="1">Non-Agen</option>
+                <option value="2" selected>Semua</option>
+              </select>
+            </div>
+            <div>
+              <label class="rt-field-label" for="inputIsi">No Satuan</label>
+              <input type="number" id="inputIsi" class="form-control" value="1">
+            </div>
           </div>
-        </div>
-
-        <div class="mb-3">
-          <label>Kategori</label>
-          <div class="input-group input-group-sm">
-            <input type="text" id="inputKategori" class="form-control" placeholder="-" value="-" readonly>
-            <button type="button" class="btn btn-primary" onclick="openPickMaster('inputKategori', '{!! $kategori !!}', 'Pilih Kategori')"><i class="bi bi-search"></i></button>
+          <div class="mb-3 d-flex align-items-center" style="gap:8px; margin-top:10px;">
+            <input type="checkbox" id="inputStockMinus" style="width:18px;height:18px;cursor:pointer;">
+            <label for="inputStockMinus" style="cursor:pointer;margin:0;">Stock Minus?</label>
           </div>
-        </div>
-
-        <div class="mb-3">
-          <label>Sub Kategori</label>
-          <div class="input-group input-group-sm">
-            <input type="text" id="inputSubKategori" class="form-control" placeholder="-" value="-" readonly>
-            <button type="button" class="btn btn-primary" onclick="openPickMaster('inputSubKategori', '{!! $subkategori !!}', 'Pilih Sub Kategori')"><i class="bi bi-search"></i></button>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label>Merk</label>
-          <div class="input-group input-group-sm">
-            <input type="text" id="inputMerk" class="form-control" placeholder="-" value="-" readonly>
-            <button type="button" class="btn btn-primary" onclick="openPickMaster('inputMerk', '{!! $merk !!}', 'Pilih Merk')"><i class="bi bi-search"></i></button>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label>Status Agen</label>
-          <select id="inputAgenSelect" class="form-select" onchange="setAgen(this.value)">
-            <option value="0">Agen</option>
-            <option value="1">Non-Agen</option>
-            <option value="2" selected>Semua</option>
-          </select>
         </div>
 
       </div>
 
       <div class="modal-footer">
-        <button
-          class="btn btn-primary"
-          data-bs-dismiss="modal">
-          Terapkan
-        </button>
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" data-bs-dismiss="modal">Terapkan</button>
+        </div>
       </div>
 
     </div>
@@ -470,7 +491,39 @@
   function pickMasterSelect(kode) {
     if (pickerTargetInput) { $('#' + pickerTargetInput).val(kode); }
     closePickMaster();
+    updateFilterBadge();
   }
+
+  // Badge "N aktif" di judul modal Filter. Field dengan nilai netral ("-" untuk picker,
+  // "2"/Semua untuk Status Agen, unchecked untuk Stock Minus) tidak dihitung -- sama
+  // seperti aturan di new-filter-modal-ui-guide.md #5. No Satuan dianggap netral di "1"
+  // (artinya tidak ada konversi satuan).
+  const PICK_FIELD_IDS = ['inputGudang', 'inputGrup', 'inputKategori', 'inputSubKategori', 'inputMerk'];
+
+  function updateFilterBadge() {
+    let count = 0;
+    PICK_FIELD_IDS.forEach(function (id) {
+      const val = $('#' + id).val();
+      if (val && val !== '-') { count++; }
+    });
+    if ($('#inputAgenSelect').val() !== '2') { count++; }
+    if (($('#inputIsi').val() || '1') !== '1') { count++; }
+    if ($('#inputStockMinus').prop('checked')) { count++; }
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    PICK_FIELD_IDS.forEach(function (id) { $('#' + id).val('-'); });
+    $('#inputAgenSelect').val('2');
+    setAgen('2');
+    $('#inputIsi').val('1');
+    $('#inputStockMinus').prop('checked', false);
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () { updateFilterBadge(); });
+  $('#modalFilter').on('change', 'select.rt-native, #inputStockMinus', updateFilterBadge);
+  $('#modalFilter').on('input', '#inputIsi', updateFilterBadge);
 
   let defaultBulan = new Date().getMonth() + 1;
   let defaultTahun = new Date().getFullYear();
@@ -544,10 +597,35 @@
     setAgen(globalAgen);
     setDefaultHeader();
 
+    // Header interaktif (drag/gear/hide kolom) hanya untuk mode QTY & RP -- header
+    // QTYRP/PERIODE pakai grouping rowspan/colspan manual (setRowHeaderQtyRp) yang
+    // tidak bisa direpresentasikan sebagai satu baris <th> per kolom, lihat
+    // docs/new-slider-table-guide.md #1.
+    if (g_modeReport == modereport_qty || g_modeReport == modereport_rp) {
+      ReportTable.init({
+        table: '#tabel',
+        bar: '#rtBar',
+        onChange: renderCachedReport
+      });
+    } else {
+      $('#rtBar').hide();
+      $('.rt-hint').hide();
+    }
+
     // setTimeout(() => {
     //   makeTable('REPORT');
     // }, 100);
   });
+
+  // Render ulang tabel dari data yang sudah dimuat (gcart_res), dipakai sebagai
+  // onChange oleh ReportTable saat kolom di-drag/disembunyikan/direset.
+  function renderCachedReport() {
+    if (!gcart_res || !gcart_res.length) { return; }
+    let _date1 = $("#inputDate1").val();
+    let _date2 = (g_modeReport == modereport_periode) ? $("#inputDate2").val() : null;
+    doShowReport(gcart_res, reportTitle, "KODEBRG", _date1, _date2);
+    relabelSubtotalRows();
+  }
 
   function setAgen (val) {
     globalAgen = val;
@@ -616,26 +694,11 @@
   }
 
   function setRowHeaderQtyOrRp(_rowHeader) {
-    _rowHeader += '<tr>';
-    _rowHeader += '  <th scope="col" class="text-start">Kode Barang</th>';
-    _rowHeader += '  <th scope="col" class="text-start">Nama Barang</th>';
-    _rowHeader += '  <th scope="col" class="text-center">Sat</th>';
-    _rowHeader += '  <th scope="col" class="text-center">Gdg</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Awal</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Beli</th>';
-    _rowHeader += '  <th scope="col" class="text-end">R. Jual</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Adj (+)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Tr (+)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">RPM (+)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">PRD (+)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Jual</th>';
-    _rowHeader += '  <th scope="col" class="text-end">R.Beli</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Adj (-)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Tr (-)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">PMK (-)</th>';
-    _rowHeader += '  <th scope="col" class="text-end">Akhir</th>';
-    _rowHeader += '</tr>';
-    return _rowHeader;
+    // Header interaktif (drag/gear/hide) -- lihat docs/new-slider-table-guide.md.
+    // cols HARUS berasal dari gcart_header.filter(...), bukan .map()/copy, supaya
+    // ReportTable.headHtml() bisa memetakan tiap kolom balik ke index globalnya.
+    const cols = gcart_header.filter(c => c[2] === 1);
+    return _rowHeader + ReportTable.headHtml(cols);
   }
 
   function setRowHeaderQtyRp(_rowHeader) {

@@ -4,7 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Models\NewMenuReport;
+use Illuminate\Support\Fluent;
 use App\Models\NewPeriode;
 
 use Carbon\Carbon;use Illuminate\Support\Arr;
@@ -26,18 +26,34 @@ trait AksesTrait {
 		        [\Auth::user()->username]
 		    )
 		)->first();
-		$menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0Report(5);
+
+		// dbmenureportweb is the live report-menu table now; DBMENUREPORT and its
+		// per-user permission table DBFLMENUREPORT are retired. No permission
+		// table exists yet that maps to dbmenureportweb's KODEMENU scheme --
+		// DBFLMENUREPORT.L1 still uses DBMENUREPORT's old numbering, and the only
+		// other candidate (new_aksesmenureport/new_menureport) is a separate,
+		// unrelated 14-row stock-report menu keyed by numeric user id, not a
+		// match. So every authenticated user gets Access = true for now; revisit
+		// if a real per-user permission table for this scheme is ever built.
+		$menul0 = $this->toFluentMenuTree(
+			app('App\Http\Controllers\HomeController')->getReportMenuTreeArray()
+		);
 
 		$program = DB::connection('SML')->select('select * from DBPERUSAHAAN');
 		$akses = Arr::add($akses, 'program', $program[0]->NAMA);
 		$akses = Arr::add($akses, 'href', $href);
 		$akses = Arr::add($akses, 'user', \Auth::User()->username);
-		
+
 		if ($href != "Home") {
-			$menu = NewMenuReport::where('href' , $href)->first();
-			$aksesmenu = $this->getAksesMenu($href);
-			$akses = Arr::add($akses, 'akses', $aksesmenu[0]);
-			$akses = Arr::add($akses, 'namamenu', $menu->Keterangan);
+			$menu = DB::connection('SML')->selectOne(
+				'select KODEMENU, Keterangan from dbmenureportweb where href = ?',
+				[$href]
+			);
+			$akses = Arr::add($akses, 'akses', new Fluent(['Access' => true, 'IsDesign' => true, 'Isexport' => true]));
+			// Falls back to the raw href when it's not in dbmenureportweb yet
+			// (some older report hrefs still aren't) instead of fataling on
+			// $menu->Keterangan against a null row.
+			$akses = Arr::add($akses, 'namamenu', $menu->Keterangan ?? $href);
 
 			// Dikirim bersama halaman supaya doLoadHeader() di masterreport2/2x/Gudang
 			// tidak perlu lagi AJAX sinkron ke globalfunctions_doLoadHeader saat page
@@ -68,12 +84,19 @@ trait AksesTrait {
 		return $akses;
 	}
 
-	public function getAksesMenu($href) {
-		if (!\Auth::check()) {
-			return array();
-		}
-
-		return DB::connection('SML')->select('select fl.* from DBFLMENUREPORT fl left outer join DBMENUREPORT m on (fl.L1 = m.KODEMENU) where fl.UserID = :user and m.href = :href' , ['user' => \Auth::User()->username, 'href' => $href]);
+	// Recursively wraps HomeController::getReportMenuTreeArray()'s plain-array
+	// nodes in Illuminate\Support\Fluent, which supports both ->prop and
+	// ['prop'] access. report/newmaster2.blade.php and newmaster2x.blade.php
+	// use both styles on the same node (e.g. $menu0->href alongside
+	// $menu0['Keterangan']) -- that only worked before because the old
+	// NewMenuReport rows were Eloquent models (dual-access natively). Plain
+	// arrays only support ['prop'], so this bridges the gap without touching
+	// every consuming Blade view.
+	private function toFluentMenuTree(array $nodes): array {
+		return array_map(function ($node) {
+			$node['child'] = $this->toFluentMenuTree($node['child'] ?? []);
+			return new Fluent($node);
+		}, $nodes);
 	}
 
 
@@ -88,7 +111,7 @@ trait AksesTrait {
 			$akses = array('userLoggedOut' => true);
 			return $akses;
 		}
-		
+
 		$columnName = ($otherColumn != '') ? $otherColumn : 'access';
 
 		$getKode = Menu::where($columnName, $access)->first();
@@ -118,7 +141,7 @@ trait AksesTrait {
 	    			->select('menu.*')->orderBy('kode', 'ASC')
 	    			->get();
 	  		}
-	  		
+
 			$periode = Periode::where('id_user', \Auth::id())->first();
 
 			$akses = Arr::add($akses, 'allowTransEdit', $this->allowTransEdit($checkUser->level));
@@ -142,5 +165,5 @@ trait AksesTrait {
 		return false;
 	}
 	/* */
-  
+
 }

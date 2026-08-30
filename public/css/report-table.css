@@ -1906,6 +1906,22 @@
   color: var(--muted);
 }
 
+/* Baris terpilih (multi-select, mis. #formFilterData) -- ditandai lewat class
+   .is-selected (bukan inline style) supaya tidak ketiban warna hover di atas.
+   Diletakkan SETELAH aturan :hover & :first-child di atas supaya menang lewat
+   urutan sumber pada specificity yang sama; kombinasi :hover eksplisit dijaga
+   juga supaya tidak bergantung diam-diam ke urutan itu. */
+.rt-picker-v2 table tbody tr.pick-row.is-selected td,
+.rt-picker-v2 table tbody tr.pick-row.is-selected:hover td {
+  background: var(--rt-blue-soft);
+  color: var(--rt-blue);
+  font-weight: 600;
+}
+
+.rt-picker-v2 table tbody tr.pick-row.is-selected td:first-child {
+  color: var(--rt-blue);
+}
+
 /* skin kontrol bawaan DataTables (search box, info, pagination) */
 
 .rt-picker-v2 .dataTables_wrapper {

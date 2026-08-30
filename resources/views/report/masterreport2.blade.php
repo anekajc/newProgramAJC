@@ -167,7 +167,13 @@ rel="stylesheet">
 
 
         <!-- start modal filter data -->
-        <div class="modal fade"  id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        {{-- Restyle-only pakai skin .rt-picker-v2 (docs/new-cust-supp-modal-guide.md) --
+             #formFilterData TETAP multi-select (klik/shift-klik baris, tombol Submit),
+             bukan diubah jadi picker klik-langsung-pilih seperti #formSelect. .rt-picker-v2
+             adalah class generik (lihat catatan di public/css/report-table.css sekitar
+             baris 1552), aman dipakai di id manapun selama modalnya cuma punya satu <table>.
+             Disamakan dengan masterreportGudang baris 196. --}}
+        <div class="modal fade rt-picker-v2"  id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-sm modal-dialog-centered"  role="document" style="max-width: 50%">
             <div class="modal-content">
               <div class="modal-header text-right">
@@ -246,6 +252,11 @@ rel="stylesheet">
   var gcart_filterShow = [];
   var gfilter_lastrow = -1, gfilter_totalrow = 0;
   var gfilter_title, gfilter_groupby, gfilter_date1, gfilter_date2;
+  // Kunci baris (nilai kolom pertama getKolomFilter(), mis. NoBukti/KODEBRG) yang
+  // sedang dipilih di modal Filter Data. Beda dari gcart_filterShow (yang dibangun
+  // ulang dari nol tiap modal dibuka) -- var ini TIDAK direset oleh doShowFilter()
+  // atau doCloseFormFilterData(), jadi pilihan tetap ada saat modal dibuka lagi.
+  var gfilter_selectedKeys = new Set();
 
   var gxls_filename = ""; // berikan nilai di Blade jika ingin custom file name excel
 
@@ -1423,7 +1434,9 @@ rel="stylesheet">
 
     makeTable("FILTER");
     doShowFilter();
-    $("#tabelfilter_totalrow").html("");
+    // gfilter_totalrow sudah dihitung ulang oleh doShowFilter() dari gfilter_selectedKeys
+    // yang tersimpan -- tampilkan labelnya kalau ada baris yang masih terpilih.
+    $("#tabelfilter_totalrow").html(gfilter_totalrow > 0 ? "Jumlah baris yang dipilih: " + gfilter_totalrow : "");
 
     $("#formFilterData").modal('toggle');
   }
@@ -1462,6 +1475,7 @@ rel="stylesheet">
     _str = "";
     let _prevdata = "", _nowdata = "", _idx = -1;
     gcart_filterShow = [];
+    gfilter_totalrow = 0;
     if (gcart_filter.length > 0) {
       gcart_filter.forEach((item, i) => {
         _nowdata = item[cart_filterHeader[0][0]];
@@ -1469,7 +1483,14 @@ rel="stylesheet">
         if (_prevdata != _nowdata) {
           _idx += 1;
           item._idx = _idx;
-          _str += '<tr id="' + _idx + '-trrowfilter" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
+
+          // Pulihkan status terpilih dari gfilter_selectedKeys (bertahan lintas
+          // buka-tutup modal), bukan selalu mulai dari false.
+          let _isSelected = gfilter_selectedKeys.has(_nowdata);
+          if (_isSelected) { gfilter_totalrow += 1; }
+
+          _str += '<tr id="' + _idx + '-trrowfilter" class="pick-row' + (_isSelected ? ' is-selected' : '') +
+                  '" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
           cart_filterHeader.forEach((itemcart, j) => {
             if (itemcart[3] == "index") {
               _str += "  <td>" + (_idx+1) + "</td>";
@@ -1486,8 +1507,9 @@ rel="stylesheet">
           _str += '</tr>';
 
           let temp = [];
-          temp.push(_idx);  // index
-          temp.push(false); // selected or not
+          temp.push(_idx);        // index
+          temp.push(_isSelected); // selected or not
+          temp.push(_nowdata);    // kunci -- dipakai doSelectrowfilter() untuk update gfilter_selectedKeys
           gcart_filterShow.push(temp);
         } else {
           item._idx = _idx;
@@ -1530,15 +1552,17 @@ rel="stylesheet">
     }
 
     while (_row_start <= _row_end) {
+      let _key = gcart_filterShow[_row_start][2];
+
       if (gcart_filterShow[_row_start][1]) {
         // unselect
-        $("#"+_row_start+"-trrowfilter").css('background-color', '');
-        $("#"+_row_start+"-trrowfilter").css('color', '');
+        $("#"+_row_start+"-trrowfilter").removeClass('is-selected');
+        gfilter_selectedKeys.delete(_key);
         gfilter_totalrow -= 1;
       } else {
         // select
-        $("#"+_row_start+"-trrowfilter").css('background-color', '#0069d9');
-        $("#"+_row_start+"-trrowfilter").css('color', 'white');
+        $("#"+_row_start+"-trrowfilter").addClass('is-selected');
+        gfilter_selectedKeys.add(_key);
         gfilter_totalrow += 1;
       }
 

@@ -1,202 +1,10 @@
-@extends('report.masterreport4')
+@extends('report.masterreport2')
 
-@section('reportname')
-      @if ($mode_menu == 'QTY')
-      @else
-      @endif
-@endsection
-
-<!-- <style>
-  .checkmark-red {
-    color: red !important;
-    font-weight: bold;
-    margin-left: 6px;
-  }
-
-  .tb-report,
-  .tb-report *,
-  .tb-report *::before,
-  .tb-report *::after {
-    box-sizing: border-box;
-  }
-
-  .tb-report * {
-    margin: 0;
-    padding: 0;
-  }
-
-  :root {
-    --bg: #F8FAFF;
-    --white: #fff;
-    --border: #E2E8F4;
-    --text: #0F172A;
-    --muted: #5A6A85;
-    --accent: #4F46E5;
-    --radius: 10px;
-    --c-asset: #1D4ED8;
-    --c-asset-bg: #EFF6FF;
-  }
-
-  .tb-report {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    width: 100% !important;
-  }
-
-  .tb-report .main {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: var(--bg);
-    width: 100% !important;
-  }
-
-  .tb-report .content {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 24px 0;
-    width: 100% !important;
-  }
-
-  .tb-report .toolbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 30;
-    width: 100% !important;
-  }
-
-  .tb-report .page-title {
-    font-size: 19px;
-    font-weight: 800;
-    color: var(--text);
-  }
-
-  .tb-report .page-sub {
-    font-size: 12.5px;
-    color: var(--muted);
-    margin-top: 1px;
-  }
-
-  .tb-report .filter-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 9px;
-    padding: 6px 12px;
-  }
-
-  .tb-report .filter-wrap label {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    white-space: nowrap;
-  }
-
-  .tb-report .filter-inp {
-    border: none;
-    background: transparent;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    outline: none;
-    padding: 2px 0;
-  }
-
-  .tb-report .filter-inp[type=date] { color: var(--accent); font-weight: 700; }
-  .tb-report .filter-sep { color: var(--muted); font-size: 12px; }
-
-  .tb-report .action-group { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  
-  .tb-report .btn-load {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    color: #fff;
-    background: linear-gradient(135deg, #16A34A, #15803D);
-    box-shadow: 0 4px 14px rgba(22, 163, 74, .28);
-    transition: all .15s;
-  }
-  .tb-report .btn-load:hover { box-shadow: 0 6px 20px rgba(22, 163, 74, .4); transform: translateY(-1px); }
-
-  .tb-report .search-inp {
-    padding: 8px 12px 8px 34px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 13px;
-    background: var(--white);
-    color: var(--text);
-    outline: none;
-    width: 200px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%235A6A85' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    transition: border-color .14s;
-  }
-
-  .tb-report .export-wrap { position: relative; }
-  .tb-report .export-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, .28);
-    transition: all .15s;
-  }
-  .tb-report .export-drop {
-    display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--white);
-    border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; min-width: 170px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .12); z-index: 100;
-  }
-  .tb-report .export-drop.open { display: block; }
-  .tb-report .export-opt {
-    display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 13px;
-    color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border);
-  }
-  .tb-report .export-opt:last-child { border-bottom: none; }
-  .tb-report .export-opt:hover { background: #EEF2FF; }
-
-  .tb-report .table-outer { display: flex; flex-direction: column; width: 100% !important; margin-top: 15px; }
-  .tb-report .table-wrap {
-    max-height: 65vh; overflow: auto; background: var(--white);
-    border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0; width: 100% !important;
-  }
-  .tb-report .tb { width: 100% !important; border-collapse: collapse; font-size: 13px; }
-  .tb-report .tb thead th {
-    position: sticky; top: 0; z-index: 20; background: #FAFBFF; padding: 10px 14px;
-    font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
-    letter-spacing: .06em; border-bottom: 2px solid var(--border) !important; white-space: nowrap; text-align: left;
-  }
-  .tb-report .tb thead th.num { text-align: right; }
-  .tb-report .empty-row td { padding: 28px 14px; text-align: center; color: var(--muted); font-size: 13px; }
-  .tb-report .table-footer {
-    background: var(--white); border: 1px solid var(--border); border-top: none;
-    border-radius: 0 0 var(--radius) var(--radius); padding: 10px 16px; font-size: 12.5px; color: var(--muted);
-  }
-
-  .tb-report .tb, .tb-report .tb th, .tb-report .tb td { border: 0 !important; }
-  .tb-report .tb thead th     { border-bottom: 2px solid var(--border) !important; }
-  .tb-report .data-row td     { border-bottom: 1px solid #F1F5F9 !important; }
-</style> -->
+<style>
+    .tb-report .table-wrap {
+        min-height: 10vh;
+    }
+</style>
 
 @section('header2')
   <div class="tb-report main">
@@ -204,10 +12,10 @@
 
       <!-- toolbar-->
       <div class="toolbar">
-        <div>
+        {{-- <div>
           <div class="page-title">Pemakaian</div>
-        </div>
-        
+        </div> --}}
+
         <!-- date range-->
         <div class="filter-wrap">
           <label>Periode</label>
@@ -219,10 +27,11 @@
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()">
 
         <div class="action-group">
-          <button
-            class="btn-load"
-            data-bs-toggle="modal"
-            data-bs-target="#modalFilter">
+          {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5).
+               Halaman ini memuat dua Bootstrap; jQuery dimuat SESUDAH bundle BS5, jadi
+               $.fn.modal dipegang BS4. applyModalFilter() menutup modal ini dengan
+               $('#modalFilter').modal('hide'), jadi pembukanya harus API yang sama. --}}
+          <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
             <i class="fas fa-filter"></i> Filter
           </button>
           <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
@@ -235,6 +44,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+      <div id="rtBar"></div>
 
       <!-- tabel-->
       <div class="table-outer">
@@ -250,15 +62,24 @@
         <div class="table-footer">
           <span id="footerLabel">Belum ada data dimuat</span>
         </div>
-      </div> 
-    </div> 
+      </div>
+
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+        sembunyikan kolom atau atur desimal &amp; total.
+      </div>
+    </div>
 
     <!-- toast-->
     <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
   </div> 
 
+  {{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+   di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+
   <!-- modal filter -->
-  <div class="modal fade" id="modalFilter">
+  <div class="modal fade rt-filter" id="modalFilter">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
 
@@ -266,36 +87,39 @@
           <h5 class="modal-title">
             <i class="fas fa-filter"></i>
             Filter Laporan
+            <span class="rt-active-badge" id="filterBadge">0 aktif</span>
           </h5>
-
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal">
-          </button>
+          {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+               $.fn.modal milik BS4. data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
+          <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+              onclick="$('#modalFilter').modal('hide')"></button>
         </div>
 
         <div class="modal-body">
 
-          <div class="mb-3">
-            <label>Otorisasi</label>
-            <select class="form-select" id="modalOtorisasi">
-              <option value="2">Semua</option>
-              <option value="1">Belum</option>
-              <option value="0">Sudah</option>
-            </select>
+          <div class="rt-section">
+            <div class="rt-group-label">Pengaturan Laporan</div>
+            <div class="rt-grid-2">
+              <div>
+                <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
+                <select class="rt-native" id="modalOtorisasi">
+                  <option value="2">Semua</option>
+                  <option value="1">Belum</option>
+                  <option value="0">Sudah</option>
+                </select>
+              </div>
+            </div>
           </div>
 
         </div>
 
         <div class="modal-footer">
-
-          <button
-            class="btn btn-primary"
-            onclick="applyModalFilter()">
-            Terapkan
-          </button>
-
+          <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+          <div class="rt-footer-buttons">
+            <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')">Batal</button>
+            <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+          </div>
         </div>
 
       </div>
@@ -306,35 +130,60 @@
 @endsection
 
 @section('jsreport')
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
   let globalDate1 = "{!! date('Y-m-d') !!}";
   let globalDate2 = "{!! date('Y-m-d') !!}";
-  let globalOtorisasi = "2"; 
-  let globalOrderBy = "N";   
-  let globalReportMode = "0"; 
-  var jenisreport = 0; 
+  let globalOtorisasi = "2";
+  let globalOrderBy = "N";
+  let globalReportMode = "0";
+  var jenisreport = 0;
   let lastRows = [];
-  let currentGroupby = 'NoBukti'; 
+  let currentGroupby = 'NoBukti';
 
-  var modereport_detail = 3; 
+  var modereport_detail = 3;
   g_modeReport = modereport_detail;
 
-  const reportUrl = "{{ url('laporanpemakaian_doReport') }}"; 
+  const reportUrl = "{{ url('laporanpemakaian_doReport') }}";
 
   $(document).ready(function() {
-    $("#showTableReport table").hide();
-    $(".card-body table").hide();
-    $(".btn-success, .btn-danger, #btnSubmitReport, .tombol-toggle").attr('style', 'display: none !important;').hide();
+    // Tabel bergaya lama dari engine masterreport2 (#showTableReport) tidak pernah dipakai
+    // halaman ini (kita punya #mainTable/.tb-report sendiri, tidak pernah panggil doMakeTable
+    // versi lama) -- dikosongkan & disembunyikan, sama seperti reportaccountingkasharian.blade.php.
+    $("#showTableReport").empty().hide();
 
     setDefaultHeader();
     if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
 
-    setTimeout(() => {
-      makeTable('REPORT');
-    }, 100);
+    // Header tabel interaktif: drag-reorder + gear (sembunyikan/desimal/total) + bar
+    // "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan" switcher -- jenisreport tidak
+    // pernah punya kontrol UI di halaman ini (selalu 0), sama seperti sebelum migrasi.
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: function() {
+        if (lastRows.length) { applyFilters(); } else { renderRows([], currentGroupby); }
+      }
+    });
+
+    // setTimeout(() => {
+    //   makeTable('REPORT');
+    // }, 100);
   });
+
+  /* -- FILTER MODAL -- */
+  function updateFilterBadge() {
+    let count = 0;
+    if ($('#modalOtorisasi').val() !== '2') { count++; }
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    $('#modalOtorisasi').val('2');
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
 
   function setDefaultHeader() {
     if ("{!! $mode_menu !!}" == "QTY") {
@@ -424,6 +273,7 @@
 
   $('#modalFilter').on('show.bs.modal', function () {
     $("#modalOtorisasi").val(globalOtorisasi);
+    updateFilterBadge();
   });
 
   function applyModalFilter() {
@@ -477,10 +327,10 @@
     const showSub   = hasTotal && (gsum_issubtotal === 1);
     const showGrand = hasTotal && (gsum_isgrandtotal === 1);
 
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
+    // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total). Juga
+    // menyegarkan #rtBar (daftar kolom tersembunyi).
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     if (!rows || !rows.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
@@ -565,6 +415,5 @@
     const wrap = document.getElementById('exportWrap');
     if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
   });
-  function getKolomFilter() { return ['NoBukti', 'Tanggal']; }
 </script>
 @endsection

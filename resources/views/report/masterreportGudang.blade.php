@@ -188,40 +188,34 @@ rel="stylesheet">
 
 
         <!-- start modal filter data -->
-        <div class="modal fade"  id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        {{-- Restyle-only pakai skin .rt-picker-v2 (docs/new-cust-supp-modal-guide.md) --
+             #formFilterData TETAP multi-select (klik/shift-klik baris, tombol Submit),
+             bukan diubah jadi picker klik-langsung-pilih seperti #formSelect. .rt-picker-v2
+             adalah class generik (lihat catatan di public/css/report-table.css sekitar
+             baris 1552), aman dipakai di id manapun selama modalnya cuma punya satu <table>. --}}
+        <div class="modal fade rt-picker-v2" id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="formFilterDataLabel" aria-hidden="true">
           <div class="modal-dialog modal-sm modal-dialog-centered"  role="document" style="max-width: 50%">
             <div class="modal-content">
-              <div class="modal-header text-right">
+              <div class="modal-header">
                 <h5 class="modal-title" id="formFilterDataLabel">Filter Data</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="doCloseFormFilterData()">
-                  <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" onclick="doCloseFormFilterData()"></button>
               </div>
               <div class="modal-body">
-                <div class="container-fluid">
-                  <div class="row" style="display: flex; justify-content: right;">
-                    <label id="tabelfilter_totalrow"></label>
-                  </div>
-                  <div class="row mt-3">
-                    <div class="col-12" style="overflow:auto;">
-                      <div class="">
-                            <table id="tabelfilter" class="table table-bordered table-striped"  >
-                              <thead id="tabelfilter_header" class="text-center">
-                                <tr>
-                                  <th>Nomor Bukti</th>
-                                  <th>Tanggal</th>
-                                </tr>
-                              </thead>
-                              <tbody id="tabelfilter_data" class="text-center" >
-                              </tbody>
-                            </table>
-                      </div>
-                    </div>
-                  </div>
+                <div class="d-flex justify-content-end mb-2">
+                  <label id="tabelfilter_totalrow"></label>
                 </div>
+                <table id="tabelfilter" class="table table-bordered table-striped">
+                  <thead id="tabelfilter_header" class="text-center">
+                    <tr>
+                      <th>Nomor Bukti</th>
+                      <th>Tanggal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabelfilter_data" class="text-center"></tbody>
+                </table>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="doCloseFormFilterData()" title="Batal (Esc)">Batal</button>
+              <div class="modal-footer ">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="doCloseFormFilterData()" title="Batal (Esc)">Batal</button>
                 <button type="button" class="btn btn-primary" onclick="doShowReportFilter()" title="Submit (Ctrl+F)">Submit</button>
               </div>
             </div>
@@ -232,6 +226,11 @@ rel="stylesheet">
 @endsection
 
 @section('js')
+{{-- window.ReportTable (drag kolom + menu roda gigi + bar kolom tersembunyi/Reset kolom),
+     dipasangkan dengan doMoveHeader/doSetDesimal/doButtonTotal di bawah -- lihat
+     docs/new-slider-table-guide.md. Dimuat sebelum @yield('jsreport') supaya globalnya
+     siap dipakai halaman anak. --}}
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 @yield('jsreport')
 <script type="text/javascript">
   var g_href = '{!! $akses['href'] !!}';
@@ -261,6 +260,11 @@ rel="stylesheet">
   var gcart_filterShow = [];
   var gfilter_lastrow = -1, gfilter_totalrow = 0;
   var gfilter_title, gfilter_groupby, gfilter_date1, gfilter_date2;
+  // Kunci baris (nilai kolom pertama getKolomFilter(), mis. NoBukti/KODEBRG) yang
+  // sedang dipilih di modal Filter Data. Beda dari gcart_filterShow (yang dibangun
+  // ulang dari nol tiap modal dibuka) -- var ini TIDAK direset oleh doShowFilter()
+  // atau doCloseFormFilterData(), jadi pilihan tetap ada saat modal dibuka lagi.
+  var gfilter_selectedKeys = new Set();
 
   var gxls_filename = ""; // berikan nilai di Blade jika ingin custom file name excel
 
@@ -511,6 +515,19 @@ rel="stylesheet">
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
+  // Pindahkan kolom dari index _from ke index _to (dipakai drag & drop header
+  // interaktif dari report-table.js / window.ReportTable).
+  function doMoveHeader(_from, _to) {
+    if (_from < 0 || _to < 0 || _from === _to) { return; }
+    if (_from >= gcart_header.length || _to >= gcart_header.length) { return; }
+
+    let _moved = gcart_header.splice(_from, 1)[0];
+    gcart_header.splice(_to, 0, _moved);
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+    doShowCustomize();
+  }
+
   function doButtonUpDown(_id, _mode) {
     // mode = 0 UP, 1 DOWN
     let temp = [];
@@ -595,7 +612,7 @@ rel="stylesheet">
       $("#setTotalDesimalPanel").hide();
     }
     $("#setTotalDesimal").val(gcart_header[_index][5]);
-    doButtonTotal(gcart_header[_index][4]);
+    doButtonSetTotalMode(gcart_header[_index][4]);
 
     $("#formCustomizeTable").css('opacity', '0.6');
     $("#formSettingTotalLabel").html("Setting Kolom " + gcart_header[_index][1]);
@@ -608,20 +625,47 @@ rel="stylesheet">
     $("#formSettingTotal").modal('toggle');
   }
 
-  function doButtonTotal(_mode) {
+  // Staging (belum disimpan) untuk toggle "Pakai Total" di modal Setting Total --
+  // beda dari doButtonTotal(_index) di bawah, yang dipakai menu roda gigi header
+  // interaktif dan langsung menyimpan. Nama lama fungsi ini ("doButtonTotal")
+  // sekarang dipakai kontrak report-table.js, jadi dipindah ke nama ini.
+  function doButtonSetTotalMode(_mode) {
     let _str = '';
     if (_mode === 0) {
       // TANPA TOTAL
-      _str += '<div class="col-6 btn-primary text-center tombol-toggle" onclick="doButtonTotal(0)">Tanpa Total</div>';
-      _str += '<div class="col-6 btn-outline-primary text-center tombol-toggle" onclick="doButtonTotal(1)">Pakai Total</div>';
+      _str += '<div class="col-6 btn-primary text-center tombol-toggle" onclick="doButtonSetTotalMode(0)">Tanpa Total</div>';
+      _str += '<div class="col-6 btn-outline-primary text-center tombol-toggle" onclick="doButtonSetTotalMode(1)">Pakai Total</div>';
     } else {
       // PAKAI TOTAL
-      _str += '<div class="col-6 btn-outline-primary text-center tombol-toggle" onclick="doButtonTotal(0)">Tanpa Total</div>';
-      _str += '<div class="col-6 btn-primary text-center tombol-toggle" onclick="doButtonTotal(1)">Pakai Total</div>';
+      _str += '<div class="col-6 btn-outline-primary text-center tombol-toggle" onclick="doButtonSetTotalMode(0)">Tanpa Total</div>';
+      _str += '<div class="col-6 btn-primary text-center tombol-toggle" onclick="doButtonSetTotalMode(1)">Pakai Total</div>';
     }
     $("#buttonSetTotal").html(_str);
 
     gsettotal_nowtotal = _mode;
+  }
+
+  // Toggle "tampilkan total" kolom _index langsung tersimpan -- dipakai menu roda
+  // gigi header interaktif (report-table.js / window.ReportTable), kontraknya sama
+  // dengan doButtonTotal di masterreport2.blade.php.
+  var gct_desimal_max = 4;
+
+  function doButtonTotal(_index) {
+    gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+    doShowCustomize();
+  }
+
+  // Ubah jumlah desimal kolom _index sebesar _step (+1/-1), lalu simpan -- dipakai
+  // menu roda gigi header interaktif.
+  function doSetDesimal(_index, _step) {
+    let _next = Number(gcart_header[_index][5]) + _step;
+    if (_next < 0 || _next > gct_desimal_max) { return; }
+
+    gcart_header[_index][5] = _next;
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+    doShowCustomize();
   }
 
   function doSimpanFormSettingTotal() {
@@ -739,7 +783,7 @@ rel="stylesheet">
   function doSetRowHeader(_reportTitle, _tempcart, _cellcount, _date1, _date2 = null) {
     let rowHeader = "";
 
-    rowHeader += doSetRowHeaderInfo(_reportTitle, _cellcount, _date1, _date2);
+    // rowHeader += doSetRowHeaderInfo(_reportTitle, _cellcount, _date1, _date2);
 
     // jika butuh header custom, buatlah function setRowHeader(rowHeader) di Blade
     if ($.isFunction(window.setRowHeader)) { return setRowHeader(rowHeader); }
@@ -760,7 +804,7 @@ rel="stylesheet">
     }
 
     rowHeader += '<tr>';
-    rowHeader += '  <th colspan="' + _cellcount + '" style="text-align: left; font-weight: bold;">{!! $akses['program'] !!}<br/> ' + _reportTitle + '</th>';
+    // rowHeader += '  <th colspan="' + _cellcount + '" style="text-align: left; font-weight: bold;">{!! $akses['program'] !!}<br/> ' + _reportTitle + '</th>';
     rowHeader += '</tr>';
     rowHeader += '<tr>';
     if (_date1 == null && _date2 == null) {
@@ -774,7 +818,7 @@ rel="stylesheet">
     rowHeader += '</tr>';
 
     rowHeader += '<tr>';
-    rowHeader += '  <th colspan="' + _cellcount + '"  style="text-align: left; font-weight: bold;">Dicetak Oleh :  ' + '  {!! $akses['user'] !!}  //  Tanggal : '+ getDateIndo() +' // Jam : ' + getTimeNow() + '</th>';
+    // rowHeader += '  <th colspan="' + _cellcount + '"  style="text-align: left; font-weight: bold;">Dicetak Oleh :  ' + '  {!! $akses['user'] !!}  //  Tanggal : '+ getDateIndo() +' // Jam : ' + getTimeNow() + '</th>';
     rowHeader += '</tr>';
 
     rowHeader += '<tr>';
@@ -1090,7 +1134,9 @@ rel="stylesheet">
 
     makeTable("FILTER");
     doShowFilter();
-    $("#tabelfilter_totalrow").html("");
+    // gfilter_totalrow sudah dihitung ulang oleh doShowFilter() dari gfilter_selectedKeys
+    // yang tersimpan -- tampilkan labelnya kalau ada baris yang masih terpilih.
+    $("#tabelfilter_totalrow").html(gfilter_totalrow > 0 ? "Jumlah baris yang dipilih: " + gfilter_totalrow : "");
 
     $("#formFilterData").modal('toggle');
   }
@@ -1129,6 +1175,7 @@ rel="stylesheet">
     _str = "";
     let _prevdata = "", _nowdata = "", _idx = -1;
     gcart_filterShow = [];
+    gfilter_totalrow = 0;
     if (gcart_filter.length > 0) {
       gcart_filter.forEach((item, i) => {
         _nowdata = item[cart_filterHeader[0][0]];
@@ -1136,7 +1183,14 @@ rel="stylesheet">
         if (_prevdata != _nowdata) {
           _idx += 1;
           item._idx = _idx;
-          _str += '<tr id="' + _idx + '-trrowfilter" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
+
+          // Pulihkan status terpilih dari gfilter_selectedKeys (bertahan lintas
+          // buka-tutup modal), bukan selalu mulai dari false.
+          let _isSelected = gfilter_selectedKeys.has(_nowdata);
+          if (_isSelected) { gfilter_totalrow += 1; }
+
+          _str += '<tr id="' + _idx + '-trrowfilter" class="pick-row' + (_isSelected ? ' is-selected' : '') +
+                  '" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
           cart_filterHeader.forEach((itemcart, j) => {
             if (itemcart[3] == "index") {
               _str += "  <td>" + (_idx+1) + "</td>";
@@ -1153,8 +1207,9 @@ rel="stylesheet">
           _str += '</tr>';
 
           let temp = [];
-          temp.push(_idx);  // index
-          temp.push(false); // selected or not
+          temp.push(_idx);       // index
+          temp.push(_isSelected); // selected or not
+          temp.push(_nowdata);   // kunci -- dipakai doSelectrowfilter() untuk update gfilter_selectedKeys
           gcart_filterShow.push(temp);
         } else {
           item._idx = _idx;
@@ -1204,15 +1259,17 @@ rel="stylesheet">
     }
 
     while (_row_start <= _row_end) {
+      let _key = gcart_filterShow[_row_start][2];
+
       if (gcart_filterShow[_row_start][1]) {
         // unselect
-        $("#"+_row_start+"-trrowfilter").css('background-color', '');
-        $("#"+_row_start+"-trrowfilter").css('color', '');
+        $("#"+_row_start+"-trrowfilter").removeClass('is-selected');
+        gfilter_selectedKeys.delete(_key);
         gfilter_totalrow -= 1;
       } else {
         // select
-        $("#"+_row_start+"-trrowfilter").css('background-color', '#0069d9');
-        $("#"+_row_start+"-trrowfilter").css('color', 'white');
+        $("#"+_row_start+"-trrowfilter").addClass('is-selected');
+        gfilter_selectedKeys.add(_key);
         gfilter_totalrow += 1;
       }
 

@@ -124,6 +124,9 @@ $iconMap = [
     <link rel="stylesheet"
         href="{!! URL::asset('css/customize-table.css') !!}?v={{ @filemtime(base_path('public/css/customize-table.css')) ?: '1' }}">
 
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
+
     {{-- Header tabel interaktif + skin modal Filter/picker: sudah DIGABUNG ke
          public/css/report-table.css (di-link di atas). public/css/report-table-v2.css
          masih ada di disk sebagai arsip, tapi TIDAK dimuat lagi. --}}
@@ -615,7 +618,7 @@ $iconMap = [
     </script>
 
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo" onclick="window.location.href='{{ url('home') }}'">
+        <div class="sidebar-logo" style="cursor: pointer" onclick="window.location.href='{{ url('home') }}'">
             <div class="logo-icon">AJC</div>
             <span class="logo-text">{{ $akses['program'] ?? 'Report' }}</span>
         </div>
