@@ -26,7 +26,7 @@ class NewPOBeliAccController extends Controller
   }
 
   public function index (Request $req) {
-    $kodemenu = '030402';
+    $kodemenu = '0304';
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu , $req->path());
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
@@ -56,7 +56,7 @@ class NewPOBeliAccController extends Controller
   }
 
   public function getAkses (Request $req) {
-    $kodemenu = '030402';
+    $kodemenu = '0304';
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, 'newpobeliacc');
     return $akses;
   }
