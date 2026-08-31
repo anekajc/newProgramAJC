@@ -212,7 +212,7 @@ class HeaderTableController extends Controller
     $isparsed = 0;
     $headertablealias = [];
 
-    $menuMoreThanOne = ['purchaseorder', 'pononstock', 'newpo', 'newpojasa'];
+    $menuMoreThanOne = ['purchaseorder', 'pononstock', 'newpo', 'newpojasa', 'invoicepembelian'];
     $desimal = [];
     $desimal2 = [];
     $aliasOrdered2 = [];
@@ -688,7 +688,11 @@ class HeaderTableController extends Controller
           if (str_contains($key, "Oto")) {
           } else {
             array_push($headertablevalue, $key);
-            array_push($headertableheader, $key);
+            // Label default kolom SisaPPL diganti jadi "SisaPR" - nama field data
+            // (dipakai untuk mengambil nilainya) tetap SisaPPL, hanya judul tampilannya
+            // yang berubah. Hanya berlaku untuk user yang belum punya konfigurasi
+            // kolom tersimpan sendiri (lihat dbheadertable di atas).
+            array_push($headertableheader, $key === 'SisaPPL' ? 'SisaPR' : $key);
             array_push($headerisshown, 1);
               // if (strtotime($value)) {
               //
@@ -945,7 +949,10 @@ class HeaderTableController extends Controller
         ];
         foreach ($default1 as $key => $tipe) {
           array_push($headertablevalue, $key);
-          array_push($headertableheader, $key);
+          // Sama seperti cabang 'purchaseorder' di atas: label SisaPPL diganti "SisaPR",
+          // field data tetap SisaPPL. Tidak berpengaruh ke $default1 milik href lain
+          // karena field itu memang cuma ada di daftar kolom pononstock.
+          array_push($headertableheader, $key === 'SisaPPL' ? 'SisaPR' : $key);
           array_push($headerisshown, 1);
           $isnumberheadertable[] = $tipe;
         }
@@ -1059,7 +1066,10 @@ class HeaderTableController extends Controller
         ];
         foreach ($default1 as $key => $tipe) {
           array_push($headertablevalue, $key);
-          array_push($headertableheader, $key);
+          // Sama seperti cabang 'purchaseorder' di atas: label SisaPPL diganti "SisaPR",
+          // field data tetap SisaPPL. Tidak berpengaruh ke $default1 milik href lain
+          // karena field itu memang cuma ada di daftar kolom pononstock.
+          array_push($headertableheader, $key === 'SisaPPL' ? 'SisaPR' : $key);
           array_push($headerisshown, 1);
           $isnumberheadertable[] = $tipe;
         }
@@ -1148,7 +1158,10 @@ class HeaderTableController extends Controller
         ];
         foreach ($default1 as $key => $tipe) {
           array_push($headertablevalue, $key);
-          array_push($headertableheader, $key);
+          // Sama seperti cabang 'purchaseorder' di atas: label SisaPPL diganti "SisaPR",
+          // field data tetap SisaPPL. Tidak berpengaruh ke $default1 milik href lain
+          // karena field itu memang cuma ada di daftar kolom pononstock.
+          array_push($headertableheader, $key === 'SisaPPL' ? 'SisaPR' : $key);
           array_push($headerisshown, 1);
           $isnumberheadertable[] = $tipe;
         }
@@ -1167,6 +1180,99 @@ class HeaderTableController extends Controller
         $default2 = [
           'NoBukti' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0, 'NoPO' => 0,
           'NAMAGUDANG' => 0, 'FAKTURSUPP' => 0,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
+    // Invoice Pembelian (invoicepembelian). urut 1 = tab "Outstanding Pembelian" (dari
+    // vwBrowsOutBeli, lihat InvoicePembelianController@getAllPembelian), urut 2 = tab
+    // "Transaksi Kelengkapan Dokumen" (dari vwTransInvoice, lihat
+    // InvoicePembelianController@getAllPO) - sama pola dengan cabang 'newpo' di atas.
+    else if ($req->href == 'invoicepembelian') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Nama field HARUS sama persis dengan field data di JS (lihat ipbBuatCart() di
+        // invoicepembelian.blade.php). field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'NoBukti' => 0, 'TANGGAL' => 2, 'KODECUSTSUPP' => 0, 'NAMACUSTSUPP' => 0, 'NoPO' => 0,
+          'TNDPP' => 1, 'TNPPN' => 1, 'TSUBTOTAL' => 1,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          // Sama seperti cabang 'purchaseorder' di atas: label SisaPPL diganti "SisaPR",
+          // field data tetap SisaPPL. Tidak berpengaruh ke $default1 milik href lain
+          // karena field itu memang cuma ada di daftar kolom pononstock.
+          array_push($headertableheader, $key === 'SisaPPL' ? 'SisaPR' : $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        $isparsed2 = 1;
+        // Field dari vwTransInvoice (lihat InvoicePembelianController@getAllPO).
+        $default2 = [
+          'NoBukti' => 0, 'Tanggal' => 2, 'KODECUSTSUPP' => 0, 'NamaCustSupp' => 0, 'NoPO' => 0,
+          'TotDPPRp' => 1, 'TotPPNRp' => 1, 'TotNetRp' => 1, 'OtoUser1' => 0, 'TglOto1' => 0,
         ];
         foreach ($default2 as $key => $tipe) {
           array_push($headertablevalue2, $key);
