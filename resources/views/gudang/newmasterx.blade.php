@@ -296,8 +296,9 @@
                 @if (count($m1->child ?? []) > 0)
                     <div class="nav-flyout" id="flyout-{{ $m1['KODEMENU'] }}">
                         @foreach ($m1->child as $m2)
-                            <div class="nav-flyout-item" onclick="window.location.href='{{ url($m2->href) }}'">
-                                {{ $m2['Keterangan'] }}</div>
+                            <div class="nav-flyout-item" onclick="window.location.href='{{ url($m2->href ?? '/') }}'">
+                                {{ $m2['Keterangan'] }}
+                            </div>
                         @endforeach
                     </div>
                 @endif
