@@ -292,6 +292,21 @@
     border-color: #D64550;
     background: #FEF2F2;
   }
+
+  /* Hide action buttons until the row is hovered */
+  #tabel tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+  /* Show them when hovering the table row */
+  #tabel tbody tr:hover .action-buttons-wrap,
+  #tabel tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
 </style>
 @endsection
 
@@ -1877,9 +1892,9 @@ function tabelActionsCell(row) {
   var nobukti = HeaderEngine.pickCI(row, 'NOBUKTI');
   var urut = HeaderEngine.pickCI(row, 'Urut');
   if (Number(HeaderEngine.pickCI(row, 'IsVerf')) === 1) {
-    return '<td class="text-center"><button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-dash"></i></button></td>';
+    return '<td class="text-center"><div class="action-buttons-wrap"><button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-dash"></i></button></div></td>';
   }
-  return '<td class="text-center"><button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-plus"></i></button></td>';
+  return '<td class="text-center"><div class="action-buttons-wrap"><button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\',\'' + urut + '\')"><i class="bi bi-plus"></i></button></div></td>';
 }
 
 // col[5] (decimals) is user-editable via the gear menu's stepper, so float

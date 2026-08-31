@@ -406,6 +406,30 @@
   @keyframes poPutarLoading {
     to { transform: rotate(360deg); }
   }
+
+  {{-- Row actions only reveal on hover/focus, port 1:1 dari pola
+       .action-buttons-wrap milik master (public/css/tableMaster2.css) --
+       scoped ke setiap tabel SO yang punya kolom Actions (#tabel/#tabel2/
+       #tabel_oto -- #tabel7 tidak punya Actions sama sekali). --}}
+  #tabel tbody .action-buttons-wrap,
+  #tabel2 tbody .action-buttons-wrap,
+  #tabel_oto tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+
+  #tabel tbody tr:hover .action-buttons-wrap,
+  #tabel2 tbody tr:hover .action-buttons-wrap,
+  #tabel_oto tbody tr:hover .action-buttons-wrap,
+  #tabel tbody tr:focus-within .action-buttons-wrap,
+  #tabel2 tbody tr:focus-within .action-buttons-wrap,
+  #tabel_oto tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
   </style>
 
   {{-- Same generic search-bar look PO uses for every "pick from list" modal,
@@ -1777,8 +1801,8 @@
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_nopenyerahan" class="data-table">
-                  <thead><tr><th style="padding: 4px 12px;" scope="col">No Sample</th><th style="padding: 4px 12px;" scope="col">Nama Brg</th></tr></thead>
-                  <tbody id="tabel_data_add_list_nopenyerahan" class="text-left"><tr><td>-</td><td>-</td></tr></tbody>
+                  <thead><tr><th style="padding: 4px 12px;" scope="col">No Sample</th></tr></thead>
+                  <tbody id="tabel_data_add_list_nopenyerahan" class="text-left"><tr><td>-</td></tr></tbody>
                 </table>
               </div>
             </div>
@@ -1796,7 +1820,7 @@
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_refpr" class="data-table">
-                  <thead><tr><th style="padding: 4px 12px;" scope="col">Nobukti</th><th style="padding: 4px 12px;" scope="col">Tanggal</th><th style="padding: 4px 12px;" scope="col">Nama Brg</th></tr></thead>
+                  <thead><tr><th style="padding: 4px 12px;" scope="col">Nobukti</th><th style="padding: 4px 12px;" scope="col">Tanggal</th><th style="padding: 4px 12px;" scope="col">No Ref</th></tr></thead>
                   <tbody id="tabel_data_add_list_refpr" class="text-left"><tr><td>-</td><td>-</td><td>-</td></tr></tbody>
                 </table>
               </div>
@@ -1871,6 +1895,43 @@
                     </tr>
                     @endfor
                   </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger btn-lg" style="margin-top:-10px; height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;" onclick="buttonAddListBatal()">Batal</button>
+        </div>
+      </div>
+
+      {{-- Hasil pencarian buttonAddAddListBarang() saat No Penyerahan (dan/atau RefPR)
+           sudah diisi -- markup ini sebelumnya belum ada sama sekali, padahal sudah
+           dirujuk oleh JS-nya (document.getElementById("tabel_data_add_list_barangrefpr")),
+           bikin error "Cannot set properties of null" tiap kali cabang ini kepakai. --}}
+      <div id="modalBodyAddListBarangRefPR" class="showhidemodalbodyadd">
+        <div class="modal-body">
+          <div class="container-fluid mt-4">
+            <div class="row">
+              <div class="col-12" style="margin-top:-30px;"><h3>Barang</h3></div>
+            </div>
+            <div class="row">
+              <div class="col-12" style="overflow:auto; margin-top:-30px;">
+                <table id="tabel_add_list_barangrefpr" class="data-table">
+                  <thead class="text-center">
+                    <tr>
+                      <th style="padding: 4px 12px;" scope="col">Actions</th>
+                      <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                      <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                      <th style="padding: 4px 12px;" scope="col">RefPR</th>
+                      <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
+                      <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+                      <th style="padding: 4px 12px;" scope="col">Merk</th>
+                      <th style="padding: 4px 12px;" scope="col">Sisa</th>
+                      <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabel_data_add_list_barangrefpr" class="text-left"></tbody>
                 </table>
               </div>
             </div>
@@ -2730,12 +2791,12 @@ function renderTabel2Rows(rows) {
   let html = ''
   ;(rows || []).forEach(function (rowWrap) {
     let row = rowWrap[0]
-    html += '<tr><td class="text-center">'
+    html += '<tr><td class="text-center"><div class="action-buttons-wrap">'
       + '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + row.NOBUKTI + '\')"><i class="bi bi-info"></i></button>'
       + '<button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi(\'' + row.NOBUKTI + '\')"><i class="bi bi-key-fill"></i></button>'
       + '<button class="btn btn-success btn-sm" title="Open CBD" onclick="lockCBD(\'' + row.NOBUKTI + '\')"><i class="bi bi-check-square-fill"></i></button>'
       + '<button class="btn btn-info btn-sm" type="button" title="Print" onclick="submitPrint(\'' + row.NOBUKTI + '\')"><i class="bi bi-printer"></i></button>'
-      + '</td>'
+      + '</div></td>'
       + '<td>' + row.NOBUKTI + '</td>'
       + '<td>' + so2FormatTanggal(row.TANGGAL) + '</td>'
       + '<td>' + (row.NAMACUSTSUPP || '') + '</td>'
@@ -2755,11 +2816,11 @@ function renderTabelOtoRows(rows) {
   let html = ''
   ;(rows || []).forEach(function (rowWrap) {
     let row = rowWrap[0]
-    html += '<tr><td class="text-center">'
+    html += '<tr><td class="text-center"><div class="action-buttons-wrap">'
       + '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + row.NOBUKTI + '\')"><i class="bi bi-info"></i></button>'
       + '<button class="btn btn-danger btn-sm" type="button" title="Cancel Authorization" onclick="buttonBatalOtorisasi(\'' + row.NOBUKTI + '\')"><i class="bi bi-key-fill"></i></button>'
       + '<button class="btn btn-info btn-sm" type="button" title="Print" onclick="submitPrint(\'' + row.NOBUKTI + '\')"><i class="bi bi-printer"></i></button>'
-      + '</td>'
+      + '</div></td>'
       + '<td>' + row.NOBUKTI + '</td>'
       + '<td>' + so2FormatTanggal(row.TANGGAL) + '</td>'
       + '<td>' + (row.NAMACUSTSUPP || '') + '</td>'
@@ -5806,8 +5867,11 @@ function buttonAddAddListBarang () {
   let refpr = $("#input_add_add_refpr").val()
 
   if (nopenyerahan || refpr) {
-    if (!refpr || !nopenyerahan) {
-      alertify.warning("Lengkapi  refpr dan no penyerahan")
+    // No Penyerahan sendirian sudah cukup buat cari (RefPR opsional kalau begitu) --
+    // cuma RefPR tanpa No Penyerahan yang masih diblokir, karena solistbarangrefpr
+    // butuh No Penyerahan buat subquery SS-nya.
+    if (refpr && !nopenyerahan) {
+      alertify.warning("Lengkapi no penyerahan")
       return
     }
 
@@ -6003,33 +6067,26 @@ function buttonAddAddListNoPenyerahan () {
       let rowTable = `<tr class="pick-row" onclick="buttonAddPickNoPenyerahan('-')">
 
       <td>-</td>
-      <td>-</td>
 
       </tr>`
 
       listnopenyerahan = res
 
+      // Dikelompokkan per No Sample (NOBUKTI) -- satu No Sample bisa punya banyak
+      // baris barang (lihat query listNoPenyerahan()), jadi tanpa grouping NOBUKTI-nya
+      // keulang beberapa kali. Cuma No Sample-nya yang ditampilkan (kolom Nama Brg
+      // dihapus) -- index yang dipakai tetap index pertama per grup di
+      // listnopenyerahan asli supaya buttonAddPickNoPenyerahan(index) tidak berubah
+      // (yang dipakai cuma .NOBUKTI-nya).
+      let sudahTampil = {}
       listnopenyerahan.forEach((item, i) => {
+        if (sudahTampil[item.NOBUKTI]) { return; }
+        sudahTampil[item.NOBUKTI] = true;
         rowTable += `
-        <tr class="pick-row" onclick="buttonAddPickNoPenyerahan(${i} )">
-
+        <tr class="pick-row" onclick="buttonAddPickNoPenyerahan(${i})">
         <td>${item.NOBUKTI}</td>
-        <td>${item.NAMABRG}</td>
-
         </tr>`
-
-        // '
-        // <tr>
-        // <td> '+ item.nomor + '</td>
-        // <td> '+ item.nama + '</td>
-        // <td>+ ' + item.alamat + '</td>
-        // <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAlamatKirim( `' + item.nomor + '` , `'+ item.nama + '` , `' + item.alamat +'` )" type="button" ><i class="bi bi-plus"></i></button></td>
-        //
-        // </tr>'
       });
-
-
-
 
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`

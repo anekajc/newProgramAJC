@@ -27,84 +27,60 @@ class ReturSuratJalanController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(4);
 
-    $tempOutstanding = DB::connection('SML')->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPB, C.Tanggal TglSPB, A.KODECUSTSUPP, B.NamaCust NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser,
-        C.Tipe, A.IsFlag,
-        Case when A.isFlag=0 then 'Retur Surat Jalan Barang Jadi'
-             when A.isFlag=1 then 'Retur Surat Jalan Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-from	dbRSPB A
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp
-left Outer join (Select x.NoBukti, x.Tanggal, 'Ekpsor' Tipe
-                 from DBSPB x
-                 ) C on C.NoBukti=A.NoSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)= @Bulan and a.IsOtorisasi1 <> 1
-order by A.NoBukti
-", ["tahun" => $periode->tahun,
-"bulan" => $periode->bulan]);
-
-
-    $tempOutstanding2 = DB::connection('SML')->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPB, C.Tanggal TglSPB, A.KODECUSTSUPP, B.NamaCust NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser,
-        C.Tipe, A.IsFlag,
-        Case when A.isFlag=0 then 'Retur Surat Jalan Barang Jadi'
-             when A.isFlag=1 then 'Retur Surat Jalan Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-from	dbRSPB A
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp
-left Outer join (Select x.NoBukti, x.Tanggal, 'Ekpsor' Tipe
-                 from DBSPB x
-                 ) C on C.NoBukti=A.NoSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and a.IsOtorisasi1 = 1
-order by A.NoBukti
-", ["tahun" => $periode->tahun,
-"bulan" => $periode->bulan]);
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryReturSuratJalanOtorisasi($tglawal, $tglakhir, 0);
 
     return view('marketing.retursuratjalan' , [
       "menul0" => $menul0,
       "periode" => $periode,
       "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
       "akses" => $akses
     ]);
 
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() -- dulu tabel (Belum
+  // Otorisasi, tombol Koreksi/Otorisasi) dan tabel2 (Sudah Otorisasi, tanpa
+  // Koreksi) adalah 2 tab terpisah dengan query nyaris identik (cuma beda
+  // IsOtorisasi1<>1/=1). Digabung jadi satu dengan filterrsj yang menyaring di
+  // server, port 1:1 dari pola queryOutstanding() milik
+  // PerintahReturJualController.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryReturSuratJalanOtorisasi ($tglawal, $tglakhir, $filterrsj) {
+    return DB::connection('SML')->select("
+      select * from (
+        select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPB, C.Tanggal TglSPB, A.KODECUSTSUPP, B.NamaCust NamaCustSupp,
+                A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser,
+                C.Tipe, A.IsFlag,
+                Case when A.isFlag=0 then 'Retur Surat Jalan Barang Jadi'
+                     when A.isFlag=1 then 'Retur Surat Jalan Bahan Baku dan Lain-lain'
+                     else ''
+                end MyTipe,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                          else 1
+                     end As Bit) NeedOtorisasi
+        from	dbRSPB A
+        left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp
+        left Outer join (Select x.NoBukti, x.Tanggal, 'Ekpsor' Tipe
+                         from DBSPB x
+                         ) C on C.NoBukti=A.NoSPB
+        where	A.Tanggal between ? and ?
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1,0) <> 1)
+         or (? = 2 and isnull(x.IsOtorisasi1,0) = 1)
+      order by x.NOBUKTI
+    ", [$tglawal, $tglakhir, $filterrsj, $filterrsj, $filterrsj]);
   }
 
   public function getDetail (Request $req) {
@@ -386,79 +362,15 @@ if ($header) {
   }
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    $tempOutstanding = DB::connection('SML')->select("
-    declare @Tahun int, @Bulan int
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterrsj = $req->filterrsj ?: 0;
+    $tempOutstanding = $this->queryReturSuratJalanOtorisasi($tglawal, $tglakhir, $filterrsj);
 
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPB, C.Tanggal TglSPB, A.KODECUSTSUPP, B.NamaCust NamaCustSupp,
-            A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser,
-            C.Tipe, A.IsFlag,
-            Case when A.isFlag=0 then 'Retur Surat Jalan Barang Jadi'
-                 when A.isFlag=1 then 'Retur Surat Jalan Bahan Baku dan Lain-lain'
-                 else ''
-            end MyTipe,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi
-    from	dbRSPB A
-    left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp
-    left Outer join (Select x.NoBukti, x.Tanggal, 'Ekpsor' Tipe
-                     from DBSPB x
-                     ) C on C.NoBukti=A.NoSPB
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and a.IsOtorisasi1 <> 1
-    order by A.NoBukti
-    ", ["tahun" => $periode->tahun,
-    "bulan" => $periode->bulan]);
-
-    $tempOutstanding2 = DB::connection('SML')->select("
-    declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPB, C.Tanggal TglSPB, A.KODECUSTSUPP, B.NamaCust NamaCustSupp,
-            A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser,
-            C.Tipe, A.IsFlag,
-            Case when A.isFlag=0 then 'Retur Surat Jalan Barang Jadi'
-                 when A.isFlag=1 then 'Retur Surat Jalan Bahan Baku dan Lain-lain'
-                 else ''
-            end MyTipe,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi
-    from	dbRSPB A
-    left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp
-    left Outer join (Select x.NoBukti, x.Tanggal, 'Ekpsor' Tipe
-                     from DBSPB x
-                     ) C on C.NoBukti=A.NoSPB
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and a.IsOtorisasi1 = 1
-    order by A.NoBukti
-    ", ["tahun" => $periode->tahun,
-    "bulan" => $periode->bulan]);
-
-
-    return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2];
+    return ["tempOutstanding" => $tempOutstanding];
   }
 
   public function loadHeader(Request $req) {

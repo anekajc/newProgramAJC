@@ -1474,6 +1474,12 @@ select a.* , b.namacustsupp
 
   public function listBarangRefPR (Request $req ) {
 
+    // noreferensi (RefPR) sekarang opsional -- kalau user cuma isi No Penyerahan
+    // tanpa RefPR, tetap dicari berdasarkan No Penyerahan saja (RefPR check
+    // dilewati). Pakai positional ? (bukan :noreferensi/:nopenyerahan) karena
+    // noreferensi dipakai 2x di query ini dan sqlsrv/ODBC driver tidak
+    // mendukung reuse named placeholder yang sama lebih dari sekali.
+    $noreferensi = $req->noreferensi ?: '';
     $listData = DB::connection('SML')->select("
 select SS.NOBUKTI,C.TANGGAL,C.REFPR,a.KODEBRG,D.namaBrg,A.SAT_1  ,a.SAT_2  ,
    case when A.NOSAT=1 then SUM(ISNULL(SS.QNT,0))-ISNULL(b.QNT,0)
@@ -1491,7 +1497,7 @@ select SS.NOBUKTI,C.TANGGAL,C.REFPR,a.KODEBRG,D.namaBrg,A.SAT_1  ,a.SAT_2  ,
 							  FROM DBRSERAHSAMPLEDET A
 							  GROUP BY A.KODEBRG,A.NoSerahsample
 								)X ON A.NOBUKTI=X.NoSerahsample AND A.KODEBRG=X.KODEBRG
- where nobukti = :nopenyerahan
+ where nobukti = ?
   group by noprsample,urutprsample,nobukti,ISNULL(QNTRSAMPLE,0),ISNULL(QNT2RSAMPLE,0)
  ) SS ON A.NOBUKTI=SS.NOPRSAMPLE AND A.URUT=SS.URUTPRSAMPLE
 
@@ -1511,14 +1517,14 @@ select SS.NOBUKTI,C.TANGGAL,C.REFPR,a.KODEBRG,D.namaBrg,A.SAT_1  ,a.SAT_2  ,
  left outer join dbbarang D on A.kodebrg=D.kodebrg
  left outer join dbmerk h on D.kodemerk = h.kodemerk
     where
-     c.RefPR<>'-' and c.RefPR= :noreferensi and isnull(D.Isaktif,0)=1
+     c.RefPR<>'-' and (? = '' or c.RefPR= ?) and isnull(D.Isaktif,0)=1
 
  and ss.nobukti is not null
  group by   A.NOBUKTI,C.TANGGAL,C.REFPR,a.KODEBRG,b.Qnt,A.NOSAT,b.Qnt2,
  Z.QNTBEBAN ,Z.QNT2BEBAN,a.SAT_1,a.SAT_2,a.ISI,Ss.Nobukti,D.namaBrg,D.pPPN,Isnull(D.QntMin,0),D.isi2,h.namamerk
   having sum(SS.QNT)-ISNULL(b.QNT,0)  -ISNULL(Z.QNTBEBAN,0)>0
 ",
-  ["nopenyerahan" => $req->nopenyerahan, "noreferensi" => $req->noreferensi]);
+  [$req->nopenyerahan, $noreferensi, $noreferensi]);
 
     return $listData;
 

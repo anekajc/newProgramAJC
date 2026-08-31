@@ -228,6 +228,23 @@
   0%, 45% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* Hide action buttons until the row is hovered, port 1:1 dari pola
+   .action-buttons-wrap milik master (public/css/tableMaster2.css) --
+   scoped ke #tabel (satu-satunya tabel di halaman ini yang punya Actions). */
+#tabel tbody .action-buttons-wrap {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+#tabel tbody tr:hover .action-buttons-wrap,
+#tabel tbody tr:focus-within .action-buttons-wrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
 </style>
 @endsection
 
@@ -2091,7 +2108,7 @@ function prjValueCell (row, col) {
 function tabelActionsCell (row) {
   let nobukti = prjPickCI(row, 'NOBUKTI');
   let isOto = Number(prjPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center">';
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
   html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
   if (isOto) {
@@ -2101,7 +2118,7 @@ function tabelActionsCell (row) {
   } else {
     html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 

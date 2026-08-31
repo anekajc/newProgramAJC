@@ -364,6 +364,21 @@
   display: inline-block;
   vertical-align: middle;
   }
+
+  /* Hide action buttons until the row is hovered */
+  #tabel tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+  /* Show them when hovering the table row */
+  #tabel tbody tr:hover .action-buttons-wrap,
+  #tabel tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
 </style>
 {{-- end tampilan search modal barang all --}}
 @endsection
@@ -391,7 +406,7 @@
 
   {{-- Tab bar: PO's exact card.tab-card + custom-tabs anchor pattern (via
        so.blade.php), only one tab so nothing to switch, but same visual shell. --}}
-  <div class="card mb-3 tab-card">
+  {{-- <div class="card mb-3 tab-card">
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
@@ -399,7 +414,7 @@
         </a>
       </div>
     </div>
-  </div>
+  </div> --}}
 
   {{-- Toolbar: periode (with its existing onchange="loadAll()" kept exactly as-is)
        + Export Excel/Import Excel now inline in the same row, PO's po-toolbar-act
@@ -822,10 +837,10 @@ function fpValueCell (row, col) {
 
 function tabelActionsCell (row) {
   let nobukti = fpPickCI(row, 'NoBukti');
-  let html = '<td class="text-center" style="white-space:nowrap;">';
+  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + fpPickCI(row, 'NoPajak') + '\' , \'' + fpPickCI(row, 'TglFPJ') + '\')"><i class="bi bi-plus"></i></button>';
   html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete(\'' + nobukti + '\')"><i class="bi bi-trash"></i></button>';
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 

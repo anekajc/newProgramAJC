@@ -422,6 +422,21 @@
   display: inline-block;
   vertical-align: middle;
   }
+
+  /* Hide action buttons until the row is hovered */
+  #tabel6 tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+  /* Show them when hovering the table row */
+  #tabel6 tbody tr:hover .action-buttons-wrap,
+  #tabel6 tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
 </style>
 
 @endsection
@@ -3385,7 +3400,7 @@ function tabel6ActionsCell(row) {
   var tglTerima = sjPickCI(row, 'TGLTERIMA');
   var tglSpbInvc = sjPickCI(row, 'TglSPBINVC');
   var isOto = Number(sjPickCI(row, 'IsOtorisasi1'));
-  var html = '<td class="text-center">';
+  var html = '<td class="text-center"><div class="action-buttons-wrap">';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button> ';
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
@@ -3393,7 +3408,7 @@ function tabel6ActionsCell(row) {
   } else {
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   }
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 

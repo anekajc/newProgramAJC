@@ -68,6 +68,25 @@
 }
 #tabel tbody tr:nth-of-type(odd), #tabel2 tbody tr:nth-of-type(odd), #tabel3 tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
 #tabel tbody tr:hover, #tabel2 tbody tr:hover, #tabel3 tbody tr:hover { background-color: #f5f3ff; }
+
+/* Hide action buttons until the row is hovered/focused, port 1:1 dari pola
+   .action-buttons-wrap milik master (public/css/tableMaster2.css). */
+#tabel tbody .action-buttons-wrap,
+#tabel2 tbody .action-buttons-wrap {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+#tabel tbody tr:hover .action-buttons-wrap,
+#tabel2 tbody tr:hover .action-buttons-wrap,
+#tabel tbody tr:focus-within .action-buttons-wrap,
+#tabel2 tbody tr:focus-within .action-buttons-wrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
 </style>
 @endsection
 
@@ -109,8 +128,7 @@
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Outstanding Uang Muka</a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Uang Muka Belum Otorisasi</a>
-        <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false">Uang Muka Sudah Otorisasi</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Uang Muka Otorisasi</a>
       </div>
     </div>
   </div>
@@ -139,34 +157,70 @@
     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div class="row">
         <div class="col-12">
+
+          {{-- Filter modal: port 1:1 dari modalFilter milik perintahreturjual.blade.php.
+               tabel2 (Belum Otorisasi) + tabel3 (Sudah Otorisasi) digabung jadi satu
+               tabel di sini dengan Status dropdown, sama seperti PRJ/RPG/SJ. --}}
+          <div class="modal fade rt-filter" id="modalFilterUMJ">
+            <div class="modal-dialog modal-md">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-funnel"></i>
+                    Filter Data
+                    <span class="rt-active-badge" id="umjFilterBadge">0 aktif</span>
+                  </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterUMJ').modal('hide')">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+
+                <div class="modal-body">
+                  <div class="rt-section">
+                    <div class="rt-group-label">Status</div>
+                    <div>
+                      <label class="rt-field-label" for="input_filterumj">Status Otorisasi</label>
+                      <select class="rt-native" id="input_filterumj">
+                        <option value=0 selected>Semua</option>
+                        <option value=1>Belum Otorisasi</option>
+                        <option value=2>Sudah Otorisasi</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="rt-reset-link" onclick="umjResetFilterFields()">Reset semua</button>
+                  <div class="rt-footer-buttons">
+                    <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                      onclick="$('#modalFilterUMJ').modal('hide')">Batal</button>
+                    <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterUMJ(); $('#modalFilterUMJ').modal('hide');">Terapkan</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
           <div class="po-toolbar">
+            <div class="po-filter-wrap">
+              <label>Periode</label>
+              <input type="date" onchange="onChangePeriodeUMJ()" class="po-filter-inp" id="input_tanggalawal_umj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <span class="po-filter-sep">s/d</span>
+              <input type="date" onchange="onChangePeriodeUMJ()" class="po-filter-inp" id="input_tanggalakhir_umj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+            </div>
             <input type="search" id="umjSearch2" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="umjLen2">Tampilkan</label>
               <select id="umjLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
             </div>
+            <button class="po-btn-filter" type="button" onclick="$('#modalFilterUMJ').modal('show')">
+              <i class="bi bi-funnel"></i> Filter
+            </button>
           </div>
           <div id="rtBarTabel2"></div>
           <table id="tabel2" class="data-table">
             <thead style="white-space:nowrap;"></thead>
             <tbody id="tabel2_data" class="text-left"></tbody>
-          </table>
-          <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
-        </div>
-      </div>
-    </div>
-    <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile1-tab">
-      <div class="row">
-        <div class="col-12">
-          <div class="po-toolbar">
-            <input type="search" id="umjSearch3" class="po-search-inp" placeholder="Cari data">
-            <div class="po-len-wrap"><label for="umjLen3">Tampilkan</label>
-              <select id="umjLen3" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
-            </div>
-          </div>
-          <div id="rtBarTabel3"></div>
-          <table id="tabel3" class="data-table">
-            <thead style="white-space:nowrap;"></thead>
-            <tbody id="tabel3_data" class="text-left"></tbody>
           </table>
           <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
         </div>
@@ -639,14 +693,13 @@ let tempAdd = {}
  * returpenjualangudang/kreditnote/notareturpenjualan/perintahreturjualminus/
  * retursuratjalan.
  */
-let umjCart = { 1 : [], 2 : [], 3 : [] }
+let umjCart = { 1 : [], 2 : [] }
 let umjActiveUrut = 0
 const UMJ_HREF = 'uangmukajual'
 const UMJ_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const UMJ_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
 
 function activeVisibleTabKeyUMJ () {
-  if ($('#nav-profile1-tab').hasClass('active')) { return 3; }
   if ($('#nav-profile-tab').hasClass('active')) { return 2; }
   return 1;
 }
@@ -681,7 +734,9 @@ function umjDefaultCart (urut) {
       ['catatan',      'Catatan',        1, 'varchar', 0, 0],
     ]
   }
-  let cart = [
+  // urut 2: Uang Muka Otorisasi -- gabungan kolom tab lama "Belum Otorisasi" +
+  // "Sudah Otorisasi" (OtoUser1/TglOto1), sejak keduanya digabung jadi satu tabel.
+  return [
     ['NOBUKTI',      'No Bukti', 1, 'varchar', 0, 0],
     ['TANGGAL',      'Tanggal',  1, 'date',    0, 0],
     ['NOSO',         'No SO',    1, 'varchar', 0, 0],
@@ -690,12 +745,9 @@ function umjDefaultCart (urut) {
     ['DPP',          'DPP',      1, 'float',   0, 2],
     ['PPN',          'PPN',      1, 'float',   0, 2],
     ['PERSEN',       'Persen',   1, 'float',   0, 2],
+    ['OtoUser1',     'Oto User', 1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto',  1, 'date',    0, 0],
   ]
-  if (urut === 3) {
-    cart.push(['OtoUser1', 'Oto User', 1, 'varchar', 0, 0])
-    cart.push(['TglOto1',  'Tgl Oto',  1, 'date',    0, 0])
-  }
-  return cart
 }
 
 function umjBuatCart (headers, values, isnumerics, isshowns, desimals) {
@@ -717,7 +769,7 @@ function umjAktifkanTabel (urut) {
 }
 
 function umjOnChangeAktif () {
-  if (umjActiveUrut === 3) { reinitTabel3(); } else if (umjActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
+  if (umjActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
 }
 
 window.g_href = UMJ_HREF
@@ -775,8 +827,8 @@ function umjInitReportTableSekali () {
   if (umjRtSudahInit || typeof ReportTable === 'undefined') { return }
   umjRtSudahInit = true
   let urutAktif = activeVisibleTabKeyUMJ()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2', 3 : '#tabel3' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2', 3 : '#rtBarTabel3' }
+  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
+  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
   Object.keys(idTabel).forEach((u) => {
     if (Number(u) === urutAktif) { return }
     ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: umjOnChangeAktif })
@@ -784,7 +836,7 @@ function umjInitReportTableSekali () {
   ReportTable.init({ table: UMJ_SELEKTOR_TABEL_AKTIF, bar: UMJ_SELEKTOR_BAR_AKTIF, onChange: umjOnChangeAktif })
 
   let umjGuardUlangKlik = false;
-  ['#tabel', '#tabel2', '#tabel3'].forEach((sel) => {
+  ['#tabel', '#tabel2'].forEach((sel) => {
     let thead = document.querySelector(sel + ' thead')
     if (!thead) { return }
     thead.addEventListener('click', function (e) {
@@ -829,33 +881,31 @@ function umjValueCell (row, col) {
 
 function tabelActionsCell (row) {
   let nobukti = umjPickCI(row, 'NoBukti');
-  let html = '<td class="text-center">';
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 
-function umjTabel2Or3ActionsCell (row, withKoreksiDelete) {
+// Digabung dari tabel2ActionsCell (Belum Otorisasi: Edit/Otorisasi/Delete) +
+// tabel3ActionsCell (Sudah Otorisasi: Batal Otorisasi/Print) sejak keduanya
+// digabung jadi satu tabel dengan filter Semua/Belum/Sudah Otorisasi.
+function umjTabel2Or3ActionsCell (row) {
   let nobukti = umjPickCI(row, 'NOBUKTI');
   let noso = umjPickCI(row, 'NOSO');
   let isOto = Number(umjPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center">';
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailKoreksi(\'' + nobukti + '\', \'' + noso + '\')"><i class="bi bi-info"></i></button>';
-  if (withKoreksiDelete) {
-    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonEdit(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-pen"></i></button>';
-  }
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-key"></i></button>';
-  }
-  if (withKoreksiDelete) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-trash"></i></button>';
-  } else {
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitPrintTT(\'' + nobukti + '\')"><i class="bi bi-printer-fill"></i></button>';
+  } else {
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonEdit(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-pen"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete(\'' + nobukti + '\' , \'' + noso + '\')"><i class="bi bi-trash"></i></button>';
   }
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 
@@ -875,7 +925,7 @@ function renderTabel2Rows (rows) {
   let cols = (umjCart[2].length ? umjCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
-    html += '<tr>' + umjTabel2Or3ActionsCell(row, true);
+    html += '<tr>' + umjTabel2Or3ActionsCell(row);
     cols.forEach(function (col) { html += umjValueCell(row, col); });
     html += '</tr>';
   });
@@ -883,25 +933,12 @@ function renderTabel2Rows (rows) {
   tulisTheadHeaderUMJ('#tabel2', cols);
 }
 
-function renderTabel3Rows (rows) {
-  let cols = (umjCart[3].length ? umjCart[3] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + umjTabel2Or3ActionsCell(row, false);
-    cols.forEach(function (col) { html += umjValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel3_data').innerHTML = html;
-  tulisTheadHeaderUMJ('#tabel3', cols);
-}
-
 let lastTabelRows = []
 let lastTabel2Rows = []
-let lastTabel3Rows = []
-let umjPanjangHalaman = { 1 : 10, 2 : 10, 3 : 10 }
+let umjPanjangHalaman = { 1 : 10, 2 : 10 }
 
 function umjIkatSearch (urut) {
-  let ids = { 1 : ['umjSearch1', 'tabel'], 2 : ['umjSearch2', 'tabel2'], 3 : ['umjSearch3', 'tabel3'] }
+  let ids = { 1 : ['umjSearch1', 'tabel'], 2 : ['umjSearch2', 'tabel2'] }
   let input = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!input || input.dataset.rtBound) { return }
@@ -917,7 +954,7 @@ function umjIkatSearch (urut) {
 }
 
 function umjIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['umjLen1', 'tabel'], 2 : ['umjLen2', 'tabel2'], 3 : ['umjLen3', 'tabel3'] }
+  let ids = { 1 : ['umjLen1', 'tabel'], 2 : ['umjLen2', 'tabel2'] }
   let sel = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!sel || sel.dataset.rtBound) { return }
@@ -950,13 +987,40 @@ function reinitTabel2 () {
   } catch (e) { console.error('reinitTabel2 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
 }
 
-function reinitTabel3 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
-    renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({ dom: UMJ_DOM_STRING, lengthChange: false, pageLength: umjPanjangHalaman[3], paging: true, order: [[0, 'asc']], ordering: false });
-    umjIkatSearch(3); umjIkatPanjangHalaman(3);
-  } catch (e) { console.error('reinitTabel3 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
+function umjResetFilterFields () {
+  $('#input_filterumj').val('0')
+}
+
+function umjUpdateFilterBadge () {
+  let n = Number($('#input_filterumj').val()) || 0
+  $('#umjFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+}
+
+function buttonFilterUMJ () {
+  let tglawal = $('#input_tanggalawal_umj').val()
+  let tglakhir = $('#input_tanggalakhir_umj').val()
+  let filterumj = $('#input_filterumj').val()
+  $.ajax({
+    url: "{!! url('uangmukajualloadall') !!}",
+    type: "get", async: false,
+    data: { tglawal, tglakhir, filterumj },
+    success: function (res) {
+      lastTabel2Rows = res.tempOutstanding2
+      reinitTabel2()
+      umjUpdateFilterBadge()
+    },
+    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
+  })
+}
+
+function onChangePeriodeUMJ () {
+  let tglawal = $('#input_tanggalawal_umj').val()
+  let tglakhir = $('#input_tanggalakhir_umj').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  buttonFilterUMJ()
 }
 
 $(document).ready(function(){
@@ -968,28 +1032,24 @@ $(document).ready(function(){
       lastTabel2Rows = @json($tempOutstanding2);
       reinitTabel2();
 
-      umjAktifkanTabel(3); window.doSetHeader(3, false);
-      lastTabel3Rows = @json($tempOutstanding3);
-      reinitTabel3();
-
       umjInitReportTableSekali();
 
       $('#nav-home-tab').on('shown.bs.tab', function () { umjAktifkanTabel(1); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } });
       $('#nav-profile-tab').on('shown.bs.tab', function () { umjAktifkanTabel(2); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } });
-      $('#nav-profile1-tab').on('shown.bs.tab', function () { umjAktifkanTabel(3); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } });
 });
 
 function loadAll () {
+  let tglawal = $('#input_tanggalawal_umj').val()
+  let tglakhir = $('#input_tanggalakhir_umj').val()
+  let filterumj = $('#input_filterumj').val()
   $.ajax({
     url: "{!! url('uangmukajualloadall') !!}",
-    type: "get", async: false, data: {},
+    type: "get", async: false, data: { tglawal, tglakhir, filterumj },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempOutstanding2;
-      lastTabel3Rows = res.tempOutstanding3;
       reinitTabel();
       reinitTabel2();
-      reinitTabel3();
     },
     error: function (err) {
       console.log(err)

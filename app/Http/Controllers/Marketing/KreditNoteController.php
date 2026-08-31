@@ -38,43 +38,48 @@ class KreditNoteController extends Controller
 
 
 
-$tempOutstanding = DB::connection("SML")->select("
-select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
-where Month(a.TANGGAL) = :bulan and YEAR(a.Tanggal) = :tahun and a.isOtorisasi1 <> 1
-",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-$tempOutstanding2 = DB::connection("SML")->select("
-select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
-where Month(a.TANGGAL) = :bulan and YEAR(a.Tanggal) = :tahun  and a.isOtorisasi1 = 1
-",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryKreditNote($tglawal, $tglakhir, 0);
 
     return view('marketing.kreditnote' , [
       "menul0" => $menul0,
       "periode" => $periode,
       "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
       "akses" => $akses
     ]);
 
   }
 
-  public function loadAll () {
+  // Satu query dipakai bareng oleh index() dan loadAll() -- dulu tabel (Belum,
+  // tombol Koreksi/Otorisasi) dan tabel2 (Sudah, tombol Batal Otorisasi) adalah
+  // 2 tab terpisah dengan query nyaris identik (cuma beda isOtorisasi1<>1/=1).
+  // Digabung jadi satu dengan filterkn yang menyaring di server, port 1:1 dari
+  // pola queryOutstanding() milik PerintahReturJualController.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryKreditNote ($tglawal, $tglakhir, $filterkn) {
+    return DB::connection("SML")->select("
+      select * from (
+        select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
+        where a.Tanggal between ? and ?
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.isOtorisasi1,0) <> 1)
+         or (? = 2 and isnull(x.isOtorisasi1,0) = 1)
+    ", [$tglawal, $tglakhir, $filterkn, $filterkn, $filterkn]);
+  }
+
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("
-    select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
-    where Month(a.TANGGAL) = :bulan and YEAR(a.Tanggal) = :tahun and a.isOtorisasi1 <> 1
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-    $tempOutstanding2 = DB::connection("SML")->select("
-    select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
-    where Month(a.TANGGAL) = :bulan and YEAR(a.Tanggal) = :tahun and a.isOtorisasi1 = 1
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterkn = $req->filterkn ?: 0;
+    $tempOutstanding = $this->queryKreditNote($tglawal, $tglakhir, $filterkn);
 
-    return ["tempOutstanding" => $tempOutstanding,
-    "tempOutstanding2" => $tempOutstanding2
-  ];
+    return ["tempOutstanding" => $tempOutstanding];
   }
 
 

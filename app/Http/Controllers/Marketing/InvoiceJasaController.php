@@ -33,94 +33,9 @@ class InvoiceJasaController extends Controller
 
     $listBarangAll = DB::connection('SML')->select("select Kodebrg , Namabrg , sat1 , isi1 from dbbarang where isjasa = 1 and IsAktif = 1" );
 
-    $tempOutstanding = DB::connection("SML")->select("
-
-
-    declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    select  A.NoBukti, A.NoUrut, A.Tanggal,
-            A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-            A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-            A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-            B.NoSPB, D.Tanggal TglSPB,
-            A.IsCetak, A.IDUser,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                    else 1
-               end As Bit) NeedOtorisasi
-            ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO
-    from	dbInvoicePL A
-    Left Outer join (Select x.NoBukti, x.NoSPB
-                     from dbInvoicePLDet x
-                     Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-    LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbSPBDet GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-    LEFT OUTER JOIN dbSPB D ON C.NoBukti=D.NoBukti
-    left Outer join dbSO E on E.Nobukti=C.NoSO
-    --left outer join vwBrowsCustomer F on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-    left outer join DBCUSTSUPP F on F.KODECUSTSUPP=A.KodeCustSupp
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-    and  isnull(A.pJasa,0)=1 and a.IsOtorisasi1 = 0
-    order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-$tempOutstanding2 = DB::connection("SML")->select("
-
-
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal,
-        A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-        A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-        A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-        B.NoSPB, D.Tanggal TglSPB,
-        A.IsCetak, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                else 1
-           end As Bit) NeedOtorisasi
-        ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO
-from	dbInvoicePL A
-Left Outer join (Select x.NoBukti, x.NoSPB
-                 from dbInvoicePLDet x
-                 Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbSPBDet GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-LEFT OUTER JOIN dbSPB D ON C.NoBukti=D.NoBukti
-left Outer join dbSO E on E.Nobukti=C.NoSO
---left outer join vwBrowsCustomer F on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-left outer join DBCUSTSUPP F on F.KODECUSTSUPP=A.KodeCustSupp
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-and  isnull(A.pJasa,0)=1 and a.IsOtorisasi1 = 1
-order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-
-
-
-
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryInvoiceJasaOtorisasi($tglawal, $tglakhir, 0);
 
 
 
@@ -130,11 +45,57 @@ order by A.NoBukti
       "periode" => $periode,
       // "users"=> $users,
       "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
       "akses" => $akses,
       "listBarangAll" => $listBarangAll
     ]);
 
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() -- dulu tabel (Belum
+  // Otorisasi, tombol Koreksi/Otorisasi) dan tabel2 (Sudah Diotorisasi, tombol
+  // Batal Otorisasi) adalah 2 tab terpisah dengan query nyaris identik (cuma
+  // beda IsOtorisasi1=0/1). Digabung jadi satu dengan filterij yang menyaring
+  // di server, port 1:1 dari pola queryOutstanding() milik
+  // PerintahReturJualController.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryInvoiceJasaOtorisasi ($tglawal, $tglakhir, $filterij) {
+    return DB::connection("SML")->select("
+      select * from (
+        select  A.NoBukti, A.NoUrut, A.Tanggal,
+                A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
+                A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
+                A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
+                B.NoSPB, D.Tanggal TglSPB,
+                A.IsCetak, A.IDUser,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                        else 1
+                   end As Bit) NeedOtorisasi
+                ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO
+        from	dbInvoicePL A
+        Left Outer join (Select x.NoBukti, x.NoSPB
+                         from dbInvoicePLDet x
+                         Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
+        LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbSPBDet GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
+        LEFT OUTER JOIN dbSPB D ON C.NoBukti=D.NoBukti
+        left Outer join dbSO E on E.Nobukti=C.NoSO
+        left outer join DBCUSTSUPP F on F.KODECUSTSUPP=A.KodeCustSupp
+        where	A.Tanggal between ? and ?
+        and  isnull(A.pJasa,0)=1
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1,0) = 0)
+         or (? = 2 and isnull(x.IsOtorisasi1,0) <> 0)
+      order by x.NoBukti
+    ", [$tglawal, $tglakhir, $filterij, $filterij, $filterij]);
   }
 
 
@@ -399,103 +360,17 @@ Order by B.Urut
 
 
 
-  public function loadAll () {
-
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterij = $req->filterij ?: 0;
+    $tempOutstanding = $this->queryInvoiceJasaOtorisasi($tglawal, $tglakhir, $filterij);
 
-    $tempOutstanding = DB::connection("SML")->select("
-
-
-    declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    select  A.NoBukti, A.NoUrut, A.Tanggal,
-            A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-            A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-            A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-            B.NoSPB, D.Tanggal TglSPB,
-            A.IsCetak, A.IDUser,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                         Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                    else 1
-               end As Bit) NeedOtorisasi
-            ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO
-    from	dbInvoicePL A
-    Left Outer join (Select x.NoBukti, x.NoSPB
-                     from dbInvoicePLDet x
-                     Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-    LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbSPBDet GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-    LEFT OUTER JOIN dbSPB D ON C.NoBukti=D.NoBukti
-    left Outer join dbSO E on E.Nobukti=C.NoSO
-    --left outer join vwBrowsCustomer F on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-    left outer join DBCUSTSUPP F on F.KODECUSTSUPP=A.KodeCustSupp
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-    and  isnull(A.pJasa,0)=1 and a.IsOtorisasi1 = 0
-    order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-$tempOutstanding2 = DB::connection("SML")->select("
-
-
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal,
-        A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-        A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-        A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-        B.NoSPB, D.Tanggal TglSPB,
-        A.IsCetak, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                else 1
-           end As Bit) NeedOtorisasi
-        ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO
-from	dbInvoicePL A
-Left Outer join (Select x.NoBukti, x.NoSPB
-                 from dbInvoicePLDet x
-                 Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbSPBDet GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-LEFT OUTER JOIN dbSPB D ON C.NoBukti=D.NoBukti
-left Outer join dbSO E on E.Nobukti=C.NoSO
---left outer join vwBrowsCustomer F on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-left outer join DBCUSTSUPP F on F.KODECUSTSUPP=A.KodeCustSupp
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-and  isnull(A.pJasa,0)=1 and a.IsOtorisasi1 = 1
-order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-
-
-
-
-  return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2 ];
-
-
+    return ["tempOutstanding" => $tempOutstanding];
   }
+
 
   public function onChangeHeader (Request $req) {
     $query = 'update dbinvoicepl set ' . $req->field . ' = :value where nobukti = :nobukti';
