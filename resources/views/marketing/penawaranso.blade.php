@@ -333,20 +333,6 @@
     {{-- Tab bar wrapped in its own card, matching purchaseOrder.blade.php's
          .card.tab-card -- a dedicated card holding only the tab nav,
          separate from the card below holding the tables. --}}
-    <div class="card mb-3 tab-card">
-      <div class="card-body">
-        <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-             Penawaran SO
-          </a>
-
-          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-            Penawaran SO Otorisasi
-          </a>
-        </div>
-      </div>
-    </div>
-
   <div id="contentContainer" class="">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
     <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
@@ -408,35 +394,6 @@
                          replaces this <thead>'s contents based on gcart_header. --}}
                     <thead style="white-space:nowrap;"></thead>
                     <tbody id="tabel2_data" class="text-left"></tbody>
-                  </table>
-                </div>
-                <div class="rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="tb-report main">
-              <div class="toolbar" style="margin-bottom:10px;">
-                <input type="search" id="tabel3_search" class="search-inp" placeholder="Cari data...">
-              </div>
-
-              <div class="rt-bar-row">
-                <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel3')">
-                  <i class="bi bi-arrow-clockwise"></i> Reset kolom
-                </button>
-                <div id="rtBarTabel3"></div>
-              </div>
-
-              <div class="table-outer">
-                <div class="table-wrap">
-                  <table id="tabel3" class="tb">
-                    <thead style="white-space:nowrap;"></thead>
-                    <tbody id="tabel3_data" class="text-left"></tbody>
                   </table>
                 </div>
                 <div class="rt-hint">
@@ -2970,7 +2927,6 @@ let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
-let dataRefreshOutstanding3 = []
 
 let dataRefreshPenerimaan = []
 
@@ -2987,7 +2943,6 @@ HeaderEngine.configure({
 });
 
 var lastTabel2Rows = [];
-var lastTabel3Rows = [];
 
 HeaderEngine.registerTable('tabel2', {
   href: 'penawaranso_tabel2',
@@ -2995,13 +2950,6 @@ HeaderEngine.registerTable('tabel2', {
   barSel: '#rtBarTabel2',
   setDefault: function () { setDefaultHeaderTabel2(); },
   onChange: function () { reinitTabel2(); }
-});
-HeaderEngine.registerTable('tabel3', {
-  href: 'penawaranso_tabel3',
-  tableSel: '#tabel3',
-  barSel: '#rtBarTabel3',
-  setDefault: function () { setDefaultHeaderTabel3(); },
-  onChange: function () { reinitTabel3(); }
 });
 
 // #tabel2's columns match dbpenawaranso's loadAll() query (Marketing/PenawaranSOController::
@@ -3019,35 +2967,22 @@ function setDefaultHeaderTabel2() {
   ];
 }
 
-function setDefaultHeaderTabel3() {
-  gcart_header = [
-    ['NoBukti',      'No Bukti',       1, 'varchar', 0, 0],
-    ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-    ['NamaCustSupp', 'Customer',       1, 'varchar', 0, 0],
-    ['NOSO',         'No. SO',         1, 'varchar', 0, 0],
-    ['TotDPPRp',     'DPP Rp',         1, 'float',   0, 2],
-    ['TotPPNRp',     'PPN Rp',         1, 'float',   0, 2],
-    ['TotNetRp',     'Grand Total Rp', 1, 'float',   0, 2]
-  ];
-}
-
+// Digabung dari tabel2ActionsCell (Belum Otorisasi, tombol Otorisasi) + tabel3ActionsCell
+// (Sudah Otorisasi, tombol Batal Otorisasi) sejak keduanya digabung jadi satu tabel dengan
+// filter Semua/Belum/Sudah Otorisasi -- port 1:1 dari pola tabelActionsCell gabungan
+// milik PerintahReturJualController/queryOutstanding().
 function tabel2ActionsCell(row) {
   var nobukti = HeaderEngine.pickCI(row, 'NoBukti');
+  var needOto = Number(HeaderEngine.pickCI(row, 'NeedOtorisasi'));
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  if (needOto) {
+    html += '<button class="btn-action-sm btn-action-primary" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  } else {
+    html += '<button class="btn-action-sm btn-action-danger" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  }
   html += '<button class="btn-action-sm btn-action-primary" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   html += '<button class="btn-action-sm btn-action-success" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
-  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  html += '</div></td>';
-  return html;
-}
-
-function tabel3ActionsCell(row) {
-  var nobukti = HeaderEngine.pickCI(row, 'NoBukti');
-  var html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn-action-sm btn-action-danger" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -3115,21 +3050,9 @@ function penawaransoOtoRowTabel2(row, level) {
   return html;
 }
 
-function penawaransoOtoHeaderTabel3() {
-  return '<th style="padding: 4px 12px;" scope="col">Authorized</th>'
-    + '<th style="padding: 4px 12px;" scope="col">User Oto</th>'
-    + '<th style="padding: 4px 12px;" scope="col">Tanggal Oto</th>';
-}
-
-function penawaransoOtoRowTabel3(row) {
-  return penawaransoOtoBoolCell(row.IsOtorisasi1)
-    + '<td>' + (row.OtoUser1 || '') + '</td>'
-    + '<td>' + (row.TglOto1 ? penawaransoFormatTanggal(row.TglOto1) : '') + '</td>';
-}
-
 // ReportTable.init()'s bindHead(thead) attaches drag/gear listeners with no matching
-// removeEventListener -- calling init() again (which reinitTabel2()/reinitTabel3() do,
-// on purpose, to re-bind after DataTables rebuilds) is only safe against a genuinely
+// removeEventListener -- calling init() again (which reinitTabel2() does, on purpose,
+// to re-bind after DataTables rebuilds) is only safe against a genuinely
 // NEW <thead> node each time, so the whole element is replaced here rather than just
 // its innerHTML (same reasoning as so.blade.php's replaceTheadWithHeader()).
 function penawaransoReplaceThead(tableSel, cols, trailingHtml) {
@@ -3179,19 +3102,6 @@ function renderTabel2Rows(rows) {
   penawaransoReplaceThead('#tabel2', cols, penawaransoOtoHeaderTabel2(level));
 }
 
-function renderTabel3Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel3') { HeaderEngine.activateEngineData('tabel3'); }
-  var cols = gcart_header.filter(function (c) { return c[2] === 1; });
-  var html = '';
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + tabel3ActionsCell(row);
-    cols.forEach(function (col) { html += penawaransoValueCell(row, col); });
-    html += penawaransoOtoRowTabel3(row) + '</tr>';
-  });
-  document.getElementById('tabel3_data').innerHTML = html;
-  penawaransoReplaceThead('#tabel3', cols, penawaransoOtoHeaderTabel3());
-}
-
 function reinitTabel2() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
@@ -3204,29 +3114,22 @@ function reinitTabel2() {
   }
 }
 
-function reinitTabel3() {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
-    renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({ dom: 't', lengthChange: false, paging: false, ordering: false });
-    HeaderEngine.bindEngineDom('tabel3');
-  } catch (e) {
-    console.error('reinitTabel3 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
 function penawaransoUpdateFilterBadge() {
   var badge = document.getElementById('penawaransoFilterBadge');
   if (!badge) { return; }
   badge.style.display = (penawaransoFilterOtorisasi !== 'SEMUA') ? '' : 'none';
 }
 
+// Terapkan/Reset dulu cuma reinitTabel2() (client-side, dari data yang sudah
+// kepotong server-side ke Belum Otorisasi doang) -- makanya milih "Sudah
+// Otorisasi" selalu kosong. Sekarang beneran manggil loadAll() supaya
+// filterso ikut dikirim ke server, port 1:1 dari pola buttonFilterPRJ()
+// milik perintahreturjual.blade.php.
 function penawaransoTerapkanFilter() {
   penawaransoFilterOtorisasi = $('#penawaransoModalOtorisasi').val() || 'SEMUA';
   penawaransoUpdateFilterBadge();
   $('#modalFilter').modal('hide');
-  reinitTabel2();
+  loadAll();
 }
 
 function penawaransoResetFilter() {
@@ -3234,47 +3137,31 @@ function penawaransoResetFilter() {
   $('#penawaransoModalOtorisasi').val('SEMUA');
   penawaransoUpdateFilterBadge();
   $('#modalFilter').modal('hide');
-  reinitTabel2();
+  loadAll();
 }
 
 function buttonHeaderTable(key) {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
     HeaderEngine.activateEngineData(key);
     HeaderEngine.doSetHeader(1, true);
-    if (key === 'tabel2') { reinitTabel2(); } else { reinitTabel3(); }
+    reinitTabel2();
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
 }
 
-// One-time seed: load each table's saved column layout (or fall back to its
-// setDefault()) before the very first render. Order matters -- ReportTable's
-// drag/gear listeners are a page-wide singleton bound to whichever table is
-// bound LAST (see bindEngineDom() calls in reinitTabel2/3), so tabel2 (the
-// tab shown by default) must be initialized after tabel3, not before.
+// One-time seed: load the table's saved column layout (or fall back to its
+// setDefault()) before the very first render.
 HeaderEngine.activateEngineData('tabel2');
 HeaderEngine.doSetHeader(1);
-HeaderEngine.activateEngineData('tabel3');
-HeaderEngine.doSetHeader(1);
 
-$('#nav-home-tab').on('shown.bs.tab', function () {
-  HeaderEngine.activateEngineData('tabel2');
-  HeaderEngine.bindEngineDom('tabel2');
-});
-$('#nav-profile-tab').on('shown.bs.tab', function () {
-  HeaderEngine.activateEngineData('tabel3');
-  HeaderEngine.bindEngineDom('tabel3');
-});
 $('#modalFilter').on('show.bs.modal', function () {
   $('#penawaransoModalOtorisasi').val(penawaransoFilterOtorisasi);
 });
 $('#tabel2_search').on('input', function () {
   $('#tabel2').DataTable().search($(this).val()).draw();
 });
-$('#tabel3_search').on('input', function () {
-  $('#tabel3').DataTable().search($(this).val()).draw();
-});
 $('#tabel2_tglawal, #tabel2_tglakhir').on('change', function () {
-  reinitTabel2();
+  loadAll();
 });
 
 let listAlamatKirim = []
@@ -5457,26 +5344,32 @@ function onChangeInputAddAddNosat () {
 
 
 
+// filterso: 0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi -- mapped from
+// penawaransoFilterOtorisasi (SEMUA/Belum/Sudah) set by penawaransoTerapkanFilter().
+function penawaransoFilterSoValue() {
+  if (penawaransoFilterOtorisasi === 'Belum') { return 1; }
+  if (penawaransoFilterOtorisasi === 'Sudah') { return 2; }
+  return 0;
+}
+
 function loadAll () {
   console.log('loadall')
+  var tglawal = $('#tabel2_tglawal').val()
+  var tglakhir = $('#tabel2_tglakhir').val()
+  var filterso = penawaransoFilterSoValue()
 
   $.ajax({
     url: "{!! url('penawaransoloadall') !!}",
     type: "get",
     async: false,
     data: {
+      tglawal: tglawal, tglakhir: tglakhir, filterso: filterso
     },
     success: function(res) {
       dataRefreshOutstanding2 = res.tempOutstanding3
-      dataRefreshOutstanding3 = res.tempOutstanding5
     }})
 
   lastTabel2Rows = dataRefreshOutstanding2 || []
-  lastTabel3Rows = dataRefreshOutstanding3 || []
-
-  // tabel2 (the tab shown by default) goes last -- see the ordering note on
-  // the one-time HeaderEngine seeding above.
-  reinitTabel3()
   reinitTabel2()
 
   console.log('loadall selesai');
@@ -8343,69 +8236,7 @@ function LockFreeOfCharge(){
 }
 
 </script>
-{{-- script buat hover po belum otorisasi dan sudah otorisasi --}}
   <script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-    // const tabProfile1 = document.getElementById('nav-profile1-tab');
-
-    function setActiveTab(homeActive) {
-      
-      console.log('homeActive', homeActive)
-      if (homeActive == 0) {
-        tabHome.style.backgroundColor = '#007bff';
-        tabHome.style.color = '#fff';
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-
-        // tabProfile1.style.backgroundColor = '#f8f9fa';
-        // tabProfile1.style.color = '#007bff';
-
-      } else 
-      
-      if (homeActive == 1){
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-
-        tabProfile.style.backgroundColor = '#007bff';
-        tabProfile.style.color = '#fff';
-
-        // tabProfile1.style.backgroundColor = '#f8f9fa';
-        // tabProfile1.style.color = '#007bff';
-      }
-      // else 
-        
-      //   if (homeActive == 1){
-      //   tabProfile.style.backgroundColor = '#f8f9fa';
-      //   tabProfile.style.color = '#007bff';
-
-      //   // tabHome.style.backgroundColor = '#f8f9fa';
-      //   // tabHome.style.color = '#007bff';
-
-      //   tabProfile1.style.backgroundColor = '#007bff';
-      //   tabProfile1.style.color = '#fff';
-      // }
-
-      // Default warna tab
-    
-    }
-
-    
-
-    // buat ganti tab
-    tabHome.addEventListener('click', function () {
-      setActiveTab(0);
-    });
-
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(1);
-    });
-
-    // tabProfile1.addEventListener('click', function () {
-    //   setActiveTab(1);
-    // });
-
-
     function performSearchSupplier () {
       const searchValue = document.getElementById('input_add_kodesupplier').value.trim();
 

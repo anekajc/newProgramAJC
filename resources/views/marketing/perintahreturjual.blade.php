@@ -238,13 +238,6 @@
 </div>
 
 <div id="page1" class="container-fluid mainpage">
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12 text-left">
-      <h2>Perintah Retur Jual</h2>
-    </div>
-  </div>
-</div>
 
 <div id="printContainer" style="display:none">
 
@@ -264,102 +257,92 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  {{-- Tab bar: PO's exact card.tab-card + custom-tabs anchor pattern, same as
-       so.blade.php/invoicejasa.blade.php/cetaktandaterima.blade.php. --}}
-  <div class="card mb-3 tab-card">
-    <div class="card-body">
-      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-          PRJ Belum Otorisasi
-        </a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-          PRJ Sudah Otorisasi
-        </a>
+  {{-- Filter modal: so.blade.php's exact modalFilterPO markup/classes, adapted to
+       PRJ's own single Status dropdown (otorisasi + proses state combined -- PRJ
+       has no Tipe Bayar concept so that field is dropped). --}}
+  <div class="modal fade rt-filter" id="modalFilter">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-funnel"></i>
+            Filter Data
+            <span class="rt-active-badge" id="prjFilterBadge">0 aktif</span>
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilter').modal('hide')">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="rt-section">
+            <div class="rt-group-label">Status</div>
+            <div>
+              <label class="rt-field-label" for="input_filterprj">Status PRJ</label>
+              <select class="rt-native" id="input_filterprj">
+                <option value=0 selected>Semua PRJ</option>
+                <option value=1>Belum Otorisasi</option>
+                <option value=2>Sudah Otorisasi</option>
+                <option value=3>Belum Diproses</option>
+                <option value=4>Proses Sebagian</option>
+                <option value=5>Selesai</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="rt-reset-link" onclick="prjResetFilterFields()">Reset semua</button>
+          <div class="rt-footer-buttons">
+            <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+              onclick="$('#modalFilter').modal('hide')">Batal</button>
+            <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterPRJ(); $('#modalFilter').modal('hide');">Terapkan</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body" style="padding: 0">
-      <div class="tab-content" id="myTabContent">
-
-        {{-- Belum Otorisasi tab: PO's toolbar + #rtBarTabel + bare data-table + hint skeleton. --}}
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                <div class="po-toolbar">
-                    <div class="po-toolbar-search">
-                        <input type="search" id="prjSearch1" class="po-search-inp" placeholder="Cari data">
-                        <div class="po-len-wrap">
-                        <label for="prjLen1">Tampilkan</label>
-                        <select id="prjLen1" class="po-len-inp">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="-1">Semua</option>
-                        </select>
-                        </div>
-                    </div>
-                    <div class="po-toolbar-act">
-                        <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ PRJ</button>
-                    </div>
-                </div>
-                <div id="rtBarTabel"></div>
-                <table id="tabel" class="data-table">
-                  <thead style="white-space:nowrap;"></thead>
-                  <tbody id="tabel_data" class="text-left"></tbody>
-                </table>
-                <div class="po-rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
         </div>
-
-        {{-- Sudah Otorisasi tab. --}}
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                <div class="po-toolbar">
-                    <div class="po-toolbar-search">
-                        <input type="search" id="prjSearch2" class="po-search-inp" placeholder="Cari data">
-                        <div class="po-len-wrap">
-                        <label for="prjLen2">Tampilkan</label>
-                        <select id="prjLen2" class="po-len-inp">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="-1">Semua</option>
-                        </select>
-                        </div>
-                    </div>
-                    </div>
-                <div id="rtBarTabel2"></div>
-                <table id="tabel2" class="data-table">
-                  <thead style="white-space:nowrap;"></thead>
-                  <tbody id="tabel2_data" class="text-left"></tbody>
-                </table>
-                <div class="po-rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
-                </div>
-              </div>
-            </div>
-          </div>
+        <input type="search" id="prjSearch1" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap">
+          <label for="prjLen1">Tampilkan</label>
+          <select id="prjLen1" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
         </div>
-
+        <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        <div class="po-toolbar-act">
+          <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ PRJ</button>
+        </div>
+      </div>
+      <div id="rtBarTabel"></div>
+      <table id="tabel" class="data-table">
+        <thead style="white-space:nowrap;"></thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
     </div>
   </div>
-
 
 </div>
 </div>
@@ -368,7 +351,7 @@
 
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Form PRJ</h2>
+      {{-- <h2>Form PRJ</h2> --}}
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
@@ -467,7 +450,7 @@
             </div>
           </div>
         </div>
-        <div class="col-md-12" style="margin-top:-10px">
+        <div class="col-md-12" style="margin-top:-19px">
           <div class="row">
 
             <div class="col-md-4">
@@ -1246,18 +1229,16 @@
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
 
-    <div class="row" style="margin-top: -30px">
+    <div class="row">
       <div class="col-8 text-left">
-        <h2>Detail PRJ</h2>
+        {{-- <h2>Detail PRJ</h2> --}}
       </div>
       <div class="col-4 text-right">
-        <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+        <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
       </div>
     </div>
 
     <div id= "modalDetail" class="">
-
-
 
     <div id="" class="">
     <div class="">
@@ -1345,7 +1326,7 @@
               </div>
             </div>
           </div>
-          <div class="col-md-12" style="margin-top:-10px">
+          <div class="col-md-12">
             <div class="row">
 
               <div class="col-md-4">
@@ -1929,20 +1910,15 @@ let xppn = 0
  * Port 1:1 dari poCart/poAktifkanTabel/poInitReportTableSekali milik
  * purchaseOrder.blade.php, sama seperti so.blade.php/invoicejasa.blade.php/
  * cetaktandaterima.blade.php. Endpoint persistensinya saveheadertable/
- * getheadertable (HeaderTableController) -- halaman ini tidak punya endpoint
- * loadHeader/simpanHeader sendiri sebelumnya, jadi tidak ada kontrak lama yang
- * perlu dipertahankan.
+ * getheadertable (HeaderTableController). Disederhanakan jadi satu tabel saja
+ * (urut 1) setelah tab Belum/Sudah Otorisasi digabung jadi satu daftar dengan
+ * filter Status PRJ (lihat modalFilter di section('content')), sama seperti
+ * so.blade.php sudah tidak punya tab otorisasi terpisah untuk tab SO-nya.
  */
-let prjCart = { 1 : [], 2 : [] }
-let prjActiveUrut = 0
+let prjCart = []
 const PRJ_HREF = 'perintahreturjual'
 const PRJ_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const PRJ_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
-let prjPerluGambar = { 1 : false, 2 : false }
-
-function activeVisibleTabKeyPRJ () {
-  return $('#nav-profile-tab').hasClass('active') ? 2 : 1
-}
 
 function prjPickCI (row, key) {
   if (!row) { return undefined; }
@@ -1954,20 +1930,17 @@ function prjPickCI (row, key) {
   return undefined;
 }
 
-function prjDefaultCart (urut) {
-  let cart = [
+function prjDefaultCart () {
+  return [
     ['NOBUKTI',      'No. Bukti',   1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
     ['NAMACUSTSUPP', 'Nama Cust',   1, 'varchar', 0, 0],
     ['NoRPJ',        'No Invoice',  1, 'varchar', 0, 0],
     ['NOSO',         'No SO',       1, 'varchar', 0, 0],
     ['IDUser',       'User',        1, 'varchar', 0, 0],
+    ['OtoUser1',     'User Oto1',   1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto1',    1, 'date',    0, 0],
   ]
-  if (urut === 2) {
-    cart.push(['OtoUser1', 'User Oto1', 1, 'varchar', 0, 0])
-    cart.push(['TglOto1',  'Tgl Oto1',  1, 'date',    0, 0])
-  }
-  return cart
 }
 
 function prjBuatCart (headers, values, isnumerics, isshowns, desimals) {
@@ -1990,23 +1963,12 @@ function prjBuatCart (headers, values, isnumerics, isshowns, desimals) {
   return cart
 }
 
-function prjAktifkanTabel (urut) {
-  prjActiveUrut = urut
-  window.g_modeReport = urut
-  window.gcart_header = prjCart[urut]
-}
-
-function prjOnChangeAktif () {
-  if (prjActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
-}
-
 window.g_href = PRJ_HREF
 window.g_modeReport = 1
 window.gcart_header = []
 
-window.doSimpanHeader = function (href, mode) {
-  let urut = mode === 2 ? 2 : 1
-  let cart = prjCart[urut] || []
+window.doSimpanHeader = function () {
+  let cart = prjCart || []
 
   let header = [], value = [], isnumber = [], isshown = [], desimal = []
   cart.forEach((c) => {
@@ -2029,7 +1991,7 @@ window.doSimpanHeader = function (href, mode) {
       value    : JSON.stringify(value),
       isshown  : JSON.stringify(isshown),
       href     : PRJ_HREF,
-      urut     : urut
+      urut     : 1
     },
     error : function (err) {
       console.log(err)
@@ -2039,8 +2001,6 @@ window.doSimpanHeader = function (href, mode) {
 }
 
 window.doSetHeader = function (mode, reset) {
-  let urut = mode === 2 ? 2 : 1
-
   $.ajax({
     url   : "{!! url('getheadertable') !!}",
     type  : "post",
@@ -2048,59 +2008,38 @@ window.doSetHeader = function (mode, reset) {
     data  : {
       _token : $("#_token").val(),
       href   : PRJ_HREF,
-      urut   : urut,
+      urut   : 1,
       reset  : reset ? 1 : 0
     },
     success : function (res) {
       if (!reset && res && res.headertableheader && res.headertableheader.length) {
-        let header = res.headertableheader
-        let value = res.headertablevalue
-        let isnumeric = res.isnumeric
-        let isshown = res.isshown
-        let tipe = res.desimal || []
-        prjCart[urut] = prjBuatCart(header, value, isnumeric, isshown, tipe)
+        prjCart = prjBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
       } else {
-        prjCart[urut] = prjDefaultCart(urut)
-        window.gcart_header = prjCart[urut]
-        window.doSimpanHeader(PRJ_HREF, urut)
+        prjCart = prjDefaultCart()
+        window.gcart_header = prjCart
+        window.doSimpanHeader()
       }
-      window.gcart_header = prjCart[urut]
+      window.gcart_header = prjCart
     },
     error : function (err) {
       console.log(err)
       alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
-      prjCart[urut] = prjDefaultCart(urut)
-      window.gcart_header = prjCart[urut]
+      prjCart = prjDefaultCart()
+      window.gcart_header = prjCart
     }
   })
 }
-
-const PRJ_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
-const PRJ_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
 
 let prjRtSudahInit = false
 function prjInitReportTableSekali () {
   if (prjRtSudahInit || typeof ReportTable === 'undefined') { return }
   prjRtSudahInit = true
 
-  let urutAktif = activeVisibleTabKeyPRJ()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
-  Object.keys(idTabel).forEach((u) => {
-    if (Number(u) === urutAktif) { return }
-    ReportTable.init({ table : idTabel[u], bar : idBar[u], onChange : prjOnChangeAktif })
-  });
-
-  ReportTable.init({
-    table    : PRJ_SELEKTOR_TABEL_AKTIF,
-    bar      : PRJ_SELEKTOR_BAR_AKTIF,
-    onChange : prjOnChangeAktif
-  })
+  ReportTable.init({ table : '#tabel', bar : '#rtBarTabel', onChange : reinitTabel })
 
   let prjGuardUlangKlik = false;
-  ['#tabel', '#tabel2'].forEach((sel) => {
-    let thead = document.querySelector(sel + ' thead')
-    if (!thead) { return }
+  let thead = document.querySelector('#tabel thead')
+  if (thead) {
     thead.addEventListener('click', function (e) {
       if (prjGuardUlangKlik) { return }
       let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
@@ -2113,11 +2052,11 @@ function prjInitReportTableSekali () {
       thead.dispatchEvent(ulang)
       prjGuardUlangKlik = false
     }, true)
-  });
+  }
 }
 
-function tulisTheadHeaderPRJ (tableSel, cols) {
-  let thead = document.querySelector(tableSel + ' thead')
+function tulisTheadHeaderPRJ (cols) {
+  let thead = document.querySelector('#tabel thead')
   if (!thead || !window.ReportTable) { return; }
   let headRowHtml = ReportTable.headHtml(cols)
     .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
@@ -2146,40 +2085,28 @@ function prjValueCell (row, col) {
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
 
+// Actions gabungan Belum/Sudah Otorisasi (dulu tabelActionsCell vs
+// tabel2ActionsCell terpisah per tab) -- cetak nota/berita acara cuma relevan
+// setelah otorisasi, sama seperti tabel2ActionsCell dulu.
 function tabelActionsCell (row) {
   let nobukti = prjPickCI(row, 'NOBUKTI');
   let isOto = Number(prjPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonEdit(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
   if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi " onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak Nota" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak Berita Acara" onclick="submitPrintBA(\'' + nobukti + '\')"><i class="bi bi-printer-fill"></i></button>';
   } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
-  html += '</td>';
-  return html;
-}
-
-function tabel2ActionsCell (row) {
-  let nobukti = prjPickCI(row, 'NOBUKTI');
-  let isOto = Number(prjPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
-  }
-  html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak nota" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
-  html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak berita acara" onclick="submitPrintBA(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   html += '</td>';
   return html;
 }
 
 function renderTabelRows (rows) {
-  if (prjActiveUrut !== 1 && prjCart[1].length === 0) { prjAktifkanTabel(1); }
-  let cols = (prjCart[1].length ? prjCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let cols = (prjCart.length ? prjCart : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
     html += '<tr>' + tabelActionsCell(row);
@@ -2187,29 +2114,14 @@ function renderTabelRows (rows) {
     html += '</tr>';
   });
   document.getElementById('tabel_data').innerHTML = html;
-  tulisTheadHeaderPRJ('#tabel', cols);
-}
-
-function renderTabel2Rows (rows) {
-  let cols = (prjCart[2].length ? prjCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + tabel2ActionsCell(row);
-    cols.forEach(function (col) { html += prjValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel2_data').innerHTML = html;
-  tulisTheadHeaderPRJ('#tabel2', cols);
+  tulisTheadHeaderPRJ(cols);
 }
 
 let lastTabelRows = []
-let lastTabel2Rows = []
-let prjPanjangHalaman = { 1 : 10, 2 : 10 }
+let prjPanjangHalaman = 10
 
-function prjIkatSearch (urut) {
-  let ids = { 1 : ['prjSearch1', 'tabel'], 2 : ['prjSearch2', 'tabel2'] }
-  let input = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function prjIkatSearch () {
+  let input = document.getElementById('prjSearch1')
   if (!input || input.dataset.rtBound) { return }
   input.dataset.rtBound = '1'
 
@@ -2218,26 +2130,24 @@ function prjIkatSearch (urut) {
     let nilai = input.value
     if (timer) { clearTimeout(timer) }
     timer = setTimeout(function () {
-      if ($.fn.DataTable.isDataTable('#' + idTabel)) {
-        $('#' + idTabel).DataTable().search(nilai).draw()
+      if ($.fn.DataTable.isDataTable('#tabel')) {
+        $('#tabel').DataTable().search(nilai).draw()
       }
     }, 400)
   })
 }
 
-function prjIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['prjLen1', 'tabel'], 2 : ['prjLen2', 'tabel2'] }
-  let sel = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function prjIkatPanjangHalaman () {
+  let sel = document.getElementById('prjLen1')
   if (!sel || sel.dataset.rtBound) { return }
   sel.dataset.rtBound = '1'
-  sel.value = String(prjPanjangHalaman[urut])
+  sel.value = String(prjPanjangHalaman)
 
   sel.addEventListener('change', function () {
     let n = Number(sel.value)
-    prjPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
-    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
-      $('#' + idTabel).DataTable().page.len(prjPanjangHalaman[urut]).draw()
+    prjPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+      $('#tabel').DataTable().page.len(prjPanjangHalaman).draw()
     }
   })
 }
@@ -2251,75 +2161,81 @@ function reinitTabel () {
     $('#tabel').DataTable({
       dom: PRJ_DOM_STRING,
       lengthChange: false,
-      pageLength: prjPanjangHalaman[1],
+      pageLength: prjPanjangHalaman,
       paging: true,
       order: [[1, 'asc']],
       ordering: false,
     });
-    prjIkatSearch(1);
-    prjIkatPanjangHalaman(1);
-    prjPerluGambar[1] = false;
+    prjIkatSearch();
+    prjIkatPanjangHalaman();
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
   }
 }
 
-function reinitTabel2 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
-    renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({
-      dom: PRJ_DOM_STRING,
-      lengthChange: false,
-      pageLength: prjPanjangHalaman[2],
-      paging: true,
-      order: [[1, 'asc']],
-      ordering: false,
-    });
-    prjIkatSearch(2);
-    prjIkatPanjangHalaman(2);
-    prjPerluGambar[2] = false;
-  } catch (e) {
-    console.error('reinitTabel2 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
-function buttonHeaderTable (key) {
+function buttonHeaderTable () {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    let urut = key === 'tabel2' ? 2 : 1
-    prjAktifkanTabel(urut)
-    window.doSetHeader(urut, true)
-    ;(urut === 2 ? reinitTabel2 : reinitTabel)()
+    window.doSetHeader(1, true)
+    reinitTabel()
     alertify.success('Kolom telah direset ke tampilan default')
   }, function () {})
 }
 
+// Filter modal ("Status PRJ") + periode -- port 1:1 dari
+// soResetFilterFields()/buttonFilterSO()/onChangePeriodeSO() milik so.blade.php,
+// disederhanakan (PRJ tidak punya field Tipe Bayar).
+function prjResetFilterFields () {
+  $('#input_filterprj').val('0');
+}
+
+function prjUpdateFilterBadge () {
+  let aktif = Number($('#input_filterprj').val()) !== 0 ? 1 : 0
+  $('#prjFilterBadge').text(aktif + ' aktif')
+}
+
+function buttonFilterPRJ () {
+  let _token = $("#_token").val()
+  let tglawal = $("#input_tanggalawal").val()
+  let tglakhir = $("#input_tanggalakhir").val()
+  let filterprj = $("#input_filterprj").val()
+
+  prjUpdateFilterBadge()
+
+  $.ajax({
+    url: "{!! url('perintahreturjualloadall') !!}",
+    type: "get",
+    async: false,
+    data: { _token, tglawal, tglakhir, filterprj },
+    success: function (res) {
+      lastTabelRows = res.tempOutstanding;
+      reinitTabel();
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function onChangePeriodePRJ () {
+  let awal = $("#input_tanggalawal").val()
+  let akhir = $("#input_tanggalakhir").val()
+  if (!awal || !akhir) { return }
+  if (awal > akhir) {
+    alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+    return
+  }
+  buttonFilterPRJ()
+}
+
 $(document).ready(function(){
 
-      prjAktifkanTabel(1);
       window.doSetHeader(1, false);
       lastTabelRows = @json($tempOutstanding);
       reinitTabel();
 
-      prjAktifkanTabel(2);
-      window.doSetHeader(2, false);
-      lastTabel2Rows = @json($tempOutstanding2);
-      reinitTabel2();
-
       prjInitReportTableSekali();
-
-      $('#nav-home-tab').on('shown.bs.tab', function () {
-        prjAktifkanTabel(1);
-        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
-        if (prjPerluGambar[1]) { reinitTabel(); }
-      });
-      $('#nav-profile-tab').on('shown.bs.tab', function () {
-        prjAktifkanTabel(2);
-        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
-        if (prjPerluGambar[2]) { reinitTabel2(); }
-      });
 
         $("#tabel_add_list_customer").DataTable({
           "lengthChange": false,
@@ -3325,9 +3241,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
 
     console.log('refreshDataTableAdd' , NOBUKTI)
 
-
     if (!NOBUKTI) {
-
 
     } else {
       let _token  = $("#_token").val()
@@ -3432,9 +3346,10 @@ function refreshDataTableAdd (NOBUKTI = "") {
 }
 
 function buttonDetail (nobukti) {
+
+document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Detail Data'
+
   console.log('buttonDetail' , nobukti)
-
-
 
     let _token  = $("#_token").val()
 
@@ -3509,6 +3424,8 @@ function buttonDetail (nobukti) {
 }
 function buttonEdit (nobukti) {
 
+document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Edit Data'
+
 let pcekglobal = 0
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",
@@ -3557,6 +3474,8 @@ if (pcekglobal) {
 }
 
 function buttonAdd (nobukti) {
+
+document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Add Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -3669,6 +3588,7 @@ function buttonAddEditItem (i) {
 
 
 function buttonCloseForm () {
+  document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -3677,21 +3597,20 @@ function buttonCloseForm () {
 
 function loadAll () {
 
-  console.log('loadall')
   let _token = $("#_token").val();
+  let tglawal = $("#input_tanggalawal").val()
+  let tglakhir = $("#input_tanggalakhir").val()
+  let filterprj = $("#input_filterprj").val()
 
   $.ajax({
     url: "{!! url('perintahreturjualloadall') !!}",
     type: "get",
     async: false,
-    data: {
-    },
+    data: { _token, tglawal, tglakhir, filterprj },
     success: function(res) {
 
       lastTabelRows = res.tempOutstanding;
-      lastTabel2Rows = res.tempOutstanding2;
       reinitTabel();
-      reinitTabel2();
 
     }})
 

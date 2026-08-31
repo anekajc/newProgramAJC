@@ -37,93 +37,9 @@ class PenawaranSOController extends Controller
 
    
 
-    $tempOutstanding3 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan
-
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO,NOPOCUST ,A.tglKirim,A.MaxOL
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=2222 and month(a.Tanggal)=@Bulan
-and  /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=1  */    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)= 1  AND TotTotalRp>=200000000
-and B.pJasa= 0
-
-
-
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-  $tempOutstanding5 = DB::connection("SML")->select("declare @Tahun int, @Bulan int,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan,@pJasa= 0
-
-Select  a.isAut,a.NoBukti, a.Tanggal,a.KodeSupp, b.NamaCustSupp, b.Handling, b.FakturSupp,
-        b.TotSubTotal, b.TotDiskon, b.TotTotal, TotDPP, b.TotPPN, TotNet,
-        TotSubTotalRp, TotDiskonRp, TotTotalRp, TotDPPRp, TotPPNRp, TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-       A.FlagTipe,NOSO, CASE WHEN ISNULL(NOPOCUST,'')='' THEN
-			(SELECT TOP 1 NOPESANAN FROM DBSO WHERE NOBUKTI=a.NOSO )
-       ELSE NOPOCUST END NOPOCUST,A.TglKirim
-From dbPO a Left Outer Join vwMasterPO b on a.NoBukti=b.NoBukti
-where year(a.Tanggal)=20222 and month(a.Tanggal)=@Bulan   and
- /*Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0*/  Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) =0    AND TotTotalRp>=200000000
-and b.pjasa=@pJasa
-
-
-
-
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding3 = $this->queryPenawaranSO($tglawal, $tglakhir, 0);
 
     return view('marketing.penawaranso' , [
       "menul0" => $menul0,
@@ -132,8 +48,6 @@ order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
       "tempOutstanding3" => $tempOutstanding3,
 
-      "tempOutstanding5" => $tempOutstanding5,
-
       "level" => $akses->OL,
       "listBarangAll" => [] ,
       "akses" => $akses
@@ -141,130 +55,70 @@ order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
 }
 
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Penawaran SO"
+  // -- dulu tabel2 (Belum Otorisasi, dengan tombol Otorisasi) dan tabel3 (Sudah
+  // Otorisasi, dengan tombol Batal Otorisasi) adalah 2 tab terpisah dengan query
+  // sendiri-sendiri (masing2 hardcode NeedOtorisasi=1/0), padahal modalFilter di
+  // tab pertama sudah punya dropdown Semua/Belum/Sudah Otorisasi yang cuma
+  // menyaring client-side dari data yang sudah kepotong server-side -- makanya
+  // pilih "Sudah Otorisasi" di sana selalu kosong. Digabung jadi satu query
+  // dengan filterso yang beneran menyaring di server, port 1:1 dari pola
+  // queryOutstanding() milik PerintahReturJualController.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryPenawaranSO ($tglawal, $tglakhir, $filterso) {
+    return DB::connection("SML")->select("
+      select * from (
+        Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(c.NAMACUSTSUPP,'-') NamaCustSupp,
+          sum(isnull(b.SUBTOTAL,0))   TotSubTotal, sum(isnull(b.NDISKON,0)) TotDiskon, sum(isnull(b.SUBTOTAL,0)) TotTotal
+          ,sum(isnull(NDPP,0)) TotDPP,
+          sum(isnull(b.NPPN,0)) TotPPN,SUM(isnull(b.NNET,0)) TotNet,
+          sum(isnull(b.SUBTOTALRP,0)) TotSubTotalRp,SUM(isnull(b.NDISKON,0)) TotDiskonRp,sum(isnull(b.SUBTOTALRP,0)) TotTotalRp,
+          sum(isnull(NDPPRP,0)) TotDPPRp, sum(isnull(b.NPPNRP,0))TotPPNRp,SUM(isnull(b.NNETRP,0))  TotNetRp,
+          A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+          A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+          A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+          A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+          A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+          Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                         Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                         Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                         Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                         Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                    else 1
+               end As Bit) NeedOtorisasi,A.IsOtorisasi2
+          ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
+          A.tglKirim,A.MaxOL
+        From dbpenawaranso a
+        Left Outer Join DBPENAWARANSODET b on a.NoBukti=b.NoBukti
+        left outer join DBCUSTSUPP c on a.KODECUST=c.KODECUSTSUPP
+        where a.Tanggal between ? and ?
+        group by a.NoBukti, a.Tanggal,a.KODECUST , C.NamaCustSupp,
+          A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+          A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+          A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+          A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+          A.IsOtorisasi5, A.OtoUser5, A.TglOto5,a.MAXOL,a.ISBATAL,a.USERBATAL,a.TglBatal,a.TglKirim
+      ) x
+      where (? = 0)
+         or (? = 1 and x.NeedOtorisasi = 1)
+         or (? = 2 and x.NeedOtorisasi = 0)
+      order by x.NoBukti
+    ", [$tglawal, $tglakhir, $filterso, $filterso, $filterso]);
+  }
 
 
 
-  public function loadAll () {
+
+  public function loadAll (Request $req) {
 
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    //
-   
-
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan
-
-Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(c.NAMACUSTSUPP,'-') NamaCustSupp,
-        sum(isnull(b.SUBTOTAL,0))   TotSubTotal, sum(isnull(b.NDISKON,0)) TotDiskon, sum(isnull(b.SUBTOTAL,0)) TotTotal
-        ,sum(isnull(NDPP,0)) TotDPP, 
-        sum(isnull(b.NPPN,0)) TotPPN,SUM(isnull(b.NNET,0)) TotNet,
-        sum(isnull(b.SUBTOTALRP,0)) TotSubTotalRp,SUM(isnull(b.NDISKON,0)) TotDiskonRp,sum(isnull(b.SUBTOTALRP,0)) TotTotalRp,
-        sum(isnull(NDPPRP,0)) TotDPPRp, sum(isnull(b.NPPNRP,0))TotPPNRp,SUM(isnull(b.NNETRP,0))  TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-      A.tglKirim,A.MaxOL
-From dbpenawaranso a 
-Left Outer Join DBPENAWARANSODET b on a.NoBukti=b.NoBukti
-left outer join DBCUSTSUPP c on a.KODECUST=c.KODECUSTSUPP
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=1 
-
-group by a.NoBukti, a.Tanggal,a.KODECUST , C.NamaCustSupp,
- A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,a.MAXOL,a.ISBATAL,a.USERBATAL,a.TglBatal,a.TglKirim
-order by NoBukti
-
-
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-// $collection2 = collect($tempOutstanding2)->groupBy('NoBukti');
-$tempOutstanding3 = [];
-foreach ($tempOutstanding2 as $p) {
-  // code...
-  array_push($tempOutstanding3, $p);
-}
-
-
-
-
-  $tempOutstanding4 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
-
-select @Tahun= :tahun, @Bulan= :bulan
-
-Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(c.NAMACUSTSUPP,'-') NamaCustSupp,
-        sum(isnull(b.SUBTOTAL,0))   TotSubTotal, sum(isnull(b.NDISKON,0)) TotDiskon, sum(isnull(b.SUBTOTAL,0)) TotTotal
-        ,sum(isnull(NDPP,0)) TotDPP, 
-        sum(isnull(b.NPPN,0)) TotPPN,SUM(isnull(b.NNET,0)) TotNet,
-        sum(isnull(b.SUBTOTALRP,0)) TotSubTotalRp,SUM(isnull(b.NDISKON,0)) TotDiskonRp,sum(isnull(b.SUBTOTALRP,0)) TotTotalRp,
-        sum(isnull(NDPPRP,0)) TotDPPRp, sum(isnull(b.NPPNRP,0))TotPPNRp,SUM(isnull(b.NNETRP,0))  TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi,A.IsOtorisasi2
-       ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
-      A.tglKirim,A.MaxOL
-From dbpenawaranso a 
-Left Outer Join DBPENAWARANSODET b on a.NoBukti=b.NoBukti
-left outer join DBCUSTSUPP c on a.KODECUST=c.KODECUSTSUPP
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0 
-
-group by a.NoBukti, a.Tanggal,a.KODECUST , C.NamaCustSupp,
- A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,a.MAXOL,a.ISBATAL,a.USERBATAL,a.TglBatal,a.TglKirim
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-// $collection3 = collect($tempOutstanding4)->groupBy('NoBukti');
-$tempOutstanding5 = [];
-foreach ($tempOutstanding4 as $p) {
-  // code...
-  array_push($tempOutstanding5, $p);
-}
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterso = $req->filterso ?: 0;
+    $tempOutstanding3 = $this->queryPenawaranSO($tglawal, $tglakhir, $filterso);
 
     return [
-     
-   
-      "tempOutstanding2" => $tempOutstanding2,
       "tempOutstanding3" => $tempOutstanding3,
-      "tempOutstanding4" => $tempOutstanding4,
-      "tempOutstanding5" => $tempOutstanding5
     ];
 }
 

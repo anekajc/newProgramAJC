@@ -73,40 +73,53 @@ AND B.NoBukti IS NOT NULL
 order by A.NoBukti",["tahun" => $periode->tahun , "bulan" =>$periode->bulan, "user" => \Auth::User()->username]);
 
 
-$tempPenerimaan = DB::connection("SML")->select("
-
-select a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO
-from dbSPBRJual a
-left outer join DBCUSTSUPP b on a.KodeCustSupp = b.KODECUSTSUPP
-left outer join dbSPBRJualDet c on a.NoBukti = c.NoBukti
-
-where a.nobukti like '%SPR%' and MONTH(a.tanggal) = :bulan and YEAR(a.tanggal) = :tahun and a.IsOtorisasi1 <> 1
-group by a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO",["bulan" =>$periode->bulan,"tahun" => $periode->tahun ]);
-
-$tempPenerimaan2 = DB::connection("SML")->select("
-
-select a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO
-from dbSPBRJual a
-left outer join DBCUSTSUPP b on a.KodeCustSupp = b.KODECUSTSUPP
-left outer join dbSPBRJualDet c on a.NoBukti = c.NoBukti
-
-where a.nobukti like '%SPR%' and MONTH(a.tanggal) = :bulan and YEAR(a.tanggal) = :tahun and a.IsOtorisasi1 = 1
-group by a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO",["bulan" =>$periode->bulan,"tahun" => $periode->tahun ]);
-
-
+$tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+$tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+$tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, 0);
 
     return view('marketing.returpenjualangudang' , [
       "menul0" => $menul0,
       "periode" => $periode,
       "tempOutstanding" => $tempOutstanding,
       "tempPenerimaan" => $tempPenerimaan,
-      "tempPenerimaan2" => $tempPenerimaan2,
       "akses" => $akses
     ]);
 
   }
 
-  public function loadAll () {
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Transaksi Retur
+  // Gudang" -- dulu ada 2 salinan query nyaris identik ($tempPenerimaan = belum
+  // otorisasi, $tempPenerimaan2 = sudah otorisasi) yang dirender di tab terpisah.
+  // Digabung jadi satu tabel dengan filterspr yang menyaring status otorisasi DAN
+  // status invoice sekaligus, port 1:1 dari pola queryOutstanding() milik
+  // PerintahReturJualController (WHERE bersyarat di derived table, bukan blok SQL
+  // per opsi filter). $tempOutstanding (tab "Outstanding PRJ") sengaja tidak disentuh.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi,
+  //   3 = Belum, 4 = Sebagian, 5 = Selesai
+  private function queryPenerimaan ($tglawal, $tglakhir, $filterspr) {
+    return DB::connection("SML")->select("
+      select * from (
+        select a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp, b.NAMACUSTSUPP, a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.IDUser, c.Noinv, a.NOSO,
+          case when isnull(qntinvr,0) = 0 then 'Belum'
+               when isnull(qntinvr,0) < qntspbr then 'Sebagian'
+               else 'Selesai' end xstatus
+        from dbSPBRJual a
+        left outer join DBCUSTSUPP b on a.KodeCustSupp = b.KODECUSTSUPP
+        left outer join (select nobukti, noinv, sum(qnt) qntspbr from dbSPBRJualDet group by NoBukti, Noinv) c on a.NoBukti = c.NoBukti
+        left outer join (select nospr, sum(qnt) qntinvr from DBINVOICERPJDet group by NOSPR) d on a.NoBukti = d.nospr
+        where a.nobukti like '%SPR%' and a.Tanggal between ? and ?
+        group by a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp, b.NAMACUSTSUPP, a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.IDUser, c.Noinv, a.NOSO, c.qntspbr, d.qntinvr
+      ) x
+      where (? = 0)
+         or (? = 1 and x.IsOtorisasi1 <> 1)
+         or (? = 2 and x.IsOtorisasi1 = 1)
+         or (? = 3 and x.xstatus = 'Belum')
+         or (? = 4 and x.xstatus = 'Sebagian')
+         or (? = 5 and x.xstatus = 'Selesai')
+    ", [$tglawal, $tglakhir, $filterspr, $filterspr, $filterspr, $filterspr, $filterspr, $filterspr]);
+  }
+
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
@@ -139,34 +152,14 @@ AND B.NoBukti IS NOT NULL
 order by A.NoBukti",["tahun" => $periode->tahun , "bulan" =>$periode->bulan, "user" => \Auth::User()->username]);
 
 
-    $tempPenerimaan = DB::connection("SML")->select("
-
-    select a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO
-    from dbSPBRJual a
-    left outer join DBCUSTSUPP b on a.KodeCustSupp = b.KODECUSTSUPP
-    left outer join dbSPBRJualDet c on a.NoBukti = c.NoBukti
-
-    where a.nobukti like '%SPR%' and MONTH(a.tanggal) = :bulan and YEAR(a.tanggal) = :tahun and a.isotorisasi1 <> 1
-    group by a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO",["bulan" =>$periode->bulan,"tahun" => $periode->tahun ]);
-    $tempPenerimaan2 = DB::connection("SML")->select("
-
-    select a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO
-    from dbSPBRJual a
-    left outer join DBCUSTSUPP b on a.KodeCustSupp = b.KODECUSTSUPP
-    left outer join dbSPBRJualDet c on a.NoBukti = c.NoBukti
-
-    where a.nobukti like '%SPR%' and MONTH(a.tanggal) = :bulan and YEAR(a.tanggal) = :tahun and a.isotorisasi1 = 1
-    group by a.NoBukti, a.Tanggal, a.NoUrut, a.KodeCustSupp , b.NAMACUSTSUPP , a.IsOtorisasi1 ,a.OtoUser1, a.TglOto1, a.IDUser , c.Noinv , a.NOSO",["bulan" =>$periode->bulan,"tahun" => $periode->tahun ]);
-
-
-
-
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterspr = $req->filterspr ?: 0;
+    $tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, $filterspr);
 
     return [
       "tempOutstanding" => $tempOutstanding,
       "tempPenerimaan" => $tempPenerimaan,
-
-      "tempPenerimaan2" => $tempPenerimaan2
   ];
   }
 

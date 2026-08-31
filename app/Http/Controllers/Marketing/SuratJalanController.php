@@ -449,116 +449,9 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
 " , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
 
 
-$tempOutstanding3 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-        E.Nobukti Noso, D.NoBukti NoSPP,
-        Case when A.isFlag=0 then 'SPB Barang Jadi'
-             when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-        ,Isnull(A.Isbatal,0) Isbatal,A.Userbatal,A.Tglbatal,F.NoPesanan ,
-        ISnull(M7.Nama,'-') namakebun,A.RefUKM,(select top 1 NOSPB from DBRSPBDet where NOSPB=a.NoBukti)NOSPB,
-        case when year(A.TGLKIRIM)=1899 then null else A.TGLKIRIM END TGLKIRIM,
-        CASE WHEN YEAR(A.TGLTERIMA)=1899 THEN NULL ELSE A.TGLTERIMA END TGLTERIMA,
-        ISnull(A.CetakKe,0) CetakKe,case when year(A.TglSPBINVC)=1899 then null else A.TglSPBINVC END TglSPBINVC
-        ,case when year(A.TglTerimaBRG)=1899 then null else A.TglTerimaBRG END TglTerimaBRG
-from	dbSPB A
-Left Outer join (Select nobukti, nospp
-                 from dbSPBDet
-                 Group by nobukti, nospp) C on C.NoBukti=A.NoBukti
-Left Outer join (Select nobukti, NoSO
-                 from dbSPPDet
-                 Group by nobukti, NoSO) D on D.NoBukti=C.NoSPP
-Left Outer join (select NObukti,NOso from DBSPBDET group by Nobukti,NOso) E on A.Nobukti=E.NoBukti
-Left Outer JOin DBSO F on E.Noso=F.Nobukti
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp and B.Sales=F.KODESLS
-Left OUter Join DbCustSupp M1 On A.kodeCustSupp=m1.KodeCustSupp
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUSTsupp=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-LEFT OUTER JOIN DBRSPB M8 ON A.NOBUKTI=M8.NOSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and A.Nobukti not like '%POS%'
-  and isnull(A.IsOtorisasi1, 0) = 0
-/*and (C.kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=:0 ) or ISNULL(A.ISBATAL,0)=1) */
-
-
-
-
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun, "bulan" => $periode->bulan ]);
-
-
-$tempOutstanding6 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-        E.Nobukti Noso, D.NoBukti NoSPP,
-        Case when A.isFlag=0 then 'SPB Barang Jadi'
-             when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-        ,Isnull(A.Isbatal,0) Isbatal,A.Userbatal,A.Tglbatal,F.NoPesanan ,
-        ISnull(M7.Nama,'-') namakebun,A.RefUKM,(select top 1 NOSPB from DBRSPBDet where NOSPB=a.NoBukti)NOSPB,
-        case when year(A.TGLKIRIM)=1899 then null else A.TGLKIRIM END TGLKIRIM,
-        CASE WHEN YEAR(A.TGLTERIMA)=1899 THEN NULL ELSE A.TGLTERIMA END TGLTERIMA,
-        ISnull(A.CetakKe,0) CetakKe,case when year(A.TglSPBINVC)=1899 then null else A.TglSPBINVC END TglSPBINVC
-        ,case when year(A.TglTerimaBRG)=1899 then null else A.TglTerimaBRG END TglTerimaBRG
-from	dbSPB A
-Left Outer join (Select nobukti, nospp
-                 from dbSPBDet
-                 Group by nobukti, nospp) C on C.NoBukti=A.NoBukti
-Left Outer join (Select nobukti, NoSO
-                 from dbSPPDet
-                 Group by nobukti, NoSO) D on D.NoBukti=C.NoSPP
-Left Outer join (select NObukti,NOso from DBSPBDET group by Nobukti,NOso) E on A.Nobukti=E.NoBukti
-Left Outer JOin DBSO F on E.Noso=F.Nobukti
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp and B.Sales=F.KODESLS
-Left OUter Join DbCustSupp M1 On A.kodeCustSupp=m1.KodeCustSupp
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUSTsupp=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-LEFT OUTER JOIN DBRSPB M8 ON A.NOBUKTI=M8.NOSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and A.Nobukti not like '%POS%'
-  and isnull(A.IsOtorisasi1, 0) <> 0
-/*and (C.kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=:0 ) or ISNULL(A.ISBATAL,0)=1) */
-
-
-
-
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun, "bulan" => $periode->bulan ]);
+$tglawalspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+$tglakhirspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+$tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, 0);
 
 
 
@@ -853,7 +746,6 @@ and Isnull(B.PUrgent,0)=1
       // "users"=> $users,
       "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
       "tempOutstanding4" => $tempOutstanding4,
       "tempOutstanding6" => $tempOutstanding6,
 
@@ -865,7 +757,65 @@ and Isnull(B.PUrgent,0)=1
 
   }
 
-  public function loadAll () {
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Surat Jalan
+  // Otorisasi" (dulu tabel3=Belum Otorisasi tanpa actions + tabel6=Sudah Otorisasi
+  // dengan actions Kirim/Terima Acc, di tab terpisah) -- digabung jadi satu tabel
+  // dengan filterspb yang menyaring status otorisasi, port 1:1 dari pola
+  // queryOutstanding() milik PerintahReturJualController. Baris Belum Otorisasi
+  // sekarang dapat tombol Otorisasi (tabel6ActionsCell di Blade), baris Sudah
+  // Otorisasi tetap dapat Kirim/Terima Acc plus Batal Otorisasi.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryOtorisasiSPB ($tglawal, $tglakhir, $filterspb) {
+    return DB::connection("SML")->select("
+      select * from (
+        select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
+                A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
+                E.Nobukti Noso, D.NoBukti NoSPP,
+                Case when A.isFlag=0 then 'SPB Barang Jadi'
+                     when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
+                     else ''
+                end MyTipe,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                               Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                          else 1
+                     end As Bit) NeedOtorisasi
+                ,Isnull(A.Isbatal,0) Isbatal,A.Userbatal,A.Tglbatal,F.NoPesanan ,
+                ISnull(M7.Nama,'-') namakebun,A.RefUKM,(select top 1 NOSPB from DBRSPBDet where NOSPB=a.NoBukti)NOSPB,
+                case when year(A.TGLKIRIM)=1899 then null else A.TGLKIRIM END TGLKIRIM,
+                CASE WHEN YEAR(A.TGLTERIMA)=1899 THEN NULL ELSE A.TGLTERIMA END TGLTERIMA,
+                ISnull(A.CetakKe,0) CetakKe,case when year(A.TglSPBINVC)=1899 then null else A.TglSPBINVC END TglSPBINVC
+                ,case when year(A.TglTerimaBRG)=1899 then null else A.TglTerimaBRG END TglTerimaBRG
+        from	dbSPB A
+        Left Outer join (Select nobukti, nospp
+                         from dbSPBDet
+                         Group by nobukti, nospp) C on C.NoBukti=A.NoBukti
+        Left Outer join (Select nobukti, NoSO
+                         from dbSPPDet
+                         Group by nobukti, NoSO) D on D.NoBukti=C.NoSPP
+        Left Outer join (select NObukti,NOso from DBSPBDET group by Nobukti,NOso) E on A.Nobukti=E.NoBukti
+        Left Outer JOin DBSO F on E.Noso=F.Nobukti
+        left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp and B.Sales=F.KODESLS
+        Left OUter Join DbCustSupp M1 On A.kodeCustSupp=m1.KodeCustSupp
+        LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUSTsupp=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
+        LEFT OUTER JOIN DBRSPB M8 ON A.NOBUKTI=M8.NOSPB
+        where A.Tanggal between ? and ? and A.Nobukti not like '%POS%'
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1, 0) = 0)
+         or (? = 2 and isnull(x.IsOtorisasi1, 0) <> 0)
+      order by x.NOBUKTI
+    ", [$tglawal, $tglakhir, $filterspb, $filterspb, $filterspb]);
+  }
+
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
@@ -1280,116 +1230,10 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
 " , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
 
 
-$tempOutstanding3 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-        E.Nobukti Noso, D.NoBukti NoSPP,
-        Case when A.isFlag=0 then 'SPB Barang Jadi'
-             when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-        ,Isnull(A.Isbatal,0) Isbatal,A.Userbatal,A.Tglbatal,F.NoPesanan ,
-        ISnull(M7.Nama,'-') namakebun,A.RefUKM,(select top 1 NOSPB from DBRSPBDet where NOSPB=a.NoBukti)NOSPB,
-        case when year(A.TGLKIRIM)=1899 then null else A.TGLKIRIM END TGLKIRIM,
-        CASE WHEN YEAR(A.TGLTERIMA)=1899 THEN NULL ELSE A.TGLTERIMA END TGLTERIMA,
-        ISnull(A.CetakKe,0) CetakKe,case when year(A.TglSPBINVC)=1899 then null else A.TglSPBINVC END TglSPBINVC
-        ,case when year(A.TglTerimaBRG)=1899 then null else A.TglTerimaBRG END TglTerimaBRG
-from	dbSPB A
-Left Outer join (Select nobukti, nospp
-                 from dbSPBDet
-                 Group by nobukti, nospp) C on C.NoBukti=A.NoBukti
-Left Outer join (Select nobukti, NoSO
-                 from dbSPPDet
-                 Group by nobukti, NoSO) D on D.NoBukti=C.NoSPP
-Left Outer join (select NObukti,NOso from DBSPBDET group by Nobukti,NOso) E on A.Nobukti=E.NoBukti
-Left Outer JOin DBSO F on E.Noso=F.Nobukti
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp and B.Sales=F.KODESLS
-Left OUter Join DbCustSupp M1 On A.kodeCustSupp=m1.KodeCustSupp
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUSTsupp=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-LEFT OUTER JOIN DBRSPB M8 ON A.NOBUKTI=M8.NOSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and A.Nobukti not like '%POS%'
-and isnull(A.IsOtorisasi1 , 0) = 0
-/*and (C.kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=:0 ) or ISNULL(A.ISBATAL,0)=1) */
-
-
-
-
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun, "bulan" => $periode->bulan ]);
-
-
-$tempOutstanding6 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-
-select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
-        A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-        E.Nobukti Noso, D.NoBukti NoSPP,
-        Case when A.isFlag=0 then 'SPB Barang Jadi'
-             when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
-             else ''
-        end MyTipe,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-        ,Isnull(A.Isbatal,0) Isbatal,A.Userbatal,A.Tglbatal,F.NoPesanan ,
-        ISnull(M7.Nama,'-') namakebun,A.RefUKM,(select top 1 NOSPB from DBRSPBDet where NOSPB=a.NoBukti)NOSPB,
-        case when year(A.TGLKIRIM)=1899 then null else A.TGLKIRIM END TGLKIRIM,
-        CASE WHEN YEAR(A.TGLTERIMA)=1899 THEN NULL ELSE A.TGLTERIMA END TGLTERIMA,
-        ISnull(A.CetakKe,0) CetakKe,case when year(A.TglSPBINVC)=1899 then null else A.TglSPBINVC END TglSPBINVC
-        ,case when year(A.TglTerimaBRG)=1899 then null else A.TglTerimaBRG END TglTerimaBRG
-from	dbSPB A
-Left Outer join (Select nobukti, nospp
-                 from dbSPBDet
-                 Group by nobukti, nospp) C on C.NoBukti=A.NoBukti
-Left Outer join (Select nobukti, NoSO
-                 from dbSPPDet
-                 Group by nobukti, NoSO) D on D.NoBukti=C.NoSPP
-Left Outer join (select NObukti,NOso from DBSPBDET group by Nobukti,NOso) E on A.Nobukti=E.NoBukti
-Left Outer JOin DBSO F on E.Noso=F.Nobukti
-left outer join vwBrowsCustomer B on B.KodeCust=A.KodeCustSupp and B.Sales=F.KODESLS
-Left OUter Join DbCustSupp M1 On A.kodeCustSupp=m1.KodeCustSupp
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUSTsupp=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-LEFT OUTER JOIN DBRSPB M8 ON A.NOBUKTI=M8.NOSPB
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and A.Nobukti not like '%POS%'
-  and isnull(A.IsOtorisasi1 , 0) <> 0
-/*and (C.kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=:0 ) or ISNULL(A.ISBATAL,0)=1) */
-
-
-
-
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun, "bulan" => $periode->bulan ]);
+$tglawalspb = $req->tglawalspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+$tglakhirspb = $req->tglakhirspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+$filterspb = $req->filterspb ?: 0;
+$tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, $filterspb);
 
 
 $tempOutstanding4 = DB::connection("SML")->select("
@@ -1667,8 +1511,6 @@ and Isnull(B.PUrgent,0)=1
     return [
       "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
-
-      "tempOutstanding3" => $tempOutstanding3,
       "tempOutstanding4" => $tempOutstanding4,
       "tempOutstanding6" => $tempOutstanding6,
       "tempOutstanding5" => $tempOutstanding5

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers\Marketing;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -21,7 +20,6 @@ class PerintahReturJualController extends Controller
        return redirect('/home');
     }
 
-
     // $users = DB::connection("SML")->select('select * from new_users');
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     // $listData = DB::connection('SML')->select('SELECT * FROM DBMERK');
@@ -30,75 +28,65 @@ class PerintahReturJualController extends Controller
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(4);
 
 
-//     $tempOutstanding = DB::connection("SML")->select("select 	month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan,
-// B.NOBUKTI, B.URUT, B.NoINV NoSC, B.UrutINV UrutSC, B.KODEBRG, C.NAMABRG,
-//         B.QNT, B.QNT2, B.SAT_1, B.SAT_2, B.ISI, B.NetW, B.GrossW, '' KetDetail, a.KodeCustSupp, d.NAMACUSTSUPP,a.KodeCustSupp, a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ , a.NOSO, a.IDUser, case when b.nosat = 1 then b.SAT_1 else b.SAT_2 end SAT , b.SATX
-// from	dbPRRJualDet B
-// left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-// left outer join dbPRRJual a on b.NoBukti=a.NoBukti
-//
-// left outer join DBCUSTSUPP D on a.KodeCustSupp=d.KODECUSTSUPP
-//  where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun
-// ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-$tempOutstanding = DB::connection("SML")->select("select month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan, a.NOBUKTI,a.KodeCustSupp, d.NAMACUSTSUPP,a.KodeCustSupp,a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ , a.NOSO, a.IDUser
-
-from dbPRRJual a
-left outer join DBCUSTSUPP D on a.KodeCustSupp=d.KODECUSTSUPP
-where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun and a.pmin = 0 and a.isOtorisasi1 <> 1
-",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-
-$tempOutstanding2 = DB::connection("SML")->select("select month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan, a.NOBUKTI,a.KodeCustSupp, d.NAMACUSTSUPP,a.KodeCustSupp,a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ , a.NOSO, a.IDUser
-
-from dbPRRJual a
-left outer join DBCUSTSUPP D on a.KodeCustSupp=d.KODECUSTSUPP
-where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun and a.pmin = 0 and a.isOtorisasi1 = 1
-",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, 0);
 
     return view('marketing.perintahreturjual' , [
       "menul0" => $menul0,
       "periode" => $periode,
       "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
       "akses" => $akses
     ]);
 
   }
 
-  public function loadAll () {
+  // Satu query dipakai bareng oleh index() (initial load) dan loadAll() (periode/filter
+  // berubah, atau refresh sehabis add/edit/delete) -- dulu ada 2 salinan query yang nyaris
+  // identik (satu tanpa xstatus buat index(), satu dengan xstatus buat loadAll()), jadi
+  // kolom baru/perubahan skema harus diedit di 2 tempat. filterprj menyaring status
+  // otorisasi DAN status proses SPBR sekaligus (port 1:1 dari pola Status SO milik
+  // so.blade.php/SOController::loadSOFilter(), disederhanakan jadi satu query dengan
+  // WHERE bersyarat -- bukan satu blok SQL terpisah per opsi filter seperti SO).
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi,
+  //   3 = Belum Diproses, 4 = Proses Sebagian, 5 = Selesai
+  private function queryOutstanding ($tglawal, $tglakhir, $filterprj) {
+    return DB::connection("SML")->select("
+      select * from (
+        select month(a.Tanggal) Bulan, YEAR(a.Tanggal) Tahun, a.Tanggal, a.Catatan, a.NOBUKTI,
+          a.KodeCustSupp, d.NAMACUSTSUPP, a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ, a.NOSO, a.IDUser,
+          case when isnull(qntspbr,0) = 0 then 'Belum'
+               when isnull(qntspbr,0) < qntprr then 'Sebagian'
+               else 'Selesai' end xstatus
+        from dbPRRJual a
+        left outer join (select nobukti, sum(qnt) qntprr from dbPRRJualDet group by NoBukti) b on b.NoBukti = a.NoBukti
+        left outer join (select NoPRRJUAL, sum(qnt) qntspbr from dbSPBRJualdet group by NoPRRJUAL) c on c.NoPRRJUAL = a.NoBukti
+        left outer join DBCUSTSUPP D on a.KodeCustSupp = d.KODECUSTSUPP
+        where a.TANGGAL between ? and ? and a.pmin = 0
+      ) x
+      where (? = 0)
+         or (? = 1 and x.IsOtorisasi1 <> 1)
+         or (? = 2 and x.IsOtorisasi1 = 1)
+         or (? = 3 and x.xstatus = 'Belum')
+         or (? = 4 and x.xstatus = 'Sebagian')
+         or (? = 5 and x.xstatus = 'Selesai')
+    ", [$tglawal, $tglakhir, $filterprj, $filterprj, $filterprj, $filterprj, $filterprj, $filterprj]);
+  }
 
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterprj = $req->filterprj ?: 0;
 
-    $tempOutstanding = DB::connection("SML")->select("select month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan, a.NOBUKTI,a.KodeCustSupp, d.NAMACUSTSUPP,a.KodeCustSupp,a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ , a.NOSO, a.IDUser
+    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, $filterprj);
 
-    from dbPRRJual a
-    left outer join DBCUSTSUPP D on a.KodeCustSupp=d.KODECUSTSUPP
-    where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun and a.pmin = 0 and a.IsOtorisasi1 <> 1
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-    $tempOutstanding2 = DB::connection("SML")->select("select month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan, a.NOBUKTI,a.KodeCustSupp, d.NAMACUSTSUPP,a.KodeCustSupp,a.IsOtorisasi1, a.OtoUser1, a.TglOto1, a.NoRPJ , a.NOSO, a.IDUser
-
-    from dbPRRJual a
-    left outer join DBCUSTSUPP D on a.KodeCustSupp=d.KODECUSTSUPP
-    where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun and a.pmin = 0 and a.IsOtorisasi1 = 1
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-
-
-
-
-    return ["tempOutstanding" => $tempOutstanding,
-  "tempOutstanding2" => $tempOutstanding2];
+    return ["tempOutstanding" => $tempOutstanding];
   }
 
 
   public function getDetail (Request $req ) {
-
-
 
         $tempOutstanding = DB::connection("SML")->select("select 	month(a.Tanggal) Bulan,YEAR(a.Tanggal) Tahun,a.Tanggal,a.Catatan,
     B.NOBUKTI,A.NOURUT, B.URUT, B.NoINV NoSC, B.UrutINV UrutSC, B.KODEBRG, C.NAMABRG,b.NAMABRG NAMAPRODUK,
