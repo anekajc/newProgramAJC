@@ -1,4 +1,4 @@
-@extends('gudang.newmaster')
+@extends('gudang.newmasterx')
 @section('buttons')
 
 @endsection
@@ -508,12 +508,12 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-        
+
         // console.log(res[0][0].IsOtorisasi1)
 
       }
     })
-    
+
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=7) {
       let tempArray = dataPrint.slice(i,i+7)
@@ -1068,7 +1068,7 @@ function submitPrint (nobukti) {
          tempPrintStr += `</tbody>`;
 
          tempPrintStr += `</table>
-         
+
           <hr style="margin-top: -6px" />
 
          <div class="footer-sign font-family: sans-serif;
@@ -1079,8 +1079,8 @@ function submitPrint (nobukti) {
          <span style="float: left; display: block; clear: left;">
          </span>
 
-     
- 
+
+
          <div style="width:100%; display:flex; font-weight:bold; margin-top:-130px;">
 
             <div style="width:77%; text-align:right; padding-right:10px;">
@@ -1102,7 +1102,7 @@ function submitPrint (nobukti) {
             </div>
 
           </div>
- 
+
          </div>
 
 
@@ -1147,7 +1147,7 @@ function submitPrint (nobukti) {
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 
@@ -1183,8 +1183,8 @@ function submitPrint (nobukti) {
 
         rowTable += "<tr>";
 	console.log( _isBlmOto ? 1:2);
-        rowTable += _isBlmOto 
-          ? doSetActionBlmOto(item.Nobukti) 
+        rowTable += _isBlmOto
+          ? doSetActionBlmOto(item.Nobukti)
           : doSetActionSdhOto1(item.Nobukti);
 
         rowTable += "<td>" + item.GroupNobukti + "</td>";
@@ -1218,7 +1218,7 @@ function submitPrint (nobukti) {
         rowTable += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + _nb + '\')"><i class="bi bi-key-fill"></i></button>';
         rowTable += '<button class="btn btn-primary btn-sm" type="button" title="Submit Print" onclick="submitPrint(\'' + _nb + '\')"><i class="bi bi-printer"></i></button>';
         rowTable += "</td>";
-        
+
         return rowTable;
       }
 
@@ -1327,7 +1327,7 @@ function submitPrint (nobukti) {
     cleanFormHeader();
     refreshForm();
     doUnlockHeader();
-    
+
     let nb = doGenerateNoBukti("KMBJ");
     $("#input_nobukti").val(nb.Nobukti);
     $("#input_nourut").val(nb.Nourut);
@@ -1438,7 +1438,7 @@ function submitPrint (nobukti) {
     dataBrowse['barang']  = "";
 
     $('#formItem').show();
-    
+
     $("#btnitem_kodebrg").prop("disabled", false);
     $("#inputitem_kodebrg").prop("disabled", false);
     $("#inputitem_qtyasal").prop("disabled", false);
@@ -1605,7 +1605,7 @@ function submitPrint (nobukti) {
     cart["choice"]       = _choice;
     cart["nobukti"]      = $("#input_nobukti").val();
     if (_choice == "D") {
-      cart["urut"]       = $("#inputitem_urut").val(); 
+      cart["urut"]       = $("#inputitem_urut").val();
       return cart;
     }
 

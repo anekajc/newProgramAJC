@@ -101,8 +101,7 @@
                         </button>
                         <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary"
                             onclick="buttonAdd()">
-                            <i class="bi bi-plus-lg"></i> Add
-                        </button>
+                            <i class="bi bi-plus-lg"></i>Add</button>
                     </div>
                 </div>
 
@@ -258,7 +257,8 @@
         <div class="container-fluid">
             <div class="row ">
                 <div class="col-md-12 text-right" id="contentContainer">
-                    <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary" onclick="buttonAddAdd()">
+                    <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary"
+                        onclick="buttonAddAdd()">
                         Add Item
                     </button>
                 </div>
@@ -289,7 +289,7 @@
                 <div id="formAddAdd" class="container-fluid showhide">
                     <!-- <div class="line"></div> -->
                     <br />
-                    <div class="row" >
+                    <div class="row">
                         <div class="col-12">
                             <h4>Add Item</h4>
                         </div>
@@ -360,8 +360,7 @@
                             <button type="button" class="btn btn-outline-danger"
                                 onclick="buttonBatalAdd()">Batal</button>
 
-                            <button type="button" class="btn btn-primary"
-                                onclick="submitAddAdd()">Submit</button>
+                            <button type="button" class="btn btn-primary" onclick="submitAddAdd()">Submit</button>
                         </div>
 
                     </div>
@@ -393,10 +392,10 @@
                                                 placeholder="Kode Barang" disabled>
                                             <!-- Tombol Plus (sementara di-comment sesuai kode asli) -->
                                             <!--
-                                                                          <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-right shadow-sm">
-                                                                            <i class="bi bi-plus"></i>
-                                                                          </button>
-                                                                          -->
+                                                                              <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-right shadow-sm">
+                                                                                <i class="bi bi-plus"></i>
+                                                                              </button>
+                                                                              -->
                                         </div>
                                     </div>
                                 </div>
@@ -448,8 +447,7 @@
                             <button type="button" class="btn btn-outline-danger"
                                 onclick="buttonBatalAdd()">Batal</button>
 
-                            <button type="button" onclick="submitAddEdit()"
-                                class="btn btn-primary">Submit</button>
+                            <button type="button" onclick="submitAddEdit()" class="btn btn-primary">Submit</button>
                         </div>
 
                     </div>
