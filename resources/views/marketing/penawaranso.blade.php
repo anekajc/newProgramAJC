@@ -316,6 +316,21 @@
     border-color: #D64550;
     background: #FEF2F2;
   }
+
+  /* Hide action buttons until the row is hovered */
+  #tabel2 tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+  /* Show them when hovering the table row */
+  #tabel2 tbody tr:hover .action-buttons-wrap,
+  #tabel2 tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
 </style>
 @endsection
 @section('content')

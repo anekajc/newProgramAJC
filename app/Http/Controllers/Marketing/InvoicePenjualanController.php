@@ -68,98 +68,9 @@ order by A.NoBukti
 
 
 
-$tempOutstanding2 = DB::connection("SML")->select("
-
-
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-set nocount on
-select  A.NoBukti, A.NoUrut, A.Tanggal,
-        A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-        A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-        A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-        B.NoSPB, D.Tanggal TglSPB,
-        A.IsCetak, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                else 1
-           end As Bit) NeedOtorisasi
-        ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO,E.NoPesanan,Isnull(A.CetakKe,0) CetakKe
-        ,G.totdpp,G.totppn,G.totnet
-from	dbo.dbInvoicePL A WITH(NOLOCK)
-Left Outer join (Select x.NoBukti, x.NoSPB
-                 from dbo.dbInvoicePLDet x  WITH(NOLOCK)
-                 Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbo.dbSPBDet WITH(NOLOCK) GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-LEFT OUTER JOIN dbo.dbSPB D WITH(NOLOCK)ON C.NoBukti=D.NoBukti
-left Outer join dbo.dbSO E WITH(NOLOCK) on E.Nobukti=C.NoSO
---left outer join dbo.vwBrowsCustomer F WITH(NOLOCK) on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-left outer join dbo.DBCUSTSUPP F WITH(NOLOCK) on F.KODECUSTSUPP=A.KodeCustSupp
-left outer join vwRpDetInvoicePL G on A.NoBukti=G.NoBukti
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-and isnull(A.FlagKasir,0)=0
-And Isnull(A.pJasa,0)=0 and A.IsOtorisasi1 = 0
-order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-$tempOutstanding3 = DB::connection("SML")->select("
-
-
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-set nocount on
-select  A.NoBukti, A.NoUrut, A.Tanggal,
-        A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-        A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-        A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-        B.NoSPB, D.Tanggal TglSPB,
-        A.IsCetak, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                else 1
-           end As Bit) NeedOtorisasi
-        ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO,E.NoPesanan,Isnull(A.CetakKe,0) CetakKe
-         ,G.totdpp,G.totppn,G.totnet
-from	dbo.dbInvoicePL A WITH(NOLOCK)
-Left Outer join (Select x.NoBukti, x.NoSPB
-                 from dbo.dbInvoicePLDet x  WITH(NOLOCK)
-                 Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbo.dbSPBDet WITH(NOLOCK) GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-LEFT OUTER JOIN dbo.dbSPB D WITH(NOLOCK)ON C.NoBukti=D.NoBukti
-left Outer join dbo.dbSO E WITH(NOLOCK) on E.Nobukti=C.NoSO
---left outer join dbo.vwBrowsCustomer F WITH(NOLOCK) on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-left outer join dbo.DBCUSTSUPP F WITH(NOLOCK) on F.KODECUSTSUPP=A.KodeCustSupp
-left outer join vwRpDetInvoicePL G on A.NoBukti=G.NoBukti
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-and isnull(A.FlagKasir,0)=0
-And Isnull(A.pJasa,0)=0 and A.IsOtorisasi1 = 1
-order by A.NoBukti
-
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding2 = $this->queryInvoicePenjualanOtorisasi($tglawal, $tglakhir, 0);
 
     return view('marketing.invoicepenjualan' , [
       "menul0" => $menul0,
@@ -167,10 +78,61 @@ order by A.NoBukti
       // "users"=> $users,
       "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
       "akses" => $akses
     ]);
 
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Invoice
+  // Otorisasi" -- dulu tabel2 (Belum, tombol Koreksi/Otorisasi/Print/Detail)
+  // dan tabel3 (Sudah, tombol Batal Otorisasi/Print/Detail) adalah 2 tab
+  // terpisah dengan query nyaris identik (cuma beda IsOtorisasi1=0/1).
+  // Digabung jadi satu dengan filterip yang menyaring di server, port 1:1
+  // dari pola queryOutstanding() milik PerintahReturJualController. Tabel
+  // "Surat Pengiriman Barang" (tabel, bukan konsep otorisasi) sengaja tidak
+  // disentuh.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryInvoicePenjualanOtorisasi ($tglawal, $tglakhir, $filterip) {
+    return DB::connection("SML")->select("
+      select * from (
+        select  A.NoBukti, A.NoUrut, A.Tanggal,
+                A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
+                A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
+                A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
+                B.NoSPB, D.Tanggal TglSPB,
+                A.IsCetak, A.IDUser,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                        else 1
+                   end As Bit) NeedOtorisasi
+                ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO,E.NoPesanan,Isnull(A.CetakKe,0) CetakKe
+                ,G.totdpp,G.totppn,G.totnet
+        from	dbo.dbInvoicePL A WITH(NOLOCK)
+        Left Outer join (Select x.NoBukti, x.NoSPB
+                         from dbo.dbInvoicePLDet x  WITH(NOLOCK)
+                         Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
+        LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbo.dbSPBDet WITH(NOLOCK) GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
+        LEFT OUTER JOIN dbo.dbSPB D WITH(NOLOCK)ON C.NoBukti=D.NoBukti
+        left Outer join dbo.dbSO E WITH(NOLOCK) on E.Nobukti=C.NoSO
+        left outer join dbo.DBCUSTSUPP F WITH(NOLOCK) on F.KODECUSTSUPP=A.KodeCustSupp
+        left outer join vwRpDetInvoicePL G on A.NoBukti=G.NoBukti
+        where	A.Tanggal between ? and ?
+        and isnull(A.FlagKasir,0)=0
+        And Isnull(A.pJasa,0)=0
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1,0) = 0)
+         or (? = 2 and isnull(x.IsOtorisasi1,0) <> 0)
+      order by x.NoBukti
+    ", [$tglawal, $tglakhir, $filterip, $filterip, $filterip]);
   }
 
   public function getListInvoiceCetak (Request $req) {
@@ -835,7 +797,7 @@ array_push($tes123 , $response);
 
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
@@ -883,100 +845,13 @@ array_push($tes123 , $response);
 
 
 
-  $tempOutstanding2 = DB::connection("SML")->select("
+  $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+  $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+  $filterip = $req->filterip ?: 0;
+  $tempOutstanding2 = $this->queryInvoicePenjualanOtorisasi($tglawal, $tglakhir, $filterip);
 
 
-  declare @Tahun int, @Bulan int
-
-  select @Tahun= :tahun , @Bulan= :bulan
-
-  set nocount on
-  select  A.NoBukti, A.NoUrut, A.Tanggal,
-        A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-        A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-        A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-        B.NoSPB, D.Tanggal TglSPB,
-        A.IsCetak, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                     Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                else 1
-           end As Bit) NeedOtorisasi
-        ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO,E.NoPesanan,Isnull(A.CetakKe,0) CetakKe
-        ,G.totdpp,G.totppn,G.totnet
-  from	dbo.dbInvoicePL A WITH(NOLOCK)
-  Left Outer join (Select x.NoBukti, x.NoSPB
-                 from dbo.dbInvoicePLDet x  WITH(NOLOCK)
-                 Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-  LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbo.dbSPBDet WITH(NOLOCK) GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-  LEFT OUTER JOIN dbo.dbSPB D WITH(NOLOCK)ON C.NoBukti=D.NoBukti
-  left Outer join dbo.dbSO E WITH(NOLOCK) on E.Nobukti=C.NoSO
-  --left outer join dbo.vwBrowsCustomer F WITH(NOLOCK) on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-  left outer join dbo.DBCUSTSUPP F WITH(NOLOCK) on F.KODECUSTSUPP=A.KodeCustSupp
-   left outer join vwRpDetInvoicePL G on A.NoBukti=G.NoBukti
-  where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-  and isnull(A.FlagKasir,0)=0
-  And Isnull(A.pJasa,0)=0 and a.IsOtorisasi1 = 0
-  order by A.NoBukti
-
-  " , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-
-    $tempOutstanding3 = DB::connection("SML")->select("
-
-
-    declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    set nocount on
-    select  A.NoBukti, A.NoUrut, A.Tanggal,
-          A.KodeCustSupp, F.NAMACUSTSUPP NamaCustSupp, A.Consignee, A.NotifyParty,
-          A.ContractNo, A.PONo, A.PaymentTerm, A.DocCreditNo, A.PoL, A.PoD,
-          A.NameOfVessel, A.ShipOnBoardDate, A.Packing, A.Others, A.ISLOKAL,
-          B.NoSPB, D.Tanggal TglSPB,
-          A.IsCetak, A.IDUser,
-          A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-          A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-          A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-          A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-          A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-          Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-          ,Isnull(A.IsBatal,0) Isbatal,A.userBatal,A.tglBatal, A.NoPajak,E.NOBUKTI NOSO,E.TANGGAL TGLSO,E.NoPesanan,Isnull(A.CetakKe,0) CetakKe
-          ,G.totdpp,G.totppn,G.totnet
-    from	dbo.dbInvoicePL A WITH(NOLOCK)
-    Left Outer join (Select x.NoBukti, x.NoSPB
-                   from dbo.dbInvoicePLDet x  WITH(NOLOCK)
-                   Group by x.NoBukti, x.NoSPB) B on B.NoBukti=A.NoBukti
-    LEFT OUTER JOIN (SELECT NOBUKTI,NoSO FROM dbo.dbSPBDet WITH(NOLOCK) GROUP BY NoBukti,NoSO) C ON B.NoSPB=c.NoBukti
-    LEFT OUTER JOIN dbo.dbSPB D WITH(NOLOCK)ON C.NoBukti=D.NoBukti
-    left Outer join dbo.dbSO E WITH(NOLOCK) on E.Nobukti=C.NoSO
-    --left outer join dbo.vwBrowsCustomer F WITH(NOLOCK) on F.KodeCust=A.KodeCustSupp and F.Sales=E.KODESLS
-    left outer join dbo.DBCUSTSUPP F WITH(NOLOCK) on F.KODECUSTSUPP=A.KodeCustSupp
-     left outer join vwRpDetInvoicePL G on A.NoBukti=G.NoBukti
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-    and isnull(A.FlagKasir,0)=0
-    And Isnull(A.pJasa,0)=0 and a.IsOtorisasi1 = 1
-    order by A.NoBukti
-
-    " , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-  return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2 , "tempOutstanding3" => $tempOutstanding3];
+  return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2];
 
 
   }

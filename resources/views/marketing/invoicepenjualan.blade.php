@@ -539,6 +539,27 @@
   display: inline-block;
   vertical-align: middle;
   }
+
+  /* Hide action buttons until the row is hovered */
+  #tabel tbody .action-buttons-wrap,
+  #tabel2 tbody .action-buttons-wrap,
+  #tabel3 tbody .action-buttons-wrap {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+  /* Show them when hovering the table row */
+  #tabel tbody tr:hover .action-buttons-wrap,
+  #tabel2 tbody tr:hover .action-buttons-wrap,
+  #tabel3 tbody tr:hover .action-buttons-wrap,
+  #tabel tbody tr:focus-within .action-buttons-wrap,
+  #tabel2 tbody tr:focus-within .action-buttons-wrap,
+  #tabel3 tbody tr:focus-within .action-buttons-wrap {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
 </style>
 {{-- end tampilan search modal barang all --}}
 @endsection
@@ -571,8 +592,9 @@
 
     {{-- Tab bar: PO's exact card.tab-card + custom-tabs anchor pattern (same as
          marketing/so.blade.php), replacing the old inline-style-colored nav-tabs.
-         ids/hrefs kept exactly as before (nav-home-tab/#home, nav-profile-tab/#profile,
-         nav-profile1-tab/#profile1) since nothing else in this page's JS changed. --}}
+         "Invoice Belum Diotorisasi" (#profile1/tabel3) was merged into "Invoice
+         Otorisasi" (#profile/tabel2) with a periode+filter, so only nav-home-tab/#home
+         and nav-profile-tab/#profile remain. --}}
     <div class="card mb-3 tab-card">
       <div class="card-body">
         <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
@@ -581,10 +603,7 @@
             Surat Pengiriman Barang
           </a>
           <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-            Invoice Belum Diotorisasi
-          </a>
-          <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false">
-            Invoice Sudah Diotorisasi
+            Invoice Otorisasi
           </a>
 
         </div>
@@ -645,7 +664,58 @@
       <div class="row">
         <div class="col-12">
           <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+
+            {{-- Filter modal: port 1:1 dari modalFilter milik perintahreturjual.blade.php.
+                 tabel2 (Belum Otorisasi) + tabel3 (Sudah Otorisasi) digabung jadi satu
+                 tabel di sini dengan Status dropdown, sama seperti PRJ/RPG/SJ/UMJ/NRP/KN. --}}
+            <div class="modal fade rt-filter" id="modalFilterIP">
+              <div class="modal-dialog modal-md">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">
+                      <i class="bi bi-funnel"></i>
+                      Filter Data
+                      <span class="rt-active-badge" id="ipFilterBadge">0 aktif</span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterIP').modal('hide')">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <div class="rt-section">
+                      <div class="rt-group-label">Status</div>
+                      <div>
+                        <label class="rt-field-label" for="input_filterip">Status Otorisasi</label>
+                        <select class="rt-native" id="input_filterip">
+                          <option value=0 selected>Semua</option>
+                          <option value=1>Belum Otorisasi</option>
+                          <option value=2>Sudah Otorisasi</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button type="button" class="rt-reset-link" onclick="ipResetFilterFields()">Reset semua</button>
+                    <div class="rt-footer-buttons">
+                      <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                        onclick="$('#modalFilterIP').modal('hide')">Batal</button>
+                      <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterIP(); $('#modalFilterIP').modal('hide');">Terapkan</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
             <div class="po-toolbar">
+              <div class="po-filter-wrap">
+                <label>Periode</label>
+                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalawal_ip" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                <span class="po-filter-sep">s/d</span>
+                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalakhir_ip" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+              </div>
               <input type="search" id="ipSearch2" class="po-search-inp" placeholder="Cari data">
               <div class="po-len-wrap">
                 <label for="ipLen2">Tampilkan</label>
@@ -657,43 +727,14 @@
                   <option value="-1">Semua</option>
                 </select>
               </div>
+              <button class="po-btn-filter" type="button" onclick="$('#modalFilterIP').modal('show')">
+                <i class="bi bi-funnel"></i> Filter
+              </button>
             </div>
             <div id="rtBarTabel2"></div>
             <table id="tabel2" class="data-table">
               <thead style="white-space:nowrap;"></thead>
               <tbody id="tabel2_data" class="text-left"></tbody>
-            </table>
-            <div class="po-rt-hint">
-              <i class="bi bi-info-circle"></i>
-              Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-              untuk menyembunyikan kolom atau mengatur jumlah desimal.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile1-tab">
-      <div class="row">
-        <div class="col-12">
-          <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-            <div class="po-toolbar">
-              <input type="search" id="ipSearch3" class="po-search-inp" placeholder="Cari data">
-              <div class="po-len-wrap">
-                <label for="ipLen3">Tampilkan</label>
-                <select id="ipLen3" class="po-len-inp">
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                  <option value="100">100</option>
-                  <option value="-1">Semua</option>
-                </select>
-              </div>
-            </div>
-            <div id="rtBarTabel3"></div>
-            <table id="tabel3" class="data-table">
-              <thead style="white-space:nowrap;"></thead>
-              <tbody id="tabel3_data" class="text-left"></tbody>
             </table>
             <div class="po-rt-hint">
               <i class="bi bi-info-circle"></i>
@@ -2776,7 +2817,7 @@ let dataPrint = []
  * (#rtBarTabel/#rtBarTabel2/#rtBarTabel3), jadi tidak perlu poPindahBar()
  * seperti PO -- lihat ipInitReportTableSekali().
  */
-let ipCart = { 1 : [], 2 : [], 3 : [] }
+let ipCart = { 1 : [], 2 : [] }
 let ipActiveUrut = 0
 const IP_HREF = 'invoicepenjualan'
 const IP_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
@@ -2785,11 +2826,10 @@ const IP_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
 // Tabel yang tabnya sedang tidak aktif tetap punya data lama tertinggal setelah
 // loadAll() kalau selalu digambar ulang tanpa syarat -- port dari soPerluGambar
 // milik so.blade.php / poPerluGambar milik purchaseOrder.blade.php.
-let ipPerluGambar = { 1 : false, 2 : false, 3 : false }
+let ipPerluGambar = { 1 : false, 2 : false }
 
 function activeVisibleTabKeyIP () {
   if ($('#nav-profile-tab').hasClass('active')) { return 2 }
-  if ($('#nav-profile1-tab').hasClass('active')) { return 3 }
   return 1
 }
 
@@ -2820,6 +2860,8 @@ function ipDefaultCart (urut) {
       ['TglSO',        'Tgl So',    1, 'date',    0, 0],
     ]
   }
+  // urut 2: Invoice Otorisasi -- gabungan kolom tab lama "Belum Diotorisasi" +
+  // "Sudah Diotorisasi" (OtoUser1/TglOto1), sejak keduanya digabung jadi satu tabel.
   let cart = [
     ['NoBukti',      'No Invoice', 1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',    1, 'date',    0, 0],
@@ -2833,11 +2875,9 @@ function ipDefaultCart (urut) {
     ['totdpp',       'DPP',        1, 'float',   0, 2],
     ['totppn',       'PPN',        1, 'float',   0, 2],
     ['totnet',       'Total',      1, 'float',   0, 2],
+    ['OtoUser1',     'User Oto1',  1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto1',   1, 'date',    0, 0],
   ]
-  if (urut === 3) {
-    cart.push(['OtoUser1', 'User Oto1', 1, 'varchar', 0, 0])
-    cart.push(['TglOto1',  'Tgl Oto1',  1, 'date',    0, 0])
-  }
   cart.push(['Isbatal',  'Batal',      1, 'bool',    0, 0])
   cart.push(['userBatal', 'User Batal', 1, 'varchar', 0, 0])
   cart.push(['tglBatal',  'Tgl Batal',  1, 'date',    0, 0])
@@ -2873,7 +2913,6 @@ function ipAktifkanTabel (urut) {
 
 function ipOnChangeAktif () {
   if (ipActiveUrut === 2) { reinitTabel2(); }
-  else if (ipActiveUrut === 3) { reinitTabel3(); }
   else { reinitTabel(); }
 }
 
@@ -2882,7 +2921,7 @@ window.g_modeReport = 1
 window.gcart_header = []
 
 window.doSimpanHeader = function (href, mode) {
-  let urut = (mode === 2 || mode === 3) ? mode : 1
+  let urut = (mode === 2) ? mode : 1
   let cart = ipCart[urut] || []
 
   let header = [], value = [], isnumber = [], isshown = [], desimal = []
@@ -2916,7 +2955,7 @@ window.doSimpanHeader = function (href, mode) {
 }
 
 window.doSetHeader = function (mode, reset) {
-  let urut = (mode === 2 || mode === 3) ? mode : 1
+  let urut = (mode === 2) ? mode : 1
 
   $.ajax({
     url   : "{!! url('getheadertable') !!}",
@@ -2974,8 +3013,8 @@ function ipInitReportTableSekali () {
   // mengisinya) tapi tidak bisa diklik sama sekali begitu user pindah ke
   // tabnya. Lihat penjelasan lebih lengkap di so.blade.php punya soInitReportTableSekali().
   let urutAktif = activeVisibleTabKeyIP()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2', 3 : '#tabel3' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2', 3 : '#rtBarTabel3' }
+  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
+  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
   Object.keys(idTabel).forEach((u) => {
     if (Number(u) === urutAktif) { return }
     ReportTable.init({ table : idTabel[u], bar : idBar[u], onChange : ipOnChangeAktif })
@@ -2993,7 +3032,7 @@ function ipInitReportTableSekali () {
   // capture sebelum sempat mencapai <th>, lalu tembakkan ulang satu click
   // baru langsung ke <thead>.
   let ipGuardUlangKlik = false;
-  ['#tabel', '#tabel2', '#tabel3'].forEach((sel) => {
+  ['#tabel', '#tabel2'].forEach((sel) => {
     let thead = document.querySelector(sel + ' thead')
     if (!thead) { return }
     thead.addEventListener('click', function (e) {
@@ -3049,41 +3088,29 @@ function ipValueCell (row, col) {
 
 function tabelActionsCell (row) {
   let nobukti = ipPickCI(row, 'NoBukti');
-  let html = '<td class="text-center" style="white-space:nowrap;">';
+  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonAddDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + ipPickCI(row, 'Noso') + '\' , \'' + ipPickCI(row, 'NamaCustSupp') + '\' , \'' + ipPickCI(row, 'KodeCustSupp') + '\' , \'' + ipPickCI(row, 'TglSO') + '\' , \'' + ipPickCI(row, 'PPNCUST') + '\')"><i class="bi bi-plus"></i></button>';
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 
+// Digabung dari tabel2ActionsCell (Belum Diotorisasi: Koreksi/Otorisasi/Print/Detail)
+// + tabel3ActionsCell (Sudah Diotorisasi: Batal Otorisasi/Print/Detail) sejak
+// keduanya digabung jadi satu tabel dengan filter Semua/Belum/Sudah Otorisasi.
 function tabel2ActionsCell (row) {
   let nobukti = ipPickCI(row, 'NoBukti');
   let isOto = Number(ipPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center" style="white-space:nowrap;">';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + ipPickCI(row, 'IsOtorisasi1') + '\')"><i class="bi bi-pen"></i></button>';
+  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   } else {
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + ipPickCI(row, 'IsOtorisasi1') + '\')"><i class="bi bi-pen"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   }
   html += '<button class="btn btn-primary btn-sm" title="Print" onclick="openPrintModal(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '</td>';
-  return html;
-}
-
-function tabel3ActionsCell (row) {
-  let nobukti = ipPickCI(row, 'NoBukti');
-  let isOto = Number(ipPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center" style="white-space:nowrap;">';
-  if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  }
-  html += '<button class="btn btn-primary btn-sm" title="Print" onclick="openPrintModal(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
-  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 
@@ -3112,25 +3139,12 @@ function renderTabel2Rows (rows) {
   tulisTheadHeaderIP('#tabel2', cols);
 }
 
-function renderTabel3Rows (rows) {
-  let cols = (ipCart[3].length ? ipCart[3] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + tabel3ActionsCell(row);
-    cols.forEach(function (col) { html += ipValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel3_data').innerHTML = html;
-  tulisTheadHeaderIP('#tabel3', cols);
-}
-
 let lastTabelRows = []
 let lastTabel2Rows = []
-let lastTabel3Rows = []
-let ipPanjangHalaman = { 1 : 10, 2 : 10, 3 : 10 }
+let ipPanjangHalaman = { 1 : 10, 2 : 10 }
 
 function ipIkatSearch (urut) {
-  let ids = { 1 : ['ipSearch1', 'tabel'], 2 : ['ipSearch2', 'tabel2'], 3 : ['ipSearch3', 'tabel3'] }
+  let ids = { 1 : ['ipSearch1', 'tabel'], 2 : ['ipSearch2', 'tabel2'] }
   let input = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!input || input.dataset.rtBound) { return }
@@ -3149,7 +3163,7 @@ function ipIkatSearch (urut) {
 }
 
 function ipIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['ipLen1', 'tabel'], 2 : ['ipLen2', 'tabel2'], 3 : ['ipLen3', 'tabel3'] }
+  let ids = { 1 : ['ipLen1', 'tabel'], 2 : ['ipLen2', 'tabel2'] }
   let sel = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!sel || sel.dataset.rtBound) { return }
@@ -3209,25 +3223,40 @@ function reinitTabel2 () {
   }
 }
 
-function reinitTabel3 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
-    renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({
-      dom: IP_DOM_STRING,
-      lengthChange: false,
-      pageLength: ipPanjangHalaman[3],
-      paging: true,
-      order: [[1, 'asc']],
-      ordering: false,
-    });
-    ipIkatSearch(3);
-    ipIkatPanjangHalaman(3);
-    ipPerluGambar[3] = false;
-  } catch (e) {
-    console.error('reinitTabel3 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
+function ipResetFilterFields () {
+  $('#input_filterip').val('0')
+}
+
+function ipUpdateFilterBadge () {
+  let n = Number($('#input_filterip').val()) || 0
+  $('#ipFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+}
+
+function buttonFilterIP () {
+  let tglawal = $('#input_tanggalawal_ip').val()
+  let tglakhir = $('#input_tanggalakhir_ip').val()
+  let filterip = $('#input_filterip').val()
+  $.ajax({
+    url: "{!! url('invoicepenjualanloadall') !!}",
+    type: "get", async: false,
+    data: { tglawal, tglakhir, filterip },
+    success: function (res) {
+      lastTabel2Rows = res.tempOutstanding2
+      reinitTabel2()
+      ipUpdateFilterBadge()
+    },
+    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
+  })
+}
+
+function onChangePeriodeIP () {
+  let tglawal = $('#input_tanggalawal_ip').val()
+  let tglakhir = $('#input_tanggalakhir_ip').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
   }
+  buttonFilterIP()
 }
 
 $(document).ready(function(){
@@ -3241,11 +3270,6 @@ $(document).ready(function(){
   lastTabel2Rows = @json($tempOutstanding2);
   reinitTabel2();
 
-  ipAktifkanTabel(3);
-  window.doSetHeader(3, false);
-  lastTabel3Rows = @json($tempOutstanding3);
-  reinitTabel3();
-
   ipInitReportTableSekali();
 
   $('#nav-home-tab').on('shown.bs.tab', function () {
@@ -3257,11 +3281,6 @@ $(document).ready(function(){
     ipAktifkanTabel(2);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
     if (ipPerluGambar[2]) { reinitTabel2(); }
-  });
-  $('#nav-profile1-tab').on('shown.bs.tab', function () {
-    ipAktifkanTabel(3);
-    if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
-    if (ipPerluGambar[3]) { reinitTabel3(); }
   });
 
   //   formAddListItem
@@ -4556,11 +4575,15 @@ function buttonCloseFormAddDetail () {
 
 function loadAll () {
   console.log('loadAll')
+  let tglawal = $('#input_tanggalawal_ip').val()
+  let tglakhir = $('#input_tanggalakhir_ip').val()
+  let filterip = $('#input_filterip').val()
           $.ajax({
             url: "{!! url('invoicepenjualanloadall') !!}",
             type: "get",
             async: false,
             data: {
+              tglawal, tglakhir, filterip
             },
             success: function(res) {
 
@@ -4609,18 +4632,21 @@ function loadAll () {
 
                 let rowTable2 = ''
 
+                // Digabung dari 2 blok (tabel2 "Belum Diotorisasi" + tabel3 "Sudah
+                // Diotorisasi") jadi satu, port 1:1 dari pola tabel2ActionsCell
+                // gabungan -- lihat komentarnya di dekat definisi tabel2ActionsCell.
                 res.tempOutstanding2.forEach((item, i) => {
 
                   rowTable2 += `
                   <tr>
-                  <td class='text-center' style="vertical-align:middle">
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item.NoBukti }' , '${item.IsOtorisasi1}')"><i class="bi bi-pen"></i></button>`
+                  <td class='text-center' style="vertical-align:middle">`
 
                     if (Number(item.IsOtorisasi1)) {
                       rowTable2 += `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${ item.NoBukti }')"><i class="bi bi-key"></i></button>`
 
                     } else {
                       rowTable2 += `
+                      <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item.NoBukti }' , '${item.IsOtorisasi1}')"><i class="bi bi-pen"></i></button>
                       <button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi('${ item.NoBukti }')"><i class="bi bi-key"></i></button>`
 
                     }
@@ -4649,6 +4675,9 @@ function loadAll () {
                       <td class='text-right'>${formatAngka(parseFloat(item.totppn).toFixed(2))}</td>
                       <td class='text-right'>${formatAngka(parseFloat(item.totnet).toFixed(2))}</td>
 
+                      <td>${item.OtoUser1 ? item.OtoUser1 : '' }</td>
+                      <td>${item.TglOto1 ? formatDate(item.TglOto1 , '/') : '' }</td>
+
                       ${Number(item.Isbatal) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
 
                       <td>${item.userBatal ? item.userBatal : '' }</td>
@@ -4673,96 +4702,6 @@ function loadAll () {
           ]
           });
 
-
-          $('#tabel3').DataTable().destroy();
-
-
-          let rowTable3 = ''
-
-          res.tempOutstanding3.forEach((item, i) => {
-
-            rowTable3 += `
-            <tr>
-            <td class='text-center' style="vertical-align:middle">`
-              if (Number(item.IsOtorisasi1)) {
-                rowTable3 += `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${ item.NoBukti }')"><i class="bi bi-key"></i></button>`
-
-              } else {
-                rowTable3 += `
-                <button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi('${ item.NoBukti }')"><i class="bi bi-key"></i></button>`
-
-              }
-
-            rowTable3 += `<button class="btn btn-primary btn-sm" title="Print" onclick="openPrintModal('${item.NoBukti}')">
-                <i class="bi bi-printer"></i>
-              </button>
-              <button class="btn btn-warning btn-sm"
-                  type="button"
-                  title="Details"
-                  onclick="buttonDetail('${item.NoBukti}')">
-                  <i class="bi bi-info"></i>
-                </button>
-		            </td>
-
-                <td>${item.NoBukti }</td>
-                <td>${formatDate(item.Tanggal , '/')}</td>
-                <td>${item.NamaCustSupp }</td>
-                <td>${item.NoSPB }</td>
-                <td>${formatDate(item.TglSPB , '/')}</td>
-                <td>${item.NOSO }</td>
-                <td>${formatDate(item.TGLSO , '/')}</td>
-
-                <td>${item.NoPajak ? item.NoPajak : '' }</td>
-                <td>${item.NoPesanan ? item.NoPesanan : '' }</td>
-
-                 <td class='text-right'>${formatAngka(parseFloat(item.totdpp).toFixed(2))}</td>
-                      <td class='text-right'>${formatAngka(parseFloat(item.totppn).toFixed(2))}</td>
-                      <td class='text-right'>${formatAngka(parseFloat(item.totnet).toFixed(2))}</td>
-
-                <td>${item.OtoUser1 ? item.OtoUser1 : '' }</td>
-                <td>${item.TglOto1 ? formatDate(item.TglOto1 , '/') : '' }</td>
-
-                ${Number(item.Isbatal) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
-
-
-
-
-                <td>${item.userBatal ? item.userBatal : '' }</td>
-                <td>${item.tglBatal ? formatDate(item.tglBatal , '/') : '' }</td>
-
-            </tr>
-            `
-          });
-
-
-
-
-
-
-          document.getElementById("tabel3_data").innerHTML = rowTable3
-
-
-
-
-
-
-
-
-
-
-
-          $("#tabel3").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-      "order": [[1, 'asc']],
-      "columnDefs": [
-        {"targets" :[0] , 'orderable' : false},
-      // { "type": "date", "targets": [3] },
-      // {  "className": "text-right", "targets": [9,10,11,12] },
-      // "columns" : [{"width" : "20px"}]
-
-    ]
-    });
 
 
 

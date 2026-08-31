@@ -69,6 +69,23 @@
 }
 #tabel tbody tr:nth-of-type(odd), #tabel2 tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
 #tabel tbody tr:hover, #tabel2 tbody tr:hover { background-color: #f5f3ff; }
+
+/* Hide action buttons until the row is hovered/focused, port 1:1 dari pola
+   .action-buttons-wrap milik master (public/css/tableMaster2.css) --
+   scoped ke #tabel (satu-satunya tabel di halaman ini yang punya Actions). */
+#tabel tbody .action-buttons-wrap {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+#tabel tbody tr:hover .action-buttons-wrap,
+#tabel tbody tr:focus-within .action-buttons-wrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
 </style>
 @endsection
 
@@ -76,34 +93,6 @@
 @section('content')
 
 <div id="page1" class="container-fluid mainpage">
-<div class="container-fluid">
-
-  <!-- <div id="qrcode"></div> -->
-  <div class="row" >
-    <div class="col-6 text-left">
-      <h2 style="margin-top: -85px">Kredit Note</h2>
-    </div>
-    <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-lg" style="
-          height: 30px;
-          margin-top: -150px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonAdd()">
-        + KN
-      </button>
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-
-<!-- <button onclick="buttonAdd('nobukti')">Add Tes</button> -->
-</div>
-
 <div id="printContainer" style="display:none">
 
 
@@ -121,62 +110,76 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card mb-3 tab-card">
-    <div class="card-body">
-      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Kredit Note Belum Otorisasi</a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Kredit Note Sudah Otorisasi</a>
+  {{-- Filter modal: port 1:1 dari modalFilter milik perintahreturjual.blade.php.
+       tabel (Belum Otorisasi) + tabel2 (Sudah Otorisasi) digabung jadi satu tabel
+       di sini dengan Status dropdown, sama seperti PRJ/RPG/SJ/UMJ/NRP -- tidak ada
+       tab lagi karena kreditnote cuma punya 2 tab, keduanya konsep otorisasi. --}}
+  <div class="modal fade rt-filter" id="modalFilterKN">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-funnel"></i>
+            Filter Data
+            <span class="rt-active-badge" id="knFilterBadge">0 aktif</span>
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterKN').modal('hide')">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="rt-section">
+            <div class="rt-group-label">Status</div>
+            <div>
+              <label class="rt-field-label" for="input_filterkn">Status Otorisasi</label>
+              <select class="rt-native" id="input_filterkn">
+                <option value=0 selected>Semua</option>
+                <option value=1>Belum Otorisasi</option>
+                <option value=2>Sudah Otorisasi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="rt-reset-link" onclick="knResetFilterFields()">Reset semua</button>
+          <div class="rt-footer-buttons">
+            <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+              onclick="$('#modalFilterKN').modal('hide')">Batal</button>
+            <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterKN(); $('#modalFilterKN').modal('hide');">Terapkan</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body" style="padding:0;">
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto; padding:0; margin:0; width:100%;">
-        <div class="container-fluid">
-          <div class="po-toolbar">
-            <input type="search" id="knSearch1" class="po-search-inp" placeholder="Cari data">
-            <div class="po-len-wrap"><label for="knLen1">Tampilkan</label>
-              <select id="knLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
-            </div>
-          </div>
-          <div id="rtBarTabel"></div>
-          <table id="tabel" class="data-table">
-            <thead style="white-space:nowrap;"></thead>
-            <tbody id="tabel_data" class="text-left" ></tbody>
-          </table>
-          <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" onchange="onChangePeriodeKN()" class="po-filter-inp" id="input_tanggalawal_kn" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" onchange="onChangePeriodeKN()" class="po-filter-inp" id="input_tanggalakhir_kn" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
         </div>
+        <input type="search" id="knSearch1" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap"><label for="knLen1">Tampilkan</label>
+          <select id="knLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
+        </div>
+        <button class="po-btn-filter" type="button" onclick="$('#modalFilterKN').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
       </div>
+      <div id="rtBarTabel"></div>
+      <table id="tabel" class="data-table">
+        <thead style="white-space:nowrap;"></thead>
+        <tbody id="tabel_data" class="text-left" ></tbody>
+      </table>
+      <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
     </div>
   </div>
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto; padding:0; margin:0; width:100%;">
-        <div class="container-fluid">
-          <div class="po-toolbar">
-            <input type="search" id="knSearch2" class="po-search-inp" placeholder="Cari data">
-            <div class="po-len-wrap"><label for="knLen2">Tampilkan</label>
-              <select id="knLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
-            </div>
-          </div>
-          <div id="rtBarTabel2"></div>
-          <table id="tabel2" class="data-table">
-            <thead style="white-space:nowrap;"></thead>
-            <tbody id="tabel2_data" class="text-left" ></tbody>
-          </table>
-          <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-</div>
-</div>
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
@@ -1361,12 +1364,14 @@ let tipeform = ''
  * Port 1:1 dari poCart/poAktifkanTabel milik purchaseOrder.blade.php, sama
  * seperti so/invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual.
  */
-let knCart = { 1 : [], 2 : [] }
-let knActiveUrut = 0
+// Disederhanakan jadi satu tabel (urut 1) setelah tab Belum/Sudah Otorisasi
+// digabung jadi satu daftar dengan filter Status Otorisasi (lihat modalFilterKN
+// di section('content')), sama seperti perintahreturjual.blade.php sudah tidak
+// punya tab otorisasi terpisah lagi.
+let knCart = []
 const KN_HREF = 'kreditnote'
 const KN_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const KN_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
-let knPerluGambar = { 1 : false, 2 : false }
 
 function knPickCI (row, key) {
   if (!row) { return undefined; }
@@ -1376,17 +1381,14 @@ function knPickCI (row, key) {
   return undefined;
 }
 
-function knDefaultCart (urut) {
-  let cart = [
+function knDefaultCart () {
+  return [
     ['NOBUKTI',      'No. Bukti', 1, 'varchar', 0, 0],
     ['TANGGAL',      'Tanggal',   1, 'date',    0, 0],
     ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
+    ['OtoUser1',     'User Oto',  1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto',   1, 'date',    0, 0],
   ]
-  if (urut === 2) {
-    cart.push(['OtoUser1', 'User Oto', 1, 'varchar', 0, 0])
-    cart.push(['TglOto1',  'Tgl Oto',  1, 'date',    0, 0])
-  }
-  return cart
 }
 
 function knBuatCart (headers, values, isnumerics, isshowns, desimals) {
@@ -1401,23 +1403,12 @@ function knBuatCart (headers, values, isnumerics, isshowns, desimals) {
   return cart
 }
 
-function knAktifkanTabel (urut) {
-  knActiveUrut = urut
-  window.g_modeReport = urut
-  window.gcart_header = knCart[urut]
-}
-
-function knOnChangeAktif () {
-  if (knActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
-}
-
 window.g_href = KN_HREF
 window.g_modeReport = 1
 window.gcart_header = []
 
-window.doSimpanHeader = function (href, mode) {
-  let urut = mode === 2 ? 2 : 1
-  let cart = knCart[urut] || []
+window.doSimpanHeader = function () {
+  let cart = knCart || []
   let header = [], value = [], isnumber = [], isshown = [], desimal = []
   cart.forEach((c) => {
     header.push(c[1]); value.push(c[0]); isnumber.push(KN_TIPE_KODE[c[3]] ?? 0)
@@ -1428,56 +1419,43 @@ window.doSimpanHeader = function (href, mode) {
     data: {
       _token: $("#_token").val(), header: JSON.stringify(header), isnumber: JSON.stringify(isnumber),
       tipe: JSON.stringify(desimal), value: JSON.stringify(value), isshown: JSON.stringify(isshown),
-      href: KN_HREF, urut: urut
+      href: KN_HREF, urut: 1
     },
     error: function (err) { console.log(err); alertify.warning('Gagal menyimpan pengaturan kolom') }
   })
 }
 
 window.doSetHeader = function (mode, reset) {
-  let urut = mode === 2 ? 2 : 1
   $.ajax({
     url: "{!! url('getheadertable') !!}", type: "post", async: false,
-    data: { _token: $("#_token").val(), href: KN_HREF, urut: urut, reset: reset ? 1 : 0 },
+    data: { _token: $("#_token").val(), href: KN_HREF, urut: 1, reset: reset ? 1 : 0 },
     success: function (res) {
       if (!reset && res && res.headertableheader && res.headertableheader.length) {
-        knCart[urut] = knBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
+        knCart = knBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
       } else {
-        knCart[urut] = knDefaultCart(urut)
-        window.gcart_header = knCart[urut]
-        window.doSimpanHeader(KN_HREF, urut)
+        knCart = knDefaultCart()
+        window.gcart_header = knCart
+        window.doSimpanHeader()
       }
-      window.gcart_header = knCart[urut]
+      window.gcart_header = knCart
     },
     error: function (err) {
       console.log(err)
       alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
-      knCart[urut] = knDefaultCart(urut)
-      window.gcart_header = knCart[urut]
+      knCart = knDefaultCart()
+      window.gcart_header = knCart
     }
   })
 }
-
-function activeVisibleTabKeyKN () { return $('#nav-profile-tab').hasClass('active') ? 2 : 1 }
-
-const KN_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
-const KN_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
 
 let knRtSudahInit = false
 function knInitReportTableSekali () {
   if (knRtSudahInit || typeof ReportTable === 'undefined') { return }
   knRtSudahInit = true
-  let urutAktif = activeVisibleTabKeyKN()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
-  Object.keys(idTabel).forEach((u) => {
-    if (Number(u) === urutAktif) { return }
-    ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: knOnChangeAktif })
-  });
-  ReportTable.init({ table: KN_SELEKTOR_TABEL_AKTIF, bar: KN_SELEKTOR_BAR_AKTIF, onChange: knOnChangeAktif })
+  ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel })
 
   let knGuardUlangKlik = false;
-  ['#tabel', '#tabel2'].forEach((sel) => {
+  ['#tabel'].forEach((sel) => {
     let thead = document.querySelector(sel + ' thead')
     if (!thead) { return }
     thead.addEventListener('click', function (e) {
@@ -1515,37 +1493,26 @@ function knValueCell (row, col) {
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
 
+// Digabung dari tabelActionsCell (Belum Otorisasi: Detail/Koreksi/Otorisasi) +
+// tabel2ActionsCell (Sudah Otorisasi: Detail/Batal Otorisasi) sejak keduanya
+// digabung jadi satu tabel dengan filter Semua/Belum/Sudah Otorisasi.
 function tabelActionsCell (row) {
   let nobukti = knPickCI(row, 'NOBUKTI');
   let isOto = Number(knPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
-  if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
-  }
-  html += '</td>';
-  return html;
-}
-
-function tabel2ActionsCell (row) {
-  let nobukti = knPickCI(row, 'NOBUKTI');
-  let isOto = Number(knPickCI(row, 'IsOtorisasi1'));
-  let html = '<td class="text-center">';
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
   } else {
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
-  html += '</td>';
+  html += '</div></td>';
   return html;
 }
 
 function renderTabelRows (rows) {
-  let cols = (knCart[1].length ? knCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let cols = (knCart.length ? knCart : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
     html += '<tr>' + tabelActionsCell(row);
@@ -1556,26 +1523,11 @@ function renderTabelRows (rows) {
   tulisTheadHeaderKN('#tabel', cols);
 }
 
-function renderTabel2Rows (rows) {
-  let cols = (knCart[2].length ? knCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + tabel2ActionsCell(row);
-    cols.forEach(function (col) { html += knValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel2_data').innerHTML = html;
-  tulisTheadHeaderKN('#tabel2', cols);
-}
-
 let lastTabelRows = []
-let lastTabel2Rows = []
-let knPanjangHalaman = { 1 : 10, 2 : 10 }
+let knPanjangHalaman = 10
 
-function knIkatSearch (urut) {
-  let ids = { 1 : ['knSearch1', 'tabel'], 2 : ['knSearch2', 'tabel2'] }
-  let input = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function knIkatSearch () {
+  let input = document.getElementById('knSearch1')
   if (!input || input.dataset.rtBound) { return }
   input.dataset.rtBound = '1'
   let timer = null
@@ -1583,22 +1535,20 @@ function knIkatSearch (urut) {
     let nilai = input.value
     if (timer) { clearTimeout(timer) }
     timer = setTimeout(function () {
-      if ($.fn.DataTable.isDataTable('#' + idTabel)) { $('#' + idTabel).DataTable().search(nilai).draw() }
+      if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().search(nilai).draw() }
     }, 400)
   })
 }
 
-function knIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['knLen1', 'tabel'], 2 : ['knLen2', 'tabel2'] }
-  let sel = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function knIkatPanjangHalaman () {
+  let sel = document.getElementById('knLen1')
   if (!sel || sel.dataset.rtBound) { return }
   sel.dataset.rtBound = '1'
-  sel.value = String(knPanjangHalaman[urut])
+  sel.value = String(knPanjangHalaman)
   sel.addEventListener('change', function () {
     let n = Number(sel.value)
-    knPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
-    if ($.fn.DataTable.isDataTable('#' + idTabel)) { $('#' + idTabel).DataTable().page.len(knPanjangHalaman[urut]).draw() }
+    knPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().page.len(knPanjangHalaman).draw() }
   })
 }
 
@@ -1608,33 +1558,53 @@ function reinitTabel () {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
-    $('#tabel').DataTable({ dom: KN_DOM_STRING, lengthChange: false, pageLength: knPanjangHalaman[1], paging: true, order: [[1, 'asc']], ordering: false });
-    knIkatSearch(1); knIkatPanjangHalaman(1); knPerluGambar[1] = false;
+    $('#tabel').DataTable({ dom: KN_DOM_STRING, lengthChange: false, pageLength: knPanjangHalaman, paging: true, order: [[1, 'asc']], ordering: false });
+    knIkatSearch(); knIkatPanjangHalaman();
   } catch (e) { console.error('reinitTabel failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
 }
 
-function reinitTabel2 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
-    renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({ dom: KN_DOM_STRING, lengthChange: false, pageLength: knPanjangHalaman[2], paging: true, order: [[1, 'asc']], ordering: false });
-    knIkatSearch(2); knIkatPanjangHalaman(2); knPerluGambar[2] = false;
-  } catch (e) { console.error('reinitTabel2 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
+function knResetFilterFields () {
+  $('#input_filterkn').val('0')
+}
+
+function knUpdateFilterBadge () {
+  let n = Number($('#input_filterkn').val()) || 0
+  $('#knFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+}
+
+function buttonFilterKN () {
+  let tglawal = $('#input_tanggalawal_kn').val()
+  let tglakhir = $('#input_tanggalakhir_kn').val()
+  let filterkn = $('#input_filterkn').val()
+  $.ajax({
+    url: "{!! url('kreditnoteloadall') !!}",
+    type: "get", async: false,
+    data: { tglawal, tglakhir, filterkn },
+    success: function (res) {
+      lastTabelRows = res.tempOutstanding
+      reinitTabel()
+      knUpdateFilterBadge()
+    },
+    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
+  })
+}
+
+function onChangePeriodeKN () {
+  let tglawal = $('#input_tanggalawal_kn').val()
+  let tglakhir = $('#input_tanggalakhir_kn').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  buttonFilterKN()
 }
 
 $(document).ready(function(){
-      knAktifkanTabel(1); window.doSetHeader(1, false);
+      window.doSetHeader(1, false);
       lastTabelRows = @json($tempOutstanding);
       reinitTabel();
 
-      knAktifkanTabel(2); window.doSetHeader(2, false);
-      lastTabel2Rows = @json($tempOutstanding2);
-      reinitTabel2();
-
       knInitReportTableSekali();
-
-      $('#nav-home-tab').on('shown.bs.tab', function () { knAktifkanTabel(1); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (knPerluGambar[1]) { reinitTabel(); } });
-      $('#nav-profile-tab').on('shown.bs.tab', function () { knAktifkanTabel(2); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (knPerluGambar[2]) { reinitTabel2(); } });
 
         $("#tabel_add_list_customer").DataTable({
           "lengthChange": false,
@@ -2892,14 +2862,15 @@ function buttonCloseForm () {
 }
 
 function loadAll () {
+  let tglawal = $('#input_tanggalawal_kn').val()
+  let tglakhir = $('#input_tanggalakhir_kn').val()
+  let filterkn = $('#input_filterkn').val()
   $.ajax({
     url: "{!! url('kreditnoteloadall') !!}",
-    type: "get", async: false, data: {},
+    type: "get", async: false, data: { tglawal, tglakhir, filterkn },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
-      lastTabel2Rows = res.tempOutstanding2;
       reinitTabel();
-      reinitTabel2();
     }})
 }
 

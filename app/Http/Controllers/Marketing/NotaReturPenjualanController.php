@@ -45,78 +45,9 @@ class NotaReturPenjualanController extends Controller
 " );
 
 
-$tempOutstanding2 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        Sum(A.NDPPRp) TotDPPRp, Sum(A.NPPNRp) TotPPNRp, Sum(A.NNETRp) TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-from	vwTransInvoiceRPJ A
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and isnull(A.IsOtorisasi1 ,0) = 0
-group by A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-$tempOutstanding3 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        Sum(A.NDPPRp) TotDPPRp, Sum(A.NPPNRp) TotPPNRp, Sum(A.NNETRp) TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-from	vwTransInvoiceRPJ A
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and isnull(A.IsOtorisasi1 ,0) <> 0
-group by A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding2 = $this->queryInvoiceOtorisasi($tglawal, $tglakhir, 0);
 
     return view('marketing.notareturpenjualan' , [
       "menul0" => $menul0,
@@ -124,10 +55,55 @@ order by A.NoBukti
       // "users"=> $users,
       "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
       "akses" => $akses
     ]);
 
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Invoice
+  // Otorisasi" -- dulu tabel2 (Belum, tombol Koreksi/Otorisasi/Delete) dan
+  // tabel3 (Sudah, tombol Koreksi/Batal Otorisasi) adalah 2 tab terpisah dengan
+  // query nyaris identik (cuma beda IsOtorisasi1=0/<>0). Digabung jadi satu
+  // dengan filternrp yang menyaring di server, port 1:1 dari pola
+  // queryOutstanding() milik PerintahReturJualController. Tabel "SPB Retur
+  // Gudang" (tabel, bukan konsep otorisasi) sengaja tidak disentuh.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryInvoiceOtorisasi ($tglawal, $tglakhir, $filternrp) {
+    return DB::connection("SML")->select("
+      select * from (
+        select  A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
+                A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
+                A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
+                Sum(A.NDPPRp) TotDPPRp, Sum(A.NPPNRp) TotPPNRp, Sum(A.NNETRp) TotNetRp,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                A.NeedOtorisasi,
+                A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
+                A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
+                A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
+        from	vwTransInvoiceRPJ A
+        where	A.Tanggal between ? and ?
+        group by A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
+                A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
+                A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
+                A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+                A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+                A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+                A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+                A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+                A.NeedOtorisasi,
+                A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
+                A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
+                A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1,0) = 0)
+         or (? = 2 and isnull(x.IsOtorisasi1,0) <> 0)
+      order by x.NoBukti
+    ", [$tglawal, $tglakhir, $filternrp, $filternrp, $filternrp]);
   }
 
 
@@ -852,7 +828,7 @@ public function spDeleteAll (Request $req) {
 
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
@@ -871,80 +847,12 @@ public function spDeleteAll (Request $req) {
 " );
 
 
-$tempOutstanding2 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filternrp = $req->filternrp ?: 0;
+    $tempOutstanding2 = $this->queryInvoiceOtorisasi($tglawal, $tglakhir, $filternrp);
 
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        Sum(A.NDPPRp) TotDPPRp, Sum(A.NPPNRp) TotPPNRp, Sum(A.NNETRp) TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-from	vwTransInvoiceRPJ A
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and isnull(A.IsOtorisasi1 ,0) = 0
-group by A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-$tempOutstanding3 = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-select  A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        Sum(A.NDPPRp) TotDPPRp, Sum(A.NPPNRp) TotPPNRp, Sum(A.NNETRp) TotNetRp,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-from	vwTransInvoiceRPJ A
-where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and isnull(A.IsOtorisasi1 ,0) <> 0
-group by A.NoBukti, A.NoUrut, A.Tanggal, A.TglJatuhTempo, A.KODECUSTSUPP, A.NAMACUSTSUPP,
-        A.Alamat, A.ALAMATKOTA, A.KOTA, A.NamaKota, A.NoInvoice, A.TglInvoice,
-        A.NORPJ, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.IDUser,
-        A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-        A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        A.NeedOtorisasi,
-        A.NoJurnal, A.NoUrutJurnal, A.TglJurnal,
-        A.IsFlag, A.MaxOL, A.IsCetak, A.CetakKe, A.KodeSls,
-        A.IsBatal, A.UserBatal, A.TglBatal, A.Flagtipe, A.TipePPN
-order by A.NoBukti
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-  return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2,
-        "tempOutstanding3" => $tempOutstanding3
-      ];
+  return ["tempOutstanding" => $tempOutstanding , "tempOutstanding2" => $tempOutstanding2];
 
 
   }

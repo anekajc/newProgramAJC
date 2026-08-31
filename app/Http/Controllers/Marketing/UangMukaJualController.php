@@ -72,70 +72,57 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
 order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
 
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun, @Bulan= :bulan
-
-    select A.NOBUKTI,A.TANGGAL,A.NOSO,A.VALAS,A.KURS,A.DPP,A.PPN,A.PERSEN,C.NamaCustSupp,
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi ,
-                 A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    from DBUMJUAL A
-    Left Outer Join DBSO B on A.Noso=B.Nobukti
-    Left Outer join DBCustSupp C on B.KodeCUst=C.KodeCUstSUpp
-    where month(A.tanggal)=@BULAN AND YEAR(A.TANGGAL)=@TAHUN
-    and Isnull(A.pBeli,0)=0 and isnull(a.IsOtorisasi1,0) = 0" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-
-    $tempOutstanding3 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun, @Bulan= :bulan
-
-    select A.NOBUKTI,A.TANGGAL,A.NOSO,A.VALAS,A.KURS,A.DPP,A.PPN,A.PERSEN,C.NamaCustSupp,
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi ,
-                 A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    from DBUMJUAL A
-    Left Outer Join DBSO B on A.Noso=B.Nobukti
-    Left Outer join DBCustSupp C on B.KodeCUst=C.KodeCUstSUpp
-    where month(A.tanggal)=@BULAN AND YEAR(A.TANGGAL)=@TAHUN
-    and Isnull(A.pBeli,0)=0 and a.IsOtorisasi1 = 1" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding2 = $this->queryUangMuka($tglawal, $tglakhir, 0);
 
     return view('marketing.uangmukajual' , [
       "menul0" => $menul0,
       "periode" => $periode,
       // "users"=> $users,
-      "tempOutstanding" => $tempOutstanding, 
+      "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
       "akses" => $akses
     ]);
 
   }
 
-  public function loadAll () {
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Uang Muka
+  // Otorisasi" -- dulu tabel2 (Belum, tombol Edit/Otorisasi/Delete) dan tabel3
+  // (Sudah, tombol Batal Otorisasi/Print) adalah 2 tab terpisah dengan query
+  // nyaris identik (cuma beda IsOtorisasi1=0/1). Digabung jadi satu dengan
+  // filterumj yang menyaring di server, port 1:1 dari pola queryOutstanding()
+  // milik PerintahReturJualController. Tabel "Outstanding Uang Muka" (tabel,
+  // bukan konsep otorisasi) sengaja tidak disentuh.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryUangMuka ($tglawal, $tglakhir, $filterumj) {
+    return DB::connection("SML")->select("
+      select * from (
+        select A.NOBUKTI,A.TANGGAL,A.NOSO,A.VALAS,A.KURS,A.DPP,A.PPN,A.PERSEN,C.NamaCustSupp,
+          Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                             Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                        else 1
+                   end As Bit) NeedOtorisasi ,
+          A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
+          A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+          A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
+          A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+          A.IsOtorisasi5, A.OtoUser5, A.TglOto5
+        from DBUMJUAL A
+        Left Outer Join DBSO B on A.Noso=B.Nobukti
+        Left Outer join DBCustSupp C on B.KodeCUst=C.KodeCUstSUpp
+        where A.Tanggal between ? and ? and Isnull(A.pBeli,0)=0
+      ) x
+      where (? = 0)
+         or (? = 1 and isnull(x.IsOtorisasi1,0) = 0)
+         or (? = 2 and isnull(x.IsOtorisasi1,0) <> 0)
+    ", [$tglawal, $tglakhir, $filterumj, $filterumj, $filterumj]);
+  }
+
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
@@ -182,54 +169,12 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
 order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
 
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $filterumj = $req->filterumj ?: 0;
+    $tempOutstanding2 = $this->queryUangMuka($tglawal, $tglakhir, $filterumj);
 
-    select @Tahun= :tahun, @Bulan= :bulan
-
-    select A.NOBUKTI,A.TANGGAL,A.NOSO,A.VALAS,A.KURS,A.DPP,A.PPN,A.PERSEN,C.NamaCustSupp,
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi ,
-                 A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    from DBUMJUAL A
-    Left Outer Join DBSO B on A.Noso=B.Nobukti
-    Left Outer join DBCustSupp C on B.KodeCUst=C.KodeCUstSUpp
-    where month(A.tanggal)=@BULAN AND YEAR(A.TANGGAL)=@TAHUN
-    and Isnull(A.pBeli,0)=0 and isnull(a.IsOtorisasi1,0) = 0" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-    $tempOutstanding3 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-    select @Tahun= :tahun, @Bulan= :bulan
-
-    select A.NOBUKTI,A.TANGGAL,A.NOSO,A.VALAS,A.KURS,A.DPP,A.PPN,A.PERSEN,C.NamaCustSupp,
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                 end As Bit) NeedOtorisasi ,
-                 A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-            A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-            A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-            A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-            A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    from DBUMJUAL A
-    Left Outer Join DBSO B on A.Noso=B.Nobukti
-    Left Outer join DBCustSupp C on B.KodeCUst=C.KodeCUstSUpp
-    where month(A.tanggal)=@BULAN AND YEAR(A.TANGGAL)=@TAHUN
-    and Isnull(A.pBeli,0)=0 and a.IsOtorisasi1 = 1" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
-
-
-    return ["tempOutstanding" => $tempOutstanding, "tempOutstanding3" => $tempOutstanding3 , "tempOutstanding2" => $tempOutstanding2];
+    return ["tempOutstanding" => $tempOutstanding, "tempOutstanding2" => $tempOutstanding2];
   }
 
   public function getNoBukti (Request $req) {
