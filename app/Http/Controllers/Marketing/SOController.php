@@ -478,7 +478,6 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
    //   }
 
 
-
   }
 
   public function getDetailCetak(Request $req)

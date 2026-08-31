@@ -144,7 +144,6 @@
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Outstanding PRJ</a>
         <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Transaksi Retur Gudang</a>
-        <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false">Transaksi Retur Gudang Sudah Otorisasi</a>
       </div>
     </div>
   </div>
@@ -181,11 +180,68 @@
     <div class="row">
       <div class="col-12" style="overflow:auto;">
         <div class="container-fluid" style="padding:0; margin:0; width:100%;">
+
+          {{-- Filter modal: port 1:1 dari modalFilter milik perintahreturjual.blade.php,
+               menggabungkan tab "Belum Otorisasi"/"Sudah Otorisasi" jadi satu tabel
+               dengan Status dropdown, sesuai keputusan yang sama dipakai buat PRJ. --}}
+          <div class="modal fade rt-filter" id="modalFilterSPR">
+            <div class="modal-dialog modal-md">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-funnel"></i>
+                    Filter Data
+                    <span class="rt-active-badge" id="sprFilterBadge">0 aktif</span>
+                  </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterSPR').modal('hide')">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+
+                <div class="modal-body">
+                  <div class="rt-section">
+                    <div class="rt-group-label">Status</div>
+                    <div>
+                      <label class="rt-field-label" for="input_filterspr">Status SPR</label>
+                      <select class="rt-native" id="input_filterspr">
+                        <option value=0 selected>Semua SPR</option>
+                        <option value=1>Belum Otorisasi</option>
+                        <option value=2>Sudah Otorisasi</option>
+                        <option value=3>Belum</option>
+                        <option value=4>Sebagian</option>
+                        <option value=5>Selesai</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="rt-reset-link" onclick="rpgResetFilterFields()">Reset semua</button>
+                  <div class="rt-footer-buttons">
+                    <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                      onclick="$('#modalFilterSPR').modal('hide')">Batal</button>
+                    <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterSPR(); $('#modalFilterSPR').modal('hide');">Terapkan</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
           <div class="po-toolbar">
+            <div class="po-filter-wrap">
+              <label>Periode</label>
+              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalawal_spr" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <span class="po-filter-sep">s/d</span>
+              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalakhir_spr" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+            </div>
             <input type="search" id="rpgSearch2" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="rpgLen2">Tampilkan</label>
               <select id="rpgLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
             </div>
+            <button class="po-btn-filter" type="button" onclick="$('#modalFilterSPR').modal('show')">
+              <i class="bi bi-funnel"></i> Filter
+            </button>
           </div>
           <div id="rtBarTabel2"></div>
           <table id="tabel2" class="data-table">
@@ -197,30 +253,6 @@
       </div>
     </div>
   </div>
-
-
-
-  <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile1-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto;">
-        <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-          <div class="po-toolbar">
-            <input type="search" id="rpgSearch3" class="po-search-inp" placeholder="Cari data">
-            <div class="po-len-wrap"><label for="rpgLen3">Tampilkan</label>
-              <select id="rpgLen3" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
-            </div>
-          </div>
-          <div id="rtBarTabel3"></div>
-          <table id="tabel3" class="data-table">
-            <thead style="white-space:nowrap;"></thead>
-            <tbody id="tabel3_data" class="text-left" ></tbody>
-          </table>
-          <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 
   <div class="tab-pane fade" id="profile3" role="tabpanel" aria-labelledby="profile-tab">
     <div class="row">
@@ -844,12 +876,12 @@
 
 <div id="page4" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row mb-4">
     <div class="col-8 text-left">
-      <h2>Detail SPR</h2>
+      {{-- <h2>Detail SPR</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >Close</button>
     </div>
   </div>
 
@@ -1124,12 +1156,12 @@ let xppn = 0
  * total), jadi tabelActionsCell() sengaja kosong -- data-only, sama seperti
  * behaviour lama.
  */
-let rpgCart = { 1 : [], 2 : [], 3 : [] }
+let rpgCart = { 1 : [], 2 : [] }
 let rpgActiveUrut = 0
 const RPG_HREF = 'returpenjualangudang'
 const RPG_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const RPG_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
-let rpgPerluGambar = { 1 : false, 2 : false, 3 : false }
+let rpgPerluGambar = { 1 : false, 2 : false }
 
 function rpgPickCI (row, key) {
   if (!row) { return undefined; }
@@ -1147,19 +1179,18 @@ function rpgDefaultCart (urut) {
       ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
     ]
   }
-  let cart = [
+  // urut 2: Transaksi Retur Gudang -- gabungan kolom tab lama "Belum Otorisasi"
+  // + "Sudah Otorisasi" (OtoUser1/TglOto1), sejak keduanya digabung jadi satu tabel.
+  return [
     ['NoBukti',      'No. Bukti',  1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',    1, 'date',    0, 0],
     ['NAMACUSTSUPP', 'Nama Cust',  1, 'varchar', 0, 0],
     ['Noinv',        'No Invoice', 1, 'varchar', 0, 0],
     ['NOSO',         'No SO',      1, 'varchar', 0, 0],
     ['IDUser',       'User',       1, 'varchar', 0, 0],
+    ['OtoUser1',     'User Oto',   1, 'varchar', 0, 0],
+    ['TglOto1',      'Tgl Oto',    1, 'date',    0, 0],
   ]
-  if (urut === 3) {
-    cart.push(['OtoUser1', 'User Oto', 1, 'varchar', 0, 0])
-    cart.push(['TglOto1',  'Tgl Oto',  1, 'date',    0, 0])
-  }
-  return cart
 }
 
 function rpgBuatCart (headers, values, isnumerics, isshowns, desimals) {
@@ -1181,7 +1212,7 @@ function rpgAktifkanTabel (urut) {
 }
 
 function rpgOnChangeAktif () {
-  if (rpgActiveUrut === 3) { reinitTabel3(); } else if (rpgActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
+  if (rpgActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
 }
 
 window.g_href = RPG_HREF
@@ -1232,7 +1263,6 @@ window.doSetHeader = function (mode, reset) {
 }
 
 function activeVisibleTabKeyRPG () {
-  if ($('#nav-profile1-tab').hasClass('active')) { return 3; }
   if ($('#nav-profile-tab').hasClass('active')) { return 2; }
   return 1;
 }
@@ -1245,8 +1275,8 @@ function rpgInitReportTableSekali () {
   if (rpgRtSudahInit || typeof ReportTable === 'undefined') { return }
   rpgRtSudahInit = true
   let urutAktif = activeVisibleTabKeyRPG()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2', 3 : '#tabel3' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2', 3 : '#rtBarTabel3' }
+  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
+  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
   Object.keys(idTabel).forEach((u) => {
     if (Number(u) === urutAktif) { return }
     ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: rpgOnChangeAktif })
@@ -1254,7 +1284,7 @@ function rpgInitReportTableSekali () {
   ReportTable.init({ table: RPG_SELEKTOR_TABEL_AKTIF, bar: RPG_SELEKTOR_BAR_AKTIF, onChange: rpgOnChangeAktif })
 
   let rpgGuardUlangKlik = false;
-  ['#tabel', '#tabel2', '#tabel3'].forEach((sel) => {
+  ['#tabel', '#tabel2'].forEach((sel) => {
     let thead = document.querySelector(sel + ' thead')
     if (!thead) { return }
     thead.addEventListener('click', function (e) {
@@ -1297,11 +1327,11 @@ function tabel2ActionsCell (row) {
   let nobukti = rpgPickCI(row, 'NoBukti');
   let isOto = Number(rpgPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailKoreksi(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetailKoreksi(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasiPenerimaan(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" title="Batal Otorisasi" type="button" onclick="buttonBatalOtorisasiPenerimaan(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
   } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasiPenerimaan(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" title="Otorisasi" type="button" onclick="buttonOtorisasiPenerimaan(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</td>';
   return html;
@@ -1331,25 +1361,12 @@ function renderTabel2Rows (rows) {
   tulisTheadHeaderRPG('#tabel2', cols, true);
 }
 
-function renderTabel3Rows (rows) {
-  let cols = (rpgCart[3].length ? rpgCart[3] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + tabel2ActionsCell(row);
-    cols.forEach(function (col) { html += rpgValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel3_data').innerHTML = html;
-  tulisTheadHeaderRPG('#tabel3', cols, true);
-}
-
 let lastTabelRows = []
 let lastTabel2Rows = []
-let lastTabel3Rows = []
-let rpgPanjangHalaman = { 1 : 10, 2 : 10, 3 : 10 }
+let rpgPanjangHalaman = { 1 : 10, 2 : 10 }
 
 function rpgIkatSearch (urut) {
-  let ids = { 1 : ['rpgSearch1', 'tabel'], 2 : ['rpgSearch2', 'tabel2'], 3 : ['rpgSearch3', 'tabel3'] }
+  let ids = { 1 : ['rpgSearch1', 'tabel'], 2 : ['rpgSearch2', 'tabel2'] }
   let input = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!input || input.dataset.rtBound) { return }
@@ -1365,7 +1382,7 @@ function rpgIkatSearch (urut) {
 }
 
 function rpgIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['rpgLen1', 'tabel'], 2 : ['rpgLen2', 'tabel2'], 3 : ['rpgLen3', 'tabel3'] }
+  let ids = { 1 : ['rpgLen1', 'tabel'], 2 : ['rpgLen2', 'tabel2'] }
   let sel = document.getElementById(ids[urut][0])
   let idTabel = ids[urut][1]
   if (!sel || sel.dataset.rtBound) { return }
@@ -1398,13 +1415,40 @@ function reinitTabel2 () {
   } catch (e) { console.error('reinitTabel2 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
 }
 
-function reinitTabel3 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
-    renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({ dom: RPG_DOM_STRING, lengthChange: false, pageLength: rpgPanjangHalaman[3], paging: true, order: [[1, 'asc']], ordering: false });
-    rpgIkatSearch(3); rpgIkatPanjangHalaman(3); rpgPerluGambar[3] = false;
-  } catch (e) { console.error('reinitTabel3 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
+function rpgResetFilterFields () {
+  $('#input_filterspr').val('0')
+}
+
+function rpgUpdateFilterBadge () {
+  let n = Number($('#input_filterspr').val()) || 0
+  $('#sprFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+}
+
+function buttonFilterSPR () {
+  let tglawal = $('#input_tanggalawal_spr').val()
+  let tglakhir = $('#input_tanggalakhir_spr').val()
+  let filterspr = $('#input_filterspr').val()
+  $.ajax({
+    url: "{!! url('returpenjualangudangloadall') !!}",
+    type: "get", async: false,
+    data: { tglawal, tglakhir, filterspr },
+    success: function (res) {
+      lastTabel2Rows = res.tempPenerimaan
+      reinitTabel2()
+      rpgUpdateFilterBadge()
+    },
+    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
+  })
+}
+
+function onChangePeriodeSPR () {
+  let tglawal = $('#input_tanggalawal_spr').val()
+  let tglakhir = $('#input_tanggalakhir_spr').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  buttonFilterSPR()
 }
 
 $(document).ready(function(){
@@ -1416,15 +1460,10 @@ $(document).ready(function(){
       lastTabel2Rows = @json($tempPenerimaan);
       reinitTabel2();
 
-      rpgAktifkanTabel(3); window.doSetHeader(3, false);
-      lastTabel3Rows = @json($tempPenerimaan2);
-      reinitTabel3();
-
       rpgInitReportTableSekali();
 
       $('#nav-home-tab').on('shown.bs.tab', function () { rpgAktifkanTabel(1); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (rpgPerluGambar[1]) { reinitTabel(); } });
       $('#nav-profile-tab').on('shown.bs.tab', function () { rpgAktifkanTabel(2); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (rpgPerluGambar[2]) { reinitTabel2(); } });
-      $('#nav-profile1-tab').on('shown.bs.tab', function () { rpgAktifkanTabel(3); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (rpgPerluGambar[3]) { reinitTabel3(); } });
 
   //   formAddListItem
 });
@@ -2008,6 +2047,8 @@ if (pcekglobal) {
 
 function buttonDetailKoreksi (nobukti) {
 
+document.getElementById('pageTitleBreadcrumb').textContent = 'Retur Penjualan Gudang / Detail Data'
+
 let pcekglobal = 0
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",
@@ -2118,20 +2159,20 @@ if (pcekglobal) {
 
   })
 
-
 }
 
 function loadAll () {
+  let tglawal = $('#input_tanggalawal_spr').val()
+  let tglakhir = $('#input_tanggalakhir_spr').val()
+  let filterspr = $('#input_filterspr').val()
   $.ajax({
     url: "{!! url('returpenjualangudangloadall') !!}",
-    type: "get", async: false, data: {},
+    type: "get", async: false, data: { tglawal, tglakhir, filterspr },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempPenerimaan;
-      lastTabel3Rows = res.tempPenerimaan2;
       reinitTabel();
       reinitTabel2();
-      reinitTabel3();
     }})
 }
 

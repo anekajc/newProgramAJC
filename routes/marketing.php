@@ -167,18 +167,16 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
 //   Route::post('/performancespbatalotoperf', [PerformanceController::class, 'spBatalOtoPerf']);
 //   Route::post('/performancedetailCetak', [PerformanceController::class, 'getDetailCetak']);
 
-
-//   // UANG MUKA JUAL
-//   Route::get('/uangmukajualprint', [UangMukaJualController::class, 'spCetak']);
-//   Route::get('/uangmukajual', [UangMukaJualController::class, 'index']);
-//   Route::post('/uangmukajualgetdetail', [UangMukaJualController::class, 'getDetail']);
-//   Route::post('/uangmukajualspnobukti', [UangMukaJualController::class, 'getNoBukti']);
-//   Route::post('/uangmukajualspadd', [UangMukaJualController::class, 'spAdd']);
-//   Route::post('/uangmukajualgetdetailumj', [UangMukaJualController::class, 'getDetailUMJ']);
-//   Route::get('/uangmukajualloadall', [UangMukaJualController::class, 'loadAll']);
-//   Route::post('/uangmukajualspoto', [UangMukaJualController::class, 'spOto']);
-//   Route::post('/uangmukajualspbataloto', [UangMukaJualController::class, 'spBatalOto']);
-
+  // UANG MUKA JUAL
+  Route::get('/uangmukajualprint', [UangMukaJualController::class, 'spCetak']);
+  Route::get('/uangmukajual', [UangMukaJualController::class, 'index']);
+  Route::post('/uangmukajualgetdetail', [UangMukaJualController::class, 'getDetail']);
+  Route::post('/uangmukajualspnobukti', [UangMukaJualController::class, 'getNoBukti']);
+  Route::post('/uangmukajualspadd', [UangMukaJualController::class, 'spAdd']);
+  Route::post('/uangmukajualgetdetailumj', [UangMukaJualController::class, 'getDetailUMJ']);
+  Route::get('/uangmukajualloadall', [UangMukaJualController::class, 'loadAll']);
+  Route::post('/uangmukajualspoto', [UangMukaJualController::class, 'spOto']);
+  Route::post('/uangmukajualspbataloto', [UangMukaJualController::class, 'spBatalOto']);
 
   // suratjalan
   Route::get('/suratjalan', [SuratJalanController::class, 'index']);

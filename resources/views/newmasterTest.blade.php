@@ -104,6 +104,13 @@
             flex-shrink: 0;
         }
 
+        .logout-link {
+          color: #e3342f; font-size: 13px; font-weight: 600;
+          display: flex; align-items: center; gap: 4px;
+          text-decoration: none;
+        }
+        .logout-link:hover { opacity: 0.75; }
+
         .logo-icon {
             width: 32px;
             height: 32px;
@@ -370,6 +377,7 @@
         }
 
         .card {
+            position: relative;
             background: var(--white);
             border-radius: var(--radius);
             padding: 24px 16px 20px;
@@ -384,6 +392,16 @@
                 box-shadow 0.15s,
                 border-color 0.15s;
             text-align: center;
+        }
+
+        .card-arrow {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 14px;
+            height: 14px;
+            opacity: 0.4;
+            color: var(--text-muted);
         }
 
         .card:hover {
@@ -900,13 +918,15 @@
         <!-- PAGE1 -->
         <header class="header">
             <div class="header-left">
-                <div class="page-title">
+                <div id='pageTitleBreadcrumb'class="page-title">
                     @yield('page-title')
                 </div>
                 <div class="breadcrumb" id="breadcrumb"><span>Beranda</span></div>
             </div>
             <div class="header-right">
                 <div class="period-badge">
+                  Username: {{ Auth::user()->username }}
+          &nbsp;–&nbsp;
                     Periode:
                     {{ [
                         1 => 'Januari',
@@ -924,6 +944,9 @@
                     ][$periode->bulan] ?? '' }}
                     {!! $periode->tahun !!}</div>
                 <div id="avatar" class="avatar">{{ \Auth::user()->username[0] }}</div>
+                <a class="logout-link" href="{{ route('logout') }}">
+                  <i class="bi bi-power"></i> Log Out
+                </a>
             </div>
         </header>
         <div class="content" id="content">
@@ -1227,26 +1250,71 @@
     if (willOpen) ng.classList.add('open');
   }
 
-  // ── Render the card-grid home for a module ───────────────────────────
+  // ── Module-home card grid, with drill-down for cards that have their own
+  // children -- port 1:1 dari stack-based drill milik Report (reportViewStack/
+  // reportDrillInto/reportGoBack/renderReportView), scoped per module lewat
+  // moduleViewStack. Cards without children still navigate straight to href.
+  let moduleViewStack = [];
+
   function showModuleHome(moduleKey) {
     closeReportPage();
     const mod = modules.find(m => m.key === moduleKey);
     if (!mod) return;
 
     activeModuleKey = moduleKey;
+    moduleViewStack = [];
 
     document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('active'));
     const ng = document.getElementById('ng-' + moduleKey);
     if (ng) ng.classList.add('active');
 
-    document.getElementById('breadcrumb').innerHTML =
-      `<span>Beranda</span><span class="bc-sep">›</span><b>${mod.label}</b>`;
+    renderModuleView();
+  }
 
-    const cards = mod.children.map((c, i) => {
+  function moduleDrillInto(node) {
+    moduleViewStack.push(node);
+    renderModuleView();
+  }
+
+  function moduleGoBack() {
+    if (moduleViewStack.length > 0) {
+      moduleViewStack.pop();
+      renderModuleView();
+    } else {
+      goHome();
+    }
+  }
+
+  function renderModuleView() {
+    const mod = modules.find(m => m.key === activeModuleKey);
+    if (!mod) return;
+
+    const currentNode = moduleViewStack[moduleViewStack.length - 1] || mod;
+    const trail = moduleViewStack.map(n => n.label);
+
+    document.getElementById('breadcrumb').innerHTML =
+      `<span>Beranda</span><span class="bc-sep">›</span>` +
+      (trail.length
+        ? `<span>${mod.label}</span><span class="bc-sep">›</span>` +
+          trail.map((label, i) => i === trail.length - 1 ? `<b>${label}</b>` : `${label} <span class="bc-sep">›</span> `).join('')
+        : `<b>${mod.label}</b>`);
+
+    const cards = (currentNode.children || []).map((c, i) => {
       const color    = cardColors[i % cardColors.length];
       const iconName = getChildIcon(c.label, c.icon);
+      const hasSub   = c.children && c.children.length > 0;
+
+      if (hasSub) {
+        return `
+          <div class="card" onclick='moduleDrillInto(${JSON.stringify(c).replace(/'/g, "&#39;")})'>
+            <div class="card-icon-wrap ${color}">${icon(iconName)}</div>
+            <div class="card-label">${c.label}</div>
+            <span class="card-arrow">${icon('chevron')}</span>
+          </div>`;
+      }
+
       return `
-        <div class="card" onclick="navToChild('${moduleKey}','${c.key}','${encodeURIComponent(c.href || '')}')">
+        <div class="card" onclick="navToChild('${encodeURIComponent(c.href || '')}')">
           <div class="card-icon-wrap ${color}">${icon(iconName)}</div>
           <div class="card-label">${c.label}</div>
         </div>`;
@@ -1258,16 +1326,16 @@
     dyn.style.display = 'block';
     dyn.innerHTML = `
       <div class="page-subtitle">
-      <button class="report-back-btn" onclick="goHome()">
+      <button class="report-back-btn" onclick="moduleGoBack()">
         ${icon('chevron')} Kembali
       </button></div>
-      <div class="page-title">${mod.label}</div>
-      <div class="page-subtitle">${mod.subtitle ?? ''}</div>
+      <div class="page-title">${currentNode.label}</div>
+      <div class="page-subtitle">${moduleViewStack.length ? '' : (mod.subtitle ?? '')}</div>
       <div class="card-grid">${cards}</div>
     `;
   }
 
-  function navToChild(moduleKey, cardKey, encodedHref) {
+  function navToChild(encodedHref) {
     const href = decodeURIComponent(encodedHref);
     if (href && href !== 'undefined' && href !== '') {
       window.location.href = href;

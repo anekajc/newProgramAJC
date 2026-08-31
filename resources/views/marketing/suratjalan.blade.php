@@ -9,18 +9,20 @@
 @section('css')
 
 {{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel/#tabel2/
-     #tabel3/#tabel5/#tabel6's draggable-column/gear-menu headers and "Tampilkan"
+     #tabel5/#tabel6's draggable-column/gear-menu headers and "Tampilkan"
      (page-length) control, same pattern as so.blade.php's #tabel/#tabel7. Linked here
      page-locally (not in newmaster.blade.php) so only this page gets it. #tabel4 ("Out SO
      Booking") is left on the old static header -- its nav-tab link is already commented
-     out elsewhere in this file, so it's unreachable in the UI. --}}
+     out elsewhere in this file, so it's unreachable in the UI. #tabel3 ("Surat Jalan Belum
+     Otorisasi", no actions) was merged into #tabel6 ("Surat Jalan Otorisasi") with a
+     Semua/Belum/Sudah Otorisasi filter, port 1:1 dari pola PRJ/RPG. --}}
 <link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
 
 {{-- Page1 rebuilt 1:1 against so.blade.php's own page1 (itself rebuilt from
      purchaseOrder.blade.php): same card-wrapped pill tab bar, shared toolbar
      (search + Tampilkan) in its own card, po-table-wrap sticky-header scroll box, and
      Reset-kolom bar -- copied verbatim, rescoped from SO's #tabel/#tabel7 to this
-     page's five live tables (#tabel/#tabel2/#tabel3/#tabel5/#tabel6). Data/business
+     page's four live tables (#tabel/#tabel2/#tabel5/#tabel6). Data/business
      logic (loadAll, HeaderEngine persistence, tabelXActionsCell) is untouched -- this
      only changes how the page is built and how it looks. --}}
 <link rel="stylesheet" href="{{ asset('css/sj-table-header.css') }}?v={{ filemtime(public_path('css/sj-table-header.css')) }}">
@@ -466,12 +468,8 @@
           SO Belum Siap Kirim
         </a>
 
-        <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false">
-          Surat Jalan Belum Otorisasi
-        </a>
-
         <a class="nav-item nav-link" id="nav-profile4-tab" data-toggle="tab" href="#profile4" role="tab" aria-controls="nav-profile4" aria-selected="false">
-          Surat Jalan Sudah Otorisasi
+          Surat Jalan Otorisasi
         </a>
 
         <!--   <a class="nav-item nav-link" id="nav-profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="nav-profile2" aria-selected="false">
@@ -548,26 +546,63 @@
         untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
   </div>
-  <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="rt-bar-row">
-        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel3')">
-          <i class="bi bi-arrow-clockwise"></i> Reset kolom
-        </button>
-        <div id="rtBarTabel3"></div>
-      </div>
-      <div class="po-table-wrap">
-        <table id="tabel3" class="tb data-table">
-          <thead style="white-space:nowrap;"></thead>
-          <tbody id="tabel3_data" class="text-left"></tbody>
-        </table>
-      </div>
-      <div class="po-rt-hint">
-        <i class="bi bi-info-circle"></i>
-        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-        untuk menyembunyikan kolom atau mengatur jumlah desimal.
-      </div>
-  </div>
   <div class="tab-pane fade" id="profile4" role="tabpanel" aria-labelledby="profile-tab">
+      {{-- Filter modal: port 1:1 dari modalFilter milik perintahreturjual.blade.php.
+           tabel3 (Belum Otorisasi, dulu tanpa actions) + tabel6 (Sudah Otorisasi,
+           actions Kirim/Terima Acc) digabung jadi satu tabel di sini dengan Status
+           dropdown, sama seperti PRJ/RPG. --}}
+      <div class="modal fade rt-filter" id="modalFilterSPB">
+        <div class="modal-dialog modal-md">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="bi bi-funnel"></i>
+                Filter Data
+                <span class="rt-active-badge" id="spbFilterBadge">0 aktif</span>
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterSPB').modal('hide')">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="rt-section">
+                <div class="rt-group-label">Status</div>
+                <div>
+                  <label class="rt-field-label" for="input_filterspb">Status Otorisasi</label>
+                  <select class="rt-native" id="input_filterspb">
+                    <option value=0 selected>Semua</option>
+                    <option value=1>Belum Otorisasi</option>
+                    <option value=2>Sudah Otorisasi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="rt-reset-link" onclick="sjResetFilterFieldsSPB()">Reset semua</button>
+              <div class="rt-footer-buttons">
+                <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                  onclick="$('#modalFilterSPB').modal('hide')">Batal</button>
+                <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterSPB(); $('#modalFilterSPB').modal('hide');">Terapkan</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalakhir_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+        </div>
+        <button class="po-btn-filter" type="button" onclick="$('#modalFilterSPB').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+      </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
@@ -3102,7 +3137,6 @@ let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
-let dataRefreshOutstanding3 = []
 
 let dataRefreshPenerimaan = []
 
@@ -3140,19 +3174,17 @@ var g_modeReport = 1;
 var gcart_header = [];
 var gsum_issubtotal = 0, gsum_isgrandtotal = 0;
 
-var sjCart = { tabel: [], tabel2: [], tabel3: [], tabel5: [], tabel6: [] };
+var sjCart = { tabel: [], tabel2: [], tabel5: [], tabel6: [] };
 var sjActiveKey = null;
 var SJ_TABLE_INFO = {
   tabel:  { href: 'suratjalan_tabel',  setDefault: setDefaultHeaderTabel  },
   tabel2: { href: 'suratjalan_tabel2', setDefault: setDefaultHeaderTabel2 },
-  tabel3: { href: 'suratjalan_tabel3', setDefault: setDefaultHeaderTabel3 },
   tabel5: { href: 'suratjalan_tabel5', setDefault: setDefaultHeaderTabel5 },
   tabel6: { href: 'suratjalan_tabel6', setDefault: setDefaultHeaderTabel6 }
 };
 
 var lastTabelRows = [];
 var lastTabel2Rows = [];
-var lastTabel3Rows = [];
 var lastTabel5Rows = [];
 var lastTabel6Rows = [];
 
@@ -3303,23 +3335,6 @@ function setDefaultHeaderTabel2() {
 // 'LokasiPenerima' has no matching field in dbSPB's result set (the original static
 // markup rendered an always-empty <td></td> for it too) -- kept as a column so hiding/
 // reordering still works, it just always renders blank via tabelValueCell's fallback.
-function setDefaultHeaderTabel3() {
-  gcart_header = [
-    ['NOBUKTI',        'Nobukti',         1, 'varchar', 0, 0],
-    ['TANGGAL',        'Tanggal',         1, 'date',    0, 0],
-    ['NamaCustSupp',   'Customer',        1, 'varchar', 0, 0],
-    ['NoPesanan',      'NoPesanan',       1, 'varchar', 0, 0],
-    ['IDUser',         'User',            1, 'varchar', 0, 0],
-    ['TGLKIRIM',       'Tgl Kirim',       1, 'date',    0, 0],
-    ['TGLTERIMA',      'Tgl Terima',      1, 'date',    0, 0],
-    ['LokasiPenerima', 'Lokasi Penerima', 1, 'varchar', 0, 0],
-    ['RefUKM',         'No UKM',          1, 'varchar', 0, 0],
-    ['Isbatal',        'Batal',           1, 'bool',    0, 0],
-    ['Userbatal',      'User Batal',      1, 'varchar', 0, 0],
-    ['Tglbatal',       'Tgl Batal',       1, 'date',    0, 0]
-  ];
-}
-
 function setDefaultHeaderTabel5() {
   gcart_header = [
     ['NOBUKTI',      'Nobukti',    1, 'varchar', 0, 0],
@@ -3369,9 +3384,15 @@ function tabel6ActionsCell(row) {
   var tglTerimaBrg = sjPickCI(row, 'TglTerimaBRG');
   var tglTerima = sjPickCI(row, 'TGLTERIMA');
   var tglSpbInvc = sjPickCI(row, 'TglSPBINVC');
+  var isOto = Number(sjPickCI(row, 'IsOtorisasi1'));
   var html = '<td class="text-center">';
-  html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonTerimaAcc(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglSpbInvc + '\')"><i class="bi bi-calendar4-range"></i></button>';
+  if (isOto) {
+    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button> ';
+    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonTerimaAcc(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglSpbInvc + '\')"><i class="bi bi-calendar4-range"></i></button>';
+  } else {
+    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  }
   html += '</td>';
   return html;
 }
@@ -3479,19 +3500,6 @@ function renderTabel2Rows(rows) {
   suratjalanReplaceThead('#tabel2', cols);
 }
 
-function renderTabel3Rows(rows) {
-  if (sjActiveKey !== 'tabel3') { sjAktifkanTabel('tabel3'); }
-  var cols = gcart_header.filter(function (c) { return c[2] === 1; });
-  var html = '';
-  (rows || []).forEach(function (row) {
-    html += '<tr>';
-    cols.forEach(function (col) { html += tabelValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel3_data').innerHTML = html;
-  suratjalanReplaceThead('#tabel3', cols);
-}
-
 function renderTabel5Rows(rows) {
   if (sjActiveKey !== 'tabel5') { sjAktifkanTabel('tabel5'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
@@ -3544,19 +3552,6 @@ function reinitTabel2() {
   }
 }
 
-function reinitTabel3() {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
-    renderTabel3Rows(lastTabel3Rows);
-    $('#tabel3').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
-    ReportTable.init({ table: '#tabel3', bar: '#rtBarTabel3', onChange: reinitTabel3 });
-    sjAturTinggiTabel();
-  } catch (e) {
-    console.error('reinitTabel3 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
 function reinitTabel5() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel5')) { $('#tabel5').DataTable().destroy(); }
@@ -3587,7 +3582,7 @@ function buttonHeaderTable(key) {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
     sjAktifkanTabel(key);
     sjDoSetHeader(key, true);
-    ({ tabel: reinitTabel, tabel2: reinitTabel2, tabel3: reinitTabel3, tabel5: reinitTabel5, tabel6: reinitTabel6 })[key]();
+    ({ tabel: reinitTabel, tabel2: reinitTabel2, tabel5: reinitTabel5, tabel6: reinitTabel6 })[key]();
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
 }
@@ -3600,11 +3595,6 @@ $(document).ready(function(){
       // initialize it last -- reinitTabelX() each end by binding ReportTable to their
       // own table, and whichever runs last wins, so this order leaves the actually-
       // visible tab interactive.
-      sjAktifkanTabel('tabel3');
-      sjDoSetHeader('tabel3', false);
-      lastTabel3Rows = @json($tempOutstanding3);
-      reinitTabel3();
-
       sjAktifkanTabel('tabel6');
       sjDoSetHeader('tabel6', false);
       lastTabel6Rows = @json($tempOutstanding6);
@@ -3640,11 +3630,6 @@ $(document).ready(function(){
         ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
         sjAturTinggiTabel();
       });
-      $('#nav-profile1-tab').on('shown.bs.tab', function () {
-        sjAktifkanTabel('tabel3');
-        ReportTable.init({ table: '#tabel3', bar: '#rtBarTabel3', onChange: reinitTabel3 });
-        sjAturTinggiTabel();
-      });
       $('#nav-profile3-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel5');
         ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
@@ -3659,7 +3644,7 @@ $(document).ready(function(){
       // Shared toolbar controls (one search box + one Tampilkan dropdown for all five
       // tabs, matching so.blade.php's shared-toolbar pattern) instead of the old
       // per-tab ones.
-      var page1Tables = ['#tabel', '#tabel2', '#tabel3', '#tabel5', '#tabel6'];
+      var page1Tables = ['#tabel', '#tabel2', '#tabel5', '#tabel6'];
       var tabelFilterVisualTimeout;
       $('#tabel_filter_visual').on('keyup', function () {
         var value = this.value;
@@ -4242,21 +4227,48 @@ function buttonAddListGudang () {
 
 
 
+function sjResetFilterFieldsSPB () {
+  $('#input_filterspb').val('0')
+}
+
+function sjUpdateFilterBadgeSPB () {
+  let n = Number($('#input_filterspb').val()) || 0
+  $('#spbFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+}
+
+function buttonFilterSPB () {
+  loadAll()
+  sjUpdateFilterBadgeSPB()
+}
+
+function onChangePeriodeSPB () {
+  let tglawal = $('#input_tanggalawal_spb').val()
+  let tglakhir = $('#input_tanggalakhir_spb').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  buttonFilterSPB()
+}
+
 function loadAll () {
   console.log('loadall tes')
   let _token = $("#_token").val();
+  let tglawalspb = $("#input_tanggalawal_spb").val()
+  let tglakhirspb = $("#input_tanggalakhir_spb").val()
+  let filterspb = $("#input_filterspb").val()
 
   $.ajax({
     url: "{!! url('suratjalanloadall') !!}",
     type: "get",
     async: false,
     data: {
+      tglawalspb, tglakhirspb, filterspb
     },
     success: function(res) {
       dataRefreshOutstanding = res.tempOutstanding
       dataRefreshOutstanding2 = res.tempOutstanding2
 
-      dataRefreshOutstanding3 = res.tempOutstanding3
       dataRefreshOutstanding4 = res.tempOutstanding4
       dataRefreshOutstanding5 = res.tempOutstanding5
       dataRefreshOutstanding6 = res.tempOutstanding6
@@ -4269,9 +4281,6 @@ function loadAll () {
 
   lastTabel2Rows = dataRefreshOutstanding2
   reinitTabel2()
-
-  lastTabel3Rows = dataRefreshOutstanding3
-  reinitTabel3()
 
   lastTabel6Rows = dataRefreshOutstanding6
   reinitTabel6()

@@ -760,7 +760,9 @@
      ============================================================ --}}
 <div id="page2" class="container-fluid" style="display: none">
   <div class="row">
-    <div class="col-6 text-left"></div>
+    <div class="col-6 text-left">
+      <h2>Add</h2>
+    </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
@@ -826,10 +828,10 @@
 
         <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-md-4">
               <div class="form-group"><label>TOP</label></div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-8">
               <input type="number" class="form-control text-right" id="input_add_hari" onblur="onChangeHari()" value=0 min=0>
             </div>
 
@@ -1340,7 +1342,7 @@
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="showTableHargaTerakhir()">Histori Harga</button>
 
-          <button type="button" class="btn btn-lg btn-batal-add" style="
+          <button type="button" class="btn btn-lg btn-danger" style="
           height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
           text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
@@ -1905,29 +1907,6 @@
         </div>
       </div>
 
-      <div id="modalBodyAddAddListBarang" class="showhidemodalbodyadd">
-        <div class="modal-body">
-          <div class="container-fluid mt-4">
-            <div class="row"><div class="col-12"><h3>Barang</h3></div></div>
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <table id="tabel_add_list_barang" class="data-table">
-                  <thead class="text-center">
-                    <tr><th scope="col">Actions</th><th scope="col">Kode</th><th scope="col">Nama</th><th scope="col">Merk</th><th scope="col">Satuan</th></tr>
-                  </thead>
-                  <tbody id="tabel_data_add_list_barang" class="text-left">
-                    <tr><td class="text-center"><button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus"></i></button></td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-batal-add" onclick="buttonAddListBatal()">Batal</button>
-        </div>
-      </div>
-
       <div id="modalBodyAddListPIC" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
@@ -2137,8 +2116,6 @@ let tempDataTableTambahSO = []
 let dataTableAdd = []
 let dataTableEdit = []
 let selectedNoBukti = ''
-
-let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
@@ -2948,11 +2925,6 @@ $(document).ready(function(){
         // reinitTabel2()/reinitTabelOto() above (called earlier in this same ready
         // block) -- this leftover direct call from before that existed would
         // re-initialize both a second time with no destroy() in between.
-
-        $("#tabel_add_list_barang").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-        });
 
         $("#tabel_add_list_barangall").DataTable({
           "lengthChange": false,
@@ -5829,184 +5801,94 @@ function buttonAddAddListSattax () {
 }
 
 function buttonAddAddListBarang () {
-  console.log('buttonAddAddListBarang','ggggggggggggggggggggggggggggggggggggggggggg')
   let _token = $("#_token").val();
   let nopenyerahan = $("#input_add_add_nopenyerahan").val()
   let refpr = $("#input_add_add_refpr").val()
 
-  console.log(refpr, nopenyerahan)
-    if(nopenyerahan || refpr ) {
-      console.log("masuk 1")
-      if(!refpr || !nopenyerahan) {
-        console.log("masuk 1")
-        alertify.warning("Lengkapi  refpr dan no penyerahan")
+  if (nopenyerahan || refpr) {
+    if (!refpr || !nopenyerahan) {
+      alertify.warning("Lengkapi  refpr dan no penyerahan")
+      return
+    }
 
-      }
-      console.log("masuk 2")
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_barangrefpr')) {
-       $('#tabel_add_list_barangrefpr').DataTable().destroy();
-      }
-      console.log(nopenyerahan,
-      refpr)
-      $.ajax({
-        url: "{!! url('solistbarangrefpr') !!}",
-        type: "post",
-        async: false,
-        data: {
-          _token,
-          nopenyerahan: nopenyerahan,
-          noreferensi: refpr
-        },
-        success: function(res) {
-          listBarangRefPR = res
-          console.log(res)
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barangrefpr')) {
+      $('#tabel_add_list_barangrefpr').DataTable().destroy();
+    }
 
-          if (!res.length) {
-            alertify.warning("Data tidak ditemukkan")
-            return
-          }
-          // if (res.length == 1) {
-          //   buttonAddAddPickBarangAll( res[0].Kodebrg , 1)
-          //   $('#input_add_add_namaproduk').focus();
-          //   return
-          // }
-          let rowTable = ""
-          res.forEach((item, i) => {
+    $.ajax({
+      url: "{!! url('solistbarangrefpr') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token,
+        nopenyerahan: nopenyerahan,
+        noreferensi: refpr
+      },
+      success: function(res) {
+        listBarangRefPR = res
 
-            rowTable +=          `
-            <tr >
-            <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('${item.KODEBRG}')" type="button" ><i class="bi bi-plus"></i></button></td>
-            <td>${item.NOBUKTI}</td>
-              <td>${item.TANGGAL}</td>
-              <td>${item.REFPR}</td>
-              <td>${item.KODEBRG}</td>
-              <td>${item.namaBrg}</td>
-              <td>${item.namamerk}</td>
-              <td>${item.Sisa1}</td>
-              <td>${item.SAT_1}</td>
+        if (!res.length) {
+          alertify.warning("Data tidak ditemukkan")
+          return
+        }
 
-
-
-
+        let rowTable = ""
+        res.forEach((item) => {
+          rowTable += `
+          <tr>
+          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('${item.KODEBRG}')" type="button" ><i class="bi bi-plus"></i></button></td>
+          <td>${item.NOBUKTI}</td>
+          <td>${item.TANGGAL}</td>
+          <td>${item.REFPR}</td>
+          <td>${item.KODEBRG}</td>
+          <td>${item.namaBrg}</td>
+          <td>${item.namamerk}</td>
+          <td>${item.Sisa1}</td>
+          <td>${item.SAT_1}</td>
           </tr>
           `
-          });
-          // $('#tabel_add_list_barangall').DataTable().destroy();
-            console.log ('selesai loaddddddddddddddddddddddd')
+        });
 
-          document.getElementById("tabel_data_add_list_barangrefpr").innerHTML = rowTable
+        document.getElementById("tabel_data_add_list_barangrefpr").innerHTML = rowTable
 
-             console.log ('selesai eeeeeeeeeeeeeeeeeeeeee')
         $("#tabel_add_list_barangrefpr").DataTable({
           "lengthChange": false,
-            "paging": false ,
-            "searching" : false,
-            "order": [[1, 'asc']],
+          "paging": false ,
+          "searching" : false,
+          "order": [[1, 'asc']],
           "columnDefs": [
-               {"targets" :[0] , 'orderable' : false}
-            ]
+            {"targets" :[0] , 'orderable' : false}
+          ]
         });
 
         $('.showhidemodalbodyadd').hide();
         $('#modalBodyAddListBarangRefPR').show();
-
         $("#form").modal('show')
-        }})
-
-
-
-      return
-
-    }
-
-  if (!nopenyerahan && !refpr) {
-    console.log("masuk barang all")
-    $('.showhidemodalbodyadd').hide();
-    $('#modalBodyAddAddListBarangAll').show();
-
-    $('#tabel_add_list_barangall').DataTable().destroy();
-
-    document.getElementById("tabel_data_add_list_barangall").innerHTML = ''
-
-    $("#tabel_add_list_barangall").DataTable({
-      "lengthChange": false,
-        "paging": false ,
-        "searching" : false
-    });
-
-    document.getElementById("input_search_barang_all").value = ''
-    $("#form").modal('toggle')
-
-
-    document.getElementById("modalBodyAddAddListBarangAllTitle").scrollIntoView();
-
-    $('#form').on('shown.bs.modal', function () {
-    $('#input_search_barang_all').trigger('focus')
-  })
-    // $('#input_search_barang_all').focus();
-    console.log("Masuk Tes")
-
-  } else {
-    console.log("masuk barang not all")
-
-    $('#tabel_add_list_barang').DataTable().destroy();
-
-    $.ajax({
-      url: "{!! url('solistbarang') !!}",
-      type: "get",
-      async: false,
-      data: {
-      },
-      success: function(res) {
-        let rowTable = ``
-        dataAddAddListItem = res
-        dataAddAddListItem.forEach((item, i) => {
-          rowTable += `
-          <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarang(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
-          <td>${item.Kodebrg}</td>
-          <td>${item.NamaBrg}</td>
-          <td>${item.namamerk}</td>
-          <td>${item.Sat1}</td>
-
-
-          </tr>`
-        });
-
-
-
-
-        if(!res.length) {
-          rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
-        }
-        document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
-
-        $("#tabel_add_list_barang").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-        });
-
-        $('.showhidemodalbodyadd').hide();
-        $('#modalBodyAddAddListBarang').show();
-
-        $("#form").modal('toggle')
-
-
-
-      },
-      error: function (err) {
-        console.log(err)
-        alertify.warning('Terjadi kesalahan silahkan refresh browser')
       }
-
     })
 
-
+    return
   }
 
+  // Baik nopenyerahan maupun refpr kosong -> tampilkan modal search barang-all.
+  $('.showhidemodalbodyadd').hide();
+  $('#modalBodyAddAddListBarangAll').show();
 
+  $('#tabel_add_list_barangall').DataTable().destroy();
+  document.getElementById("tabel_data_add_list_barangall").innerHTML = ''
+  $("#tabel_add_list_barangall").DataTable({
+    "lengthChange": false,
+    "paging": false ,
+    "searching" : false
+  });
 
+  document.getElementById("input_search_barang_all").value = ''
+  $("#form").modal('toggle')
+  document.getElementById("modalBodyAddAddListBarangAllTitle").scrollIntoView();
 
+  $('#form').on('shown.bs.modal', function () {
+    $('#input_search_barang_all').trigger('focus')
+  })
 }
 
 
@@ -6050,7 +5932,7 @@ function buttonAddAddListRefPr () {
         <tr class="pick-row" onclick="buttonAddPickRefPr(${i} )">
 
         <td>${item.nobukti}</td>
-        <td>${item.tanggal}</td>
+        <td>${formatDate(item.tanggal)}</td>
         <td>${item.refPR}</td>
 
         </tr>`
@@ -6064,8 +5946,6 @@ function buttonAddAddListRefPr () {
         //
         // </tr>'
       });
-
-
 
 
       $('#tabel_add_list_refpr').DataTable().destroy();
@@ -7848,148 +7728,6 @@ function buttonAddAddPickBarangAll (kodebrg , x = 0) {
   })
 }
 
-function buttonAddAddPickBarang (index , pEdit = 0) {
-  let _token  = $("#_token").val()
-  console.log(dataAddAddListItem[index])
-  tempAddAdd = dataAddAddListItem[index]
-  document.getElementById("input_add_add_kodebarang").value = tempAddAdd.Kodebrg
-  document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
-  document.getElementById("input_add_add_disc").value = '0.00'
-  document.getElementById("input_add_add_discrp").value = '0.00'
-  let selectOption = ''
-  if (tempAddAdd.Sat1) {
-    selectOption += `<option value=1 selected>${tempAddAdd.Sat1}</option>`
-  }
-  if (tempAddAdd.Sat2) {
-    selectOption += `<option value=2>${tempAddAdd.Sat2}</option>`
-  }
-  if (tempAddAdd.Sat3) {
-    selectOption += `<option value=3>${tempAddAdd.Sat3}</option>`
-  }
-  document.getElementById("input_add_add_nosat").innerHTML = selectOption
-
-
-  console.log("kodecust:", $("#input_add_kodepelanggan").val())
-  console.log({
-  kodebarang: tempAddEdit.KodeBrg,
-  kodecustsupp: tempAddEdit.KODECUST,
-  kodekebun: $("#input_kodekebun").val() || tempAddEdit.KODEKEBUN
-  })
-
-  $.ajax({
-    url: "{!! url('socekharga') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      kodebarang : tempAddAdd.Kodebrg,
-      nosat : 1,
-      kodecustsupp: $("#input_add_kodepelanggan").val(),
-      kodekebun: $("#input_kodekebun").val() || tempAddEdit.KODEKEBUN
-    },
-    success: function(res) {
-      console.log("BELI RAW:", res.harga_beli)
-      console.log(res)
-      let jual = res.harga_jual || []
-      let beli = res.harga_beli || []
-
-      let rowTable = ``
-      let rowTableBeli = ``
-      jual.forEach((item, i) => {
-        let date1 = ""
-        if (item.tanggal) {
-            let date = new Date(item.tanggal);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
-        rowTable += `
-        <tr>
-          <td>${date1}</td>
-          <td class="text-right">${item.qnt2 ?? '-'}</td>
-          <td class="text-center">${item.satuan ?? '-'}</td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.harga) || 0)}
-          </td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.discrp1) || 0)}
-          </td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.disctot) || 0)}
-          </td>
-        </tr>`})
-
-        if(!jual.length) {
-          rowTable= `<tr><td class="text-center" colspan=6>Tidak ada data</td></tr>`
-        }
-
-        beli.forEach((item) => {
-        let date1 = ""
-        if (item.tanggal) {
-          let date = new Date(item.tanggal);
-          let day = ("0" + date.getDate()).slice(-2);
-          let month = ("0" + (date.getMonth() + 1)).slice(-2);
-          date1 = date.getFullYear()+"/"+month+"/"+day;
-        }
-
-        rowTableBeli += `
-        <tr>
-          <td>${date1}</td>
-          <td class="text-right">${item.qntterima ?? '-'}</td>
-          <td class="text-center">${item.satuan ?? '-'}</td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.harga) || 0)}
-          </td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.ndiskon) || 0)}
-          </td>
-          <td class="text-right">
-            ${new Intl.NumberFormat('id-ID').format(Number(item.disctot) || 0)}
-          </td>
-        </tr>`
-      })
-
-      if (!beli.length) {
-        rowTableBeli = `<tr><td class="text-center" colspan=6>Tidak ada data</td></tr>`
-      }
-
-      document.getElementById("tabel_data_add_harga_terakhir").innerHTML = rowTable
-      document.getElementById("tabel_data_add_harga_beli").innerHTML = rowTableBeli
-
-
-
-
-      if (res.length && Number(res[0].Xharga)) {
-        document.getElementById("input_add_add_harga").value = formatAngka(parseFloat(res[0].Xharga).toFixed(2))
-      } else {
-        if (Number(tempAddAdd.Hrg1_1)) {
-          document.getElementById("input_add_add_harga").value = formatAngka(parseFloat(tempAddAdd.Hrg1_1).toFixed(2))
-        } else {
-          document.getElementById("input_add_add_harga").value = '0.00'
-        }
-      }
-
-      buttonAddListBatal()
-      document.getElementById("input_add_add_kodebarang").scrollIntoView();
-
-    },
-    error: function (err) {
-      console.log(err)
-      console.log(err.status)
-      console.log(err.statusText)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-
-  })
-
-
-
-  // console.log
-
-
-
-
-}
 
 
 function buttonAddPickRefPr (index ) {
@@ -8655,14 +8393,6 @@ function buttonDetail (NOBUKTI) {
       console.log('aaa')
       console.log('res' , res)
 
-      // res.header.forEach((item, i) => {
-      //   console.log('a' , i)
-      // });
-      //
-      // res.list.forEach((item, i) => {
-      //   console.log('b' , i)
-      // });
-
       if (!res.list) {
         alertify.warning("Data habis")
         // $("#form").modal('toggle')
@@ -8774,8 +8504,6 @@ function buttonDetail (NOBUKTI) {
       // $("#formDetail").modal('toggle')
       $('#page1').hide();
       $('#page3').show();
-
-
 
     },
     error: function (err) {
