@@ -61,7 +61,8 @@
 #tabel2 thead th.rt-th,
 #tabel3 thead th.rt-th,
 #tabel7 thead th.rt-th,
-#tabelso thead th.rt-th {
+#tabelso thead th.rt-th,
+#tabel_pembelian thead th.rt-th {
   padding: 0;
   vertical-align: middle;
 }
@@ -70,7 +71,8 @@
 #tabel2 thead th.rt-th .th-inner,
 #tabel3 thead th.rt-th .th-inner,
 #tabel7 thead th.rt-th .th-inner,
-#tabelso thead th.rt-th .th-inner {
+#tabelso thead th.rt-th .th-inner,
+#tabel_pembelian thead th.rt-th .th-inner {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -82,19 +84,22 @@
 #tabel2 thead th.rt-th .th-inner.dragging,
 #tabel3 thead th.rt-th .th-inner.dragging,
 #tabel7 thead th.rt-th .th-inner.dragging,
-#tabelso thead th.rt-th .th-inner.dragging { opacity: .4; }
+#tabelso thead th.rt-th .th-inner.dragging,
+#tabel_pembelian thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabel thead th.rt-th.drag-over .th-inner,
 #tabel2 thead th.rt-th.drag-over .th-inner,
 #tabel3 thead th.rt-th.drag-over .th-inner,
 #tabel7 thead th.rt-th.drag-over .th-inner,
-#tabelso thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
+#tabelso thead th.rt-th.drag-over .th-inner,
+#tabel_pembelian thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabel thead th.rt-th .th-label,
 #tabel2 thead th.rt-th .th-label,
 #tabel3 thead th.rt-th .th-label,
 #tabel7 thead th.rt-th .th-label,
-#tabelso thead th.rt-th .th-label {
+#tabelso thead th.rt-th .th-label,
+#tabel_pembelian thead th.rt-th .th-label {
   flex: 1 1 auto;
   min-width: 0;
   white-space: nowrap;
@@ -105,14 +110,16 @@
 #tabel2 thead th.rt-th.num .th-label,
 #tabel3 thead th.rt-th.num .th-label,
 #tabel7 thead th.rt-th.num .th-label,
-#tabelso thead th.rt-th.num .th-label { text-align: right; }
+#tabelso thead th.rt-th.num .th-label,
+#tabel_pembelian thead th.rt-th.num .th-label { text-align: right; }
 
 /* pegangan drag */
 #tabel thead th.rt-th .th-grip,
 #tabel2 thead th.rt-th .th-grip,
 #tabel3 thead th.rt-th .th-grip,
 #tabel7 thead th.rt-th .th-grip,
-#tabelso thead th.rt-th .th-grip {
+#tabelso thead th.rt-th .th-grip,
+#tabel_pembelian thead th.rt-th .th-grip {
   display: grid;
   grid-template-columns: repeat(2, 3px);
   gap: 3px;
@@ -125,7 +132,8 @@
 #tabel2 thead th.rt-th .th-grip i,
 #tabel3 thead th.rt-th .th-grip i,
 #tabel7 thead th.rt-th .th-grip i,
-#tabelso thead th.rt-th .th-grip i {
+#tabelso thead th.rt-th .th-grip i,
+#tabel_pembelian thead th.rt-th .th-grip i {
   width: 3px;
   height: 3px;
   border-radius: 50%;
@@ -136,14 +144,16 @@
 #tabel2 thead th.rt-th:hover .th-grip,
 #tabel3 thead th.rt-th:hover .th-grip,
 #tabel7 thead th.rt-th:hover .th-grip,
-#tabelso thead th.rt-th:hover .th-grip { opacity: 1; }
+#tabelso thead th.rt-th:hover .th-grip,
+#tabel_pembelian thead th.rt-th:hover .th-grip { opacity: 1; }
 
 /* tombol roda gigi */
 #tabel thead th.rt-th .th-gear,
 #tabel2 thead th.rt-th .th-gear,
 #tabel3 thead th.rt-th .th-gear,
 #tabel7 thead th.rt-th .th-gear,
-#tabelso thead th.rt-th .th-gear {
+#tabelso thead th.rt-th .th-gear,
+#tabel_pembelian thead th.rt-th .th-gear {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,7 +176,8 @@
 #tabel2 thead th.rt-th:hover .th-gear,
 #tabel3 thead th.rt-th:hover .th-gear,
 #tabel7 thead th.rt-th:hover .th-gear,
-#tabelso thead th.rt-th:hover .th-gear { opacity: 1; }
+#tabelso thead th.rt-th:hover .th-gear,
+#tabel_pembelian thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabel thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear.active,
@@ -177,7 +188,9 @@
 #tabel7 thead th.rt-th .th-gear:hover,
 #tabel7 thead th.rt-th .th-gear.active,
 #tabelso thead th.rt-th .th-gear:hover,
-#tabelso thead th.rt-th .th-gear.active {
+#tabelso thead th.rt-th .th-gear.active,
+#tabel_pembelian thead th.rt-th .th-gear:hover,
+#tabel_pembelian thead th.rt-th .th-gear.active {
   opacity: 1;
   background: var(--rt-indigo-soft);
   color: var(--rt-indigo);
@@ -190,7 +203,8 @@
 #tabel2 thead th.rt-th,
 #tabel3 thead th.rt-th,
 #tabel7 thead th.rt-th,
-#tabelso thead th.rt-th { background-position: right 26px center; }
+#tabelso thead th.rt-th,
+#tabel_pembelian thead th.rt-th { background-position: right 26px center; }
 
 /* ============ Menu kolom (dipasang di <body>, position:fixed) ============
    Disalin apa adanya dari report-table.css � memang sudah tanpa scope,
@@ -695,7 +709,8 @@
 #tabel2 thead th,
 #tabel3 thead th,
 #tabel7 thead th,
-#tabelso thead th {
+#tabelso thead th,
+#tabel_pembelian thead th {
   position: sticky;
   top: 0;
   z-index: 20;

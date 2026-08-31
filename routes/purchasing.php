@@ -18,7 +18,7 @@ use App\Http\Controllers\Purchasing\PONonStockController;
 use App\Http\Controllers\Purchasing\ClosingPOController;
 // use App\Http\Controllers\Purchasing\InvoiceReturBeliController;
 // use App\Http\Controllers\Purchasing\ReturPembelianGudangController;
-// use App\Http\Controllers\Purchasing\InvoicePembelianController;
+use App\Http\Controllers\Purchasing\InvoicePembelianController;
 use App\Http\Controllers\Purchasing\UangMukaBeliController;
 
 Route::middleware('auth')->group(function () {
@@ -284,20 +284,20 @@ Route::middleware('auth')->group(function () {
     // Route::post('/koreksireturbeli',                [ReturPembelianGudangController::class, 'spKoreksi']);
     // Route::post('/returbelikoreksiaddlist',         [ReturPembelianGudangController::class, 'getKoreksiAddList']);
 
-    // // ── INVOICE PEMBELIAN ─────────────────────────────────────────────────
-    // Route::get('/invoicepembelian',                 [InvoicePembelianController::class, 'index']);
-    // Route::post('/detailbeli',                      [InvoicePembelianController::class, 'getDetailPO']);
-    // Route::post('/detailBeliDet',                   [InvoicePembelianController::class, 'getBeliDet']);
-    // Route::post('/detailInvoiceBeli',               [InvoicePembelianController::class, 'getDetailPembelian']);
-    // Route::get('/getNoBuktiInvoiceBeli',            [InvoicePembelianController::class, 'getNoBukti']);
-    // Route::get('/getAksesInvoiceBeli',              [InvoicePembelianController::class, 'getAkses']);
-    // Route::post('/spotorisasiInvoiceBeli',          [InvoicePembelianController::class, 'spOtorisasi1']);
-    // Route::post('/spUnotorisasiInvoiceBeli',        [InvoicePembelianController::class, 'spUnOtorisasi1']);
-    // Route::get('/getAllInvoiceBeli',                 [InvoicePembelianController::class, 'getAllPO']);
-    // Route::get('/getAlloutbeliinv',                  [InvoicePembelianController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudangInvoiceBeli',        [InvoicePembelianController::class, 'spBeliGudang']);
-    // Route::post('/sp_edittransaksi',                [InvoicePembelianController::class, 'spedit']);
-    // Route::post('/sp_hapusinvoice',                 [InvoicePembelianController::class, 'deleteinvoice']);
+    // ── INVOICE PEMBELIAN ─────────────────────────────────────────────────
+    Route::get('/invoicepembelian',                 [InvoicePembelianController::class, 'index']);
+    Route::post('/detailbeli',                      [InvoicePembelianController::class, 'getDetailPO']);
+    Route::post('/detailBeliDet',                   [InvoicePembelianController::class, 'getBeliDet']);
+    Route::post('/detailInvoiceBeli',               [InvoicePembelianController::class, 'getDetailPembelian']);
+    Route::get('/getNoBuktiInvoiceBeli',            [InvoicePembelianController::class, 'getNoBukti']);
+    Route::get('/getAksesInvoiceBeli',              [InvoicePembelianController::class, 'getAkses']);
+    Route::post('/spotorisasiInvoiceBeli',          [InvoicePembelianController::class, 'spOtorisasi1']);
+    Route::post('/spUnotorisasiInvoiceBeli',        [InvoicePembelianController::class, 'spUnOtorisasi1']);
+    Route::get('/getAllInvoiceBeli',                 [InvoicePembelianController::class, 'getAllPO']);
+    Route::get('/getAlloutbeliinv',                  [InvoicePembelianController::class, 'getAllPembelian']);
+    Route::post('/sp_beligudangInvoiceBeli',        [InvoicePembelianController::class, 'spBeliGudang']);
+    Route::post('/sp_edittransaksi',                [InvoicePembelianController::class, 'spedit']);
+    Route::post('/sp_hapusinvoice',                 [InvoicePembelianController::class, 'deleteinvoice']);
 
     // ── UANG MUKA BELI ────────────────────────────────────────────────────
     Route::get('/uangmukabeli',                  [UangMukaBeliController::class, 'index']);
