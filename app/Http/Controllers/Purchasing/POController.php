@@ -871,8 +871,21 @@ select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
     return $listData;
   }
 
+  // Dua mode: dengan 'search' (dipakai browse FOC di Purchase Order, server-side agar cepat)
+  // dan tanpa 'search' (dipakai transferbarang & perintahreturbeli, tetap daftar penuh - jangan diubah).
   public function listBarangFOC (Request $req)
   {
+    if ($req->filled('search')) {
+      $search = "%" . $req->input('search') . "%";
+      $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,A.partNumber,B.NamaMerk
+                                                  from Dbbarang a
+                                                  Left Outer join dbmerk B on A.kodemerk=b.KodeMerk
+                                                  where a.isaktif=1
+                                                  and (a.Kodebrg like :search1 or a.NamaBrg like :search2)
+                                                  order by a.Kodebrg", ["search1" => $search, "search2" => $search]);
+      return $listData;
+    }
+
     $listData = DB::connection('SML')->select("select a.Kodebrg, a.NamaBrg,A.partNumber,B.NamaMerk
                                                 from Dbbarang a
                                                 Left Outer join dbmerk B on A.kodemerk=b.KodeMerk

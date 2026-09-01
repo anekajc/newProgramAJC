@@ -492,6 +492,13 @@
   #tabel2 td.dataTables_empty,
   #tabelso td.dataTables_empty { text-align: center !important; }
 
+  .po-empty-msg {
+    text-align: center;
+    padding: 26px 12px;
+    color: #6b7280;
+    font-size: 13px;
+  }
+
   .po-kpi-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -742,6 +749,8 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
+    <div class="po-kpi-strip" id="poKpiStrip"></div>
+
     <!-- UNTUK TAB -->
     <div class="card mb-3 tab-card">
       <div class="card-body">
@@ -842,7 +851,6 @@
   </div> -->
 
       <div class="card-body" style="padding:0;">
-        <div class="po-kpi-strip" id="poKpiStrip"></div>
         <div class="tab-content" id="myTabContent" >
 
           <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -1337,8 +1345,8 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Supplier" id="input_add_kodesupplier">
-                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" style="height:32px;" onclick="performSearchSupplier()">
-                  <i class="bi bi-plus"></i>
+                <button type="button" class="btn btn-chip-biru btn-sm" id="buttonAddListPelanggan" style="height:32px; border-radius:0;" onclick="performSearchSupplier()">
+                  <i class="bi bi-search"></i>
                 </button>
               </div>
             </div>
@@ -1771,7 +1779,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
           </div>
         </div>
 
@@ -1854,8 +1862,8 @@
                     <div class="col-md-4">
                       <div class="input-group">
                         <input type="text" class="form-control text-left" id="input_add_add_kodebarang">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonBrowseBarangItem" style="height:32px;" onclick="performSearch()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button type="button" class="btn btn-chip-biru btn-sm" id="buttonBrowseBarangItem" style="height:32px; border-radius:0;" onclick="performSearch()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -2084,7 +2092,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()">Simpan Data</button>
+              onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
               height: 30px;
@@ -2095,7 +2103,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+              onclick="submitAddEdit()" class="btn btn-secondary">Simpan</button>
             </div>
 
           </div>
@@ -3943,12 +3951,12 @@ function buttonAddPr () {
 
         <td>${item.Kodebrg}</td>
         <td>${item.NamaBrg}</td>
-        <td class="text-right">${Number(item.SaldoQnt) ? formatAngka(item.SaldoQnt) : '0.00'}</td>
-        <td class="text-right">${Number(item.Qnt1OutPO) ? formatAngka(item.Qnt1OutPO) : '0.00'}</td>
-        <td class="text-right">${Number(item.Qnt1OutSo) ? formatAngka(item.Qnt1OutSo) : '0.00'}</td>
-        <td class="text-right">${Number(item.QntMin) ? formatAngka(item.QntMin) : '0.00'}</td>
-        <td class="text-right">${Number(item.Qnt1Fiktif) ? formatAngka(item.Qnt1Fiktif) : '0.00'}</td>
-        <td class="text-right">${Number(item.SaldoQnt) ? formatAngka(item.SaldoQnt) : '0.00'}</td>
+        <td class="text-right">${formatAngkaX(item.SaldoQnt)}</td>
+        <td class="text-right">${formatAngkaX(item.Qnt1OutPO)}</td>
+        <td class="text-right">${formatAngkaX(item.Qnt1OutSo)}</td>
+        <td class="text-right">${formatAngkaX(item.QntMin)}</td>
+        <td class="text-right">${formatAngkaX(item.Qnt1Fiktif)}</td>
+        <td class="text-right">${formatAngkaX(item.SaldoQnt)}</td>
 
         <td>${item.NamaMerk}</td>
 
@@ -6195,6 +6203,10 @@ function buttonAddAddListBarang () {
   let _token = $("#_token").val();
   let sumber = poSumberBarang()
 
+  // Kotak pencarian FOC hanya relevan untuk sumber FOC - direset di sini supaya sumber
+  // lain (PR/SO/Barang All) selalu mulai dari kondisi tersembunyi.
+  $('#wrapSearchBarangFOC').hide();
+
   // PR : seluruh PR yang masih outstanding.
   //
   // Dulu di sini ada percabangan lagi - kalau form dibuka lewat tombol + di tab
@@ -6204,7 +6216,7 @@ function buttonAddAddListBarang () {
   // menjadi tampilan informasi.
   if (sumber === 'PR') {
 
-    $('#tabel_add_list_barang_nonfoc').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfoc')) { $('#tabel_add_list_barang_nonfoc').DataTable().destroy() }
 
     $.ajax({
       url: "{!! url('polistbarangnosominusallso') !!}",
@@ -6261,52 +6273,28 @@ function buttonAddAddListBarang () {
 
   } else if (sumber === 'FOC') {
 
-    $('#tabel_add_list_barang_foc').DataTable().destroy();
+    // Browse FOC diambil dari seluruh master barang - kalau langsung dimuat semua saat modal
+    // dibuka, ini lemot. Jadi modal dibuka kosong dan baru cari ke server saat user tekan
+    // Enter (searchBarangFOC), mengikuti pola di pembelianpermintaanagen/nonagen.
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
 
-    $.ajax({
-      url: "{!! url('polistbarangfoc') !!}",
-      type: "get",
-      async: false,
-      data: {
-      },
-      success: function(res) {
-        let rowTable = ``
-        dataAddAddListItem = res
-        dataAddAddListItem.forEach((item, i) => {
-          rowTable += `
-          <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
-            <td style="">${item.Kodebrg}</td>
-            <td style="">${item.NamaBrg}</td>
-            <td style="">${item.partNumber}</td>
-            <td style="">${item.NamaMerk}</td>
-          </tr>`
-        });
+    $('#input_search_barang_foc').val('')
+    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
 
-        document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable
+    document.getElementById("namaHeaderTable").textContent = 'Master Barang'
+    $('.showhidemodalbodyadd').hide();
+    $('#wrapSearchBarangFOC').show();
+    $('#modalBodyAddAddListBarangFOC').show();
 
-        $("#tabel_add_list_barang_foc").DataTable({
-          "lengthChange": false,
-            "paging": true ,
-        });
-        document.getElementById("namaHeaderTable").textContent = 'Barang (FOC)'
-        $('.showhidemodalbodyadd').hide();
-        $('#modalBodyAddAddListBarangFOC').show();
+    $("#form").modal('toggle')
 
-        $("#form").modal('toggle')
-
-      },
-      error: function (err) {
-        console.log(err)
-        alertify.warning('Terjadi kesalahan silahkan refresh browser')
-      }
-
-    })
   } else {
+
 
     // SO : seluruh SO yang masih outstanding sekaligus. Endpoint tersendiri, BUKAN
     // polistbarangnosoplus, karena yang itu menyaring per satu nomor SO (peninggalan alur
     // dua langkah) dan masih dipakai halaman lain - lihat POController@listBarangSOAll.
-    $('#tabel_add_list_barang_nonfocplus').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfocplus')) { $('#tabel_add_list_barang_nonfocplus').DataTable().destroy() }
 
     $.ajax({
       url: "{!! url('polistbarangsoall') !!}",
@@ -6525,7 +6513,7 @@ function buttonTambahSOAll () {
   // #tabel_tambahsoall yang punya 8 kolom. Sebelumnya fungsi ini menulis ke
   // #tabel_data_add_list_noSo yang cuma 3 kolom, sehingga barisnya melebihi header.
   if ($.fn.DataTable.isDataTable('#tabel_tambahsoall')) {
-    $('#tabel_tambahsoall').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_tambahsoall')) { $('#tabel_tambahsoall').DataTable().destroy() }
   }
   $.ajax({
     url: "{!! url('polistnoso') !!}",
@@ -6579,7 +6567,7 @@ function buttonAddListNoSO () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_noSo').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_noSo')) { $('#tabel_add_list_noSo').DataTable().destroy() }
   $.ajax({
     url: "{!! url('polistnoso') !!}",
     type: "post",
@@ -6684,7 +6672,7 @@ function buttonAddListLokasiPenerima () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_lokasipenerima').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_lokasipenerima')) { $('#tabel_add_list_lokasipenerima').DataTable().destroy() }
 
   $.ajax({
     url: "{!! url('polistlokasipenerima') !!}",
@@ -6783,7 +6771,7 @@ function onChangeValas () {
 
 function buttonAddListPelanggan ()
 {
-  $('#tabel_add_list_pelanggan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().destroy() }
 
   $.ajax({
     url: "{!! url('polistpelanggan') !!}",
@@ -6863,7 +6851,7 @@ function buttonAddListBackOffice () {
 }
 
 function buttonAddListSales () {
-  $('#tabel_add_list_sales').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_sales')) { $('#tabel_add_list_sales').DataTable().destroy() }
   $.ajax({
     url: "{!! url('solistsales') !!}",
     type: "get",
@@ -7607,6 +7595,37 @@ function poRenderNilai (col, item) {
   return (nilai === null || nilai === undefined) ? "" : nilai
 }
 
+// Baris "tidak ada data" bawaan DataTables memakai <td colspan=N> yang N-nya dihitung
+// saat init. Di halaman ini <thead> ditulis ulang ReportTable tiap render dan tabelnya
+// di-destroy+init berkali-kali, jadi N itu tidak bisa dipercaya - teksnya berakhir
+// terjepit di kolom Actions. Karena itu pesannya dipindah keluar dari <table>: baris
+// bawaannya disembunyikan, teksnya ditampilkan sebagai blok biasa selebar kotak tabel
+// sehingga rata tengahnya tidak bergantung pada colspan sama sekali.
+function poRapikanBarisKosong (api) {
+  let wrap = $(api.table().container()).find('.po-table-wrap')[0]
+  if (!wrap) { return }
+
+  // Dipasang SEBAGAI ANAK wrap (bukan sibling setelahnya) supaya tekasnya nongol tepat
+  // di bawah header tabel. wrap ini melar mengisi sisa tinggi tab (lihat poAturTinggiTabel),
+  // jadi kalau pesannya taruh di luar/sesudah wrap, dia terdorong ke bawah kotak kosong
+  // yang tinggi itu - persis keluhan user: teksnya nongol di bawah scrollbar, bukan di atas.
+  let pesan = wrap.querySelector('.po-empty-msg')
+  if (!pesan) {
+    pesan = document.createElement('div')
+    pesan.className = 'po-empty-msg'
+    wrap.appendChild(pesan)
+  }
+
+  let sel = api.table().body() ? api.table().body().querySelector('td.dataTables_empty') : null
+  if (sel) {
+    pesan.textContent = sel.textContent
+    pesan.hidden = false
+    sel.parentNode.style.display = 'none'
+  } else {
+    pesan.hidden = true
+  }
+}
+
 // Menggambar salah satu tabel outstanding: urut 1 = Outstanding PR, urut 3 =
 // Outstanding SO. Bedanya cuma isi PO_OUT[urut] (id elemen, endpoint, ada/tidaknya
 // kolom Actions), sisanya identik.
@@ -7717,6 +7736,11 @@ function initTabelOutstanding (urut, pakaiCache) {
     // "r" di paling depan = elemen indikator memuat, sengaja DI LUAR .po-table-wrap
     // supaya jadi anak langsung wrapper tabel dan tidak ikut tergulung bersama isinya.
     "dom" : "r<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    "language" : {
+      "emptyTable" : "Tidak ada data",
+      "zeroRecords" : "Tidak ada data yang cocok dengan pencarian"
+    },
+    "drawCallback" : function () { poRapikanBarisKosong(this.api()) },
     "order" : orderAman,
     "displayStart" : posisi ? posisi.start : 0,
     "search" : posisi ? { "search" : posisi.search } : { "search" : "" },
@@ -8042,6 +8066,11 @@ if (baris2) {
     // di sini cukup dipertahankan urutan DOM apa adanya.
     "order": [],
     "dom": "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    "language": {
+      "emptyTable": "Tidak ada data",
+      "zeroRecords": "Tidak ada data yang cocok dengan pencarian"
+    },
+    "drawCallback": function () { poRapikanBarisKosong(this.api()) },
   });
 
   poIkatSearch(2)
@@ -8094,7 +8123,7 @@ function renderKpiPO () {
       </div>
       <div>
         <div class="po-kpi-label">${c[0]}</div>
-        <div class="po-kpi-val">${c[5] ? 'Rp ' + formatAngka(c[1]) : c[1]}</div>
+        <div class="po-kpi-val">${c[5] ? 'Rp ' + poFormatAngkaDes(c[1], 2) : c[1]}</div>
       </div>
     </div>
   `).join('')
@@ -11460,10 +11489,70 @@ function searchBarangAll (e) {
 
     let search = $("#input_search_barang_all").val();
 
-    $('#tabel_add_list_barangall').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barangall')) { $('#tabel_add_list_barangall').DataTable().destroy() }
 
   }
 
+}
+
+// Pencarian server-side untuk browse FOC (Master Barang) - mengikuti pola searchBarangAll
+// di pembelianpermintaanagen/nonagen: hanya jalan saat Enter, cari lewat kode+nama barang.
+function searchBarangFOC (e) {
+  if (e.which != 13) { return }
+
+  let search = $("#input_search_barang_foc").val().trim()
+
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
+
+  if (!search) {
+    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+    return
+  }
+
+  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Mencari data...</td></tr>'
+
+  let _token = $("#_token").val()
+
+  $.ajax({
+    url: "{!! url('polistbarangfoc') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token,
+      search
+    },
+    success: function (res) {
+      dataAddAddListItem = res
+
+      if (!res.length) {
+        document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>'
+        return
+      }
+
+      let rowTable = ``
+      dataAddAddListItem.forEach((item, i) => {
+        rowTable += `
+        <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
+          <td style="">${item.Kodebrg}</td>
+          <td style="">${item.NamaBrg}</td>
+          <td style="">${item.partNumber}</td>
+          <td style="">${item.NamaMerk}</td>
+        </tr>`
+      });
+
+      document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable
+
+      $("#tabel_add_list_barang_foc").DataTable({
+        "lengthChange": false,
+        "paging": false,
+        "searching": false,
+      });
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
 }
 
 function generateInputNumber (id , style, classes, onchange) {
@@ -11485,15 +11574,19 @@ function generateInputNumber (id , style, classes, onchange) {
   }
 
   function formatAngkaVal (angka) {
-    return Number(angka.split(',').join(''))
+    return Number(String(angka == null ? '' : angka).split(',').join('')) || 0
   }
 
 
   function formatAngka (angkaString) {
   // console.log('formatAngka' , angkaString);
-  if(!angkaString) {
-      return '0.00'
+  if (angkaString === null || angkaString === undefined || angkaString === '') {
+    return '0.00'
   }
+  if (isNaN(Number(angkaString))) {
+    return '0.00'
+  }
+  angkaString = parseFloat(angkaString).toFixed(2).toString()
         let tempAngka = angkaString.split('.')
 
         if (tempAngka[0][0] == '-') {
@@ -11778,7 +11871,9 @@ function LockFreeOfCharge(){
       buttonAddListPelanggan();
 
       // Apply search to all DataTables
-      $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw();
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) {
+        $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw();
+      }
     }
 
     // Keyboard event
@@ -11795,9 +11890,15 @@ function LockFreeOfCharge(){
       buttonAddAddListBarang();
 
       // Apply search to all DataTables
-      $('#tabel_add_list_barang_nonfoc').DataTable().search(searchValue).draw();
-      $('#tabel_add_list_barang_nonfocplus').DataTable().search(searchValue).draw();
-      $('#tabel_add_list_barang_foc').DataTable().search(searchValue).draw();
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfoc')) {
+        $('#tabel_add_list_barang_nonfoc').DataTable().search(searchValue).draw();
+      }
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfocplus')) {
+        $('#tabel_add_list_barang_nonfocplus').DataTable().search(searchValue).draw();
+      }
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) {
+        $('#tabel_add_list_barang_foc').DataTable().search(searchValue).draw();
+      }
     }
 
     // Keyboard event
