@@ -362,7 +362,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -499,7 +499,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddAddItem()"><b>+ Add Item</b></button>
+            onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
         </div>
       </div>
     </div>
@@ -558,7 +558,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 <div class="col-md-4">
                   <div class="input-group mb-3">
                   <input id="input_add_add_kodebarang" type="text" class="form-control text-left" placeholder="Kode Barang">
-                  <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-primary btn-sm shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                  <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -756,7 +756,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Cari Barang</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Master Barang</h5>
         <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
           data-dismiss="modal" aria-label="Close"
           style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
@@ -1774,7 +1774,6 @@ function loadAll () {
   $.ajax({
     url: "{!! url('pembelianpermintaannonagenloadall') !!}",
     type: "post",
-    async: false,
     data: {
       _token,
       tglawal,
@@ -1912,16 +1911,23 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
   $.ajax({
     url: "{!! url('pembelianpermintaannonagenupdateotorisasi') !!}",
     type: "post",
-    async: false,
     data: {
       _token,
       nobukti,
       otorisasi: 1
     },
     success: function (res) {
-      if (res > 0) {
+      if (res && res.ok > 0) {
         alertify.success('Berhasil otorisasi');
-        loadAll();
+        let grup = dataPR.find(function (g) { return g[0].NoBukti === nobukti })
+        if (grup) {
+          grup.forEach(function (item) {
+            item.IsOtorisasi1 = 1
+            item.OtoUser1 = res.otouser
+            item.TglOto1 = res.tgloto
+          })
+        }
+        renderTabelPR()
       } else {
         alertify.warning('Gagal otorisasi');
       }
@@ -1962,7 +1968,6 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
       $.ajax({
         url: "{!! url('pembelianpermintaannonagenupdatebatalotorisasi') !!}",
         type: "post",
-        async: false,
         data: {
           _token,
           nobukti,
@@ -1970,9 +1975,17 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
           pket :value
         },
         success: function (res) {
-          if (res > 0) {
+          if (res && res.ok > 0) {
             alertify.success('Berhasil batal otorisasi');
-            loadAll();
+            let grup = dataPR.find(function (g) { return g[0].NoBukti === nobukti })
+            if (grup) {
+              grup.forEach(function (item) {
+                item.IsOtorisasi1 = 0
+                item.OtoUser1 = ''
+                item.TglOto1 = null
+              })
+            }
+            renderTabelPR()
           } else {
             alertify.warning('Gagal batal otorisasi');
           }

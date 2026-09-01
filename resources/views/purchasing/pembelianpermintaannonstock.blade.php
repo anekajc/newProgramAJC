@@ -209,10 +209,18 @@
   color: #343a40 !important;
 }
 
-/* ---------- Modal cari kode barang (#formAddListItem) - disalin dari
-   pembelianpermintaanagen.blade.php. Berbeda dengan Agen, di sini kolom Actions
-   TETAP ADA (tombol "+" per baris) karena JS-nya (searchBarangAll(),
-   buttonAddAddInsertItem()) memang dibangun di sekitar tombol itu, bukan klik baris. ---------- */
+/* ---------- Modal cari kode barang (#formAddListItem) - baris diklik langsung untuk
+   memilih (tidak ada lagi tombol "+" di kolom Actions), disamakan dengan
+   pembelianpermintaanagen.blade.php / pembelianpermintaannonagen.blade.php. ---------- */
+#formAddListItem tbody tr.pick-row {
+  cursor: pointer;
+  transition: background-color .12s;
+}
+
+#formAddListItem tbody tr.pick-row:hover td {
+  background-color: #eef2ff;
+}
+
 #formAddListItem thead th {
   background: #f8f9fb !important;
   color: #6b7280 !important;
@@ -232,7 +240,21 @@
 }
 
 #formAddListItem #input_search_barang_all {
-  max-width: 250px;
+  width: 260px;
+  max-width: 100%;
+  font-size: 13px;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+
+#formAddListItem #input_search_barang_all:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #e8edff;
 }
 
 /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
@@ -335,7 +357,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -449,7 +471,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddAddItem()">Add Item</button>
+            onclick="buttonAddAddItem()">Tambah Item</button>
         </div>
       </div>
     </div>
@@ -517,7 +539,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 <div class="col-md-4">
                   <div class="input-group mb-3">
                   <input id="input_add_add_kodebarang" type="text" class="form-control text-left" placeholder="Kode Barang">
-                  <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-primary btn-sm shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                  <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -714,7 +736,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Cari Barang</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Master Barang</h5>
         <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto" 
           data-dismiss="modal" aria-label="Close"
           style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
@@ -727,20 +749,16 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
 
           <div class="row mb-2" style="margin-top:-30px;">
             <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
-              <div class="d-flex align-items-center">
-                <label for="input_search_barang_all" class="me-2 mb-0">Search:</label>
-                <input id="input_search_barang_all" type="text" class="form-control"
-                  style="max-width: 250px;" onkeypress="searchBarangAll(event)">
-              </div>
+              <input id="input_search_barang_all" type="text" class="form-control"
+                placeholder="Cari Data, lalu tekan Enter" onkeypress="searchBarangAll(event)">
             </div>
           </div>
 
           <div class="row">
             <div class="table-responsive">
             <table id="tabel_add_list_item" class="table table-bordered table-striped">
-              <thead class="text-center bg-primary text-white">
+              <thead class="text-center">
                 <tr>
-                  <th scope="col">Actions</th>
                   <th scope="col">Kode Barang</th>
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Merk</th>
@@ -749,7 +767,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               </thead>
               <tbody id="tabel_data_add_list_item" class="text-left">
                 <tr>
-                  <td class="text-center" colspan="5">Silakan ketik pencarian</td>
+                  <td class="text-center" colspan="4">Silakan ketik pencarian</td>
                 </tr>
               </tbody>
             </table>
@@ -982,7 +1000,7 @@ $(document).ready(function(){
     }
 
     $('#tabel_data_add_list_item').empty().append(`
-      <tr><td class="text-center" colspan="5">Mencari data...</td></tr>
+      <tr><td class="text-center" colspan="4">Mencari data...</td></tr>
     `);
 
     $.ajax({
@@ -998,7 +1016,7 @@ $(document).ready(function(){
         if (!res.length) {
           $('#formAddListItem').modal('show');
           $('#tabel_data_add_list_item').empty().append(`
-            <tr><td class="text-center" colspan="5">Tidak ada data</td></tr>
+            <tr><td class="text-center" colspan="4">Tidak ada data</td></tr>
           `);
           return;
         }
@@ -1013,12 +1031,7 @@ $(document).ready(function(){
         let rowTable = "";
         res.forEach((item, i) => {
           rowTable += `
-            <tr>
-              <td class="text-center">
-                <button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button">
-                  <i class="bi bi-plus"></i>
-                </button>
-              </td>
+            <tr class="pick-row" onclick="buttonAddAddInsertItem(${i})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
               <td>${item.NAMAMERK ?? ''}</td>
@@ -1590,10 +1603,10 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
 
 function buttonBatalOtorisasi (nobukti, isOtorisasi) {
   let akses = $("#akses_isbatal").val();
-  // if (!Number(akses)) {
-  //   alertify.warning('No access');
-  //   return;
-  // }
+  if (!Number(akses)) {
+    alertify.warning('No access');
+    return;
+  }
 
   if (Number(isOtorisasi) === 0) {
     alertify.warning('Belum diotorisasi');
@@ -2123,7 +2136,7 @@ function buttonAddListKodeBarang () {
 
   $('#tabel_data_add_list_item').empty().append(`
     <tr>
-      <td class="text-center" colspan="5">Silakan ketik pencarian</td>
+      <td class="text-center" colspan="4">Silakan ketik pencarian</td>
     </tr>`);
 
   $('#formAddListItem').modal('show');
@@ -2144,7 +2157,7 @@ function searchBarangAll (e) {
       }
 
       $('#tabel_data_add_list_item').empty().append(`
-        <tr><td class="text-center" colspan="5">Silakan ketik pencarian</td></tr>
+        <tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>
       `);
       return;
     }
@@ -2154,7 +2167,7 @@ function searchBarangAll (e) {
     }
 
     $('#tabel_data_add_list_item').empty().append(`
-      <tr><td class="text-center" colspan="5">Mencari data...</td></tr>
+      <tr><td class="text-center" colspan="4">Mencari data...</td></tr>
     `);
 
     $.ajax({
@@ -2169,19 +2182,14 @@ function searchBarangAll (e) {
         let rowTable = "";
 
         if (!res.length) {
-          rowTable = `<tr><td class="text-center" colspan="5">Tidak ada data</td></tr>`;
+          rowTable = `<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>`;
           $('#tabel_data_add_list_item').empty().append(rowTable);
           return;
         }
 
         res.forEach((item, i) => {
           rowTable += `
-            <tr>
-              <td class="text-center">
-                <button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button">
-                  <i class="bi bi-plus"></i>
-                </button>
-              </td>
+            <tr class="pick-row" onclick="buttonAddAddInsertItem(${i})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
               <td>${item.NAMAMERK ?? ''}</td>

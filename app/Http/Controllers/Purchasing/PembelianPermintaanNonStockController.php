@@ -31,57 +31,13 @@ class PembelianPermintaanNonStockController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
-    $outstanding = VwPPL::where('Bulan', $periode->bulan)
-                         ->where('Tahun', $periode->tahun)
-                         ->where('IsJasa', 1)
-                         ->where('pAgen', 0)
-                         ->where(function($query) {
-                             $query->whereNull('isOtorisasi1')->orWhere('isOtorisasi1', 0);
-                         })
-                         ->get()
-                         ->groupBy('NoBukti');
-
-    $tempOutstanding = [];
-    foreach ($outstanding as $groupedData) {
-        $tempOutstanding[] = $groupedData;
-    }
-
-    $otorisasi = VwPPL::where('Bulan', $periode->bulan)
-                      ->where('Tahun', $periode->tahun)
-                      ->where('IsJasa', 1)
-                      ->where('pAgen', 0)
-                      ->where('isOtorisasi1', 1)
-                      ->get()
-                      ->groupBy('NoBukti');
-
-    $tempOtorisasi = [];
-    foreach ($otorisasi as $groupedData) {
-        $tempOtorisasi[] = $groupedData;
-    }
-
-    // =========================
-    // Header Table
-    // =========================
-    $reqHeader = new Request([
-        'href' => 'pembelianpermintaannonstock'
-    ]);
-
-    $header = app('App\Http\Controllers\HeaderTableController')
-        ->getHeaderTable($reqHeader);
-
+    // Data tabel (listData1/listData2, header kolom, dsb) TIDAK disiapkan di sini karena
+    // blade memuatnya sendiri lewat AJAX loadAll() saat halaman ready - menyiapkannya di
+    // sini dobel kerja dan bikin buka halaman lemot. Sama seperti pola Agen/Non-Agen.
     return view('purchasing.pembelianpermintaannonstock', [
-
-        "aliasordered"      => $header['aliasordered'],
-        "headertableheader" => $header['headertableheader'],
-        "isnumeric"         => $header['isnumeric'],
-        "headertablevalue"  => $header['headertablevalue'],
-        "isshown"           => $header['isshown'],
-
         "menul0" => $menul0,
         "periode" => $periode,
         "akses" => $akses,
-        "listData1" => $tempOutstanding,  // Belum Otorisasi
-        "listData2" => $tempOtorisasi     // Sudah Otorisasi
     ]);
 }
 
@@ -179,13 +135,13 @@ class PembelianPermintaanNonStockController extends Controller
   }
 
   public function spDetail (Request $req) {
-    $detailOutstanding = VwPPL::all()->where('NoBukti', $req->nobukti )->sortBy('Urut');
-    $tempOutstanding = [];
-    foreach ($detailOutstanding as $do) {
-      // code...
-      array_push($tempOutstanding,$do);
-    }
-    return $tempOutstanding;
+    // Sebelumnya VwPPL::all()->where(...) - itu menarik SELURUH isi VwPPL (semua NoBukti,
+    // semua periode) ke memori PHP baru difilter di sana. Diganti query terarah ke DB
+    // (WHERE didorong ke server SQL), sama seperti pola Agen/Non-Agen.
+    return DB::connection('SML')->select(
+      "select * from VwPPL where NoBukti = :nobukti order by Urut",
+      ["nobukti" => $req->nobukti]
+    );
   }
 
 
