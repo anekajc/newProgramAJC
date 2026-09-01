@@ -8209,10 +8209,14 @@ function poMuatKpiOutstanding () {
     $.ajax({
       url : PO_OUT[urut].url,
       type : "get",
+      cache : false,
       data : { draw : 1, start : 0, length : 1, search : '' },
       success : function (res) {
         poKpiOut[urut] = res.recordsTotal
         renderKpiPO()
+      },
+      error : function (err) {
+        console.log(PO_OUT[urut].url + ' gagal memuat KPI:', err.status, err.responseText)
       }
     })
   })

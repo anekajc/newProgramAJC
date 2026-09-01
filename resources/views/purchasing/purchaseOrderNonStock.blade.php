@@ -3272,6 +3272,7 @@ function submitAddAdd () {
         refreshDataTableAdd(NoBukti)
 
         alertify.success('Berhasil menambah item')
+        ponsSegarkanOutstanding()
       }
       if(res == 2) {
         setNewNoBukti()
@@ -3587,6 +3588,7 @@ function submitAddEdit () {
       refreshDataTableAdd(NoBukti)
 
       alertify.success('Berhasil edit item')
+      ponsSegarkanOutstanding()
 
     },
     error: function (err) {
@@ -5509,6 +5511,42 @@ function loadAll () {
   }
 }
 
+// Kartu KPI Outstanding PR tampil di semua tab, tapi tabelnya sendiri baru digambar
+// saat tabnya dibuka (lazy - lihat ponsPerluGambar). Supaya kartunya tidak menunggu
+// itu, total barisnya diambil sendiri di sini dengan payload minimal (length=1),
+// terpisah dari initTabelOutstandingPons() - pola sama dengan purchaseOrder.blade.php
+// (poMuatKpiOutstanding).
+function ponsMuatKpiOutstanding () {
+  $.ajax({
+    url : PONS_OUT[1].url,
+    type : "get",
+    cache : false,
+    data : { draw : 1, start : 0, length : 1, search : '' },
+    success : function (res) {
+      ponsKpiOut[1] = res.recordsTotal
+      renderKpiPONS()
+    },
+    error : function (err) {
+      console.log(PONS_OUT[1].url + ' gagal memuat KPI:', err.status, err.responseText)
+    }
+  })
+}
+ponsMuatKpiOutstanding()
+
+// Dipanggil tiap kali PO berhasil disimpan (tambah/edit/hapus item) supaya barang
+// yang baru saja diambil langsung hilang dari kartu Outstanding PR maupun tabelnya
+// tanpa perlu F5. Cache-nya dikosongkan dulu (ponsCacheOut/ponsPakaiCacheOut) supaya
+// draw berikutnya benar-benar menembak server - lihat initTabelOutstandingPons().
+function ponsSegarkanOutstanding () {
+  ponsCacheOut[1] = null
+  ponsPakaiCacheOut[1] = false
+  let selTabel = '#' + PONS_OUT[1].tabel
+  if ($.fn.DataTable.isDataTable(selTabel)) {
+    $(selTabel).DataTable().ajax.reload(null, false)
+  }
+  ponsMuatKpiOutstanding()
+}
+
 $(function () {
   $('#modalFilterPONS').on('show.bs.modal', function () {
     $('#ponsModalStatus').val(ponsFilterStatus)
@@ -6746,6 +6784,7 @@ function buttonAddDeleteItem (i) {
             refreshDataTableAdd(NoBukti)
 
             alertify.success('Berhasil menghapus item')
+            ponsSegarkanOutstanding()
 
           },
           error: function (err) {
