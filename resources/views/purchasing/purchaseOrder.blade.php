@@ -477,6 +477,42 @@
   @keyframes poPutarLoading {
     to { transform: rotate(360deg); }
   }
+
+  #tabel td.dataTables_empty,
+  #tabel2 td.dataTables_empty,
+  #tabelso td.dataTables_empty { text-align: center !important; }
+
+  .po-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) {
+    .po-kpi-strip { grid-template-columns: 1fr; }
+  }
+  .po-kpi-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .po-kpi-ic {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+  .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
   </style>
 {{-- tab bar baru--}}
 
@@ -796,6 +832,7 @@
   </div> -->
 
       <div class="card-body" style="padding:0;">
+        <div class="po-kpi-strip" id="poKpiStrip"></div>
         <div class="tab-content" id="myTabContent" >
 
           <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -946,8 +983,8 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
-                      <button class="btn btn-primary" onclick="buttonAddPr()">+ Tambah PR</button>
+                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                      <button class="btn btn-primary" onclick="buttonAddPr()">Tambah PR</button>
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat poPindahBar(). --}}
@@ -1494,7 +1531,7 @@
                     <div class="col-md-12">
                       <div class="input-group form-group">
                         <input class="form-control" id="input_add_kodeekspedisi" value ='-' readonly>
-                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" style="height:32px;" value = '-' class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" value = '-' class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                     <div class="col-md-12">
@@ -1563,7 +1600,7 @@
                           <div class="input-group form-group">
                             <input type="hidden" class="form-control" id="input_add_kodebackoffice" >
                             <input type="text" class="form-control" id="input_add_namabackoffice"  disabled>
-                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                           </div>
                         </div>
                       </div>
@@ -1597,7 +1634,7 @@
                       <div class="input-group form-group">
                         <input type="hidden" class="form-control" id="input_add_kodepic"  >
                         <input type="text" class="form-control" id="input_add_namapic"  disabled>
-                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                   </div>
@@ -1620,7 +1657,7 @@
                   <div class="input-group form-group">
                     <input type="hidden" class="form-control" id="input_add_kodesales" >
                     <input type="text" class="form-control" id="input_add_namasales"  disabled>
-                    <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <button onclick="buttonAddListSales()" id="buttonAddListSales" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -1734,7 +1771,7 @@
 
             <div class="row">
               <div class="col-12">
-                <h4 id="h4AddAddItem">Add Item</h4>
+                <h4 id="h4AddAddItem">Tambah Item</h4>
                 <h4 id="h4AddEditItem">Edit Item</h4>
               </div>
             </div>
@@ -1771,8 +1808,8 @@
                     <div class="input-group">
                       <input type="text" class="form-control" value="-" id="input_add_add_nopnwpo" readonly>
                       <div class="input-group-append">
-                        <button onclick="buttonAddAddListPWO()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button onclick="buttonAddAddListPWO()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -2136,7 +2173,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang"  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
+              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -2534,7 +2571,7 @@
         </div>
         <div class="col-3 text-right">
           <div class="form-group">
-        <button class="btn btn-primary btn-sm text-right" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-plus"></i></button>
+        <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
         </div>
 
       </div>
@@ -2787,7 +2824,7 @@
         </div>
         <div class="col-3 text-right">
           <div class="form-group">
-        <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+        <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
         </div>
 
       </div>
@@ -7738,6 +7775,8 @@ function initTabelOutstanding (urut, pakaiCache) {
       setTimeout(poAturTinggiTabel, 0)
       $(selTabel).find('[data-toggle="tooltip"]').tooltip('dispose')
       $(selTabel).find('[data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+      poKpiOut[urut] = this.api().page.info().recordsTotal
+      renderKpiPO()
     }
   });
 
@@ -8010,6 +8049,45 @@ if (baris2) {
   // boundary:'window' supaya Popper tidak menganggap .po-table-wrap yang pendek
   // sebagai batas dan menumpuk tooltip di atas tombol.
   $('#tabel2_data [data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+
+  poKpiDPP = dataTampil2
+  renderKpiPO()
+}
+
+// Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR / Outstanding SO) di atas
+// tab-content. Jumlah PO & Total DPP dihitung dari dataTampil2 (baris yang sedang
+// tampil di tab Purchase Order, sudah kena filter periode + status/otorisasi).
+// Outstanding PR/SO diambil dari recordsTotal endpoint podataoutstandingpr/so - satu
+// baris di sana = satu kode barang, jadi 1 nobukti dengan 3 barang terhitung 3.
+let poKpiDPP = []
+let poKpiOut = { 1 : null, 3 : null }
+
+function renderKpiPO () {
+  let totalDPP = 0
+  let poSet = new Set()
+  ;(poKpiDPP || []).forEach((r) => {
+    totalDPP += Number(r.TotDPPRp) || 0
+    if (r.NoBukti) { poSet.add(r.NoBukti) }
+  })
+
+  let cards = [
+    ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
+    ['Outstanding PR', poKpiOut[1] === null ? '-' : poKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false],
+    ['Outstanding SO', poKpiOut[3] === null ? '-' : poKpiOut[3], '#ca8a04', '#fef9c3', 'bi bi-cart-check', false]
+  ]
+
+  document.getElementById('poKpiStrip').innerHTML = cards.map((c) => `
+    <div class="po-kpi-card">
+      <div class="po-kpi-ic" style="background:${c[3]};color:${c[2]}">
+        <i class="${c[4]}"></i>
+      </div>
+      <div>
+        <div class="po-kpi-label">${c[0]}</div>
+        <div class="po-kpi-val">${c[5] ? 'Rp ' + formatAngka(c[1]) : c[1]}</div>
+      </div>
+    </div>
+  `).join('')
 }
 
 function loadAll () {
@@ -8077,6 +8155,22 @@ function loadAll () {
     initTabelOutstanding(urutAktif)
   }
 }
+
+// Kartu KPI Outstanding PR/SO tampil di semua tab, tapi tabelnya sendiri baru
+// digambar saat tabnya dibuka (lazy). Supaya kartunya tidak menunggu itu, total
+// barisnya diambil sendiri di sini dengan payload minimal (length=1), terpisah
+// dari initTabelOutstanding().
+;[1, 3].forEach((urut) => {
+  $.ajax({
+    url : PO_OUT[urut].url,
+    type : "get",
+    data : { draw : 1, start : 0, length : 1, search : '' },
+    success : function (res) {
+      poKpiOut[urut] = res.recordsTotal
+      renderKpiPO()
+    }
+  })
+});
 
 $(function () {
   muatDropdownAlamatKirim()

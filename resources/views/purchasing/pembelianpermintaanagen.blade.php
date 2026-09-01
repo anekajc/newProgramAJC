@@ -2954,39 +2954,13 @@ function unlockFormAdd () {
 }
 
 function formatAngka (angkaString) {
-      if (!Number(angkaString)) {
+      if (angkaString === null || angkaString === undefined || angkaString === '') {
         return '0.00'
       }
-      angkastring = parseFloat(angkaString).toFixed(2)
-
-      let tempAngka = angkaString.split('.')
-
-      if (tempAngka[0][0] == '-') {
-        let temp2=''
-
-        let tempAngka1 = tempAngka[0].split('-')
-        for (let i = 0; i < tempAngka1[1].length; i++) {
-          if (i != 0 && i % 3 == 0) {
-            temp2 = ',' + temp2
-          }
-          temp2 = tempAngka1[1][tempAngka1[1].length - i -1] + temp2
-
-        }
-        temp2 += '.' + tempAngka[1]
-        temp2 = '-' + temp2
-
-        return temp2
+      if (isNaN(Number(String(angkaString).split(',').join('')))) {
+        return '0.00'
       }
-      let temp1 = ''
-      for (let i = 0; i < tempAngka[0].length; i++) {
-        if (i != 0 && i % 3 == 0) {
-          temp1 = ',' + temp1
-        }
-        temp1 = tempAngka[0][tempAngka[0].length - i -1] + temp1
-
-      }
-      temp1 += '.' + tempAngka[1]
-      return temp1
+      return prFormatAngkaDes(angkaString, 2)
     }
 
     
