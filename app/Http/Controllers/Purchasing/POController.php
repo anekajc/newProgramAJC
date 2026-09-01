@@ -385,7 +385,14 @@ foreach ($collection2 as $p) {
       $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
-    $where = 'A.SisaPPL > 0 and A.pjasa = 0';
+    // A.SisaPPL bawaan vwOutPPL bisa salah kalau satu baris PR pernah dipakai
+    // beberapa PO dengan IsClose/Isbatal/Tolerate berbeda (mis. ada PO yang
+    // dibatalkan) - group by pada sub-query PO di dalam view pecah jadi
+    // beberapa baris, dan baris yang berpasangan dengan PO batal ikut
+    // menampilkan sisa qty penuh walau PO aktifnya sudah menutup semuanya.
+    // SisaBaru di sqlOutstandingPR() menghitung ulang sisa itu dari agregat
+    // dbPOdet per NoPPL+UrutPPL saja, jadi baris hantu itu tidak muncul lagi.
+    $where = '((A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0)) > 0 and A.pjasa = 0';
     $bind  = [];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
@@ -395,10 +402,13 @@ foreach ($collection2 as $p) {
       $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
     }
 
+    $sqlPO = self::sqlOutstandingPR();
+
     $jml = DB::connection("SML")->select("
       SET NOCOUNT ON
       select count(1) as jml
       from DBO.vwOutPPL A WITH(NOLOCK)
+      left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
       where $where
     ", $bind);
     $total = count($jml) ? (int) $jml[0]->jml : 0;
@@ -419,8 +429,9 @@ foreach ($collection2 as $p) {
       select X.* from (
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-               A.*
+               A.*, (A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0) SisaPPL
         from DBO.vwOutPPL A WITH(NOLOCK)
+        left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
         where $where
       ) X
       $batasBaris
@@ -433,6 +444,25 @@ foreach ($collection2 as $p) {
       "recordsFiltered" => $total,
       "data" => $rows,
     ];
+  }
+
+  /**
+   * Agregat dbPOdet per NoPPL+UrutPPL saja, dipakai LEFT JOIN oleh
+   * dataOutstandingPR() untuk menghitung ulang sisa PR yang benar - lihat
+   * catatan di dataOutstandingPR() kenapa A.SisaPPL bawaan vwOutPPL bisa
+   * salah (group by di dalam view sampai IsClose/Isbatal/Tolerate, jadi
+   * pecah baris kalau satu PR pernah dipakai PO yang lalu dibatalkan).
+   * Sengaja derived table biasa (bukan correlated subquery/APPLY) - dicoba
+   * dengan OUTER APPLY hasilnya salah (SisaPPL keluar NULL) begitu query
+   * luarnya ikut menambahkan predikat lain, tampaknya SQL Server salah
+   * mengoptimalkan APPLY yang dikorelasikan ke view sekompleks vwOutPPL.
+   */
+  public static function sqlOutstandingPR () {
+    return "
+      select NoPPL, UrutPPL, sum(Qnt-isnull(QntBatal,0)) QntPO
+      from dbPOdet WITH(NOLOCK)
+      group by NoPPL, UrutPPL
+    ";
   }
 
   /**
@@ -454,13 +484,13 @@ foreach ($collection2 as $p) {
         a.NoSat, a.Isi, a.NoBukti, a.Urut, 0 Tolerate, B.PartNumber
       from DBSODET a WITH(NOLOCK)
       Left Outer Join Dbbarang B WITH(NOLOCK) on A.kodebrg=B.Kodebrg
-      left Outer Join (select NoPPL,UrutPPL,Sum(case when nosat=1 then Qnt else Qnt*ISI End) - Sum(case when nosat=1 then QntBatal else QntBatal*ISI End) Qnt
+      left Outer Join (select NoPPL,UrutPPL,Sum(case when nosat=1 then Qnt else Qnt*ISI End) - Sum(case when nosat=1 then isnull(QntBatal,0) else isnull(QntBatal,0)*ISI End) Qnt
               ,Sum(case when Nosat=2 then Qnt
               when NOSAT=3 then Qnt
-              when NOSAT=1 then Qnt/ISI  End )-
-              Sum(case when Nosat=2 then QntBatal
-              when NOSAT=3 then QntBatal
-              when NOSAT=1 then QntBatal/ISI  End ) Qnt2
+              when NOSAT=1 then Qnt/nullif(ISI,0)  End )-
+              Sum(case when Nosat=2 then isnull(QntBatal,0)
+              when NOSAT=3 then isnull(QntBatal,0)
+              when NOSAT=1 then isnull(QntBatal,0)/nullif(ISI,0)  End ) Qnt2
               from dbPOdet WITH(NOLOCK) group by NoPPL,UrutPPL)
                 C on A.nobukti=C.noppl and A.urut=C.urutPPL
       where isnull(B.Isjasa,0)=0 and IsCetakKitir=1
