@@ -29,7 +29,6 @@
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center bg-primary text-white">
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                     <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -206,7 +205,6 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
@@ -251,7 +249,6 @@
             <table id="tabel_add_list_barang_foc" class="table table-bordered table-striped"  >
               <thead class="text-center text-white bg-primary" style='white-space:nowrap;'>
                 <tr>
-                  <th style="white-space:nowrap;" scope="col">Actions</th>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
                   <th style="white-space:nowrap;" scope="col">Part Number</th>
@@ -287,7 +284,6 @@
           <table id="tabel_add_list_barang_nonfoc" class="table table-bordered table-striped"  >
             <thead class="text-center bg-primary text-white" style='white-space:nowrap;'>
               <tr>
-                <th scope="col">Actions</th>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
                 <th scope="col">Part Number</th>
@@ -337,7 +333,6 @@
             <table id="tabel_add_list_barang_nonfocplus" class="table table-bordered table-striped"  >
               <thead class="text-center">
                 <tr>
-                  <th style="white-space:nowrap;" scope="col">Actions</th>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
                   <th style="white-space:nowrap;" scope="col">QNT Sat 1</th>
@@ -390,7 +385,6 @@
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pic" class="text-left" >
@@ -448,7 +442,6 @@
                 <th style="padding: 4px 12px;" scope="col">Qty</th>
                 <th style="padding: 4px 12px;" scope="col">Satuan</th>
                 <th style="padding: 4px 12px;" scope="col">Harga</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pwo" class="text-left" >
@@ -504,7 +497,6 @@
           <table id="tabel_add_list_lokasipenerima" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kota</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
@@ -607,7 +599,6 @@
           <table id="tabel_add_list_noSo" class="table table-bordered table-hover table-striped table-responsive-lg">
             <thead class="text-center bg-primary text-white">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">No SO</th>
                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                 <th style="padding: 4px 12px;" scope="col">No. PO Cust</th>
@@ -662,7 +653,6 @@
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_backoffice" class="text-left" >
@@ -717,7 +707,6 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_sales" class="text-left" >
