@@ -129,10 +129,6 @@
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
-                      <td class="text-center">
-                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                      </td>
                 </tr>
                 </tbody>
               </table>
@@ -343,6 +339,7 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  <th style="padding: 4px 12px;" scope="col">Aksi</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
