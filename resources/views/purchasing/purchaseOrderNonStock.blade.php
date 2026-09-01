@@ -10,6 +10,16 @@
      toolbar seragam (search + dropdown "Tampilkan" + tombol Filter), dan tombol aksi bulat
      yang baru muncul saat barisnya di-hover. --}}
   @section('css')
+  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
+  <style>
+    *::-webkit-scrollbar { width: 16px; height: 16px; }
+    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
+    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
+    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
+    *::-webkit-scrollbar-corner { background: #eef0f2; }
+    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
+    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
+  </style>
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
   <style>
   .rodokNdukurTitik{
@@ -1399,7 +1409,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()">Simpan Data</button>
+              onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
               height: 30px;
@@ -1410,7 +1420,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+              onclick="submitAddEdit()" class="btn btn-secondary">Simpan</button>
             </div>
 
           </div>

@@ -6,6 +6,16 @@
 
 
 @section('css')
+  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
+  <style>
+    *::-webkit-scrollbar { width: 16px; height: 16px; }
+    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
+    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
+    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
+    *::-webkit-scrollbar-corner { background: #eef0f2; }
+    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
+    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
+  </style>
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter), disamakan dengan resources/views/purchasing/purchaseOrder.blade.php. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
@@ -624,7 +634,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 font-size: 0.75rem;
                 font-weight: 600;
                 text-transform: uppercase;
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Submit Add</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Simpan</button>
 
                 <button type="button" id="submitAddEdit" class="btn btn-lg btn-chip-biru" style="
                 height: 30px;
@@ -633,7 +643,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 font-size: 0.75rem;
                 font-weight: 600;
                 text-transform: uppercase;
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()">Submit Edit</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()">Simpan</button>
               </div>
             </div>
           </div>
