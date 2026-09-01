@@ -622,7 +622,7 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat ponsPindahBar(). --}}
@@ -743,8 +743,8 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Supplier" id="input_add_kodesupplier">
-                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" style="height:32px;" onclick="performSearchSupplier()">
-                  <i class="bi bi-plus"></i>
+                <button class="btn btn-chip-biru btn-sm" id="buttonAddListPelanggan" style="height:32px; border-radius:0;" onclick="performSearchSupplier()">
+                  <i class="bi bi-search"></i>
                 </button>
               </div>
             </div>
@@ -852,7 +852,7 @@
                 <div class="col-md-12">
                   <div class="input-group form-group">
                     <input type="text" class="form-control" id="input_add_perkiraan">
-                    <button onclick="buttonAddListPerkiraan()" id="buttonAddListPerkiraan" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                    <button onclick="buttonAddListPerkiraan()" id="buttonAddListPerkiraan" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -1001,7 +1001,7 @@
                     <div class="col-md-12">
                       <div class="input-group form-group">
                         <input class="form-control" id="input_add_kodeekspedisi" value="-" readonly>
-                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" value="-" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" value="-" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                     <div class="col-md-12">
@@ -1218,7 +1218,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
           </div>
         </div>
 
@@ -1263,8 +1263,8 @@
                     <div class="col-md-4">
                       <div class="input-group">
                         <input type="text" class="form-control text-left" id="input_add_add_kodebarang">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonBrowseBarangItem" style="height:32px;" onclick="performSearch()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" id="buttonBrowseBarangItem" style="height:32px; border-radius:0;" onclick="performSearch()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -1285,8 +1285,8 @@
                     <div class="col-md-3">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_add_costing">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" onclick="buttonAddListCosting()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick="buttonAddListCosting()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -1294,8 +1294,8 @@
                     <div class="col-md-3">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_add_subcosting">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" onclick="buttonAddListSubCosting()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick="buttonAddListSubCosting()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -2690,11 +2690,6 @@ $(document).ready(function(){
   muatDropdownAlamatKirim()
   muatDropdownValas()
 
-  $("#tabel_add_list_barang").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-  });
-
   $("#tabel_add_list_barangall").DataTable({
     "lengthChange": false,
       "paging": false ,
@@ -3944,7 +3939,7 @@ function buttonAddAddListBarang () {
 
   if (sumber === 'NONPR') {
 
-    $('#tabel_add_list_barang_jasa').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_jasa')) { $('#tabel_add_list_barang_jasa').DataTable().destroy(); }
 
     $.ajax({
       url: "{!! url('polistbarangjasa') !!}",
@@ -3993,7 +3988,7 @@ function buttonAddAddListBarang () {
     // #modalBodyAddAddListBarangNonFOC yang kolomnya sudah cocok (Sat/Qnt PR/Qnt PO/Sisa
     // PR/No. PR/No. SO Cust), dengan buttonAddAddPickBarangNonFOC() yang mengisi
     // NoPPL/UrutPPL dari baris yang dipilih.
-    $('#tabel_add_list_barang_nonfoc').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfoc')) { $('#tabel_add_list_barang_nonfoc').DataTable().destroy(); }
 
     $.ajax({
       url: "{!! url('ponslistbarangjasaall') !!}",
@@ -4136,7 +4131,7 @@ function buttonAddListGudang () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_alamatkirim').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_alamatkirim')) { $('#tabel_add_list_alamatkirim').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('polistgudang') !!}",
     type: "post",
@@ -4201,7 +4196,7 @@ function buttonAddListLokasiPenerima () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_lokasipenerima').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_lokasipenerima')) { $('#tabel_add_list_lokasipenerima').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistlokasipenerima') !!}",
@@ -4250,7 +4245,7 @@ function buttonAddListLokasiPenerima () {
 
 function buttonAddListValas () {
 
-  $('#tabel_add_list_valas').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_valas')) { $('#tabel_add_list_valas').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('polistvalas') !!}",
     type: "get",
@@ -4302,7 +4297,7 @@ function buttonAddListValas () {
 
 function buttonAddListPelanggan ()
 {
-  $('#tabel_add_list_pelanggan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistpelanggan') !!}",
@@ -4350,7 +4345,7 @@ function performSearchSupplier () {
 
   buttonAddListPelanggan();
 
-  $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw(); }
 }
 
 document.getElementById('input_add_kodesupplier').addEventListener('keypress', function (event) {
@@ -4368,7 +4363,7 @@ function buttonAddListCosting ()
 
   console.log(perkiraan)
 
-  $('#tabel_add_list_costing').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_costing')) { $('#tabel_add_list_costing').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistcosting') !!}",
@@ -4416,7 +4411,7 @@ function buttonAddListSubCosting ()
   let _token  = $("#_token").val()
   kodeCost = document.getElementById("input_add_add_costing").value
 
-  $('#tabel_add_list_subcosting').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_subcosting')) { $('#tabel_add_list_subcosting').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistsubcosting') !!}",
@@ -4460,7 +4455,7 @@ function buttonAddListSubCosting ()
 
 function buttonAddListPerkiraan ()
 {
-  $('#tabel_add_list_perkiraan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_perkiraan')) { $('#tabel_add_list_perkiraan').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistperkiraan') !!}",
@@ -4545,7 +4540,7 @@ function buttonAddListBackOffice () {
 }
 
 function buttonAddListSales () {
-  $('#tabel_add_list_sales').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_sales')) { $('#tabel_add_list_sales').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('solistsales') !!}",
     type: "get",
@@ -6786,7 +6781,7 @@ function searchBarangAll (e) {
 
     let search = $("#input_search_barang_all").val();
 
-    $('#tabel_add_list_barangall').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barangall')) { $('#tabel_add_list_barangall').DataTable().destroy(); }
 
   }
 
