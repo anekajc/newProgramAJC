@@ -460,6 +460,43 @@
     }
   </style>
 {{-- end tampilan search modal barang all --}}
+
+{{-- Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) - gaya sama dengan
+     purchaseOrder.blade.php, tapi 3 kolom (tanpa Outstanding SO, menu ini tidak
+     punya SO). --}}
+<style>
+  .po-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) {
+    .po-kpi-strip { grid-template-columns: 1fr; }
+  }
+  .po-kpi-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .po-kpi-ic {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+  .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
+</style>
 @endsection
 @section('content')
 
@@ -479,6 +516,8 @@
     <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
+
+    <div class="po-kpi-strip" id="poKpiStrip"></div>
 
     <!-- UNTUK TAB -->
     <div class="card mb-3 tab-card">
@@ -2586,6 +2625,42 @@ let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
+
+// Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) di atas tab-content.
+// Jumlah PO & Total DPP dihitung dari dataTampil2 (baris yang sedang tampil di tab
+// Purchase Order, sudah kena filter periode + status/otorisasi). Outstanding PR
+// diambil dari recordsTotal endpoint ponsdataoutstandingpr - satu baris di sana =
+// satu kode barang, jadi 1 nobukti dengan 3 barang terhitung 3. Tidak ada
+// Outstanding SO di sini - menu ini tidak punya SO.
+let ponsKpiDPP = []
+let ponsKpiOut = { 1 : null }
+
+function renderKpiPONS () {
+  let totalDPP = 0
+  let poSet = new Set()
+  ;(ponsKpiDPP || []).forEach((r) => {
+    totalDPP += Number(r.TotDPPRp) || 0
+    if (r.NoBukti) { poSet.add(r.NoBukti) }
+  })
+
+  let cards = [
+    ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
+    ['Outstanding PR', ponsKpiOut[1] === null ? '-' : ponsKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false]
+  ]
+
+  document.getElementById('poKpiStrip').innerHTML = cards.map((c) => `
+    <div class="po-kpi-card">
+      <div class="po-kpi-ic" style="background:${c[3]};color:${c[2]}">
+        <i class="${c[4]}"></i>
+      </div>
+      <div>
+        <div class="po-kpi-label">${c[0]}</div>
+        <div class="po-kpi-val">${c[5] ? 'Rp ' + formatAngka(c[1]) : c[1]}</div>
+      </div>
+    </div>
+  `).join('')
+}
 
 let dataRefreshPenerimaan = []
 
@@ -5095,6 +5170,8 @@ function initTabelOutstandingPons (urut, pakaiCache) {
     },
     "drawCallback" : function () {
       setTimeout(ponsAturTinggiTabel, 0)
+      ponsKpiOut[urut] = this.api().page.info().recordsTotal
+      renderKpiPONS()
     }
   });
 
@@ -5388,6 +5465,9 @@ function renderTabelPO () {
   }
   ponsAturTinggiTabel()
   $('#tabel2_data [data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+
+  ponsKpiDPP = dataTampil2
+  renderKpiPONS()
 }
 
 function loadAll () {
@@ -6715,19 +6795,38 @@ function searchBarangAll (e) {
 // Membuang pemisah ribuan dari nilai input-partial-number (autoNumeric) sebelum dipakai
 // sebagai angka - tanpa ini parseFloat("1,234") berhenti di koma dan menghasilkan 1.
 function formatAngkaVal (angka) {
-  return Number((angka || '0').split(',').join(''))
+  return Number(String(angka == null ? '' : angka).split(',').join('')) || 0
 }
 
 function formatAngka (angkaString) {
-  console.log('formatAngka' , angkaString);
+  if (angkaString === null || angkaString === undefined || angkaString === '') {
+    return '0.00'
+  }
+  if (isNaN(Number(angkaString))) {
+    return '0.00'
+  }
+  angkaString = parseFloat(angkaString).toFixed(2).toString()
   let tempAngka = angkaString.split('.')
+
+  if (tempAngka[0][0] == '-') {
+    let temp2 = ''
+    let tempAngka1 = tempAngka[0].split('-')
+    for (let i = 0; i < tempAngka1[1].length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        temp2 = ',' + temp2
+      }
+      temp2 = tempAngka1[1][tempAngka1[1].length - i -1] + temp2
+    }
+    temp2 += '.' + tempAngka[1]
+    temp2 = '-' + temp2
+    return temp2
+  }
   let temp1 = ''
   for (let i = 0; i < tempAngka[0].length; i++) {
     if (i != 0 && i % 3 == 0) {
       temp1 = ',' + temp1
     }
     temp1 = tempAngka[0][tempAngka[0].length - i -1] + temp1
-    // console.log(i, temp1)
   }
   temp1 += '.' + tempAngka[1]
   return temp1

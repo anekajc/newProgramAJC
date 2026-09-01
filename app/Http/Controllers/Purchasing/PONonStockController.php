@@ -166,7 +166,10 @@ foreach ($collection2 as $p) {
 
   /**
    * Data tab "Outstanding PR" dengan server-side paging DataTables - sama persis dengan
-   * POController@dataOutstandingPR, bedanya cuma filter pjasa (non stock = 1, stock = 0).
+   * POController@dataOutstandingPR (termasuk penghitungan ulang SisaPPL/QNTPO lewat
+   * POController::sqlOutstandingPR(), supaya barang yang PR-nya sudah habis diambil PO
+   * tidak lagi muncul di sini - lihat catatan di POController@dataOutstandingPR),
+   * bedanya cuma filter pjasa (non stock = 1, stock = 0).
    */
   public function dataOutstandingPR (Request $req) {
     $draw   = (int) $req->input('draw', 1);
@@ -184,13 +187,18 @@ foreach ($collection2 as $p) {
     $orderCol = (string) $req->input('orderCol', '');
     $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
 
+    $orderColSql = [
+      'SisaPPL' => '((A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0))',
+      'QNTPO'   => 'isnull(P.QntPOBruto,0)',
+    ];
     if (in_array($orderCol, $allowedOrder, true)) {
-      $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
+      $orderExpr = $orderColSql[$orderCol] ?? ('A.[' . $orderCol . ']');
+      $orderBy = $orderExpr . ' ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
       $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
-    $where = 'A.SisaPPL > 0 and isnull(A.pjasa,0) = 1';
+    $where = '((A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0)) > 0 and isnull(A.pjasa,0) = 1';
     $bind  = [];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
@@ -200,10 +208,13 @@ foreach ($collection2 as $p) {
       $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
     }
 
+    $sqlPO = POController::sqlOutstandingPR();
+
     $jml = DB::connection("SML")->select("
       SET NOCOUNT ON
       select count(1) as jml
       from DBO.vwOutPPL A WITH(NOLOCK)
+      left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
       where $where
     ", $bind);
     $total = count($jml) ? (int) $jml[0]->jml : 0;
@@ -219,13 +230,24 @@ foreach ($collection2 as $p) {
       select X.* from (
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-               A.*
+               A.*,
+               (A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0) SisaPPLBaru,
+               isnull(P.QntPOBruto,0) QNTPOBaru,
+               CONVERT(varchar(10), A.Tanggal, 23) TanggalBaru
         from DBO.vwOutPPL A WITH(NOLOCK)
+        left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
         where $where
       ) X
       $batasBaris
       order by X.NoBaris
     ", $bind);
+
+    foreach ($rows as $r) {
+      $r->SisaPPL = $r->SisaPPLBaru;
+      $r->QNTPO   = $r->QNTPOBaru;
+      $r->Tanggal = $r->TanggalBaru;
+      unset($r->SisaPPLBaru, $r->QNTPOBaru, $r->TanggalBaru);
+    }
 
     return [
       "draw" => $draw,
@@ -435,10 +457,20 @@ where a.KodeCost=b.KodeCost and b.Perkiraan= :perkiraan
    */
   public function listBarangJasaAll (Request $req)
   {
-    $listData = DB::connection('SML')->select("SELECT a.KodeBrg, a.NamaBrg,a.PartNumber,a.NAMAMERK, a.Sat, a.NoSat, a.Isi, a.Qnt, a.QntPO, a.SisaPPL, a.NoBukti, a.Urut,a.tolerate,A.NosoCust
-                                                from vwOutPPL a
-                                                where isnull(a.pjasa,0) = 1 and a.SisaPPL > 0
-                                                order by a.KodeBrg, a.NoSat, a.NoBukti");
+    // SisaPPL/QntPO dihitung ulang dari agregat dbPOdet (POController::sqlOutstandingPR())
+    // supaya sepakat dengan dataOutstandingPR() - barang yang PR-nya sudah habis diambil
+    // PO (termasuk yang sempat dibatalkan) tidak ikut muncul di sini.
+    $sqlPO = POController::sqlOutstandingPR();
+    $listData = DB::connection('SML')->select("
+      SELECT a.KodeBrg, a.NamaBrg, a.PartNumber, a.NAMAMERK, a.Sat, a.NoSat, a.Isi,
+             a.Qnt, isnull(P.QntPOBruto,0) QntPO,
+             (a.Qnt - isnull(a.QntBatal,0)) - isnull(P.QntPO,0) SisaPPL,
+             a.NoBukti, a.Urut, a.tolerate, a.NosoCust
+      from vwOutPPL a WITH(NOLOCK)
+      left outer join ( $sqlPO ) P on P.NoPPL = a.NoBukti and P.UrutPPL = a.Urut
+      where isnull(a.pjasa,0) = 1
+        and ((a.Qnt - isnull(a.QntBatal,0)) - isnull(P.QntPO,0)) > 0
+      order by a.KodeBrg, a.NoSat, a.NoBukti");
     return $listData;
   }
 
