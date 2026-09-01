@@ -12,154 +12,109 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="pageHome" class="container-fluid">
-    	<div class="">
-    	  <div class="row">
-    	    <div class="col-6 text-left">
-    	      <h2 style="margin-top:-85px;">Ubah Kemasan Barang</h2>
-    	    </div>
-    	    <div class="col-6 text-right">
-    	      <button type="button" class="btn btn-primary btn-lg button-action" style="margin-top: -150px;" onclick="buttonAdd()">Add KMBJ</button>
-    	    </div>
-    	  </div>
-    	</div>
+<div id="pageHome" class="tb-report main">
+  <div class="content">
 
-    	<div id="contentContainer" class="" >
-    		<input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-        <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+    <div class="tb-report" id="contentContainer">
+      <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
+      <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
-        <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
-        <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
-        <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
-        <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
-        <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
-        <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
+      <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
+      <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
+      <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
+      <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+      <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+      <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
-        <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
+      <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-        <div class="card">
-          <div class="card-header" style="margin-top:-55px;">
-            <div class="row">
-              <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-                <a class="nav-item nav-link active buttonnav-active" id="nav-home-tab" href="#tabhome" role="tab" aria-controls="nav-home" aria-selected="true" onclick="doSetActiveNavTab('home')">
-                  Ubah Kemasan Barang
-                </a>
-                <a class="nav-item nav-link buttonnav-inactive" id="nav-listsdhoto-tab" href="#tablistsdhoto" role="tab" aria-controls="nav-listsdhoto" aria-selected="false" onclick="doSetActiveNavTab('listsdhoto')">
-                  Sudah Otorisasi
-                </a>
-              </div>
-            </div>
-          </div>
+      <div class="toolbar">
+        {{-- <div class="page-title">Ubah Kemasan Barang</div> --}}
 
-          <div class="card-body" style="padding:0;">
-            <div class="tab-content" id="myTabContent">
-              <div class="tab-pane fade show active" id="tabhome" role="tabpanel" aria-labelledby="home-tab">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="container-fluid col-sm-12 customTable" style="padding:0; margin:0; width:100%;">
-                      <table id="tabelhome" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
-                          <tr>
-                            <th style="padding: 4px 12px;" scope="col">Actions</th>
-                            <th style="padding: 4px 12px;" scope="col">Group No. Bukti</th>
-                            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tabelhome_data" class="text-left">
-                          @if (count($listKMBJ) > 0)
-                            @for ($i = 0; $i < count($listKMBJ); $i++)
-                              <tr>
-                                <td class="text-center">
-                                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-info"></i>
-                                  </button>
-                                  <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-pencil-fill"></i>
-                                  </button>
-                                  <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-key-fill"></i>
-                                  </button>
-                                </td>
+        <div>
+          <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
+            oninput="renderTabel()" style="width:200px">
+        </div>
 
-                                <td>{{ $listKMBJ[$i]->GroupNobukti }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listKMBJ[$i]->Tanggal)) !!}</td>
+        <div class="action-group">
+          <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+            <i class="bi bi-filter-lg"></i> Filter
+          </button>
+        </div>
+      </div>
 
-                                {{-- <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td> --}}
-                              </tr>
-                            @endfor
-                          @else
-                            <tr>
-                              <td colspan="3" class="text-center text-muted">Tidak ada transaksi</td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              {{-- <td style="display: none;"></td> --}}
-                            </tr>
-                          @endif
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+      <div id="rtBar"></div>
 
-              <div class="tab-pane fade" id="tablistsdhoto" role="tabpanel" aria-labelledby="listsdhoto-tab">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="container-fluid col-sm-12 customTable" style="padding:0; margin:0; width:100%;">
-                      <table id="tabellistsdhoto" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
-                          <tr>
-                            <th style="padding: 4px 12px;" scope="col">Actions</th>
-                            <th style="padding: 4px 12px;" scope="col">Group No. Bukti</th>
-                            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                            {{-- <th style="padding: 4px 12px;" scope="col">Oto</th> --}}
-                            <th style="padding: 4px 12px;" scope="col">User Oto</th>
-                            <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tabellistsdhoto_data" class="text-left">
-                          @if (count($listSdhOto) > 0)
-                            @for ($i = 0; $i < count($listSdhOto); $i++)
-                              <tr>
-                                <td class="text-center">
-                                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $listSdhOto[$i]->Nobukti }}')">
-                                    <i class="bi bi-info"></i>
-                                  </button>
-                                  <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $listSdhOto[$i]->Nobukti }}')">
-                                    <i class="bi bi-key-fill"></i>
-                                  </button>
-				  <button style="" class="btn btn-primary btn-sm" type="button"   onclick="submitPrint('{{$listSdhOto[$i]->Nobukti}}')" ><i class="bi bi-printer"></i></button>
-                                </td>
+      <div class="table-outer">
+        <div class="table-wrap">
+          <table class="tb" id="mainTable">
+            <thead>
+              <tr>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tabel2_data"></tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span id="footerLabel2">Belum ada data</span></div>
+      </div>
 
-                                <td>{{ $listSdhOto[$i]->GroupNobukti }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listSdhOto[$i]->Tanggal)) !!}</td>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+        sembunyikan kolom.
+      </div>
 
-                                {{-- <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td> --}}
-                                <td>{{ $listSdhOto[$i]->OtoUser1 }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listSdhOto[$i]->TglOto1)) !!}</td>
-                              </tr>
-                            @endfor
-                          @else
-                            <tr>
-                              <td colspan="5" class="text-center text-muted">Tidak ada transaksi</td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              {{-- <td style="display: none;"></td> --}}
-                            </tr>
-                          @endif
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    </div>
+  </div>
+</div>
+
+{{-- modal filter — DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i>
+          Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="modalOtorisasi">
+                <option value="2">Semua</option>
+                <option value="1">Sudah Otorisasi</option>
+                <option value="0">Belum Otorisasi</option>
+              </select>
             </div>
           </div>
         </div>
-    	</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
+<!-- modal filter -->
 
 <div id="pageForm" class="container-fluid" style="display: none" >
       <div class="row">
@@ -278,7 +233,7 @@
             <div class="col-md-12">
               <div class="row">
 
-                <!-- START OF ITEM Kode Barang & Nama Barang -->
+                <!-- Kode Barang & Nama Barang -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -317,10 +272,10 @@
                     </div>
                   </div>
                 </div>
-                <!-- END OF ITEM Kode Barang & Nama Barang -->
+                <!-- Kode Barang & Nama Barang -->
 
 
-                <!-- START OF ITEM Qty Asal & Qty Jadi -->
+                <!-- Qty Asal & Qty Jadi -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -379,10 +334,8 @@
                     </div>
                   </div>
                 </div>
-                <!-- END OF ITEM Qty Asal & Qty Jadi -->
 
-
-                <!-- START OF ITEM HPP & Biaya -->
+                <!--  HPP & Biaya -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -416,7 +369,6 @@
                     </div>
                   </div>
                 </div>
-                <!-- END OF ITEM HPP & Biaya -->
 
               </div>
             </div>
@@ -456,21 +408,285 @@
   var dataItem = [];
   var dataBrowse = {};
 
-  $(document).ready(function(){
-    $("#tabelhome").DataTable({
-      "lengthChange": false,
-      "paging": false ,
+  let lastRows = (function() {
+    let belum = @json($listKMBJ);
+    let sudah = @json($listSdhOto);
+    belum.forEach(function(r) { r.IsOtorisasi1 = 0; });
+    sudah.forEach(function(r) { r.IsOtorisasi1 = 1; });
+    return belum.concat(sudah);
+  })();
+  let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
+
+  var g_href = 'ubahkemasanbarang';
+  var g_modeReport = '1';
+  var gcart_header = [];
+  var gsum_issubtotal = 0;
+  var gsum_isgrandtotal = 0;
+  var gct_desimal_max = 4;
+
+  function setDefaultHeader() {
+    gcart_header = [
+      ['GroupNobukti', 'Group No Bukti', 1, 'varchar', 0, 0],
+      ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+      ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
+      ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
+      ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
+    ];
+  }
+
+  function doSetHeader(_modereport, _isReset = false) {
+    let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+
+    if (_strHeader != "") {
+      gcart_header = doGetHeader(_strHeader);
+    } else if ($.isFunction(window.setDefaultHeader)) {
+      setDefaultHeader();
+      doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+    }
+  }
+
+  function doLoadHeader(_href, _mode) {
+    let _header = "";
+
+    $.ajax({
+      url: "{!! url('globalfunctions_doLoadHeader') !!}",
+      type: "get",
+      async: false,
+      data: {
+        href: _href,
+        mode: _mode
+      },
+      success: function(res) {
+        _header = (res.length > 0) ? res[0].header : "";
+        if (res.length > 0) {
+          gsum_issubtotal = Number(res[0].issubtotal);
+          gsum_isgrandtotal = Number(res[0].isgrandtotal);
+        }
+      }
+    })
+
+    return _header;
+  }
+
+  function doGetHeader(_strHeader) {
+    let _cart = [];
+
+    _strHeader.split("||").forEach((item, i) => {
+      let temp = [];
+      temp.push(item.split(";;")[0]);
+      temp.push(item.split(";;")[1]);
+      temp.push(Number(item.split(";;")[2]));
+      temp.push(item.split(";;")[3]);
+      temp.push(Number(item.split(";;")[4]));
+      temp.push(Number(item.split(";;")[5]));
+      _cart.push(temp);
     });
 
-    $("#tabellistsdhoto").DataTable({
-      "lengthChange": false,
-      "paging": false ,
+    return _cart;
+  }
+
+  function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+    let _strHeader = "";
+
+    _cart.forEach((item, i) => {
+      if (i != 0) {
+        _strHeader += '||';
+      }
+      _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
+        item[5];
     });
+
+    $.ajax({
+      url: "{!! url('globalfunctions_doSimpanHeader') !!}",
+      type: "get",
+      async: false,
+      data: {
+        href: _href,
+        mode: _mode,
+        header: _strHeader,
+        issubtotal: _issubtotal,
+        isgrandtotal: _isgrandtotal
+      },
+      success: function(res) {
+      }
+    })
+  }
+
+  function doMoveHeader(_from, _to) {
+    if (_from < 0 || _to < 0 || _from === _to) {
+      return;
+    }
+    if (_from >= gcart_header.length || _to >= gcart_header.length) {
+      return;
+    }
+
+    let _moved = gcart_header.splice(_from, 1)[0];
+    gcart_header.splice(_to, 0, _moved);
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doButtonVisibility(_id) {
+    gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doSetDesimal(_index, _step) {
+    let _next = Number(gcart_header[_index][5]) + _step;
+    if (_next < 0 || _next > gct_desimal_max) {
+      return;
+    }
+
+    gcart_header[_index][5] = _next;
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doButtonTotal(_index) {
+    gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  // ambil field dari row tanpa peduli besar/kecil huruf
+  function pickCI(r, key) {
+    if (r[key] !== undefined) {
+      return r[key];
+    }
+    let lk = String(key).toLowerCase();
+    for (let k in r) {
+      if (k.toLowerCase() === lk) {
+        return r[k];
+      }
+    }
+    return null;
+  }
+
+  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client side ajaa)
+  function filterByOtorisasi(rows, filterVal) {
+    if (filterVal === '1') {
+      return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
+    }
+    if (filterVal === '0') {
+      return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 0);
+    }
+    return rows;
+  }
+
+  function aksiButtonsHtml(r) {
+    const nobukti = r.Nobukti;
+    const detailBtn =
+      '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+      nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
+
+    if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
+      // Sudah otorisasi (Print + Batal Otorisasi)
+      return '<div class="action-buttons">' + detailBtn +
+        '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+        nobukti + '\')"><i class="bi bi-printer"></i></button>' +
+        '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+        nobukti + '\')"><i class="bi bi-key"></i></button>' +
+        '</div>';
+    }
+
+    // Belum otorisasi (Edit + Otorisasi)
+    return '<div class="action-buttons">' + detailBtn +
+      '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
+      nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+      nobukti + '\')"><i class="bi bi-key"></i></button>' +
+      '</div>';
+  }
+
+  function renderTabel() {
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const thead = document.querySelector('#mainTable thead');
+    thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+
+    const search = ($('#searchBox2').val() || '').trim().toLowerCase();
+    let rows = lastRows;
+    if (search) {
+      rows = rows.filter(function(r) {
+        return cols.some(function(c) {
+          const v = pickCI(r, c[0]);
+          return v != null && String(v).toLowerCase().indexOf(search) !== -1;
+        });
+      });
+    }
+    rows = filterByOtorisasi(rows, globalOtorisasi);
+
+    const tbody = document.getElementById('tabel2_data');
+    $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
+      document.getElementById('footerLabel2').textContent = 'Tidak ada data';
+      return;
+    }
+
+    let html = '';
+    rows.forEach(function(r) {
+      html += '<tr class="data-row">';
+      html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+      html += cols.map(function(c) {
+        const v = pickCI(r, c[0]);
+        if (c[0] === 'IsOtorisasi1') {
+          return (Number(v) === 1) ?
+            '<td><span class="sp-badge is-active">Sudah</span></td>' :
+            '<td><span class="sp-badge is-inactive">Belum</span></td>';
+        }
+        if (c[3] === 'date') {
+          return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
+        }
+        return '<td>' + nullToEmpty(v) + '</td>';
+      }).join('');
+      html += '</tr>';
+    });
+
+    tbody.innerHTML = html;
+    document.getElementById('footerLabel2').textContent = 'Menampilkan ' + rows.length + ' baris';
+    $('[data-toggle="tooltip"]').tooltip({
+      container: 'body',
+      boundary: 'window'
+    });
+  }
+
+  // Filter modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
+  function updateFilterBadge() {
+    let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    $('#modalOtorisasi').val('2');
+    updateFilterBadge();
+  }
+
+  $(document).on('show.bs.modal', '#modalFilter', function() {
+    $('#modalOtorisasi').val(globalOtorisasi);
+    updateFilterBadge();
+  });
+
+  $(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
+
+  function applyModalFilter() {
+    globalOtorisasi = $('#modalOtorisasi').val();
+    renderTabel();
+    $('#modalFilter').modal('hide');
+  }
+
+  $(document).ready(function(){
+    doSetHeader(g_modeReport);
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: renderTabel
+    });
+    renderTabel();
   });
 
   function loadAll() {
     let listKMBJ = [], listSdhOto = [];
-    let _token = $("#_token").val();
 
     $.ajax({
       url: "{!! url('kmbjloadall') !!}",
@@ -479,20 +695,18 @@
       data: {
       },
       success: function(res) {
-        listKMBJ = res.listKMBJ;
-        listSdhOto = res.listSdhOto;
-    }});
+        listKMBJ = res.listKMBJ || [];
+        listSdhOto = res.listSdhOto || [];
+      }
+    });
 
-    // === listKMBJ === //
-    console.log(listSdhOto, "tabellistsdhoto", false);
-    loadKMBJ(listKMBJ, "tabelhome", true);
-    loadKMBJ(listSdhOto, "tabellistsdhoto", false);
+    listKMBJ.forEach(function(r) { r.IsOtorisasi1 = 0; });
+    listSdhOto.forEach(function(r) { r.IsOtorisasi1 = 1; });
+    lastRows = listKMBJ.concat(listSdhOto);
+    renderTabel();
   }
 
 function submitPrint (nobukti) {
-    // for (var i = 0; i < 30; i++) {
-    //   dataPrint.push(dataPrint[0])
-    // }
     let _token = $('#_token').val()
     $.ajax({
       url: "{!! url('kmbjdetailCetak') !!}",
@@ -508,9 +722,6 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-
-        // console.log(res[0][0].IsOtorisasi1)
-
       }
     })
 
@@ -1029,8 +1240,6 @@ function submitPrint (nobukti) {
         if (i == 0) {
 
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
-        // } else if ( i < 1) {
-        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
         } else {
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
         }
@@ -1167,61 +1376,6 @@ function submitPrint (nobukti) {
 
   }
 
-  function loadKMBJ(_list, _table, _isBlmOto) {
-    if ($.fn.DataTable.isDataTable("#" + _table)) {
-      $("#" + _table).DataTable().destroy();
-    }
-
-    let rowTable = "";
-    if (_list.length > 0) {
-      _list.forEach((item, i) => {
-        let dateKMBJ = doSetFormatDate(item.Tanggal, "/");
-        let dateOto1 = item.TglOto1 ? doSetFormatDate(item.TglOto1, "/") : "";
-
-	console.log("NB:", item.Nobukti);
-        console.log("FULL ITEM:", item);
-
-        rowTable += "<tr>";
-	console.log( _isBlmOto ? 1:2);
-        rowTable += _isBlmOto
-          ? doSetActionBlmOto(item.Nobukti)
-          : doSetActionSdhOto1(item.Nobukti);
-
-        rowTable += "<td>" + item.GroupNobukti + "</td>";
-        rowTable += "<td>" + dateKMBJ + "</td>";
-
-        if (!_isBlmOto) {
-          rowTable += "<td>" + (item.OtoUser1 ?? "") + "</td>";
-          rowTable += "<td>" + (dateOto1 ?? "") + "</td>";
-        }
-
-        rowTable += "</tr>";
-      });
-    } else {
-      let cHeader = _isBlmOto ? 3 : 5;
-      rowTable += doSetEmptyTable(cHeader, "Tidak ada transaksi");
-    }
-
-    $("#" + _table + "_data").html(rowTable);
-
-    $("#" + _table).DataTable({
-      "lengthChange": false,
-      "paging": false
-    });
-  }
-
-    function doSetActionSdhOto1(_nb) {
-        console.log('aa,..');
-        let rowTable = "";
-        rowTable += '<td class="text-center">';
-        rowTable += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + _nb + '\')"><i class="bi bi-info"></i></button>';
-        rowTable += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + _nb + '\')"><i class="bi bi-key-fill"></i></button>';
-        rowTable += '<button class="btn btn-primary btn-sm" type="button" title="Submit Print" onclick="submitPrint(\'' + _nb + '\')"><i class="bi bi-printer"></i></button>';
-        rowTable += "</td>";
-
-        return rowTable;
-      }
-
   function closeFormItem() {
     $('.showhide').hide();
     doUnlockHeader();
@@ -1317,27 +1471,6 @@ function submitPrint (nobukti) {
     $('#pageHome').show();
   }
 
-  function buttonAdd() {
-    if (!doCekAkses("akses_istambah")) return;
-    if (!doCekPeriode("periode_bulan", "periode_tahun", "input_tanggal")) return;
-
-    gtipeform = g_tipeformAdd;
-    $('.showhide').hide();
-
-    cleanFormHeader();
-    refreshForm();
-    doUnlockHeader();
-
-    let nb = doGenerateNoBukti("KMBJ");
-    $("#input_nobukti").val(nb.Nobukti);
-    $("#input_nourut").val(nb.Nourut);
-
-    dataBrowse['gudang']  = "";
-
-    $('#pageHome').hide();
-    $('#pageForm').show();
-  }
-
   function buttonEdit(_nb) {
     if (!doCekAkses("akses_iskoreksi")) return;
     if (!doCekOtorisasi(_nb, "kmbjcekotorisasi")) return;
@@ -1389,13 +1522,6 @@ function submitPrint (nobukti) {
         alertify.warning(res.msg);
       }
     });
-  }
-
-  function cleanFormHeader() {
-    $("#input_nobukti").val("");
-    $("#input_nourut").val("");
-    $("#input_gudang").val("");
-    $("#input_keterangan").val("");
   }
 
   function onChangeKeterangan() {
@@ -1525,19 +1651,17 @@ function submitPrint (nobukti) {
     $("#inputitem_namabrg").val(_nama);
 
     let satuanAsalSelect = $("#inputitem_satuanasal");
-    satuanAsalSelect.empty(); // Clear previous options
+    satuanAsalSelect.empty(); 
 
     let satuanJadiSelect = $("#inputitem_satuanjadi");
-    satuanJadiSelect.empty(); // Clear previous options
+    satuanJadiSelect.empty(); 
 
-    // Array of satuan objects with number and value
     const satuanList = [
       { nosat: 1, sat: _sat1, isi: _isi1 },
       { nosat: 2, sat: _sat2, isi: _isi2 },
       { nosat: 3, sat: _sat3, isi: _isi3 }
     ];
 
-    // Append valid satuan options
     let added = 0;
     satuanList.forEach(item => {
       if (item.sat && item.sat.trim() !== '') {
@@ -1558,14 +1682,13 @@ function submitPrint (nobukti) {
 
     const satuanSelect = $("#inputitem_satuan");
 
-    // Find and select the matching option
     satuanSelect.find("option").each(function () {
-      const value = $(this).val(); // e.g., "2||Box||12"
+      const value = $(this).val(); 
       const parts = value.split("||");
 
       if (parseInt(parts[0]) === _nosat) {
-        satuanSelect.val(value); // set this option as selected
-        return false; // break loop
+        satuanSelect.val(value); 
+        return false;
       }
     });
 
@@ -1597,9 +1720,6 @@ function submitPrint (nobukti) {
   }
 
   function cekValidate(_choice) {
-    /* Kolom yang wajib diisi harus dicek. Kolom yang tidak wajib di-set ke default value jika perlu.
-       Return pesan jika ada yang tidak valid. Return object cart jika semuanya sudah valid. */
-
     let cart = {};
 
     cart["choice"]       = _choice;
@@ -1609,12 +1729,12 @@ function submitPrint (nobukti) {
       return cart;
     }
 
-    // CEK EMPTY
+    // cek empty
     if (!cekNotEmpty("inputitem_kodebrg")) {
       return messageRequired("Barang");
     }
 
-    // CEK VALIDASI KODE / NO BUKTI
+    // cek validasi kode / no bukti
     if (dataBrowse['gudang'] !== $("#input_gudang").val()) {
       return "Data Gudang tidak sesuai";
     }
@@ -1622,7 +1742,7 @@ function submitPrint (nobukti) {
       return "Data Barang tidak sesuai";
     }
 
-    // CEK LAIN-LAIN
+    // cek lain-lain
     let brg = $("#inputitem_kodebrg").val();
     if (_choice === "I") {
       if (!cekNotDuplicate(dataItem, "kodebrg", brg)) {
