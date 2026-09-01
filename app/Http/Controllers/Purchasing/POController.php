@@ -439,7 +439,8 @@ foreach ($collection2 as $p) {
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
                A.*,
                (A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0) SisaPPLBaru,
-               isnull(P.QntPOBruto,0) QNTPOBaru
+               isnull(P.QntPOBruto,0) QNTPOBaru,
+               CONVERT(varchar(10), A.Tanggal, 23) TanggalBaru
         from DBO.vwOutPPL A WITH(NOLOCK)
         left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
         where $where
@@ -450,13 +451,18 @@ foreach ($collection2 as $p) {
 
     // SisaPPLBaru/QNTPOBaru dihitung ulang dari agregat dbPOdet per NoPPL+UrutPPL
     // (bukan lewat sub-query vwOutPPL yang bisa pecah baris) - lihat sqlOutstandingPR().
-    // Ditimpa di PHP, bukan diberi alias SisaPPL/QNTPO langsung di SQL, karena A.*
-    // sudah membawa kolom bernama sama dan SQL Server menolak nama kolom kembar
-    // di dalam derived table.
+    // TanggalBaru dipotong ke tanggal saja (tanpa jam) - A.Tanggal dari vwOutPPL
+    // adalah datetime, dan deteksi tipe kolom otomatis di frontend (lihat
+    // HeaderTableController::getHeaderTable()) bisa salah mengenali datetime
+    // berpresisi tinggi sebagai varchar biasa, sehingga jamnya ikut tampil.
+    // Ketiganya ditimpa di PHP, bukan diberi alias nama asli langsung di SQL,
+    // karena A.* sudah membawa kolom bernama sama dan SQL Server menolak nama
+    // kolom kembar di dalam derived table.
     foreach ($rows as $r) {
       $r->SisaPPL = $r->SisaPPLBaru;
       $r->QNTPO   = $r->QNTPOBaru;
-      unset($r->SisaPPLBaru, $r->QNTPOBaru);
+      $r->Tanggal = $r->TanggalBaru;
+      unset($r->SisaPPLBaru, $r->QNTPOBaru, $r->TanggalBaru);
     }
 
     return [
