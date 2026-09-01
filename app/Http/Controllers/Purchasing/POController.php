@@ -377,8 +377,16 @@ foreach ($collection2 as $p) {
     $orderCol = (string) $req->input('orderCol', '');
     $orderDir = strtolower((string) $req->input('orderDir', 'asc')) === 'desc' ? 'DESC' : 'ASC';
 
+    // SisaPPL & QNTPO dihitung ulang (lihat sqlOutstandingPR()), jadi ORDER BY
+    // untuk keduanya harus menunjuk ekspresi hitung ulang itu, bukan kolom lama
+    // dari vwOutPPL.
+    $orderColSql = [
+      'SisaPPL' => '((A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0))',
+      'QNTPO'   => 'isnull(P.QntPOBruto,0)',
+    ];
     if (in_array($orderCol, $allowedOrder, true)) {
-      $orderBy = 'A.[' . $orderCol . '] ' . $orderDir . ', A.NoBukti, A.Urut';
+      $orderExpr = $orderColSql[$orderCol] ?? ('A.[' . $orderCol . ']');
+      $orderBy = $orderExpr . ' ' . $orderDir . ', A.NoBukti, A.Urut';
     } else {
       // Default: data terbaru di atas. A.Urut sengaja tetap ASC - itu nomor urut
       // barang di dalam satu No. Bukti, bukan bagian dari "yang terbaru".
@@ -429,7 +437,9 @@ foreach ($collection2 as $p) {
       select X.* from (
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-               A.*, (A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0) SisaPPL
+               A.*,
+               (A.Qnt - isnull(A.QntBatal,0)) - isnull(P.QntPO,0) SisaPPLBaru,
+               isnull(P.QntPOBruto,0) QNTPOBaru
         from DBO.vwOutPPL A WITH(NOLOCK)
         left outer join ( $sqlPO ) P on P.NoPPL = A.NoBukti and P.UrutPPL = A.Urut
         where $where
@@ -437,6 +447,17 @@ foreach ($collection2 as $p) {
       $batasBaris
       order by X.NoBaris
     ", $bind);
+
+    // SisaPPLBaru/QNTPOBaru dihitung ulang dari agregat dbPOdet per NoPPL+UrutPPL
+    // (bukan lewat sub-query vwOutPPL yang bisa pecah baris) - lihat sqlOutstandingPR().
+    // Ditimpa di PHP, bukan diberi alias SisaPPL/QNTPO langsung di SQL, karena A.*
+    // sudah membawa kolom bernama sama dan SQL Server menolak nama kolom kembar
+    // di dalam derived table.
+    foreach ($rows as $r) {
+      $r->SisaPPL = $r->SisaPPLBaru;
+      $r->QNTPO   = $r->QNTPOBaru;
+      unset($r->SisaPPLBaru, $r->QNTPOBaru);
+    }
 
     return [
       "draw" => $draw,
@@ -459,7 +480,9 @@ foreach ($collection2 as $p) {
    */
   public static function sqlOutstandingPR () {
     return "
-      select NoPPL, UrutPPL, sum(Qnt-isnull(QntBatal,0)) QntPO
+      select NoPPL, UrutPPL,
+             sum(Qnt-isnull(QntBatal,0)) QntPO,
+             sum(Qnt) QntPOBruto
       from dbPOdet WITH(NOLOCK)
       group by NoPPL, UrutPPL
     ";
