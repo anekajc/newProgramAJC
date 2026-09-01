@@ -832,6 +832,7 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  <th style="padding: 4px 12px;" scope="col">Aksi</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_sales" class="text-left" >
