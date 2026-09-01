@@ -363,7 +363,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -477,7 +477,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddAddItem()"><b>+ Add Item</b></button>
+            onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
         </div>
       </div>
     </div>
@@ -549,7 +549,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-4">
                 <div class="input-group mb-3">
                 <input id="input_add_add_kodebarang" type="text" class="form-control text-left" placeholder="Kode Barang">
-                <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-primary btn-sm shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             </div>
@@ -570,7 +570,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 </div>
                 </div>
                 <div class="col-md-3">
-                  <input id="input_add_add_qnt" type="number" value=0.00 class="form-control text-right">
+                  <input id="input_add_add_qnt" type="text" value=0.00 class="form-control text-right input-partial-number">
                 </div>
                 <div class="col-md-2" style="margin-top:5px;">
                   <label for="input_add_add_satuan">Satuan</label>
@@ -726,7 +726,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Cari Barang</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Master Barang</h5>
           <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
             data-dismiss="modal" aria-label="Close"
             style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
@@ -2006,8 +2006,8 @@ function submitAddEdit () {
     let kodebarang = $("#input_add_add_kodebarang").val();
     let keterangannama = $("#input_add_add_keterangannama").val();
     let satuanInput = $("#input_add_add_satuan").val().toString(); // pastikan string
-    let isjasa = $("#input_add_add_tipejasa").val();
-    let qnt = parseFloat($("#input_add_add_qnt").val()) || 0;
+    let isjasa = 0;
+    let qnt = formatAngkaVal($("#input_add_add_qnt").val())
     let keterangan = $("#input_add_add_keterangan").val();
     let kodedepartemen = $("#input_add_kodedepartemen").val();
 
@@ -2290,7 +2290,7 @@ function buttonAddDeleteItem (index) {
         let nourut = $("#input_add_nourut").val();
         let nobukti = $("#input_add_nobukti").val();
         let tanggal = $("#input_add_tanggal").val();
-        let isjasa = data.isjasa
+        let isjasa = 0
         let pagen = 1
         let pjasa = 0
         let urut = data.Urut
@@ -2656,10 +2656,10 @@ function buttonAddAddInsertItem (i) {
   let kodebarang = $("#input_add_add_kodebarang").val();
   let keterangannama = $("#input_add_add_keterangannama").val();
   let satuan = $("#input_add_add_satuan").val();
-  let qnt = parseFloat($("#input_add_add_qnt").val()) || 0;
+  let qnt = formatAngkaVal($("#input_add_add_qnt").val())
   let keterangan = $("#input_add_add_keterangan").val();
   let kodedepartemen = $("#input_add_kodedepartemen").val();
-  let isjasa = $("#input_add_add_tipejasa").val();
+  let isjasa = 0;
 
   let barang = dataAddListItem.find(item => item.KODEBRG === kodebarang);
 
@@ -3626,6 +3626,9 @@ for (let f = 0; f < fillerCount; f++) {
     w.close()
     }
 
+      function formatAngkaVal (angka) {
+        return Number(angka.split(',').join(''))
+      }
 
 </script>
 

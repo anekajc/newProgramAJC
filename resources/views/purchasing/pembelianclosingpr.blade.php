@@ -215,6 +215,18 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
   background-position: right center;
 }
 
+/* Baris "No data available in table" bawaan DataTables ikut align kiri karena td-nya
+   juga kena rule ":first-child { display:flex; justify-content:flex-start... }" milik
+   kolom Action. Dikembalikan jadi table-cell biasa supaya colspan bawaan DataTables tetap
+   berlaku - kalau dipaksa display:block selnya lepas dari colspan dan menyempit di kiri. */
+#tabel td.dataTables_empty,
+#tabel2 td.dataTables_empty {
+  display: table-cell !important;
+  width: auto !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
 /* ---- Lapisan "sedang memuat" kedua tabel ----
    Elemennya adalah .dataTables_processing bawaan DataTables, tampilannya ditulis ulang
    di sini - lihat catatan yang sama di purchaseOrder.blade.php. */
