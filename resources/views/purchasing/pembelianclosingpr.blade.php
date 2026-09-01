@@ -2,6 +2,16 @@
 @section('page-title', 'Pembelian Closing PR')
 
 @section('css')
+  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
+  <style>
+    *::-webkit-scrollbar { width: 16px; height: 16px; }
+    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
+    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
+    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
+    *::-webkit-scrollbar-corner { background: #eef0f2; }
+    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
+    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
+  </style>
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/purchaseOrder.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}

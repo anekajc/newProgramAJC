@@ -6,6 +6,16 @@
 
 
 @section('css')
+  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
+  <style>
+    *::-webkit-scrollbar { width: 16px; height: 16px; }
+    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
+    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
+    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
+    *::-webkit-scrollbar-corner { background: #eef0f2; }
+    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
+    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
+  </style>
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter), disamakan dengan resources/views/purchasing/pembelianpermintaanagen.blade.php. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
@@ -605,7 +615,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 font-size: 0.75rem;
                 font-weight: 600;
                 text-transform: uppercase;
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Submit Add</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Simpan</button>
 
                 <button type="button" id="submitAddEdit" class="btn btn-lg btn-chip-biru" style="
                 height: 30px; 
@@ -614,7 +624,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
                 font-size: 0.75rem; 
                 font-weight: 600; 
                 text-transform: uppercase; 
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()" style="display: none;">Submit Edit</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()" style="display: none;">Simpan</button>
               </div>
             </div>
           </div>
@@ -2501,39 +2511,13 @@ function unlockFormAdd () {
 }
 
 function formatAngka (angkaString) {
-      if (!Number(angkaString)) {
+      if (angkaString === null || angkaString === undefined || angkaString === '') {
         return '0.00'
       }
-      angkastring = parseFloat(angkaString).toFixed(2)
-
-      let tempAngka = angkaString.split('.')
-
-      if (tempAngka[0][0] == '-') {
-        let temp2=''
-
-        let tempAngka1 = tempAngka[0].split('-')
-        for (let i = 0; i < tempAngka1[1].length; i++) {
-          if (i != 0 && i % 3 == 0) {
-            temp2 = ',' + temp2
-          }
-          temp2 = tempAngka1[1][tempAngka1[1].length - i -1] + temp2
-
-        }
-        temp2 += '.' + tempAngka[1]
-        temp2 = '-' + temp2
-
-        return temp2
+      if (isNaN(Number(String(angkaString).split(',').join('')))) {
+        return '0.00'
       }
-      let temp1 = ''
-      for (let i = 0; i < tempAngka[0].length; i++) {
-        if (i != 0 && i % 3 == 0) {
-          temp1 = ',' + temp1
-        }
-        temp1 = tempAngka[0][tempAngka[0].length - i -1] + temp1
-
-      }
-      temp1 += '.' + tempAngka[1]
-      return temp1
+      return prFormatAngkaDes(angkaString, 2)
     }
 
 function submitPrint (nobukti) {
