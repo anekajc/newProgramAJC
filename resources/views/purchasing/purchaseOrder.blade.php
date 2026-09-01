@@ -4734,6 +4734,7 @@ function submitAddTambahSOAll () {
 
                   $("#form").modal('toggle')
                   alertify.success('Berhasil menambah item')
+                  poSegarkanOutstanding()
                 }
                 if(res == 2) {
                   setNewNoBukti()
@@ -5109,6 +5110,7 @@ function submitAddAdd () {
                         refreshDataTableAdd(NoBukti)
 
                         alertify.success('Berhasil menambah item')
+                        poSegarkanOutstanding()
                       }
                       if(res == 2) {
                         setNewNoBukti()
@@ -5228,6 +5230,7 @@ function submitAddAdd () {
                         refreshDataTableAdd(NoBukti)
 
                         alertify.success('Berhasil menambah item')
+                        poSegarkanOutstanding()
                       }
                       if(res == 2) {
                         setNewNoBukti()
@@ -5589,6 +5592,7 @@ function submitAddEdit () {
                                                               refreshDataTableAdd(NoBukti)
 
                                                               alertify.success('Berhasil edit item')
+                                                              poSegarkanOutstanding()
 
                                                             },
                                                             error: function (err) {
@@ -5687,6 +5691,7 @@ function submitAddEdit () {
                                                               refreshDataTableAdd(NoBukti)
 
                                                               alertify.success('Berhasil edit item')
+                                                              poSegarkanOutstanding()
 
                                                             },
                                                             error: function (err) {
@@ -8199,17 +8204,36 @@ function loadAll () {
 // digambar saat tabnya dibuka (lazy). Supaya kartunya tidak menunggu itu, total
 // barisnya diambil sendiri di sini dengan payload minimal (length=1), terpisah
 // dari initTabelOutstanding().
-;[1, 3].forEach((urut) => {
-  $.ajax({
-    url : PO_OUT[urut].url,
-    type : "get",
-    data : { draw : 1, start : 0, length : 1, search : '' },
-    success : function (res) {
-      poKpiOut[urut] = res.recordsTotal
-      renderKpiPO()
+function poMuatKpiOutstanding () {
+  ;[1, 3].forEach((urut) => {
+    $.ajax({
+      url : PO_OUT[urut].url,
+      type : "get",
+      data : { draw : 1, start : 0, length : 1, search : '' },
+      success : function (res) {
+        poKpiOut[urut] = res.recordsTotal
+        renderKpiPO()
+      }
+    })
+  })
+}
+poMuatKpiOutstanding()
+
+// Dipanggil tiap kali PO berhasil disimpan (baru/edit/tambah dari SO) supaya barang
+// yang baru saja diambil langsung hilang dari tab Outstanding PR/SO tanpa perlu F5.
+// Cache-nya dikosongkan dulu (poCacheOut/poPakaiCacheOut) supaya draw berikutnya
+// benar-benar menembak server, bukan memakai respons lama - lihat initTabelOutstanding().
+function poSegarkanOutstanding () {
+  ;[1, 3].forEach((urut) => {
+    poCacheOut[urut] = null
+    poPakaiCacheOut[urut] = false
+    let selTabel = '#' + PO_OUT[urut].tabel
+    if ($.fn.DataTable.isDataTable(selTabel)) {
+      $(selTabel).DataTable().ajax.reload(null, false)
     }
   })
-});
+  poMuatKpiOutstanding()
+}
 
 $(function () {
   muatDropdownAlamatKirim()
@@ -11454,6 +11478,7 @@ function buttonAddDeleteItem (i) {
             refreshDataTableAdd(NoBukti)
 
             alertify.success('Berhasil menghapus item')
+            poSegarkanOutstanding()
 
           },
           error: function (err) {
