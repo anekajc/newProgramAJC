@@ -110,10 +110,10 @@
 
                 <div class="table-outer">
                     <div class="table-wrap">
-                        <table class="tb" id="mainTable">
+                        <table class="tb aksi-hover" id="mainTable">
                             <thead>
                                 <tr>
-                                    <th>Aksi</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="tabel2_data"></tbody>
@@ -205,7 +205,7 @@
                     <div class="action-group">
                         <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                             onclick="buttonCloseForm()">
-                            <i class="bi bi-x-lg"></i> Close
+                            Close
                         </button>
                     </div>
                 </div>
@@ -274,7 +274,7 @@
                                         <th>Nama Brg</th>
                                         <th>Qty</th>
                                         <th>Satuan</th>
-                                        <th>Aksi</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="addTableData">
@@ -807,35 +807,39 @@
             return rows;
         }
 
+        // Warna, ikon dan urutan tombol sengaja disamakan dengan kolom Actions di
+        // purchasing/purchaseOrder.blade.php supaya konsisten antar halaman:
+        // Detail=amber bi-info, Otorisasi=biru bi-key, Edit=hijau bi-pencil-fill,
+        // Batal Otorisasi=merah bi-key-fill, Print=cyan bi-printer.
         function aksiButtonsHtml(r) {
             const nobukti = r.NOBUKTI;
             const detailBtn =
                 '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi(\'' +
-                nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
+                nobukti + '\')"><i class="bi bi-info"></i></button>';
 
             if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-                // Sudah otorisasi — Print + Batal Otorisasi
+                // Sudah otorisasi — Batal Otorisasi + Print
                 return '<div class="action-buttons">' + detailBtn +
-                    '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-                    nobukti + '\')"><i class="bi bi-printer"></i></button>' +
                     '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key"></i></button>' +
+                    nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    '<button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+                    nobukti + '\')"><i class="bi bi-printer"></i></button>' +
                     '</div>';
             }
 
-            // Belum otorisasi — Edit + Otorisasi
+            // Belum otorisasi — Otorisasi + Edit
             return '<div class="action-buttons">' + detailBtn +
-                '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
-                nobukti + '\', \'' + r.NoUrut + '\')"><i class="bi bi-pencil"></i></button>' +
                 '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
                 nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key"></i></button>' +
+                '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
+                nobukti + '\', \'' + r.NoUrut + '\')"><i class="bi bi-pencil-fill"></i></button>' +
                 '</div>';
         }
 
         function renderTabel() {
             const cols = gcart_header.filter(c => c[2] === 1);
             const thead = document.querySelector('#mainTable thead');
-            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Action</th>');
 
             const search = ($('#searchBox2').val() || '').trim().toLowerCase();
             let rows = lastRows;

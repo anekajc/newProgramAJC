@@ -127,10 +127,10 @@
                     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="nav-home-tab">
                         <div class="table-outer">
                             <div class="table-wrap">
-                                <table id="tabel" class="tb">
+                                <table id="tabel" class="tb aksi-hover">
                                     <thead>
                                         <tr>
-                                            <th class="rt-fixed-th">Aksi</th>
+                                            <th class="rt-fixed-th">Action</th>
                                             <th>No.Perintah</th>
                                             <th>Tanggal</th>
                                             <th>Gudang</th>
@@ -145,8 +145,8 @@
                                                         <button type="button" class="btn-action-sm btn-action-warning"
                                                             data-toggle="tooltip" title="Detail"
                                                             onclick="buttonDetail('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i
-                                                                class="bi bi-info-circle"></i></button>
-                                                        <button type="button" class="btn-action-sm btn-action-primary"
+                                                                class="bi bi-info"></i></button>
+                                                        <button type="button" class="btn-action-sm btn-action-success"
                                                             data-toggle="tooltip" title="Add"
                                                             onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i
                                                                 class="bi bi-plus-lg"></i></button>
@@ -167,7 +167,7 @@
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                         <div class="table-outer">
                             <div class="table-wrap">
-                                <table id="tabelRetur" class="tb">
+                                <table id="tabelRetur" class="tb aksi-hover">
                                     <thead>
                                         <tr>
                                             <th class="rt-fixed-th">Aksi</th>
@@ -199,12 +199,12 @@
                                                         <button type="button" class="btn-action-sm btn-action-warning"
                                                             data-toggle="tooltip" title="Detail"
                                                             onclick="buttonDetailKoreksi('{{ $p->NOBUKTI }}')"><i
-                                                                class="bi bi-info-circle"></i></button>
-                                                        <button type="button" class="btn-action-sm"
+                                                                class="bi bi-info"></i></button>
+                                                        <button type="button" class="btn-action-sm btn-action-success"
                                                             data-toggle="tooltip" title="Edit"
                                                             onclick="buttonKoreksi('{{ $p->NOBUKTI }}')"><i
-                                                                class="bi bi-pencil"></i></button>
-                                                        <button type="button" class="btn-action-sm"
+                                                                class="bi bi-pencil-fill"></i></button>
+                                                        <button type="button" class="btn-action-sm btn-action-info"
                                                             data-toggle="tooltip" title="Print"
                                                             onclick="submitPrint('{{ $p->NOBUKTI }}')"><i
                                                                 class="bi bi-printer"></i></button>
@@ -721,7 +721,7 @@
                                                         <th scope="col">Nama Brg</th>
                                                         <th scope="col">Qty</th>
                                                         <th scope="col">Satuan</th>
-                                                        <th class="rt-fixed-th" scope="col">Aksi</th>
+                                                        <th class="rt-fixed-th" scope="col">Action</th>
                                                     </tr>
                                                 </thead>
 
@@ -1721,8 +1721,8 @@
                 rowTable += `<tr>
     <td class="text-center">
       <div class="action-buttons">
-        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info-circle"></i></button>
-        <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg"></i></button>
+        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
+        <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg"></i></button>
       </div>
     </td>
     <td>${item[0].NOBUKTI}</td>
@@ -1753,9 +1753,9 @@
                 rowTableRetur += `<tr data-oto="${isOto}" data-os="${qntOS}">
     <td class="text-center">
       <div class="action-buttons">
-        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('${p.NOBUKTI}')"><i class="bi bi-info-circle"></i></button>
-        <button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi('${p.NOBUKTI}')"><i class="bi bi-pencil"></i></button>
-        <button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint('${p.NOBUKTI}')"><i class="bi bi-printer"></i></button>
+        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('${p.NOBUKTI}')"><i class="bi bi-info"></i></button>
+        <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi('${p.NOBUKTI}')"><i class="bi bi-pencil-fill"></i></button>
+        <button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint('${p.NOBUKTI}')"><i class="bi bi-printer"></i></button>
       </div>
     </td>
     <td>${p.NOBUKTI}</td>
@@ -2576,7 +2576,7 @@
     <td class="text-center">${item.Satuan}</td>
     <td class="text-center">
     <div class="action-buttons">
-    <button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil"></i></button>
+    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil-fill"></i></button>
     <button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" onclick="buttonKoreksiDelete(${i})"><i class="bi bi-trash"></i></button>
     </div></td>
     </td>
@@ -2801,7 +2801,7 @@
     <td class="text-center">${item.Satuan}</td>
     <td class="text-center">
     <div class="action-buttons">
-    <button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil"></i></button>
+    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil-fill"></i></button>
     <button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" onclick="buttonKoreksiDelete(${i})"><i class="bi bi-trash"></i></button>
     </div></td>
     </td>

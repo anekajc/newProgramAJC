@@ -747,15 +747,22 @@
         gap: 6px;
         background: none;
         border: none;
-        color: #555;
+        color: #ff0000;
         font-size: 14px;
         cursor: pointer;
         margin-bottom: 16px;
         padding: 0;
+        transition: color 0.4s ease
       }
 
       .report-back-btn:hover {
-        color: #000;
+        color: #730202;
+      }
+
+      .report-back-btn svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
       }
 
       .report-category {
@@ -1547,7 +1554,6 @@ function showReportPage() {
       <button class="report-back-btn" id="report-back-btn" onclick="reportGoBack()">
         ${icon('chevron')} Kembali
       </button>
-      <div class="page-title">Report</div>
       <div id="report-crumb" class="page-subtitle"></div>
       <div id="report-categories-container" class="text-muted">Memuat data laporan...</div>
     </div>
