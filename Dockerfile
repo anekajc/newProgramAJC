@@ -55,11 +55,7 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN mkdir -p storage/framework/{sessions,views,cache/data} \
-    && mkdir -p storage/logs \
-    && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache \
-    && php artisan storage:link
+
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
