@@ -30,7 +30,7 @@ class PerintahReturJualController extends Controller
 
     $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
-    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, 0);
+    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, 0, 0);
 
     return view('marketing.perintahreturjual' , [
       "menul0" => $menul0,
@@ -44,13 +44,13 @@ class PerintahReturJualController extends Controller
   // Satu query dipakai bareng oleh index() (initial load) dan loadAll() (periode/filter
   // berubah, atau refresh sehabis add/edit/delete) -- dulu ada 2 salinan query yang nyaris
   // identik (satu tanpa xstatus buat index(), satu dengan xstatus buat loadAll()), jadi
-  // kolom baru/perubahan skema harus diedit di 2 tempat. filterprj menyaring status
-  // otorisasi DAN status proses SPBR sekaligus (port 1:1 dari pola Status SO milik
-  // so.blade.php/SOController::loadSOFilter(), disederhanakan jadi satu query dengan
-  // WHERE bersyarat -- bukan satu blok SQL terpisah per opsi filter seperti SO).
-  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi,
-  //   3 = Belum Diproses, 4 = Proses Sebagian, 5 = Selesai
-  private function queryOutstanding ($tglawal, $tglakhir, $filterprj) {
+  // kolom baru/perubahan skema harus diedit di 2 tempat. filterstatus (status proses SPBR)
+  // dan filteroto (status otorisasi) sekarang dua filter independen yang di-AND, bukan satu
+  // dropdown gabungan yang saling eksklusif seperti sebelumnya -- user butuh bisa mis.
+  // lihat "Belum Otorisasi" + "Selesai" sekaligus.
+  //   filterstatus: 0 = Semua, 1 = Belum Diproses, 2 = Proses Sebagian, 3 = Selesai
+  //   filteroto:    0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryOutstanding ($tglawal, $tglakhir, $filterstatus, $filteroto) {
     return DB::connection("SML")->select("
       select * from (
         select month(a.Tanggal) Bulan, YEAR(a.Tanggal) Tahun, a.Tanggal, a.Catatan, a.NOBUKTI,
@@ -64,13 +64,22 @@ class PerintahReturJualController extends Controller
         left outer join DBCUSTSUPP D on a.KodeCustSupp = d.KODECUSTSUPP
         where a.TANGGAL between ? and ? and a.pmin = 0
       ) x
-      where (? = 0)
-         or (? = 1 and x.IsOtorisasi1 <> 1)
-         or (? = 2 and x.IsOtorisasi1 = 1)
-         or (? = 3 and x.xstatus = 'Belum')
-         or (? = 4 and x.xstatus = 'Sebagian')
-         or (? = 5 and x.xstatus = 'Selesai')
-    ", [$tglawal, $tglakhir, $filterprj, $filterprj, $filterprj, $filterprj, $filterprj, $filterprj]);
+      where (
+              (? = 0)
+           or (? = 1 and x.xstatus = 'Belum')
+           or (? = 2 and x.xstatus = 'Sebagian')
+           or (? = 3 and x.xstatus = 'Selesai')
+      )
+      and (
+              (? = 0)
+           or (? = 1 and x.IsOtorisasi1 <> 1)
+           or (? = 2 and x.IsOtorisasi1 = 1)
+      )
+    ", [
+      $tglawal, $tglakhir,
+      $filterstatus, $filterstatus, $filterstatus, $filterstatus,
+      $filteroto, $filteroto, $filteroto,
+    ]);
   }
 
   public function loadAll (Request $req) {
@@ -78,9 +87,10 @@ class PerintahReturJualController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
-    $filterprj = $req->filterprj ?: 0;
+    $filterstatus = $req->filterstatus ?: 0;
+    $filteroto = $req->filteroto ?: 0;
 
-    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, $filterprj);
+    $tempOutstanding = $this->queryOutstanding($tglawal, $tglakhir, $filterstatus, $filteroto);
 
     return ["tempOutstanding" => $tempOutstanding];
   }

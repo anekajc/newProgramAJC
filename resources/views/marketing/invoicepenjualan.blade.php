@@ -83,7 +83,8 @@
 #tabel td:first-child .btn,
 #tabel2 td:first-child .btn,
 #tabel3 td:first-child .btn,
-#tabel_add td:last-child .btn {
+#tabel_add td:last-child .btn,
+#koreksiTable td:last-child .btn {
   width: 30px;
   height: 30px;
   padding: 0;
@@ -100,7 +101,8 @@
 #tabel td:first-child .btn:hover,
 #tabel2 td:first-child .btn:hover,
 #tabel3 td:first-child .btn:hover,
-#tabel_add td:last-child .btn:hover {
+#tabel_add td:last-child .btn:hover,
+#koreksiTable td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
@@ -108,41 +110,48 @@
 #tabel td:first-child .btn-success,
 #tabel2 td:first-child .btn-success,
 #tabel3 td:first-child .btn-success,
-#tabel_add td:last-child .btn-success {
+#tabel_add td:last-child .btn-success,
+#koreksiTable td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
 #tabel td:first-child .btn-warning,
 #tabel2 td:first-child .btn-warning,
 #tabel3 td:first-child .btn-warning,
-#tabel_add td:last-child .btn-warning {
+#tabel_add td:last-child .btn-warning,
+#koreksiTable td:last-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
 #tabel td:first-child .btn-primary,
 #tabel2 td:first-child .btn-primary,
 #tabel3 td:first-child .btn-primary,
-#tabel_add td:last-child .btn-primary {
+#tabel_add td:last-child .btn-primary,
+#koreksiTable td:last-child .btn-primary {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
 #tabel td:first-child .btn-danger,
 #tabel2 td:first-child .btn-danger,
 #tabel3 td:first-child .btn-danger,
-#tabel_add td:last-child .btn-danger {
+#tabel_add td:last-child .btn-danger,
+#koreksiTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
 #tabel td:first-child .btn-info,
 #tabel2 td:first-child .btn-info,
 #tabel3 td:first-child .btn-info,
-#tabel_add td:last-child .btn-info {
+#tabel_add td:last-child .btn-info,
+#koreksiTable td:last-child .btn-info {
   color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
 }
 
 #tabel thead th,
 #tabel2 thead th,
 #tabel3 thead th,
+#tabelListInvoice thead th,
+#koreksiTable thead th,
 #tabel_data_header th,
 #addTable_data_header th {
   background: #f8f9fb !important;
@@ -159,6 +168,8 @@
 #tabel2 tbody tr:nth-of-type(odd),
 #tabel3 tbody tr:nth-of-type(odd),
 #tabel_add tbody tr:nth-of-type(odd),
+#tabelListInvoice tbody tr:nth-of-type(odd),
+#koreksiTable tbody tr:nth-of-type(odd),
 #detailTable tbody tr:nth-of-type(odd) {
   background-color: #fbfbfc;
 }
@@ -167,6 +178,8 @@
 #tabel2 tbody tr:hover,
 #tabel3 tbody tr:hover,
 #tabel_add tbody tr:hover,
+#tabelListInvoice tbody tr:hover,
+#koreksiTable tbody tr:hover,
 #detailTable tbody tr:hover {
   background-color: #f5f3ff;
 }
@@ -642,7 +655,7 @@
                    tab (it's already active) so the user lands where every row's "+"
                    already works, instead of risking buttonAdd() with missing data. --}}
               <div class="po-toolbar-act">
-                <button type="button" class="btn btn-primary" onclick="printAll()">+ Add</button>
+                <button type="button" class="btn btn-primary" onclick="printAll()">Print</button>
               </div>
             </div>
             <div id="rtBarTabel"></div>
@@ -924,7 +937,7 @@
           border-radius: 20px;
           font-size: 0.75rem;
           font-weight: 600;
-          text-transform: uppercase;">Submit Add</button>
+          text-transform: uppercase;">Simpan Data</button>
         </div>
       </div>
     </div>
@@ -938,7 +951,7 @@
         <!-- <div id="qrcode"></div> -->
         <div class="row">
           <div class="col-6 text-left">
-            <h1>Form Koreksi</h1>
+            {{-- <h1>Form Koreksi</h1> --}}
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
@@ -1384,7 +1397,7 @@
         <!-- <div id="qrcode"></div> -->
         <div class="row">
           <div class="col-6 text-left">
-            <h1>Form Detail</h1>
+            {{-- <h1>Form Detail</h1> --}}
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
@@ -2498,7 +2511,7 @@
           <div class="col-12 text-right">
 
             <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-            <button id="" type="button" onclick="openPrintModalAll()" class="btn btn-primary" style="height: 30px;
+            <button id="" type="button" onclick="openPrintModalAll()" class="btn btn-chip-biru" style="height: 30px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -2510,8 +2523,8 @@
           <div class="col-12">
             <div class="table-responsive">
 
-                  <table id="tabelListInvoice" class="table table-bordered table-striped"  >
-                    <thead class="text-center bg-primary text-white">
+                  <table id="tabelListInvoice" class="data-table">
+                    <thead class="text-center">
                       <tr>
                         <th style="padding: 4px 12px;" class="text-center" scope="col">v</th>
                         <th style="padding: 4px 12px;" scope="col">No Invoice</th>
@@ -3480,6 +3493,7 @@ function choosePrint (type) {
 
 
 function buttonCloseForm () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -4189,6 +4203,7 @@ function onChangeDetail (field, idValue , alias = field) {
 
 
 function buttonKoreksi (nobukti , isoto) {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan / Edit Data'
   console.log(' buttonKoreksi' , nobukti, isoto)
   let akses = $("#akses_iskoreksi").val();
 
@@ -4405,6 +4420,7 @@ function refreshDataTableKoreksifirstadd (nobukti , tipeRefresh = '') {
 
 function buttonDetail (nobukti) {
 
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan / Detail Data'
   let _token = $("#_token").val()
 
   $('#detailTableData').html(`
@@ -4564,11 +4580,13 @@ function buttonAddDetail (nobukti) {
 }
 
 function buttonCloseFormDetail () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('#page4').hide();
   $('#page1').show();
 }
 
 function buttonCloseFormAddDetail () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('#page5').hide();
   $('#page1').show();
 }

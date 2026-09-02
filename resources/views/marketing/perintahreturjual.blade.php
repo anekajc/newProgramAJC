@@ -141,7 +141,8 @@
 }
 
 #tabel td:first-child .btn,
-#tabel2 td:first-child .btn {
+#tabel2 td:first-child .btn,
+#addTable td:last-child .btn {
   width: 30px;
   height: 30px;
   padding: 0;
@@ -156,28 +157,33 @@
 }
 
 #tabel td:first-child .btn:hover,
-#tabel2 td:first-child .btn:hover {
+#tabel2 td:first-child .btn:hover,
+#addTable td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
 #tabel td:first-child .btn-success,
-#tabel2 td:first-child .btn-success {
+#tabel2 td:first-child .btn-success,
+#addTable td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
 #tabel td:first-child .btn-warning,
-#tabel2 td:first-child .btn-warning {
+#tabel2 td:first-child .btn-warning,
+#addTable td:last-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
 #tabel td:first-child .btn-primary,
-#tabel2 td:first-child .btn-primary {
+#tabel2 td:first-child .btn-primary,
+#addTable td:last-child .btn-primary {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
 #tabel td:first-child .btn-danger,
-#tabel2 td:first-child .btn-danger {
+#tabel2 td:first-child .btn-danger,
+#addTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
@@ -245,6 +251,34 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+/* Search-icon button appended flush to an input, ported from so.blade.php. */
+.btn-icon-search {
+  height: 32px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
 </style>
 @endsection
 
@@ -295,14 +329,24 @@
           <div class="rt-section">
             <div class="rt-group-label">Status</div>
             <div>
-              <label class="rt-field-label" for="input_filterprj">Status PRJ</label>
-              <select class="rt-native" id="input_filterprj">
-                <option value=0 selected>Semua PRJ</option>
+              <label class="rt-field-label" for="input_filterstatus">Status PRJ</label>
+              <select class="rt-native" id="input_filterstatus">
+                <option value=0 selected>Semua Status</option>
+                <option value=1>Belum Diproses</option>
+                <option value=2>Proses Sebagian</option>
+                <option value=3>Selesai</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rt-section">
+            <div class="rt-group-label">Otorisasi</div>
+            <div>
+              <label class="rt-field-label" for="input_filteroto">Status Otorisasi</label>
+              <select class="rt-native" id="input_filteroto">
+                <option value=0 selected>Semua</option>
                 <option value=1>Belum Otorisasi</option>
                 <option value=2>Sudah Otorisasi</option>
-                <option value=3>Belum Diproses</option>
-                <option value=4>Proses Sebagian</option>
-                <option value=5>Selesai</option>
               </select>
             </div>
           </div>
@@ -345,7 +389,7 @@
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ PRJ</button>
+          <button type="button" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
       <div id="rtBarTabel"></div>
@@ -406,7 +450,7 @@
           <div class="col-md-8">
             <div class="form-group input-group">
               <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-              <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
+              <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
             </div>
           </div>
           </div>
@@ -456,13 +500,12 @@
             </div>
           </div> -->
 
-
             <div class="col-md-8">
               <div class="form-group input-group">
-                <input type="hidden" class="form-control" id="input_add_flagtipe" value=""  >
-                <input type="hidden" class="form-control" id="input_add_ppn" value=""  >
+                <input type="hidden" class="form-control" id="input_add_flagtipe" value="">
+                <input type="hidden" class="form-control" id="input_add_ppn" value="">
                 <input type="text" class="form-control" id="input_add_noinvoice" value="" disabled >
-                <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoInvoice" onclick="buttonAddListNoInvoice()"><i class="bi bi-plus"></i></button>
+                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoInvoice" onclick="buttonAddListNoInvoice()"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -481,6 +524,7 @@
                 <textarea  style="width: 100%; resize: none" rows=3  class="form-control" id="input_add_catatan"  ></textarea>
               </div>
             </div>
+            
           </div>
         </div>
           </div>
@@ -678,11 +722,11 @@
 
 
   <div class="col-md-12 mt-2 text-right">
-  <button type="button" class="btn btn-primary" onclick="buttonAddAddItem()" class="btn btn-secondary" style="height: 30px;
+  <button type="button" class="btn btn-chip-biru" onclick="buttonAddAddItem()" style="height: 30px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;" >+ Tambah Item</button>
+  text-transform: uppercase;" >Tambah Item</button>
 </div>
 
 
@@ -728,7 +772,7 @@
       <div class="col-md-8">
         <div class="input-group form-group">
           <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
-          <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
+          <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
         </div>
       </div>
@@ -751,7 +795,7 @@
         <div class="input-group form-group">
           <input id="AddAddUrutBeli" type="hidden" class="form-control" >
           <input id="AddAddNoBeli" type="text" class="form-control" disabled>
-          <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoBeli" onclick="buttonAddListNoBeli()"><i class="bi bi-plus"></i></button>
+          <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoBeli" onclick="buttonAddListNoBeli()"><i class="bi bi-search"></i></button>
 
         </div>
         <!-- <input id="AddAddKodeGudang" type="hidden" class="form-control" disabled> -->
@@ -929,17 +973,17 @@
 
   <div class="row mt-2" style="margin-top: 0">
     <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
+      <button type="button" class="btn btn-danger" onclick="buttonAddBatal()" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;">Batal</button>
 
-      <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-primary" style="height: 30px;
+      <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;">Submit Add</button>
+      text-transform: uppercase;">Simpan</button>
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
     </div>
 
@@ -998,7 +1042,6 @@
       <div class="input-group form-group">
         <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
         <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> -->
-
       </div>
     </div>
 
@@ -1033,10 +1076,6 @@
 
 </div>
 </div>
-
-
-
-
 
 
 
@@ -1214,7 +1253,7 @@
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;">Submit Edit</button>
+      text-transform: uppercase;">Simpan</button>
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
     </div>
 
@@ -2203,11 +2242,14 @@ function buttonHeaderTable () {
 // soResetFilterFields()/buttonFilterSO()/onChangePeriodeSO() milik so.blade.php,
 // disederhanakan (PRJ tidak punya field Tipe Bayar).
 function prjResetFilterFields () {
-  $('#input_filterprj').val('0');
+  $('#input_filterstatus').val('0');
+  $('#input_filteroto').val('0');
 }
 
 function prjUpdateFilterBadge () {
-  let aktif = Number($('#input_filterprj').val()) !== 0 ? 1 : 0
+  let aktif = 0
+  if (Number($('#input_filterstatus').val()) !== 0) { aktif++ }
+  if (Number($('#input_filteroto').val()) !== 0) { aktif++ }
   $('#prjFilterBadge').text(aktif + ' aktif')
 }
 
@@ -2215,7 +2257,8 @@ function buttonFilterPRJ () {
   let _token = $("#_token").val()
   let tglawal = $("#input_tanggalawal").val()
   let tglakhir = $("#input_tanggalakhir").val()
-  let filterprj = $("#input_filterprj").val()
+  let filterstatus = $("#input_filterstatus").val()
+  let filteroto = $("#input_filteroto").val()
 
   prjUpdateFilterBadge()
 
@@ -2223,7 +2266,7 @@ function buttonFilterPRJ () {
     url: "{!! url('perintahreturjualloadall') !!}",
     type: "get",
     async: false,
-    data: { _token, tglawal, tglakhir, filterprj },
+    data: { _token, tglawal, tglakhir, filterstatus, filteroto },
     success: function (res) {
       lastTabelRows = res.tempOutstanding;
       reinitTabel();
@@ -3617,13 +3660,14 @@ function loadAll () {
   let _token = $("#_token").val();
   let tglawal = $("#input_tanggalawal").val()
   let tglakhir = $("#input_tanggalakhir").val()
-  let filterprj = $("#input_filterprj").val()
+  let filterstatus = $("#input_filterstatus").val()
+  let filteroto = $("#input_filteroto").val()
 
   $.ajax({
     url: "{!! url('perintahreturjualloadall') !!}",
     type: "get",
     async: false,
-    data: { _token, tglawal, tglakhir, filterprj },
+    data: { _token, tglawal, tglakhir, filterstatus, filteroto },
     success: function(res) {
 
       lastTabelRows = res.tempOutstanding;
