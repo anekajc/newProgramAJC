@@ -21,6 +21,8 @@
       --sp-amber-bg:  #fef3e0;
       --sp-red:       #dc2626;
       --sp-red-bg:    #fdeaea;
+      --sp-cyan:      #0891b2;
+      --sp-cyan-bg:   #ecfeff;
       --sp-radius:    10px;
       --sp-radius-sm: 7px;
       --sp-shadow:    0 1px 2px rgba(20,20,43,.04), 0 1px 1px rgba(20,20,43,.03);
@@ -136,9 +138,12 @@
 
     .btn-action-sm:hover{ filter: brightness(0.97); transform: translateY(-1px); }
     .btn-action-success{ color: var(--sp-green); border-color: #cdebd7; background: var(--sp-green-bg); }
-    .btn-action-warning{ color: var(--sp-amber); border-color: #cdebd7; background: var(--sp-amber-bg); }
+    .btn-action-warning{ color: var(--sp-amber); border-color: #fbe3bd; background: var(--sp-amber-bg); }
     .btn-action-primary{ color: var(--sp-blue); border-color: #cfdcff; background: var(--sp-blue-bg); }
     .btn-action-danger { color: var(--sp-red);  border-color: #f7cfcf; background: var(--sp-red-bg); }
+    /* Cyan — dipakai tombol Print di kolom Aksi, warnanya disamakan dengan
+       #tabel2 .btn-info di purchasing/purchaseOrder.blade.php. */
+    .btn-action-info   { color: var(--sp-cyan); border-color: #a5f3fc; background: var(--sp-cyan-bg); }
 
     .action-buttons-wrap {
         display: flex;
@@ -507,7 +512,25 @@
     .action-buttons {
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
+    }
+
+    /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. Opt-in lewat kelas
+       .aksi-hover pada <table> supaya tabel lain yang juga memakai .action-buttons
+       tidak ikut berubah — pola yang sama dengan .po-aksi-hover di
+       purchasing/purchaseOrder.blade.php.
+       visibility (bukan display) supaya lebar kolomnya tetap dipesan — tabel tidak
+       melompat saat tombol muncul/hilang. :focus-within supaya tombol tetap bisa
+       dicapai lewat keyboard (Tab), bukan hanya mouse. */
+    table.aksi-hover tbody .action-buttons .btn-action-sm {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity .12s ease;
+    }
+    table.aksi-hover tbody tr:hover .action-buttons .btn-action-sm,
+    table.aksi-hover tbody tr:focus-within .action-buttons .btn-action-sm {
+      visibility: visible;
+      opacity: 1;
     }
 
     /* Tabel di dalam .tb-report yang masih pakai DataTables bawaan (bukan mesin

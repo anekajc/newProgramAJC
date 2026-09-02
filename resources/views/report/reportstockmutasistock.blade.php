@@ -619,11 +619,17 @@
 
   // Render ulang tabel dari data yang sudah dimuat (gcart_res), dipakai sebagai
   // onChange oleh ReportTable saat kolom di-drag/disembunyikan/direset.
-  function renderCachedReport() {
+  // _rows opsional: kalau diisi (mis. hasil pencarian) baris itu yang dirender --
+  // termasuk array kosong, supaya "Tidak ada data ditemukan" tetap muncul. Penjaga
+  // di awal sengaja memeriksa gcart_res (sumbernya), bukan _rows.
+  // ReportTable memanggil onChange() tanpa argumen; saat itu searchedRows() dipakai
+  // supaya kata kunci yang sedang diketik tidak hilang begitu kolom di-drag.
+  function renderCachedReport(_rows) {
     if (!gcart_res || !gcart_res.length) { return; }
+    let rows = (_rows === undefined) ? searchedRows() : _rows;
     let _date1 = $("#inputDate1").val();
     let _date2 = (g_modeReport == modereport_periode) ? $("#inputDate2").val() : null;
-    doShowReport(gcart_res, reportTitle, "KODEBRG", _date1, _date2);
+    doShowReport(rows, reportTitle, "KODEBRG", _date1, _date2);
     relabelSubtotalRows();
   }
 
@@ -796,7 +802,14 @@
 
     doMakeTable(_mode, groupby, data, reportTitle, _date1);
 
-    $('#tabel_header tr').slice(0, 4).remove();
+    // JANGAN buang baris <tr> dari #tabel_header di sini. Baris itu dulu dipakai untuk
+    // membuang 4 baris info (judul/periode/dicetak-oleh) yang dibuat doSetRowHeaderInfo(),
+    // tapi pemanggilnya sudah dikomentari di masterreportGudang.blade.php (doSetRowHeader,
+    // sekitar baris 786). Yang tersisa di #tabel_header sekarang HANYA baris judul kolom
+    // (1 baris dari ReportTable.headHtml untuk mode QTY/RP, 3 baris grouping untuk
+    // QTYRP/PERIODE), jadi slice(0, 4).remove() ikut menghapus header aslinya --
+    // dan karena makeTable('FILTER') juga lewat sini, header hilang begitu tombol
+    // "Filter Data" ditekan walaupun doShowReport() belum sempat dipanggil.
 
     setTimeout(() => {
 
@@ -992,14 +1005,48 @@
     }
   }
 
+  // === PENCARIAN SISI-KLIEN ===
+  // Dulu memanggil doRenderTable(), function yang tidak ada di mana pun (bukan di blade
+  // mana pun, bukan di public/js/report-table.js), jadi tiap ketukan tombol melempar
+  // ReferenceError dan kotak cari tidak berfungsi sama sekali. Sekarang lewat
+  // renderCachedReport(), jalur render yang memang dipakai halaman ini.
+
+  // Baris yang seharusnya tampil sekarang: gcart_res disaring kata kunci di kotak cari
+  // (kosong -> semua baris). Hanya kolom yang terlihat yang ikut dicari, dan nilai 0
+  // ikut dibandingkan -- String(v || '') yang lama mengubah 0 jadi '' sehingga angka 0
+  // tidak pernah cocok.
+  function searchedRows() {
+    const term = ($('#searchBox2').val() || '').trim().toLowerCase();
+    if (!term) { return gcart_res; }
+
+    const cols = gcart_header.filter(c => c[2] === 1);
+    return gcart_res.filter(function (r) {
+      return cols.map(function (c) {
+        let v = r[c[0]];
+        return (v == null) ? '' : String(v);
+      }).join(' ').toLowerCase().indexOf(term) !== -1;
+    });
+  }
+
   function applyFilters() {
     if (typeof gcart_res === 'undefined' || !gcart_res.length) return;
-    const term = ($('#searchBox2').val() || '').trim().toLowerCase();
-    if (!term) { doRenderTable(gcart_res, "KODEBRG"); relabelSubtotalRows(); return; }
-    const cols = gcart_header.filter(c => c[2] === 1);
-    const filtered = gcart_res.filter(r => cols.map(c => String(r[c[0]] || '')).join(' ').toLowerCase().indexOf(term) !== -1);
-    doRenderTable(filtered, "KODEBRG");
-    relabelSubtotalRows();
+
+    const rows = searchedRows();
+
+    // doShowReport() diakhiri doGodown() -> scrollIntoView({behavior:'smooth'}).
+    // Kalau dibiarkan, halaman meloncat ke tabel tiap ketukan tombol dan kotak cari
+    // ikut tergeser keluar layar. Dimatikan sementara khusus untuk pencarian; jalur
+    // lain (Tampilkan, drag kolom) tetap memakai doGodown seperti biasa.
+    const _godown = window.doGodown;
+    window.doGodown = function () {};
+    try {
+      renderCachedReport(rows);
+    } finally {
+      window.doGodown = _godown;
+    }
+
+    document.getElementById('footerLabel').textContent =
+      rows.length ? ('Menampilkan ' + rows.length + ' baris') : 'Tidak ada data';
   }
 
   function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }

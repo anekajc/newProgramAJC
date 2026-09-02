@@ -491,8 +491,6 @@ Route::get('/laporantransferkecabangblmditerima_doReportFilter', [LaporanTransfe
 // CLOSING TRANSFER CABANG
 Route::get('/laporanclosingtransfercabang', [LaporanClosingTransferCabangController::class, 'index']);
 Route::get('/laporanclosingtransfercabang_doReport', [LaporanClosingTransferCabangController::class, 'doReport']);
-Route::get('/laporanclosingtransfercabang_doFilter', [LaporanClosingTransferCabangController::class, 'doFilter']);
-Route::get('/laporanclosingtransfercabang_doReportFilter', [LaporanClosingTransferCabangController::class, 'doReportFilter']);
 
 // OUTSTANDING SO PO
 Route::get('/laporangudangoutstandingsopo', [LaporanGudangOutstandingSoPoController::class, 'index']);
