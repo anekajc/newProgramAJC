@@ -220,14 +220,24 @@
                   <div class="rt-section">
                     <div class="rt-group-label">Status</div>
                     <div>
-                      <label class="rt-field-label" for="input_filterspr">Status SPR</label>
-                      <select class="rt-native" id="input_filterspr">
-                        <option value=0 selected>Semua SPR</option>
+                      <label class="rt-field-label" for="input_filterstatus">Status SPR</label>
+                      <select class="rt-native" id="input_filterstatus">
+                        <option value=0 selected>Semua Status</option>
+                        <option value=1>Belum</option>
+                        <option value=2>Sebagian</option>
+                        <option value=3>Selesai</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="rt-section">
+                    <div class="rt-group-label">Otorisasi</div>
+                    <div>
+                      <label class="rt-field-label" for="input_filteroto">Status Otorisasi</label>
+                      <select class="rt-native" id="input_filteroto">
+                        <option value=0 selected>Semua</option>
                         <option value=1>Belum Otorisasi</option>
                         <option value=2>Sudah Otorisasi</option>
-                        <option value=3>Belum</option>
-                        <option value=4>Sebagian</option>
-                        <option value=5>Selesai</option>
                       </select>
                     </div>
                   </div>
@@ -1434,22 +1444,26 @@ function reinitTabel2 () {
 }
 
 function rpgResetFilterFields () {
-  $('#input_filterspr').val('0')
+  $('#input_filterstatus').val('0')
+  $('#input_filteroto').val('0')
 }
 
 function rpgUpdateFilterBadge () {
-  let n = Number($('#input_filterspr').val()) || 0
-  $('#sprFilterBadge').text(n === 0 ? '0 aktif' : '1 aktif')
+  let n = 0
+  if ((Number($('#input_filterstatus').val()) || 0) !== 0) { n++ }
+  if ((Number($('#input_filteroto').val()) || 0) !== 0) { n++ }
+  $('#sprFilterBadge').text(n + ' aktif')
 }
 
 function buttonFilterSPR () {
   let tglawal = $('#input_tanggalawal_spr').val()
   let tglakhir = $('#input_tanggalakhir_spr').val()
-  let filterspr = $('#input_filterspr').val()
+  let filterstatus = $('#input_filterstatus').val()
+  let filteroto = $('#input_filteroto').val()
   $.ajax({
     url: "{!! url('returpenjualangudangloadall') !!}",
     type: "get", async: false,
-    data: { tglawal, tglakhir, filterspr },
+    data: { tglawal, tglakhir, filterstatus, filteroto },
     success: function (res) {
       lastTabel2Rows = res.tempPenerimaan
       reinitTabel2()
@@ -2182,10 +2196,11 @@ if (pcekglobal) {
 function loadAll () {
   let tglawal = $('#input_tanggalawal_spr').val()
   let tglakhir = $('#input_tanggalakhir_spr').val()
-  let filterspr = $('#input_filterspr').val()
+  let filterstatus = $('#input_filterstatus').val()
+  let filteroto = $('#input_filteroto').val()
   $.ajax({
     url: "{!! url('returpenjualangudangloadall') !!}",
-    type: "get", async: false, data: { tglawal, tglakhir, filterspr },
+    type: "get", async: false, data: { tglawal, tglakhir, filterstatus, filteroto },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempPenerimaan;

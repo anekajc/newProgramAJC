@@ -26,7 +26,6 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
@@ -56,29 +55,47 @@ input[type=number] {
   padding: 3px;
 }
 
-.custom-tabs .nav-link {
-  display: inline-block !important;
-  padding: 5px 16px !important;
-  font-size: 0.75rem !important;
-  border: none;
-  border-radius: 17px;
-  color: #495057;
-  background: transparent;
-  font-weight: 600;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
 
-.custom-tabs .nav-link:hover {
-  background: transparent;
-  color: #007bff;
-}
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
 
-.custom-tabs .nav-link.active {
-  background: #007bff;
-  border-color: #007bff;
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
-}
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
 
 #content { padding-top: 12px; }
 
@@ -446,10 +463,10 @@ input[type=number] {
 
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Cetak Tanda Terima Invoice</h2>
+      {{-- <h2>Cetak Tanda Terima Invoice</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
     </div>
   </div>
 
@@ -676,7 +693,7 @@ input[type=number] {
 </div>
 
 <div class="col-md-12 mt-2 text-right">
-<button type="button" class="btn btn-primary" onclick="previewPrint()" class="btn btn-secondary" style="height: 30px;
+<button type="button" class="btn btn-chip-biru" onclick="previewPrint()" class="btn btn-secondary" style="height: 30px;
 border-radius: 20px;
 font-size: 0.75rem;
 font-weight: 600;
@@ -684,7 +701,7 @@ text-transform: uppercase;" >+ Preview</button>
 
 
 
-<button type="button" class="btn btn-primary" onclick="submitPrint()" class="btn btn-secondary" style="height: 30px;
+<button type="button" class="btn btn-chip-biru" onclick="submitPrint()" class="btn btn-secondary" style="height: 30px;
 border-radius: 20px;
 font-size: 0.75rem;
 font-weight: 600;
@@ -4567,6 +4584,9 @@ document.getElementById("input_add_nama").value = namapenerima
 
 
 function buttonAdd (kodecustsupp) {
+  
+document.getElementById('pageTitleBreadcrumb').textContent = 'Cetak Tanda Terima / Cetak Invoice'
+
   console.log('buttonAdd' ,kodecustsupp)
   let akses = $("#akses_istambah").val();
   console.log(kodecustsupp)
@@ -4721,6 +4741,7 @@ function buttonAddEditItem (i) {
 
 
 function buttonCloseForm () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Cetak Tanda Terima'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();

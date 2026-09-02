@@ -770,7 +770,7 @@ and Isnull(B.PUrgent,0)=1
       select * from (
         select  A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
                 A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-                E.Nobukti Noso, D.NoBukti NoSPP,
+                E.Nobukti Noso, D.NoBukti NoSPPJoin,
                 Case when A.isFlag=0 then 'SPB Barang Jadi'
                      when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
                      else ''
@@ -1939,7 +1939,7 @@ public function getDetailKoreksi (Request $req) {
 
   select  m9.Nama NamaKebunX,f.AlamatKirim AlamatKirimX,a.nourut, A.SOPIR , A.KODEEXP ,E.NOSO NOSOT ,A.NOBUKTI, A.NOURUT, A.TANGGAL, A.NOSPP, A.KODECUSTSUPP, M1.NamaCustSupp,
           A.NoPolKend, A.Container, A.NoContainer, A.NoSeal, A.Catatan, A.IDUser, A.IsFlag Tipe,
-          E.Nobukti Noso, D.NoBukti NoSPP,
+          E.Nobukti Noso, D.NoBukti NoSPPJoin,
           Case when A.isFlag=0 then 'SPB Barang Jadi'
                when A.isFlag=1 then 'SPB Bahan Baku dan Lain-lain'
                else ''

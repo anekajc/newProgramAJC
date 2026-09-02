@@ -86,6 +86,34 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+/* Search-icon button appended flush to an input, ported from so.blade.php. */
+.btn-icon-search {
+  height: 32px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
 </style>
 @endsection
 
@@ -288,7 +316,7 @@
           <div class="col-md-8">
             <div class="form-group input-group">
               <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-              <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
+              <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
             </div>
           </div>
           </div>
@@ -447,7 +475,7 @@
         <div class="input-group form-group">
           <input id="AddAddUrutBeli" type="hidden" class="form-control" >
           <input id="AddAddNoBeli" type="text" class="form-control" disabled>
-          <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoBeli" onclick="buttonAddListNoBeli()"><i class="bi bi-plus"></i></button>
+          <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoBeli" onclick="buttonAddListNoBeli()"><i class="bi bi-search"></i></button>
 
         </div>
         <!-- <input id="AddAddKodeGudang" type="hidden" class="form-control" disabled> -->

@@ -54,16 +54,31 @@
   background-repeat: no-repeat; background-position: right center;
 }
 #tabel td:first-child, #tabel2 td:first-child, #tabel3 td:first-child { display: flex; gap: 4px; justify-content: center; align-items: center; }
-#tabel td:first-child .btn, #tabel2 td:first-child .btn, #tabel3 td:first-child .btn {
+#tabel td:first-child .btn, #tabel2 td:first-child .btn, #tabel3 td:first-child .btn,
+#koreksiTable td:last-child .btn, #tabel_add_list_pelanggan td:last-child .btn,
+#tabel_add_list_pic td:last-child .btn, #tabel_add_list_lokasipenerima td:last-child .btn,
+#tabel_add_list_alamatkirim td:last-child .btn, #tabel_add_list_backoffice td:last-child .btn,
+#tabel_add_list_sales td:last-child .btn {
   width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
   justify-content: center; border-radius: 7px; font-size: 13px; border: 1px solid transparent;
   box-shadow: none; transition: all .12s ease;
 }
-#tabel td:first-child .btn:hover, #tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
-#tabel td:first-child .btn-primary, #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
-#tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
-#tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
-#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel td:first-child .btn:hover, #tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover,
+#koreksiTable td:last-child .btn:hover, #tabel_add_list_pelanggan td:last-child .btn:hover,
+#tabel_add_list_pic td:last-child .btn:hover, #tabel_add_list_lokasipenerima td:last-child .btn:hover,
+#tabel_add_list_alamatkirim td:last-child .btn:hover, #tabel_add_list_backoffice td:last-child .btn:hover,
+#tabel_add_list_sales td:last-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+#tabel td:first-child .btn-primary, #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary,
+#koreksiTable td:last-child .btn-primary, #tabel_add_list_pelanggan td:last-child .btn-primary,
+#tabel_add_list_pic td:last-child .btn-primary, #tabel_add_list_lokasipenerima td:last-child .btn-primary,
+#tabel_add_list_alamatkirim td:last-child .btn-primary, #tabel_add_list_backoffice td:last-child .btn-primary,
+#tabel_add_list_sales td:last-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+#tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning, #koreksiTable td:last-child .btn-warning,
+#tabel_add_list_pelanggan td:last-child .btn-warning, #tabel_add_list_pic td:last-child .btn-warning,
+#tabel_add_list_lokasipenerima td:last-child .btn-warning, #tabel_add_list_alamatkirim td:last-child .btn-warning,
+#tabel_add_list_backoffice td:last-child .btn-warning, #tabel_add_list_sales td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+#tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success, #koreksiTable td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger, #koreksiTable td:last-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabel thead th, #tabel2 thead th, #tabel3 thead th {
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px; text-transform: uppercase;
   letter-spacing: .04em; font-weight: 600; border-bottom: 1px solid #e7e9ee; border-top: none;
@@ -88,6 +103,34 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+/* Search-icon button appended flush to an input, ported from so.blade.php. */
+.btn-icon-search {
+  height: 32px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
 </style>
 @endsection
 
@@ -101,7 +144,7 @@
     <!-- <div id="qrcode"></div> -->
     <div class="row" >
       <div class="col-6 text-left">
-        <h2 style="margin-top: -85px">Nota Retur Penjualan</h2>
+        {{-- <h2 style="margin-top: -85px">Nota Retur Penjualan</h2> --}}
       </div>
       <div class="col-6 text-right">
         <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add SO</button> -->
@@ -255,12 +298,12 @@
       <div class="container-fluid">
 
         <!-- <div id="qrcode"></div> -->
-        <div class="row" style="margin-top: -30px">
+        <div class="row">
           <div class="col-6 text-left">
-            <h1>Nota Retur Penjualan</h1>
+            {{-- <h1>Nota Retur Penjualan</h1> --}}
           </div>
           <div class="col-6 text-right">
-            <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+            <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
           </div>
         </div>
       <!-- <button onclick="loadAll()">tes</button> -->
@@ -376,9 +419,6 @@
               </div>
 
 
-
-
-
             </div>
           </div>
 
@@ -435,7 +475,7 @@
                   <div class="col-8">
                     <div class="form-group input-group">
                       <input type="text" class="form-control" id="input_add_valas" placeholder="" disabled>
-                      <button onclick="buttonAddListValas()" id="buttonAddListValas"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                      <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                     </div>
                   </div>
                 </div>
@@ -458,10 +498,6 @@
                   </div>
                 </div>
               </div>
-
-
-
-
 
 
             </div>
@@ -558,14 +594,6 @@
 
 
         </div>
-
-
-
-
-
-
-
-
 
 
         </div>
@@ -3206,12 +3234,12 @@ function submitAdd () {
 
 
 function buttonCloseForm () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Nota Retur Penjualan'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
 
 }
-
 
 function buttonAddBatal () {
 
@@ -3946,6 +3974,8 @@ function onChangePembayaran () {
 
 
 function buttonKoreksi (nobukti , noretur) {
+  
+document.getElementById('pageTitleBreadcrumb').textContent = 'Nota Retur Penjualan / Edit Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -3966,10 +3996,10 @@ let pcekglobal = 0
 
   })
 
-if (pcekglobal) {
-  alertify.warning("Periode sudah dikunci")
-  return
-}
+  if (pcekglobal) {
+    alertify.warning("Periode sudah dikunci")
+    return
+  }
 
   console.log(nobukti , noretur)
   tipeform = 'edit'
@@ -3982,14 +4012,11 @@ if (pcekglobal) {
     return
   }
 
-
   // tipeform = 'edit'
   // loadAll()
   // lockFormAdd()
   // $('.showhideitem').hide();
   // refreshDataTableKoreksi(nobukti, norpj)
-
-
 
   let _token = $("#_token").val();
 
@@ -4003,16 +4030,11 @@ if (pcekglobal) {
     }
   }
 
-
-
   document.getElementById("input_add_tipeppn").disabled = false
   document.getElementById("input_add_tipebayar").disabled = false
   document.getElementById("input_add_hari").disabled = false
   document.getElementById("input_add_catatan").disabled = false
   document.getElementById("buttonAddListValas").disabled = false
-
-
-
 
   $('.showhideitem').hide();
   $('#page1').hide();

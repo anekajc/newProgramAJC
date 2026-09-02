@@ -311,6 +311,35 @@
 </style>
 {{-- end tampilan search bar modal add pelanggan --}}
 <style>
+  /* Search-icon button appended flush to an input, ported from so.blade.php. */
+  .btn-icon-search {
+    height: 32px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+</style>
+<style>
   #tabel_add_list_pelanggan_filter{
     display: flex;
     align-items: flex-end;
@@ -556,7 +585,7 @@
             <div class="col-8">
               <div class="input-group">
                 <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
-                <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-plus"></i></button>
+                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -609,7 +638,7 @@
             <div class="col-8">
                 <div class="input-group">
                   <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-                  <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustSupp" onclick="buttonAddListCustSupp()"><i class="bi bi-plus"></i></button>
+                  <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustSupp" onclick="buttonAddListCustSupp()"><i class="bi bi-search"></i></button>
                 </div>
             </div>
           </div>

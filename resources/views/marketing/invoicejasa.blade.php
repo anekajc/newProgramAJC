@@ -146,7 +146,8 @@
 }
 
 #tabel td:first-child .btn,
-#tabel2 td:first-child .btn {
+#tabel2 td:first-child .btn,
+#addTable td:last-child .btn {
   width: 30px;
   height: 30px;
   padding: 0;
@@ -161,33 +162,39 @@
 }
 
 #tabel td:first-child .btn:hover,
-#tabel2 td:first-child .btn:hover {
+#tabel2 td:first-child .btn:hover,
+#addTable td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
 #tabel td:first-child .btn-success,
-#tabel2 td:first-child .btn-success {
+#tabel2 td:first-child .btn-success,
+#addTable td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
 #tabel td:first-child .btn-warning,
-#tabel2 td:first-child .btn-warning {
+#tabel2 td:first-child .btn-warning,
+#addTable td:last-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
-#tabel td:first-child .btn-primary,
-#tabel2 td:first-child .btn-primary {
+#tabel td:first-child .btn-chip-biru,
+#tabel2 td:first-child .btn-chip-biru,
+#addTable td:last-child .btn-chip-biru {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
 #tabel td:first-child .btn-danger,
-#tabel2 td:first-child .btn-danger {
+#tabel2 td:first-child .btn-danger,
+#addTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
 #tabel td:first-child .btn-info,
-#tabel2 td:first-child .btn-info {
+#tabel2 td:first-child .btn-info,
+#addTable td:last-child .btn-info {
   color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
 }
 
@@ -356,6 +363,36 @@
 </style>
 {{-- end tampilan search sales --}}
 
+<style>
+  /* Search-icon button appended flush to an input, ported from so.blade.php. */
+  .btn-icon-search {
+    height: 32px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+</style>
+
 {{-- tampilan search modal barang all --}}
 <style>
   #input_search_barang_all {
@@ -460,7 +497,7 @@
           <div class="rt-footer-buttons">
             <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
               onclick="$('#modalFilterIJ').modal('hide')">Batal</button>
-            <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterIJ(); $('#modalFilterIJ').modal('hide');">Terapkan</button>
+            <button type="button" class="rt-btn rt-btn-chip-biru" onclick="buttonFilterIJ(); $('#modalFilterIJ').modal('hide');">Terapkan</button>
           </div>
         </div>
 
@@ -492,7 +529,7 @@
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ Add Invoice</button>
+          <button type="button" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
       <div id="rtBarTabel"></div>
@@ -519,133 +556,299 @@
 <div class="container-fluid mainpage" id="page2" style="display: none">
 
   <div id="" class="">
-  <!-- <div class="modal-header">
+    <!-- <div class="modal-header">
 
-
-      <h5 class="modal-title" id="">Add</h5>
+    <h5 class="modal-title" id="">Add</h5>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true">&times;</span>
     </button>
-  </div> -->
+    </div> -->
 
-  <div class="container-fluid">
-
-
-    <!-- <div id="qrcode"></div> -->
-    <div class="row">
-      <div class="col-6 text-left">
-        {{-- <h1>Form Invoice</h1> --}}
-      </div>
-      <div class="col-6 text-right">
-        <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button> -->
-        <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
-
-      </div>
-    </div>
-  <!-- <button onclick="loadAll()">tes</button> -->
-  </div>
-
-
-
-
-  <div id="" class="">
-  <div class="">
-    <!-- <h1>Tes Modal</h1> -->
-
-    <div class="container-fluid mt-4">
-      <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-      <div class="row">
-
-        <div class="col-md-3">
-          <div class="row">
-
-
-          <div class="col-md-4">
-            <div class="form-group">
-              <label>Customer</label>
-            </div>
-          </div>
-          <!-- <div class="col-md-3 text-right">
-            <div class="form-group">
-          </div>
-        </div> -->
-          <div class="col-md-8">
-            <div class="form-group input-group">
-              <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-              <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
-            </div>
-          </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Tgl</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-            <div class="row">
-
-
-            </div>
-        </div>
-
-      </div>
-    </div>
     <div class="container-fluid">
 
-      <hr/ style="margin-top: -8px">
-    </div>
-    <div class="container-fluid mt-4">
+      <!-- <div id="qrcode"></div> -->
       <div class="row">
+        <div class="col-6 text-left">
+          {{-- <h1>Form Invoice</h1> --}}
+        </div>
+        <div class="col-6 text-right">
+          <!-- <button type="button" class="btn btn-chip-biru btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button> -->
+          <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
 
+        </div>
+      </div>
+      <!-- <button onclick="loadAll()">tes</button> -->
+    </div>
 
+    <div id="" class="">
+      <div class="">
+        <!-- <h1>Tes Modal</h1> -->
 
-        <div class="col-md-3">
+        <div class="container-fluid mt-4">
+          <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
           <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_namacustomer"  disabled></textarea>
+
+            <div class="col-md-3">
+              <div class="row">
+
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Customer</label>
+                  </div>
+                </div>
+                <!-- <div class="col-md-3 text-right">
+                <div class="form-group">
+                </div>
+                </div> -->
+                <div class="col-md-8">
+                  <div class="form-group input-group">
+                    <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
+                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-            <div class="row" style="margin-top: -10px">
-
-            <div class="col-12">
-
-              <textarea  style="width: 100%; resize: none" rows=3  class="form-control" id="input_add_alamatcustomer"  disabled></textarea>
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>No Bukti</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Tgl</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="row">
+
+              </div>
+            </div>
+
           </div>
         </div>
+        <div class="container-fluid">
 
-        <div class="col-md-3">
+          <hr/ style="margin-top: -8px">
+        </div>
+        <div class="container-fluid mt-4">
           <div class="row">
 
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-12">
+                  <div class="form-group">
+                    <textarea  style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_namacustomer"  disabled></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="row" style="margin-top: -10px">
 
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
+                <div class="col-12">
+
+                  <textarea  style="width: 100%; resize: none" rows=3  class="form-control" id="input_add_alamatcustomer"  disabled></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="row">
+
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>No PO</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="input_add_nopo" value="" onblur="onChangeHeader('pono' , 'input_add_nopo' , 'No PO')"  >
+                  </div>
+                </div>
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Sales</label>
+                  </div>
+                </div>
+                <!-- <div class="col-md-3">
+                <div class="row">
+
+                <div class="form-group">
+                </div>
+                </div>
+
+                </div> -->
+                <div class="col-md-8">
+                  <div class="form-group input-group">
+                    <input type="text" class="form-control" id="input_add_sales" value="" disabled >
+                    <input type="hidden" class="form-control text-center" id="input_add_kodesales" value="" disabled >
+                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-search"></i></button>
+                  </div>
+                </div>
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <!-- </div>
+
+                </div> -->
+
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
+
+                <div class="col-12">
+                  <div class="form-group">
+                    <label>Lokasi Penerima</label>
+                  </div>
+                </div>
+
+              </div>
+              <div class="row">
+
+                <div class="col-12" style="margin-top: -10px">
+                  <div class="form-group input-group">
+                    <input type="hidden" class="form-control text-center" id="input_add_kodelokasipenerima" value="" disabled >
+                    <input type="text" class="form-control" id="input_add_lokasipenerima" value="" disabled >
+                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListLokasiPenerima" onclick="buttonAddListLokasiPenerima()"><i class="bi bi-search"></i></button>
+                  </div>
+                </div>
+                <!-- </div>
+                </div> -->
+
+                <!-- </div>
+
+                </div> -->
+
+              </div>
+
+            </div>
+
+            <div class="col-md-3">
+              <div class="row">
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
+
+                <!-- </div>
+                </div> -->
+
+                <!-- <div class="col-md-6">
+                <div class="row"> INI BUAT AKU -->
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Valas</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="input_add_valas" value="IDR" disabled >
+                  </div>
+                </div>
+                <!-- </div>
+                </div> -->
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Kurs</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="number" class="form-control text-right" id="input_add_kurs" value="1.00"  onblur="onChangeKurs('kurs' , 'input_add_kurs')">
+                  </div>
+                </div>
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <div class="col-12">
+                  <div class="form-group">
+                    <label>Catatan</label>
+                  </div>
+                </div>
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <div class="col-12">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="input_add_catatan" value="" onblur="onChangeHeader('footnote' , 'input_add_catatan', 'catatan')" >
+                  </div>
+                </div>
+                <!-- </div>
+                </div> -->
+
+              </div>
+
+            </div>
+
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Pembayaran</label>
+                  </div>
+                </div>
+
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <select id="input_add_pembayaran" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onchange="onChangePembayaran()">
+                      <option value=0 selected>Tunai</option>
+                      <option value=1 >Kredit</option>
+                    </select>
+                  </div>
+                </div>
+                <!-- </div>
+                </div> -->
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Hari</label>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <input type="number" class="form-control  text-right" id="input_add_hari" value="0"  onblur="onChangeHeader('hari' , 'input_add_hari')">
+                    <input type="hidden" class="form-control  text-right" id="input_add_harikredit" value="0"  >
+                  </div>
+                </div>
+
+              </div>
+              <div class="row" style="margin-top: -10px">
+
+                <!-- <div class="col-md-6">
+                <div class="row"> -->
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>Tipe PPN</label>
@@ -655,119 +858,19 @@
                   <div class="form-group">
                     <select id="input_add_tipeppn" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onchange="onChangePPN('ppn' , 'input_add_tipeppn')">
                       <option value=0 selected>None</option>
-                      <option value=1 >Exclude</option>
-
-                      <option value=2 >Include</option>
+                      <option value=1>Exclude</option>
+                      <option value=2>Include</option>
                     </select>
                   </div>
                 </div>
-
-              </div>
-                <div class="row" style="margin-top: -10px">
-
-
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>Sales</label>
-                  </div>
-                </div>
-                <!-- <div class="col-md-3">
-                  <div class="row">
-
-                  <div class="form-group">
-                </div>
-              </div>
-
-                </div> -->
-                <div class="col-md-8">
-                  <div class="form-group input-group">
-                    <input type="text" class="form-control" id="input_add_sales" value="" disabled >
-                    <input type="hidden" class="form-control text-center" id="input_add_kodesales" value="" disabled >
-                    <button class="btn btn-primary btn-sm text-right" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-plus"></i></button>
-                  </div>
-                </div>
-
-              </div>
-                <div class="row" style="margin-top: -10px">
-
-
-
-              <!-- </div>
-
-            </div> -->
-
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
-
-
-
-
-
-
-                    <div class="col-12">
-                      <div class="form-group">
-                        <label>Lokasi Penerima</label>
-                      </div>
-                    </div>
-
-                  </div>
-                    <div class="row">
-
-
-                    <div class="col-12" style="margin-top: -10px">
-                      <div class="form-group input-group">
-                        <input type="hidden" class="form-control text-center" id="input_add_kodelokasipenerima" value="" disabled >
-                        <input type="text" class="form-control" id="input_add_lokasipenerima" value="" disabled >
-                        <button class="btn btn-primary btn-sm text-right" id="buttonAddListLokasiPenerima" onclick="buttonAddListLokasiPenerima()"><i class="bi bi-plus"></i></button>
-                      </div>
-                    </div>
-                  <!-- </div>
+                <!-- </div>
                 </div> -->
 
+              </div>
+              <div class="row" style="margin-top: -10px">
 
-              <!-- </div>
-
-            </div> -->
-
-
-
-
-          </div>
-
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
-
-              <!-- </div>
-            </div> -->
-
-
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>No PO</label>
-                  </div>
-                </div>
-
-
-                <div class="col-md-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_add_nopo" value="" onblur="onChangeHeader('pono' , 'input_add_nopo' , 'No PO')"  >
-                  </div>
-                </div>
-              <!-- </div>
-            </div> -->
-
-          </div>
-            <div class="row" style="margin-top: -10px">
-
-
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
+                <!-- <div class="col-md-6">
+                <div class="row"> INI BUAT BUDI -->
                 <div class="col-md-4">
                   <div class="form-group">
                     <label>Uang Muka</label>
@@ -780,163 +883,35 @@
                 </div>
 
               </div>
-                <div class="row" style="margin-top: -10px">
+            </div>
 
-
-                <div class="col-12">
-                  <div class="form-group">
-                    <label>Catatan</label>
-                  </div>
-                </div>
+            <div class="col-md-3 mt-2">
+              <div class="row">
 
               </div>
-                <div class="row" style="margin-top: -10px">
+            </div>
 
+            <div class="col-md-3 mt-2">
+              <div class="row">
 
-                <div class="col-12">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_add_catatan" value="" onblur="onChangeHeader('footnote' , 'input_add_catatan', 'catatan')" >
-                  </div>
-                </div>
-              <!-- </div>
-            </div> -->
+              </div>
+            </div>
 
           </div>
 
         </div>
-
-
-
-
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Pembayaran</label>
-              </div>
-            </div>
-
-
-            <div class="col-md-8">
-              <div class="form-group">
-                <select id="input_add_pembayaran" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onchange="onChangePembayaran()">
-                  <option value=0 selected>Tunai</option>
-                  <option value=1 >Kredit</option>
-                </select>
-              </div>
-            </div>
-          <!-- </div>
-        </div> -->
-
-      </div>
-        <div class="row" style="margin-top: -10px">
-
-
-        <!-- <div class="col-md-6">
-          <div class="row"> -->
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Hari</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="number" class="form-control  text-right" id="input_add_hari" value="0"  onblur="onChangeHeader('hari' , 'input_add_hari')">
-                <input type="hidden" class="form-control  text-right" id="input_add_harikredit" value="0"  >
-              </div>
-            </div>
-
-          </div>
-            <div class="row" style="margin-top: -10px">
-
-
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>Valas</label>
-                  </div>
-                </div>
-
-
-                <div class="col-md-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_add_valas" value="IDR" disabled >
-                  </div>
-                </div>
-              <!-- </div>
-            </div> -->
-
-
-            </div>
-            <div class="row" style="margin-top: -10px">
-
-            <!-- <div class="col-md-6">
-              <div class="row"> -->
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>Kurs</label>
-                  </div>
-                </div>
-                <div class="col-md-8">
-                  <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_add_kurs" value="1.00"  onblur="onChangeKurs('kurs' , 'input_add_kurs')">
-                  </div>
-                </div>
-
-
-          </div>
-        </div>
-
-        <div class="col-md-3 mt-2">
-          <div class="row">
-
-
-
-          </div>
-        </div>
-
-        <div class="col-md-3 mt-2">
-          <div class="row">
-
-
-          </div>
-        </div>
-
-
-
-
-
-
-
 
       </div>
 
+      <!-- <div class="row "> -->
 
-
-
-
-
-
-
-
+      <!-- </div> -->
+      <div class="container-fluid">
+        <hr/>
 
       </div>
 
-
-
-    </div>
-
-    <!-- <div class="row "> -->
-
-<!-- </div> -->
-<div class="container-fluid">
-  <hr/>
-
-</div>
-
-  <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
+      <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
 
         <table id="addTable" class="data-table">
           <thead class="text-center">
@@ -953,337 +928,301 @@
             </tr>
           </thead>
 
-
           <tbody id="addTableData" class="" >
             <tr >
 
-                <td colspan=7 class="text-center">Belum ada data</td>
+              <td colspan=7 class="text-center">Belum ada data</td>
 
-          </tr>
+            </tr>
 
           </tbody>
 
-
         </table>
-  </div>
-
-  </div>
-
-
-
-
-  <div id="" class="container-fluid">
-    <div class="row">
-      <div class="col-md-12 mt-2 text-right">
-      <!-- <button type="button" class="btn btn-primary" onclick="buttonAddAddItem()" class="btn btn-secondary"  >+ Tambah Item</button> -->
-      <button type="button" class="btn btn-primary btn-lg" style="
-        height: 30px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        transition: background-color 0.3s, box-shadow 0.3s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-        onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
-  </div>
-
-    </div>
-    <!-- <button id="" type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button> -->
-  </div>
-
-  <div id="formAddAdd" class="container-fluid showhideitem">
-    <!-- <div class="line"></div> -->
-    <hr/>
-    <div class="row">
-      <div class="col-12">
-        <h4>Add Item</h4>
-      </div>
-    </div>
-    <div class="row">
-
-      <div class="col-md-6">
-
-
-
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Barang</label>
-      </div>
-      </div>
-      <!-- <div class="col-md-4 text-right">
-
-        </div> -->
-      <div class="col-md-3">
-        <div class="input-group form-group">
-
-          <input id="AddAddKodeBrg" type="text" class="form-control" onkeypress="onKeyPressBarang(event)">
-          <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
-        </div>
-      </div>
-
-      <div class="col-md-5">
-        <div class="input-group form-group">
-          <input id="AddAddNamaBrg" type="text" class="form-control" disabled>
-        </div>
       </div>
 
     </div>
 
-  </div>
-
-
-
-
-</div>
-  <div class="row" style="margin-top: -10px">
-
-  <div class="col-md-6">
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Qty</label>
-      </div>
-      </div>
-
-
-      <div class="col-md-3">
-        <input id="AddAddInputQty" type="number" value='0.00' class="form-control text-right">
-      </div>
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Harga</label>
-      </div>
-      </div>
-
-      <div class="col-md-3">
-        <input id="AddAddInputHarga" type="number" value='0.00' class="form-control text-right">
-        <input id="AddAddInputIsi" type="hidden"  class="form-control  " disabled>
-        <input id="AddAddInputSatuan" type="hidden"  class="form-control  " disabled>
-      </div>
-
-    </div>
-  </div>
-
-
-  <div class="col-md-4">
-
-  </div>
-
-</div>
-  <div class="row" style="margin-top: -10px">
-
-
-  <div class="col-md-6 ">
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Keterangan</label>
-      </div>
-      </div>
-      <!-- <div class="col-md-4 text-right">
-
-          <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
-        </div> -->
-      <div class="col-md-8">
-        <input id="AddAddKeterangan" type="text" class="form-control" >
-        <!-- <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled> -->
-      </div>
-
-    </div>
-  </div>
-  </div>
-
-
-
-    <div class="row mt-2">
-      <div class="col-md-12 text-right mt-4">
-        <!-- <button type="button" class="btn btn-secondary" onclick="closeShowHideItem()" >Batal</button> -->
-        <button id="" type="button" onclick="closeShowHideItem()" class="btn btn-secondary" style="height: 30px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;">Batal</button>
-        <!-- <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-primary" >Add</button> -->
-        <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-primary" style="height: 30px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;">Submit Add</button>
-
-        <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
-      </div>
-
-    </div>
-    <!-- <div class="line"></div> -->
-    <!-- <hr/> -->
-  </div>
-
-
-
-  <div id="formAddEdit" class="container-fluid showhideitem">
-    <!-- <div class="line"></div> -->
-    <hr/>
-    <div class="row">
-      <div class="col-12">
-        <h4>Edit Item</h4>
-      </div>
-    </div>
-    <div class="row">
-
-      <div class="col-md-4">
-
-
-
-    <div class="row">
-      <div class="col-md-4">
-        <div class="form-group">
-        <label>Kode Barang</label>
-      </div>
-      </div>
-      <!-- <div class="col-md-4 text-right"> -->
-
-          <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> -->
-        <!-- </div> -->
-      <div class="col-md-8">
-        <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="col-md-4">
-    <!-- <div class="row"> -->
+    <div id="" class="container-fluid">
       <div class="row">
-        <div class="col-md-4 ">
-          <div class="form-group">
-          <label>Nama Barang</label>
+        <div class="col-md-12 mt-2 text-right">
+          <!-- <button type="button" class="btn btn-chip-biru" onclick="buttonAddAddItem()" class="btn btn-secondary"  >+ Tambah Item</button> -->
+          <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
+        height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+        text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+        onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
         </div>
-        </div>
-        <div class="col-md-8">
-          <div class="form-group">
 
-            <input id="AddEditNamaBrg" type="text" class="form-control" disabled>
+      </div>
+      <!-- <button id="" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Submit</button> -->
+    </div>
+
+    <div id="formAddAdd" class="container-fluid showhideitem">
+      <!-- <div class="line"></div> -->
+      <hr/>
+      <div class="row">
+        <div class="col-12">
+          <h4>Add Item</h4>
+        </div>
+      </div>
+      <div class="row">
+
+        <div class="col-md-6">
+
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>Barang</label>
+              </div>
+            </div>
+            <!-- <div class="col-md-4 text-right">
+
+            </div> -->
+            <div class="col-md-3">
+              <div class="input-group form-group">
+
+                <input id="AddAddKodeBrg" type="text" class="form-control" onkeypress="onKeyPressBarang(event)">
+                <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru" >+</button>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="input-group form-group">
+                <input id="AddAddNamaBrg" type="text" class="form-control" disabled>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+      <div class="row" style="margin-top: -10px">
+
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>Qty</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <input id="AddAddInputQty" type="number" value='0.00' class="form-control text-right">
+            </div>
+
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>Harga</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <input id="AddAddInputHarga" type="number" value='0.00' class="form-control text-right">
+              <input id="AddAddInputIsi" type="hidden"  class="form-control  " disabled>
+              <input id="AddAddInputSatuan" type="hidden"  class="form-control  " disabled>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-md-4">
+
+        </div>
+
+      </div>
+      <div class="row" style="margin-top: -10px">
+
+        <div class="col-md-6 ">
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <!-- <div class="col-md-4 text-right">
+
+            <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru" >+</button>
+            </div> -->
+            <div class="col-md-8">
+              <input id="AddAddKeterangan" type="text" class="form-control" >
+              <!-- <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled> -->
+            </div>
+
           </div>
         </div>
       </div>
 
-    <!-- </div> -->
-
-  </div>
-
-  <div class="col-md-4">
-
-  </div>
-
-
-  </div>
-  <div class="row" style="margin-top: -10px">
-
-  <div class="col-md-4">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="form-group">
-        <label>Qty</label>
-      </div>
-      </div>
-
-
-      <div class="col-md-8">
-        <input id="AddEditInputQty" type="number" value='0.00' class="form-control text-right">
-      </div>
-
-
-
-    </div>
-  </div>
-
-
-  <div class="col-md-4">
-
-    <div class="row">
-      <div class="col-md-4">
-        <div class="form-group">
-        <label>Harga</label>
-      </div>
-      </div>
-      <div class="col-md-8">
-        <input id="AddEditInputUrutItem" type="hidden"  class="form-control  " disabled>
-        <input id="AddEditInputHarga" type="number" value='0.00' class="form-control text-right">
-        <input id="AddEditInputIsi" type="hidden"  class="form-control  " disabled>
-        <input id="AddEditInputSatuan" type="hidden"  class="form-control  " disabled>
-      </div>
-    </div>
-
-  </div>
-  <!-- <div class="col-md-6">
-
-  </div> -->
-
-  <div class="col-md-4">
-
-  </div>
-
-
-  </div>
-  <div class="row" style="margin-top: -10px">
-
-  <div class="col-md-8">
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Keterangan</label>
-      </div>
-      </div>
-      <!-- <div class="col-md-4 text-right">
-
-          <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
-        </div> -->
-      <div class="col-md-4">
-        <input id="AddEditKeterangan" type="text" class="form-control" >
-        <!-- <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled> -->
-      </div>
-
-    </div>
-  </div>
-  </div>
-
-
-
-    <div class="row mt-2">
-      <div class="col-md-12 text-right mt-4">
-        <!-- <button type="button" class="btn btn-secondary" onclick="closeShowHideItem()" >Batal</button>
-
-        <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
-
-        <button id="" type="button" onclick="closeShowHideItem()" class="btn btn-secondary" style="height: 30px;
+      <div class="row mt-2">
+        <div class="col-md-12 text-right mt-4">
+          <!-- <button type="button" class="btn btn-secondary" onclick="closeShowHideItem()" >Batal</button> -->
+          <button id="" type="button" onclick="closeShowHideItem()" class="btn btn-danger" style="height: 30px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;">Batal</button>
-        <!-- <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-primary" >Add</button> -->
-        <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" style="height: 30px;
+          <!-- <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru" >Add</button> -->
+          <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru" style="height: 30px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
-        text-transform: uppercase;">Submit Edit</button>
+        text-transform: uppercase;">Simpan</button>
 
-        <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
+          <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru" >Edit</button> -->
+        </div>
+
+      </div>
+      <!-- <div class="line"></div> -->
+      <!-- <hr/> -->
+    </div>
+
+    <div id="formAddEdit" class="container-fluid showhideitem">
+      <!-- <div class="line"></div> -->
+      <hr/>
+      <div class="row">
+        <div class="col-12">
+          <h4>Edit Item</h4>
+        </div>
+      </div>
+      <div class="row">
+
+        <div class="col-md-4">
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Kode Barang</label>
+              </div>
+            </div>
+            <!-- <div class="col-md-4 text-right"> -->
+
+            <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru" >+</button> -->
+            <!-- </div> -->
+            <div class="col-md-8">
+              <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="col-md-4">
+          <!-- <div class="row"> -->
+          <div class="row">
+            <div class="col-md-4 ">
+              <div class="form-group">
+                <label>Nama Barang</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+
+                <input id="AddEditNamaBrg" type="text" class="form-control" disabled>
+              </div>
+            </div>
+          </div>
+
+          <!-- </div> -->
+
+        </div>
+
+        <div class="col-md-4">
+
+        </div>
+
+      </div>
+      <div class="row" style="margin-top: -10px">
+
+        <div class="col-md-4">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Qty</label>
+              </div>
+            </div>
+
+            <div class="col-md-8">
+              <input id="AddEditInputQty" type="number" value='0.00' class="form-control text-right">
+            </div>
+
+          </div>
+        </div>
+
+        <div class="col-md-4">
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Harga</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <input id="AddEditInputUrutItem" type="hidden"  class="form-control  " disabled>
+              <input id="AddEditInputHarga" type="number" value='0.00' class="form-control text-right">
+              <input id="AddEditInputIsi" type="hidden"  class="form-control  " disabled>
+              <input id="AddEditInputSatuan" type="hidden"  class="form-control  " disabled>
+            </div>
+          </div>
+
+        </div>
+        <!-- <div class="col-md-6">
+
+        </div> -->
+
+        <div class="col-md-4">
+
+        </div>
+
+      </div>
+      <div class="row" style="margin-top: -10px">
+
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <!-- <div class="col-md-4 text-right">
+
+            <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru" >+</button>
+            </div> -->
+            <div class="col-md-4">
+              <input id="AddEditKeterangan" type="text" class="form-control" >
+              <!-- <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled> -->
+            </div>
+
+          </div>
+        </div>
       </div>
 
+      <div class="row mt-2">
+        <div class="col-md-12 text-right mt-4">
+          <!-- <button type="button" class="btn btn-secondary" onclick="closeShowHideItem()" >Batal</button>
+
+          <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru" >Edit</button> -->
+
+          <button id="" type="button" onclick="closeShowHideItem()" class="btn btn-danger" style="height: 30px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;">Batal</button>
+          <!-- <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru" >Add</button> -->
+          <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru" style="height: 30px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;">Simpan</button>
+
+          <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru" >Edit</button> -->
+        </div>
+
+      </div>
+      <!-- <div class="line"></div> -->
+      <!-- <hr/> -->
     </div>
-    <!-- <div class="line"></div> -->
-    <!-- <hr/> -->
-  </div>
-
-
 
   </div>
-
-
 
 </div>
 
@@ -1302,8 +1241,8 @@
             <h1>Otorisasi</h1>
           </div>
           <div class="col-6 text-right">
-            <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonCloseForm()"  >Close</button> -->
-            <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+            <!-- <button type="button" class="btn btn-chip-biru btn-lg " style="height: 60px; " onclick="buttonCloseForm()"  >Close</button> -->
+            <button type="button" class="btn btn-danger" style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
 
           </div>
         </div>
@@ -1330,7 +1269,7 @@
             </div>
             <!-- <div class="col-md-3 text-right">
               <div class="form-group">
-            <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
+            <button class="btn btn-chip-biru btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
             </div>
           </div> -->
             <div class="col-md-8">
@@ -1448,7 +1387,7 @@
                     <div class="row">
 
                     <div class="form-group">
-                  <button class="btn btn-primary btn-sm text-right" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-plus"></i></button>
+                  <button class="btn btn-chip-biru btn-sm text-right" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-plus"></i></button>
                   </div>
                 </div>
 
@@ -1753,7 +1692,7 @@
     <div id="" class="container-fluid mt-2">
       <div class="row">
         <div class="text-right col-12">
-          <button type="button" class="btn btn-primary btn-lg" style="
+          <button type="button" class="btn btn-chip-biru btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -2327,7 +2266,7 @@ function tabelActionsCell (row) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   } else {
     html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + ijPickCI(row, 'IsOtorisasi1') + '\')"><i class="bi bi-pen"></i></button>';
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-chip-biru btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
   return html;
@@ -2484,6 +2423,7 @@ $(document).ready(function(){
 
 
 function buttonCloseForm () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -2540,6 +2480,7 @@ function closeShowHideAdd () {
 
 
 function buttonAdd () {
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa / Add Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -2602,8 +2543,6 @@ if (pcekglobal) {
 }
 
 function submitAddAdd () {
-
-
 
   console.log('submitAddAdd')
   let akses = $("#akses_istambah").val();
@@ -3763,6 +3702,7 @@ function refreshDataTableAdd (nobukti) {
 
 function buttonKoreksi (nobukti , isoto) {
 
+document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa / Edit Data'
 let pcekglobal = 0
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",
