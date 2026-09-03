@@ -135,7 +135,7 @@
       <div class="modal-body">
 
         <div class="rt-section">
-          <div class="rt-group-label">Pengaturan Laporan</div>
+          {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
           {{-- Rp/Valas TIDAK di sini -- halaman ini sudah punya switcher "Tampilan" di
                #rtBar lewat ReportTable.init({ views: {...} }), lihat
                docs/new-filter-modal-ui-guide.md §3a. --}}

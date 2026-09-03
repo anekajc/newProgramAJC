@@ -1,7 +1,7 @@
 @extends('report.masterreport2')
 
 <style>
-    .tb-report .table-wrap { min-height: 15vh; }
+    .tb-report .table-wrap { min-height: 10vh; }
 </style>
 
 @section('header2')
@@ -14,11 +14,26 @@
             <div class="page-title">PO</div>
           </div> --}}
 
+          <!-- Jenis laporan: Non Outstanding (ke Sp_ReportPODet, tombol Filter aktif -- Report,
+               VALAS & Otorisasi semua bisa diatur, dua tanggal) atau Outstanding (ke
+               Sp_reportoutStandingPOdet, tombol Filter disembunyikan -- proc ini tidak punya
+               Otorisasi/VALAS & Rekap dipaksa mati (kolom KOdeCustSupp/OS sudah tidak ada sejak
+               sebelum merge ini) -- HANYA tanggal kedua; LaporanPenerimaanGudangOSPOController
+               mematok tgl1 sendiri. Order By (No Bukti/Barang/Supplier) jadi switcher "Tampilan"
+               di #rtBar, HANYA muncul di mode Outstanding. -->
+          <div class="filter-wrap">
+            <label>Jenis</label>
+            <select class="filter-inp" id="inputMode" onchange="setMode(this.value)">
+              <option value="0">Non Outstanding</option>
+              <option value="1">Outstanding</option>
+            </select>
+          </div>
+
           <!-- Periode (date range) -->
           <div class="filter-wrap">
-            <label>Periode</label>
+            <label id="periodeLabel">Periode</label>
             <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
-            <span class="filter-sep">s/d</span>
+            <span class="filter-sep" id="dateSep">s/d</span>
             <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
           </div>
 
@@ -29,7 +44,7 @@
                  Halaman ini memuat dua Bootstrap; jQuery dimuat SESUDAH bundle BS5, jadi
                  $.fn.modal dipegang BS4. applyModalFilter() menutup modal ini dengan
                  $('#modalFilter').modal('hide'), jadi pembukanya harus API yang sama. --}}
-            <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+            <button class="btn-load" type="button" id="btnFilter" onclick="$('#modalFilter').modal('show')">
               <i class="fas fa-filter"></i> Filter
             </button>
             <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
@@ -101,7 +116,7 @@
             <div class="modal-body">
 
                 <div class="rt-section">
-                    <div class="rt-group-label">Pengaturan Laporan</div>
+                    {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
                     <div class="rt-grid-2">
                         <div>
                             <label class="rt-field-label" for="modalReport">Report</label>
@@ -161,35 +176,80 @@
   let globalOtorisasi = "2"; // default: Semua
   let globalReportMode = "0"; // default: Detail
   let globalValas = "0";
+  let globalOrderBy = "N";   // dipakai Outstanding saja -- Non Outstanding selalu kirim 'N'
   let lastRows = [];         // hasil fetch terakhir (dipakai renderRows / export / search)
   let currentGroupby = 'NoBukti'; // groupby aktif untuk render ulang saat search
+
+  // "0" = Non Outstanding (Sp_ReportPODet), "1" = Outstanding (Sp_reportoutStandingPOdet)
+  let globalMode = "0";
+
+  // Offset mode report Outstanding supaya kolom tersimpan (DBSIMPANHEADER, dikunci per
+  // href+reportmode) tidak bentrok dengan mode Non Outstanding di href yang sama.
+  const OUT_MODE_OFFSET = 20;
+
+  const reportUrlPo  = "{{ url('laporanpurchaseorderpo_doReport') }}";
+  const reportUrlOut = "{{ url('laporanpenerimaangudangospo_doReport') }}";
 
   var modereport_detailidr = 0;
   var modereport_detailvls = 1;
   var modereport_rekapidr  = 2;
   var modereport_rekapvls  = 3;
 
+  // Outstanding HANYA punya Detail (Rekap sudah mati sejak sebelum merge ini -- kolom
+  // KOdeCustSupp/OS tidak ada di Sp_reportoutStandingPOdet), jadi tiga mode ini dikelompokkan
+  // per Order By, bukan per Report/VALAS seperti sisi Non Outstanding.
+  var modereport_out_nobukti = 0, modereport_out_barang = 1, modereport_out_supplier = 2;
+
   g_modeReport = modereport_detailidr;
+
+  // Switcher "Tampilan" (Order By) -- HANYA ada di mode Outstanding (Non Outstanding tidak
+  // punya Order By sama sekali, selalu 'N'). options: [] membuat ReportTable tidak merender
+  // switcher apapun (lihat report-table.js viewHtml()), jadi Non Outstanding tetap tanpa bar
+  // switcher seperti sebelumnya. Ditukar lewat cfg.options + refresh(), BUKAN init() ulang.
+  const VIEW_OPTIONS_OUT = [
+    { value: 'N', label: 'No Bukti',  desc: 'Dikelompokkan per No Bukti' },
+    { value: 'B', label: 'Barang',    desc: 'Dikelompokkan per Nama Barang' },
+    { value: 'S', label: 'Supplier',  desc: 'Dikelompokkan per Nama Supplier' }
+  ];
+  const viewsCfg = {
+    label: 'Order By',
+    options: [],
+    get: function () { return globalOrderBy; },
+    set: function (v) {
+      setOrderBy(String(v));
+      if (lastRows.length) { makeTable('REPORT'); }
+    }
+  };
 
   $(document).ready(function () {
       setOtorisasi(globalOtorisasi);
       setValas(globalValas);
       setReportMode(globalReportMode);
+      setOrderBy(globalOrderBy);
+
+      // Menu lama boleh mengarahkan ke /laporanpurchaseorderpo?mode=out supaya langsung terbuka
+      // di mode Outstanding (lihat rencana retire halaman lama).
+      if ("{{ request('mode') }}" === "out") {
+        $('#inputMode').val('1');
+        setMode('1');
+      }
 
       setDefaultHeader();
       doSetHeader(g_modeReport);
       doShowCustomize();
 
       // Header tabel interaktif: drag-reorder + gear (sembunyikan/desimal/total) + bar
-      // "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan" switcher di #rtBar -- Report
-      // (Detail/Rekap) & VALAS tetap di modal Filter seperti sebelumnya karena keduanya
-      // dua dimensi independen (4 kombinasi gcart_header), bukan satu switcher tunggal.
+      // "Reset kolom"/kolom tersembunyi, plus switcher "Tampilan" (Order By) yang HANYA
+      // muncul di mode Outstanding (lihat viewsCfg). Report (Detail/Rekap) & VALAS tetap di
+      // modal Filter seperti sebelumnya karena keduanya dua dimensi independen, bukan satu
+      // switcher tunggal.
       ReportTable.init({
         table: '#mainTable',
         bar: '#rtBar',
         onChange: function () {
           if (lastRows.length) { applyFilters(); } else { renderRows([], currentGroupby); }
-        }
+        },
+        views: viewsCfg
       });
   });
 
@@ -236,15 +296,98 @@
     globalOtorisasi = val;
   }
 
+  // order by -- HANYA dipakai mode Outstanding (UI-nya switcher "Tampilan" di #rtBar)
+  function setOrderBy(val) {
+    globalOrderBy = val;
+  }
+
+  // Jenis laporan: "0" Non Outstanding (Sp_ReportPODet, tombol Filter aktif, dua tanggal) atau
+  // "1" Outstanding (Sp_reportoutStandingPOdet, tombol Filter disembunyikan, HANYA tanggal
+  // kedua -- lihat komentar di toolbar).
+  function setMode(val) {
+    globalMode = val;
+    const isOut = (val === '1');
+
+    // date1 tidak dikirim di mode Outstanding -- LaporanPenerimaanGudangOSPOController sudah
+    // mematok tgl1 sendiri, jadi tidak perlu fallback apapun di sini.
+    $('#inputDate1').toggle(!isOut);
+    $('#dateSep').toggle(!isOut);
+    $('#periodeLabel').text(isOut ? 'Sampai Tanggal' : 'Periode');
+
+    // Modal filter jadi tidak terjangkau sama sekali di mode Outstanding (satu-satunya
+    // pembukanya disembunyikan), jadi ketiganya dipaksa balik ke default supaya tidak ada
+    // nilai basi dari mode Non Outstanding yang diam-diam ikut terpakai (Rekap dipaksa mati --
+    // Sp_reportoutStandingPOdet tidak mengembalikan KOdeCustSupp/OS -- dan VALAS/Otorisasi
+    // tidak berarti apa-apa buat proc ini).
+    $('#btnFilter').toggle(!isOut);
+    if (isOut) {
+      $('#modalReport').val('0');
+      setReportMode('0');
+      $('#modalValas').val('0');
+      setValas('0');
+      $('#modalOtorisasi').val('2');
+      setOtorisasi('2');
+    }
+
+    // Order By hanya ada di mode Outstanding -- tukar opsi switcher lalu jatuhkan balik ke No
+    // Bukti kalau nilainya sekarang tidak lagi valid untuk mode baru.
+    viewsCfg.options = isOut ? VIEW_OPTIONS_OUT : [];
+    if (!isOut) { setOrderBy('N'); }
+    if (typeof ReportTable !== 'undefined' && ReportTable.refresh) {
+      ReportTable.refresh();
+    }
+
+    // Ganti mode tidak langsung fetch ulang -- tabel dikosongkan, user tekan Tampilkan.
+    lastRows = [];
+    currentGroupby = 'NoBukti';
+    $('#tableBody').html('<tr class="empty-row"><td>Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>');
+    $('#footerLabel').text('Belum ada data dimuat');
+
+    // Segarkan susunan kolom (bar kolom tersembunyi + modal Customize) sesuai mode & Order By
+    // yang berlaku sekarang, supaya tidak menampilkan sisa dari mode sebelumnya.
+    resolveModeAndGroupby();
+    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
+    if (typeof doShowCustomize === 'function') { doShowCustomize(); }
+
+    updateFilterBadge();
+  }
+
   /* -- EXPORT -- */
   function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }
   document.addEventListener('click', function (e) {
     const wrap = document.getElementById('exportWrap');
     if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
   });
+  // doExport() sebelumnya HANYA menangani Print -- XLSX/CSV tidak melakukan apa-apa karena
+  // exportDelimited() belum pernah ada di halaman ini. Diperbaiki di sini dengan trio
+  // doExport/exportDelimited standar (lihat reportlaporanmarketingspbhrgso).
   function doExport(fmt) {
     document.getElementById('exportDrop').classList.remove('open');
-    if (fmt === 'Print') { window.print(); }
+    if (fmt === 'Print') { window.print(); return; }
+    exportDelimited(fmt);
+  }
+  function exportDelimited(fmt) {
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const header = cols.map(c => c[1]);
+    const body = (lastRows || []).map(r => cols.map(function (c) {
+      const key = c[0], v = r[key];
+      if (key === 'NeedOtorisasi') return (v == 1 ? 'Belum' : 'Sudah');
+      if (key === 'DiTerima') return getStatusDiterima(r);
+      if (c[3] === 'date') return format_date(v);
+      if (c[3] === 'float' || c[3] === 'int') return currencyNormalizer(v);
+      return (v == null ? '' : v);
+    }));
+    const rows = [header].concat(body);
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const ext = (fmt === 'Excel') ? 'xls' : 'csv';
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (globalMode === '1')
+      ? 'OutstandingPO_' + (globalDate2 || '') + '.' + ext
+      : 'LaporanPO_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('📄', 'Data diekspor sebagai ' + fmt);
   }
 
   // valas
@@ -257,8 +400,52 @@
     DetOrRekap = Number(val);
   }
 
+  // Menentukan g_modeReport & groupby dari globalMode + (DetOrRekap/globalValas atau
+  // globalOrderBy) yang berlaku sekarang -- dipakai makeTable() (sebelum fetch) dan setMode()
+  // (supaya bar kolom & modal Customize langsung ikut mode baru tanpa menunggu Tampilkan).
+  // Kedua sisi bernomor mulai dari 0, jadi Outstanding digeser OUT_MODE_OFFSET supaya kolom
+  // tersimpan (DBSIMPANHEADER, dikunci per href+reportmode) tidak bentrok dengan Non
+  // Outstanding di href yang sama.
+  function resolveModeAndGroupby() {
+    if (globalMode === '1') {
+      if (globalOrderBy == "N") {
+        g_modeReport = modereport_out_nobukti + OUT_MODE_OFFSET;
+        return 'NoBukti';
+      } else if (globalOrderBy == "B") {
+        g_modeReport = modereport_out_barang + OUT_MODE_OFFSET;
+        return 'NamaBrg';
+      } else {
+        g_modeReport = modereport_out_supplier + OUT_MODE_OFFSET;
+        return 'NAMACUSTSUPP';
+      }
+    }
+
+    // Non Outstanding: groupby selalu NoBukti, sama seperti sebelum merge ini.
+    if (globalValas == "0") {
+      g_modeReport = (DetOrRekap === 0) ? modereport_detailidr : modereport_rekapidr;
+    } else {
+      g_modeReport = (DetOrRekap === 0) ? modereport_detailvls : modereport_rekapvls;
+    }
+    return 'NoBukti';
+  }
+
+  // Dispatcher: kedua SP punya set kolom & penomoran mode yang berbeda total (POPO 0-3,
+  // Outstanding 0-2 dalam numbering-nya sendiri) -- tetap dipisah jadi dua fungsi, BUKAN
+  // digabung, supaya g_modeReport (dengan offset di sisi Outstanding) tidak salah dibaca. Nama
+  // fungsi ini ("setDefaultHeader") tetap dipertahankan karena masterreport2's doSetHeader()
+  // memanggilnya lewat nama ini.
   function setDefaultHeader() {
-    if (g_modeReport == modereport_detailidr) {
+    const isOut = (globalMode === '1');
+    const base = isOut ? (g_modeReport - OUT_MODE_OFFSET) : g_modeReport;
+    if (isOut) {
+      setHeaderOut(base);
+    } else {
+      setHeaderPo(base);
+    }
+  }
+
+  function setHeaderPo(base) {
+    if (base == modereport_detailidr) {
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -277,7 +464,7 @@
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 1;
 
-    } else if (g_modeReport == modereport_detailvls){
+    } else if (base == modereport_detailvls){
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -296,7 +483,7 @@
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 1;
 
-    } else if(g_modeReport == modereport_rekapidr){
+    } else if(base == modereport_rekapidr){
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -313,7 +500,7 @@
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 1;
 
-    } else if(g_modeReport == modereport_rekapvls){
+    } else if(base == modereport_rekapvls){
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -349,76 +536,135 @@
     }
   }
 
-  const reportUrl = "{{ url('laporanpurchaseorderpo_doReport') }}"
+  // Kolom NYATA dari Sp_reportoutStandingPOdet, dipindah dari
+  // reportpengadaanpgoutstandingpo.blade.php -- HANYA tiga cabang Detail (per Order By). Tiga
+  // cabang Rekap dari halaman sumber (KOdeCustSupp/OS) DIBUANG di sini: proc ini tidak pernah
+  // mengembalikan kolom itu & controllernya tidak meneruskan inputDetOrRekap sama sekali --
+  // Rekap sudah mati sejak sebelum merge ini (lihat setMode()).
+  function setHeaderOut(base) {
+    if (base === modereport_out_nobukti) {
+      gcart_header = [
+        ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
+        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+        ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
+        ['NOPOCUST', 'PO Cust', 1, 'varchar', 0, 0],
+        ['NAMACUSTOMER', 'Nama Customer', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QntPO', 'Qnt PO', 1, 'float', 1, 0],
+        ['QntBeli', 'Qnt Terima', 1, 'float', 1, 0],
+        ['QNTOS', 'Qnt Sisa', 1, 'float', 1, 0],
+        ['LeadTime', 'Lead Time', 1, 'varchar', 0, 0],
+        ['HARGA', 'Harga', 1, 'float', 1, 2],
+        ['NDPP', 'DPP', 1, 'float', 1, 2],
+        ['NNET', 'Total', 1, 'float', 1, 2]
+      ];
+      gsum_issubtotal = 0; gsum_isgrandtotal = 1;
+
+    } else if (base === modereport_out_barang) {
+      gcart_header = [
+        ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
+        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+        ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QntPO', 'Qnt PO', 1, 'float', 1, 0],
+        ['QntBeli', 'Qnt Terima', 1, 'float', 1, 0],
+        ['QNTOS', 'Qnt Sisa', 1, 'float', 1, 0],
+        ['LeadTime', 'Lead Time', 1, 'varchar', 0, 0],
+        ['NDPP', 'DPP', 1, 'float', 1, 2],
+        ['NNET', 'Total', 1, 'float', 1, 2]
+      ];
+      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
+
+    } else {
+      gcart_header = [
+        ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
+        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+        ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QntPO', 'Qnt PO', 1, 'float', 1, 0],
+        ['QntBeli', 'Qnt Terima', 1, 'float', 1, 0],
+        ['QNTOS', 'Qnt Sisa', 1, 'float', 1, 0],
+        ['LeadTime', 'Lead Time', 1, 'varchar', 0, 0],
+        ['NDPP', 'DPP', 1, 'float', 1, 2],
+        ['NNET', 'Total', 1, 'float', 1, 2]
+      ];
+      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
+    }
+  }
+
   function makeTable(_mode) {
-    let groupby = 'NoBukti';
+    showPeriode();
+    const isOut = (globalMode === '1');
     let _date1 = $("#inputDate1").val();
     let _date2 = $("#inputDate2").val();
 
-    let input_valas = globalValas;
-
-    // BELUM DIPERBAIKI (di luar cakupan migrasi ini -- lihat catatan yang dilaporkan ke
-    // user): kondisi kedua di bawah cek "0" lagi (harusnya "1"), jadi memilih VALAS "VLS"
-    // TIDAK PERNAH mengganti g_modeReport/kolom ke varian *vls -- sudah begini sejak sebelum
-    // migrasi.
-    if (input_valas == "0") {
-      if (DetOrRekap === 0) {
-        g_modeReport = modereport_detailidr;
-        groupby = 'NoBukti';
-      } else {
-        g_modeReport = modereport_rekapidr;
-        groupby = 'NoBukti';
-      }
-    } else if (input_valas == "0") {
-      if (DetOrRekap === 0) {
-        g_modeReport = modereport_detailvls;
-        groupby = 'NoBukti';
-      } else {
-        g_modeReport = modereport_rekapvls;
-        groupby = 'NoBukti';
-      }
-    }
+    const groupby = resolveModeAndGroupby();
 
     if (typeof doSetHeader === 'function') {
       doSetHeader(g_modeReport);
     }
 
-    let inputOtoSP = globalOtorisasi;
+    let url, data;
+    if (isOut) {
+      // date1 sengaja tidak dikirim -- LaporanPenerimaanGudangOSPOController mematok tgl1
+      // sendiri. Tidak ada inputOto/inputDetOrRekap/inputValas: Sp_reportoutStandingPOdet
+      // tidak punya parameter untuk itu semua.
+      url  = reportUrlOut;
+      data = {
+        date2    : _date2,
+        inputOrd : globalOrderBy,
+      };
+    } else {
+      let inputOtoSP = globalOtorisasi;
 
-    if (['3', '4', '5', '6'].includes(globalOtorisasi)) {
-      inputOtoSP = '2';   // Semua
+      if (['3', '4', '5', '6'].includes(globalOtorisasi)) {
+        inputOtoSP = '2';   // Semua
+      }
+
+      url  = reportUrlPo;
+      data = {
+        date1: _date1,
+        date2: _date2,
+        inputOto: inputOtoSP,
+        inputOrd: 'N',
+        inputDetOrRekap: DetOrRekap,
+        inputValas: globalValas
+      };
     }
-
-    let data = {
-      date1: _date1,
-      date2: _date2,
-      inputOto: inputOtoSP,
-      inputOrd: 'N',
-      inputDetOrRekap: DetOrRekap,
-      inputValas: globalValas
-    };
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
     // Ambil data SEKALI, lalu render langsung ke tabel styled baru (#tableBody).
     $.ajax({
-      url    : reportUrl,
+      url    : url,
       type   : 'get',
       data   : data,
       success: function (res) {
       let rows = res || [];
 
-        if (globalOtorisasi === '3') {
-          rows = rows.filter(r => getStatusDiterima(r) === 'Diterima');
-        }
-        else if (globalOtorisasi === '4') {
-          rows = rows.filter(r => getStatusDiterima(r) === 'Menunggu');
-        }
-        else if (globalOtorisasi === '5') {
-          rows = rows.filter(r => getStatusDiterima(r) === 'Sebagian');
-        }
-        else if (globalOtorisasi === '6') {
-          rows = rows.filter(r => getStatusDiterima(r) === 'Batal');
+        // Filter status diterima (Diterima/Menunggu/Sebagian/Batal) HANYA berlaku Non
+        // Outstanding -- Sp_reportoutStandingPOdet tidak mengembalikan Qnt/qntLPB/QntBatal
+        // sama sekali (setMode() juga sudah memaksa globalOtorisasi balik ke '2', ini jaga-jaga
+        // kalau ada nilai basi).
+        if (!isOut) {
+          if (globalOtorisasi === '3') {
+            rows = rows.filter(r => getStatusDiterima(r) === 'Diterima');
+          }
+          else if (globalOtorisasi === '4') {
+            rows = rows.filter(r => getStatusDiterima(r) === 'Menunggu');
+          }
+          else if (globalOtorisasi === '5') {
+            rows = rows.filter(r => getStatusDiterima(r) === 'Sebagian');
+          }
+          else if (globalOtorisasi === '6') {
+            rows = rows.filter(r => getStatusDiterima(r) === 'Batal');
+          }
         }
 
         lastRows = rows;
@@ -427,7 +673,7 @@
         renderRows(lastRows, groupby);
       },
       error  : function (xhr) {
-        console.error('laporanpurchaseorderpo_doReport gagal:', xhr.status, xhr.responseText);
+        console.error(url + ' gagal:', xhr.status, xhr.responseText);
         showToast('⚠️', 'Gagal memuat data (' + xhr.status + ')');
         lastRows = [];
         currentGroupby = groupby;
@@ -479,15 +725,16 @@
     const keys  = cols.filter(c => c[4] === 1).map(c => c[0]); // kolom yang di-subtotal
     const thead = document.querySelector('#mainTable thead');
     const tbody = document.getElementById('tableBody');
-    // Baris total cuma tampil kalau kolom DPP (NDPP/Ndppusd) sedang terlihat --
-    // dipertahankan apa adanya (bukan "ada kolom total apa saja"), sesuai versi sebelumnya.
-    const totalVisible = cols.some(c => ['NDPP', 'Ndppusd'].includes(c[0]));
+    // Baris total tampil kalau ADA kolom yang ditandai total (item[4]===1) -- generik,
+    // menggantikan gate lama yang cuma cek DPP (NDPP/Ndppusd) secara spesifik. Kolom Rekap
+    // Outstanding (QntPO/NNET) tidak pernah punya DPP sama sekali, jadi gate lama akan
+    // menyembunyikan GRAND TOTAL-nya total; gate generik ini dipakai sama di kedua mode.
     // Baris Subtotal & Grand Total mengikuti toggle di modal Customize Table
     // (#buttonSubtotal -> gsum_issubtotal, #buttonGrandtotal -> gsum_isgrandtotal).
     // gsum_* dimuat oleh doSetHeader() saat klik Tampilkan, jadi pilihan user
     // (sudah tersimpan) langsung berlaku.
-    const showSub   = totalVisible && (gsum_issubtotal === 1);
-    const showGrand = totalVisible && (gsum_isgrandtotal === 1);
+    const showSub   = keys.length > 0 && (gsum_issubtotal === 1);
+    const showGrand = keys.length > 0 && (gsum_isgrandtotal === 1);
 
     // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
     // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).

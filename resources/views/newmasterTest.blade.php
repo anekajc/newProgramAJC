@@ -1333,8 +1333,8 @@
     dyn.style.display = 'block';
     dyn.innerHTML = `
       <div class="page-subtitle">
-      <button class="report-back-btn" onclick="moduleGoBack()">
-        ${icon('chevron')} Kembali
+      <button class="report-back-btn" id="report-back-btn" onclick="goHome()">
+        ${icon('arrow-left')} Kembali
       </button></div>
       <div class="page-title">${currentNode.label}</div>
       <div class="page-subtitle">${moduleViewStack.length ? '' : (mod.subtitle ?? '')}</div>

@@ -34,11 +34,11 @@ class LaporanMarketingHistoryOutSOController extends Controller
     public function doReport(Request $req)
     {
         $isout = $req->get('isout');
-        if ($isout >= 0) {
-            $tgl1 = $req->get('date1');
-        } else {
-            $tgl1    = '01/01/2019';
-        }
+        // Halaman gabungan (reportmarketinghistoryso mode Outstanding) menyembunyikan tanggal
+        // awal dan tidak mengirim date1 -> pakai 2019-01-01 ("semua outstanding s/d date2"),
+        // sesuai maksud cabang else lama (isout dari view selalu "0"/"1", keduanya >= 0, jadi
+        // cabang itu sebelumnya tidak pernah tereksekusi).
+        $tgl1 = $req->get('date1') ?: '2019-01-01';
         $tgl2    = $req->get('date2');
         $KodeCust = $req->get('inputCustomer');
         $lokasi = $req->get('inputLokasi');
