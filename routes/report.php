@@ -243,8 +243,6 @@ Route::get('/laporanpengadaanregisteroutstandinginvoice_doReport', [LaporanPenga
 //LAPORAN SO LAPORAN SO
 Route::get('/laporanmarketingso', [LaporanMarketingSOController::class, 'index']);
 Route::get('/laporanmarketingso_doReport', [LaporanMarketingSOController::class, 'doReport']);
-Route::get('/laporanmarketingso_doFilter', [LaporanMarketingSOController::class, 'doFilter']);
-Route::get('/laporanmarketingso_doReportFilter', [LaporanMarketingSOController::class, 'doReportFilter']);
 Route::get('/laporanmarketingso_loadcustomer', [LaporanMarketingSOController::class, 'loadCustomer']);
 Route::get('/laporanmarketingso_loadgroup', [LaporanMarketingSOController::class, 'loadGroup']);
 Route::get('/laporanmarketingso_loadpic', [LaporanMarketingSOController::class, 'loadPIC']);

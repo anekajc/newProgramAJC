@@ -29,7 +29,8 @@ class LaporanPenerimaanGudangOSPOController extends Controller {
   public function doReport(Request $req) {
     $SReport = "T";
     $Ordr    = $req->query('inputOrd');
-    $tgl1    = $req->query('date1');
+    // $tgl1    = $req->query('date1');
+    $tgl1    = '2019-01-01';
     $tgl2    = $req->query('date2');
     $isiList = "";
     $IDuser = '';

@@ -18,11 +18,22 @@
                     <div class="page-title">History SO</div>
                 </div> --}}
 
+                <!-- Jenis laporan: Non Outstanding (dua tanggal, ke SP_REPORTHISSO) atau
+                     Outstanding (tgl1 dipatok di controller, hanya tgl2 dikirim, ke
+                     SP_REPORTHISSOOUTweb). -->
+                <div class="filter-wrap">
+                    <label>Jenis</label>
+                    <select class="filter-inp" id="inputMode" onchange="setMode(this.value)">
+                        <option value="0">Non Outstanding</option>
+                        <option value="1">Outstanding</option>
+                    </select>
+                </div>
+
                 <!-- Periode (date range) -->
                 <div class="filter-wrap">
-                    <label>Periode</label>
+                    <label id="periodeLabel">Periode</label>
                     <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
-                    <span class="filter-sep">s/d</span>
+                    <span class="filter-sep" id="dateSep">s/d</span>
                     <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
                 </div>
 
@@ -125,7 +136,9 @@
                     <div class="rt-section">
                         <div class="rt-group-label">Pengaturan Laporan</div>
                         <div class="rt-grid-1">
-                            <div>
+                            {{-- SP_REPORTHISSOOUTweb tidak punya parameter ini -- hanya berlaku
+                                 di mode Non Outstanding. --}}
+                            <div id="wrapOtorisasi">
                                 <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
                                 <select class="rt-native" id="modalOtorisasi">
                                     <option value="0">Outstanding</option>
@@ -173,18 +186,62 @@
         let globalOtorisasi = "2"; // default: Semua
         let globalOrderBy = "N"; // default: Nomor Bukti (SP_REPORTHISSO tidak punya parameter order)
         let globalReportMode = "0"; // default: Detail
+        let globalMode = "0"; // "0" = Non Outstanding (SP_REPORTHISSO), "1" = Outstanding (SP_REPORTHISSOOUTweb)
 
         var jenisreport = 0; // ini untuk detail dan rekap
         let lastRows = []; // hasil fetch terakhir (dipakai render / export / search)
         let currentGroupby = 'NOBUKTI'; // groupby aktif untuk render ulang saat search
 
-        const reportUrl = "{{ url('laporanmarketinghistoryso_doReport') }}";
+        // Offset mode report Outstanding supaya kolom tersimpan (DBSIMPANHEADER, dikunci per
+        // href+reportmode) tidak bentrok dengan mode Non Outstanding di href yang sama.
+        const OUT_MODE_OFFSET = 20;
+
+        const reportUrlHis = "{{ url('laporanmarketinghistoryso_doReport') }}";
+        const reportUrlOut = "{{ url('laporanmarketinghistoryoutso_doReport') }}";
+
+        // Opsi switcher "Tampilan" (Detail/Rekap) -- disembunyikan di mode Outstanding
+        // (SP_REPORTHISSOOUTweb hanya pernah dipakai untuk Detail No Bukti) dengan menukar
+        // cfg.views.options lalu ReportTable.refresh(), BUKAN init() ulang.
+        const VIEW_OPTIONS = [{
+                value: '0',
+                label: 'Detail',
+                desc: 'Rincian per baris'
+            },
+            {
+                value: '1',
+                label: 'Rekap',
+                desc: 'Ringkasan per grup'
+            }
+        ];
+        const viewsCfg = {
+            label: 'Tampilan',
+            options: VIEW_OPTIONS,
+            get: function() {
+                return globalReportMode;
+            },
+            set: function(v) {
+                setReportMode(String(v));
+                $('#modalReport').val(String(v));
+                // detail/rekap hanya mengubah susunan kolom, bukan query
+                if (lastRows.length) {
+                    render();
+                }
+            }
+        };
 
         $(document).ready(function() {
             setReportMode(globalReportMode);
             setOtorisasi(globalOtorisasi);
             setOrderBy(globalOrderBy);
             showPeriode();
+
+            // Menu lama boleh mengarahkan ke /laporanmarketinghistoryso?mode=out supaya
+            // langsung terbuka di mode Outstanding (lihat rencana retire halaman lama).
+            if ("{{ request('mode') }}" === "out") {
+                $('#inputMode').val('1');
+                setMode('1');
+            }
+
             setDefaultHeader();
 
             // Header tabel interaktif. "Tampilan" = filter Report (Detail/Rekap)
@@ -193,31 +250,7 @@
                 table: '#mainTable',
                 bar: '#rtBar',
                 onChange: render,
-                views: {
-                    label: 'Tampilan',
-                    options: [{
-                            value: '0',
-                            label: 'Detail',
-                            desc: 'Rincian per baris'
-                        },
-                        {
-                            value: '1',
-                            label: 'Rekap',
-                            desc: 'Ringkasan per grup'
-                        }
-                    ],
-                    get: function() {
-                        return globalReportMode;
-                    },
-                    set: function(v) {
-                        setReportMode(String(v));
-                        $('#modalReport').val(String(v));
-                        // detail/rekap hanya mengubah susunan kolom, bukan query
-                        if (lastRows.length) {
-                            render();
-                        }
-                    }
-                }
+                views: viewsCfg
             });
 
 
@@ -232,6 +265,48 @@
         // otorisasi (0 = Outstanding, 1 = Terpenuhi, 2 = Semua) -> parameter @penuh SP_REPORTHISSO
         function setOtorisasi(val) {
             globalOtorisasi = val;
+        }
+
+        // Jenis laporan: "0" Non Outstanding (SP_REPORTHISSO, dua tanggal) atau
+        // "1" Outstanding (SP_REPORTHISSOOUTweb, tgl1 dipatok di controller).
+        function setMode(val) {
+            globalMode = val;
+            const isOut = (val === '1');
+
+            // tgl1 tidak dikirim di mode Outstanding -- controller sudah mematoknya sendiri
+            // (fallback ke 2019-01-01, lihat LaporanMarketingHistoryOutSOController@doReport).
+            $('#inputDate1').toggle(!isOut);
+            $('#dateSep').toggle(!isOut);
+            $('#periodeLabel').text(isOut ? 'Per Tanggal' : 'Periode');
+
+            // Otorisasi (@penuh) tidak ada di SP_REPORTHISSOOUTweb -- lewati di Outstanding.
+            // Filter Data (Customer/Lokasi) TETAP tampil: SP_REPORTHISSOOUTweb menerimanya.
+            $('#wrapOtorisasi').toggle(!isOut);
+
+            if (isOut) {
+                $('#modalOtorisasi').val('2');
+                setOtorisasi('2');
+                // Dropdown atas menggantikan select "Outstanding" bawaan OutSO (isout) --
+                // paksa isout=0 di makeTable(), tanpa switcher Detail/Rekap (SP ini cuma
+                // pernah dipakai utk Detail No Bukti).
+                setReportMode('0');
+                $('#modalReport').val('0');
+                viewsCfg.options = [];
+            } else {
+                viewsCfg.options = VIEW_OPTIONS;
+            }
+            if (typeof ReportTable !== 'undefined' && ReportTable.refresh) {
+                ReportTable.refresh();
+            }
+
+            // Ganti mode tidak langsung fetch ulang -- tabel dikosongkan, user tekan Tampilkan.
+            lastRows = [];
+            currentGroupby = 'NOBUKTI';
+            $('#tableBody').html('<tr class="empty-row"><td>Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>');
+            $('#footerLabel').text('Belum ada data dimuat');
+
+            setModeReport();
+            updateFilterBadge();
         }
 
         // order by
@@ -381,7 +456,9 @@
         function exportDelimited(fmt) {
             const cols = gcart_header.filter(c => c[2] === 1);
             const header = cols.map(c => c[1]);
+            const osMap = (globalMode === '1') ? buildOutstandingMap(lastRows) : null;
             const body = (lastRows || []).map(r => cols.map(function(c) {
+                if (c[0] === 'OUTSTANDING') return osMap ? outstandingStatus(osMap, r).label : '';
                 const v = pickCI(r, c[0]);
                 if (c[3] === 'date') return format_date(v);
                 if (c[3] === 'float' || c[3] === 'int') return currencyNormalizer(v);
@@ -395,7 +472,9 @@
             });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'HistorySO_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
+            a.download = (globalMode === '1')
+                ? 'OutstandingHistorySO_' + (globalDate2 || '') + '.' + ext
+                : 'HistorySO_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -420,6 +499,50 @@
             return undefined;
         }
 
+        // Kolom OUTSTANDING (badge Belum/Sebagian/Terkirim) hanya ada di mode Outstanding dan
+        // dihitung sisi-klien -- diambil apa adanya dari reportmarketinghistoryoutso.blade.php.
+
+        // Kunci grup NOBUKTI dinormalkan: kolom CHAR(n) SQL Server sering ada padding spasi.
+        function osKey(v) {
+            return String(v == null ? '' : v).trim();
+        }
+
+        // Peta NOBUKTI -> { sum: total QNTSPB se-NOBUKTI, qntSO: QNTSO baris PERTAMA grup itu }.
+        // Dihitung dari SELURUH data termuat (lastRows), bukan hasil search/filter, supaya
+        // status satu SO tidak berubah hanya karena sebagian barisnya tersembunyi saat dicari.
+        function buildOutstandingMap(rows) {
+            const m = {};
+            (rows || []).forEach(function(r) {
+                const k = osKey(pickCI(r, 'NOBUKTI'));
+                if (!k) return;
+                if (!(k in m)) m[k] = {
+                    sum: 0,
+                    qntSO: currencyNormalizer(pickCI(r, 'QNTSO'))
+                };
+                m[k].sum += currencyNormalizer(pickCI(r, 'QNTSPB'));
+            });
+            return m;
+        }
+
+        // { label, cls } untuk satu baris, berdasarkan peta di atas.
+        // sum <= 0 -> Belum; sum >= QNTSO -> Terkirim (>= dipakai, bukan ==, supaya
+        // over-delivery dan pembulatan float tidak salah jadi "Sebagian").
+        function outstandingStatus(map, r) {
+            const g = map[osKey(pickCI(r, 'NOBUKTI'))];
+            if (!g || g.sum <= 0) return {
+                label: 'Belum',
+                cls: 'is-inactive'
+            };
+            if (g.sum >= g.qntSO) return {
+                label: 'Terkirim',
+                cls: 'is-active'
+            };
+            return {
+                label: 'Sebagian',
+                cls: 'is-supervisor'
+            };
+        }
+
         var modereport_detailnobukti = 0,
             modereport_detailbarang = 1,
             modereport_detailcustomer = 2;
@@ -428,8 +551,21 @@
             modereport_rekapcustomer = 5;
         g_modeReport = modereport_detailnobukti;
 
+        // Dispatcher: hanya Detail No Bukti yang benar-benar berbeda antara Non Outstanding dan
+        // Outstanding (kolom OUTSTANDING dkk.) -- lima mode lainnya identik di kedua SP, tapi
+        // tetap dipisah jadi dua fungsi supaya konsisten dengan halaman SO yang sudah digabung.
         function setDefaultHeader() {
-            if (g_modeReport == modereport_detailnobukti) {
+            const isOut = (globalMode === '1');
+            const base = isOut ? (g_modeReport - OUT_MODE_OFFSET) : g_modeReport;
+            if (isOut) {
+                setHeaderOut(base);
+            } else {
+                setHeaderHis(base);
+            }
+        }
+
+        function setHeaderHis(base) {
+            if (base == modereport_detailnobukti) {
                 gcart_header = [
                     ['NOBUKTI', 'No. Bukti', 1, 'varchar', 0, 0],
                     ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -457,7 +593,7 @@
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;
 
-            } else if (g_modeReport == modereport_detailbarang) {
+            } else if (base == modereport_detailbarang) {
                 gcart_header = [
                     ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
                     ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
@@ -473,7 +609,7 @@
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;
 
-            } else if (g_modeReport == modereport_detailcustomer) {
+            } else if (base == modereport_detailcustomer) {
                 gcart_header = [
                     ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
                     ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
@@ -489,7 +625,7 @@
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;
 
-            } else if (g_modeReport == modereport_rekapnobukti) {
+            } else if (base == modereport_rekapnobukti) {
                 gcart_header = [
                     ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
                     ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -507,7 +643,127 @@
                 gsum_issubtotal = 0;
                 gsum_isgrandtotal = 1;
 
-            } else if (g_modeReport == modereport_rekapbarang) {
+            } else if (base == modereport_rekapbarang) {
+                gcart_header = [
+                    ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
+                    ['Qnt', 'QNT', 1, 'float', 1, 2],
+                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
+                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
+                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
+                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
+                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
+                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
+                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
+                    ['totalusd', 'Total $', 1, 'float', 1, 2]
+                ];
+                gsum_issubtotal = 0;
+                gsum_isgrandtotal = 1;
+
+            } else {
+                gcart_header = [
+                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
+                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
+                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
+                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
+                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
+                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
+                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
+                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
+                    ['totalusd', 'Total $', 1, 'float', 1, 2]
+                ];
+                gsum_issubtotal = 1;
+                gsum_isgrandtotal = 1;
+            }
+        }
+
+        // Kolom Outstanding (SP_REPORTHISSOOUTweb) -- diambil apa adanya dari
+        // reportmarketinghistoryoutso.blade.php. Hanya Detail No Bukti yang beda dari Non
+        // Outstanding (kolom OUTSTANDING, tanpa NoPesanan/NamaSLS/TGLPO/dst.); lima mode
+        // lainnya identik dan dipertahankan sama persis untuk konsistensi.
+        function setHeaderOut(base) {
+            if (base == modereport_detailnobukti) {
+                gcart_header = [
+                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+                    ['NoPesanan', 'No. PO Cust', 1, 'varchar', 0, 0],
+                    ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
+                    ['NAMAGROUPCUSTSUPP', 'Nama Group', 1, 'varchar', 0, 0],
+                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                    ['HARGA', 'Harga', 1, 'float', 0, 0],
+                    ['QNTSO', 'Qnt. SO', 1, 'float', 1, 0],
+                    ['NOBUKTISPB', 'No. SPB', 1, 'varchar', 0, 0],
+                    ['TGLSPB', 'Tgl. SPB', 1, 'date', 0, 0],
+                    ['QNTSPB', 'Qnt. SPB', 1, 'float', 1, 0],
+                    ['NOBINV', 'No. Inv', 1, 'varchar', 0, 0],
+                    ['TGLINV', 'Tgl. Inv', 1, 'date', 0, 0],
+                    ['QNTINV', 'Qnt. Inv', 1, 'float', 1, 0],
+                    ['NORSPB', 'No. RSPB', 1, 'varchar', 0, 0],
+                    ['TGLRSPB', 'Tgl. RSPB', 1, 'date', 0, 0],
+                    ['QNTRSPB', 'Qnt. RSPB', 1, 'float', 1, 0],
+                    ['sTOCK', 'Stock Tgl. SO', 1, 'float', 1, 0],
+                    ['QNTBATAL', 'Batal SO', 1, 'float', 1, 0],
+                    ['OSSO', 'Sisa SO-SPB', 1, 'float', 1, 0],
+                    ['OUTSTANDING', 'Outstanding', 1, 'varchar', 0, 0],
+                ];
+                gsum_issubtotal = 1;
+                gsum_isgrandtotal = 1;
+
+            } else if (base == modereport_detailbarang) {
+                gcart_header = [
+                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
+                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                    ['QNT', 'Qnt', 1, 'float', 1, 0],
+                    ['NetW', 'Net W', 1, 'float', 1, 2],
+                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
+                    ['HARGA', 'Harga', 1, 'float', 1, 2]
+                ];
+                gsum_issubtotal = 1;
+                gsum_isgrandtotal = 1;
+
+            } else if (base == modereport_detailcustomer) {
+                gcart_header = [
+                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
+                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                    ['QNT', 'Qnt', 1, 'float', 1, 0],
+                    ['NetW', 'Net W', 1, 'float', 1, 2],
+                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
+                    ['HARGA', 'Harga', 1, 'float', 1, 2]
+                ];
+                gsum_issubtotal = 1;
+                gsum_isgrandtotal = 1;
+
+            } else if (base == modereport_rekapnobukti) {
+                gcart_header = [
+                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
+                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
+                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
+                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
+                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
+                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
+                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
+                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
+                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
+                    ['totalusd', 'Total $', 1, 'float', 1, 2]
+                ];
+                gsum_issubtotal = 0;
+                gsum_isgrandtotal = 1;
+
+            } else if (base == modereport_rekapbarang) {
                 gcart_header = [
                     ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
@@ -568,19 +824,36 @@
                 doSetHeader(g_modeReport);
             }
 
-            let data = {
-                date1: _date1,
-                date2: _date2,
-                inputCustomer: _inputCustomer,
-                inputLokasi: _inputLokasi,
-                inputOto,
-                inputOrd: input_order,
-            };
+            const isOut = (globalMode === '1');
+
+            // SP_REPORTHISSOOUTweb tidak punya parameter @penuh -- LaporanMarketingHistoryOutSOController
+            // sudah mematok tgl1 sendiri saat date1 tidak dikirim (lihat @doReport). Dropdown atas
+            // menggantikan select "Outstanding" bawaan halaman lama, jadi isout selalu dipaksa '0'.
+            let url, data;
+            if (isOut) {
+                url = reportUrlOut;
+                data = {
+                    date2: _date2,
+                    inputCustomer: _inputCustomer,
+                    inputLokasi: _inputLokasi,
+                    isout: '0',
+                };
+            } else {
+                url = reportUrlHis;
+                data = {
+                    date1: _date1,
+                    date2: _date2,
+                    inputCustomer: _inputCustomer,
+                    inputLokasi: _inputLokasi,
+                    inputOto,
+                    inputOrd: input_order,
+                };
+            }
 
             document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
             $.ajax({
-                url: reportUrl,
+                url: url,
                 type: 'get',
                 data: data,
                 success: function(res) {
@@ -589,7 +862,9 @@
                     $('#searchBox2').val('');
                     render();
                 },
-                error: function() {
+                error: function(xhr) {
+                    console.error((isOut ? 'laporanmarketinghistoryoutso_doReport' : 'laporanmarketinghistoryso_doReport') + ' gagal:', xhr.status, xhr.responseText);
+                    showToast('⚠️', 'Gagal memuat data (' + xhr.status + ')');
                     lastRows = [];
                     currentGroupby = groupby;
                     render();
@@ -609,9 +884,13 @@
             const showSub = (gsum_issubtotal === 1);
             const showGrand = (gsum_isgrandtotal === 1);
 
+            // Kolom OUTSTANDING hanya ada di mode Outstanding -- peta dihitung dari SELURUH data
+            // termuat (lastRows), bukan hasil search, supaya status tidak berubah saat dicari.
+            const osMap = (globalMode === '1') ? buildOutstandingMap(lastRows) : null;
+
             const search = ($('#searchBox2').val() || '').trim().toLowerCase();
             const rows = !search ? (lastRows || []) : (lastRows || []).filter(function(r) {
-                return rowSearchText(r, cols).indexOf(search) !== -1;
+                return rowSearchText(r, cols, osMap).indexOf(search) !== -1;
             });
 
             // HEADER dinamis dari gcart_header — dibangun report-table.js (ReportTable) supaya
@@ -656,6 +935,10 @@
                 html += '<tr class="data-row">' + cols.map(function(c) {
                     const key = c[0],
                         type = c[3];
+                    if (key === 'OUTSTANDING') {
+                        const st = outstandingStatus(osMap, r);
+                        return '<td><span class="sp-badge ' + st.cls + '">' + st.label + '</span></td>';
+                    }
                     if (type === 'date') return '<td>' + format_date(pickCI(r, key)) + '</td>';
                     if (type === 'float' || type === 'int') return '<td class="num">' + format_number(
                         currencyNormalizer(pickCI(r, key)), c[5]) + '</td>';
@@ -697,8 +980,10 @@
 
         // Gabungan teks satu baris dari kolom terlihat (tanggal pakai format tampil
         // dd/mm/yyyy) supaya pencarian cocok dengan apa yang user lihat di tabel.
-        function rowSearchText(r, cols) {
+        // osMap opsional: kalau ada, kolom OUTSTANDING ikut dicocokkan dengan label statusnya.
+        function rowSearchText(r, cols, osMap) {
             return cols.map(function(c) {
+                if (c[0] === 'OUTSTANDING') return osMap ? outstandingStatus(osMap, r).label : '';
                 const v = pickCI(r, c[0]);
                 if (c[3] === 'date') return format_date(v);
                 return (v == null ? '' : String(v));
@@ -732,6 +1017,13 @@
                 g_modeReport = (jenisreport === 0) ? modereport_detailbarang : modereport_rekapbarang;
             } else {
                 g_modeReport = (jenisreport === 0) ? modereport_detailcustomer : modereport_rekapcustomer;
+            }
+
+            // Kolom tersimpan (DBSIMPANHEADER) dikunci per href+reportmode -- offset mode
+            // Outstanding supaya tidak bentrok/menimpa layout tersimpan mode Non Outstanding
+            // di href yang sama (lihat OUT_MODE_OFFSET).
+            if (globalMode === '1') {
+                g_modeReport += OUT_MODE_OFFSET;
             }
 
             doSetHeader(g_modeReport);
