@@ -31,6 +31,14 @@
       <div class="toolbar">
         {{-- <div class="page-title">Ubah Kemasan Barang</div> --}}
 
+        <div class="filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+            onchange="reloadData()">
+          <span class="filter-sep">s/d</span>
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+            onchange="reloadData()">
+        </div>
         <div>
           <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
             oninput="renderTabel()" style="width:200px">
@@ -233,7 +241,7 @@
             <div class="col-md-12">
               <div class="row">
 
-                <!-- Kode Barang & Nama Barang -->
+                <!-- START OF ITEM Kode Barang & Nama Barang -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -272,10 +280,10 @@
                     </div>
                   </div>
                 </div>
-                <!-- Kode Barang & Nama Barang -->
+                <!-- END OF ITEM Kode Barang & Nama Barang -->
 
 
-                <!-- Qty Asal & Qty Jadi -->
+                <!-- START OF ITEM Qty Asal & Qty Jadi -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -334,8 +342,10 @@
                     </div>
                   </div>
                 </div>
+                <!-- END OF ITEM Qty Asal & Qty Jadi -->
 
-                <!--  HPP & Biaya -->
+
+                <!-- START OF ITEM HPP & Biaya -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -369,6 +379,7 @@
                     </div>
                   </div>
                 </div>
+                <!-- END OF ITEM HPP & Biaya -->
 
               </div>
             </div>
@@ -408,7 +419,27 @@
   var dataItem = [];
   var dataBrowse = {};
 
+  if (typeof doSetFormatDate !== 'function') {
+    window.doSetFormatDate = function(dateVal, sep) {
+      if (!dateVal) return '';
+      sep = sep || '/';
+      let d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal);
+      let yyyy = d.getFullYear();
+      let mm = String(d.getMonth() + 1).padStart(2, '0');
+      let dd = String(d.getDate()).padStart(2, '0');
+      return yyyy + sep + mm + sep + dd;
+    };
+  }
+
+  if (typeof nullToEmpty !== 'function') {
+    window.nullToEmpty = function(v) {
+      return (v === null || v === undefined) ? '' : v;
+    };
+  }
+
   let lastRows = (function() {
+    // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
     let belum = @json($listKMBJ);
     let sudah = @json($listSdhOto);
     belum.forEach(function(r) { r.IsOtorisasi1 = 0; });
@@ -425,6 +456,7 @@
   var gct_desimal_max = 4;
 
   function setDefaultHeader() {
+    // [ field, label, visible, type, total, decimals ]
     gcart_header = [
       ['GroupNobukti', 'Group No Bukti', 1, 'varchar', 0, 0],
       ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
@@ -508,6 +540,7 @@
         isgrandtotal: _isgrandtotal
       },
       success: function(res) {
+        // nothing to do
       }
     })
   }
@@ -548,7 +581,7 @@
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
-  // ambil field dari row tanpa peduli besar/kecil huruf
+  // ambil field dari row tanpa peduli besar/kecil huruf.
   function pickCI(r, key) {
     if (r[key] !== undefined) {
       return r[key];
@@ -562,7 +595,7 @@
     return null;
   }
 
-  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client side ajaa)
+  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client-side ajaa)
   function filterByOtorisasi(rows, filterVal) {
     if (filterVal === '1') {
       return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
@@ -651,7 +684,7 @@
     });
   }
 
-  // Filter modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
+  // Filter Modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
   function updateFilterBadge() {
     let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
     $('#filterBadge').text(count + ' aktif');
@@ -685,7 +718,7 @@
     renderTabel();
   });
 
-  function loadAll() {
+  function reloadData() {
     let listKMBJ = [], listSdhOto = [];
 
     $.ajax({
@@ -693,6 +726,8 @@
       type: "get",
       async: false,
       data: {
+        date1: $('#inputDate1').val(),
+        date2: $('#inputDate2').val()
       },
       success: function(res) {
         listKMBJ = res.listKMBJ || [];
@@ -707,6 +742,9 @@
   }
 
 function submitPrint (nobukti) {
+    // for (var i = 0; i < 30; i++) {
+    //   dataPrint.push(dataPrint[0])
+    // }
     let _token = $('#_token').val()
     $.ajax({
       url: "{!! url('kmbjdetailCetak') !!}",
@@ -722,6 +760,9 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
+
+        // console.log(res[0][0].IsOtorisasi1)
+
       }
     })
 
@@ -1240,6 +1281,8 @@ function submitPrint (nobukti) {
         if (i == 0) {
 
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
+        // } else if ( i < 1) {
+        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
         } else {
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
         }
@@ -1504,7 +1547,7 @@ function submitPrint (nobukti) {
     doOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdateotorisasi", function (res) {
       if (res.status === 1) {
         alertify.success(res.msg);
-        loadAll();
+        reloadData();
       } else {
         alertify.warning(res.msg);
       }
@@ -1517,7 +1560,7 @@ function submitPrint (nobukti) {
     doBatalOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdatebatalotorisasi", function (res) {
       if (res.status === 1) {
         alertify.success(res.msg);
-        loadAll();
+        reloadData();
       } else {
         alertify.warning(res.msg);
       }
@@ -1651,17 +1694,19 @@ function submitPrint (nobukti) {
     $("#inputitem_namabrg").val(_nama);
 
     let satuanAsalSelect = $("#inputitem_satuanasal");
-    satuanAsalSelect.empty(); 
+    satuanAsalSelect.empty(); // Clear previous options
 
     let satuanJadiSelect = $("#inputitem_satuanjadi");
-    satuanJadiSelect.empty(); 
+    satuanJadiSelect.empty(); // Clear previous options
 
+    // Array of satuan objects with number and value
     const satuanList = [
       { nosat: 1, sat: _sat1, isi: _isi1 },
       { nosat: 2, sat: _sat2, isi: _isi2 },
       { nosat: 3, sat: _sat3, isi: _isi3 }
     ];
 
+    // Append valid satuan options
     let added = 0;
     satuanList.forEach(item => {
       if (item.sat && item.sat.trim() !== '') {
@@ -1682,13 +1727,14 @@ function submitPrint (nobukti) {
 
     const satuanSelect = $("#inputitem_satuan");
 
+    // Find and select the matching option
     satuanSelect.find("option").each(function () {
-      const value = $(this).val(); 
+      const value = $(this).val(); // e.g., "2||Box||12"
       const parts = value.split("||");
 
       if (parseInt(parts[0]) === _nosat) {
-        satuanSelect.val(value); 
-        return false;
+        satuanSelect.val(value); // set this option as selected
+        return false; // break loop
       }
     });
 
@@ -1729,12 +1775,12 @@ function submitPrint (nobukti) {
       return cart;
     }
 
-    // cek empty
+    // CEK EMPTY
     if (!cekNotEmpty("inputitem_kodebrg")) {
       return messageRequired("Barang");
     }
 
-    // cek validasi kode / no bukti
+    // CEK VALIDASI KODE / NO BUKTI
     if (dataBrowse['gudang'] !== $("#input_gudang").val()) {
       return "Data Gudang tidak sesuai";
     }
@@ -1742,7 +1788,7 @@ function submitPrint (nobukti) {
       return "Data Barang tidak sesuai";
     }
 
-    // cek lain-lain
+    // CEK LAIN-LAIN
     let brg = $("#inputitem_kodebrg").val();
     if (_choice === "I") {
       if (!cekNotDuplicate(dataItem, "kodebrg", brg)) {
@@ -1792,7 +1838,7 @@ function submitPrint (nobukti) {
   }
 
   function successAdd(_nobukti) {
-    loadAll();
+    reloadData();
     cleanFormItem();
     refreshForm(_nobukti);
 
@@ -1800,14 +1846,14 @@ function submitPrint (nobukti) {
   }
 
   function successEdit(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     cleanFormItem();
     refreshForm(_nobukti);
   }
 
   function successDelete(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     refreshForm(_nobukti);
   }
