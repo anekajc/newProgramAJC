@@ -5,7 +5,14 @@
      Keterangan, Perkiraan, Lawan, Nilai). Filter: Periode (rentang tanggal). Klik di mana saja pada
      baris membuka voucher (CetakKasharian) di panel bawah — Jenis diambil dari No Bukti via
      jenisFromNo. Sumber: sp_ReportBukuTambahanSKB ?,?. Data hanya dimuat setelah klik "Tampilkan".
-     Mode "Nomor Barang" lama dihapus (kolomnya tidak cocok dengan SP ini; Order By disembunyikan). --}}
+     Mode "Nomor Barang" lama dihapus (kolomnya tidak cocok dengan SP ini; Order By disembunyikan).
+
+     Header interaktif (drag/gear + #rtBar), pola sama persis dengan reportaccountingbukubesar.blade.php
+     (ledger RATA + klik-baris-buka-voucher yang sama), lihat docs/new-slider-table-guide.md.
+     PERBAIKAN vs versi lama: doSetHeader(g_modeReport) sebelumnya TIDAK PERNAH dipanggil, sehingga
+     gcart_header tidak pernah terisi dan kustomisasi kolom (sembunyikan/urutkan/desimal) tidak bisa
+     tersimpan sama sekali. Sekarang dipanggil di $(document).ready() & makeTable() seperti halaman
+     report lain. --}}
 <style>
   /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
   .tb-report .table-wrap { min-height: 10vh; }
@@ -17,9 +24,9 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title">Laporan SKB</div>
-      </div>
+      </div> --}}
 
       <!-- Periode (rentang tanggal) -->
       <div class="filter-wrap">
@@ -29,9 +36,13 @@
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
+      <!-- Search -->
+      <div>
+        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
+      </div>
+
       <!-- Actions: search + tampilkan + export -->
       <div class="action-group">
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -44,7 +55,10 @@
       </div>
     </div>
 
-    <!-- TABLE (kolom di-render dari COLS; klik baris membuka voucher) -->
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
+
+    <!-- TABLE (header + rows dirender dinamis dari gcart_header; klik baris membuka voucher) -->
     <div class="table-outer">
       <div class="table-wrap">
         <table class="tb" id="mainTable">
@@ -59,6 +73,11 @@
       <div class="table-footer">
         <span id="footerLabel">Belum ada data dimuat</span>
       </div>
+    </div>
+
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom atau atur desimal &amp; total.
     </div>
 
   </div><!-- /content -->
@@ -104,13 +123,23 @@
   ];
 
   $(document).ready(function () {
+    doSetHeader(g_modeReport);   // muat susunan kolom (default / hasil kustomisasi user) tersimpan --
+                                  // sebelumnya TIDAK PERNAH dipanggil, lihat catatan di atas file.
+
+    // Header tabel interaktif: seret kolom, menu roda gigi (sembunyikan/desimal/total).
+    // Tidak ada "Tampilan" switcher -- halaman ini cuma satu mode.
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: function () { if (lastRows.length) { applyFilters(); } else { render(); } }
+    });
+
     // Sengaja TIDAK memuat data saat halaman dibuka — laporan hanya dimuat setelah
     // pengguna klik tombol "Tampilkan".
   });
 
-  // Header sederhana untuk menjaga engine masterreport2 tetap terinisialisasi
-  // (doSetHeader memanggil ini bila belum ada header tersimpan). Tabel styled
-  // di-render sendiri oleh render() dari COLS, jadi gcart_header tidak dipakai untuk layout.
+  // gcart_header (dipakai render() untuk header interaktif + urutan/visibilitas kolom)
+  // dibangun dari COLS. doSetHeader() memanggil ini bila belum ada header tersimpan.
   function setDefaultHeader() {
     gcart_header = COLS.map(c => [c.key, c.label, 1, (c.type === 'num' ? 'float' : c.type), 0, c.dec]);
     gsum_issubtotal = 1; gsum_isgrandtotal = 1;
@@ -128,11 +157,14 @@
     exportDelimited(fmt);
   }
   function exportDelimited(fmt) {
-    const header = COLS.map(c => c.label);
-    const body = (lastRows || []).map(r => COLS.map(function (c) {
-      const v = pickCI(r, c.key);
-      if (c.type === 'date') return format_date(v);
-      if (c.type === 'num') return currencyNormalizer(v);
+    // Hanya kolom yang sedang terlihat (gcart_header[i][2]===1) yang ikut diekspor -- konsisten
+    // dengan yang tampil di layar setelah kolom disembunyikan lewat gear.
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const header = cols.map(c => c[1]);
+    const body = (lastRows || []).map(r => cols.map(function (c) {
+      const v = pickCI(r, c[0]);
+      if (c[3] === 'date') return format_date(v);
+      if (c[3] === 'float' || c[3] === 'int') return currencyNormalizer(v);
       return (v == null ? '' : v);
     }));
     const rows = [header].concat(body);
@@ -151,6 +183,8 @@
     globalDate1 = $('#inputDate1').val();
     globalDate2 = $('#inputDate2').val();
     g_reportTitle = 'REPORT SKB';
+
+    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
@@ -207,33 +241,35 @@
            'onclick="openVoucher(\'' + esc + '\',\'' + jsc + '\')">';
   }
 
-  /* ── RENDER: daftar RATA baris ledger (satu baris per transaksi). Kolom & urutan
-     dari COLS; No Bukti dapat diklik (buka voucher lewat klik baris). ── */
+  /* ── RENDER: daftar RATA baris ledger (satu baris per transaksi). Kolom terlihat & urutan
+     dari gcart_header (item[2]===1) supaya show/hide/seret lewat gear benar-benar berpengaruh;
+     No Bukti dapat diklik (buka voucher lewat klik baris) — dicocokkan lewat nama field
+     ('NoBukti'), bukan posisi, jadi tetap benar walau kolomnya digeser. ── */
   function render() {
+    const cols  = gcart_header.filter(c => c[2] === 1);
     const thead = document.querySelector('#mainTable thead');
     const tbody = document.getElementById('tableBody');
     const search = ($('#searchBox2').val() || '').trim().toLowerCase();
 
-    // HEADER
-    thead.innerHTML = '<tr>' + COLS.map(function (c) {
-      return '<th' + (c.type === 'num' ? ' class="num"' : '') + '>' + c.label + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis — dibangun report-table.js (ReportTable) supaya kolom bisa diseret
+    // untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).
+    thead.innerHTML = ReportTable.headHtml(cols);
 
-    const rows = (lastRows || []).filter(r => !search || rowSearchText(r).indexOf(search) !== -1);
+    const rows = (lastRows || []).filter(r => !search || rowSearchText(r, cols).indexOf(search) !== -1);
 
     if (!rows.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + COLS.length + '">Tidak ada data ditemukan.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
       document.getElementById('footerLabel').textContent = 'Tidak ada data';
       return;
     }
 
     let html = '';
     rows.forEach(r => {
-      html += voucherRowOpen(pickCI(r, 'NoBukti'), 'data-row') + COLS.map(function (c) {
-        const v = pickCI(r, c.key);
-        if (c.voucher) return voucherCell(v);
-        if (c.type === 'date') return '<td>' + format_date(v) + '</td>';
-        if (c.type === 'num') return '<td class="num">' + format_number(currencyNormalizer(v), c.dec) + '</td>';
+      html += voucherRowOpen(pickCI(r, 'NoBukti'), 'data-row') + cols.map(function (c) {
+        const v = pickCI(r, c[0]);
+        if (c[0] === 'NoBukti') return voucherCell(v);
+        if (c[3] === 'date') return '<td>' + format_date(v) + '</td>';
+        if (c[3] === 'float' || c[3] === 'int') return '<td class="num">' + format_number(currencyNormalizer(v), c[5]) + '</td>';
         return '<td>' + nullToEmpty(v) + '</td>';
       }).join('') + '</tr>';
     });
@@ -245,10 +281,10 @@
   /* ── PENCARIAN SISI-KLIEN ── */
   function applyFilters() { render(); }
 
-  function rowSearchText(r) {
-    return COLS.map(function (c) {
-      const v = pickCI(r, c.key);
-      return (c.type === 'date') ? format_date(v) : (v == null ? '' : String(v));
+  function rowSearchText(r, cols) {
+    return cols.map(function (c) {
+      const v = pickCI(r, c[0]);
+      return (c[3] === 'date') ? format_date(v) : (v == null ? '' : String(v));
     }).join(' ').toLowerCase();
   }
 
