@@ -1,12 +1,258 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
-
-
+@section('page-title', 'Perintah Retur Beli')
 
 @endsection
 {{-- tampilan search bar 1 --}}
   @section('css')
-  
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
+       filter), disamakan dengan newpo.blade.php / uangmukabeli.blade.php. --}}
+  <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+  <style>
+  #content { padding-top: 12px; }
+
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+  }
+
+  #page1 .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--border) !important;
+  }
+
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai inline
+     style pada <table>, yang mengalahkan `.data-table { width: 100% }`. Dipakai min-width,
+     BUKAN width, dan di-scope lewat ID (bukan class) - sama seperti uangmukabeli.blade.php. */
+  #tabel, #tabel2 {
+    min-width: 100%;
+  }
+
+  #tabel td:first-child:not([colspan]),
+  #tabel2 td:first-child:not([colspan]) {
+    vertical-align: middle;
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #tabel td:first-child .btn,
+  #tabel2 td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel td:first-child .btn:hover,
+  #tabel2 td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel td:first-child .btn-success,  #tabel2 td:first-child .btn-success  { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel td:first-child .btn-warning,  #tabel2 td:first-child .btn-warning  { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel td:first-child .btn-primary,  #tabel2 td:first-child .btn-primary  { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel td:first-child .btn-danger,   #tabel2 td:first-child .btn-danger   { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel td:first-child .btn-info,     #tabel2 td:first-child .btn-info     { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+  /* ---------- #tabel_add (tabel item di form Perintah Retur Beli, dalam #page2) - kolom
+     Actions ada di kolom PALING KIRI (first-child, sama seperti #tabel/#tabel2), header
+     abu-abu uppercase + zebra + hover + tombol aksi pastel bulat, disamakan dengan
+     resources/views/purchasing/pembelianpermintaannonagen.blade.php. ---------- */
+  #tabel_add td:first-child:not([colspan]) {
+    vertical-align: middle;
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #tabel_add td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel_add td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel_add td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel_add td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel_add td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel_add td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+
+  #tabel_add thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee;
+    border-top: none;
+  }
+
+  #tabel_add tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+  #tabel_add tbody tr:hover { background-color: #f5f3ff; }
+
+  /* Qty & Sat rata tengah, header dan isi, supaya lurus segaris. */
+  #tabel_add thead th:nth-child(4),
+  #tabel_add thead th:nth-child(5),
+  #tabel_add tbody td:nth-child(4):not([colspan]),
+  #tabel_add tbody td:nth-child(5):not([colspan]) {
+    text-align: center;
+  }
+
+  table.data-table.po-aksi-hover tbody td:first-child .btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .12s ease;
+  }
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar - tidak ada di
+     po-table-header.css, ditulis di sini supaya perubahan cukup mengunggah file blade-nya saja. */
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink);
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  /* ---------- Tombol chip (latar tint muda + teks berwarna) untuk tombol Tambah Item,
+     Submit Add/Edit di form #page2 - disalin dari pembelianpermintaannonagen.blade.php. ---------- */
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }
+
+  /* Batal = aksi sekunder, jadi abu-abu muda dengan teks gelap (bukan solid merah). */
+  .btn-batal-add {
+    background-color: #f1f3f5;
+    border-color: #dee2e6;
+    color: #495057;
+  }
+
+  .btn-batal-add:hover,
+  .btn-batal-add:focus {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #343a40;
+  }
+
+  .btn-batal-add:active {
+    background-color: #dee2e6 !important;
+    border-color: #ced4da !important;
+    color: #343a40 !important;
+  }
+  </style>
+
   <style>
   .rodokNdukurTitik{
     margin-top:-12px;
@@ -27,18 +273,6 @@
       border: none !important;
   }
 
-  #tabel td, #tabel th {
-      border-left: 1px solid #dee2e6;
-      border-top: 1px solid #dee2e6;
-  }
-
-  #tabel td:first-child, #tabel th:first-child {
-      border-left: none;
-  }
-
-  #tabel thead tr:first-child th {
-      border-top: none;
-  }
     </style>
 
   <style>
@@ -149,124 +383,7 @@
   </style>
 {{-- end tampilan search bar modal add pelanggan --}}
 
-{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
-     filter), disamakan dengan resources/views/purchasing/pembelianpermintaanagen.blade.php,
-     dipakai untuk styling #tabel_add (tabel item form Add PRB) di bawah. --}}
-<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
-<style>
-/* ---------- #tabel_add (tabel item di form Add PRB) - header abu-abu uppercase + zebra
-   + hover, disalin dari purchaseOrder.blade.php / pembelianpermintaanagen.blade.php.
-   Kolom Actions di tabel ini ada di PALING KIRI (first-child), beda dari #tabel_add pada
-   pembelianpermintaanagen.blade.php yang Actions-nya di paling kanan. ---------- */
-#tabel_add thead th {
-  background: #f8f9fb !important;
-  color: #6b7280 !important;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  font-weight: 600;
-  border-bottom: 1px solid #e7e9ee;
-  border-top: none;
-}
-
-#tabel_add tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
-#tabel_add tbody tr:hover { background-color: #f5f3ff; }
-
-/* Qty & Sat rata tengah, header dan isi, supaya lurus segaris (kolomnya masing-masing
-   ada di posisi ke-4 dan ke-5: Actions, Kode Barang, Nama Barang, Qty, Sat, ...). */
-#tabel_add thead th:nth-child(4),
-#tabel_add thead th:nth-child(5),
-#tabel_add tbody td:nth-child(4):not([colspan]),
-#tabel_add tbody td:nth-child(5):not([colspan]) {
-  text-align: center;
-}
-
-/* Kolom Actions ada di paling kiri (first-child) - tombol bulat kecil pastel, disalin
-   dari purchaseOrder.blade.php / #tabel2 di pembelianpermintaanagen.blade.php. */
-#tabel_add td:first-child:not([colspan]) {
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-  align-items: center;
-}
-
-#tabel_add td:first-child .btn {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 7px;
-  font-size: 13px;
-  border: 1px solid transparent;
-  box-shadow: none;
-  transition: all .12s ease;
-}
-
-#tabel_add td:first-child .btn:hover {
-  filter: brightness(0.97);
-  transform: translateY(-1px);
-}
-
-#tabel_add td:first-child .btn-success {
-  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-}
-
-#tabel_add td:first-child .btn-warning {
-  color: #b45309; border-color: #fbe3bd; background: #fef3e0;
-}
-
-#tabel_add td:first-child .btn-primary {
-  color: #2563eb; border-color: #cfdcff; background: #e8edff;
-}
-
-#tabel_add td:first-child .btn-danger {
-  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-}
-
-/* ---------- Tombol chip (latar tint muda + teks berwarna) untuk tombol + Tambah Item,
-   Submit Add/Edit, dan Batal di form Add PRB - disalin dari purchaseOrder.blade.php. ---------- */
-.btn-chip-biru {
-  background-color: #e8edff;
-  border-color: #cfdcff;
-  color: #2563eb;
-}
-
-.btn-chip-biru:hover,
-.btn-chip-biru:focus {
-  background-color: #dce6ff;
-  border-color: #b9c9ff;
-  color: #1d4ed8;
-}
-
-.btn-chip-biru:active {
-  background-color: #cfdcff !important;
-  border-color: #a8bdff !important;
-  color: #1d4ed8 !important;
-}
-
-/* Batal = aksi sekunder, jadi abu-abu muda dengan teks gelap (bukan solid gelap). */
-.btn-batal-add {
-  background-color: #f1f3f5;
-  border-color: #dee2e6;
-  color: #495057;
-}
-
-.btn-batal-add:hover,
-.btn-batal-add:focus {
-  background-color: #e9ecef;
-  border-color: #ced4da;
-  color: #343a40;
-}
-
-.btn-batal-add:active {
-  background-color: #dee2e6 !important;
-  border-color: #ced4da !important;
-  color: #343a40 !important;
-}
-</style>
-{{-- end tampilan search sales --}}
+{{-- tampilan search sales --}}
   <style>
     #tabel_add_list_sales_filter{
       display: flex;
@@ -309,41 +426,15 @@
 @endsection
 @section('content')
 
+<div id="imagecontainer" class="d-none" style="">
+  <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
+</div>
+
 <div id="page1" class="container-fluid">
     <!-- <div id="qrcode"></div> -->
-    <div class="row">
-      <div class="col-6 text-left">
-        <h2 style="margin-top:-85px;">Perintah Retur Beli</h2>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add PRB
-        </button>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
+    <div class="row" style="margin-bottom: 14px;">
+      <div class="col-12 text-left">
+        <!-- <h2>Perintah Retur Beli</h2> -->
       </div>
     </div>
 
@@ -359,22 +450,16 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
     <div class="card">
-      <div class="card-header" style="margin-top:-55px;">
-        <div class="row">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              Perintah Retur Beli
-            </a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              Perintah Retur Beli (Sudah Otorisasi)
-            </a>
-            <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              List Retur Jual
-            </a>
-          </div>
+      <div class="card-header">
+        <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
+             aria-controls="nav-home" aria-selected="true">
+            Perintah Retur Beli
+          </a>
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab"
+             aria-controls="nav-profile" aria-selected="false">
+            List Retur Jual
+          </a>
         </div>
       </div>
 
@@ -383,41 +468,50 @@
 
           <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
             <div class="row">
-              <div class="col-md-12" style='overflow:auto;'>
+              <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                  <table id="tabel" class="table table-bordered table-hover table-striped">
-                    <thead class="text-center bg-primary text-white">
+                  <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="prbTglAwal1" value="{!! $prbTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="prbTglAkhir1" value="{!! $prbTglAkhir !!}">
+                    </div>
+                    <input type="search" id="prbSearch1" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap">
+                      <label for="prbLen1">Tampilkan</label>
+                      <select id="prbLen1" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
+                    <button class="po-btn-filter" type="button" id="prbBtnFilter" onclick="$('#modalFilterPRB').modal('show')">
+                      <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <div class="po-toolbar-act">
+                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                    </div>
+                  </div>
+
+                  {{-- #rtBar diisi lewat JS oleh ReportTable.init() - satu elemen dipakai
+                       bersama #tabel dan #tabel2, dipindah lewat JS (prbPindahBar) saat tab
+                       berganti - lihat prbInitReportTableSekali(). --}}
+                  <div id="rtBar"></div>
+                  <table id="tabel" class="data-table po-aksi-hover">
+                    <thead id="tabel_header" class="text-center">
                       <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto</th>
+                        <th style="padding: 4px 12px;" scope="col">Actions</th>
                       </tr>
                     </thead>
-                    <tbody id="tabel_data" class="text-left">
-                      {{-- @foreach ($tempOutstanding1 as $OutPR)
-                      <tr>
-                        
-                         <td class="text-center">
-                            <button class="btn btn-success btn-sm" type="button" title="Details" onclick="buttonAdd('{{ $OutPR->Nobukti }}')">
-                              <i class="bi bi-plus-lg"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Nobukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($OutPR->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->kodebrg }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->NamaBrg }}</td>
-                        <td style='white-space:nowrap;' class='text-center'>{{ $OutPR->sat }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->Qnt, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QNTPO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->SisaPPL, 2) }}</td>
-                        <td style='white-space:nowrap;'>{{ $OutPR->Keterangan }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntoutSO, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntStock, 2) }}</td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
+                    <tbody id="tabel_data" class="text-left"></tbody>
                   </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+                  </div>
                 </div>
               </div>
             </div>
@@ -425,196 +519,41 @@
 
           <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="row">
-              <div class="col-12" style="overflow:auto;">
+              <div class="col-12">
                 <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-                  
-                  <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center bg-primary text-white">
+                  <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="prbTglAwal2" value="{!! $prbTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="prbTglAkhir2" value="{!! $prbTglAkhir !!}">
+                    </div>
+                    <input type="search" id="prbSearch2" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap">
+                      <label for="prbLen2">Tampilkan</label>
+                      <select id="prbLen2" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat prbPindahBar(). --}}
+                  <table id="tabel2" class="data-table po-aksi-hover">
+                    <thead id="tabel2_header" class="text-center">
                       <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Oto</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Oto</th>
+                        <th style="padding: 4px 12px;" scope="col">Nomor Retur</th>
                       </tr>
                     </thead>
-                    <tbody id="tabel2_data" class="text-left">
-                      {{-- @foreach( $tempOutstanding3 as $PurchaseOrderData)
-                      <tr>
-                        <td class="text-center"style='white-space:nowrap;'>
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-info-circle-fill"></i>
-                            </button>
-                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-pencil-fill"></i>
-                            </button>
-                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $PurchaseOrderData->NoBukti }}')">
-                              <i class="bi bi-key-fill"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($PurchaseOrderData->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NamaCustSupp }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($PurchaseOrderData->tglKirim)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOSO }}</td>
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->NOPOCUST }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($PurchaseOrderData->TotNetRp, 2) }}</td>
-                          @if($PurchaseOrderData->IsOtorisasi1 == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($PurchaseOrderData->TglOto1 === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglOto1)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                          @if($PurchaseOrderData->Isbatal== 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $PurchaseOrderData->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($PurchaseOrderData->TglBatal === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($PurchaseOrderData->TglBatal)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
+                    <tbody id="tabel2_data" class="text-left"></tbody>
                   </table>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-                  
-                  <table id="tabel3" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center bg-primary text-white">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Nomor Retur</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Kode Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Nama Barang</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Satuan</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qty</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabel3_data" class="text-left">
-                      {{-- @foreach ($tempOutstanding5 as $POOtorisasi)
-                      <tr>
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $POOtorisasi->NoBukti }}')">
-                              <i class="bi bi-info-circle-fill"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $POOtorisasi->NoBukti }}')">
-                              <i class="bi bi-key-fill"></i>
-                            </button>
-                        </td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NoBukti }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($POOtorisasi->Tanggal)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NamaCustSupp }}</td>
-                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($POOtorisasi->TglKirim)) !!}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NOSO }}</td>
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->NOPOCUST }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotDPPRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotSubTotalRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotPPNRp, 2) }}</td>
-                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($POOtorisasi->TotNetRp, 2) }}</td>
-                          @if($POOtorisasi->IsOtorisasi1 == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->OtoUser1 }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($POOtorisasi->TglOto1 === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($POOtorisasi->TglOto1)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                          @if($POOtorisasi->Isbatal == 1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                            <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-                        <td style='white-space:nowrap;'>{{ $POOtorisasi->UserBatal }}</td>
-                        <td style='white-space:nowrap;'>
-                          @if($POOtorisasi->TglBatal === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($POOtorisasi->TglBatal)->format('d/m/Y - H:i:s') }}
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach --}}
-                    </tbody>
-                  </table>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="profile2" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid">
-                      <table id="tabelRetur" class="table table-bordered table-striped"  >
-                        <thead class="text-center">
-                          <tr>
-                            <th scope="col">Profile 2</th>
-                            <th scope="col">No. SSP</th>
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">No. Out</th>
-                            <th scope="col">Gudang</th>
-                          </tr>
-                        </thead>
-
-                        <tbody id="tabelRetur_data" class="text-left" >
-
-                        </tbody>
-                      </table>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="profile3" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-12" style="overflow:auto;">
-                <div class="container-fluid">
-
-                      <table id="tabelRetur" class="table table-bordered table-striped"  >
-                        <thead class="text-center">
-                          <tr>
-                            <th scope="col">Profile 3</th>
-                            <th scope="col">No. SSP</th>
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">No. Out</th>
-                            <th scope="col">Gudang</th>
-                          </tr>
-                        </thead>
-
-                        <tbody id="tabelRetur_data" class="text-left" >
-
-                        </tbody>
-                      </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+                  </div>
                 </div>
               </div>
             </div>
@@ -625,18 +564,17 @@
 
     </div>
   </div>
-  
+
 </div>
 
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="margin-top: -80px;">Form Perintah Retur Beli</h2>
+      <h2></h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px; 
-          margin-top: -120px; 
           padding: 4px 12px; 
           border-radius: 20px; 
           font-size: 0.75rem; 
@@ -651,7 +589,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="margin-top:-60px;">
+    <div class="modal-body">
       <div class="row">
 
             <input type="hidden" class="form-control" id="input_nourut">
@@ -665,8 +603,8 @@
                 </div>
                 <div class="col-md-2">
                   <div class="form-group">
-                    <input type="text" class="form-control text-center" id="input_add_nobukti" placeholder="" readonly>
-                    <input type="text" class="form-control text-center" id="input_add_nourut" placeholder="nourut" hidden>
+                    <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" readonly>
+                    <input type="text" class="form-control text-left" id="input_add_nourut" placeholder="nourut" hidden>
                   </div>
                 </div>
 
@@ -677,7 +615,7 @@
                 </div>
                 <div class="col-md-2">
                   <div class="form-group">
-                    <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" readonly>
+                    <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" readonly>
                   </div>
                 </div>
 
@@ -688,7 +626,7 @@
                 </div>
                 <div class="col-md-2">
                   <div class="form-group">
-                    <select id="input_add_tipebayar" class="form-control form-select-lg mb-3 text-center" aria-label=".form-select-lg example">
+                    <select id="input_add_tipebayar" class="form-control form-select-lg mb-3 text-left" aria-label=".form-select-lg example">
                       <option value=0 selected >Tunai</option>
                       <option value=1>Kredit</option>
                     </select>
@@ -697,7 +635,7 @@
               </div>
             </div>
 
-            <div class="col-md-12" style='margin-top:-12px;'>
+            <div class="col-md-12">
               <div class="row">
                 <div class="col-md-1">
                   <div class="form-group">
@@ -730,7 +668,7 @@
             </div>
           </div> --}}
             <div class="showhidemodalbodyaddmain mt-4" id="modalBodyAddMainHeader" style="display: none;">
-              <div class="row" style='margin-top:-30px'>
+              <div class="row">
 
                 <div class="col-md-3">
                   <div class="row">
@@ -946,7 +884,7 @@
           </div>
             
         </div>
-            <hr/>
+        <hr/>
       </div>
 
     </div>
@@ -958,13 +896,13 @@
             <table id="tabel_add" class="data-table">
               <thead class="text-center">
                 <tr>
-                  <th scope="col">Actions</th>
-                  <th scope="col">Kode Barang</th>
-                  <th scope="col">Nama Barang</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Sat</th>
-                  <th scope="col">No. Retur Jual</th>
-                  <th scope="col">No. Beli</th>
+                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                  <th style="padding: 4px 12px;" scope="col">Qty</th>
+                  <th style="padding: 4px 12px;" scope="col">Sat</th>
+                  <th style="padding: 4px 12px;" scope="col">No. Retur Jual</th>
+                  <th style="padding: 4px 12px;" scope="col">No. Beli</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
@@ -1005,7 +943,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
           </div>
         </div>
 
@@ -1039,9 +977,9 @@
                         </div>
                         <div class="col-md-8">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_norjual" value='-'>
+                            <input type="text" class="form-control" id="input_add_add_norjual" readonly>
                             <input type="text" class="form-control" id="input_add_add_urutRJual" hidden>
-                            <button class="btn btn-primary btn-sm text-right" onclick='buttonNoRJual()'>
+                            <button class="btn btn-primary btn-sm text-right" onclick='buttonNoRJual()' hidden>
                               <i class="bi bi-plus"></i>
                             </button>
                           </div>
@@ -1056,10 +994,10 @@
                         </div>
                         <div class="col-md-8">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_nobeli" value='-'>
+                            <input type="text" class="form-control" id="input_add_add_nobeli" onchange='lockSupplier()'>
                             <input type="text" class="form-control" id="input_add_add_urutPbl" hidden>
-                            <button class="btn btn-primary btn-sm text-right" onclick='buttonNoBeli()'>
-                              <i class="bi bi-plus"></i>
+                            <button id="buttonBrowseNoBeli" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick='buttonNoBeli()'>
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -1073,10 +1011,12 @@
                         </div>
                         <div class="col-md-8">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_supplier">
-                            <button class="btn btn-primary btn-sm text-right" onclick='buttonSupplier()'>
-                              <i class="bi bi-plus"></i>
-                            </button>
+                            <div class="input-group form-group">
+                              <input type="text" class="form-control" id="input_add_add_supplier" readonly>
+                              <button class="btn btn-primary btn-sm text-right" id="buttonSupplier" onclick='buttonSupplier()' hidden>
+                                <i class="bi bi-plus"></i>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1101,8 +1041,8 @@
                         <div class="col-md-8">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_add_kodebrg" >
-                            <button class="btn btn-primary btn-sm text-right" onclick='buttonBarang()'>
-                              <i class="bi bi-plus"></i>
+                            <button id="buttonBrowseBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick='buttonBarang()'>
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -1140,7 +1080,7 @@
                         </div>
                         <div class="col-3">
                           <div class="input-group form-group">
-                            <select id="input_add_add_satuan" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" readonly>
+                            <select id="input_add_add_satuan" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
                             </select>
                           </div>
                           
@@ -1167,8 +1107,8 @@
                         <div class="col-md-9">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_add_gudang">
-                            <button id="buttonBrowseGudang" class="btn btn-primary btn-sm text-right" onclick='buttonGudang()'>
-                              <i class="bi bi-plus"></i>
+                            <button id="buttonBrowseGudang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick='buttonGudang()'>
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -1218,7 +1158,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()">Submit Add</button>
+              onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-lg btn-chip-biru" style="
               height: 30px;
@@ -1229,7 +1169,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddEdit()">Submit Edit</button>
+              onclick="submitAddEdit()">Simpan</button>
             </div>
 
           </div>
@@ -1569,7 +1509,16 @@
 
           <div class="row mt-2">
             <div class="col-md-12 text-right">
-              <button type="button" class="btn btn-secondary" onclick="closeShowHideAdd()" >Batal</button>
+              <button type="button" class="btn btn-lg btn-batal-add" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+              onclick="closeShowHideAdd()">Batal</button>
             </div>
           </div>
 
@@ -1668,7 +1617,7 @@
         </div>
         <div class="col-md-8" style="margin-top:-40px;">
           <div class="form-group">
-            <input type="text" class="form-control text-center" id="input_detail_nobukti" placeholder="" disabled>
+            <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
           </div>
         </div>
 
@@ -1679,7 +1628,7 @@
       </div>
       <div class="col-md-8" style="margin-top:-12px;">
         <div class="form-group">
-          <input type="date" class="form-control text-center" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+          <input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
         </div>
       </div>
 
@@ -1693,7 +1642,7 @@
 
     <div class="col-md-8" style="margin-top:-10px;">
       <div class="input-group form-group">
-        <input type="text" class="form-control text-center" id="input_detail_kodepelanggan" disabled>
+        <input type="text" class="form-control text-left" id="input_detail_kodepelanggan" disabled>
       </div>
     </div>
 
@@ -1732,7 +1681,7 @@
 
         <div class="col-md-12" style="margin-top:-40px;">
           <div class="form-group">
-            <input type="text" class="form-control text-center" id="input_detail_namapelanggan"  disabled>
+            <input type="text" class="form-control text-left" id="input_detail_namapelanggan"  disabled>
           </div>
         </div>
         <!-- </div>
@@ -1743,7 +1692,7 @@
 
         <div class="col-md-12" style="margin-top:-10px;">
           <div class="form-group">
-            <textarea  style="width: 100%; resize: none" rows=3  class="form-control text-center" id="input_detail_alamatpelanggan" disabled></textarea>
+            <textarea  style="width: 100%; resize: none" rows=3  class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea>
           </div>
         </div>
         <!-- </div>
@@ -1833,7 +1782,7 @@
 
         <div class="col-md-6">
           <div class="form-group">
-          <select  id="input_detail_pembayaran" disabled class="form-control text-center form-select-lg mb-3" aria-label=".form-select-lg example">
+          <select  id="input_detail_pembayaran" disabled class="form-control text-left form-select-lg mb-3" aria-label=".form-select-lg example">
             <option value=0 selected >Non-Kredit</option>
             <option value=1 >Kredit</option>
           </select>
@@ -2378,11 +2327,59 @@
 
 <!-- page3 end input_add -->
 
-@include('modals/modalPRBAdd')
+@include('purchasing/modals/modalPRBAdd')
+
+<!-- modal filter status otorisasi Perintah Retur Beli -->
+<div class="modal fade rt-filter" id="modalFilterPRB">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-funnel"></i>
+          Filter Perintah Retur Beli
+          <span class="rt-active-badge" id="prbFilterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterPRB').modal('hide')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Penyaringan Data</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="prbModalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="prbModalOtorisasi">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="prbResetFilter()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+            onclick="$('#modalFilterPRB').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="prbTerapkanFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 @endsection
 
 @section('js')
+{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
+     "Reset kolom"), disamakan dengan newpo.blade.php / uangmukabeli.blade.php. --}}
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
     window.onload = function(){
@@ -2396,12 +2393,6 @@ let dataRefresh = []
 
 let dataAddAddListItem = []
 
-let dataRefreshOutstanding = []
-let dataRefreshOutstanding2 = []
-let dataRefreshOutstanding3 = []
-
-let dataRefreshPenerimaan = []
-
 let listAlamatKirim = []
 
 let tempAddAdd = {}
@@ -2413,6 +2404,7 @@ let tempEditEdit = {}
 let nosatTemp = 0
 let isi1Temp = 0
 let isi2Temp = 0
+let urutTemp = 0
 
 let tipeform = ''
 let tipeformitem = ''
@@ -2460,9 +2452,16 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-  alertify.confirm('Batal Otorisasi', 'Batal Otorisasi PRB ' + nobukti + ' ?',
-      function() {
-        let _token = $("#_token").val();
+  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  function(evt, value) {
+    // alertify.success("You entered: " + value);
+    let xpket = value;
+
+     if (xpket==''){
+          alertify.warning('Keterangan harus diisi.');
+          $.abort();
+        }        
+let _token = $("#_token").val();
 
         $.ajax({
           url: "{!! url('prbupdatebatalotorisasi') !!}",
@@ -2470,7 +2469,8 @@ function buttonBatalOtorisasi (nobukti) {
           async: false,
           data: {
             _token,
-            nobukti
+            nobukti,
+          pket :value
 
           },
           success: function(res) {
@@ -2487,6 +2487,7 @@ function buttonBatalOtorisasi (nobukti) {
       }
     ,function(){
       console.log('no')
+	alertify.error("Action cancelled");
     });
 
 
@@ -2808,9 +2809,9 @@ function submitAddAdd () {
 
         loadAll()
         tipeform = 'edit'
-        document.getElementById("buttonAddListPelanggan").disabled = true
-        $('#divhargaterakhir').hide();
-        $('#divStockProyeksi').hide();
+
+        // $('#divhargaterakhir').hide();
+        // $('#divStockProyeksi').hide();
         cleanFormAddAdd()
 
         refreshDataTableAdd(NoBukti)
@@ -2846,6 +2847,11 @@ function submitAddEdit () {
   //     return
   // }
 
+   let Jmlrecord = 0 
+  if (dataTableAdd.length) {
+    Jmlrecord = 1
+  }
+
   let _token  = $("#_token").val()
   let Choice = "U"
 
@@ -2858,7 +2864,6 @@ function submitAddEdit () {
   let NoBeli = $("#input_add_add_nobeli").val()
   let Keterangan = $("#input_add_keterangan").val()
   // let FakturSupp = $("#input_add_lier").val() isi di controller
-  // let Urut = $("#input_add_lier").val() isi di controller
   let KodeBrg = $("#input_add_add_kodebrg").val()
   let UrutPBL = $("#input_add_add_urutPbl").val()
   let Qnt = $("#input_add_add_quantity").val()
@@ -2911,9 +2916,11 @@ function submitAddEdit () {
     NORJual,
     UrutRJual,
     Jmlrecord,
+    urutTemp,
     KETDET,
     0
   )
+
 
   console.log('==========' , Number(NoSat))
   if (!KodeBrg || !KodeGdg) {
@@ -2951,6 +2958,7 @@ function submitAddEdit () {
     Qnt2,
     NORJual,
     UrutRJual,
+    Urut : urutTemp,
     Jmlrecord,
     KETDET
 
@@ -3081,6 +3089,23 @@ function buttonAddAddItem () {
 
   $('#divhargaterakhir').hide();
 
+  document.getElementById('input_add_add_norjual').value = '-'
+  document.getElementById('input_add_add_nobeli').value = '-'
+  document.getElementById('input_add_add_supplier').value = ''
+  document.getElementById('input_add_add_kodebrg').value = ''
+  document.getElementById('input_add_add_namabrg').value = ''
+  document.getElementById('input_add_add_quantity').value = ''
+  document.getElementById('input_add_add_satuan').innerHTML = ''
+  document.getElementById('input_add_add_gudang').value = ''
+  document.getElementById('input_add_add_keterangan').value = ''
+
+  document.getElementById('input_add_add_nobeli').disabled = false
+  document.getElementById('input_add_add_kodebrg').disabled = false
+  document.getElementById('input_add_add_gudang').disabled = false
+  document.getElementById('buttonBrowseBarang').disabled = false
+  document.getElementById('buttonBrowseGudang').disabled = false
+  document.getElementById('buttonBrowseNoBeli').disabled = false
+
   // cleanFormAddAdd()
   // document.getElementById("buttonAddAddListBarang").disabled = false
   $('#h4AddAddItem').show();
@@ -3138,15 +3163,33 @@ function buttonAddEditItem (i) {
     tempAddEdit.NoPNW = '-' 
   }
 
+  urutTemp = tempAddEdit.URUT
+
   document.getElementById("input_add_add_norjual").value = tempAddEdit.NORJual
   document.getElementById("input_add_add_nobeli").value = tempAddEdit.nopbl
   document.getElementById("input_add_add_supplier").value = tempAddEdit.KODESUPP
   document.getElementById("input_add_add_kodebrg").value = tempAddEdit.KODEBRG
   document.getElementById("input_add_add_namabrg").value = tempAddEdit.NamaBrg
   document.getElementById("input_add_add_quantity").value = tempAddEdit.QNT
-  document.getElementById("input_add_add_satuan").value = tempAddEdit.SATUAN
+
+  let satuanEditTemp = `<option value="${tempAddEdit.SATUAN}" selected>${tempAddEdit.SATUAN}</option>`
+  document.getElementById("input_add_add_satuan").innerHTML = satuanEditTemp
+
+  nosatTemp = tempAddEdit.NOSAT ?? nosatTemp
+  isi1Temp = tempAddEdit.brgIsi1 ?? isi1Temp
+  isi2Temp = tempAddEdit.brgIsi2 ?? isi2Temp
+
   document.getElementById("input_add_add_gudang").value = tempAddEdit.KodeGdg
   document.getElementById("input_add_add_keterangan").value = tempAddEdit.KETERANGAN
+  document.getElementById("input_add_add_urutPbl").value = tempAddEdit.URUTPBL
+  document.getElementById("input_add_add_urutRJual").value = tempAddEdit.UrutRJual
+
+  document.getElementById("input_add_add_nobeli").disabled = true
+  document.getElementById("input_add_add_kodebrg").disabled = true
+  document.getElementById("input_add_add_gudang").disabled = true
+  document.getElementById("buttonBrowseBarang").disabled = true
+  document.getElementById("buttonBrowseGudang").disabled = true
+  document.getElementById("buttonBrowseNoBeli").disabled = true
 
   $('#divhargaterakhir').hide();
   $('#divStockProyeksi').hide();
@@ -3983,124 +4026,603 @@ function onChangeInputAddAddNosat () {
 
 }
       
-function loadAll() {
-  console.log("loadAll test");
+/* ==========================================================================
+ * Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi),
+ * urut 1 = tabel PRB gabungan (#tabel), urut 2 = tabel List Retur Jual
+ * (#tabel2) - sama pola dengan newpo.blade.php (satu #rtBar dipindah lewat
+ * prbPindahBar()) digabung dengan modal filter otorisasi ala uangmukabeli.blade.php.
+ * ========================================================================== */
+const PRB_HREF = 'perintahreturbeli'
+let prbCart = { 1: [], 2: [] }
+let prbActiveUrut = 1
+let prbPanjangHalaman = { 1: 10, 2: 10 }
+let prbRtSudahInit = false
+const PRB_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
+// Tabel di tab yang TIDAK aktif tidak digambar saat loadAll() - cukup ditandai di sini,
+// lalu digambar sungguhan saat tabnya dibuka (lihat handler shown.bs.tab). Sama pola
+// dengan npoPerluGambar di newpo.blade.php.
+let prbPerluGambar = { 1: false, 2: false }
 
-  // optional: if you’re not using CSRF token here, you can remove this
-  const _token = $("#_token").val();
+let dataPRB = []
+let dataRJual = []
 
-  // Safely destroy DataTables if they exist
-  if ($.fn.DataTable.isDataTable('#tabel')) $('#tabel').DataTable().destroy();
-  if ($.fn.DataTable.isDataTable('#tabel2')) $('#tabel2').DataTable().destroy();
-  if ($.fn.DataTable.isDataTable('#tabel3')) $('#tabel3').DataTable().destroy();
+const PRB_LABEL_1 = { NoBukti: 'No. Bukti', Tanggal: 'Tanggal' }
+const PRB_LABEL_2 = { NomorRetur: 'Nomor Retur', KodeBrg: 'Kode Barang', NamaBrg: 'Nama Barang', Satuan: 'Satuan', Qty: 'Qty' }
 
-  // Fetch data asynchronously
+window.g_href = PRB_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+function prbBuatCart (headers, values, isnumerics, isshowns, desimals, aliasordered, labelMap) {
+  let cart = []
+  ;(headers || []).forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let tipeNama = { 0: 'varchar', 1: 'float', 2: 'date' }
+    let label = (labelMap && labelMap[h]) || h
+    if (aliasordered && aliasordered[i] && aliasordered[i].alias && aliasordered[i].alias !== h) {
+      label = aliasordered[i].alias
+    }
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null)
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+
+    cart.push([
+      tipe === 0 ? h : values[i],        // 0 nama field di data
+      label,                             // 1 judul kolom
+      Number(isshowns[i]) === 1 ? 1 : 0, // 2 tampil
+      tipeNama[tipe] || 'varchar',       // 3 tipe data
+      0,                                 // 4 total (tidak dipakai halaman ini)
+      isNaN(des) ? 0 : des,              // 5 jumlah desimal
+      h,                                 // 6 header asli
+      values[i],                         // 7 value asli
+      tipe                               // 8 isnumeric asli
+    ])
+  });
+  return cart
+}
+
+// Kolom yang tampil. WAJIB hasil filter() dari cart, bukan map/salinan - lihat catatan
+// yang sama di uangmukabeli.blade.php / newpo.blade.php.
+function prbKolomTampil (urut) {
+  return (prbCart[urut] || []).filter(c => Number(c[2]) === 1)
+}
+
+function prbKolomRender (c) {
+  return { field: c[0], label: c[1], tipe: Number(c[8]), desimal: Number(c[5]) }
+}
+
+// formatAngka() selalu menempelkan '.' + bagian desimal - dipakai versi yang sadar jumlah
+// desimal, sama seperti umbFormatAngkaDes() di uangmukabeli.blade.php.
+function prbFormatAngkaDes (nilai, des) {
+  let d = Number(des)
+  if (isNaN(d) || d < 0) { d = 0 }
+
+  let mentah = (nilai === null || nilai === undefined || nilai === '') ? 0 : nilai
+  let angka = Number(String(mentah).split(',').join(''))
+  if (isNaN(angka)) {
+    return (nilai === null || nilai === undefined) ? '' : nilai
+  }
+
+  let teks = angka.toFixed(d)
+  let minus = teks.charAt(0) === '-'
+  if (minus) { teks = teks.substring(1) }
+
+  let bagian = teks.split('.')
+  let bulat = bagian[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (minus ? '-' : '') + bulat + (bagian[1] ? '.' + bagian[1] : '')
+}
+
+function prbRenderNilai (col, item) {
+  let nilai = item ? item[col.field] : undefined
+  if (col.tipe === 1) {
+    return prbFormatAngkaDes(nilai, col.desimal)
+  }
+  if (col.tipe === 2) {
+    return nilai ? formatDate(nilai) : ''
+  }
+  return (nilai === null || nilai === undefined) ? '' : nilai
+}
+
+// Kalau public/js/report-table.js belum ikut terunggah, halaman tetap tampil dengan
+// <th> biasa, hanya tanpa drag & roda gigi.
+function prbHeadHtml (cols) {
+  if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+    return ReportTable.headHtml(cols)
+  }
+  console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.')
+  let html = '<tr>'
+  cols.forEach((c) => { html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>` });
+  return html + '</tr>'
+}
+
+function prbUrutTabAktif () {
+  return $('#nav-profile-tab').hasClass('active') ? 2 : 1
+}
+
+function prbAktifkanTabel (urut) {
+  prbActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = prbCart[urut]
+}
+
+function prbOnChangeAktif () {
+  if (prbActiveUrut === 2) {
+    renderTabelRJual()
+  } else {
+    renderTabelPRB()
+  }
+}
+
+// Ikat handler drag & roda gigi ke ELEMEN <thead> TEPAT SEKALI seumur halaman - sama
+// alasannya dengan newpo.blade.php / uangmukabeli.blade.php.
+function prbInitReportTableSekali () {
+  if (prbRtSudahInit || typeof ReportTable === 'undefined') { return }
+  prbRtSudahInit = true
+
+  let urutAktif = prbUrutTabAktif()
+  let idTabel = { 1: '#tabel', 2: '#tabel2' }
+  Object.keys(idTabel).forEach((u) => {
+    if (Number(u) === urutAktif) { return }
+    ReportTable.init({ table: idTabel[u], onChange: prbOnChangeAktif })
+  });
+
+  ReportTable.init({
+    table: PRB_SELEKTOR_TABEL_AKTIF,
+    bar: '#rtBar',
+    onChange: prbOnChangeAktif
+  })
+
+  // DataTables memasang handler sort langsung di tiap <th>, sedangkan roda gigi/drag milik
+  // report-table.js didelegasikan di <thead> - hentikan event aslinya di fase capture, lalu
+  // tembakkan ulang satu event click baru langsung ke <thead>. Sama solusinya dengan
+  // newpo.blade.php / uangmukabeli.blade.php.
+  let prbGuardUlangKlik = false
+  let idThead = ['tabel_header', 'tabel2_header']
+  idThead.forEach((id) => {
+    let thead = document.getElementById(id)
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (prbGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+
+      e.stopPropagation()
+      e.preventDefault()
+
+      prbGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      prbGuardUlangKlik = false
+    }, true)
+  });
+}
+
+// Pindahkan elemen #rtBar supaya duduk tepat sebelum tabel yang sedang aktif - sama
+// catatan/bug-fix dengan npoPindahBar()/umbPindahBar().
+function prbPindahBar (urut) {
+  let bar = document.getElementById('rtBar')
+  let id = urut === 2 ? 'tabel2' : 'tabel'
+  let tabel = document.getElementById(id)
+  if (!bar || !tabel) { return }
+
+  let acuan = tabel
+  if ($.fn.DataTable.isDataTable('#' + id)) {
+    acuan = document.getElementById(id + '_wrapper') || tabel
+  }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan)
+  }
+}
+
+// Kotak scroll tabel dibuat setinggi sisa ruang di #content, sama seperti
+// npoAturTinggiTabel() di newpo.blade.php.
+function prbAturTinggiTabel () {
+  let area = document.getElementById('content')
+  let pane = document.querySelector('#myTabContent .tab-pane.active')
+  if (!area || !pane) { return }
+  let wrap = pane.querySelector('.po-table-wrap')
+  if (!wrap) { return }
+
+  wrap.style.maxHeight = 'none'
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah
+  let kotak = wrap.getBoundingClientRect()
+  let bawah = pane.getBoundingClientRect().bottom - kotak.bottom
+
+  let sisa = batasBawah - kotak.top - bawah - 4
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
+}
+
+// Kotak search & dropdown "Tampilkan" - statis di blade, diikat sekali lewat
+// dataset.rtBound karena renderTabelPRB()/renderTabelRJual() destroy+init tiap kali kolom
+// digeser/disembunyikan.
+function prbIkatSearch (urut) {
+  let id = urut === 2 ? 'prbSearch2' : 'prbSearch1'
+  let tabelId = urut === 2 ? '#tabel2' : '#tabel'
+  let input = document.getElementById(id)
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+  input.addEventListener('input', function () {
+    $(tabelId).DataTable().search(input.value).draw()
+  })
+}
+
+function prbIkatPanjangHalaman (urut) {
+  let id = urut === 2 ? 'prbLen2' : 'prbLen1'
+  let tabelId = urut === 2 ? '#tabel2' : '#tabel'
+  let sel = document.getElementById(id)
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(prbPanjangHalaman[urut])
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    prbPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+    $(tabelId).DataTable().page.len(prbPanjangHalaman[urut]).draw()
+  })
+}
+
+// Ubah salah satu tanggal periode -> muat ulang data dari server. urut 1 = tab Perintah
+// Retur Beli, urut 2 = tab List Retur Jual (difilter lewat tanggal SPR di dbSPBRJual).
+function prbIkatPeriode (urut) {
+  let idAwal  = urut === 2 ? 'prbTglAwal2'  : 'prbTglAwal1'
+  let idAkhir = urut === 2 ? 'prbTglAkhir2' : 'prbTglAkhir1'
+  let awal  = document.getElementById(idAwal)
+  let akhir = document.getElementById(idAkhir)
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  // Saat tanggal diketik manual, browser mengirim 'change' tiap digit tahun (0002, 0020,
+  // 0201...) - tahun setengah jadi jangan sampai memicu request. Lihat juga penjaga tahun
+  // di PerintahReturBeliController@loadAll.
+  let sahTanggal = function (v) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(v) && Number(v.slice(0, 4)) >= 1900
+  }
+
+  let onUbah = function () {
+    if (!sahTanggal(awal.value) || !sahTanggal(akhir.value)) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    loadAll()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
+// 'SEMUA' = tidak menyaring. Disimpan di luar renderTabelPRB() supaya tetap berlaku saat
+// tabel digambar ulang (sehabis simpan, otorisasi, dst).
+let prbFilterOtorisasi = 'SEMUA'
+
+function prbOtorisasiPRB (item) {
+  return Number(item.IsOtorisasi1) ? 'Sudah' : 'Belum'
+}
+
+function prbUpdateFilterBadge () {
+  let jml = (prbFilterOtorisasi !== 'SEMUA') ? 1 : 0
+  let badge = document.getElementById('prbFilterBadge')
+  if (badge) { badge.textContent = jml + ' aktif' }
+}
+
+function prbTerapkanFilter () {
+  prbFilterOtorisasi = $('#prbModalOtorisasi').val() || 'SEMUA'
+  prbUpdateFilterBadge()
+  $('#modalFilterPRB').modal('hide')
+  renderTabelPRB()
+}
+
+function prbResetFilter () {
+  prbFilterOtorisasi = 'SEMUA'
+  $('#prbModalOtorisasi').val('SEMUA')
+  prbUpdateFilterBadge()
+  $('#modalFilterPRB').modal('hide')
+  renderTabelPRB()
+}
+
+/* ---- Jembatan ke mesin penyimpan milik report-table.js ----
+ * doMoveHeader / doButtonVisibility / doSetDesimal / doButtonTotal SENGAJA tidak
+ * didefinisikan - report-table.js sudah punya fallback yang memutasi gcart_header sendiri
+ * lalu memanggil saveHeader(), dan saveHeader() itulah yang mampir ke doSimpanHeader di bawah. */
+function prbUrutSah (mode) {
+  return Number(mode) === 2 ? 2 : 1
+}
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = prbUrutSah(mode)
+  let cart = prbCart[urut] || []
+
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[6])
+    value.push(c[7])
+    isnumber.push(c[8])
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url: "{!! url('saveheadertable') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token: $("#_token").val(),
+      header: JSON.stringify(header),
+      isnumber: JSON.stringify(isnumber),
+      tipe: JSON.stringify(desimal),
+      value: JSON.stringify(value),
+      isshown: JSON.stringify(isshown),
+      href: PRB_HREF,
+      urut: urut
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+// Dipakai tombol "Reset kolom" di bar. Harus async:false karena report-table.js langsung
+// menggambar ulang setelahnya.
+window.doSetHeader = function (mode, reset) {
+  if (!reset) { return }
+  let urut = prbUrutSah(mode)
+
+  $.ajax({
+    url: "{!! url('getheadertable') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token: $("#_token").val(),
+      href: PRB_HREF,
+      urut: urut,
+      reset: 1
+    },
+    success: function (res) {
+      if (urut === 2) {
+        prbCart[2] = prbBuatCart(res.headertableheader2, res.headertablevalue2, res.isnumeric2, res.isshown2, res.desimal2, res.aliasordered2, PRB_LABEL_2)
+      } else {
+        prbCart[1] = prbBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered, PRB_LABEL_1)
+      }
+      window.gcart_header = prbCart[urut]
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal mengembalikan kolom ke pengaturan awal')
+    }
+  })
+}
+
+// Tab "Perintah Retur Beli" (urut 1) - tabel PRB gabungan (dulu tab "Perintah Retur Beli" +
+// "Sudah Otorisasi"). Tombol aksi ikut status otorisasi barisnya, sama seperti
+// renderTabelUMB() di uangmukabeli.blade.php.
+function renderTabelPRB () {
+  prbAktifkanTabel(1)
+
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy()
+  }
+
+  let cols = prbKolomTampil(1)
+  let kolomRender = cols.map(prbKolomRender)
+
+  let thead = document.getElementById('tabel_header')
+  thead.innerHTML = prbHeadHtml(cols)
+  let baris = thead.querySelector('tr')
+  if (baris) {
+    baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
+    baris.insertAdjacentHTML('beforeend', `
+      <th style="padding: 4px 12px;" scope="col">Oto</th>
+      <th style="padding: 4px 12px;" scope="col">User Oto</th>
+      <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+    `)
+  }
+
+  let dataTampil = dataPRB || []
+  if (prbFilterOtorisasi !== 'SEMUA') {
+    dataTampil = dataTampil.filter(function (item) { return prbOtorisasiPRB(item) === prbFilterOtorisasi })
+  }
+
+  let rowTable = ''
+  dataTampil.forEach((item) => {
+    let isOtorisasi = Number(item.IsOtorisasi1) || 0
+    let nobukti = item.NoBukti || ''
+
+    let tombolAksi = `<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail('${nobukti}')"><i class="bi bi-info"></i></button>`
+    if (isOtorisasi === 1) {
+      tombolAksi += `
+        <button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${nobukti}')"><i class="bi bi-key"></i></button>
+        <button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint('${nobukti}')"><i class="bi bi-printer"></i></button>
+      `
+    } else {
+      tombolAksi += `
+        <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('${nobukti}')"><i class="bi bi-pen"></i></button>
+        <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('${nobukti}')"><i class="bi bi-key"></i></button>
+      `
+    }
+
+    rowTable += `<tr><td class="text-center"><div class="po-aksi-wrap">${tombolAksi}</div></td>`
+    kolomRender.forEach((c) => {
+      if (c.tipe === 1) {
+        rowTable += `<td style="text-align: right;">${prbRenderNilai(c, item)}</td>`
+      } else {
+        rowTable += `<td>${prbRenderNilai(c, item)}</td>`
+      }
+    });
+    rowTable += `
+      ${isOtorisasi ?
+          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        :
+          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      }
+      <td>${item.OtoUser1 || ''}</td>
+      <td>${item.TglOto1 ? formatDate(item.TglOto1) : ''}</td>
+    </tr>`;
+  });
+
+  // Baris "Tidak ada data" TIDAK ditulis manual di sini - baris manual hanya berisi 1 sel
+  // sedangkan header punya banyak kolom, dan DataTables mencoba mengindeks sel-sel yang
+  // tidak ada di situ lalu crash (_DT_CellIndex). Biarkan <tbody> kosong dan serahkan ke
+  // opsi language.emptyTable di bawah.
+  document.getElementById('tabel_data').innerHTML = rowTable
+
+  $('#tabel').DataTable({
+    lengthChange: false,
+    pageLength: prbPanjangHalaman[1],
+    // "order": [] WAJIB - tanpa ini DataTables jatuh ke default [[0,'asc']] (kolom Actions).
+    // Data sudah diurutkan berdasarkan NoBukti oleh loadAll().
+    order: [],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    },
+    drawCallback: function () {
+      setTimeout(prbAturTinggiTabel, 0)
+    }
+  })
+
+  prbPindahBar(1)
+  prbIkatSearch(1)
+  prbIkatPanjangHalaman(1)
+  prbIkatPeriode(1)
+  let inputSearch = document.getElementById('prbSearch1')
+  if (inputSearch && inputSearch.value) {
+    $('#tabel').DataTable().search(inputSearch.value).draw()
+  }
+  prbAturTinggiTabel()
+}
+
+// Tab "List Retur Jual" (urut 2) - datanya tidak difilter tanggal & tidak punya tombol aksi,
+// sama seperti tampilan lama.
+function renderTabelRJual () {
+  prbAktifkanTabel(2)
+
+  if ($.fn.DataTable.isDataTable('#tabel2')) {
+    $('#tabel2').DataTable().destroy()
+  }
+
+  let cols = prbKolomTampil(2)
+  let kolomRender = cols.map(prbKolomRender)
+
+  let thead = document.getElementById('tabel2_header')
+  thead.innerHTML = prbHeadHtml(cols)
+
+  let rowTable = ''
+  dataRJual.forEach((item) => {
+    rowTable += '<tr>'
+    kolomRender.forEach((c) => {
+      if (c.tipe === 1) {
+        rowTable += `<td style="text-align: right;">${prbRenderNilai(c, item)}</td>`
+      } else {
+        rowTable += `<td>${prbRenderNilai(c, item)}</td>`
+      }
+    });
+    rowTable += '</tr>'
+  });
+
+  document.getElementById('tabel2_data').innerHTML = rowTable
+
+  $('#tabel2').DataTable({
+    lengthChange: false,
+    pageLength: prbPanjangHalaman[2],
+    order: [],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    },
+    drawCallback: function () {
+      setTimeout(prbAturTinggiTabel, 0)
+    }
+  })
+
+  prbPindahBar(2)
+  prbIkatSearch(2)
+  prbIkatPanjangHalaman(2)
+  prbIkatPeriode(2)
+  let inputSearch = document.getElementById('prbSearch2')
+  if (inputSearch && inputSearch.value) {
+    $('#tabel2').DataTable().search(inputSearch.value).draw()
+  }
+  prbAturTinggiTabel()
+}
+
+function loadAll () {
+  // Idempotent - hanya benar-benar mengikat sekali seumur halaman.
+  prbInitReportTableSekali()
+
+  let urutAktif = prbUrutTabAktif()
+  prbPerluGambar[1] = (urutAktif !== 1)
+  prbPerluGambar[2] = (urutAktif !== 2)
+
   $.ajax({
     url: "{!! url('prbloadall') !!}",
     type: "GET",
-    success: function(res) {
-      console.log(res);
-
-      const dataRefreshOutstanding = res.listPRB || [];
-      const dataRefreshOutstanding2 = res.listSdhOto || [];
-      const dataRefreshOutstanding3 = res.listRJual || [];
-
-      // ========== TABLE 1 ==========
-      let rowTable = "";
-      if (dataRefreshOutstanding.length > 0) {
-        // If it's a 2D array (like [ [ {...}, {...} ] ]), use [0]
-        const list1 = Array.isArray(dataRefreshOutstanding[0]) ? dataRefreshOutstanding[0] : dataRefreshOutstanding;
-        list1.forEach((item) => {
-          const date1 = item.TANGGAL ? formatDate(item.TANGGAL) : "";
-          rowTable += `
-            <tr>
-              <td class="text-center" style="white-space:nowrap;">
-                <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NOBUKTI}')">
-                  <i class="bi bi-info"></i>
-                </button>
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item.NOBUKTI}')">
-                  <i class="bi bi-pen"></i>
-                </button>
-                <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('${item.NOBUKTI}')">
-                  <i class="bi bi-key"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete('${item.NOBUKTI}')">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-              <td style="white-space:nowrap;">${item.NOBUKTI}</td>
-              <td style="white-space:nowrap;">${date1}</td>
-              ${
-                item.IsOtorisasi1 == 1
-                  ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display:none">1</div></i></td>'
-                  : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display:none">0</div></i></td>'
-              }
-            </tr>`;
-        });
-      }
-      $("#tabel_data").html(rowTable);
-      $("#tabel").DataTable({ lengthChange: false, paging: false });
-
-
-      // ========== TABLE 2 ==========
-      let rowTable2 = "";
-      if (dataRefreshOutstanding2.length > 0) {
-        const list2 = Array.isArray(dataRefreshOutstanding2[0]) ? dataRefreshOutstanding2[0] : dataRefreshOutstanding2;
-        list2.forEach((item) => {
-          const date1 = item.Tanggal ? formatDate(item.Tanggal) : "";
-          const date2 = item.TglOto1 ? formatDate(item.TglOto1) : "";
-
-          rowTable2 += `
-            <tr>
-              <td class="text-center" style="white-space:nowrap;">
-                <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NOBUKTI}')">
-                  <i class="bi bi-info"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item.NOBUKTI}')">
-                  <i class="bi bi-key"></i>
-                </button>
-              </td>
-              <td style="white-space:nowrap;">${item.NOBUKTI}</td>
-              <td style="white-space:nowrap;">${date1}</td>
-              ${
-                item.IsOtorisasi1 == 1
-                  ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display:none">1</div></i></td>'
-                  : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display:none">0</div></i></td>'
-              }
-              <td style="white-space:nowrap;">${item.OtoUser1 || ""}</td>
-              <td style="white-space:nowrap;">${date2}</td>
-            </tr>`;
-        });
-      }
-      $("#tabel2_data").html(rowTable2);
-      $("#tabel2").DataTable({ lengthChange: false, paging: false });
-
-
-      // ========== TABLE 3 ==========
-      let rowTable3 = "";
-      if (dataRefreshOutstanding3.length > 0) {
-        const list3 = Array.isArray(dataRefreshOutstanding3[0]) ? dataRefreshOutstanding3[0] : dataRefreshOutstanding3;
-        list3.forEach((item) => {
-          rowTable3 += `
-            <tr>
-              <td style="white-space:nowrap;">${item.Nobukti}</td>
-              <td style="white-space:nowrap;">${item.Kodebrg}</td>
-              <td style="white-space:nowrap;">${item.NAMABRG}</td>
-              <td style="white-space:nowrap;">${item.Satuan}</td>
-              <td class="text-right">${formatAngka(parseFloat(item.Qnt || 0).toFixed(2))}</td>
-            </tr>`;
-        });
-      }
-      $("#tabel3_data").html(rowTable3);
-      $("#tabel3").DataTable({ lengthChange: false, paging: false });
-
-      console.log("Finished rendering all tables");
+    data: {
+      tglawal: $('#prbTglAwal1').val(),
+      tglakhir: $('#prbTglAkhir1').val(),
+      tglawal2: $('#prbTglAwal2').val(),
+      tglakhir2: $('#prbTglAkhir2').val()
     },
-    error: function(err) {
-      console.error("Error loading data:", err);
+    success: function (res) {
+      prbCart[1] = prbBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered, PRB_LABEL_1)
+      prbCart[2] = prbBuatCart(res.headertableheader2, res.headertablevalue2, res.isnumeric2, res.isshown2, res.desimal2, res.aliasordered2, PRB_LABEL_2)
+      window.gcart_header = prbCart[prbActiveUrut]
+
+      dataPRB = res.listPRB || []
+      dataRJual = res.listRJual || []
+
+      if (urutAktif === 2) {
+        renderTabelRJual()
+      } else {
+        renderTabelPRB()
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
-  });
+  })
 }
+
+$('#nav-home-tab').on('shown.bs.tab', function () {
+  prbAktifkanTabel(1)
+  prbPindahBar(1)
+
+  if (prbPerluGambar[1]) {
+    prbPerluGambar[1] = false
+    renderTabelPRB()
+    return
+  }
+
+  if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
+  prbAturTinggiTabel()
+})
+
+$('#nav-profile-tab').on('shown.bs.tab', function () {
+  prbAktifkanTabel(2)
+  prbPindahBar(2)
+
+  if (prbPerluGambar[2]) {
+    prbPerluGambar[2] = false
+    renderTabelRJual()
+    return
+  }
+
+  if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
+  prbAturTinggiTabel()
+})
+
+// Layar diubah ukurannya - tinggi kotak tabel diukur ulang, didebounce.
+let prbTimerResize = null
+$(window).on('resize', function () {
+  if (prbTimerResize) { clearTimeout(prbTimerResize) }
+  prbTimerResize = setTimeout(prbAturTinggiTabel, 150)
+})
 
 
 // ========== Helper: Date Formatter ==========
@@ -4406,6 +4928,22 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
 
 }
 
+function lockSupplier (){
+  let noBeliCek = document.getElementById('input_add_add_nobeli').value
+  console.log(noBeliCek)
+  if ( noBeliCek == '-'){
+    document.getElementById('input_add_add_supplier').disabled = false
+    document.getElementById('buttonSupplier').hidden = false
+    document.getElementById('input_add_add_supplier').value = ''
+  }
+  else if ( noBeliCek != '-'){
+    document.getElementById('input_add_add_supplier').disabled = true
+    document.getElementById('buttonSupplier').hidden = true
+
+  }
+
+}
+
 function buttonAddAddPickBarangNonFOCPlus (index , pEdit = 0) {
   let _token  = $("#_token").val()
   console.log(dataAddAddListItem[index])
@@ -4676,40 +5214,31 @@ function cleanFormAddAdd () {
   document.getElementById("input_add_add_kodebrg").value = ''
   document.getElementById("input_add_add_namabrg").value = ''
   document.getElementById("input_add_add_quantity").value = ''
-  document.getElementById("input_add_add_satuan").value = ''
+  document.getElementById("input_add_add_satuan").innerHTML = ''
   document.getElementById("input_add_add_gudang").value = ''
-  document.getElementById("input_add_add_keterangan").value = '' 
+  document.getElementById("input_add_add_keterangan").value = ''
+
+  document.getElementById("input_add_add_nobeli").disabled = false
+  document.getElementById("input_add_add_kodebrg").disabled = false
+  document.getElementById("input_add_add_gudang").disabled = false
+  document.getElementById("buttonBrowseBarang").disabled = false
+  document.getElementById("buttonBrowseGudang").disabled = false
 
 }
 
 function lockFormAdd () {
-  document.getElementById("input_add_tipeppn").disabled = true
-  document.getElementById("input_add_pembayaran").disabled = true
-  document.getElementById("input_add_nopocust").disabled = true
-  document.getElementById("input_add_noso").disabled = true
+  document.getElementById("input_add_add_norjual").disabled = true
+  document.getElementById("input_add_add_nobeli").disabled = true
+  document.getElementById("input_add_add_supplier").disabled = true
+  document.getElementById("input_add_add_kodebrg").disabled = true
+  document.getElementById("input_add_add_namabrg").disabled = true
+  document.getElementById("input_add_add_quantity").disabled = true
+  document.getElementById("input_add_add_satuan").disabled = true
+  document.getElementById("input_add_add_gudang").disabled = true
+  document.getElementById("input_add_add_keterangan").disabled = true 
+  
+  document.getElementById("input_add_tipebayar").disabled = true
   document.getElementById("input_add_keterangan").disabled = true
-  document.getElementById("input_add_tanggalkirim").disabled = true
-  document.getElementById("input_add_tanggalkirim").disabled = true
-  document.getElementById("input_add_hari").disabled = true
-  document.getElementById("input_add_draftpo").disabled = true
-  document.getElementById("input_add_add_discpersen1").disabled = true
-  document.getElementById("input_add_add_discpersen2").disabled = true
-  document.getElementById("input_add_add_discpersen3").disabled = true
-  document.getElementById("input_add_add_foc").disabled = true
-
-  document.getElementById("buttonAddListPelanggan").hidden = true
-  document.getElementById("buttonAddListGudang").hidden = true
-  document.getElementById("buttonAddListSales").hidden = true
-  document.getElementById("buttonAddListValas").hidden = true
-  document.getElementById("buttonAddListPIC").hidden = true
-  document.getElementById("buttonAddListLokasiPenerima").hidden = true
-  document.getElementById("buttonAddListBackOffice").hidden = true
-  document.getElementById("buttonAddListBackOffice").hidden = true
-  document.getElementById("buttonAddListNoSo").hidden = true
-  document.getElementById("buttonTambahItem").hidden = true
-
-  document.getElementById("input_add_disc").disabled = true
-  document.getElementById("input_add_discrp").disabled = true
 }
 
 function buttonShowHideHeader () 
@@ -4744,9 +5273,33 @@ function cleanFormAdd () {
 }
 
 function buttonEdit (NOBUKTI) {
+  let pcekglobal = 0
+  $.ajax({
+    url: "{!! url('ceklockperiode') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      if (res.length ) {
+        pcekglobal = 1
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
+
+if (pcekglobal) {
+  alertify.warning("Periode sudah dikunci")
+  return
+}
   tipeform = 'edit'
   console.log('buttonEdit' , NOBUKTI)
 
+  document.getElementById('buttonTambahItem').hidden = false;
   $('.showhide').hide();
   // $('.showhidemodalbodyaddmain').hide();
   $('#buttonSubmitSaveHeader').show();
@@ -4798,6 +5351,29 @@ function buttonEdit (NOBUKTI) {
  let noBuktiUntukAdd = 0
 
 function buttonAdd (noBukti) {
+  let pcekglobal = 0
+  $.ajax({
+    url: "{!! url('ceklockperiode') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      if (res.length ) {
+        pcekglobal = 1
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
+
+if (pcekglobal) {
+  alertify.warning("Periode sudah dikunci")
+  return
+}
   tipeform = 'add'
 
   if (noBukti != null){
@@ -4806,6 +5382,8 @@ function buttonAdd (noBukti) {
   if ( noBukti == null){
     noBuktiUntukAdd = 0
   }
+
+  document.getElementById('buttonTambahItem').hidden = false;
 
   $('.showhide').hide();
   // $('.showhidemodalbodyaddmain').hide();
@@ -4899,6 +5477,8 @@ function buttonDetail (NOBUKTI) {
   tipeform = 'detail'
   console.log('button Detail' , NOBUKTI)
 
+  document.getElementById('buttonTambahItem').hidden = true;
+
   $('.showhide').hide();
   // $('.showhidemodalbodyaddmain').hide();
   $('#buttonSubmitSaveHeader').show();
@@ -4948,7 +5528,6 @@ function refreshDataTableAdd (NOBUKTI) {
         console.log('res' , res)
 
         if (!res.list.length) {
-          alertify.warning("Data habis")
           //  $("#form").modal('toggle')
           $('#page3').hide();
           $('#page2').hide();
@@ -4971,7 +5550,7 @@ function refreshDataTableAdd (NOBUKTI) {
               </td>
               <td>${item.KODEBRG}</td>
               <td>${item.NamaBrg}</td>
-              <td class="text-right">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
+              <td class="text-right">${item.QNT ? parseFloat(item.QNT).toFixed(2) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td>${item.NORJual}</td>
               <td>${item.nopbl}</td>
@@ -5022,73 +5601,36 @@ function buttonAddDeleteItem (i) {
         let _token = $("#_token").val();
         let Choice = "D"
 
-        let NoBukti = dataDelete.NoBukti
-        let Urut = dataDelete.Urut
+        let NoBukti = dataDelete.NOBUKTI
+        let Urut = dataDelete.URUT
 
         $.ajax({
-          url: "{!! url('pospadd') !!}",
+          url: "{!! url('prbspadd') !!}",
           type: "post",
           async: false,
           data: {
             _token,
             Choice,
             NoBukti,
-            NoUrut:0,
-            Tanggal: '',
-            TglJatuhTempo: '',
-            KodeSupp: '',
-            // Handling,
-            KodeExp: '',
-            Keterangan: '',
-            // FakturSupp,
-            KodeVls: '',
-            Kurs: 0,
-            PPn: 0,
-            TipeBayar: 0,
-            Hari: 0,
-            // TipeDisc,
-            // Disc,
-            DiscRp: 0,
+            NoUrut : 0,
             Urut,
-            KodeBrg: 0,
-            Qnt: 0,
-            NoSat: 0,
-            Satuan: '',
-            Isi: 0,
-            Harga: 0,
-            DiscP: 0,
-            // DiscTot,
-            NoPPL: '',
-            // IsClose,
-            // IsCloseD,
-            // Catatan,
-            // IsExp,
-            // Tolerate,
-            UrutPPL: 0,
-            Kodegdg: '',
-            Discpdet2: 0,
-            Discpdet3: 0,
-            // Discpdet4,
-            // Discpdet5,
-            // FlagTipe,
-            NamaBrg: '',
-            // IsJasa,
-            // pFirst,
-            pFOC: 0,
-            Noso: '',
-            Jmlrecord: 0,
-            NOPOCUST: '',
-            // IdUser,
-            // pJasa,
-            // NPPH23,
-            // PERKIRAAN,
-            // SatX,
-            // COST,
-            // SUBCOST,
-            TglKirim: '',
-            // PPH21,
-            NOPNw: '',
-            UrutPNW: 0
+            Tanggal : '',
+            KodeSupp : '',
+            KodeGdg : '',
+            NoBeli : '',
+            Keterangan : '',
+            KodeBrg : '',
+            UrutPBL : 0,
+            Qnt : 0,
+            NoSat : 0,
+            Satuan : '',
+            Isi : 0,
+            Qnt1 : 0,
+            Qnt2 : 0,
+            NORJual:'',
+            UrutRJual : 0,
+            Jmlrecord : 0,
+            KETDET :''
 
           },
           success: function(res) {
@@ -5143,7 +5685,7 @@ function searchBarangAll (e) {
 }
 
 function formatAngka (angkaString) {
-  console.log('formatAngka' , angkaString);
+  // console.log('formatAngka' , angkaString);
   let tempAngka = angkaString.split('.')
   let temp1 = ''
   for (let i = 0; i < tempAngka[0].length; i++) {
@@ -5235,65 +5777,18 @@ function LockFreeOfCharge(){
 }
 
 </script>
-{{-- script buat hover po belum otorisasi dan sudah otorisasi --}}
+{{-- Warna tab aktif sekarang murni CSS (.custom-tabs .nav-link.active) + Bootstrap Tab
+     (bs.tab), sama seperti newpo.blade.php - script pewarna tab manual (setActiveTab, yang
+     dulu menunjuk juga ke #nav-profile1-tab yang sudah dihapus) tidak lagi diperlukan. --}}
   <script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-    const tabProfile1 = document.getElementById('nav-profile1-tab');
-  
-    function setActiveTab(homeActive) {
-      if (homeActive == 0) {
-        tabHome.style.backgroundColor = '#007bff';
-        tabHome.style.color = '#fff';
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-
-        tabProfile1.style.backgroundColor = '#f8f9fa';
-        tabProfile1.style.color = '#007bff';
-
-      } else if (homeActive == 1){
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-
-        tabProfile.style.backgroundColor = '#007bff';
-        tabProfile.style.color = '#fff';
-
-        tabProfile1.style.backgroundColor = '#f8f9fa';
-        tabProfile1.style.color = '#007bff';
-      }
-      else if (homeActive == 2){
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-
-        tabProfile1.style.backgroundColor = '#007bff';
-        tabProfile1.style.color = '#fff';
-      }
-    }
-  
-    // Default warna tab
-    setActiveTab(0);
-  
-    // buat ganti tab
-    tabHome.addEventListener('click', function () {
-      setActiveTab(0);
-    });
-  
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(1);
-    });
-
-    tabProfile1.addEventListener('click', function () {
-      setActiveTab(2);
-    });
-
     function performSearch () {
-      const searchValue = document.getElementById('input_add_add_kodebarang').value.trim();
-    
+      // input_add_add_kodebarang adalah sisa salinan dari modul lain - tidak ada di halaman
+      // ini (id yang benar: input_add_add_kodebrg), jadi dijaga null di sini.
+      const elKodeBrgCari = document.getElementById('input_add_add_kodebarang');
+      const searchValue = elKodeBrgCari ? elKodeBrgCari.value.trim() : '';
+
       buttonAddAddListBarang();
-    
+
       // Apply search to all DataTables
       $('#tabel_add_list_barang_nonfoc').DataTable().search(searchValue).draw();
       $('#tabel_add_list_barang_nonfocplus').DataTable().search(searchValue).draw();
@@ -5301,12 +5796,14 @@ function LockFreeOfCharge(){
     }
 
     // Keyboard event
-    document.getElementById('input_add_add_kodebarang').addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-          event.preventDefault();
-          performSearch();
-      }
-    });
+    if (document.getElementById('input_add_add_kodebarang')) {
+      document.getElementById('input_add_add_kodebarang').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            performSearch();
+        }
+      });
+    }
 
 
   function buttonNoRJual () {
@@ -5317,6 +5814,8 @@ function LockFreeOfCharge(){
    if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
     $('#tabelModalOpen').DataTable().destroy();
   }
+  $('#tabelModalOpen').removeClass('modalOpen-plain');
+  $('#modalOpenCustomSearch').hide().find('input').val('');
 
   $.ajax({
     url: "{!! url('prblistnorjual') !!}",
@@ -5331,7 +5830,14 @@ function LockFreeOfCharge(){
     },
   });
 
-  let rowTable = "";
+  let rowTable = `<tr>
+      <td class="text-center">
+        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectNoRJual('-','-')"><i class="bi bi-plus"></i></button>
+      </td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>`;
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
@@ -5368,7 +5874,6 @@ function LockFreeOfCharge(){
 
 function buttonSelectNoRJual(NoBukti, urut){
   document.getElementById('input_add_add_norjual').value = NoBukti;
-  document.getElementById('input_add_add_urutRJual').value = urut;
   // document.getElementById('input_detailAkun_edit_hutPiut').value = perkiraan;
 
   $("#formModalOpen").modal("hide");
@@ -5395,16 +5900,19 @@ function buttonNoBeli () {
     },
   });
 
-  let rowTable = "";
+  let rowTable = `<tr class="pick-row" onclick="buttonSelectNoBeli('-','-','-')">
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>`;
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectNoBeli('${item.NoBukti}','${item.urut}')"><i class="bi bi-plus"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectNoBeli('${item.NoBukti}','${item.KodeSupp}', '${item.Kodegdg}')">
       <td>${item.NoBukti}</td>
-      <td>${item.Tanggal}</td>
+      <td>${String(item.Tanggal).split(' ')[0]}</td>
       <td>${item.KodeSupp}</td>
       <td>${item.namaCustSupp}</td>
       <td>${item.Kodegdg}</td>
@@ -5415,7 +5923,6 @@ function buttonNoBeli () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">No. Bukti</th>
     <th scope="col">Tanggal</th>
     <th scope="col">Kode Supp</th>
@@ -5426,18 +5933,25 @@ function buttonNoBeli () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'No. Beli'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
+  $('#tabelModalOpen').addClass('modalOpen-plain');
+  let $modalOpenSearch = $('#modalOpenCustomSearch').show().find('input').val('');
+  $modalOpenSearch.off('input').on('input', function () {
+    let q = this.value.toLowerCase();
+    $('#tabel_dataModalOpen tr').each(function () {
+      $(this).toggle(this.textContent.toLowerCase().indexOf(q) > -1);
+    });
   });
-  
+
   $("#formModalOpen").modal('toggle')
 }
 
-function buttonSelectNoBeli(NoBukti, urut){
+function buttonSelectNoBeli(NoBukti, kodeSupp, kodegdg){
   document.getElementById('input_add_add_nobeli').value = NoBukti;
-  document.getElementById('input_add_add_urutPbl').value = urut;
+  document.getElementById('input_add_add_supplier').value = kodeSupp;
+  document.getElementById('input_add_add_gudang').value = kodegdg;
   // document.getElementById('input_detailAkun_edit_hutPiut').value = perkiraan;
+
+  lockSupplier()
 
   $("#formModalOpen").modal("hide");
 }
@@ -5450,6 +5964,8 @@ function buttonSupplier () {
    if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
     $('#tabelModalOpen').DataTable().destroy();
   }
+  $('#tabelModalOpen').removeClass('modalOpen-plain');
+  $('#modalOpenCustomSearch').hide().find('input').val('');
 
   $.ajax({
     url: "{!! url('prblistsupplier') !!}",
@@ -5507,14 +6023,31 @@ function buttonSelectSupplier (NoBukti){
   $("#formModalOpen").modal("hide");
 }
 
-function buttonGudang () {
-  console.log('asd');
+function renderModalPickTable (headers, rows, callbacks) {
+  let headerHtml = '<tr>' + headers.map(h => `<th scope="col">${h}</th>`).join('') + '</tr>'
+  document.querySelector("#theadOpen").innerHTML = headerHtml
 
+  let bodyHtml = rows.map((r, i) => `<tr class="modalPickRow" data-idx="${i}" style="cursor:pointer">` + r.map(c => `<td>${c}</td>`).join('') + `</tr>`).join('')
+  document.getElementById("tabel_dataModalOpen").innerHTML = bodyHtml
+
+  window.modalPickCallbacks = callbacks
+
+  $(document).off('click', '#tabel_dataModalOpen tr.modalPickRow').on('click', '#tabel_dataModalOpen tr.modalPickRow', function () {
+    let idx = $(this).data('idx')
+    if (window.modalPickCallbacks && window.modalPickCallbacks[idx]) {
+      window.modalPickCallbacks[idx]()
+    }
+  })
+}
+
+function buttonGudang () {
   let _token = $("#_token").val();
 
    if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
     $('#tabelModalOpen').DataTable().destroy();
   }
+  $('#tabelModalOpen').removeClass('modalOpen-plain');
+  $('#modalOpenCustomSearch').hide().find('input').val('');
 
   $.ajax({
     url: "{!! url('prblistgudang') !!}",
@@ -5528,38 +6061,19 @@ function buttonGudang () {
     },
   });
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
+  renderModalPickTable(
+    ['Kode', 'Nama', 'Alamat'],
+    dataRefresh.map(item => [item.KodeGdg, item.Nama, item.Alamat]),
+    dataRefresh.map(item => () => buttonSelectGudang(item.KodeGdg))
+  );
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectGudang('${item.KodeGdg}')"><i class="bi bi-plus"></i></button>
-      </td>
-      <td>${item.KodeGdg}</td>
-      <td>${item.Nama}</td>
-      <td>${item.Alamat}</td>
-    </tr>`;
-  });
-
-  document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-  let headerTable = `
-  <tr>
-    <th scope="col">Actions</th>
-    <th scope="col">Kode</th>
-    <th scope="col">Nama</th>
-    <th scope="col">Alamat</th>
-  </tr>
-  `
-  document.querySelector("#theadOpen").innerHTML = headerTable;
-  document.getElementById("namaModalOpen").innerHTML = 'No. Beli'
+  document.getElementById("namaModalOpen").innerHTML = 'Gudang'
 
   $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
+    "lengthChange": false,
     "paging": true,
   });
-  
+
   $("#formModalOpen").modal('toggle')
 }
 
@@ -5572,8 +6086,6 @@ function buttonSelectGudang (NoBukti){
 
 
 function buttonBarang () {
-  console.log('asd');
-
   let _token = $("#_token").val();
 
   const isEmpty = (value) => !value || value === '-';
@@ -5584,6 +6096,8 @@ function buttonBarang () {
    if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
     $('#tabelModalOpen').DataTable().destroy();
   }
+  $('#tabelModalOpen').removeClass('modalOpen-plain');
+  $('#modalOpenCustomSearch').hide().find('input').val('');
 
 if(isEmpty(kodeBeli)&&isEmpty(kodeJual)){
   alertify.warning('No Jual dan No Beli Kosong')
@@ -5602,29 +6116,11 @@ if (isEmpty(kodeBeli)){
     success: function (res) {
       dataRefresh = res;
 
-      let rowTable = "";
-      dataRefresh.forEach((item, i) => {
-        let temp = "";
-
-        rowTable += `<tr>
-          <td class="text-center">
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectBarang('${item.Kodebrg}','${item.NamaBrg}', ${item.Qnt}, '${item.satuan}', '${item.Nosat}', '${item.ISI1}', '${item.ISI2}' )"><i class="bi bi-plus"></i></button>
-          </td>
-          <td>${item.Kodebrg}</td>
-          <td>${item.NamaBrg}</td>
-        </tr>`;
-      });
-
-      document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-      let headerTable = `
-      <tr>
-        <th scope="col">Actions</th>
-        <th scope="col">Kode Barang</th>
-        <th scope="col">Nama Barang</th>
-      </tr>
-      `
-      document.querySelector("#theadOpen").innerHTML = headerTable;
+      renderModalPickTable(
+        ['Kode Barang', 'Nama Barang'],
+        dataRefresh.map(item => [item.Kodebrg, item.NamaBrg]),
+        dataRefresh.map(item => () => buttonSelectBarang(item.Kodebrg, item.NamaBrg, item.Qnt, item.satuan, item.Nosat, item.ISI1, item.ISI2, '0', item.Urut))
+      );
 
     },
   });
@@ -5639,30 +6135,12 @@ if (isEmpty(kodeBeli)){
     },
     success: function (res) {
       dataRefresh = res;
-      
-      let rowTable = "";
-      dataRefresh.forEach((item, i) => {
-        let temp = "";
 
-        rowTable += `<tr>
-          <td class="text-center">
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectBarang('${item.KODEBRG}','${item.NAMABRG}',${item.Qnt}, '${item.SATUAN}', '${item.NOSAT}', '${item.ISI1}', '${item.ISI2}')"><i class="bi bi-plus"></i></button>
-          </td>
-          <td>${item.KODEBRG}</td>
-          <td>${item.NAMABRG}</td>
-        </tr>`;
-      });
-
-      document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-      let headerTable = `
-      <tr>
-        <th scope="col">Actions</th>
-        <th scope="col">Kode Barang</th>
-        <th scope="col">Nama Barang</th>
-      </tr>
-      `
-      document.querySelector("#theadOpen").innerHTML = headerTable;
+      renderModalPickTable(
+        ['Kode Barang', 'Nama Barang'],
+        dataRefresh.map(item => [item.KODEBRG, item.NAMABRG]),
+        dataRefresh.map(item => () => buttonSelectBarang(item.KODEBRG, item.NAMABRG, item.Qnt, item.SATUAN, item.NOSAT, item.ISI1, item.ISI2, item.URUT, '0'))
+      );
     },
   });
 
@@ -5679,47 +6157,31 @@ if (isEmpty(kodeBeli)){
     success: function (res) {
       dataRefresh = res;
 
-      let rowTable = "";
-      dataRefresh.forEach((item, i) => {
-        let temp = "";
-
-        rowTable += `<tr>
-          <td class="text-center">
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonSelectBarang('${item.KODEBRG}','${item.NAMABRG}',${item.QntTerima}, '${item.SATUAN}', '${item.NOSAT}', '${item.ISI1}', '${item.ISI2}')"><i class="bi bi-plus"></i></button>
-          </td>
-          <td>${item.KODEBRG}</td>
-          <td>${item.NAMABRG}</td>
-        </tr>`;
-      });
-
-      document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-      let headerTable = `
-      <tr>
-        <th scope="col">Actions</th>
-        <th scope="col">Kode Barang</th>
-        <th scope="col">Nama Barang</th>
-      </tr>
-      `
-      document.querySelector("#theadOpen").innerHTML = headerTable;
+      renderModalPickTable(
+        ['Kode Barang', 'Nama Barang'],
+        dataRefresh.map(item => [item.KODEBRG, item.NAMABRG]),
+        dataRefresh.map(item => () => buttonSelectBarang(item.KODEBRG, item.NAMABRG, item.QntTerima, item.SATUAN, item.NOSAT, item.ISI1, item.ISI2, item.URUT, '0'))
+      );
     },
   });
 
 }
-  
+
   document.getElementById("namaModalOpen").innerHTML = 'Barang'
 
   $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
+    "lengthChange": false,
     "paging": true,
   });
   
   $("#formModalOpen").modal('toggle')
 }
 
-function buttonSelectBarang (kodebrg, namabrg, qnt, satuan, nosat, isi1, isi2){
+function buttonSelectBarang (kodebrg, namabrg, qnt, satuan, nosat, isi1, isi2, urut, urutJual){
   document.getElementById('input_add_add_kodebrg').value = kodebrg;
   document.getElementById('input_add_add_namabrg').value = namabrg;
+  document.getElementById('input_add_add_urutPbl').value = urut;
+  document.getElementById('input_add_add_urutRJual').value = urutJual;
   document.getElementById('input_add_add_quantity').value = qnt;
 
   let satuanTemp = `
@@ -5738,6 +6200,626 @@ function buttonSelectBarang (kodebrg, namabrg, qnt, satuan, nosat, isi1, isi2){
 
   $("#formModalOpen").modal("hide");
 }
+
+function submitPrint (nobukti) {
+
+  let _token = $('#_token').val()
+
+    $.ajax({
+      url: "{!! url('perintahreturbeliPrint') !!}",
+      type: "get",
+      async: false,
+      data: {
+        _token : _token,
+        NOBUKTI: nobukti
+      },
+      success: function(res) {
+
+        dataPrint = res
+
+        console.log(dataPrint)
+        
+      }
+    })
+  
+    let arrayDataPrint = []
+    for (let i = 0; i < dataPrint.length; i+=7) 
+    {
+      let tempArray = dataPrint.slice(i,i+7)
+      arrayDataPrint.push(tempArray)
+    }
+
+    let printContent = ''
+    let imageContent = document.getElementById(`imagecontainer`).innerHTML;
+    let css = ''
+    let hdr = ''
+    let str= ''
+    let ftr= ''
+    let tanggalOnly = dataPrint[0].TANGGAL.split(' ')[0];
+
+    const now = new Date()
+    const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')
+    
+    css = `<style type="text/css">
+      body {
+        font-family: sans-serif;
+        font-size: 11px !important;
+      }
+
+      table {
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
+
+      table th,
+      table td {
+        border: 1px solid #3c3c3c;
+        height: 24px;
+        padding: 1px 5px 0px;
+        overflow: hidden;
+      }
+
+      a {
+        background: blue;
+        color: #fff;
+        padding: 8px 10px;
+        text-decoration: none;
+        border-radius: 2px;
+      }
+
+      .ttd-place {
+        height: 80px;
+        text-align: center;
+      }
+
+      #ttd {
+        width: 1000px;
+        border: none;
+      }
+
+      .ttd-header {
+        padding-top: 40px;
+      }
+
+      .body-main-print {
+        padding: 1rem;
+        padding-top: 1rem;
+
+      }
+
+      .header-ba {
+        margin-bottom: 2rem;
+        text-decoration: underline;
+        margin-top: 2rem;
+      }
+
+      .detail-spb-table {
+        margin: 0;
+      }
+
+      .no-border {
+        border: none;
+      }
+
+      .border-bottom {
+        border: bottom;
+      }
+      .detail-ba-div {
+      }
+
+      .vertical-align-baseline {
+        vertical-align: baseline;
+      }
+
+      .mt-2rem {
+        margin-top: 2rem;
+      }
+
+      .mb-3 {
+        margin-bottom: 0.5rem;
+      }
+
+      .fw-bold {
+        font-weight: bold;
+      }
+
+      .mb-1 {
+        margin-bottom: 0.25rem;
+      }
+
+      .mb-2 {
+        margin-bottom: 0.5rem;
+      }
+
+      .mb-3 {
+        margin-bottom: 1rem;
+      }
+
+      .mb-4 {
+        margin-bottom: 1.5rem;
+      }
+
+      .mb-5 {
+        margin-bottom: 3rem;
+      }
+
+      .mt-1 {
+        margin-top: 0.25rem;
+      }
+
+      .mt-2 {
+        margin-top: 0.5rem;
+      }
+
+      .mt-3 {
+        margin-top: 1rem;
+      }
+
+      .mt-4 {
+        margin-top: 1.5rem;
+      }
+
+      .mt-5 {
+        margin-top: 3rem;
+      }
+
+      .ms-1 {
+        margin-left: 0.25rem;
+      }
+
+      .ms-2 {
+        margin-left: 0.5rem;
+      }
+
+      .ms-3 {
+        margin-left: 1rem;
+      }
+
+      .ms-4 {
+        margin-left: 1.5rem;
+      }
+
+      .ms-5 {
+        margin-left: 3rem;
+      }
+
+      .me-1 {
+        margin-right: 0.25rem;
+      }
+
+      .me-2 {
+        margin-right: 0.5rem;
+      }
+
+      .me-3 {
+        margin-right: 1rem;
+      }
+
+      .me-4 {
+        margin-right: 1.5rem;
+      }
+
+      .me-5 {
+        margin-right: 3rem;
+      }
+
+      .my-1 {
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .my-2 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .my-3 {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .my-4 {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .my-5 {
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+      }
+
+      .pb-1 {
+        padding-bottom: 0.25rem;
+      }
+
+      .pb-2 {
+        padding-bottom: 0.5rem;
+      }
+
+      .pb-3 {
+        padding-bottom: 1rem;
+      }
+
+      .pb-4 {
+        padding-bottom: 1.5rem;
+      }
+
+      .pb-5 {
+        padding-bottom: 3rem;
+      }
+
+      .pt-1 {
+        padding-top: 0.25rem;
+      }
+
+      .pt-2 {
+        padding-top: 0.5rem;
+      }
+
+      .pt-3 {
+        padding-top: 1rem;
+      }
+
+      .pt-4 {
+        padding-top: 1.5rem;
+      }
+
+      .pt-5 {
+        padding-top: 3rem;
+      }
+
+      .ps-0 {
+        padding-left: 0;
+      }
+
+      .ps-1 {
+        padding-left: 0.25rem;
+      }
+
+      .ps-2 {
+        padding-left: 0.5rem;
+      }
+
+      .ps-3 {
+        padding-left: 1rem;
+      }
+
+      .ps-4 {
+        padding-left: 1.5rem;
+      }
+
+      .ps-5 {
+        padding-left: 3rem;
+      }
+
+      .pe-1 {
+        padding-right: 0.25rem;
+      }
+
+      .pe-2 {
+        padding-right: 0.5rem;
+      }
+
+      .pe-3 {
+        padding-right: 1rem;
+      }
+
+      .pe-4 {
+        padding-right: 1.5rem;
+      }
+
+      .pe-5 {
+        padding-right: 3rem;
+      }
+
+      .py-1 {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+      }
+
+      .py-1-5 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+
+      .py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+
+      .py-3 {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
+
+      .py-4 {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+
+      .py-5 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+      }
+
+      .px-1 {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+      }
+
+      .px-1-5 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+
+      .px-2 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+
+      .px-3 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .px-4 {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+
+      .px-5 {
+        padding-left: 3rem;
+        padding-right: 3rem;
+      }
+
+      .text-left {
+        text-align: left;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .text-decoration-underline {
+        text-decoration: underline;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 10px;
+      }
+
+      .note {
+        width: 75%;
+      }
+
+      .w-15 {
+        width: 16%;
+      }
+
+      .w-25 {
+        width: 30%;
+      }
+
+      .w-10 {
+        width: 4%;
+      }
+
+      .w-1 {
+        width: 1%;
+      }
+
+      .m-0 {
+        margin: 0;
+      }
+
+      .body-main-prints {
+        width: 21cm;
+        height: 13.5cm;
+        position: relative;
+      }
+
+      .footer-sign {
+        padding-top: 5px;
+        position: absolute;
+        width: 100%;
+        bottom: 12px;
+      }
+
+      .footer-print-date {
+        position: absolute;
+        width: 100%;
+        bottom: 5px;
+      }
+
+       .solid{
+        border-left: 0px red solid;
+        height: 225px;
+        width: 0px;
+        display: inline-block;
+        padding-left: 0px;
+        }
+
+      </style>`;
+    hdr = `<div style="display: flex; justify-content: space-between; width: 100%">
+
+                  <div class="pe-1" style="width: 60%">
+                    <div style="display: flex; width: 100%">
+                      <div class="pb-1" style="width: 15%; margin-top: 15px">
+                        `+ imageContent +`
+                      </div>
+                      <div class="pb-1 ps-3" style="width: 85%">
+                        <h2 class="m-0 pb-2">CV. SINAR MAHAKAM LESTARI</h2>
+                        <div class="pb-1" style="width: 100%">JL. PRAMUKA NO. 63 RT. 11 BANJARMASIN 70249</div>
+                        <div class="pb-1" style="width: 100%">TELP : 0511 - 3269593 | FAX : 0511 - 3272142</div>
+                        <div class="pb-1" style="width: 100%">E-Mail : spl@indo.net</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; width: 100%">
+                      <div class="pb-1" style="width: 20%">Reff No.</div>
+                      <div class="pb-1" style="width: 5%">:</div>
+                      <div class="pb-1" style="width: 75%">${dataPrint[0].NOBUKTI}</div>
+                    </div>
+                    <div style="display: flex; width: 100%">
+                      <div class="pb-1" style="width: 20%">Tanggal</div>
+                      <div class="pb-1" style="width: 5%">:</div>
+                      <div class="pb-1" style="width: 75%">${tanggalOnly}</div>
+                    </div>
+                  </div>
+
+                  <div style="width: 40%">
+                    <div style="display: flex; width: 100%">
+                      <h2 class="m-0 pb-2">BERITA ACARA RETUR</h2>
+                    </div>
+                    <div style="display: flex; width: 100%">
+                      <div class="pb-1" style="width: 20%">Supplier</div>
+                      <div class="pb-1" style="width: 5%">:</div>
+                      <div class="pb-1" style="width: 75%">${dataPrint[0].NAMASUPPLIER}</div>
+                    </div>
+                  </div>
+
+                </div>
+   <table
+    class="detail-spb-table"
+    style="width: 100%; height: 225px; max-height: 225px; font-family: sans-serif; display: table; font-size: 10px;">
+                <thead>
+                  <tr>
+                    <td class="text-center" style="width: 30%">BARANG</td>
+                    <td class="text-center" style="width: 5%">QNT</td>
+                    <td class="text-center" style="width: 5%">SUPPLIER</td>
+                    <td class="text-center" style="width: 5%">PO BELI</td>
+                    <td class="text-center" style="width: 5%">NOTA BELI</td>
+                  </tr>
+                </thead> `;
+
+    let z = 0
+    let jumlahTotal = 0
+    let diskonTotal = 0
+    let subTotal = 0
+    let ppnTotal = 0
+    let totalTotal = 0
+    
+    let tempPrintStr = ``
+    tempPrintStr += `<html>
+    <head>
+      <title></title>
+    </head>
+
+    <body onload="window.print()">
+      ` + css
+
+      arrayDataPrint.forEach((item, i) => {
+        console.log('arrayDataPrint' , i)
+        if (i == 0) {
+
+          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
+        // } else if ( i < 1) {
+        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
+        } else {
+          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
+        }
+        tempPrintStr += hdr
+        tempPrintStr += `<tbody border="1">`;
+item.forEach((itemSub, j) => {
+  tempPrintStr += `
+    <tr>
+      <td style='' class="no-border" style="width: 20%;">${z+1} ${itemSub.NAMABRG}</td>
+      <td style='' class="no-border" style="width: 5%;">${itemSub.QNT}  ${itemSub.SATUAN}</td>
+      <td style='' class="no-border" style="width: 35%;">${itemSub.namaCustSupp}</td>
+      <td style='' class="no-border" style="width: 20%;">${itemSub.POBELI}</td>
+      <td style='' class="no-border" style="width: 20%;">${itemSub.NOBELI}</td>
+    </tr>`;
+  z++;
+});
+tempPrintStr += `
+    <tr style="height: 24px;">
+      <td  style='' class='no-border'>Kronologi:</td>
+      <td  colspan=4 style='' class='no-border'>&nbsp;</td>
+    </tr>`;
+// Fill remaining empty rows � table is 225px, each row ~24px, header ~24px = ~8 total slots
+const maxRows = 6;
+const fillerCount = Math.max(0, maxRows - item.length);
+for (let f = 0; f < fillerCount; f++) {
+  tempPrintStr += `
+    <tr style="height: 24px;">
+      <td style='' class='no-border'>&nbsp;</td>
+      <td style='' class='no-border'>&nbsp;</td>
+      <td style='' class='no-border'>&nbsp;</td>
+      <td style='' class='no-border'>&nbsp;</td>
+      <td style='' class='no-border'>&nbsp;</td>
+    </tr>`;
+
+    if (f == 3){
+    tempPrintStr += `
+    <tr style="height: 24px;">
+      <td  style='' class='no-border'>Rekomendasi Barang yang Diretur:</td>
+      <td  colspan=4 style='' class='no-border'>&nbsp;</td>
+    </tr>`;
+  }
+}
+
+tempPrintStr += `</tbody>`;
+tempPrintStr += `</table>`;
+
+tempPrintStr += `<div style="display: flex; width: 100%; margin-top: 10px; font-family: sans-serif; font-size: 10px;">
+
+  <div style="width: 100%;">
+    <div style="margin-bottom: 6px;">Banjarmasin, ${tanggalCetak}</div>
+
+    <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 20px;">
+      <tr>
+        <td class="no-border text-center" style="width: 33%; font-size: 13px;">Di Buat Oleh,</td>
+        <td class="no-border text-center" style="width: 33%; font-size: 13px;">Diketahui Oleh,</td>
+        <td class="no-border text-center" style="width: 34%; font-size: 13px;">Disetujui Oleh,</td>
+      </tr>
+      <tr style="height: 2.5rem;">
+        <td class="no-border" colspan="3">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Nama :</p>
+        </td>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Nama :</p>
+        </td>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Nama :</p>
+        </td>
+      </tr>
+      <tr>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Tanggal :</p>
+        </td>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Tanggal :</p>
+        </td>
+        <td class="no-border px-2">
+          <p class="m-0" style="border-bottom: 1px solid black; font-size: 12px;">Tanggal :</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</div>`;
+
+
+    tempPrintStr += `</div>`
+  });
+
+
+      tempPrintStr +=  `</body></html>`
+
+    w=window.open(' ')
+    w.document.write(tempPrintStr)
+    w.print()
+    w.close()
+    }
+
 
   </script>
 

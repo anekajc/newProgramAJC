@@ -6,22 +6,14 @@
 @endsection
 {{-- tab bar baru--}}
   @section('css')
-  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
-  <style>
-    *::-webkit-scrollbar { width: 16px; height: 16px; }
-    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
-    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
-    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
-    *::-webkit-scrollbar-corner { background: #eef0f2; }
-    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
-    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
-  </style>
-  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi).
+    {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi).
        File khusus halaman ini: aturannya disalin dari public/css/report-table.css
        dengan scope diganti ke #tabel/#tabel2/#rtBar (satu bar dipakai bersama,
        dipindah lewat JS - lihat poPindahBar()), supaya reset ganas
        `.tb-report * { margin:0; padding:0 }` di file aslinya tidak ikut terbawa. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
   {{-- Tampilan disamakan dengan gudang/permintaanpemakaian.blade.php (tab-toggle,
        toolbar + page-title, tombol aksi bulat) - hanya CSS, id/class yang dipakai
@@ -349,15 +341,13 @@
   /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
      po-aksi-hover supaya tabel lain (mis. modalPOAdd) tidak ikut terpengaruh.
      visibility (bukan display) supaya lebar kolomnya tetap dipesan - tabel tidak
-     melompat saat tombol muncul/hilang. :focus-within supaya tombol tetap bisa
-     dicapai lewat keyboard (Tab), bukan hanya mouse. */
+     melompat saat tombol muncul/hilang. Sengaja TIDAK memakai :focus-within: klik mouse membuat tombol tetap fokus sehingga tidak ikut hilang saat kursor sudah pindah. */
   table.data-table.po-aksi-hover tbody td:first-child .btn {
     visibility: hidden;
     opacity: 0;
     transition: opacity .12s ease;
   }
-  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-  table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     visibility: visible;
     opacity: 1;
   }

@@ -2,20 +2,12 @@
 @section('page-title', 'Closing Purchase Order')
 
 @section('css')
-  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
-  <style>
-    *::-webkit-scrollbar { width: 16px; height: 16px; }
-    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
-    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
-    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
-    *::-webkit-scrollbar-corner { background: #eef0f2; }
-    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
-    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
-  </style>
-{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/pembelianclosingpr.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 <style>
 /* Halaman ini dirancang mengisi tinggi layar (lihat cpoAturTinggiTabel()), jadi padding
    atas #content layout dikecilkan supaya tab tidak menggantung jauh dari header. */
@@ -177,15 +169,13 @@
 
 /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
    po-aksi-hover supaya tabel lain tidak ikut terpengaruh. visibility (bukan display)
-   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
-   :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang. Sengaja TIDAK memakai :focus-within: klik mouse membuat tombol tetap fokus sehingga tidak ikut hilang saat kursor sudah pindah. */
 table.data-table.po-aksi-hover tbody td:first-child .btn {
   visibility: hidden;
   opacity: 0;
   transition: opacity .12s ease;
 }
-table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   visibility: visible;
   opacity: 1;
 }
@@ -1265,15 +1255,11 @@ $(document).ready(function () {
 
     const isA4 = dataPrint.length > 7;
 
-    if (!isA4) {
+    const maxRowsPerPage = isA4 ? 7 : 7;
 
-        for (let i = 0; i < dataPrint.length; i += 7) {
-            let tempArray = dataPrint.slice(i, i + 7);
-            arrayDataPrint.push(tempArray);
-        }
-    } else {
-        arrayDataPrint.push(dataPrint);
-
+    for (let i = 0; i < dataPrint.length; i += maxRowsPerPage) {
+        let tempArray = dataPrint.slice(i, i + maxRowsPerPage);
+        arrayDataPrint.push(tempArray);
     }
 
     let printContent = ''
@@ -1668,15 +1654,16 @@ $(document).ready(function () {
         margin: 0;
       }
 
+      /* Tinggi kotak sengaja dibiarkan mengikuti isi. Dulu jalur isA4 memaksa
+         min-height:29.7cm, padahal halaman dicetak Landscape (tinggi fisik cuma
+         ~21cm), sehingga tiap chunk tumpah ke halaman berikutnya dan tumpahan
+         kosong itu tercetak sebagai halaman kosong selang-seling. */
       .body-main-prints{
       width:21cm;
       ${isA4 ? `
-          min-height:29.7cm;
           padding:15px;
           box-sizing:border-box;
-      ` : `
-          height:14cm;
-      `}
+      ` : ``}
       position:relative;
       }
 
@@ -1791,14 +1778,13 @@ $(document).ready(function () {
 
       arrayDataPrint.forEach((item, i) => {
         console.log('arrayDataPrint' , i)
-        if (i == 0) {
-
-          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
-        // } else if ( i < 1) {
-        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
-        } else {
-          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
-        }
+        const isLastChunk = i == arrayDataPrint.length - 1
+        // Break dikontrol per chunk di sini, bukan lewat CSS :last-of-type yang
+        // tidak reliable - chunk terakhir tidak diberi break supaya tidak ada
+        // halaman kosong di ujung.
+        const breakStyle = isLastChunk ? '' : 'page-break-after: always;'
+        const outerStyle = i == 0 ? 'margin-left: 7px; margin-top:5px;' : 'margin-left: 7px; padding-top:7px;'
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; ${outerStyle} ${breakStyle}">`
         tempPrintStr += hdr
         tempPrintStr += `<tbody border="1">`;
 item.forEach((itemSub, j) => {
@@ -1873,11 +1859,13 @@ tempPrintStr += `</table>`;
     </div>
   </div>`
 
+  tempPrintStr += `
+  <div style="width: 62%; font-family: sans-serif; font-size: 10px;">
+`
+
   if(i == arrayDataPrint.length - 1){
 
     tempPrintStr += `
-  <div style="width: 62%; font-family: sans-serif; font-size: 10px;">
-
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> JUMLAH </div>
       <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TSUBTOTALRpbatal).toFixed(2))}</div>
@@ -1920,7 +1908,8 @@ tempPrintStr += `</table>`;
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 8px; font-weight: bold;">
       <div style="width: 5%; text-align:left;"> TOTAL </div>
       <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].nnetrpbatal).toFixed(2))}</div>
-    </div>`};
+    </div>`
+  };
 
      tempPrintStr += `
       <div style="width:50%; margin-top:15px; margin-left:-25px; float:left; text-align:center; font-size:10px;">

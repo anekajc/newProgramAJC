@@ -6,17 +6,9 @@
 {{-- tampilan tampilan baru: tab custom, tabel .data-table, header interaktif - disamakan
      dengan resources/views/purchasing/newpo.blade.php. --}}
   @section('css')
-  {{-- Scrollbar tabel/panel dibesarkan supaya gampang di-drag --}}
-  <style>
-    *::-webkit-scrollbar { width: 16px; height: 16px; }
-    *::-webkit-scrollbar-track { background: #eef0f2; border-radius: 8px; }
-    *::-webkit-scrollbar-thumb { background: #9aa0a6; border-radius: 8px; border: 3px solid #eef0f2; }
-    *::-webkit-scrollbar-thumb:hover { background: #6b7075; }
-    *::-webkit-scrollbar-corner { background: #eef0f2; }
-    * { scrollbar-width: auto; scrollbar-color: #9aa0a6 #eef0f2; }
-    .sidebar-nav::-webkit-scrollbar { width: 6px; height: 6px; }
-  </style>
-  <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
   .custom-tabs {
     display: inline-flex;
@@ -111,8 +103,7 @@
     opacity: 0;
     transition: opacity .12s ease;
   }
-  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-  table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     visibility: visible;
     opacity: 1;
   }
