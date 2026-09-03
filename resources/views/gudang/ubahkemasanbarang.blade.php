@@ -8,6 +8,14 @@
 
 @section('content')
 
+{{-- tampilan & struktur tabel disamakan dengan gudang/permintaanpemakaian.blade.php:
+     toolbar + search + filter modal, tabel interaktif (ReportTable: drag/gear/bar) via
+     report-table.css / report-table.js (dimuat global dari gudang/newmasterx.blade.php).
+     Tidak ada tombol Add (file ubahkemasan yang asli tidak punya fitur Add).
+     Tab "Ubah Kemasan Barang" (belum otorisasi) dan "Sudah Otorisasi" digabung jadi satu
+     tabel, dibedakan lewat filter Otorisasi (Semua/Sudah/Belum) di modal Filter — tidak
+     ada filter Status karena KMBJ tidak punya konsep status seperti Terkirim. --}}
+
 <div id="imagecontainer" class="d-none" style="">
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
@@ -31,6 +39,14 @@
       <div class="toolbar">
         {{-- <div class="page-title">Ubah Kemasan Barang</div> --}}
 
+        <div class="filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+            onchange="reloadData()">
+          <span class="filter-sep">s/d</span>
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+            onchange="reloadData()">
+        </div>
         <div>
           <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
             oninput="renderTabel()" style="width:200px">
@@ -233,7 +249,7 @@
             <div class="col-md-12">
               <div class="row">
 
-                <!-- Kode Barang & Nama Barang -->
+                <!-- START OF ITEM Kode Barang & Nama Barang -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -272,10 +288,10 @@
                     </div>
                   </div>
                 </div>
-                <!-- Kode Barang & Nama Barang -->
+                <!-- END OF ITEM Kode Barang & Nama Barang -->
 
 
-                <!-- Qty Asal & Qty Jadi -->
+                <!-- START OF ITEM Qty Asal & Qty Jadi -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -334,8 +350,10 @@
                     </div>
                   </div>
                 </div>
+                <!-- END OF ITEM Qty Asal & Qty Jadi -->
 
-                <!--  HPP & Biaya -->
+
+                <!-- START OF ITEM HPP & Biaya -->
                 <div class="col-md-4">
                   <div class="row">
                     <div class="col-md-12">
@@ -369,6 +387,7 @@
                     </div>
                   </div>
                 </div>
+                <!-- END OF ITEM HPP & Biaya -->
 
               </div>
             </div>
@@ -408,7 +427,39 @@
   var dataItem = [];
   var dataBrowse = {};
 
+  // Fallback lokal — di halaman ini `doSetFormatDate`/`nullToEmpty` dari
+  // ajc-func-core.js ternyata tidak ke-load (ReferenceError: doSetFormatDate
+  // is not defined), jadi renderTabel() berhenti di tengah jalan walau
+  // lastRows sudah terisi. Didefinisikan cuma kalau versi globalnya belum ada,
+  // supaya tidak menimpa versi asli kalau suatu saat filenya benar ke-include.
+  if (typeof doSetFormatDate !== 'function') {
+    window.doSetFormatDate = function(dateVal, sep) {
+      if (!dateVal) return '';
+      sep = sep || '/';
+      let d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal);
+      let yyyy = d.getFullYear();
+      let mm = String(d.getMonth() + 1).padStart(2, '0');
+      let dd = String(d.getDate()).padStart(2, '0');
+      return yyyy + sep + mm + sep + dd;
+    };
+  }
+
+  if (typeof nullToEmpty !== 'function') {
+    window.nullToEmpty = function(v) {
+      return (v === null || v === undefined) ? '' : v;
+    };
+  }
+
+  /* ============================================================================
+   * Tabel interaktif gabungan (belum + sudah otorisasi) — pola sama dengan
+   * gudang/permintaanpemakaian.blade.php (lihat docs/new-slider-table-guide.md).
+   * doShowCustomize()/doButtonSubtotal()/doButtonGrandtotal() sengaja tidak
+   * diikutkan — itu untuk modal "Atur Kolom" yang tidak ada di halaman ini;
+   * report-table.js memanggil onChange sendiri.
+   * ========================================================================= */
   let lastRows = (function() {
+    // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
     let belum = @json($listKMBJ);
     let sudah = @json($listSdhOto);
     belum.forEach(function(r) { r.IsOtorisasi1 = 0; });
@@ -425,10 +476,13 @@
   var gct_desimal_max = 4;
 
   function setDefaultHeader() {
+    // [ field, label, visible, type, total, decimals ]
     gcart_header = [
       ['GroupNobukti', 'Group No Bukti', 1, 'varchar', 0, 0],
       ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
       ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
+      // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum,
+      // jadi jangan diperlakukan sebagai kolom angka (rata kanan).
       ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
       ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
     ];
@@ -508,6 +562,7 @@
         isgrandtotal: _isgrandtotal
       },
       success: function(res) {
+        // nothing to do
       }
     })
   }
@@ -548,7 +603,7 @@
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
-  // ambil field dari row tanpa peduli besar/kecil huruf
+  // Ambil field dari row tanpa peduli besar/kecil huruf.
   function pickCI(r, key) {
     if (r[key] !== undefined) {
       return r[key];
@@ -562,7 +617,8 @@
     return null;
   }
 
-  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client side ajaa)
+  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum — client-side saja, server selalu
+  // mengembalikan seluruh data (listKMBJ + listSdhOto sudah digabung di lastRows).
   function filterByOtorisasi(rows, filterVal) {
     if (filterVal === '1') {
       return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
@@ -580,7 +636,7 @@
       nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
 
     if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-      // Sudah otorisasi (Print + Batal Otorisasi)
+      // Sudah otorisasi — Print + Batal Otorisasi
       return '<div class="action-buttons">' + detailBtn +
         '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
         nobukti + '\')"><i class="bi bi-printer"></i></button>' +
@@ -589,7 +645,7 @@
         '</div>';
     }
 
-    // Belum otorisasi (Edit + Otorisasi)
+    // Belum otorisasi — Edit + Otorisasi
     return '<div class="action-buttons">' + detailBtn +
       '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
       nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
@@ -616,6 +672,11 @@
     rows = filterByOtorisasi(rows, globalOtorisasi);
 
     const tbody = document.getElementById('tabel2_data');
+
+    // Buang instance tooltip lama sebelum tombolnya dihapus lewat innerHTML —
+    // tooltip Bootstrap 4 nempel elemen terpisah di <body>, jadi kalau tombol
+    // pemicunya diganti tanpa dispose dulu, tooltip lama nyangkut selamanya
+    // dan bisa menutupi tombol baru (klik jadi tidak berfungsi).
     $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
 
     if (!rows.length) {
@@ -645,13 +706,15 @@
 
     tbody.innerHTML = html;
     document.getElementById('footerLabel2').textContent = 'Menampilkan ' + rows.length + ' baris';
+    // container:'body' + boundary:'window' — lihat catatan yang sama di
+    // gudang/permintaanpemakaian.blade.php (mencegah tooltip numpuk di tombol).
     $('[data-toggle="tooltip"]').tooltip({
       container: 'body',
       boundary: 'window'
     });
   }
 
-  // Filter modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
+  /* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum) -- */
   function updateFilterBadge() {
     let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
     $('#filterBadge').text(count + ' aktif');
@@ -676,6 +739,10 @@
   }
 
   $(document).ready(function(){
+    // Tabel gabungan — mesin interaktif (drag/gear/bar), lihat
+    // docs/new-slider-table-guide.md. doSetHeader() memuat layout tersimpan
+    // milik user ini untuk halaman+mode ini, atau menyimpan setDefaultHeader()
+    // kalau ini kunjungan pertama.
     doSetHeader(g_modeReport);
     ReportTable.init({
       table: '#mainTable',
@@ -685,7 +752,11 @@
     renderTabel();
   });
 
-  function loadAll() {
+  // Menggantikan loadAll() lama — satu list gabungan (belum + sudah otorisasi),
+  // difilter di server berdasarkan rentang tanggal yang sedang dipilih (bukan
+  // cuma bulan/tahun periode aktif). Dipanggil saat tanggal berubah dan setelah
+  // otorisasi/batal otorisasi/simpan/hapus supaya tabel menyegarkan diri sendiri.
+  function reloadData() {
     let listKMBJ = [], listSdhOto = [];
 
     $.ajax({
@@ -693,6 +764,8 @@
       type: "get",
       async: false,
       data: {
+        date1: $('#inputDate1').val(),
+        date2: $('#inputDate2').val()
       },
       success: function(res) {
         listKMBJ = res.listKMBJ || [];
@@ -707,6 +780,9 @@
   }
 
 function submitPrint (nobukti) {
+    // for (var i = 0; i < 30; i++) {
+    //   dataPrint.push(dataPrint[0])
+    // }
     let _token = $('#_token').val()
     $.ajax({
       url: "{!! url('kmbjdetailCetak') !!}",
@@ -722,6 +798,9 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
+
+        // console.log(res[0][0].IsOtorisasi1)
+
       }
     })
 
@@ -1240,6 +1319,8 @@ function submitPrint (nobukti) {
         if (i == 0) {
 
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
+        // } else if ( i < 1) {
+        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
         } else {
           tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
         }
@@ -1504,7 +1585,7 @@ function submitPrint (nobukti) {
     doOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdateotorisasi", function (res) {
       if (res.status === 1) {
         alertify.success(res.msg);
-        loadAll();
+        reloadData();
       } else {
         alertify.warning(res.msg);
       }
@@ -1517,7 +1598,7 @@ function submitPrint (nobukti) {
     doBatalOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdatebatalotorisasi", function (res) {
       if (res.status === 1) {
         alertify.success(res.msg);
-        loadAll();
+        reloadData();
       } else {
         alertify.warning(res.msg);
       }
@@ -1651,17 +1732,19 @@ function submitPrint (nobukti) {
     $("#inputitem_namabrg").val(_nama);
 
     let satuanAsalSelect = $("#inputitem_satuanasal");
-    satuanAsalSelect.empty(); 
+    satuanAsalSelect.empty(); // Clear previous options
 
     let satuanJadiSelect = $("#inputitem_satuanjadi");
-    satuanJadiSelect.empty(); 
+    satuanJadiSelect.empty(); // Clear previous options
 
+    // Array of satuan objects with number and value
     const satuanList = [
       { nosat: 1, sat: _sat1, isi: _isi1 },
       { nosat: 2, sat: _sat2, isi: _isi2 },
       { nosat: 3, sat: _sat3, isi: _isi3 }
     ];
 
+    // Append valid satuan options
     let added = 0;
     satuanList.forEach(item => {
       if (item.sat && item.sat.trim() !== '') {
@@ -1682,13 +1765,14 @@ function submitPrint (nobukti) {
 
     const satuanSelect = $("#inputitem_satuan");
 
+    // Find and select the matching option
     satuanSelect.find("option").each(function () {
-      const value = $(this).val(); 
+      const value = $(this).val(); // e.g., "2||Box||12"
       const parts = value.split("||");
 
       if (parseInt(parts[0]) === _nosat) {
-        satuanSelect.val(value); 
-        return false;
+        satuanSelect.val(value); // set this option as selected
+        return false; // break loop
       }
     });
 
@@ -1720,6 +1804,9 @@ function submitPrint (nobukti) {
   }
 
   function cekValidate(_choice) {
+    /* Kolom yang wajib diisi harus dicek. Kolom yang tidak wajib di-set ke default value jika perlu.
+       Return pesan jika ada yang tidak valid. Return object cart jika semuanya sudah valid. */
+
     let cart = {};
 
     cart["choice"]       = _choice;
@@ -1729,12 +1816,12 @@ function submitPrint (nobukti) {
       return cart;
     }
 
-    // cek empty
+    // CEK EMPTY
     if (!cekNotEmpty("inputitem_kodebrg")) {
       return messageRequired("Barang");
     }
 
-    // cek validasi kode / no bukti
+    // CEK VALIDASI KODE / NO BUKTI
     if (dataBrowse['gudang'] !== $("#input_gudang").val()) {
       return "Data Gudang tidak sesuai";
     }
@@ -1742,7 +1829,7 @@ function submitPrint (nobukti) {
       return "Data Barang tidak sesuai";
     }
 
-    // cek lain-lain
+    // CEK LAIN-LAIN
     let brg = $("#inputitem_kodebrg").val();
     if (_choice === "I") {
       if (!cekNotDuplicate(dataItem, "kodebrg", brg)) {
@@ -1792,7 +1879,7 @@ function submitPrint (nobukti) {
   }
 
   function successAdd(_nobukti) {
-    loadAll();
+    reloadData();
     cleanFormItem();
     refreshForm(_nobukti);
 
@@ -1800,14 +1887,14 @@ function submitPrint (nobukti) {
   }
 
   function successEdit(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     cleanFormItem();
     refreshForm(_nobukti);
   }
 
   function successDelete(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     refreshForm(_nobukti);
   }
