@@ -8,14 +8,6 @@
 
 @section('content')
 
-{{-- tampilan & struktur tabel disamakan dengan gudang/permintaanpemakaian.blade.php:
-     toolbar + search + filter modal, tabel interaktif (ReportTable: drag/gear/bar) via
-     report-table.css / report-table.js (dimuat global dari gudang/newmasterx.blade.php).
-     Tidak ada tombol Add (file ubahkemasan yang asli tidak punya fitur Add).
-     Tab "Ubah Kemasan Barang" (belum otorisasi) dan "Sudah Otorisasi" digabung jadi satu
-     tabel, dibedakan lewat filter Otorisasi (Semua/Sudah/Belum) di modal Filter — tidak
-     ada filter Status karena KMBJ tidak punya konsep status seperti Terkirim. --}}
-
 <div id="imagecontainer" class="d-none" style="">
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
@@ -427,11 +419,6 @@
   var dataItem = [];
   var dataBrowse = {};
 
-  // Fallback lokal — di halaman ini `doSetFormatDate`/`nullToEmpty` dari
-  // ajc-func-core.js ternyata tidak ke-load (ReferenceError: doSetFormatDate
-  // is not defined), jadi renderTabel() berhenti di tengah jalan walau
-  // lastRows sudah terisi. Didefinisikan cuma kalau versi globalnya belum ada,
-  // supaya tidak menimpa versi asli kalau suatu saat filenya benar ke-include.
   if (typeof doSetFormatDate !== 'function') {
     window.doSetFormatDate = function(dateVal, sep) {
       if (!dateVal) return '';
@@ -451,13 +438,6 @@
     };
   }
 
-  /* ============================================================================
-   * Tabel interaktif gabungan (belum + sudah otorisasi) — pola sama dengan
-   * gudang/permintaanpemakaian.blade.php (lihat docs/new-slider-table-guide.md).
-   * doShowCustomize()/doButtonSubtotal()/doButtonGrandtotal() sengaja tidak
-   * diikutkan — itu untuk modal "Atur Kolom" yang tidak ada di halaman ini;
-   * report-table.js memanggil onChange sendiri.
-   * ========================================================================= */
   let lastRows = (function() {
     // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
     let belum = @json($listKMBJ);
@@ -481,8 +461,6 @@
       ['GroupNobukti', 'Group No Bukti', 1, 'varchar', 0, 0],
       ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
       ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
-      // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum,
-      // jadi jangan diperlakukan sebagai kolom angka (rata kanan).
       ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
       ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
     ];
@@ -603,7 +581,7 @@
     doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
   }
 
-  // Ambil field dari row tanpa peduli besar/kecil huruf.
+  // ambil field dari row tanpa peduli besar/kecil huruf.
   function pickCI(r, key) {
     if (r[key] !== undefined) {
       return r[key];
@@ -617,8 +595,7 @@
     return null;
   }
 
-  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum — client-side saja, server selalu
-  // mengembalikan seluruh data (listKMBJ + listSdhOto sudah digabung di lastRows).
+  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client-side ajaa)
   function filterByOtorisasi(rows, filterVal) {
     if (filterVal === '1') {
       return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
@@ -636,7 +613,7 @@
       nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
 
     if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-      // Sudah otorisasi — Print + Batal Otorisasi
+      // Sudah otorisasi (Print + Batal Otorisasi)
       return '<div class="action-buttons">' + detailBtn +
         '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
         nobukti + '\')"><i class="bi bi-printer"></i></button>' +
@@ -645,7 +622,7 @@
         '</div>';
     }
 
-    // Belum otorisasi — Edit + Otorisasi
+    // Belum otorisasi (Edit + Otorisasi)
     return '<div class="action-buttons">' + detailBtn +
       '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
       nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
@@ -672,11 +649,6 @@
     rows = filterByOtorisasi(rows, globalOtorisasi);
 
     const tbody = document.getElementById('tabel2_data');
-
-    // Buang instance tooltip lama sebelum tombolnya dihapus lewat innerHTML —
-    // tooltip Bootstrap 4 nempel elemen terpisah di <body>, jadi kalau tombol
-    // pemicunya diganti tanpa dispose dulu, tooltip lama nyangkut selamanya
-    // dan bisa menutupi tombol baru (klik jadi tidak berfungsi).
     $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
 
     if (!rows.length) {
@@ -706,15 +678,13 @@
 
     tbody.innerHTML = html;
     document.getElementById('footerLabel2').textContent = 'Menampilkan ' + rows.length + ' baris';
-    // container:'body' + boundary:'window' — lihat catatan yang sama di
-    // gudang/permintaanpemakaian.blade.php (mencegah tooltip numpuk di tombol).
     $('[data-toggle="tooltip"]').tooltip({
       container: 'body',
       boundary: 'window'
     });
   }
 
-  /* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum) -- */
+  // Filter Modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
   function updateFilterBadge() {
     let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
     $('#filterBadge').text(count + ' aktif');
@@ -739,10 +709,6 @@
   }
 
   $(document).ready(function(){
-    // Tabel gabungan — mesin interaktif (drag/gear/bar), lihat
-    // docs/new-slider-table-guide.md. doSetHeader() memuat layout tersimpan
-    // milik user ini untuk halaman+mode ini, atau menyimpan setDefaultHeader()
-    // kalau ini kunjungan pertama.
     doSetHeader(g_modeReport);
     ReportTable.init({
       table: '#mainTable',
@@ -752,10 +718,6 @@
     renderTabel();
   });
 
-  // Menggantikan loadAll() lama — satu list gabungan (belum + sudah otorisasi),
-  // difilter di server berdasarkan rentang tanggal yang sedang dipilih (bukan
-  // cuma bulan/tahun periode aktif). Dipanggil saat tanggal berubah dan setelah
-  // otorisasi/batal otorisasi/simpan/hapus supaya tabel menyegarkan diri sendiri.
   function reloadData() {
     let listKMBJ = [], listSdhOto = [];
 
@@ -1804,9 +1766,6 @@ function submitPrint (nobukti) {
   }
 
   function cekValidate(_choice) {
-    /* Kolom yang wajib diisi harus dicek. Kolom yang tidak wajib di-set ke default value jika perlu.
-       Return pesan jika ada yang tidak valid. Return object cart jika semuanya sudah valid. */
-
     let cart = {};
 
     cart["choice"]       = _choice;
