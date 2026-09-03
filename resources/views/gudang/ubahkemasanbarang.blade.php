@@ -442,14 +442,12 @@
     // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
     let belum = @json($listKMBJ);
     let sudah = @json($listSdhOto);
-    belum.forEach(function(r) { r.IsOtorisasi1 = 0; });
-    sudah.forEach(function(r) { r.IsOtorisasi1 = 1; });
     return belum.concat(sudah);
   })();
   let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
 
   var g_href = 'ubahkemasanbarang';
-  var g_modeReport = '1';
+  var g_modeReport = '2';
   var gcart_header = [];
   var gsum_issubtotal = 0;
   var gsum_isgrandtotal = 0;
@@ -458,9 +456,9 @@
   function setDefaultHeader() {
     // [ field, label, visible, type, total, decimals ]
     gcart_header = [
-      ['GroupNobukti', 'Group No Bukti', 1, 'varchar', 0, 0],
+      ['GroupNobukti', 'No Bukti', 1, 'varchar', 0, 0],
       ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-      ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
+      ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
       ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
       ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
     ];
@@ -595,13 +593,12 @@
     return null;
   }
 
-  // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum (client-side ajaa)
   function filterByOtorisasi(rows, filterVal) {
-    if (filterVal === '1') {
-      return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
+    if (filterVal === '1') { // NeedOtorisasi = 0 itu sudah
+      return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 0);
     }
-    if (filterVal === '0') {
-      return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 0);
+    if (filterVal === '0') { // NeedOtorisasi = 1 itu belum
+      return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 1);
     }
     return rows;
   }
@@ -612,7 +609,7 @@
       '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
       nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
 
-    if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
+    if (Number(pickCI(r, 'NeedOtorisasi')) === 0) {
       // Sudah otorisasi (Print + Batal Otorisasi)
       return '<div class="action-buttons">' + detailBtn +
         '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
@@ -629,6 +626,12 @@
       '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
       nobukti + '\')"><i class="bi bi-key"></i></button>' +
       '</div>';
+  }
+
+  function stripTanggalSuffix(v) {
+    if (!v) return v;
+    let idx = String(v).search(/\s*Tanggal\s*:/i);
+    return (idx >= 0) ? String(v).substring(0, idx).trim() : v;
   }
 
   function renderTabel() {
@@ -663,10 +666,13 @@
       html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
       html += cols.map(function(c) {
         const v = pickCI(r, c[0]);
-        if (c[0] === 'IsOtorisasi1') {
-          return (Number(v) === 1) ?
+        if (c[0] === 'NeedOtorisasi') {
+          return (Number(v) === 0) ?
             '<td><span class="sp-badge is-active">Sudah</span></td>' :
             '<td><span class="sp-badge is-inactive">Belum</span></td>';
+        }
+        if (c[0] === 'GroupNobukti') {
+          return '<td>' + nullToEmpty(stripTanggalSuffix(v)) + '</td>';
         }
         if (c[3] === 'date') {
           return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
@@ -735,8 +741,6 @@
       }
     });
 
-    listKMBJ.forEach(function(r) { r.IsOtorisasi1 = 0; });
-    listSdhOto.forEach(function(r) { r.IsOtorisasi1 = 1; });
     lastRows = listKMBJ.concat(listSdhOto);
     renderTabel();
   }
