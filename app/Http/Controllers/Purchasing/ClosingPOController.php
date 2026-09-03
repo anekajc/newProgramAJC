@@ -27,8 +27,8 @@ class ClosingPOController extends Controller
     ['field' => 'NamaBrg',      'label' => 'Nama Barang', 'tipe' => 0],
     ['field' => 'Satuan',       'label' => 'Satuan',      'tipe' => 0],
     ['field' => 'Qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'QntBatal',     'label' => 'Qty Batal',   'tipe' => 1],
+    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'QntSisa',      'label' => 'Qty Sisa',    'tipe' => 1],
   ];
 
@@ -43,8 +43,8 @@ class ClosingPOController extends Controller
     ['field' => 'namabrg',      'label' => 'Nama Barang', 'tipe' => 0],
     ['field' => 'satuan',       'label' => 'Satuan',      'tipe' => 0],
     ['field' => 'qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'qntbatal',     'label' => 'Qty Batal',   'tipe' => 1],
+    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'qntsisa',      'label' => 'Qty Sisa',    'tipe' => 1],
     ['field' => 'UserBatal',    'label' => 'User Close',  'tipe' => 0],
     ['field' => 'TglBatal',     'label' => 'Tgl. Close',  'tipe' => 2],
@@ -71,7 +71,8 @@ class ClosingPOController extends Controller
           B.qnt,
           B.qntterima,
           B.qntbatal,
-          B.qntsisa,
+          -- qntsisa bawaan vwMasterPOOut belum mengurangi qntbatal, jadi dihitung ulang di sini
+          (ISNULL(B.qnt, 0) - ISNULL(B.qntbatal, 0) - ISNULL(B.qntterima, 0)) as qntsisa,
           B.UserBatal,
           B.TglBatal,
           B.KetBatal,
@@ -253,7 +254,10 @@ class ClosingPOController extends Controller
       select X.* from (
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-               A.*
+               A.Nobukti, A.TANGGAL, A.NAMACUSTSUPP, A.kodebrg, A.NamaBrg, A.Satuan,
+               A.Qnt, A.qntterima, A.QntBatal, A.urut,
+               -- QntSisa bawaan vwOutPOBatal belum mengurangi QntBatal, jadi dihitung ulang
+               (ISNULL(A.Qnt, 0) - ISNULL(A.QntBatal, 0) - ISNULL(A.qntterima, 0)) as QntSisa
         from vwOutPOBatal A WITH(NOLOCK)
         where $where
       ) X

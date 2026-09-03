@@ -212,7 +212,7 @@ class HeaderTableController extends Controller
     $isparsed = 0;
     $headertablealias = [];
 
-    $menuMoreThanOne = ['purchaseorder', 'pononstock', 'newpo', 'newpojasa', 'invoicepembelian'];
+    $menuMoreThanOne = ['purchaseorder', 'pononstock', 'newpo', 'newpojasa', 'invoicepembelian', 'perintahreturbeli', 'returpembeliangudang'];
     $desimal = [];
     $desimal2 = [];
     $aliasOrdered2 = [];
@@ -857,6 +857,65 @@ class HeaderTableController extends Controller
 
       $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
     }
+    // Invoice Retur Beli
+    else if ($req->href == 'invoicereturbeli') {
+      $statusset = 1;
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Sama seperti cabang 'uangmukabeli' - kolom default DITULIS EKSPLISIT supaya
+        // tabel tetap punya header meski periode berjalan belum punya data sama sekali.
+        // Nama field HARUS sama persis dengan alias kolom di
+        // InvoiceReturBeliController@loadAll (dipakai juga sebagai nama field data di JS,
+        // lihat irbBuatCart()/irbRenderNilai() di invoicereturbeli.blade.php). IsOtorisasi1/
+        // OtoUser1/TglOto1 SENGAJA tidak dimasukkan - itu kolom teknis untuk filter otorisasi
+        // & kolom Oto/User Oto/Tgl Oto yang selalu ditambahkan lewat JS, bukan kolom yang
+        // bisa digeser/disembunyikan pengguna.
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default = [
+          'NoBukti'     => 0,
+          'Tanggal'     => 2,
+          'KodeSupp'    => 0,
+          'NamaCustSupp'=> 0,
+          'NoBeli'      => 0,
+          'TotDPPRp'    => 1,
+          'TotPPNRp'    => 1,
+          'TotNetRp'    => 1,
+        ];
+        foreach ($default as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
+    }
     // Penerimaan ACC (gabungan Acc Tunai/Kredit + Jasa Acc Tunai/Kredit)
     else if ($req->href == 'newpobeliacc') {
       $statusset = 1;
@@ -1273,6 +1332,204 @@ class HeaderTableController extends Controller
         $default2 = [
           'NoBukti' => 0, 'Tanggal' => 2, 'KODECUSTSUPP' => 0, 'NamaCustSupp' => 0, 'NoPO' => 0,
           'TotDPPRp' => 1, 'TotPPNRp' => 1, 'TotNetRp' => 1, 'OtoUser1' => 0, 'TglOto1' => 0,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
+    // Retur Pembelian Gudang (returpembeliangudang). urut 1 = tab "Outstanding Retur Beli"
+    // (dari DBPRRBELIDET, lihat ReturPembelianGudangController@loadAll - $outstandingArray),
+    // urut 2 = tab "Retur Beli" (dari dbRBeli, $penerimaanArray) - sama pola dengan cabang
+    // 'newpo' di atas. BUKAN filter otorisasi: kedua tab isinya data berbeda (outstanding
+    // vs transaksi retur yang sudah jadi), jadi tidak digabung jadi satu tabel seperti
+    // 'perintahreturbeli'/'uangmukabeli'. Daftar kolom default DITULIS EKSPLISIT supaya
+    // seluruh kolom tampil sejak kunjungan pertama.
+    else if ($req->href == 'returpembeliangudang') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Nama field HARUS sama persis dengan field data di JS setelah item[0] diratakan
+        // (lihat rpgBuatCart() di returpembeliangudang.blade.php - field berasal dari query
+        // DBPRRBELIDET/DBPRRBELI/DBCUSTSUPP, tanpa alias AS jadi ikut nama kolom aslinya).
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'NOBUKTI' => 0, 'TANGGAL' => 2, 'NAMACUSTSUPP' => 0,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+      } else {
+        $isparsed2 = 1;
+        // Field dari dbRBeli/dbCustSupp (lihat ReturPembelianGudangController@loadAll -
+        // $penerimaanArray), nama kolom ikut casing aslinya (tanpa alias AS).
+        $default2 = [
+          'NoBukti' => 0, 'Tanggal' => 2, 'NamaCustSupp' => 0,
+        ];
+        foreach ($default2 as $key => $tipe) {
+          array_push($headertablevalue2, $key);
+          array_push($headertableheader2, $key);
+          array_push($headerisshown2, 1);
+          $isnumberheadertable2[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $aliasOrdered2 = [];
+      if ($headertablealias2) {
+        foreach ($headertablevalue2 as $header) {
+          foreach ($headertablealias2 as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered2 , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue2 as $header) {
+          array_push( $aliasOrdered2 , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
+      $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
+    // Perintah Retur Beli (perintahreturbeli). urut 1 = tabel PRB gabungan (dulu tab
+    // "Perintah Retur Beli" + "Sudah Otorisasi", sekarang satu tabel dengan filter
+    // otorisasi lewat modal, sama pola dengan 'uangmukabeli'), urut 2 = tabel "List Retur
+    // Jual" (dari VwOUtPRJUALPRBELI, lihat PerintahReturBeliController@loadAll) - sama pola
+    // dengan cabang 'newpo' di atas. Daftar kolom default DITULIS EKSPLISIT supaya seluruh
+    // kolom tampil sejak kunjungan pertama. IsOtorisasi1/OtoUser1/TglOto1 SENGAJA tidak
+    // dimasukkan ke default urut 1 - itu kolom teknis untuk filter otorisasi & kolom
+    // Oto/User Oto/Tgl Oto yang selalu ditambahkan lewat JS, sama seperti 'invoicereturbeli'.
+    else if ($req->href == 'perintahreturbeli') {
+      $statusset = 1;
+      $isparsed = 0;
+      $isparsed2 = 0;
+
+      $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+      $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Nama field HARUS sama persis dengan alias kolom di
+        // PerintahReturBeliController@loadAll (dipakai juga sebagai nama field data di JS,
+        // lihat prbBuatCart()/prbRenderNilai() di perintahreturbeli.blade.php).
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default1 = [
+          'NoBukti' => 0, 'Tanggal' => 2,
+        ];
+        foreach ($default1 as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      if (count($headertable2) > 0) {
+        $isnumberheadertable2 = json_decode($headertable2[0]->isnumber);
+        $headertablevalue2 = json_decode($headertable2[0]->value);
+        $headertableheader2 = json_decode($headertable2[0]->header);
+        $headerisshown2 = json_decode($headertable2[0]->isshown);
+        $isparsed2 = 0;
+
+        // Kolom Tanggal ditambahkan belakangan (lihat $default2 di bawah). Susunan kolom
+        // yang sudah tersimpan milik user tidak memuatnya, jadi disisipkan di sini supaya
+        // tetap muncul tanpa perlu mereset dbheadertable tiap user.
+        if (!in_array('Tanggal', $headertablevalue2)) {
+          array_splice($headertablevalue2,     1, 0, ['Tanggal']);
+          array_splice($headertableheader2,    1, 0, ['Tanggal']);
+          array_splice($headerisshown2,        1, 0, [1]);
+          array_splice($isnumberheadertable2,  1, 0, [2]);
+        }
+      } else {
+        $isparsed2 = 1;
+        // Field dari VwOUtPRJUALPRBELI (lihat PerintahReturBeliController@loadAll).
+        $default2 = [
+          'NomorRetur' => 0, 'Tanggal' => 2, 'KodeBrg' => 0, 'NamaBrg' => 0, 'Satuan' => 0, 'Qty' => 1,
         ];
         foreach ($default2 as $key => $tipe) {
           array_push($headertablevalue2, $key);
