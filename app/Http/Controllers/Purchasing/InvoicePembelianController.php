@@ -57,12 +57,42 @@ class InvoicePembelianController extends Controller
     // PHP dulu (::all()->where()) baru menyaring - jauh lebih ringan untuk view besar.
     // Hasilnya kini array baris DATAR (bukan array-berisi-satu-grup seperti sebelumnya),
     // jadi pemanggil (buttonDetail/buttonDetailout) membaca langsung dari res, bukan res[0].
-    $pembelian = VWtampilbeli::where('NoBukti', $req->input('NoBukti'))->get();
-    $tempoutstanding = [];
-    foreach ($pembelian as $p) {
-      array_push($tempoutstanding, $p);
-    }
-    return $tempoutstanding;
+    // Query di bawah adalah isi view VWtampilbeli TANPA klausa "a.pJasa = 0" - view itu
+    // menyaring habis dokumen jasa (SML/PBJ/...), sehingga tombol Detail pada baris PBJ di
+    // tab Outstanding dulu selalu menerima array kosong. View-nya sendiri TIDAK diubah
+    // (dipakai modul lain); alias kolom dijaga sama persis supaya blade tidak perlu diubah.
+    return DB::connection('SML')->select("
+Select
+A.pQC, MONTH(A.TANGGAL) Bulan, YEAR(A.TANGGAL) Tahun, a.TANGGAL, A.KODESUPP, J.NAMACUSTSUPP NamaSupplier, A.KETERANGAN,
+A.NoBukti, A.NoUrut, B.NoPO, B.UrutPO, B.KODEGDG, K.NAMA NAMAGUDANG, A.FAKTURSUPP,
+-- Kolom header dokumen (dbBeli) + alamat supplier: tidak ada di view VWtampilbeli, padahal
+-- form Detail memakainya (Alamat, Valas, Kurs, PPN, Pembayaran, TOP, Jth Tempo, Uang Muka,
+-- dan blok total). Tanpa ini semuanya undefined di JS lalu dikosongkan oleh operator nullish.
+-- Catatan: JANGAN tulis tanda tanya di komentar SQL ini - PDO membacanya sebagai placeholder
+-- posisional dan bentrok dengan parameter bernama :nobukti (hasilnya error 500).
+J.ALAMAT1, A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.TglJatuhTempo,
+A.NOUMK, A.NuangMuka, A.DISC disc, A.DISCRP,
+A.NILAIDPP TotDPP, A.NILAIPPN TotPPN, A.NILAINET TotNet,
+    B.Urut, B.KodeBrg, B.NamaBrg, B.Qnt, B.NoSat, B.Isi, case when isNull (B.Satuan, '') = '' then 'PCS' else B.Satuan end Satuan,
+        0.00 Qnt2, '' SatuanRoll, B.Harga, B.HrgNetto,
+        B.DiscP DiscP1, B.DiscTot DiscRp1, B.DiscTot,
+        B.SubTotal TotalUSD, B.SubTotal TotalIDR, B.NDPP NDPP,
+        B.NPPN NPPN, B.BYAngkut Beban, B.SubTotal + B.BYAngkut Total,
+        H.PARTNUMBER, I.QNT QNTPO, I.QNTOUT, H.ISI1, H.ISI2, b.QntTerima, h.NAMABRG namabrgx, l.NAMAMERK, a.IsOtorisasi1
+From dbBeliDet B
+Left Outer Join dbBeli A On A.NoBukti=b.NoBukti
+Left Outer Join dbBarang H on H.KodeBrg=B.KodeBrg
+LEFT OUTER JOIN (SELECT y.NoPO NOBUKTI, y.UrutPO Urut, x.QNT - sum(y.QntTerima - ISNULL(QntReject,0)) QNTOUT, x.QNT QNT
+                FROM DBBELIDET y
+                left outer join DBPODET x on x.NOBUKTI=y.nopo and y.UrutPO=x.urut
+                group by y.NoPO, y.UrutPO, x.QNT
+                ) I ON B.NoPO=I.NOBUKTI AND B.UrutPO=I.Urut
+left outer join DBCUSTSUPP J on A.KODESUPP=J.KODECUSTSUPP
+Left Outer join DBGUDANG K ON B.KodeGdg=K.KODEGDG
+left outer join DBMERK L on h.KodeMerk = L.KODEMERK
+where B.NoBukti = :nobukti
+order by B.Urut
+    ", ['nobukti' => $req->input('NoBukti')]);
   }
 
   public function getAkses () {
