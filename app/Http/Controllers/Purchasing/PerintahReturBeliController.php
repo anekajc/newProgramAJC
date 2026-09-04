@@ -143,11 +143,20 @@ class PerintahReturBeliController extends Controller
     return $res;
   }
 
+  // Update satu kolom header dbPRRBeli (dipakai onblur Keterangan di perintahreturbeli.blade.php).
+  // Nama kolom di-whitelist - jangan sisipkan $req->field mentah ke SQL.
   public function onChangeHeader (Request $req) {
-    $query = 'update dbpo set ' . $req->field . ' = :value where nobukti = :nobukti';
-    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
-    return $res;
+    $allowedFields = ['KETERANGAN', 'TIPEBAYAR'];
+    if (!in_array($req->field, $allowedFields)) {
+      return 0;
+    }
 
+    $res = DB::connection('SML')->update(
+      'update dbPRRBeli set ' . $req->field . ' = :value where NOBUKTI = :nobukti',
+      ["value" => $req->value, "nobukti" => $req->nobukti]
+    );
+
+    return $res;
   }
 
   public function updateOtorisasi (Request $req) {

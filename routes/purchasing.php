@@ -190,6 +190,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/prbcekotorisasi',                 [PerintahReturBeliController::class, 'cekOtorisasi']);
     Route::post('/prbupdateotorisasi',              [PerintahReturBeliController::class, 'updateOtorisasi']);
     Route::post('/prbupdatebatalotorisasi',         [PerintahReturBeliController::class, 'updateBatalOtorisasi']);
+    Route::post('/prbonchangeheader',               [PerintahReturBeliController::class, 'onChangeHeader']);
 
     // ── PURCHASE ORDER ────────────────────────────────────────────────────
     Route::get('/purchaseorder',                    [POController::class, 'index']);

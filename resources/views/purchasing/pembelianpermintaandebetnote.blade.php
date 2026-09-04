@@ -1,143 +1,287 @@
-@extends('purchasing.newmaster')
+@extends('newmasterTest')
 @section('buttons')
+@section('page-title', 'Debet Note')
 
 @endsection
 
 @section('css')
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
+     filter) --}}
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+<style>
+/* Halaman ini dirancang mengisi tinggi layar (lihat dnAturTinggiTabel()), jadi padding
+   atas. */
+#content { padding-top: 12px; }
 
-{{-- tampilan search bar 1 --}}
-  <style>
-  #tabel_add_list_customer_filter{
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: -10px;
-  }
-  #tabel_add_list_customer_filter label input {
-    width: 150px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+/* Rule .card global di layout newmasterx (flex + align-items:center + efek melayang saat
+   hover) untuk kartu menu dashboard, bukan kartu berisi tabel. */
+#page1 .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
 
-  #tabel_add_list_noinvoice_filter{
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: -10px;
-  }
-  #tabel_add_list_noinvoice_filter label input {
-    width: 150px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+#page1 .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border) !important;
+}
 
-  #tabel_add_list_barang_filter{
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: -10px;
-  }
-  #tabel_add_list_barang_filter label input {
-    width: 150px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+/* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai inline
+   style pada <table>, yang mengalahkan `.data-table { width: 100% }`. Dipakai min-width,
+   BUKAN width, dan di-scope lewat ID (bukan class) karena DataTables meng-clone tabel
+   sambil membuang id saat mengukur kolom. */
+#tabel2 {
+  min-width: 100%;
+}
 
-  #tabel_add_list_nobeli_filter{
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: -10px;
-  }
-  #tabel_add_list_nobeli_filter label input {
-    width: 150px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
+/* ---------- Kolom Aksi tabel (#tabel2) - tombol bulat kecil, warna pastel, disalin dari
+   uangmukabeli.blade.php supaya tampilannya seragam dengan menu purchasing lain. ---------- */
+#tabel2 td:first-child:not([colspan]) {
+  vertical-align: middle;
+}
 
-  #tabel_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
+#tabel2 td:first-child .po-aksi-wrap {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
 
-  #tabel_filter label input {
-      width: 150px;
-      padding: 5px 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      box-shadow: none;
-      font-size: 0.65rem;
-    }
+#tabel2 td:first-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
 
-  #tabel_filter label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #333;
-    }
-  </style>
-{{-- end tampilan search bar 1 --}}
+#tabel2 td:first-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
 
-{{-- tampilan search bar 2 --}}
-  <style>
-  #tabel2_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-  #tabel2_filter label input {
-      width: 150px;
-      padding: 5px 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      box-shadow: none;
-      font-size: 0.65rem;
-    }
+#tabel2 td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel2 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+#tabel2 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+#tabel2 td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel2 td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
-  #tabel2_filter label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #333;
-    }
+/* Tombol di kolom Action baru muncul saat barisnya di-hover. */
+table.data-table.po-aksi-hover tbody td:first-child .btn {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+  visibility: visible;
+  opacity: 1;
+}
 
-  #tabel2_filter input:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-  </style>
-{{-- end tampilan search bar 2 --}}
+/* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar - tidak ada di
+   po-table-header.css, ditulis di sini supaya perubahan cukup mengunggah file blade-nya saja. */
+.po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card);
+  border: 1.5px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+/* ---------- #addTable (form Add) dan #detailTable (form Detail) - header abu-abu
+   uppercase + zebra + hover, disalin dari pembelianpermintaanagen.blade.php. ---------- */
+#addTable thead th,
+#detailTable thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#addTable tbody tr:nth-of-type(odd),
+#detailTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addTable tbody tr:hover,
+#detailTable tbody tr:hover { background-color: #f5f3ff; }
+
+#addTable thead th:nth-child(n+3),
+#addTable tbody td:nth-child(n+3):not([colspan]) { text-align: center; }
+#detailTable thead th:nth-child(n+3),
+#detailTable tbody td:nth-child(n+3):not([colspan]) { text-align: center; }
+
+#addTable td:last-child:not([colspan]) {
+  white-space: nowrap;
+}
+#addTable td:last-child .btn {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+#addTable td:last-child .btn-success {
+  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+}
+#addTable td:last-child .btn-primary {
+  color: #2563eb; border-color: #cfdcff; background: #e8edff;
+}
+#addTable td:last-child .btn-danger {
+  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+}
+
+/* ---------- Tombol chip (latar tint muda + teks berwarna) untuk tombol Submit dan Batal -
+   disalin dari uangmukabeli.blade.php / pembelianpermintaanagen.blade.php supaya seragam. ---------- */
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
+
+.btn-batal-add {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.btn-batal-add:hover,
+.btn-batal-add:focus {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #343a40;
+}
+
+.btn-batal-add:active {
+  background-color: #dee2e6 !important;
+  border-color: #ced4da !important;
+  color: #343a40 !important;
+}
+
+/* ---------- Modal lookup Customer/Invoice (#form) - baris tabel modal tetap
+   table-bordered/table-striped (pola baku semua modal lookup di purchasing). ---------- */
+#form .modal-header .btn-danger.rounded-circle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Modal lookup Supplier/Invoice (#form) - baris supplier diklik langsung
+   (tidak ada tombol Actions), disalin dari #formAddListItem di pembelianpermintaanagen. ---------- */
+#tabel_add_list_customer tbody tr.pick-row {
+  cursor: pointer;
+  transition: background-color .12s;
+}
+#tabel_add_list_customer tbody tr.pick-row:hover td {
+  background-color: #eef2ff;
+}
+#tabel_add_list_customer thead th,
+#tabel_add_list_invoice thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee !important;
+  border-top: none !important;
+}
+#tabel_add_list_customer tbody td,
+#tabel_add_list_invoice tbody td {
+  border-top: none !important;
+  border-bottom: 1px solid #f1f3f5 !important;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+#input_search_customer_debetnote,
+#input_search_invoice_debetnote {
+  width: 260px;
+  max-width: 100%;
+  font-size: 13px;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+#input_search_customer_debetnote:focus,
+#input_search_invoice_debetnote:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #e8edff;
+}
+</style>
 @endsection
 
 @section('content')
 
 <div id="page1" class="container-fluid mainpage">
-<div class="container-fluid" >
-  <!-- <div id="qrcode"></div> -->
-  <div class="row" style="margin-top: -30px">
-    <div class="col-6 text-left">
-      <h2>Debet Note</h2>
-    </div>
-    <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="buttonAdd()">ADD DN</button>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- <h2>Debet Note</h2> -->
     </div>
   </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-
-<!-- <button onclick="buttonAdd('nobukti')">Add Tes</button> -->
 </div>
 
-<div id="printContainer" style="display:none">
-</div>
+<div id="printContainer" style="display:none"></div>
 <div id="contentContainer" class="container-fluid">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
@@ -148,645 +292,929 @@
   <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  
+
   <div class="card">
-  <div class="card-header">
-    <div class="row">
-      <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
-           aria-controls="nav-home" aria-selected="true"
-           style="color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem;">
-          Debet Note Belum Otorisasi
-        </a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab"
-           aria-controls="nav-profile" aria-selected="false"
-           style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff;">
-          Debet Note Sudah Otorisasi
-        </a>
+    <div class="card-body" style="padding:0;">
+
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="po-filter-inp" id="dnTglAwal" value="{!! $dnTglAwal !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" class="po-filter-inp" id="dnTglAkhir" value="{!! $dnTglAkhir !!}">
+        </div>
+        <input type="search" id="dnSearch" class="po-search-inp" placeholder="Cari data">
+        {{-- Jumlah baris per halaman - lihat dnIkatPanjangHalaman(). --}}
+        <div class="po-len-wrap">
+          <label for="dnLen">Tampilkan</label>
+          <select id="dnLen" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
+        <button class="po-btn-filter" type="button" id="dnBtnFilter" onclick="$('#modalFilterDN').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        <div class="po-toolbar-act">
+          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+        </div>
       </div>
+
+      {{-- #rtBar diisi lewat JS oleh ReportTable.init() - lihat dnInitReportTableSekali(). --}}
+      <div id="rtBar"></div>
+
+      <table id="tabel2" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Supp</th>
+            <th style="padding: 4px 12px;" scope="col">Supplier</th>
+            <th style="padding: 4px 12px;" scope="col">Nilai DN</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+          {{-- Baris digambar renderTabelDN() lewat JS, supaya susunan kolom hasil geser/
+               sembunyi selalu konsisten dengan hasil render ulang. --}}
+        </tbody>
+      </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
   </div>
-
-  <div class="card-body">
-    <div class="tab-content" id="myTabContent">
-      {{-- Belum Otorisasi --}}
-      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <table id="tabel" class="table table-bordered table-striped">
-          <thead class="text-center bg-primary text-white">
-            <tr>
-              <th>No Bukti</th>
-              <th>Tanggal</th>
-              <th>Authorized</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tabel_data" class="text-left"></tbody>
-        </table>
-      </div>
-
-      {{-- Sudah Otorisasi --}}
-      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-        <table id="tabel2" class="table table-bordered table-striped">
-          <thead class="text-center bg-primary text-white">
-            <tr>
-              <th>No Bukti</th>
-              <th>Tanggal</th>
-              <th>Authorized</th>
-              <th>User Oto</th>
-              <th>Tanggal Oto</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tabel2_data" class="text-left"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
 </div>
 </div>
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
-  <div class="row" style="margin-top: -30px">
+
+  <div class="row" style="margin-bottom: 14px;">
     <div class="col-8 text-left">
-      <h2>Form Debit Note</h2>
+      <!-- <h2>Form Debet Note</h2> -->
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg" style="
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          transition: background-color 0.3s, box-shadow 0.3s;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="buttonCloseForm()">
+        Close
+      </button>
     </div>
   </div>
-  <div id= "modalAdd" class="">
-  <div id="" class="">
-  <div class="">
-    <!-- <h1>Tes Modal</h1> -->
+
+  <div id="modalAdd">
+    <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
+
     <div class="container-fluid">
-      <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
       <div class="row">
         <div class="col-md-3">
           <div class="row">
-            <div class="col-md-12" >
-              <div class="row">
             <div class="col-md-4">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
+              <div class="form-group"><label>No Bukti</label></div>
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled>
+                <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="No Bukti" disabled>
               </div>
             </div>
-          </div>
-        </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-md-12" >
-              <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-4" style="margin-top:-10px;">
+              <div class="form-group"><label>Tanggal</label></div>
+            </div>
+            <div class="col-md-8" style="margin-top:-10px;">
               <div class="form-group">
-                <label>Tanggal</label>
+                <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}">
               </div>
             </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
+            <div class="col-md-4" style="margin-top:-10px;">
+              <div class="form-group"><label>Supplier</label></div>
+            </div>
+            <div class="col-md-8" style="margin-top:-10px;">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control text-left" id="input_add_kodecustomer" placeholder="" disabled>
+                <button type="button" id="buttonAddListCustomer" onclick="buttonAddListCustomer()" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
         </div>
-          </div>
-        </div>
-      </div>
-      <div class="row" style="margin-top: -10px">
         <div class="col-md-3">
           <div class="row">
             <div class="col-md-12">
-              <div class="row">
-          <div class="col-md-4">
-            <div class="form-group">
-              <label>Supplier</label>
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows="3" placeholder="Nama Supplier" class="form-control text-left" id="input_add_namacustomer" disabled></textarea>
+              </div>
             </div>
-          </div>
-          <!-- <div class="col-3 text-right">
-            <div class="form-group">
-          </div>
-        </div> -->
-          <div class="col-md-8">
-            <div class="form-group input-group">
-              <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-              <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button>
-            </div>
-          </div>
-          </div>
-          </div>
-          <div class="col-md-12" style="margin-top:-10px">
-            <div class="form-group">
-              <textarea  style="width: 100%; resize: none" rows=1  class="form-control" id="input_add_namacustomer"  disabled></textarea>
-            </div>
-          </div>
-          </div>
-        </div>
-        <div class="col-md-3" style="margin-top: 10px">
-          <div class="row">
-            <div class="col-md-12" style="margin-top:-10px">
-              <textarea  style="width: 100%; resize: none" rows=3  class="form-control" id="input_add_alamatcustomer"  disabled></textarea>
+            <div class="col-md-12" style="margin-top:-10px;">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows="3" placeholder="Alamat Supplier" class="form-control text-left" id="input_add_alamatcustomer" disabled></textarea>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <div class="col-md-12 text-right">
+          <button id="buttonAddListInvoice" type="button" class="btn btn-lg btn-chip-biru" style="
+            height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 600; text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="buttonAddListInvoice()"><b>Tambah Invoice</b></button>
+        </div>
       </div>
-<div class="container-fluid">
-  <hr/>
-</div>
-  <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-        <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+    </div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <table id="addTable" class="data-table">
+          <thead class="text-center">
             <tr>
-              <th style="padding: 4px 12px;" scope="col">No Inv</th>
-              <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-              <th style="padding: 4px 12px;" scope="col">Nilai Debet Note</th>
-              <th style="padding: 4px 12px;" scope="col">Nilai Inv</th>
-              <th style="padding: 4px 12px;" scope="col">Valas</th>
-              <th style="padding: 4px 12px;" scope="col">Kurs</th>
-              <th style="padding: 4px 12px;" scope="col">Nilai DN Rp</th>
-              <th style="padding: 4px 12px;" scope="col">Nilai Invoice Rp</th>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th scope="col">No Inv</th>
+              <th scope="col">Keterangan</th>
+              <th scope="col">Nilai Debet Note</th>
+              <th scope="col">Nilai Inv</th>
+              <th scope="col">Valas</th>
+              <th scope="col">Kurs</th>
+              <th scope="col">Nilai DN Rp</th>
+              <th scope="col">Nilai Invoice Rp</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
-          <tbody id="addTableData" class="" >
-            <tr >
-              <td colspan=9 class="text-center">Belum ada data</td>
-          </tr>
+          <tbody id="addTableData">
+            <tr>
+              <td colspan="9" class="text-center">Belum ada data</td>
+            </tr>
           </tbody>
         </table>
-  </div>
-  <div class="col-md-12 mt-2 text-right">
-  <button id="buttonAddListInvoice" type="button" class="btn btn-primary" onclick="buttonAddListInvoice()" class="btn btn-secondary" style="height: 30px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;">+ Tambah Invoice</button>
-</div>
-  </div>
-</div>
-<!-- </div> -->
-
-
-<!-- ADD EDIT -->
-
-<div id="formAddEdit" class="container-fluid showhideitem">
-  <!-- <div class="line"></div> -->
-  <!-- <div class="row"> -->
-
-  <div class="col-12">
-  <hr/>
-  <div class="row">
-    <div class="col-12">
-      <h4>Edit Item</h4>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-md-12">
+
+    <div id="formAddEdit" class="container-fluid showhideitem" style="display:none;">
       <div class="row">
-    <div class="col-md-4">
-  <div class="row">
-    <div class="col-md-2">
-      <div class="form-group">
-      <label>No Inv</label>
-    </div>
-    </div>
-    <!-- <div class="col-4 text-right">
-      </div> -->
-    <div class="col-md-6">
-      <div class="input-group form-group">
-        <input id="AddEditNoInv" type="text" class="form-control" disabled>
-        <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> -->
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-2">
-      <div class="form-group">
-      <label>Ket.</label>
-    </div>
-    </div>
-    <!-- <div class="col-4 text-right">
-
-      </div> -->
-    <div class="col-md-6">
-      <div class="input-group form-group">
-        <input id="AddEditKeterangan" type="text" class="form-control">
-        <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> -->
-
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-</div>
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-2" >
-    <div class="row">
-  <div class="col-md-4">
-    <div class="form-group">
-    <label>Valas</label>
-  </div>
-  </div>
-  <div class="col-md-8">
-    <input id="AddEditValas" type="text" class="form-control" disabled>
-  </div>
-</div>
-</div>
-</div>
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-2" >
-    <div class="row">
-  <div class="col-md-4">
-    <div class="form-group">
-    <label>Kurs</label>
-  </div>
-  </div>
-  <div class="col-md-8">
-    <input id="AddEditKurs" type="number" value="1.00" class="form-control text-right" onBlur="onChangeNilaiKursItem()">
-  </div>
-</div>
-</div>
-</div>
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-2" >
-    <div class="row">
-  <div class="col-md-4">
-    <div class="form-group">
-    <label>Nilai</label>
-  </div>
-  </div>
-  <div class="col-md-8">
-    <input id="AddEditNilai" type="number" value="0.00" class="form-control text-right" onBlur="onChangeNilaiKursItem()">
-  </div>
-</div>
-</div>
-<div class="col-md-2" >
-  <div class="row">
-<div class="col-md-8">
-  <input id="AddEditNilaiRp" type="number" value="0.00" class="form-control text-right" disabled>
-</div>
-</div>
-</div>
-</div>
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-2" >
-    <div class="row">
-  <div class="col-md-4">
-    <div class="form-group">
-    <label>Nilai Inv</label>
-  </div>
-  </div>
-  <div class="col-md-8">
-    <input id="AddEditNilaiInv" type="number" value="0.00" class="form-control text-right" disabled>
-  </div>
-</div>
-</div>
-<div class="col-md-2" >
-  <div class="row">
-<div class="col-md-8">
-  <input id="AddEditNilaiInvRp" type="number" value="0.00" class="form-control text-right" disabled>
-</div>
-</div>
-</div>
-</div>
-
-  <div class="row mt-2">
-    <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Batal</button>
-
-      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Submit Edit</button>
-      <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
-    </div>
-  </div>
-  <!-- <div class="line"></div> -->
-  <!-- <hr/> -->
-</div>
-</div>
-<!-- </div> -->
-    </div>
-
-    <!-- <div class="row "> -->
-
-<!-- </div> -->
-  </div>
-  <div id="page3" style="display: none" class="mainpage container-fluid" >
-    <div class="row" style="margin-top: -30px">
-      <div class="col-8 text-left">
-        <h2>Form Debet Note</h2>
-      </div>
-      <div class="col-4 text-right">
-        <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
-      </div>
-    </div>
-
-    <div id= "modalDetail" class="">
-    <div id="" class="">
-    <div class="">
-      <!-- <h1>Tes Modal</h1> -->
-      <div class="container-fluid">
-        <!-- <input type="hidden" name="noUrut" id="input_add_nourut" value="" /> -->
-        <div class="row">
-          <div class="col-md-3">
-            <div class="row">
-              <div class="col-md-12" >
-                <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>No Bukti</label>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_detail_nobukti" placeholder="No Bukti" disabled>
-                </div>
-              </div>
-            </div>
-          </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-              <div class="col-md-12" >
-                <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Tanggal</label>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="form-group">
-                  <input type="date" class="form-control text-center" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}"  disabled>
-                </div>
-              </div>
-            </div>
-          </div>
-            </div>
-          </div>
+        <div class="col-4">
+          <h4 style="margin-left:-35px;">Edit Item</h4>
         </div>
-        <div class="row" style="margin-top: -10px">
-          <div class="col-md-3">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Customer</label>
-              </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>No Inv</label></div>
             </div>
-            <!-- <div class="col-3 text-right">
-              <div class="form-group">
-            </div>
-          </div> -->
             <div class="col-md-8">
-              <div class="form-group input-group">
-                <input type="text" class="form-control" id="input_detail_kodecustomer" placeholder="" disabled>
-                <!-- <button class="btn btn-primary btn-sm text-right" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-plus"></i></button> -->
-              </div>
-            </div>
-            </div>
-            </div>
-            <div class="col-md-12" style="margin-top:-10px">
               <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=1  class="form-control" id="input_detail_namacustomer"  disabled></textarea>
+                <input id="AddEditNoInv" type="text" class="form-control" disabled>
               </div>
             </div>
+          </div>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Ket.</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditKeterangan" type="text" class="form-control">
+              </div>
             </div>
           </div>
-          <div class="col-md-3" style="margin-top: 10px">
-            <div class="row">
-              <div class="col-md-12" style="margin-top:-10px">
-                <textarea  style="width: 100%; resize: none" rows=3  class="form-control" id="input_detail_alamatcustomer"  disabled></textarea>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Valas</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditValas" type="text" class="form-control" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Kurs</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditKurs" type="number" value="1.00" class="form-control text-right" onBlur="onChangeNilaiKursItem()">
               </div>
             </div>
           </div>
         </div>
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Nilai</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditNilai" type="number" value="0.00" class="form-control text-right" onBlur="onChangeNilaiKursItem()">
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Nilai (Rp)</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditNilaiRp" type="number" value="0.00" class="form-control text-right" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Nilai Inv</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditNilaiInv" type="number" value="0.00" class="form-control text-right" disabled>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:-15px;">
+            <div class="col-md-3" style="margin-top:5px;">
+              <div class="form-group"><label>Nilai Inv (Rp)</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input id="AddEditNilaiInvRp" type="number" value="0.00" class="form-control text-right" disabled>
+              </div>
+            </div>
+          </div>
         </div>
-  <div class="container-fluid">
-    <hr/>
-  </div>
-    <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-          <table id="detailTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
-              <tr>
-                <th style="padding: 4px 12px;" scope="col">No Inv</th>
-                <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-                <th style="padding: 4px 12px;" scope="col">Nilai Debet Note</th>
-                <th style="padding: 4px 12px;" scope="col">Nilai Inv</th>
-                <th style="padding: 4px 12px;" scope="col">Valas</th>
-                <th style="padding: 4px 12px;" scope="col">Kurs</th>
-                <th style="padding: 4px 12px;" scope="col">Nilai Debet Note</th>
-                <th style="padding: 4px 12px;" scope="col">Nilai Invoice Rp</th>
-              </tr>
-            </thead>
-            <tbody id="detailTableData" class="" >
-              <tr >
-                  <td colspan=9 class="text-center">Belum ada data</td>
-            </tr>
-            </tbody>
-          </table>
-    </div>
-    <div class="col-md-12 mt-2 text-right" id="divOto">
-      <button id="submitOtorisasi" type="button" class="btn btn-primary" onclick="submitOtorisasi()" class="btn btn-secondary" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Otorisasi</button>
-    </div>
-  </div>
-  </div>
-  <!-- </div> -->
-  <!-- ADD EDIT -->
-  <!-- </div> -->
       </div>
-      <!-- <div class="row "> -->
-  <!-- </div> -->
+      <div class="row mt-2">
+        <div class="col-md-12 text-right">
+          <button type="button" class="btn btn-batal-add" onclick="buttonAddBatal()">Batal</button>
+          <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="page3" style="display: none" class="mainpage container-fluid" >
+
+  <div class="row" style="margin-bottom: 14px;">
+    <div class="col-8 text-left">
+      <!-- <h2>Detail Debet Note</h2> -->
+    </div>
+    <div class="col-4 text-right">
+      <button type="button" class="btn btn-danger btn-lg" style="
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          transition: background-color 0.3s, box-shadow 0.3s;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="buttonCloseForm()">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <div id="modalDetail">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group"><label>No Bukti</label></div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="No Bukti" disabled>
+              </div>
+            </div>
+            <div class="col-md-4" style="margin-top:-10px;">
+              <div class="form-group"><label>Tanggal</label></div>
+            </div>
+            <div class="col-md-8" style="margin-top:-10px;">
+              <div class="form-group">
+                <input type="date" class="form-control text-left" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+              </div>
+            </div>
+            <div class="col-md-4" style="margin-top:-10px;">
+              <div class="form-group"><label>Supplier</label></div>
+            </div>
+            <div class="col-md-8" style="margin-top:-10px;">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_detail_kodecustomer" placeholder="" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows="3" placeholder="Nama Supplier" class="form-control text-left" id="input_detail_namacustomer" disabled></textarea>
+              </div>
+            </div>
+            <div class="col-md-12" style="margin-top:-10px;">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows="3" placeholder="Alamat Supplier" class="form-control text-left" id="input_detail_alamatcustomer" disabled></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <table id="detailTable" class="data-table">
+          <thead class="text-center">
+            <tr>
+              <th scope="col">No Inv</th>
+              <th scope="col">Keterangan</th>
+              <th scope="col">Nilai Debet Note</th>
+              <th scope="col">Nilai Inv</th>
+              <th scope="col">Valas</th>
+              <th scope="col">Kurs</th>
+              <th scope="col">Nilai DN Rp</th>
+              <th scope="col">Nilai Invoice Rp</th>
+            </tr>
+          </thead>
+          <tbody id="detailTableData">
+            <tr>
+              <td colspan="8" class="text-center">Belum ada data</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-12 text-right" id="divOto">
+          <button id="submitOtorisasi" type="button" class="btn btn-chip-biru" onclick="submitOtorisasi()">Otorisasi</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!--  -->
+<!-- modal filter otorisasi -->
+<div class="modal fade rt-filter" id="modalFilterDN">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
 
-<!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialo g-centered"  role="document">
-    <div id="" class="modal-content ">
-      <div id= "modalAddListCustomer" class="showhidemodalbodyadd">
       <div class="modal-header">
-          <h5 class="modal-title" id="">Customer</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <h5 class="modal-title">
+          <i class="bi bi-funnel"></i>
+          Filter Debet Note
+          <span class="rt-active-badge" id="dnFilterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterDN').modal('hide')">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div id="" class="">
+
       <div class="modal-body">
-        <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Customer</h3>
+        <div class="rt-section">
+          <div class="rt-group-label">Penyaringan Data</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="dnModalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="dnModalOtorisasi">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+              </select>
             </div>
           </div>
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px; ">
-            <!-- <div class="container-fluid"> -->
-            <table id="tabel_add_list_customer" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Alamat</th>
-                  <th style="padding: 4px 12px;" scope="col">Kota</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tabel_data_add_list_customer" class="text-left" >
-                <tr >
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
-              </tr>
-              </tbody>
-            </table>
-          <!-- </div> -->
-            <!-- <button onclick="buttonSubKategori()">tes</button> -->
-          </div>
-            </div>
-            </div>
         </div>
       </div>
-      <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
-      </div>
-      </div>
-      <div id= "modalAddListInvoice" class="showhidemodalbodyadd">
-      <div class="modal-header">
-          <h5 class="modal-title" id="">Invoice</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div id="" class="">
-      <div class="modal-body">
 
-        <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Invoice</h3>
-            </div>
-          </div>
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px; ">
-            <!-- <div class="container-fluid"> -->
-
-
-            <table id="tabel_add_list_invoice" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white">
-                <tr>
-                  <th class="text-center" style="padding: 4px 12px;" scope="col">v</th>
-                  <th style="padding: 4px 12px;" scope="col">No Faktur</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Jatuh Tempo</th>
-                  <th style="padding: 4px 12px;" scope="col">Valas</th>
-                  <th style="padding: 4px 12px;" scope="col">Nilai Debet Note</th>
-                  <th style="padding: 4px 12px;" scope="col">Kurs</th>
-                  <th style="padding: 4px 12px;" scope="col">Nilai DN (Rp)</th>
-                  <th style="padding: 4px 12px;" scope="col">Piutang (Valas)</th>
-                  <th style="padding: 4px 12px;" scope="col">Piutang (Rp)</th>
-                  <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-
-                </tr>
-              </thead>
-
-
-              <tbody id="tabel_data_add_list_invoice" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-
-
-
-              </tr>
-              </tbody>
-
-
-            </table>
-          <!-- </div> -->
-            <!-- <button onclick="buttonSubKategori()">tes</button> -->
-          </div>
-            </div>
-            </div>
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="dnResetFilter()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+            onclick="$('#modalFilterDN').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="dnTerapkanFilter()">Terapkan</button>
         </div>
-      </div>
-      <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
-        <button type="button" class="btn btn-primary" onclick="buttonAddPickInvoice()" >Submit</button>
-      </div>
-      </div>
-
       </div>
 
     </div>
   </div>
+</div>
+<!-- end modal filter otorisasi -->
 
-<!-- End modal add-->
+<!-- start modal add (lookup Customer / Invoice) -->
+<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
 
+      <div id="modalAddListCustomer" class="showhidemodalbodyadd">
+        <div class="modal-header">
+          <h5 class="modal-title">Supplier</h5>
+          <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
+            data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid mt-4">
+            <div class="row mb-2" style="margin-top:-30px;">
+              <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
+                <input id="input_search_customer_debetnote" type="search" class="form-control" placeholder="Cari data">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table id="tabel_add_list_customer" class="data-table">
+                <thead class="text-center">
+                  <tr>
+                    <th scope="col">Kode</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">Kota</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_add_list_customer" class="text-left">
+                  <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-batal-add" onclick="buttonAddListBatal()">Batal</button>
+        </div>
+      </div>
 
+      <div id="modalAddListInvoice" class="showhidemodalbodyadd">
+        <div class="modal-header">
+          <h5 class="modal-title">Invoice</h5>
+          <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
+            data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid mt-4">
+            <div class="row mb-2" style="margin-top:-30px;">
+              <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
+                <input id="input_search_invoice_debetnote" type="search" class="form-control" placeholder="Cari data" onkeyup="searchInvoiceDebetNote(event)">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table id="tabel_add_list_invoice" class="data-table">
+                <thead class="text-center">
+                  <tr>
+                    <th class="text-center" scope="col">v</th>
+                    <th scope="col">No Faktur</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Jatuh Tempo</th>
+                    <th scope="col">Valas</th>
+                    <th scope="col">Nilai Debet Note</th>
+                    <th scope="col">Kurs</th>
+                    <th scope="col">Nilai DN (Rp)</th>
+                    <th scope="col">Hutang (Valas)</th>
+                    <th scope="col">Hutang (Rp)</th>
+                    <th scope="col">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_add_list_invoice" class="text-left">
+                  <tr>
+                    <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-batal-add" onclick="buttonAddListBatal()">Batal</button>
+          <button type="button" class="btn btn-chip-biru" onclick="buttonAddPickInvoice()">Simpan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- end modal add -->
 
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let listInvoice = []
-// let tempNoBukti = ''
 let listData = []
-
-
-let listBarang = []
-let tempBarangAddAdd = {}
 let tempBarangAddEdit = {}
-let dataBarang = []
 let tipeform = ''
 
-$(document).ready(function() {
-  $("#tabel").DataTable({ lengthChange: false, paging: false });
-  $("#tabel2").DataTable({ lengthChange: false, paging: false });
+// Dipatok, bukan diambil dari window.location - harus sama persis dengan $req->href yang
+// dikirim PembelianPermintaanDebetNoteController@loadAll ke
+// HeaderTableController@getHeaderTable.
+const DN_HREF = 'pembelianpermintaandebetnote'
 
-  loadAll();
+let dnCart = []
+let dataDN = []
+
+function dnBuatCart (headers, values, isnumerics, isshowns, desimals, aliasordered) {
+  let cart = []
+  ;(headers || []).forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let tipeNama = { 0 : 'varchar', 1 : 'float', 2 : 'date' }
+    let label = h
+    if (aliasordered && aliasordered[i] && aliasordered[i].alias) {
+      label = aliasordered[i].alias
+    }
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null)
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+
+    cart.push([
+      tipe === 0 ? h : values[i],
+      label,
+      Number(isshowns[i]) === 1 ? 1 : 0,
+      tipeNama[tipe] || 'varchar',
+      0,
+      isNaN(des) ? 0 : des,
+      h,
+      values[i],
+      tipe
+    ])
+  });
+  return cart
+}
+
+function dnKolomTampil () {
+  return (dnCart || []).filter(c => Number(c[2]) === 1)
+}
+
+function dnKolomRender (c) {
+  return { field : c[0], label : c[1], tipe : Number(c[8]), desimal : Number(c[5]) }
+}
+
+function dnFormatAngkaDes (nilai, des) {
+  let d = Number(des)
+  if (isNaN(d) || d < 0) { d = 0 }
+
+  let mentah = (nilai === null || nilai === undefined || nilai === '') ? 0 : nilai
+  let angka = Number(String(mentah).split(',').join(''))
+  if (isNaN(angka)) {
+    return (nilai === null || nilai === undefined) ? '' : nilai
+  }
+
+  let teks = angka.toFixed(d)
+  let minus = teks.charAt(0) === '-'
+  if (minus) { teks = teks.substring(1) }
+
+  let bagian = teks.split('.')
+  let bulat = bagian[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (minus ? '-' : '') + bulat + (bagian[1] ? '.' + bagian[1] : '')
+}
+
+function dnRenderNilai (col, item) {
+  let nilai = item[col.field]
+  if (col.tipe === 1) {
+    return dnFormatAngkaDes(nilai, col.desimal)
+  }
+  if (col.tipe === 2) {
+    return nilai ? formatDate(nilai) : ""
+  }
+  return (nilai === null || nilai === undefined) ? "" : nilai
+}
+
+function dnHeadHtml (cols) {
+  if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+    return ReportTable.headHtml(cols)
+  }
+  console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.')
+  let html = '<tr>'
+  cols.forEach((c) => {
+    html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`
+  });
+  return html + '</tr>'
+}
+
+let dnRtSudahInit = false
+
+function dnInitReportTableSekali () {
+  if (dnRtSudahInit || typeof ReportTable === 'undefined') { return }
+  dnRtSudahInit = true
+
+  ReportTable.init({
+    table    : '#tabel2',
+    bar      : '#rtBar',
+    onChange : renderTabelDN
+  })
+
+  let dnGuardUlangKlik = false
+  let thead = document.getElementById('tabel_header')
+  if (thead) {
+    thead.addEventListener('click', function (e) {
+      if (dnGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+
+      e.stopPropagation()
+      e.preventDefault()
+
+      dnGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles : false, cancelable : true, view : window })
+      Object.defineProperty(ulang, 'target', { value : interaktif, configurable : true })
+      thead.dispatchEvent(ulang)
+      dnGuardUlangKlik = false
+    }, true)
+  }
+}
+
+function dnPindahBar () {
+  let bar = document.getElementById('rtBar')
+  let tabel = document.getElementById('tabel2')
+  if (!bar || !tabel) { return }
+
+  let acuan = tabel
+  if ($.fn.DataTable.isDataTable('#tabel2')) {
+    acuan = document.getElementById('tabel2_wrapper') || tabel
+  }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan)
+  }
+}
+
+function dnIkatSearch () {
+  let input = document.getElementById('dnSearch')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    $('#tabel2').DataTable().search(input.value).draw()
+  })
+}
+
+let dnPanjangHalaman = 10
+function dnIkatPanjangHalaman () {
+  let sel = document.getElementById('dnLen')
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(dnPanjangHalaman)
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    dnPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    $('#tabel2').DataTable().page.len(dnPanjangHalaman).draw()
+  })
+}
+
+function dnIkatPeriode () {
+  let awal  = document.getElementById('dnTglAwal')
+  let akhir = document.getElementById('dnTglAkhir')
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    loadAll()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
+function dnAturTinggiTabel () {
+  let area = document.getElementById('content')
+  let wrap = document.querySelector('#page1 .po-table-wrap')
+  if (!area || !wrap) { return }
+
+  wrap.style.maxHeight = 'none'
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah
+  let kotak = wrap.getBoundingClientRect()
+  let pageEl = document.getElementById('page1')
+  let bawah = pageEl.getBoundingClientRect().bottom - kotak.bottom
+
+  let sisa = batasBawah - kotak.top - bawah - 4
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
+}
+
+let dnFilterOtorisasi = 'SEMUA'
+
+function dnOtorisasiDN (item) {
+  return Number(item.IsOtorisasi1) ? 'Sudah' : 'Belum'
+}
+
+function dnUpdateFilterBadge () {
+  let jml = (dnFilterOtorisasi !== 'SEMUA') ? 1 : 0
+  let badge = document.getElementById('dnFilterBadge')
+  if (badge) { badge.textContent = jml + ' aktif' }
+}
+
+function dnTerapkanFilter () {
+  dnFilterOtorisasi = $('#dnModalOtorisasi').val() || 'SEMUA'
+  dnUpdateFilterBadge()
+  $('#modalFilterDN').modal('hide')
+  renderTabelDN()
+}
+
+function dnResetFilter () {
+  dnFilterOtorisasi = 'SEMUA'
+  $('#dnModalOtorisasi').val('SEMUA')
+  dnUpdateFilterBadge()
+  $('#modalFilterDN').modal('hide')
+  renderTabelDN()
+}
+
+window.g_href = DN_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  dnCart.forEach((c) => {
+    header.push(c[6])
+    value.push(c[7])
+    isnumber.push(c[8])
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : DN_HREF
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+window.doSetHeader = function (mode, reset) {
+  if (!reset) { return }
+
+  $.ajax({
+    url   : "{!! url('getheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val(),
+      href   : DN_HREF,
+      reset  : 1
+    },
+    success : function (res) {
+      dnCart = dnBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered)
+      window.gcart_header = dnCart
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal mengembalikan kolom ke pengaturan awal')
+    }
+  })
+}
+
+$(document).ready(function() {
+  dnInitReportTableSekali()
+  loadAll()
 });
+
+function loadAll () {
+  document.getElementById('tabel_data').innerHTML =
+    '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>'
+
+  $.ajax({
+    url: "{!! url('debetnoteloadall') !!}",
+    type: "get",
+    async: true,
+    data: {
+      tglawal: $('#dnTglAwal').val(),
+      tglakhir: $('#dnTglAkhir').val()
+    },
+    success: function (res) {
+      dnCart = dnBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered)
+      window.gcart_header = dnCart
+      dataDN = res.listData1 || []
+      renderTabelDN()
+    },
+    error: function (err) {
+      console.error("Load failed:", err);
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function renderTabelDN () {
+  window.g_modeReport = 1
+  window.gcart_header = dnCart
+
+  if ($.fn.DataTable.isDataTable('#tabel2')) {
+    $('#tabel2').DataTable().destroy()
+  }
+
+  let cols = dnKolomTampil()
+  let kolomRender = cols.map(dnKolomRender)
+
+  let thead = document.getElementById('tabel_header')
+  thead.innerHTML = dnHeadHtml(cols)
+  let baris = thead.querySelector('tr')
+  if (baris) {
+    baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
+    baris.insertAdjacentHTML('beforeend', `
+      <th style="padding: 4px 12px;" scope="col">Oto</th>
+      <th style="padding: 4px 12px;" scope="col">User Oto</th>
+      <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+    `)
+  }
+
+  let dataTampil = dataDN || []
+  if (dnFilterOtorisasi !== 'SEMUA') {
+    dataTampil = dataTampil.filter(function (item) { return dnOtorisasiDN(item) === dnFilterOtorisasi })
+  }
+
+  let rowTable = ''
+  dataTampil.forEach((item) => {
+    let isOtorisasi = Number(item.IsOtorisasi1) || 0
+
+    let tombolAksi = `<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail('${item.NOBUKTI}')"><i class="bi bi-info"></i></button>`
+    if (isOtorisasi === 1) {
+      tombolAksi += `
+        <button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NOBUKTI}')"><i class="bi bi-key"></i></button>
+      `
+    } else {
+      tombolAksi += `
+        <button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi('${item.NOBUKTI}')"><i class="bi bi-pen"></i></button>
+        <button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('${item.NOBUKTI}')"><i class="bi bi-key"></i></button>
+      `
+    }
+
+    rowTable += `<tr><td class="text-center"><div class="po-aksi-wrap">${tombolAksi}</div></td>`
+    kolomRender.forEach((c) => {
+      if (c.tipe === 1) {
+        rowTable += `<td style="text-align: right;">${dnRenderNilai(c, item)}</td>`
+      } else {
+        rowTable += `<td>${dnRenderNilai(c, item)}</td>`
+      }
+    });
+    rowTable += `
+      ${isOtorisasi ?
+          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        :
+          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      }
+      <td>${item.OtoUser1 || ''}</td>
+      <td>${item.TglOto1 ? formatDate(item.TglOto1) : ''}</td>
+    </tr>`
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+
+  $('#tabel2').DataTable({
+    lengthChange: false,
+    pageLength: dnPanjangHalaman,
+    order: [],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
+  });
+
+  dnPindahBar()
+  dnIkatSearch()
+  dnIkatPanjangHalaman()
+  dnIkatPeriode()
+  let inputSearch = document.getElementById('dnSearch')
+  if (inputSearch && inputSearch.value) {
+    $('#tabel2').DataTable().search(inputSearch.value).draw()
+  }
+  dnAturTinggiTabel()
+}
 
 function setNewNoBukti () {
   $.ajax({
@@ -796,36 +1224,9 @@ function setNewNoBukti () {
     data: {
     },
     success: function(res) {
-
-      console.log(res)
       document.getElementById("input_add_nobukti").value = res[0].Nobukti
       document.getElementById("input_add_nourut").value = res[0].Nourut
-
     }})
-}
-
-
-function cleanFormAddAdd () {
-  document.getElementById("AddAddKodeBrg").value = ''
-  document.getElementById("AddAddNamaBrg").value = ''
-  document.getElementById("AddAddNoBeli").value = ''
-  document.getElementById("AddAddUrutBeli").value = 0
-  document.getElementById("AddAddInputQty").value = '0.00'
-  document.getElementById("AddAddInputNosat").value = 0
-
-  document.getElementById("AddAddInputIsi").value = 0
-
-  document.getElementById("AddAddReturSupp").value = 0
-
-  document.getElementById("AddAddKeterangan").value = ''
-  tempBarangAddAdd = {}
-  // AddAddReturSupp
-}
-
-
-function closeShowHideAdd () {
-  $('.showhide').hide();
-
 }
 
 function cleanFormAdd () {
@@ -835,19 +1236,6 @@ function cleanFormAdd () {
   document.getElementById("input_add_nobukti").value = ''
   document.getElementById("input_add_tanggal").valueAsDate = new Date()
 }
-
-
-function submitAdd () {
-  console.log("submitAdd")
-  let _token  = $("#_token").val()
-  let nobukti  = $("#input_add_nobukti").val()
-
-  let tanggal  = $("#input_add_tanggal").val()
-  let nopajak  = $("#input_add_nopajak").val()
-
-  console.log(nobukti , tanggal , nopajak)
-}
-
 
 function submitAddEdit () {
   let barang = tempBarangAddEdit
@@ -869,21 +1257,6 @@ function submitAddEdit () {
     alertify.warning("Nilai < 0")
     return
   }
-
-  console.log({
-    choice,
-    nobukti,
-    tanggal,
-    urut,
-    noinvoice,
-    kodecustsupp,
-    nilai,
-    kodevls,
-    kurs,
-    nilairp,
-    keterangan,
-    nourut
-  })
 
   $.ajax({
     url: "{!! url('debetnotespkoreksi') !!}",
@@ -919,10 +1292,7 @@ function submitAddEdit () {
   })
 }
 
-
 function buttonAddDelete (i) {
-  console.log(i)
-
   let akses = $("#akses_ishapus").val();
 
   if (!Number(akses)) {
@@ -945,7 +1315,6 @@ function buttonAddDelete (i) {
         let nilairp  = $("#AddEditNilaiRp").val()
         let kodevls  = $("#AddEditValas").val()
         let kurs  = $("#AddEditKurs").val()
-        console.log(nobukti, urut)
         $.ajax({
           url: "{!! url('debetnotespkoreksi') !!}",
           type: "post",
@@ -964,15 +1333,8 @@ function buttonAddDelete (i) {
             nilairp
           },
           success: function(res) {
-            console.log('resspadd', res)
-            // return
             if (res == 1) {
-
-              // tipeform = 'edit'
-              // lockFormAdd()
               $('.showhideitem').hide();
-              // $('.showhideform').hide();
-              // $('#modalAdd').show();
               loadAll()
               refreshDataTable(nobukti)
               alertify.success('Berhasil menghapus Invoice')
@@ -997,28 +1359,21 @@ function buttonAddPickInvoice () {
   let nourut = $("#input_add_nourut").val();
 
   let tanggal = $("#input_add_tanggal").val();
-    let kodecustsupp = $("#input_add_kodecustomer").val();
+  let kodecustsupp = $("#input_add_kodecustomer").val();
 
   if ( checkDate.getFullYear()  !== Number(periode_tahun)  || (checkDate.getMonth() +1) !== Number(periode_bulan) ) {
-
       alertify.warning("Tanggal tidak sesuai periode");
       return
   }
-  console.log(nourut)
   let _token = $("#_token").val();
-  console.log("buttonAddPickInvoice")
   let tempData = []
-  // let checkQnt = 0
   let checkMinus = 0
-  console.log(listInvoice)
-    listInvoice.forEach((item, i) => {
-      console.log(document.getElementById(`add_checkbox${i}`).checked)
+  listInvoice.forEach((item, i) => {
       if (document.getElementById(`add_checkbox${i}`).checked) {
 
         let checkNilai = $(`#add_inputQnt${i}`).val();
         let checkKurs = $(`#add_inputKurs${i}`).val();
         let checkNilaiRp = $(`#add_inputQntRp${i}`).val();
-        // add_inputKeterangan
         listInvoice[i].Keterangan = $(`#add_inputKeterangan${i}`).val();
         listInvoice[i].inputNilai = checkNilai
         listInvoice[i].inputKurs = checkKurs
@@ -1031,7 +1386,6 @@ function buttonAddPickInvoice () {
       }
 
     });
-    console.log(tempData)
 
     if (!tempData.length) {
       alertify.warning("Tidak ada item dipilih");
@@ -1058,13 +1412,9 @@ function buttonAddPickInvoice () {
           nourut
         },
         success: function(res) {
-          console.log(res ,'!')
-
           if (res == 1) {
-            // $("#form").modal('toggle')
             alertify.success('DN telah ditambah');
             loadAll()
-            // buttonCloseForm()
             tipeform = 'edit'
             document.getElementById("buttonAddListCustomer").disabled = true
             document.getElementById("input_add_tanggal").disabled = true
@@ -1072,17 +1422,11 @@ function buttonAddPickInvoice () {
             refreshDataTable(nobukti)
 
             $("#form").modal('toggle')
-
           }
           if (res == 2) {
             setNewNoBukti()
             alertify.warning('Nobukti telah di refresh, silahkan submit ulang');
           }
-          //
-          // if (res == 3 ) {
-          //   alertify.warning('Stok gudang tidak mencukupi');
-          // }
-
         },
         error: function (err) {
           console.log(err)
@@ -1091,11 +1435,16 @@ function buttonAddPickInvoice () {
       })
 }
 
+function searchInvoiceDebetNote (event) {
+  let keyword = event.target.value.toLowerCase()
+  $('#tabel_data_add_list_invoice tr').each(function () {
+    let text = $(this).text().toLowerCase()
+    $(this).toggle(text.indexOf(keyword) > -1)
+  })
+}
 
 function buttonAddListInvoice () {
   listInvoice = []
-
-  console.log('buttonAddListInvoice')
 
   let _token = $("#_token").val();
   let kodecustsupp = $("#input_add_kodecustomer").val();
@@ -1114,11 +1463,10 @@ function buttonAddListInvoice () {
       kodecustsupp,
     },
     success: function(res) {
-      console.log(res)
       listInvoice = res
       let rowTable = ``
       res.forEach((item, i) => {
-        rowTable += 
+        rowTable +=
         `<tr>
         <td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>
         <td>${item.NoFaktur}</td>
@@ -1138,13 +1486,9 @@ function buttonAddListInvoice () {
         </tr>`
       });
 
-      // if(!res.length) {
-      //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
-      // }
       document.getElementById("tabel_data_add_list_invoice").innerHTML = rowTable
 
       if (res.length) {
-
         $('.showhidemodalbodyadd').hide();
         $('#modalAddListInvoice').show();
         $("#form").modal('toggle')
@@ -1160,67 +1504,7 @@ function buttonAddListInvoice () {
   })
 }
 
-
-
-function buttonAddListNoBeli () {
-  let _token = $("#_token").val();
-  let kodecustsupp = $("#input_add_kodecustomer").val();
-  let noinvoice = $("#input_add_noinvoice").val();
-  let noso = $("#input_add_noso").val();
-  let kodebrg = $("#AddAddKodeBrg").val();
-
-  if (!kodebrg ) {
-    alertify.warning("Pilih barang terlebih dahulu")
-    return
-  }
-
-  $('#tabel_add_list_nobeli').DataTable().destroy();
-  $.ajax({
-    url: "{!! url('perintahreturjuallistnobeli') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      kodebrg,
-      noso
-    },
-    success: function(res) {
-      let rowTable = ``
-      rowTable += `<tr>
-      <td>-</td>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoBeli('-' , 0)" type="button" ><i class="bi bi-plus"></i></button></td>
-
-      </tr>`
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr>
-        <td>${item.NOBUKTI}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoBeli('${item.NOBUKTI}' ,${item.urut} )" type="button" ><i class="bi bi-plus"></i></button></td>
-
-        </tr>`
-      });
-      // if(!res.length) {
-      //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
-      // }
-      document.getElementById("tabel_data_add_list_nobeli").innerHTML = rowTable
-      $("#tabel_add_list_nobeli").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
-      $('.showhidemodalbodyadd').hide();
-      $('#modalAddListNoBeli').show();
-      $("#form").modal('toggle')
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-  })
-}
-
 function onChangeNilaiKursItem () {
-  console.log('onChangeNilaiKursItem' )
   let onChangeQnt = $(`#AddEditNilai`).val();
   let onChangeKurs = $(`#AddEditKurs`).val();
 
@@ -1228,16 +1512,13 @@ function onChangeNilaiKursItem () {
 }
 
 function onChangeNilaiKurs (index) {
-  console.log('onChangeNilaiKurs' , index)
   let onChangeQnt = $(`#add_inputQnt${index}`).val();
   let onChangeKurs = $(`#add_inputKurs${index}`).val();
 
   document.getElementById(`add_inputQntRp${index}`).value = parseFloat(Number(onChangeQnt) * Number(onChangeKurs)).toFixed(2)
 }
 
-
 function buttonAddListCustomer () {
-  console.log('buttonAddListCustomer')
   $('#tabel_add_list_customer').DataTable().destroy();
   $.ajax({
     url: "{!! url('debetnotelistcustomer') !!}",
@@ -1246,26 +1527,29 @@ function buttonAddListCustomer () {
     data: {
     },
     success: function(res) {
-      console.log(res)
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustomer('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}' , '${item.ALAMAT1}')">
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td>${item.ALAMAT}</td>
         <td>${item.NamaKota}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustomer('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}' , '${item.ALAMAT1}')" type="button" ><i class="bi bi-plus"></i></button></td>
         </tr>`
       })
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
       $("#tabel_add_list_customer").DataTable({
         "lengthChange": false,
-          "paging": false ,
+        "paging": false,
+        "searching": true,
+        "dom": 't',
     });
+      $('#input_search_customer_debetnote').off('keyup').on('keyup', function () {
+        $('#tabel_add_list_customer').DataTable().search(this.value).draw();
+      });
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListCustomer').show();
       $("#form").modal('toggle')
@@ -1279,54 +1563,13 @@ function buttonAddListCustomer () {
   })
 }
 
-
 function buttonAddPickCustomer (kode, nama , alamat) {
-  console.log('buttonAddPickCustomer')
-  console.log(kode,nama,alamat)
   document.getElementById("input_add_kodecustomer").value = kode
   document.getElementById("input_add_namacustomer").value = nama
   document.getElementById("input_add_alamatcustomer").value = alamat
 
   $('.showhideitem').hide();
   buttonAddListBatal()
-  // $("#form").modal('toggle')
-}
-
-function onChangeQty () {
-
-  console.log('onChangeQty')
-  console.log('tempBarangAddAdd' , tempBarangAddAdd)
-  let qty = $("#AddAddInputQty").val();
-  let nosat = $("#AddAddInputNosat").val();
-  console.log('qty' , qty)
-  console.log('nosat' , nosat)
-
-  if (jQuery.isEmptyObject(tempBarangAddAdd)) {
-    console.log('gk ada barang')
-  } else {
-
-    console.log('ada barang')
-    let tempIsi = nosat == 1 ? tempBarangAddAdd.Isi1 : tempBarangAddAdd.Isi2
-    console.log(tempIsi)
-    let tempTotalQty = Number(tempIsi) * Number(qty)
-
-    document.getElementById("AddAddInputQty1").value = tempTotalQty / tempBarangAddAdd.Isi1
-    document.getElementById("AddAddInputQty2").value = tempTotalQty / tempBarangAddAdd.Isi2
-  }
-
-}
-
-
-function buttonAddPickNoInvoice (nobukti, noso , kodegdg, flagtipe, ppn) {
-  console.log('buttonAddPickNoInvoice')
-  document.getElementById("input_add_noinvoice").value = nobukti
-  document.getElementById("input_add_noso").value = noso
-  document.getElementById("input_add_gudang").value = kodegdg
-  document.getElementById("input_add_flagtipe").value = flagtipe
-  document.getElementById("input_add_ppn").value = ppn
-  $('.showhideitem').hide();
-  buttonAddListBatal()
-  // $("#form").modal('toggle')
 }
 
 function buttonAddBatal () {
@@ -1335,39 +1578,10 @@ function buttonAddBatal () {
 
 function buttonAddListBatal () {
   $('.showhidemodalbodyadd').hide();
-  // $('#modalBodyAddMain').show();
   $("#form").modal('toggle')
 }
 
-// function buttonAddListCustomer () {
-//
-//   $('.showhidemodalbodyadd').hide();
-//   $('#modalBodyAddListValas').show();
-//
-//   $("#form").modal('toggle')
-// }
-
-
-function closeShowHideItem () {
-  $('.showhideitem').hide();
-}
-
-function unlockFormAdd () {
-  document.getElementById("input_add_catatan").disabled = false
-  document.getElementById("input_add_tanggal").disabled = false
-  document.getElementById("buttonAddListCustomer").disabled = false
-  document.getElementById("buttonAddListNoInvoice").disabled = false
-}
-
-function lockFormAdd () {
-  document.getElementById("input_add_catatan").disabled = true
-  document.getElementById("input_add_tanggal").disabled = true
-  document.getElementById("buttonAddListCustomer").disabled = true
-  document.getElementById("buttonAddListNoInvoice").disabled = true
-}
-
 function refreshDataTable (nobukti) {
-  console.log('refreshDataTable' , nobukti)
   let _token = $("#_token").val();
   $.ajax({
     url: "{!! url('debetnotespdetail') !!}",
@@ -1379,17 +1593,13 @@ function refreshDataTable (nobukti) {
 
     },
     success: function(res) {
-      console.log(res)
       listData = res
-      // console.log(res)
       if (!res.length) {
           alertify.success('Data Habis')
-          // $("#form").modal('toggle')
           $('#page2').hide();
           $('#page1').show();
           return
       }
-      // dataTableAdd = res
 
       let rowTable = ``
       listData.forEach((item, i) => {
@@ -1421,7 +1631,6 @@ function refreshDataTable (nobukti) {
     error: function (err) {
       console.log(err)
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
-      resRefresh = 0;
     }
 
   })
@@ -1451,7 +1660,6 @@ function submitOtorisasi () {
   });
 }
 
-
 function buttonDetail (nobukti) {
   document.getElementById("divOto").style.display = "none";
   let _token = $("#_token").val();
@@ -1464,15 +1672,10 @@ function buttonDetail (nobukti) {
       nobukti
     },
     success: function(res) {
-      console.log(res)
-      // listData = res
-      // console.log(res)
       if (!res.length) {
           alertify.success('Data tidak ditemukkan')
-          // $("#form").modal('toggle')
           return
       }
-      // dataTableAdd = res
 
       let rowTable = ``
       res.forEach((item, i) => {
@@ -1481,7 +1684,7 @@ function buttonDetail (nobukti) {
                   <td>${item.NoInv}</td>
                   <td>${item.Keterangan}</td>
                   <td class="text-right">${item.Nilai ? formatAngka(parseFloat(item.Nilai).toFixed(2)) : '0.00'}</td>
-                  <td class="text-right">${item.Saldo ?  formatAngka(parseFloat(item.Saldo).toFixed(2)) : '0.00'}</td>  
+                  <td class="text-right">${item.Saldo ?  formatAngka(parseFloat(item.Saldo).toFixed(2)) : '0.00'}</td>
                   <td>${item.kodeVls}</td>
                   <td class="text-right">${item.Kurs ?  formatAngka(parseFloat(item.Kurs).toFixed(2)) : '0.00'}</td>
                   <td class="text-right">${item.NilaiRp ? formatAngka(parseFloat(item.NilaiRp).toFixed(2)) : '0.00'}</td>
@@ -1496,14 +1699,14 @@ function buttonDetail (nobukti) {
         document.getElementById("input_detail_nobukti").value = res[0].NoBukti
         document.getElementById("input_detail_tanggal").valueAsDate = new Date(res[0].tanggal)
 
-        $('#modalDetail').show();
+        document.getElementById("divOto").style.display = (Number(res[0].IsOtorisasi1) ? "none" : "block")
+
         $('.mainpage').hide();
         $('#page3').show();
     },
     error: function (err) {
       console.log(err)
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
-      resRefresh = 0;
     }
   })
 }
@@ -1542,11 +1745,7 @@ function buttonOtorisasi (nobukti) {
   });
 }
 
-
-
 function buttonKoreksi (nobukti ) {
-  console.log('buttonKoreksi' , nobukti )
-
   let akses = $("#akses_iskoreksi").val();
 
   if (!Number(akses)) {
@@ -1563,23 +1762,18 @@ function buttonKoreksi (nobukti ) {
     alertify.warning("Data tidak ditemukkan")
     return
   }
-  console.log(listData)
-  console.log(listData[0].isOtorisasi1)
   if (listData[0].IsOtorisasi1 == 1) {
     alertify.warning("DN sudah diotorisasi")
     return
   }
 
   $('.showhideitem').hide();
-  $('.showhideform').hide();
   $('#modalAdd').show();
   $('.mainpage').hide();
   $('#page2').show();
 }
 
 function buttonAdd (nobukti) {
-  console.log('buttonAdd' , nobukti)
-
   let akses = $("#akses_istambah").val();
 
   if (!Number(akses)) {
@@ -1588,16 +1782,10 @@ function buttonAdd (nobukti) {
   }
   document.getElementById("input_add_tanggal").disabled = false
   document.getElementById("buttonAddListCustomer").disabled = false
-  document.getElementById("addTableData").innerHTML = `<td colspan=9 class="text-center">Belum ada data</td>`
+  document.getElementById("addTableData").innerHTML = `<tr><td colspan=9 class="text-center">Belum ada data</td></tr>`
   tipeform = 'add'
-  // unlockFormAdd()
   $('.showhideitem').hide();
-  $('.showhideform').hide();
   $('#modalAdd').show();
-  // $("#form").modal('toggle')
-
-  // input_add_nobukti
-  // document.getElementById("input_add_nobukti").value = nobukti
 
   cleanFormAdd()
   setNewNoBukti()
@@ -1606,15 +1794,8 @@ function buttonAdd (nobukti) {
   $('#page2').show();
 }
 
-function buttonAddAddItem () {
-    $('.showhideitem').hide();
-    cleanFormAddAdd()
-    $('#formAddAdd').show();
-}
-
 function buttonAddEditItem (i) {
   tempBarangAddEdit = listData[i]
-  console.log(tempBarangAddEdit)
   document.getElementById("AddEditNoInv").value = tempBarangAddEdit.NoInv
   document.getElementById("AddEditValas").value = tempBarangAddEdit.kodeVls
   document.getElementById("AddEditKurs").value = tempBarangAddEdit.Kurs
@@ -1626,116 +1807,16 @@ function buttonAddEditItem (i) {
   document.getElementById("AddEditNilaiInv").value = tempBarangAddEdit.Saldo
   document.getElementById("AddEditNilaiInvRp").value = tempBarangAddEdit.Saldo
 
-  // document.getElementById("AddEditKodeBrg").value = tempBarangAddEdit.KODEBRG
-  // document.getElementById("AddEditReturSupp").value = tempBarangAddEdit.FlagKembali
-  // document.getElementById("AddEditNoBeli").value = tempBarangAddEdit.nobeli
-  // document.getElementById("AddEditUrutBeli").value = tempBarangAddEdit.urutbeli
-  // document.getElementById("AddEditNamaBrg").value = tempBarangAddEdit.NAMABRG
-  // document.getElementById("AddEditInputQty").value = parseFloat(tempBarangAddEdit.QNT).toFixed(2)
-  // document.getElementById("AddEditInputQty1").value = parseFloat(tempBarangAddEdit.QNT1).toFixed(2)
-  // document.getElementById("AddEditInputQty2").value = parseFloat(tempBarangAddEdit.QNT2).toFixed(2)
-  // document.getElementById("AddEditInputSat1").value = tempBarangAddEdit.SAT_1
-  // document.getElementById("AddEditInputSat2").value = tempBarangAddEdit.SAT_2
-  //
-  // document.getElementById("AddEditKeterangan").value = tempBarangAddEdit.KetDetail
-  //
-  // let selectOption = ''
-  // if (tempBarangAddEdit.SAT_1) {
-  //   selectOption += `<option value=1 ${tempBarangAddEdit.NoSat == 1 ? 'selected' : ''}>SAT1 - ${tempBarangAddEdit.SAT_1}</option>`
-  // }
-  // if (tempBarangAddEdit.SAT_2) {
-  //   selectOption += `<option value=2 ${tempBarangAddEdit.NoSat == 2 ? 'selected' : ''}>SAT2 - ${tempBarangAddEdit.SAT_2}</option>`
-  // }
-  // document.getElementById("AddEditInputNosat").innerHTML = selectOption
-  //
-  //
   $('.showhideitem').hide();
   $('#formAddEdit').show();
 }
 
-
 function buttonCloseForm () {
   $('.mainpage').hide();
-  // $('#page2').hide();
   $('#page1').show();
 }
 
-function loadAll () {
-  $('#tabel').DataTable().destroy();
-  $('#tabel2').DataTable().destroy();
-
-  let listData1 = [], listData2 = [];
-
-  $.ajax({
-    url: "{{ url('debetnoteloadall') }}",
-    type: "GET",
-    async: false,
-    success: function(res) {
-      console.log(res);
-      listData1 = res.listData1 || [];
-      listData2 = res.listData2 || [];
-    },
-    error: function(xhr, status, error) {
-      console.error("Load failed:", error);
-      alert("Gagal memuat data Debet Note.");
-    }
-  });
-
-  let html1 = "", html2 = "";
-
-  listData1.forEach(item => {
-    let tglStr = formatDate(item.Tanggal);
-    html1 += `
-      <tr>
-        <td>${item.NoBukti || '-'}</td>
-        <td>${tglStr}</td>
-        <td class="text-center">
-          <span class="text-danger"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></span>
-        </td>
-        <td class="text-center">
-          <button class="btn btn-warning btn-sm" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-          <button class="btn btn-success btn-sm" onclick="buttonKoreksi('${item.NoBukti}')"><i class="bi bi-pen"></i></button>
-          <button class="btn btn-info btn-sm" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
-        </td>
-      </tr>`;
-  });
-
-  listData2.forEach(item => {
-    let tglStr = formatDate(item.Tanggal);
-    let tglOtoStr = item.TglOto1 ? formatDate(item.TglOto1) : '-';
-
-    html2 += `
-      <tr>
-        <td>${item.NoBukti || '-'}</td>
-        <td>${tglStr}</td>
-        <td class="text-center">
-          <span class="text-success"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></span>
-        </td>
-        <td>${item.OtoUser1 || '-'}</td>
-        <td>${tglOtoStr}</td>
-        <td class="text-center">
-          <button class="btn btn-warning btn-sm" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-          <button class="btn btn-danger btn-sm" onclick="buttonBatalOtorisasi('${item.NoBukti}', '${item.IsOtorisasi1}')"><i class="bi bi-key"></i></button>
-        </td>
-      </tr>`;
-  });
-
-  $("#tabel_data").html(html1);
-  $("#tabel2_data").html(html2);
-
-  $('#tabel').DataTable({ lengthChange: false, paging: false });
-  $('#tabel2').DataTable({ lengthChange: false, paging: false });
-}
-
-
 function buttonBatalOtorisasi(nobukti) {
-  let akses = $("#akses_isotorisasi1").val();
-
-  // if (!Number(akses)) {
-  //   alertify.warning('No access');
-  //   return;
-  // }
-
   alertify.confirm(
     'Konfirmasi Batal Otorisasi',
     'Yakin Ingin Membatalkan Otorisasi ' + nobukti + '?',
@@ -1781,7 +1862,6 @@ function formatDate(date , pemisah = '/') {
 }
 
 function formatAngka (angkaString) {
-  console.log('formatAngka' , angkaString);
   let tempAngka = angkaString.split('.')
   let temp1 = ''
   for (let i = 0; i < tempAngka[0].length; i++) {
@@ -1789,38 +1869,9 @@ function formatAngka (angkaString) {
       temp1 = ',' + temp1
     }
     temp1 = tempAngka[0][tempAngka[0].length - i -1] + temp1
-    // console.log(i, temp1)
   }
   temp1 += '.' + tempAngka[1]
   return temp1
 }
-
 </script>
-
-{{-- hover belum otorisasi dan sudah otorisasi --}}
-  <script>
-  const tabHome = document.getElementById('nav-home-tab');
-  const tabProfile = document.getElementById('nav-profile-tab');
-
-  function setActiveTab(isHome) {
-    if (isHome) {
-      tabHome.style.backgroundColor = '#007bff';
-      tabHome.style.color = '#fff';
-      tabProfile.style.backgroundColor = '#f8f9fa';
-      tabProfile.style.color = '#007bff';
-    } else {
-      tabProfile.style.backgroundColor = '#007bff';
-      tabProfile.style.color = '#fff';
-      tabHome.style.backgroundColor = '#f8f9fa';
-      tabHome.style.color = '#007bff';
-    }
-  }
-
-  // Default
-  setActiveTab(true);
-
-  tabHome.addEventListener('click', () => setActiveTab(true));
-  tabProfile.addEventListener('click', () => setActiveTab(false));
-  </script>
-{{-- hover belum otorisasi dan sudah otorisasi --}}
 @endsection

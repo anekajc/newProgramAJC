@@ -4,84 +4,93 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 
 class PembelianPermintaanDebetNoteController extends Controller
-
 
 // contoh desktop ce006
 // sp_ProsesPostingHutPiut
 // sp_ProsesPostingJurnalOto
 {
 
+  // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Uang Muka Beli).
+  private function periodeRange ($periode) {
+    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
+    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
+  }
+
   public function index(Request $req) {
-    $kodemenu = '0306';
-    $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu, $req->path)->first();
+    $kodemenu = '0307';
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
     }
-    $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
-    $tempOutstanding = DB::connection("SML")->select("
-    select a.* , b.NAMACUSTSUPP from dbdebetnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
-    where Month(a.TANGGAL) = :bulan and YEAR(a.Tanggal) = :tahun
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
+    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
+
+    list($dnTglAwal, $dnTglAkhir) = $this->periodeRange($periode);
+
+    // Baris tabel digambar JS lewat loadAll() (lihat pembelianpermintaandebetnote.blade.php),
+    // jadi index() tidak lagi perlu menyiapkan tempOutstanding.
     return view('purchasing.pembelianpermintaandebetnote' , [
       "menul0" => $menul0,
       "periode" => $periode,
-      "tempOutstanding" => $tempOutstanding,
+      "dnTglAwal" => $dnTglAwal,
+      "dnTglAkhir" => $dnTglAkhir,
       "akses" => $akses
     ]);
 
   }
 
-  public function loadAll()
+  public function loadAll(Request $req)
 {
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
-    $data = collect(DB::connection("SML")->select("
-        SELECT 
-            a.NoBukti,
-            a.Tanggal,
-            a.IsOtorisasi1,
-            a.TglOto1,
-            a.OtoUser1,
-            a.KodeSupp,
-            b.NAMACUSTSUPP as NamaCustSupp
-        FROM 
-            dbdebetnote a 
-        JOIN 
-            DBCUSTSUPP b ON a.KodeSupp = b.KODECUSTSUPP
-        WHERE 
-            MONTH(a.TANGGAL) = :bulan 
-            AND YEAR(a.Tanggal) = :tahun
-        ORDER BY 
-            a.TANGGAL DESC
+    // Konfigurasi kolom (susunan/lebar/desimal tersimpan per user) - sama seperti
+    // UangMukaBeliController@loadAll.
+    $reqHeader = new Request(['href' => 'pembelianpermintaandebetnote']);
+    $header = app('App\Http\Controllers\HeaderTableController')->getHeaderTable($reqHeader);
+
+    // Satu tabel gabungan (belum maupun sudah diotorisasi) - penyaringan otorisasi
+    // dikerjakan di browser lewat modal Filter, sama seperti Uang Muka Beli.
+    // Kolom dialiaskan supaya sama persis dengan alias di
+    // HeaderTableController@getHeaderTable cabang 'pembelianpermintaandebetnote'.
+    $tempData = DB::connection("SML")->select("
+        SELECT
+            A.NOBUKTI,
+            A.NOBUKTI                              as [No Bukti],
+            Convert(varchar(10), A.TANGGAL, 23)    as [Tanggal],
+            A.KodeSupp                             as [Kode Supp],
+            B.NAMACUSTSUPP                         as [Supplier],
+            Isnull(D.NilaiRp,0)                    as [Nilai DN],
+            A.IsOtorisasi1, A.OtoUser1, A.TglOto1
+        FROM dbdebetnote A
+        JOIN DBCUSTSUPP B ON A.KodeSupp = B.KODECUSTSUPP
+        LEFT OUTER JOIN (select NoBukti, Sum(NilaiRp) NilaiRp from dbDebetNoteDet group by NoBukti) D
+               ON D.NoBukti = A.NoBukti
+        WHERE A.TANGGAL BETWEEN :tglawal AND :tglakhir
+        ORDER BY A.TANGGAL DESC, A.NOBUKTI DESC
     ", [
-        "bulan" => $periode->bulan,
-        "tahun" => $periode->tahun
-    ]));
-
-    $belumOto = $data->filter(function ($item) {
-        return is_null($item->IsOtorisasi1) || $item->IsOtorisasi1 == 0;
-    })->values();
-
-    $sudahOto = $data->filter(function ($item) {
-        return $item->IsOtorisasi1 == 1;
-    })->values();
-
-    return response()->json([
-        'listData1' => $belumOto,
-        'listData2' => $sudahOto
+        "tglawal" => $tglawal,
+        "tglakhir" => $tglakhir
     ]);
+
+    return [
+      "listData1"         => $tempData,
+      "aliasordered"      => $header['aliasordered'],
+      "headertableheader" => $header['headertableheader'],
+      "isnumeric"         => $header['isnumeric'],
+      "headertablevalue"  => $header['headertablevalue'],
+      "isparsed"          => $header['isparsed'],
+      "isshown"           => $header['isshown'],
+      "desimal"           => $header['desimal'],
+    ];
 }
 
   public function getDetail (Request $req ) {
@@ -146,8 +155,8 @@ class PembelianPermintaanDebetNoteController extends Controller
 public function updateOtorisasi(Request $req) {
     $tanggal = now();
     $res = DB::connection('SML')->update(
-        "UPDATE dbdebetnote 
-         SET IsOtorisasi1 = 1, OtoUser1 = :username, TglOto1 = :tanggal 
+        "UPDATE dbdebetnote
+         SET IsOtorisasi1 = 1, OtoUser1 = :username, TglOto1 = :tanggal
          WHERE NoBukti = :nobukti",
         [
             "username" => \Auth::user()->username,
