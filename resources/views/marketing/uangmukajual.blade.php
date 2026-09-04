@@ -128,7 +128,7 @@
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Outstanding Uang Muka</a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Uang Muka Otorisasi</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Uang Muka Jual</a>
       </div>
     </div>
   </div>
@@ -140,6 +140,12 @@
       <div class="row">
         <div class="col-12">
           <div class="po-toolbar">
+            <div class="po-filter-wrap">
+              <label>Periode</label>
+              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalawal_umj1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <span class="po-filter-sep">s/d</span>
+              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalakhir_umj1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+            </div>
             <input type="search" id="umjSearch1" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="umjLen1">Tampilkan</label>
               <select id="umjLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
@@ -1023,6 +1029,31 @@ function onChangePeriodeUMJ () {
   buttonFilterUMJ()
 }
 
+function buttonFilterUMJ1 () {
+  let tglawal1 = $('#input_tanggalawal_umj1').val()
+  let tglakhir1 = $('#input_tanggalakhir_umj1').val()
+  $.ajax({
+    url: "{!! url('uangmukajualloadall') !!}",
+    type: "get", async: false,
+    data: { tglawal1, tglakhir1 },
+    success: function (res) {
+      lastTabelRows = res.tempOutstanding
+      reinitTabel()
+    },
+    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
+  })
+}
+
+function onChangePeriodeUMJ1 () {
+  let tglawal1 = $('#input_tanggalawal_umj1').val()
+  let tglakhir1 = $('#input_tanggalakhir_umj1').val()
+  if (tglawal1 && tglakhir1 && tglawal1 > tglakhir1) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  buttonFilterUMJ1()
+}
+
 $(document).ready(function(){
       umjAktifkanTabel(1); window.doSetHeader(1, false);
       lastTabelRows = @json($tempOutstanding);
@@ -1039,12 +1070,14 @@ $(document).ready(function(){
 });
 
 function loadAll () {
+  let tglawal1 = $('#input_tanggalawal_umj1').val()
+  let tglakhir1 = $('#input_tanggalakhir_umj1').val()
   let tglawal = $('#input_tanggalawal_umj').val()
   let tglakhir = $('#input_tanggalakhir_umj').val()
   let filterumj = $('#input_filterumj').val()
   $.ajax({
     url: "{!! url('uangmukajualloadall') !!}",
-    type: "get", async: false, data: { tglawal, tglakhir, filterumj },
+    type: "get", async: false, data: { tglawal1, tglakhir1, tglawal, tglakhir, filterumj },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempOutstanding2;

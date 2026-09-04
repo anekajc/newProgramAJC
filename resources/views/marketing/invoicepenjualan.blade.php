@@ -3493,7 +3493,6 @@ function choosePrint (type) {
 
 
 function buttonCloseForm () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -4203,7 +4202,6 @@ function onChangeDetail (field, idValue , alias = field) {
 
 
 function buttonKoreksi (nobukti , isoto) {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan / Edit Data'
   console.log(' buttonKoreksi' , nobukti, isoto)
   let akses = $("#akses_iskoreksi").val();
 
@@ -4420,7 +4418,6 @@ function refreshDataTableKoreksifirstadd (nobukti , tipeRefresh = '') {
 
 function buttonDetail (nobukti) {
 
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan / Detail Data'
   let _token = $("#_token").val()
 
   $('#detailTableData').html(`
@@ -4580,13 +4577,11 @@ function buttonAddDetail (nobukti) {
 }
 
 function buttonCloseFormDetail () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('#page4').hide();
   $('#page1').show();
 }
 
 function buttonCloseFormAddDetail () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Penjualan'
   $('#page5').hide();
   $('#page1').show();
 }

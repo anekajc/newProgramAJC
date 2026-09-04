@@ -31,12 +31,32 @@ class UangMukaJualController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(4);
 
+    $tglawal1 = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir1 = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryOutstandingUM($tglawal1, $tglakhir1);
 
-    $tempOutstanding = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
+    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding2 = $this->queryUangMuka($tglawal, $tglakhir, 0);
 
-select  @Bulan= :bulan , @Tahun= :tahun
+    return view('marketing.uangmukajual' , [
+      "menul0" => $menul0,
+      "periode" => $periode,
+      // "users"=> $users,
+      "tempOutstanding" => $tempOutstanding,
+      "tempOutstanding2" => $tempOutstanding2,
+      "akses" => $akses
+    ]);
 
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Outstanding
+  // Uang Muka" -- sebelumnya periode-nya dead code (filter year/month di WHERE
+  // dikomentari, jadi query ini selalu menampilkan SEMUA baris tanpa peduli
+  // periode). Sekarang beneran menyaring pakai rentang tanggal, port 1:1 dari
+  // pola periode-picker milik so.blade.php/tab lain di halaman ini (queryUangMuka).
+  private function queryOutstandingUM ($tglawal, $tglakhir) {
+    return DB::connection("SML")->select("
 Select 	A.NoBukti, A.NoUrut, A.Tanggal, A.KodeCust, C.NamaCustSupp NamaCust,
 	A.Handling, A.NoAlamatKirim, J.Alamat AlamatKirim, C.Kota NamaKota,
         I.TotSubTotal, I.TotDiskon, I.TotTotal, I.TotDPP, I.TotPPN, I.TotNet,
@@ -60,7 +80,7 @@ Left Outer Join vwRpDetSO I on I.NoBukti=A.NoBukti
 Left Outer Join dbAlamatCust J on J.KodeCustsupp=A.KodeCust and J.Nomor=A.NoAlamatKirim
 Left outer join dbKaryawan K ON A.KODESLS=K.KeyNIK
 LEFT OUTER JOIN DBPICCUSTSUPP L ON A.KodePF=L.KODEPIC  and A.kodecust=L.kodecustsupp
-where /*(year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan)  and*/  A.OtoPerf=1 and A.nobukti not in (select noso from dbumjual) and
+where A.Tanggal between :tglawal and :tglakhir and A.OtoPerf=1 and A.nobukti not in (select noso from dbumjual) and
 Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                        Case when A.IsOtorisasi2=1 then 1 else 0 end+
                        Case when A.IsOtorisasi3=1 then 1 else 0 end+
@@ -69,22 +89,7 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                   else 1
              end As Bit)=0
 
-order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-
-    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
-    $tempOutstanding2 = $this->queryUangMuka($tglawal, $tglakhir, 0);
-
-    return view('marketing.uangmukajual' , [
-      "menul0" => $menul0,
-      "periode" => $periode,
-      // "users"=> $users,
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
-      "akses" => $akses
-    ]);
-
+order by A.NoBukti" , ["tglawal" => $tglawal, "tglakhir" => $tglakhir]);
   }
 
   // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Uang Muka
@@ -127,47 +132,9 @@ order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-
-
-    $tempOutstanding = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select  @Bulan= :bulan , @Tahun= :tahun
-
-Select 	A.NoBukti, A.NoUrut, A.Tanggal, A.KodeCust, C.NamaCustSupp NamaCust,
-	A.Handling, A.NoAlamatKirim, J.Alamat AlamatKirim, C.Kota NamaKota,
-        I.TotSubTotal, I.TotDiskon, I.TotTotal, I.TotDPP, I.TotPPN, I.TotNet,
-        I.TotSubTotalRp, I.TotDiskonRp, I.TotTotalRp, I.TotDPPRp, I.TotPPNRp, I.TotNetRp,
-        A.Userid, A.TglInput,
-	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-	A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-	A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-        Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit) NeedOtorisasi
-        ,Isnull(A.Isbatal,0)IsBatal,A.userbatal,A.Tglbatal,Isnull(A.TipePPN,0) TipePPN,
-        A.KODESLS,K.Nama NAMASLS,A.KodePF,L.Nama NAMAPIC,A.NoPesanan,A.catatan,A.OtoPerf,A.userOtoPerf,A.tglOtoPerf ,A.DP
-From dbSO A
-Left Outer Join dbCustSupp C on c.KodeCustsupp=a.KodeCust
-Left Outer Join vwRpDetSO I on I.NoBukti=A.NoBukti
-Left Outer Join dbAlamatCust J on J.KodeCustsupp=A.KodeCust and J.Nomor=A.NoAlamatKirim
-Left outer join dbKaryawan K ON A.KODESLS=K.KeyNIK
-LEFT OUTER JOIN DBPICCUSTSUPP L ON A.KodePF=L.KODEPIC  and A.kodecust=L.kodecustsupp
-where /*(year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan)  and*/  A.OtoPerf=1 and A.nobukti not in (select noso from dbumjual) and
-Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                       Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                  else 1
-             end As Bit)=0
-
-order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
+    $tglawal1 = $req->tglawal1 ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir1 = $req->tglakhir1 ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryOutstandingUM($tglawal1, $tglakhir1);
 
     $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');

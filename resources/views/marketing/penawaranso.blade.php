@@ -1,7 +1,18 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
- 
+
 @endsection
+
+@section('page-title', 'Penawaran SO')
+@section('title', 'SML - Penawaran SO')
+
+{{-- Rerouted to match Purchase Order's UI 1:1 via so.blade.php's own pattern,
+     same as invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual/
+     returpenjualangudang/kreditnote/notareturpenjualan/closingso before it.
+     Only page1's two list tabs (Penawaran SO / Otorisasi) are touched in this
+     pass -- page2 (Add/Edit) and page3 (Detail) are left as-is. Business logic
+     (buttonAdd/buttonEdit/buttonDetail/buttonOtorisasi/buttonBatalOtorisasi/
+     submitPrint, loadAll's ajax endpoint and data shape) is untouched. --}}
 {{-- tampilan search bar 1 --}}
   @section('css')
 
@@ -188,155 +199,110 @@
   </style>
 {{-- end tampilan search modal barang all --}}
 
-{{-- tableMaster2.css carries the .btn-action-{success,warning,primary,danger}
-     chip classes used below for #tabel2/#tabel3's Actions buttons. The
-     shared newmaster layout doesn't load it (so.blade.php links it the same
-     page-local way). --}}
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
-
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <style>
-  /* "Fresh look" pass matching so.blade.php/purchaseOrder.blade.php: flat
-     gray-uppercase header, light-purple row hover, consistent padding.
-     #tabel2/#tabel3 had no custom header/row styling at all before this --
-     just Bootstrap's default bg-primary/text-white header. */
-  #tabel2 thead th,
-  #tabel3 thead th {
-    background: #f8f9fb !important;
-    color: #6b7280 !important;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    border-bottom: 1px solid #e7e9ee;
-    padding: 10px 14px;
-  }
-  #tabel2 tbody td,
-  #tabel3 tbody td {
-    padding: 10px 14px;
-    font-size: 15px;
-  }
-  #tabel2 tbody tr:hover td,
-  #tabel3 tbody tr:hover td {
-    background-color: #f5f3ff;
-  }
+.custom-tabs {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  padding: 3px;
+}
+.custom-tabs .nav-link {
+  display: inline-block !important;
+  padding: 5px 16px !important;
+  font-size: 0.75rem !important;
+  border: none;
+  border-radius: 17px;
+  color: #495057;
+  background: transparent;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.custom-tabs .nav-link:hover { background: transparent; color: #007bff; }
+.custom-tabs .nav-link.active {
+  background: #007bff; border-color: #007bff; color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+}
+.tab-card {
+  display: block !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  border: none !important;
+  margin-bottom: 6px !important;
+}
+.tab-card .card-body { padding: 5px 10px !important; }
+#page1 .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+#page1 .card:hover { transform: none !important; box-shadow: none !important; border-color: var(--border) !important; }
+.po-len-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--rt-card); border: 1.5px solid var(--rt-border);
+  border-radius: 8px; padding: 5px 12px;
+}
+.po-len-wrap label {
+  margin: 0; font-size: 11.5px; font-weight: 700; color: var(--rt-ink-soft);
+  text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+}
+.po-len-inp {
+  border: none; background: transparent; font-size: 13px; font-weight: 700;
+  color: var(--rt-ink); outline: none; cursor: pointer; padding: 2px 20px 2px 0;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right center;
+}
 
-  /* Re-skins the Penawaran SO / Penawaran SO Otorisasi tab toggle to match
-     so.blade.php's .radioChoiceMaster pill look (white pill bar, rounded
-     buttons, solid-blue active state with a soft shadow), without touching
-     the underlying <div class="nav nav-tabs">/<a data-toggle="tab"> markup
-     -- that structure is what Bootstrap's tab JS binds to, so the visual
-     restyle is done entirely through these selectors instead of changing
-     tags. Replaces the old per-element inline styles (outlined pill,
-     always-on border, no real "active" state distinction). */
-  #nav-tab.nav-tabs {
-    display: inline-flex;
-    background-color: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
-  }
-  #nav-tab.nav-tabs .nav-link {
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6c757d;
-    background-color: transparent;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-  }
-  #nav-tab.nav-tabs .nav-link:hover {
-    color: #212529;
-    background-color: rgba(0,0,0,0.04);
-  }
-  #nav-tab.nav-tabs .nav-link.active {
-    color: #fff;
-    background-color: #007bff;
-    box-shadow: 0 2px 6px rgba(0,123,255,0.35);
-  }
+{{-- Kolom Aksi tabel2/tabel3 -- pastel round-button treatment, copied
+     verbatim from so.blade.php's @section('css'). Actions ada di kolom
+     pertama di kedua tabel, sesuai markup lama. --}}
+#tabel2 td:first-child, #tabel3 td:first-child {
+  display: flex; gap: 4px; justify-content: center; align-items: center;
+}
+#tabel2 td:first-child .btn, #tabel3 td:first-child .btn {
+  width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
+  justify-content: center; border-radius: 7px; font-size: 13px; border: 1px solid transparent;
+  box-shadow: none; transition: all .12s ease;
+}
+#tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+#tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+#tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 
-  /* Wraps the pill tab bar in its own card, matching purchaseOrder.blade.php's
-     .card.tab-card -- a dedicated card holding only the tab nav, separate
-     from the card below it that holds the tables. */
-  .tab-card {
-    display: block !important;
-    align-items: flex-start !important;
-    padding: 0 !important;
-    border: none !important;
-    margin-bottom: 6px !important;
-  }
-  .tab-card .card-body {
-    padding: 5px 10px !important;
-  }
-</style>
+#tabel2 thead th, #tabel3 thead th {
+  background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px; text-transform: uppercase;
+  letter-spacing: .04em; font-weight: 600; border-bottom: 1px solid #e7e9ee; border-top: none;
+}
+#tabel2 tbody tr:nth-of-type(odd), #tabel3 tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#tabel2 tbody tr:hover, #tabel3 tbody tr:hover { background-color: #f5f3ff; }
 
-{{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel2/#tabel3's
-     drag-to-reorder/hide/decimal column headers -- same engine so.blade.php uses (see that
-     file's header comment), extracted there specifically so other pages could reuse it
-     instead of each re-implementing purchaseOrder.blade.php's ~900-line one-off version
-     (which turned out to depend on two ajax routes -- podataoutstandingpr/poloadpurchaseorder
-     -- that don't actually exist in this app, so it never worked). --}}
-<link rel="stylesheet" href="{{ asset('css/report-table.css') }}?v={{ filemtime(public_path('css/report-table.css')) }}">
-
-<style>
-  /* "Reset kolom" pill + its row, matching so.blade.php's copy of this same block.
-     Kept OUTSIDE #rtBarTabel2/#rtBarTabel3 (as a flex sibling, not a child) because
-     report-table.js's renderBar() fully overwrites those divs' innerHTML on every
-     drag/hide/decimal change -- a button placed inside them would vanish on the
-     first re-render. Not part of report-table.css itself, so declared here. */
-  .rt-bar-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .rt-bar-row .rt-bar { margin-bottom: 0; }
-  .rt-reset-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 12px;
-    border: 1px solid var(--rt-border);
-    border-radius: var(--rt-radius);
-    background: var(--rt-card);
-    font-size: 13px;
-    font-weight: 600;
-    font-family: inherit;
-    line-height: 1.2;
-    cursor: pointer;
-    white-space: nowrap;
-    color: var(--rt-ink-soft);
-  }
-  .rt-reset-btn:hover {
-    color: #D64550;
-    border-color: #D64550;
-    background: #FEF2F2;
-  }
-
-  /* Hide action buttons until the row is hovered */
-  #tabel2 tbody .action-buttons-wrap {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(-6px);
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-  }
-  /* Show them when hovering the table row */
-  #tabel2 tbody tr:hover .action-buttons-wrap,
-  #tabel2 tbody tr:focus-within .action-buttons-wrap {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
+/* Hide action buttons until the row is hovered/focused, port 1:1 dari pola
+   .action-buttons-wrap milik master (public/css/tableMaster2.css). */
+#tabel2 tbody .action-buttons-wrap, #tabel3 tbody .action-buttons-wrap {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+#tabel2 tbody tr:hover .action-buttons-wrap, #tabel3 tbody tr:hover .action-buttons-wrap,
+#tabel2 tbody tr:focus-within .action-buttons-wrap, #tabel3 tbody tr:focus-within .action-buttons-wrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
 </style>
 @endsection
 @section('content')
 
 <div id="imagecontainer" class="d-none" style="">
-  <img src="img/sml1.png" style="height: 50px; width: 80px" alt="">
+  <img src="img/sml1.png" style="height: 50px; width: 280px" alt="">
 </div>
 
 <div id="imagecontainerTtd" class="d-none">
@@ -345,9 +311,42 @@
 
 <div id="page1" class="container-fluid">
     <!-- <div id="qrcode"></div> -->
-    {{-- Tab bar wrapped in its own card, matching purchaseOrder.blade.php's
-         .card.tab-card -- a dedicated card holding only the tab nav,
-         separate from the card below holding the tables. --}}
+    <div class="row">
+      <div class="col-6 text-left">
+        <h2 style="margin-top:-85px;">Penawaran SO</h2>
+      </div>
+      <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px;
+            margin-top: -150px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="buttonAdd()">
+          Add Penawaran
+        </button>
+      </div>
+      {{-- <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px;
+            margin-top: -150px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="loadAll()">
+          tes load all
+        </button>
+      </div> --}}
+    </div>
+
   <div id="contentContainer" class="">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
     <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
@@ -360,61 +359,108 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
-    {{-- No outer Bootstrap .card here (unlike the old markup this replaces) --
-         .tb-report/.tb-report .main below already render as their own card-like
-         panel (report-table.css), the same way so.blade.php's tables sit directly
-         in its tab-content with no surrounding .card. Nesting them inside a
-         Bootstrap .card as well double-boxed the toolbar/table/hint text, each
-         fighting the other's padding and rounded corners. --}}
-    <div class="tab-content" id="myTabContent">
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
+        <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Penawaran SO</a>
+          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Otorisasi</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <div class="tab-content" id="myTabContent">
+
+          <!-- <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div class="row">
+              <div class="col-md-12" style='overflow:auto;'>
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <table id="tabel" class="table table-bordered table-hover table-striped">
+                    <thead class="text-center bg-primary text-white">
+                      <tr>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Kode Barang</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Nama Barang</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sat</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt PO</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Sisa PR</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Keterangan</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Out. SO</th>
+                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Qnt Stock</th>
+
+                      </tr>
+                    </thead>
+                    <tbody id="tabel_data" class="text-left">
+                      {{-- @foreach ($tempOutstanding1 as $OutPR)
+                      <tr>
+
+                         <td class="text-center">
+                            <button class="btn btn-success btn-sm" type="button" title="Details" onclick="buttonAdd('{{ $OutPR->Nobukti }}')">
+                              <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </td>
+                        <td style='white-space:nowrap;'>{{ $OutPR->Nobukti }}</td>
+                        <td style='white-space:nowrap;'>{!! date("Y/m/d", strtotime($OutPR->Tanggal)) !!}</td>
+                        <td style='white-space:nowrap;'>{{ $OutPR->kodebrg }}</td>
+                        <td style='white-space:nowrap;'>{{ $OutPR->NamaBrg }}</td>
+                        <td style='white-space:nowrap;' class='text-center'>{{ $OutPR->sat }}</td>
+                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->Qnt, 2) }}</td>
+                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QNTPO, 2) }}</td>
+                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->SisaPPL, 2) }}</td>
+                        <td style='white-space:nowrap;'>{{ $OutPR->Keterangan }}</td>
+                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntoutSO, 2) }}</td>
+                        <td style='white-space:nowrap;' class='text-right'>{{ number_format($OutPR->QntStock, 2) }}</td>
+                      </tr>
+                      @endforeach --}}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
 
           <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            {{-- Toolbar matching purchaseOrder.blade.php's .po-toolbar on its "Purchase
-                 Order" tab (period filter + search + Filter button + Add), rebuilt with
-                 report-table.css's own .tb-report/.toolbar/.filter-wrap/.search-inp/
-                 .btn-load/.action-group classes -- the same ones so.blade.php's toolbar
-                 already uses -- instead of duplicating another copy of that CSS. --}}
-            <div class="tb-report main">
-              <div class="toolbar" style="margin-bottom:10px;">
-                <input type="search" id="tabel2_search" class="search-inp" placeholder="Cari data...">
-
-                <div class="filter-wrap">
-                  <label>Periode</label>
-                  <input type="date" class="filter-inp" id="tabel2_tglawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-                  <span class="filter-sep">s/d</span>
-                  <input type="date" class="filter-inp" id="tabel2_tglakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
-                </div>
-
-                <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-                  <i class="bi bi-funnel"></i> Filter
-                </button>
-
-                <div class="action-group">
-                  <button type="button" class="btn btn-action-primary" onclick="buttonAdd()">+ Add Penawaran</button>
-                </div>
-              </div>
-
-              <div class="rt-bar-row">
-                <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
-                  <i class="bi bi-arrow-clockwise"></i> Reset kolom
-                </button>
-                <div id="rtBarTabel2"></div>
-              </div>
-
-              <div class="table-outer">
-                <div class="table-wrap">
-                  <table id="tabel2" class="tb">
-                    {{-- Header content is fully JS-owned -- penawaransoReplaceThead()
-                         (called from renderTabel2Rows(), run on page load via loadAll())
-                         replaces this <thead>'s contents based on gcart_header. --}}
+            <div class="row">
+              <div class="col-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <input type="search" id="psoSearch1" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap"><label for="psoLen1">Tampilkan</label>
+                      <select id="psoLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
+                    </div>
+                  </div>
+                  <div id="rtBarTabel2"></div>
+                  <table id="tabel2" class="data-table">
                     <thead style="white-space:nowrap;"></thead>
                     <tbody id="tabel2_data" class="text-left"></tbody>
                   </table>
+                  <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
                 </div>
-                <div class="rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="row">
+              <div class="col-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <input type="search" id="psoSearch2" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap"><label for="psoLen2">Tampilkan</label>
+                      <select id="psoLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
+                    </div>
+                  </div>
+                  <div id="rtBarTabel3"></div>
+                  <table id="tabel3" class="data-table">
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel3_data" class="text-left"></tbody>
+                  </table>
+                  <div class="po-rt-hint"><i class="bi bi-info-circle"></i> Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom atau mengatur jumlah desimal.</div>
                 </div>
               </div>
             </div>
@@ -469,67 +515,23 @@
             </div>
           </div> -->
 
-    </div>
-  </div>
-
-</div>
-
-{{-- Filter modal for the "Penawaran SO" tab's Filter button. Reuses report-table.css's
-     #modalFilter.rt-filter styling verbatim (that CSS is scoped to the literal id
-     "modalFilter", the same id so.blade.php's own filter modal uses -- safe to repeat
-     here since each page has its own DOM). --}}
-<div class="modal fade rt-filter" id="modalFilter">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-funnel"></i>
-          Filter Penawaran SO
-          <span class="rt-active-badge" id="penawaransoFilterBadge" style="display:none">1 aktif</span>
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilter').modal('hide')">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="rt-section">
-          <div class="rt-group-label">Penyaringan Data</div>
-          <div class="rt-grid-2">
-            <div>
-              <label class="rt-field-label" for="penawaransoModalOtorisasi">Otorisasi</label>
-              <select class="rt-native" id="penawaransoModalOtorisasi">
-                <option value="SEMUA">Semua</option>
-                <option value="Sudah">Sudah</option>
-                <option value="Belum">Belum</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="rt-reset-link" onclick="penawaransoResetFilter()">Reset</button>
-        <div class="rt-footer-buttons">
-          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
-            onclick="$('#modalFilter').modal('hide')">Batal</button>
-          <button type="button" class="rt-btn rt-btn-primary" onclick="penawaransoTerapkanFilter()">Terapkan</button>
         </div>
       </div>
 
     </div>
   </div>
+
 </div>
 
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="">Form Penawaran</h2>
+      <h2 style="margin-top: -80px;">Form Penawaran</h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
+          margin-top: -120px;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -544,7 +546,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="">
+    <div class="modal-body" style="margin-top:-60px;">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
         <div class="col-md-3">
@@ -611,9 +613,9 @@
             </div>
 
             
-            <div class="col-md-12">
+            <div class="col-md-12" style="margin-top:-10px;">
               <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=2 placeholder="perihal" class="form-control text-left align-items-left" id="input_add_alamatsupplier"  ></textarea>
+                <textarea style="width: 100%; resize: none;" rows=2 placeholder="perihal" class="form-control text-left align-items-left" onblur="onChangePerihal()" id="input_add_alamatsupplier"  ></textarea>
               </div>
             </div>
 
@@ -678,7 +680,7 @@
 
                 <div class="col-md-6" style="margin-top:-10px;">
               <div class="form-group">
-                <input type="number" class="form-control text-right" id="input_add_freight"  placeholder="0.00">
+                <input type="number" class="form-control text-right" onchange="onChangeFreight()" id="input_add_freight"  placeholder="0.00">
               </div>
             </div>
 
@@ -724,8 +726,19 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <select id="input_add_pembayaran" onchange="onChangeInputAddPembayaran()" class="form-control form-select-lg mb-3 text-left" aria-label=".form-select-lg example">
-                    <option value=0 selected >Tunai</option>
-                    <option value=1 >Kredit</option>
+
+                    <!-- <option value=0 selected >Tunai</option>
+                    <option value=1 >Kredit</option> -->
+                    <option value=1 selected>30 Hari Setelah Barang Dikirim</option>
+                    <option value=2 >60 Hari Setelah Barang Dikirim</option>
+                    <option value=3 >45 Hari Setelah Barang Dikirim</option>
+                    <option value=4 >Cash Before Delivery</option>
+                    <option value=5 >30 Hari Setelah Pekerjaan Selesai</option>
+                    <option value=6 >BG 30 hari setelah barang diterima</option>
+    `
+
+
+
                   </select>
                 </div>
               </div>
@@ -785,7 +798,7 @@
 
                     <div class="col-md-12">
                       <div class="input-group form-group">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_alamatkirim"  ></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_alamatkirim"  onblur="onChangeAlamatkirim()"></textarea>
                       </div>
                     </div>
 
@@ -805,7 +818,7 @@
 
                     <div class="col-md-12">
                       <div class="form-group">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_ekspedisi"  ></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_ekspedisi"  onblur="onChangeDelivery()" ></textarea>
                       </div>
                     </div>
                   </div>
@@ -879,7 +892,7 @@
 
                     <div class="col-md-12">
                       <div class="input-group form-group">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_up"  ></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_up"  onblur="onChangeUp()"></textarea>
                       </div>
                     </div>
                   </div>
@@ -897,7 +910,7 @@
 
                     <div class="col-md-12">
                       <div class="form-group">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_up2"  ></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_up2"  onblur="onChangeUp2()"></textarea>
                       </div>
                     </div>
                   </div>
@@ -911,7 +924,7 @@
                     </div>
                     <div class="col-md-12">
                       <div class="form-group" style="margin-top: 14px">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_note" onblur="onChangeCatatan()"></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_note" onblur="onChangeNote()"></textarea>
                       </div>
                     </div>
                   </div>
@@ -925,7 +938,7 @@
                     </div>
                     <div class="col-md-12">
                       <div class="form-group" style="margin-top: 14px">
-                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_ketrevisi" onblur="onChangeCatatan()"></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=2  class="form-control" id="input_add_ketrevisi" onblur="onChangeKetrevisi()"></textarea>
                       </div>
                     </div>
                   </div>
@@ -946,7 +959,7 @@
 
                     <div class="col-md-12">
                       <div class="input-group form-group">
-                         <input type="date" class="form-control text-left" id="input_add_tglrevisi" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
+                         <input type="date" class="form-control text-left" id="input_add_tglrevisi" value="{!! date('Y-m-d') !!}" onblur="onChangeTglrevisi()">
                       </div>
                     </div>
                   </div>
@@ -964,7 +977,7 @@
 
                     <div class="col-md-12">
                       <div class="form-group">
-                         <input type="date" class="form-control text-left" id="input_add_tglprcust" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()">
+                         <input type="date" class="form-control text-left" id="input_add_tglprcust" value="{!! date('Y-m-d') !!}" onblur="onChangeTglprcust()">
                       </div>
                     </div>
                   </div>
@@ -1004,7 +1017,7 @@
                     <div class="col-8" style="margin-top:-5px">
                           <div class="input-group form-group">
 
-                            <input type="text" class="form-control" id="input_add_namalokasipenerima" value='-' readonly>
+                            <input type="text" class="form-control"  onblur="onChangeLokasipenerima()" id="input_add_namalokasipenerima" value='-' readonly>
                             
 
 
@@ -1145,7 +1158,7 @@
     </div>
 
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
-        <div class="container-fluid" style="overflow:auto;">
+        <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
             <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
@@ -1572,7 +1585,7 @@
 
                   <div class="col-12">
                     <div class="form-group">
-                      <label>Harga Terakhir</label>
+                      <label>Harga Beli Terakhir</label>
                     </div>
                   </div>
 
@@ -1581,22 +1594,16 @@
                       <table id="tabel_add_harga_terakhir" class="table table-bordered table-hover table-striped table-responsive-lg">
                         <thead class="text-center bg-primary text-white">
                           <tr>
+                            <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                            <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                             <th style="padding: 4px 12px;" scope="col">Supplier</th>
-                            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                            <th style="padding: 4px 12px;" scope="col">Qnt</th>
-                            <th style="padding: 4px 12px;" scope="col">Satuan</th>
-                            <th style="padding: 4px 12px;" scope="col">Valas</th>
-                            <th style="padding: 4px 12px;" scope="col">Kurs</th>
-                            <th style="padding: 4px 12px;" scope="col">Harga</th>
-                            <th style="padding: 4px 12px;" scope="col">Disc Rp</th>
-                            <th style="padding: 4px 12px;" scope="col">Hrg. Nett</th>
+                            <th style="padding: 4px 12px;" scope="col">Tgl LPB</th>
+                            <th style="padding: 4px 12px;" scope="col">No LPB</th>
+                            <th style="padding: 4px 12px;" scope="col">Harga LPB</th>
                           </tr>
                         </thead>
                         <tbody id="tabel_data_add_harga_terakhir" class="text-left" >
                           <tr>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
                             <td>-</td>
                             <td>-</td>
                             <td>-</td>
@@ -1619,7 +1626,7 @@
 
                   <div class="col-12">
                     <div class="form-group">
-                      <label>Stock Proyeksi</label>
+                      <label>Harga Jual Terakhir</label>
                     </div>
                   </div>
 
@@ -1628,16 +1635,20 @@
                       <table id="tabel_add_stock_proyeksi" class="table table-bordered table-hover table-striped table-responsive-lg">
                         <thead class="text-center bg-primary text-white">
                           <tr>
+                            <th style="padding: 4px 12px;" scope="col">Tgl INVC</th>
+                            <th style="padding: 4px 12px;" scope="col">No INVC</th>
                             <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                             <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                            <th style="padding: 4px 12px;" scope="col">Stock</th>
-                            <th style="padding: 4px 12px;" scope="col">Out PO</th>
-                            <th style="padding: 4px 12px;" scope="col">Out SO</th>
-                            <th style="padding: 4px 12px;" scope="col">S Marketing</th>
+                            <th style="padding: 4px 12px;" scope="col">Harga INVC</th>
+                            <th style="padding: 4px 12px;" scope="col">Customer</th>
+                            <th style="padding: 4px 12px;" scope="col">Kode Kebun</th>
+                            <th style="padding: 4px 12px;" scope="col">Nama Kebun</th>
                           </tr>
                         </thead>
                         <tbody id="tabel_data_add_stock_proyeksi" class="text-left" >
                           <tr>
+                            <td>-</td>
+                            <td>-</td>
                             <td>-</td>
                             <td>-</td>
                             <td>-</td>
@@ -1657,7 +1668,7 @@
           </div>
 
           <div class="row mt-2">
-            <div class="col-md-12 text-right" style="margin-top:-40px;">
+            <div class="col-md-12 text-right" style="margin-top:-10px;">
 
               <button type="button" class="btn btn-success btn-lg" style="
               height: 30px;
@@ -1668,7 +1679,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableHargaTerakhir()" class="btn btn-secondary">Histori Harga</button>
+              onclick="showTableHargaTerakhir()" class="btn btn-secondary">Harga Beli Terakhir</button>
 
               <button type="button" class="btn btn-info btn-lg" style="
               height: 30px;
@@ -1679,7 +1690,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableStockProyeksi()" class="btn btn-secondary">Stock Proyeksi</button>
+              onclick="showTableStockProyeksi()" class="btn btn-secondary">Harga Jual Terakhir</button>
 
               <button type="button" class="btn btn-danger btn-lg" style="
               height: 30px;
@@ -2931,8 +2942,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/report-table.js') }}"></script>
-<script src="{{ asset('js/headerEngine.js') }}?v={{ filemtime(public_path('js/headerEngine.js')) }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 $purut=0
 let dataTableAdd = []
@@ -2944,240 +2954,6 @@ let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
 
 let dataRefreshPenerimaan = []
-
-// -- #tabel2/#tabel3 interactive column engine (public/js/headerEngine.js) --
-// Same shared drag/hide/decimal-column engine so.blade.php uses (extracted
-// there from its original #tabel/#tabel7 implementation specifically so it
-// could be reused here instead of duplicating it). Persistence goes through
-// PenawaranSOController::loadHeader/simpanHeader -- the same generic
-// (username, href, reportmode) contract SOController's own loadHeader/
-// simpanHeader use, just with a href unique to each of this page's tables.
-HeaderEngine.configure({
-  loadUrl: "{!! url('penawaransoloadheader') !!}",
-  simpanUrl: "{!! url('penawaransosimpanheader') !!}"
-});
-
-var lastTabel2Rows = [];
-
-HeaderEngine.registerTable('tabel2', {
-  href: 'penawaranso_tabel2',
-  tableSel: '#tabel2',
-  barSel: '#rtBarTabel2',
-  setDefault: function () { setDefaultHeaderTabel2(); },
-  onChange: function () { reinitTabel2(); }
-});
-
-// #tabel2's columns match dbpenawaranso's loadAll() query (Marketing/PenawaranSOController::
-// loadAll()); "No. SO" is kept for parity with the table this replaces even though that
-// query doesn't actually select a NOSO field, so it always renders blank today.
-function setDefaultHeaderTabel2() {
-  gcart_header = [
-    ['NoBukti',      'No Bukti',       1, 'varchar', 0, 0],
-    ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-    ['NamaCustSupp', 'Customer',       1, 'varchar', 0, 0],
-    ['NOSO',         'No. SO',         1, 'varchar', 0, 0],
-    ['TotDPPRp',     'DPP Rp',         1, 'float',   0, 2],
-    ['TotPPNRp',     'PPN Rp',         1, 'float',   0, 2],
-    ['TotNetRp',     'Grand Total Rp', 1, 'float',   0, 2]
-  ];
-}
-
-// Digabung dari tabel2ActionsCell (Belum Otorisasi, tombol Otorisasi) + tabel3ActionsCell
-// (Sudah Otorisasi, tombol Batal Otorisasi) sejak keduanya digabung jadi satu tabel dengan
-// filter Semua/Belum/Sudah Otorisasi -- port 1:1 dari pola tabelActionsCell gabungan
-// milik PerintahReturJualController/queryOutstanding().
-function tabel2ActionsCell(row) {
-  var nobukti = HeaderEngine.pickCI(row, 'NoBukti');
-  var needOto = Number(HeaderEngine.pickCI(row, 'NeedOtorisasi'));
-  var html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn-action-sm btn-action-warning" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  if (needOto) {
-    html += '<button class="btn-action-sm btn-action-primary" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn-action-sm btn-action-danger" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
-  }
-  html += '<button class="btn-action-sm btn-action-primary" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
-  html += '<button class="btn-action-sm btn-action-success" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
-  html += '</div></td>';
-  return html;
-}
-
-function penawaransoFormatTanggal(raw) {
-  if (!raw) { return ''; }
-  var d = new Date(raw);
-  var dd = ('0' + d.getDate()).slice(-2);
-  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
-  return dd + '/' + mm + '/' + d.getFullYear();
-}
-
-// col: [field, label, visible, type, hasTotal, decimals] -- same shape as gcart_header rows.
-function penawaransoValueCell(row, col) {
-  var raw = HeaderEngine.pickCI(row, col[0]);
-  var type = col[3];
-  if (type === 'date') {
-    return '<td>' + penawaransoFormatTanggal(raw) + '</td>';
-  }
-  if (type === 'float') {
-    var dp = Number(col[5]) || 0;
-    var n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
-    return '<td class="text-right">' + formatAngka(n.toFixed(dp)) + '</td>';
-  }
-  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
-}
-
-function penawaransoOtoBoolCell(flag) {
-  return Number(flag)
-    ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
-    : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
-}
-
-// Kolom Otorisasi (level 1..$level) + Batal ditempel FIXED di belakang kolom hasil cart --
-// jumlahnya berubah tergantung level login, jadi tidak cocok disimpan/diseret sebagai
-// bagian dari layout kolom milik user (sama seperti kolom Authorized/Batal di
-// purchaseOrder.blade.php's renderTabelPO(), yang juga dirakit manual di luar poCart).
-function penawaransoOtoHeaderTabel2(level) {
-  var html = '<th style="padding: 4px 12px;" scope="col">Oto1</th>'
-    + '<th style="padding: 4px 12px;" scope="col">User Oto1</th>'
-    + '<th style="padding: 4px 12px;" scope="col">Tgl Oto1</th>';
-  for (var lvl = 2; lvl <= level; lvl++) {
-    html += '<th style="padding: 4px 12px;" scope="col">Oto' + lvl + '</th>'
-      + '<th style="padding: 4px 12px;" scope="col">User Oto' + lvl + '</th>'
-      + '<th style="padding: 4px 12px;" scope="col">Tgl Oto' + lvl + '</th>';
-  }
-  html += '<th style="padding: 4px 12px;" scope="col">Batal</th>'
-    + '<th style="padding: 4px 12px;" scope="col">User Batal</th>'
-    + '<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>';
-  return html;
-}
-
-function penawaransoOtoRowTabel2(row, level) {
-  var html = penawaransoOtoBoolCell(row.IsOtorisasi1)
-    + '<td>' + (row.OtoUser1 || '') + '</td>'
-    + '<td>' + (row.TglOto1 ? penawaransoFormatTanggal(row.TglOto1) : '') + '</td>';
-  for (var lvl = 2; lvl <= level; lvl++) {
-    html += penawaransoOtoBoolCell(row['IsOtorisasi' + lvl])
-      + '<td>' + (row['OtoUser' + lvl] || '') + '</td>'
-      + '<td>' + (row['TglOto' + lvl] ? penawaransoFormatTanggal(row['TglOto' + lvl]) : '') + '</td>';
-  }
-  html += penawaransoOtoBoolCell(row.IsBatal)
-    + '<td>' + (row.UserBatal || '') + '</td>'
-    + '<td>' + (row.TglBatal ? penawaransoFormatTanggal(row.TglBatal) : '') + '</td>';
-  return html;
-}
-
-// ReportTable.init()'s bindHead(thead) attaches drag/gear listeners with no matching
-// removeEventListener -- calling init() again (which reinitTabel2() does, on purpose,
-// to re-bind after DataTables rebuilds) is only safe against a genuinely
-// NEW <thead> node each time, so the whole element is replaced here rather than just
-// its innerHTML (same reasoning as so.blade.php's replaceTheadWithHeader()).
-function penawaransoReplaceThead(tableSel, cols, trailingHtml) {
-  var oldThead = document.querySelector(tableSel + ' thead');
-  if (!oldThead || !window.ReportTable) { return; }
-  var headRowHtml = ReportTable.headHtml(cols)
-    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>')
-    .replace('</tr>', trailingHtml + '</tr>');
-  var newThead = document.createElement('thead');
-  newThead.setAttribute('style', 'white-space:nowrap;');
-  newThead.innerHTML = headRowHtml;
-  oldThead.parentNode.replaceChild(newThead, oldThead);
-}
-
-// Client-side period + Otorisasi filtering, same idea as purchaseOrder.blade.php's
-// poFilterStatus/poFilterOtorisasi (filtering the already-fetched array, not re-querying
-// the server -- penawaransoloadall has no date-range/otorisasi params to filter by).
-var penawaransoFilterOtorisasi = 'SEMUA';
-
-function penawaransoFilterRowsTabel2(rows) {
-  var awalEl = document.getElementById('tabel2_tglawal');
-  var akhirEl = document.getElementById('tabel2_tglakhir');
-  var awal = awalEl ? awalEl.value : '';
-  var akhir = akhirEl ? akhirEl.value : '';
-  return (rows || []).filter(function (row) {
-    var tgl = row.Tanggal ? String(row.Tanggal).slice(0, 10) : '';
-    if (awal && tgl && tgl < awal) { return false; }
-    if (akhir && tgl && tgl > akhir) { return false; }
-    if (penawaransoFilterOtorisasi === 'Sudah' && !Number(row.IsOtorisasi1)) { return false; }
-    if (penawaransoFilterOtorisasi === 'Belum' && Number(row.IsOtorisasi1)) { return false; }
-    return true;
-  });
-}
-
-function renderTabel2Rows(rows) {
-  if (HeaderEngine.activeKey() !== 'tabel2') { HeaderEngine.activateEngineData('tabel2'); }
-  var cols = gcart_header.filter(function (c) { return c[2] === 1; }); // same refs -- never .map()
-  var level = Number($('#level').val()) || 1;
-  var dataTampil = penawaransoFilterRowsTabel2(rows);
-  var html = '';
-  dataTampil.forEach(function (row) {
-    html += '<tr>' + tabel2ActionsCell(row);
-    cols.forEach(function (col) { html += penawaransoValueCell(row, col); });
-    html += penawaransoOtoRowTabel2(row, level) + '</tr>';
-  });
-  document.getElementById('tabel2_data').innerHTML = html;
-  penawaransoReplaceThead('#tabel2', cols, penawaransoOtoHeaderTabel2(level));
-}
-
-function reinitTabel2() {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
-    renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({ dom: 't', lengthChange: false, paging: false, ordering: false });
-    HeaderEngine.bindEngineDom('tabel2');
-  } catch (e) {
-    console.error('reinitTabel2 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
-function penawaransoUpdateFilterBadge() {
-  var badge = document.getElementById('penawaransoFilterBadge');
-  if (!badge) { return; }
-  badge.style.display = (penawaransoFilterOtorisasi !== 'SEMUA') ? '' : 'none';
-}
-
-// Terapkan/Reset dulu cuma reinitTabel2() (client-side, dari data yang sudah
-// kepotong server-side ke Belum Otorisasi doang) -- makanya milih "Sudah
-// Otorisasi" selalu kosong. Sekarang beneran manggil loadAll() supaya
-// filterso ikut dikirim ke server, port 1:1 dari pola buttonFilterPRJ()
-// milik perintahreturjual.blade.php.
-function penawaransoTerapkanFilter() {
-  penawaransoFilterOtorisasi = $('#penawaransoModalOtorisasi').val() || 'SEMUA';
-  penawaransoUpdateFilterBadge();
-  $('#modalFilter').modal('hide');
-  loadAll();
-}
-
-function penawaransoResetFilter() {
-  penawaransoFilterOtorisasi = 'SEMUA';
-  $('#penawaransoModalOtorisasi').val('SEMUA');
-  penawaransoUpdateFilterBadge();
-  $('#modalFilter').modal('hide');
-  loadAll();
-}
-
-function buttonHeaderTable(key) {
-  alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    HeaderEngine.activateEngineData(key);
-    HeaderEngine.doSetHeader(1, true);
-    reinitTabel2();
-    alertify.success('Kolom telah direset ke tampilan default');
-  }, function () {});
-}
-
-// One-time seed: load the table's saved column layout (or fall back to its
-// setDefault()) before the very first render.
-HeaderEngine.activateEngineData('tabel2');
-HeaderEngine.doSetHeader(1);
-
-$('#modalFilter').on('show.bs.modal', function () {
-  $('#penawaransoModalOtorisasi').val(penawaransoFilterOtorisasi);
-});
-$('#tabel2_search').on('input', function () {
-  $('#tabel2').DataTable().search($(this).val()).draw();
-});
-$('#tabel2_tglawal, #tabel2_tglakhir').on('change', function () {
-  loadAll();
-});
 
 let listAlamatKirim = []
 
@@ -3295,7 +3071,7 @@ function choosePrint(type) {
 //     }
 //   });
 
-//   // Handle confirm/otorisasi button ï¿½ unbind first to avoid duplicate handlers
+//   // Handle confirm/otorisasi button � unbind first to avoid duplicate handlers
 //   $('#btn-confirm-otorisasi').off('click').on('click', function() {
 
 //       let _token = $("#_token").val();
@@ -3512,25 +3288,104 @@ function buttonBatalOtorisasi (nobukti) {
 }
 
 function onChangeCatatan () {
-
   if (tipeform == 'edit') {
     let value  = $("#input_add_keterangan").val()
-    onChangeHeader('Keterangan' , value)
+    onChangeHeader('validitas' , value)
+  }
+}
+
+function onChangePerihal () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_alamatsupplier").val()
+    onChangeHeader('keterangan' , value)
+  }
+}
+
+
+function onChangeAlamatkirim () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_alamatkirim").val()
+    onChangeHeader('franco' , value)
+  }
+}
+
+function onChangeDelivery () {
+
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_ekspedisi").val()
+    onChangeHeader('delivery' , value)
 
   }
 
 }
+
+
+
+function onChangeUp () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_up").val()
+    onChangeHeader('namapic' , value)
+  }
+}
+
+function onChangeUp2 () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_up2").val()
+    onChangeHeader('namapic2' , value)
+  }
+}
+
+
+function onChangeNote () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_note").val()
+    onChangeHeader('catatan' , value)
+  }
+}
+
+function onChangeKetrevisi () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_ketrevisi").val()
+    onChangeHeader('ketrevisi' , value)
+  }
+}
+
+function onChangeFreight () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_freight").val()
+    onChangeHeader('freight' , value)
+  }
+}
+
+function onChangeLokasipenerima () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_lokasipenerima").val()
+    onChangeHeader('kodekebunh' , value)
+  }
+}
+
+
+
+
+
 function onChangeNoPO () {
   if (tipeform == 'edit') {
     let value  = $("#input_add_noso").val()
-    onChangeHeader('NoPesanan' , value)
+    onChangeHeader('ttd' , value)
   }
 }
 
 function onChangeTglprcust () {
   if (tipeform == 'edit') {
-    let value  = $("#onChangeTglprcust").val()
-    onChangeHeader('TglKirim' , value)
+    let value  = $("#input_add_tglprcust").val()
+    onChangeHeader('Tglprcust' , value)
+  }
+}
+
+function onChangeTglrevisi () {
+  if (tipeform == 'edit') {
+    let value  = $("#input_add_tglrevisi").val()
+    onChangeHeader('Tglrevisi' , value)
   }
 }
 
@@ -3539,7 +3394,7 @@ function onChangeTipePPN () {
   if (tipeform == 'edit') {
     let value = $("#input_add_tipeppn").val()
     console.log(value)
-    onChangeHeader('TipePPn' , value)
+    // onChangeHeader('TipePPn' , value)
     onChangeHeader('PPN' , value)
     refreshUpdateHeader()
     let nobukti = $("#input_add_nobukti").val()
@@ -3673,7 +3528,7 @@ function onChangeHeader (field, value) {
   let _token  = $("#_token").val()
   let nobukti = $("#input_add_nobukti").val()
   $.ajax({
-    url: "{!! url('poonchangeheader') !!}",
+    url: "{!! url('penawaransoonchangeheader') !!}",
     type: "post",
     async: false,
     data: {
@@ -4382,7 +4237,7 @@ function onChangeInputAddPembayaran () {
 
   if (dataTableAdd.length) {
 
-    onChangeHeader('TIPEBAYAR' , check)
+    onChangeHeader('PEMBAYARAN' , check)
   }
   let nobukti = $("#input_add_nobukti").val()
   console.log('len',dataTableAdd.length)
@@ -4588,43 +4443,72 @@ function buttonAddEditItem (i) {
   document.getElementById("input_add_add_tipeso").value = tempAddEdit.tipeso
   document.getElementById("input_add_add_merkso").value = tempAddEdit.namamerkso
   document.getElementById("input_add_add_satminus").value = tempAddEdit.nmsat
-
+console.log('zzzzzzzzzz',tempAddEdit.KodeBrg,tempAddEdit.Nosat,tempAddEdit.KodeSupp)
   $.ajax({
-    url: "{!! url('pocekharga') !!}",
+    url: "{!! url('penawaransocekharga') !!}",
     type: "post",
     async: false,
     data: {
       _token,
-      kodebarang : tempAddAdd.KodeBrg
+      kodebarang: tempAddEdit.KodeBrg,
+      nosat: tempAddEdit.Nosat,
+      kodecust: tempAddEdit.KodeSupp
+
     },
     success: function(res) {
-      console.log(res)
+      console.log(res.harga_lama);
+      console.log(res.cari_beli_akhir);
+      console.log(res.cari_beli_akhir_top1);
+
       let rowTable = ``
-      res.forEach((item, i) => {
-        let date1 = ""
-        if (item.TANGGAL) {
-            let date = new Date(item.TANGGAL);
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
-          }
+      res.cari_beli_akhir.forEach((item, i) => {
+        // let date1 = ""
+        // if (item.tanggal) {
+        //     let date = new Date(item.tanggal);
+        //     let day = ("0" + date.getDate()).slice(-2);
+        //     let month = ("0" + (date.getMonth() + 1)).slice(-2);
+        //     date1 = date.getFullYear()+"/"+(month)+"/"+(day) ;
+        //   }
         rowTable += `
         <tr>
-          <td>${item.NamaCustSupp}</td>
-          <td>${date1}</td>
-          <td>${item.QNT}</td>
-          <td>${item.SATUAN}</td>
-          <td>${item.KODEVLS}</td>
-          <td>${item.KURS}</td>
+          <td>${item.KODEBRG}</td>
+          <td>${item.namabrg}</td>
+          <td>${item.namacustsupp}</td>
+          <td>${item.tanggal}</td>
+          <td>${item.nobukti}</td>
           <td class="text-right">${Number(item.HARGA) ? parseFloat(item.HARGA).toFixed(2) : '0.00'}</td>
-          <td>${item.DISCRP}</td>
-          <td class="text-right">${Number(item.HrgNetto) ? parseFloat(item.HrgNetto).toFixed(2) : '0.00'}</td>
         </tr>`
       });
 
       document.getElementById("tabel_data_add_harga_terakhir").innerHTML = rowTable
 
       document.getElementById("input_add_add_kodebarang").scrollIntoView();
+
+      let rowTableJual = '';
+
+      res.cari_beli_akhir_top1.forEach((item, i) => {
+
+          rowTableJual += `
+          <tr>
+              <td>${item.tanggal}</td>
+              <td>${item.nobukti}</td>
+              <td>${item.kodebrg}</td>
+              <td>${item.namabrg}</td>
+              <td class="text-right">
+                ${Number(item.hargabeli)
+                    ? parseFloat(item.harga).toLocaleString('id-ID', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                      })
+                    : '0'}
+              </td>
+              <td>${item.namacustsupp}</td>
+              <td>${item.kodekebun}</td>
+              <td>${item.namakebun}</td>
+          </tr>`;
+      });
+
+      document.getElementById("tabel_data_add_stock_proyeksi").innerHTML = rowTableJual;
 
     },
     error: function (err) {
@@ -4645,6 +4529,7 @@ function buttonAddEditItem (i) {
 
   document.getElementById("input_add_add_namabarang").scrollIntoView();
 }
+
 
 function closeShowHideAdd () {
   $('.showhide').hide();
@@ -5359,35 +5244,370 @@ function onChangeInputAddAddNosat () {
 
 
 
-// filterso: 0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi -- mapped from
-// penawaransoFilterOtorisasi (SEMUA/Belum/Sudah) set by penawaransoTerapkanFilter().
-function penawaransoFilterSoValue() {
-  if (penawaransoFilterOtorisasi === 'Belum') { return 1; }
-  if (penawaransoFilterOtorisasi === 'Sudah') { return 2; }
-  return 0;
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Port 1:1 dari poCart/poAktifkanTabel milik purchaseOrder.blade.php, sama
+ * seperti so/invoicejasa/.../closingso. Dua tabel real -- tabel2 (urut 1) =
+ * Penawaran SO (belum fully-otorisasi), tabel3 (urut 2) = Otorisasi (sudah
+ * fully-otorisasi) -- masing-masing Actions kolom pertama, port 1:1 dari
+ * markup lama. Kolom Oto2..Oto5/UserOto2..5/TglOto2..5 di tabel2 cuma
+ * dimasukkan ke default cart kalau level otorisasi user (#level, dari
+ * $akses->OL) cukup tinggi, sama seperti kondisi "level > N" di markup lama.
+ */
+let psoCart = { 1 : [], 2 : [] }
+let psoActiveUrut = 0
+const PSO_HREF = 'penawaranso'
+const PSO_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+const PSO_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
+let psoPerluGambar = { 1 : false, 2 : false }
+
+function psoPickCI (row, key) {
+  if (!row) { return undefined; }
+  if (row[key] !== undefined) { return row[key]; }
+  let lower = key.toLowerCase();
+  for (let k in row) { if (k.toLowerCase() === lower) { return row[k]; } }
+  return undefined;
 }
 
+function psoDefaultCart (urut) {
+  let level = Number($('#level').val()) || 0
+  if (urut === 1) {
+    let cols = [
+      ['NoBukti',      'No Bukti',           1, 'varchar', 0, 0],
+      ['Tanggal',      'Tanggal',            1, 'date',    0, 0],
+      ['NamaCustSupp', 'Customer',           1, 'varchar', 0, 0],
+      ['NOSO',         'No. SO',             1, 'varchar', 0, 0],
+      ['TotDPPRp',     'DPP Rp',             1, 'float',   0, 2],
+      ['TotPPNRp',     'PPN Rp',             1, 'float',   0, 2],
+      ['TotNetRp',     'Grand Total Rp',     1, 'float',   0, 2],
+      ['IsOtorisasi1', 'Oto1',               1, 'bool',    0, 0],
+      ['OtoUser1',     'User Oto1',          1, 'varchar', 0, 0],
+      ['TglOto1',      'Tgl Oto1',           1, 'date',    0, 0],
+    ]
+    if (level > 1) {
+      cols.push(['IsOtorisasi2', 'Oto2', 1, 'bool', 0, 0])
+      cols.push(['OtoUser2',     'User Oto2', 1, 'varchar', 0, 0])
+      cols.push(['TglOto2',      'Tgl Oto2', 1, 'date', 0, 0])
+    }
+    if (level > 2) {
+      cols.push(['IsOtorisasi3', 'Oto3', 1, 'bool', 0, 0])
+      cols.push(['TglOto3',      'Tgl Oto3', 1, 'date', 0, 0])
+      cols.push(['OtoUser3',     'User Oto3', 1, 'varchar', 0, 0])
+    }
+    if (level > 3) {
+      cols.push(['IsOtorisasi4', 'Oto4', 1, 'bool', 0, 0])
+      cols.push(['TglOto4',      'Tgl Oto4', 1, 'date', 0, 0])
+      cols.push(['OtoUser4',     'User Oto4', 1, 'varchar', 0, 0])
+    }
+    if (level > 4) {
+      cols.push(['IsOtorisasi5', 'Oto5', 1, 'bool', 0, 0])
+      cols.push(['TglOto5',      'Tgl Oto5', 1, 'date', 0, 0])
+      cols.push(['OtoUser5',     'User Oto5', 1, 'varchar', 0, 0])
+    }
+    cols.push(['IsBatal',   'Batal',         1, 'bool', 0, 0])
+    cols.push(['UserBatal', 'User Batal',    1, 'varchar', 0, 0])
+    cols.push(['TglBatal',  'Tanggal Batal', 1, 'date', 0, 0])
+    return cols
+  }
+  // urut 2: Otorisasi -- port 1:1 dari markup lama, tanpa level (cuma Oto1).
+  return [
+    ['NoBukti',      'No Bukti',            1, 'varchar', 0, 0],
+    ['Tanggal',      'Tanggal',             1, 'date',    0, 0],
+    ['NamaCustSupp', 'Customer',            1, 'varchar', 0, 0],
+    ['NOSO',         'No. SO',              1, 'varchar', 0, 0],
+    ['TotDPPRp',     'DPP Rp',              1, 'float',   0, 2],
+    ['TotPPNRp',     'PPN Rp',              1, 'float',   0, 2],
+    ['TotNetRp',     'Grand Total Rp',      1, 'float',   0, 2],
+    ['IsOtorisasi1', 'Authorized 1',        1, 'bool',    0, 0],
+    ['OtoUser1',     'Authorized User',     1, 'varchar', 0, 0],
+    ['TglOto1',      'Authorized Date 1',   1, 'date',    0, 0],
+  ]
+}
+
+function psoBuatCart (headers, values, isnumerics, isshowns, desimals) {
+  headers = headers || []
+  let cart = []
+  headers.forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+      ? Number(desimals[i]) : (tipe === 1 ? 2 : 0)
+    cart.push([values[i], h, Number(isshowns[i]) === 1 ? 1 : 0, PSO_TIPE_NAMA[tipe] || 'varchar', 0, isNaN(des) ? 0 : des])
+  });
+  return cart
+}
+
+function psoAktifkanTabel (urut) {
+  psoActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = psoCart[urut]
+}
+
+function psoOnChangeAktif () {
+  if (psoActiveUrut === 2) { reinitTabel3(); } else { reinitTabel2(); }
+}
+
+window.g_href = PSO_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = mode || 1
+  let cart = psoCart[urut] || []
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[1]); value.push(c[0]); isnumber.push(PSO_TIPE_KODE[c[3]] ?? 0)
+    isshown.push(Number(c[2]) === 1 ? 1 : 0); desimal.push(Number(c[5]) || 0)
+  });
+  $.ajax({
+    url: "{!! url('saveheadertable') !!}", type: "post", async: false,
+    data: {
+      _token: $("#_token").val(), header: JSON.stringify(header), isnumber: JSON.stringify(isnumber),
+      tipe: JSON.stringify(desimal), value: JSON.stringify(value), isshown: JSON.stringify(isshown),
+      href: PSO_HREF, urut: urut
+    },
+    error: function (err) { console.log(err); alertify.warning('Gagal menyimpan pengaturan kolom') }
+  })
+}
+
+window.doSetHeader = function (mode, reset) {
+  let urut = mode || 1
+  $.ajax({
+    url: "{!! url('getheadertable') !!}", type: "post", async: false,
+    data: { _token: $("#_token").val(), href: PSO_HREF, urut: urut, reset: reset ? 1 : 0 },
+    success: function (res) {
+      if (!reset && res && res.headertableheader && res.headertableheader.length) {
+        psoCart[urut] = psoBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
+      } else {
+        psoCart[urut] = psoDefaultCart(urut)
+        window.gcart_header = psoCart[urut]
+        window.doSimpanHeader(PSO_HREF, urut)
+      }
+      window.gcart_header = psoCart[urut]
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+      psoCart[urut] = psoDefaultCart(urut)
+      window.gcart_header = psoCart[urut]
+    }
+  })
+}
+
+function activeVisibleTabKeyPSO () {
+  if ($('#nav-profile-tab').hasClass('active')) { return 2; }
+  return 1;
+}
+
+const PSO_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
+const PSO_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
+
+let psoRtSudahInit = false
+function psoInitReportTableSekali () {
+  if (psoRtSudahInit || typeof ReportTable === 'undefined') { return }
+  psoRtSudahInit = true
+  let urutAktif = activeVisibleTabKeyPSO()
+  let idTabel = { 1 : '#tabel2', 2 : '#tabel3' }
+  let idBar = { 1 : '#rtBarTabel2', 2 : '#rtBarTabel3' }
+  Object.keys(idTabel).forEach((u) => {
+    if (Number(u) === urutAktif) { return }
+    ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: psoOnChangeAktif })
+  });
+  ReportTable.init({ table: PSO_SELEKTOR_TABEL_AKTIF, bar: PSO_SELEKTOR_BAR_AKTIF, onChange: psoOnChangeAktif })
+
+  let psoGuardUlangKlik = false;
+  ['#tabel2', '#tabel3'].forEach((sel) => {
+    let thead = document.querySelector(sel + ' thead')
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (psoGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+      e.stopPropagation()
+      e.preventDefault()
+      psoGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      psoGuardUlangKlik = false
+    }, true)
+  });
+}
+
+function tulisTheadHeaderPSO (tableSel, cols, withActions) {
+  let thead = document.querySelector(tableSel + ' thead')
+  if (!thead || !window.ReportTable) { return; }
+  let headRowHtml = ReportTable.headHtml(cols)
+  if (withActions) { headRowHtml = headRowHtml.replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>'); }
+  thead.setAttribute('style', 'white-space:nowrap;');
+  thead.innerHTML = headRowHtml;
+}
+
+function psoValueCell (row, col) {
+  let raw = psoPickCI(row, col[0]);
+  let type = col[3];
+  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw) + '</td>'; }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  if (type === 'float') {
+    let dp = Number(col[5]) || 0;
+    let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+    return '<td class="text-right">' + formatAngka(n.toFixed(dp)) + '</td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+// Port 1:1 dari tombol Details/Edit/Otorisasi milik markup lama.
+function tabel2ActionsCell (row) {
+  let nobukti = psoPickCI(row, 'NoBukti');
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+// Port 1:1 dari tombol Details/Batal Otorisasi/Print milik markup lama.
+function tabel3ActionsCell (row) {
+  let nobukti = psoPickCI(row, 'NoBukti');
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+function renderTabel2Rows (rows) {
+  let cols = (psoCart[1].length ? psoCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabel2ActionsCell(row);
+    cols.forEach(function (col) { html += psoValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel2_data').innerHTML = html;
+  tulisTheadHeaderPSO('#tabel2', cols, true);
+}
+
+function renderTabel3Rows (rows) {
+  let cols = (psoCart[2].length ? psoCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + tabel3ActionsCell(row);
+    cols.forEach(function (col) { html += psoValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel3_data').innerHTML = html;
+  tulisTheadHeaderPSO('#tabel3', cols, true);
+}
+
+let lastTabel2Rows = []
+let lastTabel3Rows = []
+let psoPanjangHalaman = { 1 : 10, 2 : 10 }
+
+function psoIkatSearch (urut) {
+  let ids = { 1 : ['psoSearch1', 'tabel2'], 2 : ['psoSearch2', 'tabel3'] }
+  let input = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+  let timer = null
+  input.addEventListener('input', function () {
+    let nilai = input.value
+    if (timer) { clearTimeout(timer) }
+    timer = setTimeout(function () {
+      if ($.fn.DataTable.isDataTable('#' + idTabel)) { $('#' + idTabel).DataTable().search(nilai).draw() }
+    }, 400)
+  })
+}
+
+function psoIkatPanjangHalaman (urut) {
+  let ids = { 1 : ['psoLen1', 'tabel2'], 2 : ['psoLen2', 'tabel3'] }
+  let sel = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(psoPanjangHalaman[urut])
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    psoPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#' + idTabel)) { $('#' + idTabel).DataTable().page.len(psoPanjangHalaman[urut]).draw() }
+  })
+}
+
+const PSO_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+
+function reinitTabel2 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(lastTabel2Rows);
+    $('#tabel2').DataTable({ dom: PSO_DOM_STRING, lengthChange: false, pageLength: psoPanjangHalaman[1], paging: true, order: [[1, 'asc']], ordering: false });
+    psoIkatSearch(1); psoIkatPanjangHalaman(1); psoPerluGambar[1] = false;
+  } catch (e) { console.error('reinitTabel2 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
+}
+
+function reinitTabel3 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy(); }
+    renderTabel3Rows(lastTabel3Rows);
+    $('#tabel3').DataTable({ dom: PSO_DOM_STRING, lengthChange: false, pageLength: psoPanjangHalaman[2], paging: true, order: [[1, 'asc']], ordering: false });
+    psoIkatSearch(2); psoIkatPanjangHalaman(2); psoPerluGambar[2] = false;
+  } catch (e) { console.error('reinitTabel3 failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
+}
+
+// Halaman ini punya banyak $(document).ready() lain yang sudah ada sebelum port
+// ini (form Add/Edit, dsb) yang kadang butuh >1 detik untuk selesai jalan secara
+// sinkron -- karena jQuery menjalankan semua callback ready() berurutan dalam
+// satu antrian, ready() milik blok ini bisa baru jalan lama SETELAH event
+// 'load' asli (yang memicu loadAll() di window.onload di bawah) sudah lewat.
+// Akibatnya loadAll() sempat menggambar tabel dengan psoCart yang masih kosong
+// sebelum doSetHeader() sempat mengisinya, dan `order` menunjuk kolom yang belum
+// ada. psoSetupSekali() dibuat idempotent dan dipanggil dari DUA tempat (ready()
+// di sini, dan loadAll() sendiri) supaya konfigurasi kolom selalu siap sebelum
+// tabel pertama kali digambar, siapa pun yang jalan lebih dulu.
+let psoSetupSudahJalan = false
+function psoSetupSekali () {
+  if (psoSetupSudahJalan) { return }
+  psoSetupSudahJalan = true
+
+  psoAktifkanTabel(1); window.doSetHeader(1, false);
+  psoAktifkanTabel(2); window.doSetHeader(2, false);
+
+  psoInitReportTableSekali();
+
+  $('#nav-home-tab').on('shown.bs.tab', function () { psoAktifkanTabel(1); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (psoPerluGambar[1]) { reinitTabel2(); } });
+  $('#nav-profile-tab').on('shown.bs.tab', function () { psoAktifkanTabel(2); if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); } if (psoPerluGambar[2]) { reinitTabel3(); } });
+}
+
+$(document).ready(function(){
+  psoSetupSekali();
+});
+
 function loadAll () {
-  console.log('loadall')
-  var tglawal = $('#tabel2_tglawal').val()
-  var tglakhir = $('#tabel2_tglakhir').val()
-  var filterso = penawaransoFilterSoValue()
+  psoSetupSekali();
 
   $.ajax({
     url: "{!! url('penawaransoloadall') !!}",
     type: "get",
     async: false,
     data: {
-      tglawal: tglawal, tglakhir: tglakhir, filterso: filterso
     },
     success: function(res) {
-      dataRefreshOutstanding2 = res.tempOutstanding3
-    }})
-
-  lastTabel2Rows = dataRefreshOutstanding2 || []
-  reinitTabel2()
-
-  console.log('loadall selesai');
+      lastTabel2Rows = res.tempOutstanding3 || []
+      lastTabel3Rows = res.tempOutstanding5 || []
+      reinitTabel2()
+      reinitTabel3()
+      console.log('loadall selesai');
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
 }
 
 
@@ -5868,8 +6088,8 @@ function buttonAddPickAlamatKirim (index) {
   console.log(itemX)
   // console.log(kode,nama,alamat)
   if (tipeform == 'edit') {
-    onChangeHeader('NoAlamatKirim' , itemX.KODEGDG)
-    onChangeHeader('AlamatKirim' , itemX.Alamat)
+    // onChangeHeader('NoAlamatKirim' , itemX.KODEGDG)
+    onChangeHeader('franco' , itemX.Alamat)
   }
 
   // document.getElementById("input_add_kodealamatkirim").value = itemX.KODEGDG
@@ -5882,7 +6102,7 @@ function buttonAddPickNoSO (kode, nama) {
   console.log('buttonAddPickLokasiPenerima')
   console.log(kode,nama)
   if (tipeform == 'edit') {
-    onChangeHeader('KODEKEBUN' , kode)
+    onChangeHeader('ttd' , kode)
 
   }
   document.getElementById("input_add_noso").value = kode
@@ -5897,7 +6117,7 @@ function buttonAddPickLokasiPenerima (kode, nama ) {
   console.log('buttonAddPickLokasiPenerima')
   console.log(kode,nama)
   if (tipeform == 'edit') {
-    onChangeHeader('KODEKEBUN' , kode)
+    onChangeHeader('KODEKEBUNH' , kode)
 
   }
   
@@ -6577,9 +6797,6 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
 
 
-
-
-
         }
 
       },
@@ -6973,7 +7190,7 @@ function submitPrint (nobukti) {
 
                   <div class="pe-1" style="width: 100%">
                     <div style="width: 100%">
-                      <div class="pb-1" style="width: 15%; margin-top: 15px">
+                      <div class="pb-1" style="width: 55%; margin-top: 15px">
                         `+ imageContent +`
                       </div>
                     </div>
@@ -6981,53 +7198,55 @@ function submitPrint (nobukti) {
                     <div style="display: flex; width: 100%; font-size: 13px; margin-top: 10px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Ref.No</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">`+dataPrint[0].nobukti+`</div>
+                      <div class="pb-1" style="width: 100%">`+dataPrint[0].nobukti+`</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Tanggal</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">`+tanggalOnly+`</div>
+                      <div class="pb-1" style="width: 100%">`+tanggalOnly+`</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Kepada Yth</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].NAMA ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].NAMA ?? ''}</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Lokasi</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].namalokasi ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].namalokasi ?? ''}</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Up</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].namapic ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].namapic ?? ''}</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%">Dari</div>
                       <div class="pb-1" style="width: 3%">:</div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].nmprs ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].nmprs ?? ''}</div>
                     </div>
 
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%"></div>
                       <div class="pb-1" style="width: 3%"></div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].alamatprs ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].alamatprs ?? ''}</div>
                     </div>
+                    
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%"></div>
                       <div class="pb-1" style="width: 3%"></div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">${dataPrint[0].kotaprs ?? ''}</div>
+                      <div class="pb-1" style="width: 100%">${dataPrint[0].kotaprs ?? ''}</div>
                     </div>
+
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%"></div>
                       <div class="pb-1" style="width: 3%"></div>
-                      <div class="pb-1" style="width: 100%; font-size: 13px;">Telp: (0541) 4104142 Email: sml@indo.net.id</div>
+                      <div class="pb-1" style="width: 100%">Telp: (0541) 4104142 Email: sml@indo.net.id</div>
                     </div>
 
                   </div>
@@ -7039,7 +7258,7 @@ function submitPrint (nobukti) {
                     font-size:15px;
                     text-decoration: underline;
                     text-decoration-thickness: 2px;">
-                    PERIHAL : PENAWARAN HARGA NF
+                    PERIHAL : `+dataPrint[0].keterangan+`
                 </span>
               </div>
 
@@ -7050,20 +7269,20 @@ function submitPrint (nobukti) {
               <div style="display: flex; width: 100%; font-size: 13px;">
                  <div class="pb-1" style="width: 100%;">Bersama ini perkenankanlah kami menawarkan harga sebagai berikut:</div>
               </div>
-   <table
+    <table
     class="detail-spb-table"
     style="width: 98%; height: 100px; max-height: 100px; font-family: sans-serif; display: table; border: 1px solid #3c3c3c; font-size: 10px;">
-                <thead style='background-color:#609af7'>
-                  <tr>
+                <thead>
+                  <tr style="background-color:#609af7">
                     <td class="text-center" style="color:White; width: 2%" >No.</td>
-                    <td class="text-center" style="color:White; width: 45%">Nama Barang</td>
+                    <td class="text-center" style="color:White; width: 35%">Nama Barang</td>
                     <td class="text-center" style="color:White; width: 5%">Tipe</td>
                     <td class="text-center" style="color:White; width: 5%">Merk</td>
-                    <td class="text-center" style="color:White; width: 8%">Qty</td>
-                    <td class="text-center" style="color:White; width: 5%">Sat</td>
+                    <td class="text-center" style="color:White; width: 6%">Qty</td>
+                    <td class="text-center" style="color:White; width: 4%">Sat</td>
                     <td class="text-center" style="color:White; width: 10%">Harga</td>
-                    <td class="text-center" style="color:White; width: 10%">Disc</td>
-                    <td class="text-center" style="color:White; width: 15%">Total</td>
+                    <td class="text-center" style="color:White; width: 8%">Disc</td>
+                    <td class="text-center" style="color:White; width: 10%">Total</td>
                     <td class="text-center" style="color:White; width: 15%">Keterangan</td>
                   </tr>
                 </thead> `;
@@ -7094,33 +7313,33 @@ function submitPrint (nobukti) {
         }
         tempPrintStr += hdr
         tempPrintStr += `<tbody border="1">`;
-      item.forEach((itemSub, j) => {
+        item.forEach((itemSub, j) => {
         tempPrintStr += `
           <tr>
             <td style="width: 2%; text-align: center; font-size: 10px;">${z+1}</td>
 
-            <td style="width: 45%; text-align: left; font-size: 10px;">${itemSub.NAMABRG}</td>
+            <td style="width: 35%; text-align: left; font-size: 10px;">${itemSub.NAMABRG}</td>
 
             <td style="width: 5%; text-align: center; font-size: 10px;">${itemSub.tipeso}</td>
 
             <td style="width: 5%; text-align: left; font-size: 10px;">${itemSub.namamerkso ?? ''}</td>
 
-            <td style="width: 8%; text-align: right; font-size: 10px;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
+            <td style="width: 6%; text-align: right; font-size: 10px;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
 
-            <td style="width: 5%; text-align: center; font-size: 10px;">${itemSub.SATUAN}</td>
+            <td style="width: 4%; text-align: center; font-size: 10px;">${itemSub.SATUAN}</td>
 
-            <td style="width: 10%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.harga).toFixed(2))}</td>
+            <td style="width: 10%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.hrg).toFixed(2))}</td>
 
-            <td style="width: 10%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.ndiskon).toFixed(2))}</td>
+            <td style="width: 8%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.DISCTOT).toFixed(2))}</td>
 
-            <td style="width: 15%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.nnet).toFixed(2))}</td>
+            <td style="width: 10%; text-align: right; font-size: 10px;">${formatAngka(parseFloat(itemSub.subtotalpenawaran).toFixed(2))}</td>
 
             <td style="width: 15%; text-align: left; font-size: 10px;">${itemSub.ketdet ?? ''}</td>
           </tr>`;
         z++;
       });
 
-tempPrintStr += `
+      tempPrintStr += `
         <tr>
           <td colspan="7" style="border:1px solid; padding:5px; font-size: 10px;">
           </td>
@@ -7153,7 +7372,6 @@ tempPrintStr += `</table>`;
 
 
   <div style="width: 95%; font-family: sans-serif; font-size: 10px;">
-
      <div style="display: flex; width: 100%; padding:10px 0;">
       <div>
         <span style="
@@ -7162,7 +7380,7 @@ tempPrintStr += `</table>`;
           font-size: 13px;
           border-bottom: 1px solid #000;
           line-height: 1.5;">
-          â€œMohon perhatikan spesifikasi barang yang kami tawarkan di atas, barang tidak dapat DIRETUR setelah PO kami proses. Mohon menjadi perhatian bersama. Terima kasih.â€
+          “Mohon perhatikan spesifikasi barang yang kami tawarkan di atas, barang tidak dapat DIRETUR setelah PO kami proses. Mohon menjadi perhatian bersama. Terima kasih.”
         </span>
       </div>
     </div>
