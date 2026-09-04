@@ -25,7 +25,7 @@ class FunctionBrowseController extends Controller {
 	}
 	
 	public function doBrowseGudang(Request $req) {
-		$table = DB::connection('MGL')->select('select KODEGDG, NAMA from DBGUDANG');
+		$table = DB::connection('SML')->select('select KODEGDG, NAMA from DBGUDANG');
 		$kolom = [
                     ['KODEGDG', 'Kode', 'varchar', 0],
                     ['NAMA', 'Nama', 'varchar', 0]
@@ -34,16 +34,16 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doLoadGudang(Request $req) {
-		$kode = $req->get('kode');
-		$table = DB::connection('MGL')->select('select KODEGDG, NAMA from DBGUDANG where KODEGDG = ?', [$kode]);
+		$kode = $req->query('kode');
+		$table = DB::connection('SML')->select('select KODEGDG, NAMA from DBGUDANG where KODEGDG = ?', [$kode]);
 
 		return $table;
 	}
-	
+
 	public function doBrowseHdGroup(Request $req) {
-		$table = DB::connection('MGL')->select('select KODEHDGRP, NAMAHDGRP from DBHDGROUP');
+		$table = DB::connection('SML')->select('select KODEHDGRP, NAMAHDGRP from DBHDGROUP');
 		$kolom = [
                     ['KODEHDGRP', 'Kode', 'varchar', 0],
                     ['NAMAHDGRP', 'Nama', 'varchar', 0]
@@ -52,9 +52,9 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doBrowseSubGroup(Request $req) {
-		$table = DB::connection('MGL')->select('select KodeSubGrp, NamaSubGrp from dbSubGroup order by NamaSubGrp');
+		$table = DB::connection('SML')->select('select KodeSubGrp, NamaSubGrp from dbSubGroup order by NamaSubGrp');
 		$kolom = [
                     ['KodeSubGrp', 'Kode', 'varchar', 0],
                     ['NamaSubGrp', 'Nama', 'varchar', 0]
@@ -63,9 +63,9 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doBrowseSubGroupJnsTambah(Request $req) {
-		$table = DB::connection('MGL')->select('select KodeSubGrp, Keterangan from DBSubGroupJnsTambah');
+		$table = DB::connection('SML')->select('select KodeSubGrp, Keterangan from DBSubGroupJnsTambah');
 		$kolom = [
                     ['KodeSubGrp', 'Kode', 'varchar', 0],
                     ['Keterangan', 'Nama', 'varchar', 0]
@@ -74,9 +74,9 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doBrowseMerk(Request $req) {
-		$table = DB::connection('MGL')->select('select KODEMERK, NAMAMERK from DBMERK order by NAMAMERK');
+		$table = DB::connection('SML')->select('select KODEMERK, NAMAMERK from DBMERK order by NAMAMERK');
 		$kolom = [
                     ['KODEMERK', 'Kode', 'varchar', 0],
                     ['NAMAMERK', 'Nama', 'varchar', 0]
@@ -85,9 +85,9 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doBrowseBarang(Request $req) {
-		$filter = $req->get('filter');
+		$filter = $req->query('filter');
 
 		if (!$filter) {
 	        $table = [];
@@ -95,7 +95,7 @@ class FunctionBrowseController extends Controller {
 	        $query = "select KODEBRG, NAMABRG from DBBARANG where KODEBRG like ? or NAMABRG like ? order by KODEBRG";
 	        $params = ["%$filter%", "%$filter%"];
 
-	        $table = DB::connection('MGL')->select($query, $params);
+	        $table = DB::connection('SML')->select($query, $params);
 		}
 
 		$kolom = [
@@ -106,17 +106,17 @@ class FunctionBrowseController extends Controller {
 
 		return $this->doSetResult($table, $kolom, $title);
 	}
-	
+
 	public function doLoadBarang(Request $req) {
-		$kode = $req->get('kode');
-		$table = DB::connection('MGL')->select('select * from DBBARANG where KODEBRG = ?', [$kode]);
+		$kode = $req->query('kode');
+		$table = DB::connection('SML')->select('select * from DBBARANG where KODEBRG = ?', [$kode]);
 
 		return $table;
 	}
-	
+
 	public function doLoadMLokasi(Request $req) {
-		$kode = $req->get('kode');
-		$table = DB::connection('MGL')->select('select mlokasi.* from DBMLOKASI mlokasi left outer join DBLOKASI lokasi on mlokasi.KODELOKASI = lokasi.lokasi left outer join DBBARANG brg ON brg.MLOKASI = lokasi.LOKASI where brg.KODEBRG = ?', [$kode]);
+		$kode = $req->query('kode');
+		$table = DB::connection('SML')->select('select mlokasi.* from DBMLOKASI mlokasi left outer join DBLOKASI lokasi on mlokasi.KODELOKASI = lokasi.lokasi left outer join DBBARANG brg ON brg.MLOKASI = lokasi.LOKASI where brg.KODEBRG = ?', [$kode]);
 
 		return $table;
 	}
