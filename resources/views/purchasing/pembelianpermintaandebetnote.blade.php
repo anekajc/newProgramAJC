@@ -660,7 +660,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
       <div class="row mt-2">
         <div class="col-md-12 text-right" id="divOto">
-          <button id="submitOtorisasi" type="button" class="btn btn-chip-biru" onclick="submitOtorisasi()">Otorisasi</button>
+          <!-- <button id="submitOtorisasi" type="button" class="btn btn-chip-biru" onclick="submitOtorisasi()">Otorisasi</button> -->
         </div>
       </div>
     </div>

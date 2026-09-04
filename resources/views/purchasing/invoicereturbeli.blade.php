@@ -36,7 +36,7 @@
 
 /* Tabel item Add/Edit/Detail - header abu-abu uppercase, zebra, tombol pastel - sama
    seperti #tabel_add di perintahreturbeli.blade.php. */
-#addTable td:first-child:not([colspan]),
+#addTable td:last-child:not([colspan]),
 #detailTable td:first-child:not([colspan]) {
   vertical-align: middle;
   display: flex;
@@ -45,7 +45,7 @@
   align-items: center;
 }
 
-#addTable td:first-child .btn,
+#addTable td:last-child .btn,
 #detailTable td:first-child .btn {
   width: 30px;
   height: 30px;
@@ -60,14 +60,14 @@
   transition: all .12s ease;
 }
 
-#addTable td:first-child .btn:hover,
+#addTable td:last-child .btn:hover,
 #detailTable td:first-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
-#addTable td:first-child .btn-success  { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
-#addTable td:first-child .btn-danger   { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#addTable td:last-child .btn-success  { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#addTable td:last-child .btn-danger   { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 
 #addTable thead th,
 #detailTable thead th {
@@ -561,7 +561,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         <table id="addTable" class="table data-table"  >
           <thead class="text-center">
             <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Kode Barang</th>
               <th scope="col">Nama Barang</th>
               <th scope="col">Qnt</th>
@@ -570,6 +569,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               <th scope="col">Diskon</th>
               <th scope="col">Sub Total</th>
               <th scope="col">No. PR.</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
 
@@ -2983,11 +2983,6 @@ function refreshDataTableAdd (NOBUKTI = "") {
             res.forEach((item, i) => {
 
               rowTable += `<tr>
-              <td class="text-center">
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
-              </td>
-
               <td>${item.KodeBrg}</td>
               <td>${item.NamaBrg}</td>
               <td class="text-right">${item.Qnt ? formatAngka(parseFloat(item.Qnt).toFixed(2)) : '0.00'}</td>
@@ -2998,6 +2993,10 @@ function refreshDataTableAdd (NOBUKTI = "") {
               <td class="text-right">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
               <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
               <td>${item.NoPPL ? item.NoPPL : ''}</td>
+              <td class="text-center">
+                <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+              </td>
 
               </tr>`
 

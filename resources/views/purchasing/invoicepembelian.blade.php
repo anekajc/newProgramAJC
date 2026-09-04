@@ -409,6 +409,232 @@
   </div>
 </div>
 
+<!-- start page detail tab kiri (out beli) -->
+<div id="page3" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;" >
+  <div class="row">
+    <div class="col-6 text-left">
+      <h2 id="detailModalLabelout" style="display:none;"></h2>
+    </div>
+    <div class="col-6 text-right">
+      <button type="button" class="btn btn-danger btn-lg" style="
+      height: 30px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="buttonCloseForm()">Close</button>
+    </div>
+  </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <input type="hidden" class="form-control" id="input_add_nourut">
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No Bukti</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailPembelianNobuktiout" placeholder="" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Tanggal</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-left" id="detailDateout" value="{!! date('Y-m-d') !!}" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Supplier</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="detailPembelianKodeSuppout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No PO</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="No PO" id="detailNoPOout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Surat Jln</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="detailFakturSuppout" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Nama Supp</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="detailPembelianSuppout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Alamat</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="detailPembelianAlamatSuppout" disabled></textarea>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Gudang</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Gudang" id="detailgudangout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>SO Cust</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailSoCustomerout" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Valas</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="detailPembelianvalasout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Kurs</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="detailPembeliankursout" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>TOP</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="detailPembelianhariout" value=0 min=0 disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No/Sopir</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailNoSopirout" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Bayar</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeInputAddPembayaran()" id="detailPembeliantipebayarout" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>Tunai</option>
+                  <option value=1>Kredit</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Jth Tempo</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-center" id="detailPembelianJthTempoout" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>PPN</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeTipePPN()" id="detailPembeliantipeppnout" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>None</option>
+                  <option value=1>Exclude</option>
+                  <option value=2>Include</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="detailNuangmukaout" disabled>
+              </div></div>
+            </div>
+            <div class="row" hidden>
+              <div class="col-md-4" style="margin-top:5px;"><label>No Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailNoUangMukaout" disabled>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <table id="detailTableout" class="data-table">
+              <thead class="text-center">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Qty</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Qty PO</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Satuan</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Harga</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Disc</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="detailTableDataout" class="text-left">
+                <tr>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>Disc %</label>
+              <input type="number" class="form-control text-right" id="input_det_discout" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DiscRp</label>
+              <input type="number" class="form-control text-right" id="input_det_discrpout" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DPP</label>
+              <input type="text" class="form-control text-right" id="input_det_dppout" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>PPN</label>
+              <input type="text" class="form-control text-right" id="input_det_ppnout" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>Grand Total</label>
+              <input type="text" class="form-control text-right" id="input_det_grandtotalout" value="0.00" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commented out footer button
+      <div class="modal-footer">
+        <button type="button" id="btnotokiri" class="btn btn-primary" style="height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitOtorisasi1()">Approve</button>
+      </div>
+      -->
+</div>
+    <!-- End page detail Informasi-->
+
+
 
 
 
@@ -536,27 +762,12 @@
               <input type="text" class="form-control" id="editnobukti" placeholder="Nomor Bukti" disabled>
             </div>
             <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-center" id="editPembelianDate" value="{!! date('Y-m-d') !!}">
-            </div>
-            <div class="pba-f">
-              <label>No. Pajak</label>
-              <input type="text" class="form-control" id="editnopajak" placeholder="No. Pajak">
-            </div>
-          </div>
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>PPN</label>
-              <input type="text" class="form-control" id="editPembeliantipeppn" placeholder="Tipe PPN" disabled>
+              <label>No. Invoice</label>
+              <input type="text" class="form-control" id="editnoinvoice" placeholder="No. Invoice">
             </div>
             <div class="pba-f">
               <label>Tgl Invoice</label>
               <input type="date" class="form-control text-center" id="edittglinvoice" value="{!! date('Y-m-d') !!}">
-            </div>
-            <div class="pba-f">
-              <label>No B.Potong</label>
-              <input type="text" class="form-control" id="editnobpotong" placeholder="No. Bukti Potong">
             </div>
           </div>
 
@@ -566,6 +777,25 @@
               <input type="text" class="form-control" id="editPembelianSupp" placeholder="Supplier" disabled>
             </div>
             <div class="pba-f">
+              <label>No. Pajak</label>
+              <input type="text" class="form-control" id="editnopajak" placeholder="No. Pajak">
+            </div>
+            <div class="pba-f">
+              <label>Tgl Pajak</label>
+              <input type="date" class="form-control text-center" id="edittglfpajak" value="{!! date('Y-m-d') !!}">
+            </div>
+          </div>
+
+          <div class="pba-fcol">
+            <div class="pba-f">
+              <label>Tanggal</label>
+              <input type="date" class="form-control text-center" id="editPembelianDate" value="{!! date('Y-m-d') !!}">
+            </div>
+            <div class="pba-f">
+              <label>No B.Potong</label>
+              <input type="text" class="form-control" id="editnobpotong" placeholder="No. Bukti Potong">
+            </div>
+            <div class="pba-f">
               <label>Tgl B.Potong</label>
               <input type="date" class="form-control text-center" id="edittglbpotong" value="{!! date('Y-m-d') !!}">
             </div>
@@ -573,12 +803,8 @@
 
           <div class="pba-fcol">
             <div class="pba-f">
-              <label>No. Invoice</label>
-              <input type="text" class="form-control" id="editnoinvoice" placeholder="No. Invoice">
-            </div>
-            <div class="pba-f">
-              <label>Tgl Pajak</label>
-              <input type="date" class="form-control text-center" id="edittglfpajak" value="{!! date('Y-m-d') !!}">
+              <label>PPN</label>
+              <input type="text" class="form-control" id="editPembeliantipeppn" placeholder="Tipe PPN" disabled>
             </div>
           </div>
         </div>
@@ -1076,27 +1302,12 @@
               <input type="text" class="form-control" id="editnobukti2" placeholder="Nomor Bukti" disabled>
             </div>
             <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-center" id="editPembelianDate2" value="{!! date('Y-m-d') !!}" disabled>
-            </div>
-            <div class="pba-f">
-              <label>No. Pajak</label>
-              <input type="text" class="form-control" id="editnopajak2" placeholder="No. Pajak" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>PPN</label>
-              <input type="text" class="form-control" id="editPembeliantipeppn2" placeholder="Tipe PPN" disabled>
+              <label>No. Invoice</label>
+              <input type="text" class="form-control" id="editnoinvoice2" placeholder="No. Invoice" disabled>
             </div>
             <div class="pba-f">
               <label>Tgl Invoice</label>
               <input type="date" class="form-control text-center" id="edittglinvoice2" value="{!! date('Y-m-d') !!}" disabled>
-            </div>
-            <div class="pba-f">
-              <label>No B.Potong</label>
-              <input type="text" class="form-control" id="editnobpotong2" placeholder="No. Bukti Potong" disabled>
             </div>
           </div>
 
@@ -1106,6 +1317,25 @@
               <input type="text" class="form-control" id="editPembelianSupp2" placeholder="Supplier" disabled>
             </div>
             <div class="pba-f">
+              <label>No. Pajak</label>
+              <input type="text" class="form-control" id="editnopajak2" placeholder="No. Pajak" disabled>
+            </div>
+            <div class="pba-f">
+              <label>Tgl Pajak</label>
+              <input type="date" class="form-control text-center" id="edittglfpajak2" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+          </div>
+
+          <div class="pba-fcol">
+            <div class="pba-f">
+              <label>Tanggal</label>
+              <input type="date" class="form-control text-center" id="editPembelianDate2" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+            <div class="pba-f">
+              <label>No B.Potong</label>
+              <input type="text" class="form-control" id="editnobpotong2" placeholder="No. Bukti Potong" disabled>
+            </div>
+            <div class="pba-f">
               <label>Tgl B.Potong</label>
               <input type="date" class="form-control text-center" id="edittglbpotong2" value="{!! date('Y-m-d') !!}" disabled>
             </div>
@@ -1113,12 +1343,8 @@
 
           <div class="pba-fcol">
             <div class="pba-f">
-              <label>No. Invoice</label>
-              <input type="text" class="form-control" id="editnoinvoice2" placeholder="No. Invoice" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Tgl Pajak</label>
-              <input type="date" class="form-control text-center" id="edittglfpajak2" value="{!! date('Y-m-d') !!}" disabled>
+              <label>PPN</label>
+              <input type="text" class="form-control" id="editPembeliantipeppn2" placeholder="Tipe PPN" disabled>
             </div>
           </div>
         </div>
@@ -1177,27 +1403,12 @@
               <input type="text" class="form-control" id="editnobukti3" placeholder="Nomor Bukti" disabled>
             </div>
             <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-center" id="editPembelianDate3" value="{!! date('Y-m-d') !!}" disabled>
-            </div>
-            <div class="pba-f">
-              <label>No. Pajak</label>
-              <input type="text" class="form-control" id="editnopajak3" placeholder="No. Pajak">
-            </div>
-          </div>
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>PPN</label>
-              <input type="text" class="form-control" id="editPembeliantipeppn3" placeholder="Tipe PPN" disabled>
+              <label>No. Invoice</label>
+              <input type="text" class="form-control" id="editnoinvoice3" placeholder="No. Invoice">
             </div>
             <div class="pba-f">
               <label>Tgl Invoice</label>
               <input type="date" class="form-control text-center" id="edittglinvoice3" value="{!! date('Y-m-d') !!}">
-            </div>
-            <div class="pba-f">
-              <label>No B.Potong</label>
-              <input type="text" class="form-control" id="editnobpotong3" placeholder="No. Bukti Potong">
             </div>
           </div>
 
@@ -1207,6 +1418,25 @@
               <input type="text" class="form-control" id="editPembelianSupp3" placeholder="Supplier" disabled>
             </div>
             <div class="pba-f">
+              <label>No. Pajak</label>
+              <input type="text" class="form-control" id="editnopajak3" placeholder="No. Pajak">
+            </div>
+            <div class="pba-f">
+              <label>Tgl Pajak</label>
+              <input type="date" class="form-control text-center" id="edittglfpajak3" value="{!! date('Y-m-d') !!}">
+            </div>
+          </div>
+
+          <div class="pba-fcol">
+            <div class="pba-f">
+              <label>Tanggal</label>
+              <input type="date" class="form-control text-center" id="editPembelianDate3" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+            <div class="pba-f">
+              <label>No B.Potong</label>
+              <input type="text" class="form-control" id="editnobpotong3" placeholder="No. Bukti Potong">
+            </div>
+            <div class="pba-f">
               <label>Tgl B.Potong</label>
               <input type="date" class="form-control text-center" id="edittglbpotong3" value="{!! date('Y-m-d') !!}">
             </div>
@@ -1214,12 +1444,8 @@
 
           <div class="pba-fcol">
             <div class="pba-f">
-              <label>No. Invoice</label>
-              <input type="text" class="form-control" id="editnoinvoice3" placeholder="No. Invoice">
-            </div>
-            <div class="pba-f">
-              <label>Tgl Pajak</label>
-              <input type="date" class="form-control text-center" id="edittglfpajak3" value="{!! date('Y-m-d') !!}">
+              <label>PPN</label>
+              <input type="text" class="form-control" id="editPembeliantipeppn3" placeholder="Tipe PPN" disabled>
             </div>
           </div>
         </div>
@@ -1468,181 +1694,9 @@
 <!-- End modal editpembelian-->
 
 
-
+  <!-- start page tab kiri detail INFORMASI-->
  <!-- detail informasi tab kiri/out beli -->
   <!-- start modal tab kiri detail INFORMASI-->
-<div class="modal fade" id="detailout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xxl modal-dialog-centered" role="document" style="max-width: 95%;">
-    <div class="modal-content rounded-4">
-      <div class="modal-header">
-        <h5 class="modal-title" id="detailModalLabelout">Detail</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="pba-fgrid">
-          <input type="hidden" class="form-control" id="input_add_nourut">
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>No Bukti</label>
-              <input type="text" class="form-control text-left" id="detailPembelianNobuktiout" placeholder="" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-left" id="detailDateout" value="{!! date('Y-m-d') !!}" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="detailPembelianKodeSuppout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>No PO</label>
-              <input type="text" class="form-control text-left" placeholder="No PO" id="detailNoPOout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Surat Jln Supp</label>
-              <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="detailFakturSuppout" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol pba-fcol-wide">
-            <div class="pba-f">
-              <label>Nama Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="detailPembelianSuppout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Alamat</label>
-              <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="detailPembelianAlamatSuppout" disabled></textarea>
-            </div>
-            <div class="pba-f">
-              <label>Gudang</label>
-              <input type="text" class="form-control text-left" placeholder="Gudang" id="detailgudangout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>SO Cust</label>
-              <input type="text" class="form-control text-left" id="detailSoCustomerout" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Valas</label>
-              <input type="text" class="form-control" id="detailPembelianvalasout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Kurs</label>
-              <input type="text" class="form-control" id="detailPembeliankursout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>TOP</label>
-              <input type="number" class="form-control text-left" id="detailPembelianhariout" value=0 min=0 disabled>
-            </div>
-            <div class="pba-f">
-              <label>No/Sopir</label>
-              <input type="text" class="form-control text-left" id="detailNoSopirout" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Pembayaran</label>
-              <select onchange="onChangeInputAddPembayaran()" id="detailPembeliantipebayarout" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>Tunai</option>
-                <option value=1>Kredit</option>
-              </select>
-            </div>
-            <div class="pba-f">
-              <label>Jth Tempo</label>
-              <input type="date" class="form-control text-center" id="detailPembelianJthTempoout" value="{!! date('Y-m-d') !!}" onblur="onChangeTgglKirim()" disabled>
-            </div>
-            <div class="pba-f">
-              <label>PPN</label>
-              <select onchange="onChangeTipePPN()" id="detailPembeliantipeppnout" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>None</option>
-                <option value=1>Exclude</option>
-                <option value=2>Include</option>
-              </select>
-            </div>
-            <div class="pba-f" hidden>
-              <label>No Uang Muka</label>
-              <input type="text" class="form-control text-left" id="detailNoUangMukaout" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Uang Muka</label>
-              <input type="number" class="form-control text-left" id="detailNuangmukaout" disabled>
-            </div>
-          </div>
-        </div>
-
-        <div class="row mt-3">
-          <div class="col-12">
-            <div class="table-responsive">
-              <table id="detailTableout" class="data-table">
-                <thead class="text-center">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Qty</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Qty PO</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Satuan</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Harga</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Disc</th>
-                    <th style="padding: 4px 12px;" scope="col" class="text-center">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody id="detailTableDataout" class="text-left">
-                  <tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="pba-tgrid">
-          <div class="pba-f">
-            <label>Disc %</label>
-            <input type="number" class="form-control text-right" id="input_det_discout" onblur="onChangeInputAddDisc()" value="0.00" disabled>
-          </div>
-          <div class="pba-f">
-            <label>DiscRp</label>
-            <input type="number" class="form-control text-right" id="input_det_discrpout" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
-          </div>
-          <div class="pba-f">
-            <label>DPP</label>
-            <input type="text" class="form-control text-right" id="input_det_dppout" value="0.00" disabled>
-          </div>
-          <div class="pba-f">
-            <label>PPN</label>
-            <input type="text" class="form-control text-right" id="input_det_ppnout" value="0.00" disabled>
-          </div>
-          <div class="pba-f">
-            <label>GrandTotal</label>
-            <input type="text" class="form-control text-right" id="input_det_grandtotalout" value="0.00" disabled>
-          </div>
-        </div>
-      </div>
-
-      <!-- Commented out footer button
-      <div class="modal-footer">
-        <button type="button" id="btnotokiri" class="btn btn-primary" style="height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitOtorisasi1()">Approve</button>
-      </div>
-      -->
-    </div>
-  </div>
-</div>
-    <!-- End modal detail Informasi-->
 
 
 
@@ -2671,7 +2725,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
       dataRefreshPO.forEach((item) => {
         let tombolAksi = `
           <button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetailout('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-          <button class="btn btn-success btn-sm" type="button" title="Buat Invoice" onclick="buttonEditPembelian('${item.NoPO}')"><i class="bi bi-bag-plus-fill"></i></button>
+          <button class="btn btn-primary btn-sm" type="button" title="Buat Invoice" onclick="buttonEditPembelian('${item.NoPO}')"><i class="bi bi-plus"></i></button>
         `
         rowTable += `<tr><td class="text-center">${tombolAksi}</td>`
         kolomRender.forEach((c) => {
@@ -3865,6 +3919,11 @@ console.log(nobukti,"sebelum url")
         }
       })
 
+      if (!detail_row_data || detail_row_data.length === 0) {
+        alertify.warning('Detail dokumen tidak ditemukan')
+        return
+      }
+
        dataLPB =  detail_row_data[0]
        dataEditPembelianEdit = detail_row_data
 
@@ -3913,7 +3972,7 @@ console.log(nobukti,"sebelum url")
       document.getElementById("detailTableData").innerHTML = table_row_detail
 
 
-      $("#detailout").modal('toggle');
+      $("#detail").modal('toggle');
     }
 
     function buttonAdd(add_row_id, add_row_data) {
@@ -4319,6 +4378,11 @@ if (pcekglobal) {
           }
         })
 
+        if (!detail_row_data || detail_row_data.length === 0) {
+          alertify.warning('Detail dokumen tidak ditemukan')
+          return
+        }
+
         dataLPB =  detail_row_data[0]
         dataEditPembelianEdit = detail_row_data
 
@@ -4378,6 +4442,11 @@ if (pcekglobal) {
 
         document.getElementById("detailNoSopirout").value = detail_row_data[0].SOPIR ?? ''
 
+        // Jth Tempo sebelumnya tidak pernah diisi - selalu menampilkan tanggal hari ini.
+        if (detail_row_data[0].TglJatuhTempo) {
+          $('#detailPembelianJthTempoout').val(ipbTanggalYMD(new Date(detail_row_data[0].TglJatuhTempo)))
+        }
+
         document.getElementById("input_det_discout").value = detail_row_data[0].disc ?? 0
         document.getElementById("input_det_discrpout").value = detail_row_data[0].DISCRP ?? 0
         document.getElementById("input_det_dppout").value = detail_row_data[0].TotDPP ?? 0
@@ -4388,7 +4457,15 @@ if (pcekglobal) {
         document.getElementById("detailTableDataout").innerHTML = table_row_detail
 
 
-        $("#detailout").modal('toggle');
+        $("#page1").hide();
+        $("#page3").show();
+        window.scrollTo(0, 0);
+      }
+
+      function buttonCloseForm () {
+        $("#page3").hide();
+        $("#page1").show();
+        window.scrollTo(0, 0);
       }
 
       function setNewNoBukti () {
