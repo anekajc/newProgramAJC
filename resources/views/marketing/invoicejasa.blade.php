@@ -2423,7 +2423,6 @@ $(document).ready(function(){
 
 
 function buttonCloseForm () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -2480,7 +2479,6 @@ function closeShowHideAdd () {
 
 
 function buttonAdd () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa / Add Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -3702,7 +3700,6 @@ function refreshDataTableAdd (nobukti) {
 
 function buttonKoreksi (nobukti , isoto) {
 
-document.getElementById('pageTitleBreadcrumb').textContent = 'Invoice Jasa / Edit Data'
 let pcekglobal = 0
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",

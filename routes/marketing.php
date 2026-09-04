@@ -26,11 +26,8 @@ use App\Http\Controllers\Marketing\VerifikasiPenawaranController;
 use Illuminate\Support\Facades\Route;
 
 
-
 // KAS
 Route::middleware('auth')->group(function () {
-
-
 
   //PENAWARAN SO
 Route::get('/penawaranso', [PenawaranSOController::class, 'index']);
@@ -153,11 +150,11 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/sosimpanheader', [SOController::class, 'simpanHeader']);
 
 
-//   // closing so
-//   Route::get('/closingso', [ClosingSOController::class, 'index']);
-//   Route::post('/closingsospclosingso', [ClosingSOController::class, 'spClosingSO']);
-//   Route::post('/closingsospopenso', [ClosingSOController::class, 'spOpenSO']);
-//   Route::get('/closingsoloadall', [ClosingSOController::class, 'loadAll']);
+  // closing so
+  Route::get('/closingso', [ClosingSOController::class, 'index']);
+  Route::post('/closingsospclosingso', [ClosingSOController::class, 'spClosingSO']);
+  Route::post('/closingsospopenso', [ClosingSOController::class, 'spOpenSO']);
+  Route::get('/closingsoloadall', [ClosingSOController::class, 'loadAll']);
 
 //   // performance
 //   Route::get('/performance', [PerformanceController::class, 'index']);
