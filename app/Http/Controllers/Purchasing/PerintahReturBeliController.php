@@ -592,7 +592,7 @@ having COUNT(*)>1
         $xurut= $purut[0]->xurut;
         }else { 
             // return 'mmm';
-            $xurut = $req->urut;
+            $xurut = $req->Urut;
         }
         
     }else{
@@ -677,7 +677,7 @@ having COUNT(*)>1
         0, //Tipee
 
       ];
-      DB::connection('SML')->statement('exec Sp_PRRBeli ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+      DB::connection('SML')->statement('exec Sp_PRRBeli ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
  	$tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $choice,'PRB',$nobukti,'',$xurut,'DBPRRBELIDET');
       return 1;
   }
