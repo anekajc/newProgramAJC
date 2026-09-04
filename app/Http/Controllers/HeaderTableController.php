@@ -857,6 +857,61 @@ class HeaderTableController extends Controller
 
       $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
     }
+    // Debet Note
+    else if ($req->href == 'pembelianpermintaandebetnote') {
+      $statusset = 1;
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Sama seperti cabang 'uangmukabeli' - kolom default DITULIS EKSPLISIT supaya tabel
+        // tetap punya header meski periode berjalan belum punya data Debet Note sama sekali.
+        // Nama field HARUS sama persis dengan alias kolom di
+        // PembelianPermintaanDebetNoteController@loadAll (dipakai juga sebagai nama field data
+        // di JS, lihat dnBuatCart()/dnRenderNilai() di pembelianpermintaandebetnote.blade.php).
+        // IsOtorisasi1/OtoUser1/TglOto1 SENGAJA tidak dimasukkan - itu kolom teknis untuk filter
+        // otorisasi & kolom Oto/User Oto/Tgl Oto yang selalu ditambahkan lewat JS.
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default = [
+          'No Bukti'  => 0,
+          'Tanggal'   => 2,
+          'Kode Supp' => 0,
+          'Supplier'  => 0,
+          'Nilai DN'  => 1,
+        ];
+        foreach ($default as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
+    }
     // Invoice Retur Beli
     else if ($req->href == 'invoicereturbeli') {
       $statusset = 1;

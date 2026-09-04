@@ -105,10 +105,11 @@
   #tabel td:first-child .btn-info,     #tabel2 td:first-child .btn-info     { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
   /* ---------- #tabel_add (tabel item di form Perintah Retur Beli, dalam #page2) - kolom
-     Actions ada di kolom PALING KIRI (first-child, sama seperti #tabel/#tabel2), header
-     abu-abu uppercase + zebra + hover + tombol aksi pastel bulat, disamakan dengan
+     Actions ada di kolom PALING KANAN (last-child; disembunyikan di mode detail karena
+     mode itu tidak punya kolom aksi), header abu-abu uppercase + zebra + hover + tombol
+     aksi pastel bulat, disamakan dengan
      resources/views/purchasing/pembelianpermintaannonagen.blade.php. ---------- */
-  #tabel_add td:first-child:not([colspan]) {
+  #tabel_add td:last-child:not([colspan]) {
     vertical-align: middle;
     display: flex;
     gap: 4px;
@@ -116,7 +117,7 @@
     align-items: center;
   }
 
-  #tabel_add td:first-child .btn {
+  #tabel_add td:last-child .btn {
     width: 30px;
     height: 30px;
     padding: 0;
@@ -130,15 +131,15 @@
     transition: all .12s ease;
   }
 
-  #tabel_add td:first-child .btn:hover {
+  #tabel_add td:last-child .btn:hover {
     filter: brightness(0.97);
     transform: translateY(-1px);
   }
 
-  #tabel_add td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
-  #tabel_add td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
-  #tabel_add td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
-  #tabel_add td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel_add td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel_add td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel_add td:last-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel_add td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 
   #tabel_add thead th {
     background: #f8f9fb !important;
@@ -155,10 +156,10 @@
   #tabel_add tbody tr:hover { background-color: #f5f3ff; }
 
   /* Qty & Sat rata tengah, header dan isi, supaya lurus segaris. */
+  #tabel_add thead th:nth-child(3),
   #tabel_add thead th:nth-child(4),
-  #tabel_add thead th:nth-child(5),
-  #tabel_add tbody td:nth-child(4):not([colspan]),
-  #tabel_add tbody td:nth-child(5):not([colspan]) {
+  #tabel_add tbody td:nth-child(3):not([colspan]),
+  #tabel_add tbody td:nth-child(4):not([colspan]) {
     text-align: center;
   }
 
@@ -644,7 +645,7 @@
                 </div>
                 <div class="col-md-5">
                   <div class="form-group">
-                    <textarea style="width: 100%; resize: none" rows="2" placeholder="Keterangan" class="form-control text-left " id="input_add_keterangan"></textarea>
+                    <textarea style="width: 100%; resize: none" rows="2" placeholder="Keterangan" class="form-control text-left " id="input_add_keterangan" onblur="onChangeCatatan()"></textarea>
                   </div>
                 </div>
               </div>
@@ -715,7 +716,7 @@
                     </div>
                     <div class="col-md-12">
                       <div class="form-group" style="margin-top: 14px">
-                        <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_keterangan" onblur="onChangeCatatan()"></textarea>
+                        <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" disabled></textarea>
                       </div>
                     </div>
                   </div>
@@ -896,37 +897,16 @@
             <table id="tabel_add" class="data-table">
               <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Qty</th>
                   <th style="padding: 4px 12px;" scope="col">Sat</th>
                   <th style="padding: 4px 12px;" scope="col">No. Retur Jual</th>
                   <th style="padding: 4px 12px;" scope="col">No. Beli</th>
+                  <th style="padding: 4px 12px;" scope="col" id="th_action_add">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
-                <tr>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td class="text-center">
-                    <div class="btn-group" role="group">
-                      <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="">
-                        <i class="bi bi-info-circle-fill"></i>
-                      </button>
-                      <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="">
-                        <i class="bi bi-key-fill"></i>
-                      </button>
-                      <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="">
-                        <i class="bi bi-pencil-fill"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -2496,11 +2476,36 @@ let _token = $("#_token").val();
 
 function onChangeCatatan () {
 
-  if (tipeform == 'edit') {
-    let value  = $("#input_add_keterangan").val()
-    onChangeHeader('Keterangan' , value)
-
+  if (tipeform == 'detail') {
+    return
   }
+
+  let nobukti = $("#input_add_nobukti").val()
+  if (!nobukti) {
+    return
+  }
+
+  let value = $("#input_add_keterangan").val()
+  let _token = $("#_token").val()
+
+  $.ajax({
+    url: "{!! url('prbonchangeheader') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      field: 'KETERANGAN',
+      value,
+      nobukti
+    },
+    success: function(res) {
+      alertify.success('update Keterangan berhasil')
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
 
 }
 function onChangeNoPO () {
@@ -3180,7 +3185,7 @@ function buttonAddEditItem (i) {
   isi2Temp = tempAddEdit.brgIsi2 ?? isi2Temp
 
   document.getElementById("input_add_add_gudang").value = tempAddEdit.KodeGdg
-  document.getElementById("input_add_add_keterangan").value = tempAddEdit.KETERANGAN
+  document.getElementById("input_add_add_keterangan").value = tempAddEdit.ketdet ?? ''
   document.getElementById("input_add_add_urutPbl").value = tempAddEdit.URUTPBL
   document.getElementById("input_add_add_urutRJual").value = tempAddEdit.UrutRJual
 
@@ -5263,12 +5268,25 @@ function buttonShowHideHeaderDetail () {
 }
 
 function unlockFormAdd () {
+  document.getElementById("input_add_add_norjual").disabled = false
+  document.getElementById("input_add_add_nobeli").disabled = false
+  document.getElementById("input_add_add_supplier").disabled = false
+  document.getElementById("input_add_add_kodebrg").disabled = false
+  document.getElementById("input_add_add_namabrg").disabled = false
+  document.getElementById("input_add_add_quantity").disabled = false
+  document.getElementById("input_add_add_satuan").disabled = false
+  document.getElementById("input_add_add_gudang").disabled = false
+  document.getElementById("input_add_add_keterangan").disabled = false
 
+  // Pembayaran hanya boleh diisi saat Add; di Edit/Detail dokumen sudah ada, jadi terkunci.
+  document.getElementById("input_add_tipebayar").disabled = (tipeform !== 'add')
+  // Keterangan header boleh diedit di Add maupun Edit; hanya terkunci di Detail lewat lockFormAdd().
+  document.getElementById("input_add_keterangan").disabled = false
 }
 
-function cleanFormAdd () { 
-  
-  document.getElementById("input_add_tipebayar").value = ''
+function cleanFormAdd () {
+
+  document.getElementById("input_add_tipebayar").value = '0'
   document.getElementById("input_add_keterangan").value = ''
 }
 
@@ -5303,7 +5321,7 @@ if (pcekglobal) {
   $('.showhide').hide();
   // $('.showhidemodalbodyaddmain').hide();
   $('#buttonSubmitSaveHeader').show();
-  // unlockFormAdd()
+  unlockFormAdd()
 
   let akses = $("#akses_iskoreksi").val();
 
@@ -5395,9 +5413,9 @@ if (pcekglobal) {
     return
   }
   dataTableAdd = []
-  // cleanFormAdd()
-  // cleanFormAddAdd()
-  // unlockFormAdd()
+  cleanFormAdd()
+  cleanFormAddAdd()
+  unlockFormAdd()
   setNewNoBukti();
 
   refreshDataTableAdd()
@@ -5503,11 +5521,17 @@ function buttonDetail (NOBUKTI) {
 function refreshDataTableAdd (NOBUKTI) {
 
   console.log('refreshDataTableAdd' , NOBUKTI)
+
+  let thAction = document.getElementById("th_action_add")
+  if (thAction) {
+    thAction.style.display = (tipeform == 'detail') ? 'none' : ''
+  }
+
   if (!NOBUKTI) {
-    
+
     // if(!dataTableAdd.length) {
       let rowTable = `<tr>
-      <td class="text-center" colspan="9">Belum ada barang</td>
+      <td class="text-center" colspan="${tipeform == 'detail' ? 6 : 7}">Belum ada barang</td>
       </tr>`
     // }
     document.getElementById("tabel_data_add").innerHTML = rowTable
@@ -5539,27 +5563,29 @@ function refreshDataTableAdd (NOBUKTI) {
           let rowTable = ""
           dataTableAdd.forEach((item, i) => {
 
-            rowTable += 
+            rowTable +=
             `<tr>
-              <td class="text-center">
-                ${tipeform == 'edit' ? 
-                `<button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>`
-                : `-`
-                }
-              </td>
               <td>${item.KODEBRG}</td>
               <td>${item.NamaBrg}</td>
               <td class="text-right">${item.QNT ? parseFloat(item.QNT).toFixed(2) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td>${item.NORJual}</td>
               <td>${item.nopbl}</td>
+              ${tipeform == 'detail' ? '' : `
+              <td class="text-center">
+                ${tipeform == 'edit' ?
+                `<button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>`
+                : `-`
+                }
+              </td>`
+              }
             </tr>`
           });
 
           if(!dataTableAdd.length) {
             rowTable = `<tr>
-            <td class="text-center" colspan="9">Belum ada barang</td>
+            <td class="text-center" colspan="${tipeform == 'detail' ? 6 : 7}">Belum ada barang</td>
             </tr>`
           }
           document.getElementById("tabel_data_add").innerHTML = rowTable

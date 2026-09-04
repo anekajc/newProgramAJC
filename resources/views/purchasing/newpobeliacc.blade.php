@@ -4764,7 +4764,7 @@ tempPrintStr += `
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Satuan}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngkaRound(itemSub.harga)}</td>
-    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${formatAngka(itemSub.DISC)}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.DISC}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngka(Math.round(Number(itemSub.subtotal))).split('.')[0]}</td>
   </tr>`;
 z++;
