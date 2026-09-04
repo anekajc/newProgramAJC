@@ -253,9 +253,9 @@
 
             let data = {
                 date1: _date1,
-                date2: _date2,
-                inputOto: globalOtorisasi,
-                inputOrd: globalOrderBy
+                date2: _date2
+                // inputOto: globalOtorisasi,
+                // inputOrd: globalOrderBy
             };
 
             document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');

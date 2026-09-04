@@ -90,7 +90,7 @@ class FunctionBrowseController extends Controller {
 		$filter = $req->query('filter');
 
 		if (!$filter) {
-	        $table = [];
+	        $table = DB::connection('SML')->select('select KODEBRG, NAMABRG from DBBARANG order by KODEBRG');
 	    } else {
 	        $query = "select KODEBRG, NAMABRG from DBBARANG where KODEBRG like ? or NAMABRG like ? order by KODEBRG";
 	        $params = ["%$filter%", "%$filter%"];

@@ -1,4 +1,4 @@
-@extends('newmasterTest')
+@extends('gudang.newmasterx')
 @section('buttons')
 
 @endsection
@@ -1041,7 +1041,11 @@ function buttonBatalOtorisasi (nobukti) {
     return;
   }
 
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  // alertify.prompt(JUDUL, PESAN, NILAI_AWAL, onOK, onCancel) — argumen pertama jadi
+  // judul header dialog; classList di bawah menyamakan gaya tombol OK/Cancel dengan
+  // dialog Batal Otorisasi di permintaanpemakaian.blade.php ('is-danger' karena aksi ini
+  // merusak/membalik otorisasi).
+  var dlgBatalOtorisasi = alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -1076,6 +1080,7 @@ function buttonBatalOtorisasi (nobukti) {
       alertify.error("Action cancelled");
     }
   );
+  dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }
 
 
