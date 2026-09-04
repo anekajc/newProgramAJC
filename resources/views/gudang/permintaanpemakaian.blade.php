@@ -33,6 +33,57 @@
             font-size: 0.9rem;
             color: #333;
         }
+
+        /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar. Ditulis lokal
+                   di sini (bukan di report-table.css) meniru pola .po-len-wrap milik
+                   purchasing/purchaseOrder.blade.php — supaya halaman lain yang memakai
+                   report-table.css tidak ikut berubah. Warna/border memakai variabel
+                   --white/--border/--muted milik .tb-report di report-table.css supaya
+                   tetap seragam dengan kotak search & tombol Filter di sebelahnya. */
+        .len-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 5px 12px;
+        }
+
+        .len-wrap label {
+            margin: 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
+
+        .len-inp {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1D2130;
+            outline: none;
+            cursor: pointer;
+            padding: 2px 20px 2px 0;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right center;
+        }
+
+        /* Tombol Prev/Next dinonaktifkan (halaman pertama/terakhir) — .pg/.pg.active
+                   sudah ada di report-table.css, .disabled belum. */
+        .tb-report .pg.disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
     {{-- end tampilan search bar 1 --}}
 
@@ -95,13 +146,27 @@
                             oninput="renderTabel()" style="width:200px">
                     </div>
 
-                    <div class="action-group">
-                        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-                            <i class="bi bi-filter-lg"></i> Filter
-                        </button>
-                        <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary"
-                            onclick="buttonAdd()">
-                            <i class="bi bi-plus-lg"></i>Add</button>
+                    {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) —
+                         lihat renderTabel()/onLenChange2() di bawah. --}}
+                    <div class="len-wrap">
+                        <label for="tabelLen2">Tampilkan</label>
+                        <select id="tabelLen2" class="len-inp" onchange="onLenChange2()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="-1">Semua</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+
+                    <div class="po-toolbar-act action-group">
+                        <button type="button" class="btn btn-primary" onclick="buttonAdd()">
+                            {{-- <i class="bi bi-plus-lg"></i>Add</button> --}}
+                            Tambah</button>
                     </div>
                 </div>
 
@@ -119,7 +184,10 @@
                             <tbody id="tabel2_data"></tbody>
                         </table>
                     </div>
-                    <div class="table-footer"><span id="footerLabel2">Belum ada data</span></div>
+                    <div class="table-footer">
+                        <span id="footerLabel2">Belum ada data</span>
+                        <div class="pager-btns" id="pagerBtns2"></div>
+                    </div>
                 </div>
 
                 <div class="rt-hint">
@@ -201,7 +269,7 @@
         <div class="tb-report" id="contentContainer">
             <div class="content">
                 <div class="toolbar">
-                    <div class="page-title" id="pageForm_title">Add</div>
+                    <div class="page-title" id="pageForm_title"></div>
                     <div class="action-group">
                         <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                             onclick="buttonCloseForm()">
@@ -259,7 +327,7 @@
                 <div class="col-md-12 text-right" id="contentContainer">
                     <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary"
                         onclick="buttonAddAdd()">
-                        Add Item
+                        Tambah Item
                     </button>
                 </div>
 
@@ -270,8 +338,8 @@
                             <table id="addTable" class="tb">
                                 <thead>
                                     <tr>
-                                        <th>Kode Brg</th>
-                                        <th>Nama Brg</th>
+                                        <th>Kode Barang</th>
+                                        <th>Nama Barang</th>
                                         <th>Qty</th>
                                         <th>Satuan</th>
                                         <th>Action</th>
@@ -291,7 +359,7 @@
                     <br />
                     <div class="row">
                         <div class="col-12">
-                            <h4>Add Item</h4>
+                            <h4>Tambah Item</h4>
                         </div>
                     </div>
 
@@ -307,8 +375,8 @@
                                             <input id="AddAddKodeBrg" type="text" class="form-control text-left"
                                                 placeholder="Kode Barang" onkeypress="onKeyPressBarang(event)">
                                             <button type="button" onclick="buttonAddListBarang()"
-                                                class="btn btn-primary btn-sm rounded-right shadow-sm">
-                                                <i class="bi bi-plus"></i>
+                                                class="btn btn-primary">
+                                                <i class="bi bi-search"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -357,10 +425,10 @@
 
                     <div class="row mt-2">
                         <div class="col-md-12 text-right" id="contentContainer">
-                            <button type="button" class="btn btn-outline-danger"
+                            <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                 onclick="buttonBatalAdd()">Batal</button>
 
-                            <button type="button" class="btn btn-primary" onclick="submitAddAdd()">Submit</button>
+                            <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary" onclick="submitAddAdd()">Simpan</button>
                         </div>
 
                     </div>
@@ -392,10 +460,10 @@
                                                 placeholder="Kode Barang" disabled>
                                             <!-- Tombol Plus (sementara di-comment sesuai kode asli) -->
                                             <!--
-                                                                              <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-right shadow-sm">
-                                                                                <i class="bi bi-plus"></i>
-                                                                              </button>
-                                                                              -->
+                                                                                      <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary btn-sm rounded-right shadow-sm">
+                                                                                        <i class="bi bi-plus"></i>
+                                                                                      </button>
+                                                                                      -->
                                         </div>
                                     </div>
                                 </div>
@@ -447,7 +515,7 @@
                             <button type="button" class="btn btn-outline-danger"
                                 onclick="buttonBatalAdd()">Batal</button>
 
-                            <button type="button" onclick="submitAddEdit()" class="btn btn-primary">Submit</button>
+                            <button type="button" onclick="submitAddEdit()" class="btn btn-pill-primary">Simpan</button>
                         </div>
 
                     </div>
@@ -503,11 +571,11 @@
         <div class="tb-report" id="contentContainer">
             <div class="content">
                 <div class="toolbar">
-                    <div class="page-title">Detail</div>
+                    <div class="page-title"></div>
                     <div class="action-group">
                         <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                             onclick="buttonCloseForm()">
-                            <i class="bi bi-x-lg"></i> Close
+                            Close
                         </button>
                     </div>
                 </div>
@@ -549,8 +617,8 @@
                             <table id="detailKoreksiTable" class="tb">
                                 <thead>
                                     <tr>
-                                        <th>Kode Brg</th>
-                                        <th>Nama Brg</th>
+                                        <th>Kode Barang</th>
+                                        <th>Nama Barang</th>
                                         <th>Qty</th>
                                         <th>Satuan</th>
                                     </tr>
@@ -601,6 +669,14 @@
         let lastRows = @json($penerimaanArray); // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya
         let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
         let globalStatus = "2"; // filter modal: 2=Semua, 1=Terkirim, 0=Belum Terkirim
+
+        // Dropdown "Tampilkan" (#tabelLen2) — jumlah baris per halaman. -1 = semua data,
+        // sama seperti pola poLen1 di purchasing/purchaseOrder.blade.php, tapi paging di
+        // sini murni client-side (renderTabel() sudah memegang seluruh lastRows), bukan
+        // lewat DataTables. tabelPage2 disimpan terpisah dari elemen select supaya tidak
+        // ikut ter-reset saat renderTabel() dipanggil ulang oleh onChange report-table.js.
+        let tabelLen2 = 10;
+        let tabelPage2 = 1;
 
         var g_href = 'permintaanpemakaian';
         // '2' (bukan '0'/'1') supaya user lama dengan layout tersimpan otomatis dapat key
@@ -836,7 +912,15 @@
                 '</div>';
         }
 
-        function renderTabel() {
+        // resetPage tidak dikirim (undefined) di semua pemanggilan lama (search/filter/
+        // reloadData/onChange report-table.js) sehingga tetap kembali ke halaman 1 — sikap
+        // aman kalau data/filter berubah. Hanya gotoPage2() yang mengirim resetPage=false,
+        // karena di situ tabelPage2 sudah sengaja diarahkan ke halaman tujuan.
+        function renderTabel(resetPage) {
+            if (resetPage !== false) {
+                tabelPage2 = 1;
+            }
+
             const cols = gcart_header.filter(c => c[2] === 1);
             const thead = document.querySelector('#mainTable thead');
             thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Action</th>');
@@ -865,11 +949,19 @@
             if (!rows.length) {
                 tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
                 document.getElementById('footerLabel2').textContent = 'Tidak ada data';
+                renderPager2(0, 0);
                 return;
             }
 
+            const totalRows = rows.length;
+            const totalPages = tabelLen2 === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLen2));
+            if (tabelPage2 > totalPages) {
+                tabelPage2 = totalPages;
+            }
+            const pageRows = tabelLen2 === -1 ? rows : rows.slice((tabelPage2 - 1) * tabelLen2, tabelPage2 * tabelLen2);
+
             let html = '';
-            rows.forEach(function(r) {
+            pageRows.forEach(function(r) {
                 html += '<tr class="data-row">';
                 html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
                 html += cols.map(function(c) {
@@ -893,7 +985,10 @@
             });
 
             tbody.innerHTML = html;
-            document.getElementById('footerLabel2').textContent = 'Menampilkan ' + rows.length + ' baris';
+            document.getElementById('footerLabel2').textContent = tabelLen2 === -1 ?
+                'Menampilkan ' + totalRows + ' baris' :
+                'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
+            renderPager2(tabelPage2, totalPages);
             // container:'body' — tanpa ini tooltip disisipkan sebagai sibling tombol di
             // dalam <td>, jadi mepet/numpuk di atas tombol (baris tabel sempit) dan
             // menghalangi klik. Dengan container:'body', Popper bebas menaruhnya di atas baris.
@@ -905,6 +1000,54 @@
                 container: 'body',
                 boundary: 'window'
             });
+        }
+
+        // Dropdown "Tampilkan" — ganti jumlah baris/halaman lalu balik ke halaman 1
+        // (nomor halaman lama tidak lagi berarti setelah panjang halaman berubah).
+        function onLenChange2() {
+            const v = Number(document.getElementById('tabelLen2').value);
+            tabelLen2 = (v === -1 || v > 0) ? v : 10;
+            renderTabel();
+        }
+
+        // Dipanggil tombol Prev/Next/nomor halaman di #pagerBtns2. resetPage=false supaya
+        // renderTabel() tidak langsung membalikkan tabelPage2 ke 1.
+        function gotoPage2(p) {
+            tabelPage2 = p;
+            renderTabel(false);
+        }
+
+        // Gambar ulang tombol pager di footer tabel. totalPages<=1 (atau tabelLen2=-1,
+        // "Semua") menyembunyikan pager sepenuhnya — tidak ada gunanya menavigasi satu halaman.
+        function renderPager2(page, totalPages) {
+            const el = document.getElementById('pagerBtns2');
+            if (!el) {
+                return;
+            }
+            if (!totalPages || totalPages <= 1) {
+                el.innerHTML = '';
+                return;
+            }
+
+            function pgBtn(label, targetPage, active, disabled) {
+                const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
+                const click = disabled ? '' : ' onclick="gotoPage2(' + targetPage + ')"';
+                return '<div class="' + cls + '"' + click + '>' + label + '</div>';
+            }
+
+            // Jendela nomor halaman: maksimal 5 tombol angka di sekitar halaman aktif,
+            // supaya pager tidak melebar tak terbatas kalau datanya banyak.
+            let start = Math.max(1, page - 2);
+            let end = Math.min(totalPages, start + 4);
+            start = Math.max(1, end - 4);
+
+            let html = pgBtn('&laquo;', page - 1, false, page <= 1);
+            for (let p = start; p <= end; p++) {
+                html += pgBtn(String(p), p, p === page, false);
+            }
+            html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
+
+            el.innerHTML = html;
         }
 
         /* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum, Status: Semua/Terkirim/Belum) -- */
@@ -2242,7 +2385,7 @@
 
             document.getElementById("input_add_gudang").innerHTML = rowSelect
 
-            $('#pageForm_title').text('Edit PPI');
+            $('#pageForm_title').text('');
             showPage('pageForm')
 
         }
@@ -2297,7 +2440,7 @@
             refreshTableAdd()
             console.log('1')
 
-            $('#pageForm_title').text('Add');
+            $('#pageForm_title').text('');
             showPage('pageForm')
         }
 
@@ -2454,8 +2597,9 @@
       <td>${item.NAMABRG}</td>
       <td class="text-right">${formatAngka(parseFloat(item.Qntx).toFixed(2))}</td>
       <td class="text-center">${item.SATUAN}</td>
-      <td class="text-center"><button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NOBUKTI}', ${item.URUT})" ><i class="bi bi-trash"></i></button>
-      <button class="btn-action-sm" type="button" onclick="buttonEdit(${i})" ><i class="bi bi-pencil"></i></button>
+      <td class="text-center">
+        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit(${i})" ><i class="bi bi-pen"></i></button>
+        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NOBUKTI}', ${item.URUT})" ><i class="bi bi-trash"></i></button>
 
       </td>
       </tr>

@@ -301,7 +301,9 @@
                     ['HPPKartu', 'Hpp Kartu', 1, 'float', 1, 2],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
                     ['Qntdb', 'Qty Debet', 1, 'float', 1, 2],
-                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 2]
+                    ['HrgAdi', 'HPP X Debet', 1, 'float', 1, 2],
+                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 2],
+                    ['HrgADO', 'HPP X Kredit', 1, 'float', 1, 2]
                 ];
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;
@@ -316,7 +318,9 @@
                     ['HPPKartu', 'Hpp Kartu', 1, 'float', 1, 2],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
                     ['Qntdb', 'Qty Debet', 1, 'float', 1, 2],
-                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 2]
+                    ['HrgAdi', 'HPP X Debet', 1, 'float', 1, 2],
+                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 2],
+                    ['HrgADO', 'HPP X Kredit', 1, 'float', 1, 2]
                 ];
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;

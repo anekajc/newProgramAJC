@@ -404,6 +404,18 @@
   }
 
   function openBarangPicker(term) {
+    // #modalFilter (modal Bootstrap 4 -- lihat public/js/bootstrap.min.js v4.0.0 yang
+    // dimuat newmaster2x; tag CDN Bootstrap 5 di atas masterreportGudang.blade.php tidak
+    // pernah ke-render karena ada di luar blok section Blade, jadi bukan itu yang dipakai) tetap
+    // "shown" secara teknis di belakang picker ini. Bootstrap 4 punya focus-enforcement
+    // (listener focusin.bs.modal di document) yang memaksa fokus balik ke #modalFilter
+    // setiap ada elemen DI LUAR #modalFilter yang di-fokus -- termasuk search box
+    // DataTables di picker ini, walau tampil di atas (z-index lebih tinggi). Akibatnya
+    // klik/ketik di search box seperti tidak berefek. .modal('hide') melepas listener
+    // itu secara sinkron; tidak terlihat karena backdrop picker ini sudah menutup modal
+    // filter sepenuhnya.
+    $('#modalFilter').modal('hide');
+
     $('#modalPickMasterBackdrop').addClass('show');
     $('#modalPickMaster').addClass('show').attr('aria-hidden', 'false');
 
@@ -423,6 +435,9 @@
   function closeBarangPicker() {
     $('#modalPickMaster').removeClass('show').attr('aria-hidden', 'true');
     $('#modalPickMasterBackdrop').removeClass('show');
+
+    // Kembalikan #modalFilter yang di-hide() saat picker dibuka (lihat openBarangPicker).
+    $('#modalFilter').modal('show');
   }
 
   $(document).on('keydown', function (e) {
