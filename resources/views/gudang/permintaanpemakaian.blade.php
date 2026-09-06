@@ -421,8 +421,6 @@
                             </div>
                         </div>
                     </div>
-
-
                     <div class="row mt-2">
                         <div class="col-md-12 text-right" id="contentContainer">
                             <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"

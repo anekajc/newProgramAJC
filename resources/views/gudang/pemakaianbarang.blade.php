@@ -6,6 +6,86 @@
     {{-- Search box #tabel_filter / #tabelRetur_filter dihapus — DataTables bawaan tab 1 & 2
      dimatikan (dom:'rt') dan diganti satu #searchBox di toolbar .tb-report. --}}
 
+    {{-- Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar, dan status disabled
+     tombol pager — sama seperti permintaanpemakaian.blade.php. Ditulis lokal di sini
+     (bukan di report-table.css) supaya halaman lain yang memakai report-table.css tidak
+     ikut berubah. Warna/border memakai variabel --white/--border/--muted milik .tb-report
+     di report-table.css supaya tetap seragam dengan kotak search & tombol Filter. --}}
+    <style>
+        .len-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 5px 12px;
+        }
+
+        .len-wrap label {
+            margin: 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
+
+        .len-inp {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1D2130;
+            outline: none;
+            cursor: pointer;
+            padding: 2px 20px 2px 0;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right center;
+        }
+
+        .tb-report .pg.disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+    {{-- end dropdown Tampilkan / pager disabled --}}
+
+    {{-- Hover row color + jarak vertikal baris untuk kedua tabel — nilai disalin persis dari
+     .tb-report .data-row di public/css/report-table.css (dipakai permintaanpemakaian.blade.php)
+     supaya kedua halaman terlihat sama, meski #tabel/#tabelRetur di sini masih baris DataTables
+     biasa (tanpa class .data-row) jadi nilainya diulang di sini, bukan mewarisi rule bersama itu.
+     #contentContainer di depan + !important pada padding/border wajib untuk mengalahkan
+     gudang/newmasterx.blade.php baris ~134 (`table tbody td { padding: 0 10px !important }`,
+     dimuat SETELAH @yield('css') jadi lebih akhir di sumber juga) — spesifisitas rule ini
+     (2 id + tbody + td) lebih tinggi jadi tetap menang terlepas urutan pemuatan, sama seperti
+     alasan report-table.css sendiri memberi !important pada .data-row td untuk masalah serupa
+     di halaman masterreport2/newmaster2x. --}}
+    <style>
+        #contentContainer #tabel tbody td,
+        #contentContainer #tabelRetur tbody td {
+            padding: 9px 14px !important;
+            border-bottom: 1px solid #F1F5F9 !important;
+        }
+
+        #contentContainer #tabel tbody tr,
+        #contentContainer #tabelRetur tbody tr {
+            transition: background .12s;
+        }
+
+        #contentContainer #tabel tbody tr:hover td,
+        #contentContainer #tabelRetur tbody tr:hover td {
+            background: #F8F9FF;
+        }
+    </style>
+    {{-- end hover row color + jarak baris --}}
+
     {{-- tampilan search bar modal add pelanggan --}}
     <style>
         #tabel_add_list_pelanggan_filter {
@@ -93,15 +173,41 @@
                 <div class="toolbar">
                     {{-- <div class="page-title">Pemakaian Barang</div> --}}
 
+                    {{-- Rentang tanggal — menggantikan periode bulan/tahun sebagai filter data
+                     (server tetap tahu periode aktif lewat #periode_bulan/#periode_tahun untuk
+                     validasi tanggal saat Add/Koreksi). Berlaku untuk kedua tab sekaligus karena
+                     loadAll() mengembalikan outstandingArray + penerimaanArray dalam satu request. --}}
+                    <div class="filter-wrap">
+                        <label>Periode</label>
+                        <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+                            onchange="loadAll()">
+                        <span class="filter-sep">s/d</span>
+                        <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+                            onchange="loadAll()">
+                    </div>
+
                     <div>
                         <input class="search-inp" type="text" id="searchBox" placeholder="Cari data..."
                             oninput="onToolbarSearch()" style="width:200px">
                     </div>
 
-                    <div class="action-group">
+                    {{-- Jumlah baris per halaman untuk tab yang sedang aktif. -1 = tampilkan
+                     semua data (tanpa pager) — lihat onLenChange()/renderPager() di bawah. --}}
+                    <div class="len-wrap">
+                        <label for="tabelLen">Tampilkan</label>
+                        <select id="tabelLen" class="len-inp" onchange="onLenChange()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="-1">Semua</option>
+                        </select>
+                    </div>
+
+                    <div class="">
                         <button type="button" id="btnFilter" class="btn-load" style="display:none"
                             onclick="$('#modalFilter').modal('show')">
-                            <i class="bi bi-filter-lg"></i> Filter
+                            <i class="bi bi-funnel"></i> Filter
                         </button>
                     </div>
                 </div>
@@ -137,30 +243,16 @@
                                         </tr>
                                     </thead>
 
-                                    <tbody id="tabel_data">
-                                        @for ($i = 0; $i < count($outstandingArray); $i++)
-                                            <tr>
-                                                <td class="text-center">
-                                                    <div class="action-buttons">
-                                                        <button type="button" class="btn-action-sm btn-action-warning"
-                                                            data-toggle="tooltip" title="Detail"
-                                                            onclick="buttonDetail('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i
-                                                                class="bi bi-info"></i></button>
-                                                        <button type="button" class="btn-action-sm btn-action-success"
-                                                            data-toggle="tooltip" title="Add"
-                                                            onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i
-                                                                class="bi bi-plus-lg"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $outstandingArray[$i][0]->NOBUKTI }}</td>
-                                                <td>{!! date('Y/m/d', strtotime($outstandingArray[$i][0]->TANGGAL)) !!}</td>
-                                                <td>{{ $outstandingArray[$i][0]->NamaGudangAsal }}</td>
-                                            </tr>
-                                        @endfor
-                                    </tbody>
+                                    {{-- Diisi oleh renderOutstanding() (lihat @section('js')) — baris pertama
+                                     kali dirender dari outstandingRows yang di-seed lewat @json(), sama
+                                     seperti setiap refresh sesudahnya lewat loadAll(). --}}
+                                    <tbody id="tabel_data"></tbody>
                                 </table>
                             </div>
-                            <div class="table-footer"><span id="footerLabel1">Belum ada data</span></div>
+                            <div class="table-footer">
+                                <span id="footerLabel1">Belum ada data</span>
+                                <div class="pager-btns" id="pagerBtns1"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -182,60 +274,15 @@
                                         </tr>
                                     </thead>
 
-                                    <tbody id="tabelRetur_data">
-                                        @for ($i = 0; $i < count($penerimaanArray); $i++)
-                                            @php
-                                                $p = $penerimaanArray[$i][0];
-                                                $isOto = (int) ($p->IsOtorisasi1 ?? 0);
-                                                $qntOS = (float) ($p->QntOS ?? 0);
-                                                $isTerkirim = $qntOS <= 0;
-                                                $tglOto = !empty($p->TglOto1)
-                                                    ? date('Y/m/d', strtotime($p->TglOto1))
-                                                    : '';
-                                            @endphp
-                                            <tr data-oto="{{ $isOto }}" data-os="{{ $qntOS }}">
-                                                <td class="text-center">
-                                                    <div class="action-buttons">
-                                                        <button type="button" class="btn-action-sm btn-action-warning"
-                                                            data-toggle="tooltip" title="Detail"
-                                                            onclick="buttonDetailKoreksi('{{ $p->NOBUKTI }}')"><i
-                                                                class="bi bi-info"></i></button>
-                                                        <button type="button" class="btn-action-sm btn-action-success"
-                                                            data-toggle="tooltip" title="Edit"
-                                                            onclick="buttonKoreksi('{{ $p->NOBUKTI }}')"><i
-                                                                class="bi bi-pencil-fill"></i></button>
-                                                        <button type="button" class="btn-action-sm btn-action-info"
-                                                            data-toggle="tooltip" title="Print"
-                                                            onclick="submitPrint('{{ $p->NOBUKTI }}')"><i
-                                                                class="bi bi-printer"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $p->NOBUKTI }}</td>
-                                                <td>{!! date('Y/m/d', strtotime($p->TANGGAL)) !!}</td>
-                                                <td>{{ $p->NooutBRg }}</td>
-                                                <td>{{ $p->Namagdg }}</td>
-                                                <td>
-                                                    @if ($isTerkirim)
-                                                        <span class="sp-badge is-active">Terkirim</span>
-                                                    @else
-                                                        <span class="sp-badge is-inactive">Belum Terkirim</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if ($isOto === 1)
-                                                        <span class="sp-badge is-active">Sudah</span>
-                                                    @else
-                                                        <span class="sp-badge is-inactive">Belum</span>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $p->OtoUser1 }}</td>
-                                                <td>{{ $tglOto }}</td>
-                                            </tr>
-                                        @endfor
-                                    </tbody>
+                                    {{-- Diisi oleh renderPenerimaan() (lihat @section('js')) — sama seperti
+                                     #tabel_data di atas. --}}
+                                    <tbody id="tabelRetur_data"></tbody>
                                 </table>
                             </div>
-                            <div class="table-footer"><span id="footerLabel2">Belum ada data</span></div>
+                            <div class="table-footer">
+                                <span id="footerLabel2">Belum ada data</span>
+                                <div class="pager-btns" id="pagerBtns2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -369,9 +416,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
                 <div class="tb-report container-fluid mt-2">
                     <div class="table-outer">
@@ -380,19 +424,16 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Terima</th>
-                                        <th scope="col">Kode Brg</th>
-                                        <th scope="col">Nama Brg</th>
+                                        <th scope="col">Kode Barang</th>
+                                        <th scope="col">Nama Barang</th>
                                         <th scope="col">Qty</th>
                                         {{-- <th scope="col">Qty OS</th> --}}
                                         <th scope="col">Satuan</th>
                                         <th scope="col">Qty Kirim </th>
                                     </tr>
                                 </thead>
-
-
                                 <tbody id="addTableData" class="text-right">
                                     <tr>
-
                                         <td class="text-center"><input class="" type="checkbox" value=""
                                                 id="flexCheckDefault"></td>
                                         <td>-</td>
@@ -402,20 +443,13 @@
                                         <td>-</td>
                                         <td>-</td>
                                     </tr>
-
                                 </tbody>
-
-
                             </table>
                         </div>
                     </div>
                 </div>
-
-
-
                 <div class="modal-footer" id="contentContainer">
-                    <button type="button" class="btn btn-outline-danger btn-lg"
-                        data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-outline-danger btn-lg" data-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-primary btn-lg" onclick="submitAdd()">Submit</button>
                 </div>
             </div>
@@ -489,8 +523,8 @@
                             <table id="detailTable" class="tb">
                                 <thead>
                                     <tr>
-                                        <th scope="col">Kode Brg</th>
-                                        <th scope="col">Nama Brg</th>
+                                        <th scope="col">Kode Barang</th>
+                                        <th scope="col">Nama Barang</th>
                                         <th scope="col">Qty</th>
                                         <th scope="col">Satuan</th>
                                     </tr>
@@ -517,12 +551,8 @@
                         </div>
                     </div>
                 </div>
-
-
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-pill-secondary" data-dismiss="modal">Batal</button>
-
                 </div>
             </div>
         </div>
@@ -717,15 +747,13 @@
                                             <table id="koreksiTable" class="tb">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col">Kode Brg</th>
-                                                        <th scope="col">Nama Brg</th>
+                                                        <th scope="col">Kode Barang</th>
+                                                        <th scope="col">Nama Barang</th>
                                                         <th scope="col">Qty</th>
                                                         <th scope="col">Satuan</th>
                                                         <th class="rt-fixed-th" scope="col">Action</th>
                                                     </tr>
                                                 </thead>
-
-
                                                 <tbody id="koreksiTableData" class="text-right">
                                                     <tr>
 
@@ -735,15 +763,11 @@
                                                         <td>-</td>
                                                         <td>-</td>
                                                     </tr>
-
                                                 </tbody>
-
-
                                             </table>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div id="formKoreksiEdit" class="container-fluid showhide">
                                     <div class="line"></div>
                                     <div class="row">
@@ -811,62 +835,43 @@
                                             <!-- Kolom 3 -->
                                             <div class="col-md-4">
                                                 <!-- <div class="row align-items-center mb-2">
-                        <div class="col-md-4">
-                          <label for="koreksiEditInputQty" class="form-label">Qty</label>
-                        </div>
-                        <div class="col-md-8">
-                          <input id="koreksiEditInputQty" type="number" value="0.00" class="form-control text-right">
-                        </div>
-                      </div> -->
+                            <div class="col-md-4">
+                              <label for="koreksiEditInputQty" class="form-label">Qty</label>
+                            </div>
+                            <div class="col-md-8">
+                              <input id="koreksiEditInputQty" type="number" value="0.00" class="form-control text-right">
+                            </div>
+                          </div> -->
                                                 <!-- <div class="row align-items-center mb-2">
-                        <div class="col-md-4">
-                          <label for="koreksiEditQtyOS" class="form-label">Qty OS</label>
-                        </div>
-                        <div class="col-md-8">
-                          <input id="koreksiEditQtyOS" type="number" value="0.00" class="form-control text-right" disabled>
-                        </div>
-                      </div> -->
+                            <div class="col-md-4">
+                              <label for="koreksiEditQtyOS" class="form-label">Qty OS</label>
+                            </div>
+                            <div class="col-md-8">
+                              <input id="koreksiEditQtyOS" type="number" value="0.00" class="form-control text-right" disabled>
+                            </div>
+                          </div> -->
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="row mt-2">
                                         <div class="col-md-12 text-right">
-                                            <button type="button" class="btn btn-pill-secondary"
+                                            <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                                 onclick="buttonBatalShowHide()">Batal</button>
                                             <button id="" type="button" onclick="submitEditKoreksi()"
-                                                class="btn btn-pill-primary">Edit</button>
+                                                class="btn btn-action-primary btn-primary btn-pill-primary">Edit</button>
                                         </div>
-
                                     </div>
                                     <div class="line"></div>
-
-                                </div>
-
-                                <div class="row">
-
-
                                 </div>
                                 <div class="row">
-
-
                                 </div>
-
+                                <div class="row">
+                                </div>
                             </div>
-
                             <!-- end  -->
                         </div>
-
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
             </div>
         </div>
@@ -880,7 +885,7 @@
         <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 90%; max-width:1500px;" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Detail Koreksi</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Detail</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -942,47 +947,31 @@
                         <div class="row ">
                             <div class="col-md-12 text-right">
                             </div>
-
                             <div class="tb-report container-fluid mt-4">
                                 <div class="table-outer">
                                     <div class="table-wrap" style="max-height:40vh;">
                                         <table id="koreksiDetailTable" class="tb">
                                             <thead>
                                                 <tr>
-                                                    <th scope="col">Kode Brg</th>
-                                                    <th scope="col">Nama Brg</th>
+                                                    <th scope="col">Kode Barang</th>
+                                                    <th scope="col">Nama Barang</th>
                                                     <th scope="col">Qty</th>
                                                     <th scope="col">Satuan</th>
                                                 </tr>
                                             </thead>
-
-
                                             <tbody id="koreksiDetailTableData" class="text-right">
                                                 <tr>
-
                                                     <td>-</td>
                                                     <td>-</td>
                                                     <td>-</td>
                                                     <td>-</td>
                                                 </tr>
-
                                             </tbody>
-
-
                                         </table>
                                     </div>
                                 </div>
                             </div>
-
-
-
-
                         </div>
-
-
-
-
-
                     </div>
                 </div>
             </div>
@@ -999,16 +988,32 @@
         let koreksiDataEdit = {}
         let koreksiDataAddList = []
 
-        // dom:'rt' membuang search box + info line bawaan DataTables — diganti satu #searchBox
-        // di toolbar (lihat activeTable()/onToolbarSearch()) supaya kedua tab pakai satu kotak
-        // pencarian. emptyTable dipakai footer draw handler di bawah untuk teks "Tidak ada data".
+        // paint pertama tanpa AJAX; loadAll() menyegarkan setelahnya — satu-satunya sumber
+        // data dipakai bareng oleh render pertama dan setiap refresh (lihat renderOutstanding()/
+        // renderPenerimaan() di bawah), jadi tidak ada lagi drift antara markup Blade dan JS.
+        let outstandingRows = @json($outstandingArray);
+        let penerimaanRows = @json($penerimaanArray);
+
+        // Jumlah baris per halaman per tabel (DataTables page.len) — dikunci per id tabel
+        // supaya dropdown #tabelLen bisa disinkronkan ke tab yang sedang aktif saat berpindah tab.
+        // -1 = "Semua", sama seperti konvensi bawaan DataTables untuk page.len().
+        let panjangHalaman = {
+            tabel: 10,
+            tabelRetur: 10
+        };
+
+        // dom:'rt' membuang search box + info line + pager bawaan DataTables — diganti satu
+        // #searchBox + #tabelLen di toolbar dan pager kustom (lihat activeTable()/onToolbarSearch()/
+        // renderPager() di bawah) supaya kedua tab pakai satu kotak pencarian & tampilan pager yang
+        // sama dengan permintaanpemakaian.blade.php. emptyTable dipakai footer draw handler di
+        // bawah untuk teks "Tidak ada data".
         const dtOptionsOutstanding = {
             dom: 'rt',
             order: [
                 [1, 'asc']
             ],
             lengthChange: false,
-            paging: false,
+            paging: true,
             language: {
                 emptyTable: 'Tidak ada data'
             },
@@ -1030,7 +1035,7 @@
                 [1, 'asc']
             ],
             lengthChange: false,
-            paging: false,
+            paging: true,
             language: {
                 emptyTable: 'Tidak ada data'
             },
@@ -1074,22 +1079,84 @@
             return true;
         });
 
-        // Tabel DataTable yang sedang terlihat — dipakai toolbar search supaya satu kotak
-        // mengontrol tab manapun yang sedang aktif.
+        // Id tabel DataTable yang sedang terlihat ('tabel' atau 'tabelRetur') — dipakai toolbar
+        // search & dropdown Tampilkan supaya satu kontrol mengurus tab manapun yang sedang aktif.
+        function activeTableId() {
+            return $('.tab-pane.active table').eq(0).attr('id');
+        }
+
         function activeTable() {
-            return $('.tab-pane.active table').eq(0).DataTable();
+            return $('#' + activeTableId()).DataTable();
         }
 
         function onToolbarSearch() {
             activeTable().search($('#searchBox').val() || '').draw();
         }
 
+        // Dropdown "Tampilkan" — ganti jumlah baris/halaman tabel yang sedang aktif lalu balik
+        // ke halaman 1 (page.len().draw() bawaan DataTables sudah melakukan ini sendiri).
+        function onLenChange() {
+            const tableId = activeTableId();
+            const v = Number(document.getElementById('tabelLen').value);
+            const n = (v === -1 || v > 0) ? v : 10;
+            panjangHalaman[tableId] = n;
+            $('#' + tableId).DataTable().page.len(n).draw();
+        }
+
         function updateFooter(tableId, footerId) {
             const api = $('#' + tableId).DataTable();
-            const count = api.rows({
-                search: 'applied'
-            }).count();
-            $('#' + footerId).text(count ? ('Menampilkan ' + count + ' baris') : 'Tidak ada data');
+            const info = api.page.info();
+            if (!info.recordsDisplay) {
+                $('#' + footerId).text('Tidak ada data');
+                return;
+            }
+            const isAll = info.length === -1;
+            $('#' + footerId).text(isAll ?
+                ('Menampilkan ' + info.recordsDisplay + ' baris') :
+                ('Menampilkan ' + (info.end - info.start) + ' dari ' + info.recordsDisplay + ' baris'));
+        }
+
+        // Gambar ulang tombol pager di footer tabel — dipanggil dari draw.dt (search/filter/sort/
+        // ganti halaman semuanya lewat draw.dt) dan sekali lagi tiap kali rebuildTable() selesai.
+        // totalPages<=1 (atau panjang halaman "Semua") menyembunyikan pager sepenuhnya.
+        function renderPager(pagerId, tableId) {
+            const el = document.getElementById(pagerId);
+            if (!el) {
+                return;
+            }
+            const info = $('#' + tableId).DataTable().page.info();
+            const totalPages = info.pages;
+            if (!totalPages || totalPages <= 1) {
+                el.innerHTML = '';
+                return;
+            }
+            const page = info.page + 1; // page.info().page dihitung dari 0
+
+            function pgBtn(label, targetPage, active, disabled) {
+                const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
+                const click = disabled ? '' : ` onclick="gotoPage('${tableId}', ${targetPage})"`;
+                return `<div class="${cls}"${click}>${label}</div>`;
+            }
+
+            // Jendela nomor halaman: maksimal 5 tombol angka di sekitar halaman aktif, supaya
+            // pager tidak melebar tak terbatas kalau datanya banyak.
+            let start = Math.max(1, page - 2);
+            let end = Math.min(totalPages, start + 4);
+            start = Math.max(1, end - 4);
+
+            let html = pgBtn('&laquo;', page - 1, false, page <= 1);
+            for (let p = start; p <= end; p++) {
+                html += pgBtn(String(p), p, p === page, false);
+            }
+            html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
+
+            el.innerHTML = html;
+        }
+
+        // Dipanggil tombol Prev/Next/nomor halaman di pager. Menerima nomor halaman 1-based
+        // (sesuai tampilan), DataTables sendiri pakai 0-based.
+        function gotoPage(tableId, page) {
+            $('#' + tableId).DataTable().page(page - 1).draw('page');
         }
 
         /* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum, Status: Semua/Terkirim/Belum Terkirim) -- */
@@ -1126,17 +1193,22 @@
             // $("#formKoreksiDetail").modal('toggle')
             // $("#formKoreksi").modal('toggle')
 
-            $("#tabel").DataTable(dtOptionsOutstanding);
-            $("#tabelRetur").DataTable(dtOptionsPenerimaan);
+            // Render pertama — sama persis jalurnya dengan setiap refresh lewat loadAll(),
+            // lihat definisi renderOutstanding()/renderPenerimaan() di bawah.
+            renderOutstanding();
+            renderPenerimaan();
+            rebindTooltips();
 
             $("#tabel").on('draw.dt', function() {
                 updateFooter('tabel', 'footerLabel1');
+                renderPager('pagerBtns1', 'tabel');
             });
             $("#tabelRetur").on('draw.dt', function() {
                 updateFooter('tabelRetur', 'footerLabel2');
+                renderPager('pagerBtns2', 'tabelRetur');
             });
-            updateFooter('tabel', 'footerLabel1');
-            updateFooter('tabelRetur', 'footerLabel2');
+
+            $('#tabelLen').val(String(panjangHalaman[activeTableId()]));
 
             // Filter hanya berlaku untuk tab "Pemakaian Barang" (Otorisasi/Status ada di sana).
             // columns.adjust() wajib dipanggil setelah tab baru terlihat — DataTables mengukur
@@ -1145,6 +1217,7 @@
                 const targetId = $(e.target).attr('href');
                 $(targetId + ' table').DataTable().columns.adjust();
                 activeTable().search($('#searchBox').val() || '').draw();
+                $('#tabelLen').val(String(panjangHalaman[activeTableId()]));
                 $('#btnFilter').toggle(targetId === '#profile');
             });
 
@@ -1154,8 +1227,6 @@
         function buttonBatalShowHide() {
             $('.showhide').hide();
         }
-
-
 
         function submitAddKoreksi() {
             let _token = $("#_token").val();
@@ -1674,12 +1745,7 @@
 
                 }
             })
-
-
-
-
             $("#formDetail").modal('toggle')
-
         }
 
         function fmtYMD(v) {
@@ -1695,30 +1761,8 @@
             return date.getFullYear() + "/" + month + "/" + day;
         }
 
-        function loadAll() {
-            let dataRefreshOutstanding = []
-            let dataRefreshPenerimaan = []
-
-            $.ajax({
-                url: "{!! url('pemakaianbarangloadall') !!}",
-                type: "get",
-                async: false,
-                success: function(res) {
-                    console.log(res)
-                    dataRefreshOutstanding = res.outstandingArray
-                    dataRefreshPenerimaan = res.penerimaanArray
-                }
-            })
-
-            // dispose dulu supaya tooltip lama (nempel terpisah di <body>) tidak nyangkut
-            // menutupi tombol baru setelah innerHTML diganti — lihat catatan yang sama di
-            // permintaanpemakaian.blade.php renderTabel().
-            $('#tabel_data, #tabelRetur_data').find('[data-toggle="tooltip"]').tooltip('dispose');
-
-            $('#tabel').DataTable().destroy();
-            let rowTable = ""
-            dataRefreshOutstanding.forEach((item, i) => {
-                rowTable += `<tr>
+        function outstandingRowHtml(item) {
+            return `<tr>
     <td class="text-center">
       <div class="action-buttons">
         <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
@@ -1729,28 +1773,21 @@
     <td>${fmtYMD(item[0].TANGGAL)}</td>
     <td>${item[0].NamaGudangAsal}</td>
     </tr>`
-            })
+        }
 
-            document.getElementById("tabel_data").innerHTML = rowTable
-            $("#tabel").DataTable(dtOptionsOutstanding)
-            updateFooter('tabel', 'footerLabel1')
+        function penerimaanRowHtml(item) {
+            let p = item[0]
+            let isOto = Number(p.IsOtorisasi1 || 0)
+            let qntOS = Number(p.QntOS || 0)
+            let isTerkirim = qntOS <= 0
+            let statusBadge = isTerkirim ?
+                '<span class="sp-badge is-active">Terkirim</span>' :
+                '<span class="sp-badge is-inactive">Belum Terkirim</span>'
+            let otoBadge = (isOto === 1) ?
+                '<span class="sp-badge is-active">Sudah</span>' :
+                '<span class="sp-badge is-inactive">Belum</span>'
 
-            $('#tabelRetur').DataTable().destroy();
-            let rowTableRetur = ""
-
-            dataRefreshPenerimaan.forEach((item, i) => {
-                let p = item[0]
-                let isOto = Number(p.IsOtorisasi1 || 0)
-                let qntOS = Number(p.QntOS || 0)
-                let isTerkirim = qntOS <= 0
-                let statusBadge = isTerkirim ?
-                    '<span class="sp-badge is-active">Terkirim</span>' :
-                    '<span class="sp-badge is-inactive">Belum Terkirim</span>'
-                let otoBadge = (isOto === 1) ?
-                    '<span class="sp-badge is-active">Sudah</span>' :
-                    '<span class="sp-badge is-inactive">Belum</span>'
-
-                rowTableRetur += `<tr data-oto="${isOto}" data-os="${qntOS}">
+            return `<tr data-oto="${isOto}" data-os="${qntOS}">
     <td class="text-center">
       <div class="action-buttons">
         <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('${p.NOBUKTI}')"><i class="bi bi-info"></i></button>
@@ -1767,13 +1804,63 @@
     <td>${p.OtoUser1 || ''}</td>
     <td>${fmtYMD(p.TglOto1)}</td>
     </tr>`
+        }
+
+        // Membangun ulang satu DataTable dari array baris terbaru — dipakai bareng oleh render
+        // pertama (document ready, tabel belum jadi DataTable) dan setiap kali loadAll() dipanggil
+        // (tabel sudah aktif, harus destroy dulu). State (halaman aktif, pencarian, urutan)
+        // dipertahankan lewat destroy/reinit — pola sama seperti
+        // purchasing/pembelianclosingpr.blade.php — supaya submit Add/Koreksi tidak melempar user
+        // balik ke halaman 1 / menghapus pencarian yang sedang diketik.
+        function rebuildTable(tableId, tbodyId, rows, rowHtmlFn, dtOptions, footerId, pagerId) {
+            const tableSel = '#' + tableId;
+            let state = null;
+
+            if ($.fn.dataTable.isDataTable(tableSel)) {
+                const dtOld = $(tableSel).DataTable();
+                state = {
+                    start: dtOld.page.info().start,
+                    search: dtOld.search(),
+                    order: dtOld.order()
+                };
+
+                // dispose dulu supaya tooltip lama (nempel terpisah di <body>) tidak nyangkut
+                // menutupi tombol baru setelah innerHTML diganti — lihat catatan yang sama di
+                // permintaanpemakaian.blade.php renderTabel().
+                $('#' + tbodyId).find('[data-toggle="tooltip"]').tooltip('dispose');
+                dtOld.destroy();
+            }
+
+            document.getElementById(tbodyId).innerHTML = rows.map(rowHtmlFn).join('');
+
+            const opts = Object.assign({}, dtOptions, {
+                pageLength: panjangHalaman[tableId]
             });
+            const dt = $(tableSel).DataTable(opts);
 
-            document.getElementById("tabelRetur_data").innerHTML = rowTableRetur
+            if (state) {
+                dt.search(state.search).order(state.order).draw();
+                const len = panjangHalaman[tableId];
+                if (len > 0) {
+                    dt.page(Math.floor(state.start / len)).draw('page');
+                }
+            }
 
-            $("#tabelRetur").DataTable(dtOptionsPenerimaan)
-            updateFooter('tabelRetur', 'footerLabel2')
+            updateFooter(tableId, footerId);
+            renderPager(pagerId, tableId);
+        }
 
+        function renderOutstanding() {
+            rebuildTable('tabel', 'tabel_data', outstandingRows, outstandingRowHtml, dtOptionsOutstanding,
+                'footerLabel1', 'pagerBtns1');
+        }
+
+        function renderPenerimaan() {
+            rebuildTable('tabelRetur', 'tabelRetur_data', penerimaanRows, penerimaanRowHtml,
+                dtOptionsPenerimaan, 'footerLabel2', 'pagerBtns2');
+        }
+
+        function rebindTooltips() {
             // container:'body', boundary:'window' — lihat penjelasan panjang di
             // permintaanpemakaian.blade.php renderTabel() soal kenapa keduanya wajib di
             // dalam kotak scroll pendek (.table-wrap).
@@ -1781,6 +1868,33 @@
                 container: 'body',
                 boundary: 'window'
             });
+        }
+
+        // Menyegarkan kedua tabel sekaligus untuk rentang tanggal yang sedang dipilih (dipanggil
+        // saat tanggal berubah dan setelah Add/Koreksi/otorisasi supaya tabel menyegarkan diri
+        // sendiri) — sama seperti reloadData() di permintaanpemakaian.blade.php.
+        function loadAll() {
+            let date1 = $('#inputDate1').val();
+            let date2 = $('#inputDate2').val();
+
+            $.ajax({
+                url: "{!! url('pemakaianbarangloadall') !!}",
+                type: "get",
+                async: false,
+                data: {
+                    date1,
+                    date2
+                },
+                success: function(res) {
+                    console.log(res)
+                    outstandingRows = res.outstandingArray
+                    penerimaanRows = res.penerimaanArray
+                }
+            })
+
+            renderOutstanding();
+            renderPenerimaan();
+            rebindTooltips();
         }
 
         function submitPrint(nobukti) {
@@ -2583,10 +2697,6 @@
     </tr>`
             });
             document.getElementById("koreksiTableData").innerHTML = rowTable
-
-
-
-
             $.ajax({
                 url: "{!! url('pemakaianbarangkoreksiaddlist') !!}",
                 type: "post",
@@ -2612,18 +2722,7 @@
             } else {
                 tempKoreksiAddList += `<option value="" selected disabled>Tidak ada barang untuk ditambah</option>`
             }
-
-
-
             document.getElementById("koreksiAddSelect").innerHTML = tempKoreksiAddList
-
-
-
-
-
-
-
-
             // $("#formKoreksi").modal('toggle')
 
         }
@@ -2663,9 +2762,6 @@
                     let month = ("0" + (date.getMonth() + 1)).slice(-2);
                     date1 = date.getFullYear() + "-" + (month) + "-" + (day);
                     $('#input_koreksidetail_tanggal').val(date1)
-
-
-
                     let rowTable = ""
                     res.forEach((item, i) => {
                         let qnt = 0.00
