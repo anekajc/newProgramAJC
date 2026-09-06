@@ -24,7 +24,7 @@
                 <div class="filter-wrap">
                     <label>Jenis</label>
                     <select class="filter-inp" id="inputMode" onchange="setMode(this.value)">
-                        <option value="0">Non Outstanding</option>
+                        <option value="0">Semua</option>
                         <option value="1">Outstanding</option>
                     </select>
                 </div>
