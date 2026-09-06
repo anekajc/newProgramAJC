@@ -131,6 +131,12 @@
             onchange="reloadData()">
         </div>
 
+        {{-- Susunan (Cari data -> Tampilkan -> Filter -> Tambah) disamakan dengan
+             gudang/purchaseOrder.blade.php (po-search-inp/po-len-wrap/po-btn-filter/
+             po-toolbar-act): ditulis sejajar langsung di dalam .toolbar (bukan
+             dibungkus lagi di .action-group), Tambah saja yang dikelompokkan supaya
+             tetap ngambang di ujung kanan (lihat .action-group{margin-left:auto}
+             di @section('css')). --}}
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
           oninput="currentPage = 1; renderTabel()" style="width:200px">
 
@@ -280,9 +286,14 @@
                 </div>
                 <div class="col-md-2">
                   <div class="input-group form-group">
-                    <input type="text" class="form-control" id="input_gudang"  disabled>
-                    <button id="buttonbrowse_gudang" onclick="doBrowseMaster('Gudang', '{!! $gudang !!}')" class="btn btn-primary btn-sm text-right lockableHeader lockableModeDetail">
-                      <i class="bi bi-plus"></i>
+                    {{-- Gudang: pola "resolve-or-pick" (lihat guide-update-barang.md) --
+                         bisa diketik langsung + Enter, atau pakai tombol search; match
+                         persis KODEGDG langsung isi field ini, kalau tidak baru modal
+                         #modalPickGudang terbuka (bukan lagi #formBrowseMaster generik). --}}
+                    <input type="text" class="form-control text-left lockableHeader lockableModeDetail" id="input_gudang" placeholder="Kode Gudang"
+                      onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveGudang($('#input_gudang').val()); }">
+                    <button type="button" id="buttonbrowse_gudang" class="btn btn-chip-biru btn-sm lockableHeader lockableModeDetail" style="height:32px; border-radius:0;" onclick="resolveGudang($('#input_gudang').val())">
+                      <i class="bi bi-search"></i>
                     </button>
                   </div>
                 </div>
@@ -507,6 +518,147 @@
 
 @include('gudang.modalbrowsemaster')
 
+<style>
+  #modalPickGudang tbody tr.pick-row {
+    cursor: pointer;
+    transition: background-color .12s;
+  }
+
+  #modalPickGudang tbody tr.pick-row:hover td {
+    background-color: #eef2ff;
+  }
+
+  #modalPickGudangLabel {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  #modalPickGudang .modal-body {
+    padding: 24px 32px 32px;
+  }
+
+  #modalPickGudang thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid #e7e9ee !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  #modalPickGudang thead th:first-child {
+    width: 30%;
+  }
+
+  #modalPickGudang tbody td {
+    border-top: none !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 18px 16px;
+    vertical-align: middle;
+  }
+
+  #modalPickGudang .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  #modalPickGudang .dataTables_filter {
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 16px;
+  }
+
+  #modalPickGudang .dataTables_filter label {
+    font-size: 0;
+    margin: 0;
+    display: inline-block;
+  }
+
+  #modalPickGudang .dataTables_filter input {
+    font-size: 15px;
+    margin-left: 0;
+    width: 280px;
+    max-width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+  }
+
+  #modalPickGudang .dataTables_filter input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #e8edff;
+  }
+
+  #modalPickGudang .dataTables_info,
+  #modalPickGudang .dataTables_paginate {
+    font-size: 14px;
+    margin-top: 16px !important;
+  }
+</style>
+
+
+<div class="modal fade" id="modalPickGudang" tabindex="-1" role="dialog" aria-labelledby="modalPickGudangLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalPickGudangLabel">Pilih Gudang</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelPickGudang" class="table table-hover table-responsive-lg">
+                <thead class="text-center">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelPickGudang_data" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Placeholder "Cari Data" untuk kotak pencarian DataTables di modal ini - disamakan
+     dengan modalPOAdd.blade.php (dipasang lewat event shown.bs.modal, bukan lewat opsi
+     language.searchPlaceholder, karena kotak pencariannya baru ada setelah DataTables
+     di-init di dalam openGudangPicker()). --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof jQuery === 'undefined') { return }
+
+  jQuery(document).on('shown.bs.modal', '#modalPickGudang', function () {
+    jQuery('#modalPickGudang .dataTables_filter input').attr('placeholder', 'Cari Data')
+  })
+})
+</script>
+
 @endsection
 
 @section('js')
@@ -585,7 +737,7 @@
     };
   }
 
-  // nyala/matiin field header + item berdasarkan class yang uda dipasang di
+  // nyala/matiin field header + item berdasarkan class yang sudah dipasang di
   // markup form: lockableHeader, lockableModeDetail, hideableModeDetail, lockableItemModeEdit.
   if (typeof doUnlockHeader !== 'function') {
     window.doUnlockHeader = function() {
@@ -635,6 +787,7 @@
     };
   }
 
+  // Format angka ke Rupiah 2 desimal (dipakai nampilin Qty/HPP/Harga di tabel item saat mode Edit/Detail).
   if (typeof formatCurrency !== 'function') {
     window.formatCurrency = function(v) {
       let n = Number(v) || 0;
@@ -716,7 +869,7 @@
     return belum.concat(sudah);
   })();
   let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
-  let pageSize = 10;   
+  let pageSize = 10;  
   let currentPage = 1; // halaman aktif, di-reset ke 1 tiap kali search/filter/tanggal berubah
 
   var g_href = 'ubahkemasanbarang';
@@ -978,7 +1131,7 @@
     });
   }
 
-  // dropdown "Tampilkan" (#tampilLen) 
+  // Dropdown "Tampilkan"
   function onChangeTampilLen() {
     pageSize = Number($('#tampilLen').val());
     currentPage = 1;
@@ -991,8 +1144,8 @@
   }
 
   // render tombol Prev/nomor halaman/Next di kanan table-footer 
-  // kelas .pager-btns/.pg sudah ada di report-table.css).
-  // ditampilkan maksimal 5 nomor halaman sekaligus, digeser mengikuti currentPage biar ga kepanjangan klo datanya banyak
+  // kelas .pager-btns/.pg sudah ada di report-table.css). 
+  // ditampilkan maksimal 5 nomor halaman sekaligus, digeser mengikuti currentPage biar tidak kepanjangan klo datanya banyak.
   function renderPager(totalPages) {
     const el = document.getElementById('pagerBtns');
     if (!el) return;
@@ -1107,8 +1260,6 @@ function submitPrint (nobukti) {
       }
     })
 
-    // Jaga-jaga kalau Sp_CetakUbahKemasan ga mengembalikan baris apapun
-    // klo ga ada ini, dataPrint[0] bakal undefined dan bikin error
     if (!dataPrint || !dataPrint.length) {
       alertify.warning('Data cetak tidak ditemukan');
       return;
@@ -1772,6 +1923,7 @@ function submitPrint (nobukti) {
     doUnlockHeader();
     doUnlockModeEdit();
     $("#buttonbrowse_gudang").prop("disabled", dataItem.length > 0);
+    $("#input_gudang").prop("disabled", dataItem.length > 0);
   }
 
   function refreshForm(_nobukti = "") {
@@ -1900,6 +2052,7 @@ function submitPrint (nobukti) {
     refreshForm(_nb);
     doUnlockHeader();
     $("#buttonbrowse_gudang").prop("disabled", dataItem.length > 0);
+    $("#input_gudang").prop("disabled", dataItem.length > 0);
 
     $('#pageHome').hide();
     $('#pageForm').show();
@@ -1945,8 +2098,6 @@ function submitPrint (nobukti) {
     });
   }
 
-  // pake alertify.confirm bukan alertify.prompt karena endpoint kmbjupdatebatalotorisasi ga
-  // nyimpen alasan batal otorisasi, jadi ga perlu input teks
   function buttonBatalOtorisasi(_nb) {
     if (!doCekAkses("akses_isbatal")) return;
 
@@ -2099,6 +2250,114 @@ function submitPrint (nobukti) {
   function buttonBrowsePickGudang(_kode) {
     $("#input_gudang").val(_kode);
     dataBrowse['gudang'] = _kode;
+  }
+
+  let gudangCacheAll = null;
+  let gudangLookupBusy = false;
+  let listGudangPicker = [];
+
+  function fetchGudangList(callback) {
+    let _token = $("#_token").val();
+    gudangLookupBusy = true;
+    $.ajax({
+      url: "{!! url('polistgudang') !!}",
+      type: "post",
+      data: { _token },
+      success: function(res) {
+        gudangLookupBusy = false;
+        gudangCacheAll = res;
+        callback(res);
+      },
+      error: function(err) {
+        gudangLookupBusy = false;
+        console.log(err);
+        alertify.warning('Terjadi kesalahan, silahkan refresh browser');
+      }
+    });
+  }
+
+  function findExactGudang(list, term) {
+    let needle = term.toLowerCase();
+    return list.find(g => String(g.KODEGDG || '').trim().toLowerCase() === needle);
+  }
+
+  function resolveGudang(term) {
+    term = (term || '').trim();
+
+    if (term === '') {
+      openGudangPicker('');
+      return;
+    }
+
+    if (gudangLookupBusy) return;
+
+    if (gudangCacheAll) {
+      let hit = findExactGudang(gudangCacheAll, term);
+      hit ? applyGudangToForm(hit) : openGudangPicker(term);
+      return;
+    }
+
+    fetchGudangList(function(res) {
+      let hit = findExactGudang(res, term);
+      hit ? applyGudangToForm(hit) : openGudangPicker(term);
+    });
+  }
+
+  function applyGudangToForm(item) {
+    $('#input_gudang').val(item.KODEGDG);
+    dataBrowse['gudang'] = item.KODEGDG;
+    $('#modalPickGudang').modal('hide');
+  }
+
+  let gudangTablePending = null;
+  let gudangSearchPending = '';
+
+  function initGudangTable(list, searchTerm) {
+    if (!$('#modalPickGudang').is(':visible')) {
+      gudangTablePending = list;
+      gudangSearchPending = searchTerm || '';
+      return;
+    }
+
+    listGudangPicker = list;
+    let rowTable = '';
+    list.forEach((item, i) => {
+      rowTable += `<tr class="pick-row" onclick="buttonPickGudang(${i})">
+        <td>${item.KODEGDG}</td>
+        <td>${item.NAMA}</td>
+      </tr>`;
+    });
+    $('#tabelPickGudang_data').html(rowTable);
+
+    if ($.fn.DataTable.isDataTable('#tabelPickGudang')) {
+      $('#tabelPickGudang').DataTable().destroy();
+    }
+    $('#tabelPickGudang').DataTable({ lengthChange: false, paging: true })
+      .search(searchTerm || '').draw();
+  }
+
+  $(document).on('shown.bs.modal', '#modalPickGudang', function () {
+    if (gudangTablePending) {
+      initGudangTable(gudangTablePending, gudangSearchPending);
+      gudangTablePending = null;
+    } else if ($.fn.DataTable.isDataTable('#tabelPickGudang')) {
+      let dt = $('#tabelPickGudang').DataTable();
+      dt.columns.adjust();
+      dt.search(gudangSearchPending || '').draw();
+    }
+  });
+
+  function openGudangPicker(term) {
+    let showWith = function(list) {
+      $('#modalPickGudang').modal('show');
+      initGudangTable(list, term);
+    };
+
+    gudangCacheAll ? showWith(gudangCacheAll) : fetchGudangList(showWith);
+  }
+
+  function buttonPickGudang(index) {
+    applyGudangToForm(listGudangPicker[index]);
   }
 
   function doBrowseBarang() {
