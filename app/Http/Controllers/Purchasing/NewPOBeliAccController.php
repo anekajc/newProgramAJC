@@ -217,13 +217,30 @@ public function spUpdateSO (Request $req) {
       }
 
 public function getDetailPembelian (Request $req) {
-  $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+  $nobukti = $req->NoBukti;
+
+  // Bulan/tahun HARUS diambil dari tanggal dokumennya sendiri, bukan periode kerja user
+  // yang sedang aktif - kalau tidak, dokumen dari bulan lain (filter tanggal di luar
+  // periode berjalan, seperti di grid newpobeliacc yang boleh lintas bulan) selalu
+  // kembali kosong. Sama seperti NewPOController::getDetailPembelian.
+  $header = DB::connection('SML')->select('select TANGGAL from dbBeli where NOBUKTI = :nobukti', ['nobukti' => $nobukti]);
+  if ($header) {
+    $bulan = (int) date('n', strtotime($header[0]->TANGGAL));
+    $tahun = (int) date('Y', strtotime($header[0]->TANGGAL));
+  } else {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $bulan = $periode->bulan;
+    $tahun = $periode->tahun;
+  }
 
   // Halaman gabungan melayani baris jasa maupun non-jasa dalam satu tabel, jadi
   // pjasa dikirim dari baris yang dipilih di JS (lihat renderTabelPBA() di
   // newpobeliacc.blade.php), bukan lagi dipatok 0/1 per controller.
-  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_Tampilbeli ( :bulan , :tahun, :pjasa) where NoBukti = :NoBukti" , ["bulan" => $periode->bulan, "tahun" => $periode->tahun , "pjasa" => (int) ($req->pjasa ?? 0), "NoBukti" => $req->NoBukti]);
-   
+  $pembelian = DB::connection("SML")->select("select * from dbo.fnc_Tampilbeli ( :bulan , :tahun, :pjasa) where NoBukti = :NoBukti" , ["bulan" => $bulan, "tahun" => $tahun , "pjasa" => (int) ($req->pjasa ?? 0), "NoBukti" => $nobukti]);
+
+  // Sama seperti getAllPembelian - TANGGAL bisa NULL kalau barang belum di-QC, fallback ke tanggal dbBeli.
+  if ($header) { foreach ($pembelian as $p) { if (empty($p->TANGGAL)) { $p->TANGGAL = $header[0]->TANGGAL; } } }
+
   $tempPembelian1 = [];
   foreach ($pembelian as $p) {
     array_push($tempPembelian1, $p);

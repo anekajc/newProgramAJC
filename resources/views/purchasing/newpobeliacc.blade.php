@@ -18,13 +18,13 @@
     .pba-f .form-control,.pba-f select{width:100%;}
     .pba-f textarea.form-control{resize:none;}
     .pba-tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px 16px;margin-top:14px;}
-    #editPembelian .btn,#detail .btn,#IdetailPembelian .btn{border-radius:9px;font-weight:600;border:none;}
-    #editPembelian .btn-success,#detail .btn-success,#IdetailPembelian .btn-success{background:#e6f6ec;color:#16a34a;}
-    #editPembelian .btn-success:hover,#detail .btn-success:hover,#IdetailPembelian .btn-success:hover{background:#d3f0dd;color:#16a34a;}
-    #editPembelian .btn-primary,#detail .btn-primary,#IdetailPembelian .btn-primary{background:#e8edff;color:#3b5bdb;}
-    #editPembelian .btn-primary:hover,#detail .btn-primary:hover,#IdetailPembelian .btn-primary:hover{background:#d6deff;color:#3b5bdb;}
-    #editPembelian .btn-secondary,#detail .btn-secondary,#IdetailPembelian .btn-secondary{background:#f1f2f4;color:#5c6470;}
-    #editPembelian .btn-secondary:hover,#detail .btn-secondary:hover,#IdetailPembelian .btn-secondary:hover{background:#e4e6e9;color:#5c6470;}
+    #page2 .btn,#page3 .btn,#page4 .btn{border-radius:9px;font-weight:600;border:none;}
+    #page2 .btn-success,#page3 .btn-success,#page4 .btn-success{background:#e6f6ec;color:#16a34a;}
+    #page2 .btn-success:hover,#page3 .btn-success:hover,#page4 .btn-success:hover{background:#d3f0dd;color:#16a34a;}
+    #page2 .btn-primary,#page3 .btn-primary,#page4 .btn-primary{background:#e8edff;color:#3b5bdb;}
+    #page2 .btn-primary:hover,#page3 .btn-primary:hover,#page4 .btn-primary:hover{background:#d6deff;color:#3b5bdb;}
+    #page2 .btn-secondary,#page3 .btn-secondary,#page4 .btn-secondary{background:#f1f2f4;color:#5c6470;}
+    #page2 .btn-secondary:hover,#page3 .btn-secondary:hover,#page4 .btn-secondary:hover{background:#e4e6e9;color:#5c6470;}
 
     #content { padding-top: 12px; }
 
@@ -462,114 +462,157 @@
   <!-- End modal add-->
 
 
-
-  <!-- start modal edit pembelian  -->
-<div class="modal fade" id="editPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editPembelianModalLabel">Detail</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+  <!-- start page edit pembelian (dulu modal #editPembelian) -->
+<div id="page2" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+  <div class="row">
+    <div class="col-6 text-left">
+      <h2 id="editPembelianModalLabel">Detail</h2>
+    </div>
+    <div class="col-6 text-right">
+      <button type="button" class="btn btn-danger btn-lg" style="
+      height: 30px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="pbaClosePage()">Close</button>
+    </div>
+  </div>
 
       <div class="modal-body">
-        <div class="pba-fgrid">
+        <div class="row">
           <input type="hidden" class="form-control" id="EditNourut">
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>No Bukti</label>
-              <input type="text" class="form-control text-left" id="EditNobukti" placeholder="" disabled>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No Bukti</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="EditNobukti" placeholder="" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-left" id="editPembelianDate" value="{!! date('Y-m-d') !!}" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Tanggal</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-left" id="editPembelianDate" value="{!! date('Y-m-d') !!}" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="editPembelianKodeSupp" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Supplier</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="editPembelianKodeSupp" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>No PO</label>
-              <input type="text" class="form-control text-left" placeholder="No PO" id="editPembelianNoPO" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No PO</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="No PO" id="editPembelianNoPO" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Surat Jln Supp</label>
-              <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="editPembelianFakturSupp" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol pba-fcol-wide">
-            <div class="pba-f">
-              <label>Nama Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="editPembelianSupp" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Alamat</label>
-              <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="editPembelianAlamatSupp" disabled></textarea>
-            </div>
-            <div class="pba-f">
-              <label>Gudang</label>
-              <input type="text" class="form-control text-left" placeholder="Gudang" id="editPembeliangudang" disabled>
-            </div>
-            <div class="pba-f">
-              <label>SO Cust</label>
-              <input type="text" class="form-control text-left" id="editPembelianSoCustomer" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Surat Jln</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="editPembelianFakturSupp" disabled>
+              </div></div>
             </div>
           </div>
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Valas</label>
-              <input type="text" class="form-control" id="editPembelianvalas" disabled>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Nama Supp</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="editPembelianSupp" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Kurs</label>
-              <input type="text" class="form-control" id="editPembeliankurs" onchange="onchangekurs()" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Alamat</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="editPembelianAlamatSupp" disabled></textarea>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>TOP</label>
-              <input type="number" class="form-control text-left" id="editPembelianHari" value=0 min=0 disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Gudang</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Gudang" id="editPembeliangudang" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>No/Sopir</label>
-              <input type="text" class="form-control text-left" id="editPembelianNoSopir" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>SO Cust</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="editPembelianSoCustomer" disabled>
+              </div></div>
             </div>
           </div>
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Pembayaran</label>
-              <select onchange="onChangeInputAddPembayaran()" id="editPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>Tunai</option>
-                <option value=1>Kredit</option>
-              </select>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Valas</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="editPembelianvalas" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Jth Tempo</label>
-              <input type="date" class="form-control text-center" id="editPembelianJthTempo" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Kurs</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="editPembeliankurs" onchange="onchangekurs()" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>PPN</label>
-              <select onchange="onChangeTipePPN()" id="editPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>None</option>
-                <option value=1>Exclude</option>
-                <option value=2>Include</option>
-              </select>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>TOP</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="editPembelianHari" value=0 min=0 disabled>
+              </div></div>
             </div>
-            <div class="pba-f" hidden>
-              <label>No Uang Muka</label>
-              <input type="text" class="form-control text-left" id="editPembelianNoUangMuka" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No/Sopir</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="editPembelianNoSopir" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Uang Muka</label>
-              <input type="number" class="form-control text-left" id="editPembelianNuangmuka" disabled>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Bayar</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeInputAddPembayaran()" id="editPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>Tunai</option>
+                  <option value=1>Kredit</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Jth Tempo</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-center" id="editPembelianJthTempo" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>PPN</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeTipePPN()" id="editPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>None</option>
+                  <option value=1>Exclude</option>
+                  <option value=2>Include</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row" hidden>
+              <div class="col-md-4" style="margin-top:5px;"><label>No Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="editPembelianNoUangMuka" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="editPembelianNuangmuka" disabled>
+              </div></div>
             </div>
           </div>
         </div>
-
         <div class="container-fluid mt-2">
           <div class="row">
             <div class="col-md-12 text-right">
@@ -737,335 +780,440 @@
         </div>
 
         <!-- PPN GRANDTOTAL -->
-        <div class="pba-tgrid">
-          <div class="pba-f">
-            <label>Disc %</label>
-            <input type="number" class="form-control text-right" id="input_edit_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+        <div class="row mt-4">
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>Disc %</label>
+              <input type="number" class="form-control text-right" id="input_edit_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>DiscRp</label>
-            <input type="number" class="form-control text-right" id="input_edit_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DiscRp</label>
+              <input type="number" class="form-control text-right" id="input_edit_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>DPP</label>
-            <input type="text" class="form-control text-right" id="input_edit_dpp" value="0.00" disabled>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DPP</label>
+              <input type="text" class="form-control text-right" id="input_edit_dpp" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>PPN</label>
-            <input type="text" class="form-control text-right" id="input_edit_ppn" value="0.00" disabled>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>PPN</label>
+              <input type="text" class="form-control text-right" id="input_edit_ppn" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>GrandTotal</label>
-            <input type="text" class="form-control text-right" id="input_edit_grandtotal" value="0.00" disabled>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>Grand Total</label>
+              <input type="text" class="form-control text-right" id="input_edit_grandtotal" value="0.00" disabled>
+            </div>
           </div>
         </div>
-      <!-- PPN GRANDTOTAL -->
+      </div>
 
       <div class="modal-footer">
         <button type="button" id="btnotokananedit" class="btn btn-primary" onclick="submitUnOtorisasi1()">Batal Oto</button>
         <!-- submitUnOtorisasi1   -->
         <!-- submitOtorisasi1 -->
       </div>
-    </div>
-  </div>
 </div>
+  <!-- End page edit pembelian -->
+
+  <!-- Dua penutup div di bawah ini BUKAN milik page di atas. Blok modal lama menutup dua div
+       lebih banyak daripada yang dibukanya sendiri, dan kelebihan itu menutup elemen yang
+       dibuka di atas blok. Dipertahankan apa adanya supaya susunan DOM halaman tidak berubah
+       saat modal diganti jadi page. -->
     </div>
     </div>
-    </div>
-
-
-
-
-  <!-- End modal editpembelian-->
 
   <!-- //TAB KIRI -->
 
 
-  <!-- start modal tab kiri detail INFORMASI-->
-<div class="modal fade" id="detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">Detail</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <div class="pba-fgrid">
-                    <input type="hidden" class="form-control" id="input_add_nourut">
-
-                    <div class="pba-fcol">
-                        <div class="pba-f">
-                            <label>No Bukti</label>
-                            <input type="text" class="form-control text-left" id="detailPembelianNobukti" placeholder="" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Tanggal</label>
-                            <input type="date" class="form-control text-left" id="detailDate" value="" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Supplier</label>
-                            <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="detailPembelianKodeSupp" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>No PO</label>
-                            <input type="text" class="form-control text-left" placeholder="No PO" id="detailNoPO" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Surat Jln Supp</label>
-                            <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="detailFakturSupp" disabled>
-                        </div>
-                    </div>
-
-                    <div class="pba-fcol pba-fcol-wide">
-                        <div class="pba-f">
-                            <label>Nama Supplier</label>
-                            <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="detailPembelianSupp" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Alamat</label>
-                            <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="detailPembelianAlamatSupp" disabled></textarea>
-                        </div>
-                        <div class="pba-f">
-                            <label>Gudang</label>
-                            <input type="text" class="form-control text-left" placeholder="Gudang" id="detailgudang" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>SO Cust</label>
-                            <input type="text" class="form-control text-left" id="detailSoCustomer" disabled>
-                        </div>
-                    </div>
-
-                    <div class="pba-fcol">
-                        <div class="pba-f">
-                            <label>Valas</label>
-                            <input type="text" class="form-control" id="detailPembelianvalas" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Kurs</label>
-                            <input type="text" class="form-control" id="detailPembeliankurs" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>TOP</label>
-                            <input type="number" class="form-control text-left" id="detailPembelianhari" value=0 min=0 disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>No/Sopir</label>
-                            <input type="text" class="form-control text-left" id="detailNoSopir" disabled>
-                        </div>
-                    </div>
-
-                    <div class="pba-fcol">
-                        <div class="pba-f">
-                            <label>Pembayaran</label>
-                            <select onchange="onChangeInputAddPembayaran()" id="detailPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
-                                <option value=0 selected>Tunai</option>
-                                <option value=1>Kredit</option>
-                            </select>
-                        </div>
-                        <div class="pba-f">
-                            <label>Jth Tempo</label>
-                            <input type="date" class="form-control text-center" id="detailPembelianJthTempo" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>PPN</label>
-                            <select onchange="onChangeTipePPN()" id="detailPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
-                                <option value=0 selected>None</option>
-                                <option value=1>Exclude</option>
-                                <option value=2>Include</option>
-                            </select>
-                        </div>
-                        <div class="pba-f" hidden>
-                            <label>No Uang Muka</label>
-                            <input type="text" class="form-control text-left" id="detailNoUangMuka" disabled>
-                        </div>
-                        <div class="pba-f">
-                            <label>Uang Muka</label>
-                            <input type="number" class="form-control text-left" id="detailNuangmuka" disabled>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="table-responsive">
-                            <table id="detailTable" class="data-table">
-                                <thead class="text-center">
-                                    <tr>
-                                        <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                                        <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Qty</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Qty PO</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Satuan</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Harga</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Disc</th>
-                                        <th style="padding: 4px 12px;" scope="col" class="text-center">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="detailTableData" class="text-left">
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pba-tgrid">
-                    <div class="pba-f">
-                        <label>Disc %</label>
-                        <input type="number" class="form-control text-right" id="input_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
-                    </div>
-                    <div class="pba-f">
-                        <label>DiscRp</label>
-                        <input type="number" class="form-control text-right" id="input_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
-                    </div>
-                    <div class="pba-f">
-                        <label>DPP</label>
-                        <input type="text" class="form-control text-right" id="input_det_dpp" value="0.00" disabled>
-                    </div>
-                    <div class="pba-f">
-                        <label>PPN</label>
-                        <input type="text" class="form-control text-right" id="input_det_ppn" value="0.00" disabled>
-                    </div>
-                    <div class="pba-f">
-                        <label>GrandTotal</label>
-                        <input type="text" class="form-control text-right" id="input_det_grandtotal" value="0.00" disabled>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" id="btnotokiri" class="btn btn-primary" onclick="submitOtorisasi1()">Approve</button>
-            </div>
-        </div>
+  <!-- start page tab kiri detail INFORMASI (dulu modal #detail) -->
+<div id="page3" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+  <div class="row">
+    <div class="col-6 text-left">
+      <h2 id="detailModalLabel">Detail</h2>
     </div>
-</div>
-    <!-- End modal detail Informasi-->
-
-
-
-
-
-
-
-  
-  
-  
-    <!-- TAB KANAN detail INFORMASI-->
-    
-<div class="modal fade" id="IdetailPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="IdetailPembelianModalLabel">Detail </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+    <div class="col-6 text-right">
+      <button type="button" class="btn btn-danger btn-lg" style="
+      height: 30px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="pbaClosePage()">Close</button>
+    </div>
+  </div>
 
       <div class="modal-body">
-        <div class="pba-fgrid">
+        <div class="row">
+          <input type="hidden" class="form-control" id="input_add_nourut">
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No Bukti</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailPembelianNobukti" placeholder="" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Tanggal</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-left" id="detailDate" value="" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Supplier</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="detailPembelianKodeSupp" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No PO</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="No PO" id="detailNoPO" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Surat Jln</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="detailFakturSupp" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Nama Supp</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="detailPembelianSupp" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Alamat</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="detailPembelianAlamatSupp" disabled></textarea>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Gudang</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Gudang" id="detailgudang" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>SO Cust</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailSoCustomer" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Valas</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="detailPembelianvalas" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Kurs</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="detailPembeliankurs" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>TOP</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="detailPembelianhari" value=0 min=0 disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No/Sopir</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailNoSopir" disabled>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Bayar</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeInputAddPembayaran()" id="detailPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>Tunai</option>
+                  <option value=1>Kredit</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Jth Tempo</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-center" id="detailPembelianJthTempo" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>PPN</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeTipePPN()" id="detailPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>None</option>
+                  <option value=1>Exclude</option>
+                  <option value=2>Include</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row" hidden>
+              <div class="col-md-4" style="margin-top:5px;"><label>No Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="detailNoUangMuka" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="detailNuangmuka" disabled>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="table-responsive">
+              <table id="detailTable" class="data-table">
+                <thead class="text-center">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Qty</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Qty PO</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Satuan</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Harga</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Disc</th>
+                    <th style="padding: 4px 12px;" scope="col" class="text-center">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody id="detailTableData" class="text-left">
+                  <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>Disc %</label>
+              <input type="number" class="form-control text-right" id="input_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DiscRp</label>
+              <input type="number" class="form-control text-right" id="input_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DPP</label>
+              <input type="text" class="form-control text-right" id="input_det_dpp" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>PPN</label>
+              <input type="text" class="form-control text-right" id="input_det_ppn" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>Grand Total</label>
+              <input type="text" class="form-control text-right" id="input_det_grandtotal" value="0.00" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnotokiri" class="btn btn-primary" onclick="submitOtorisasi1()">Approve</button>
+      </div>
+</div>
+    <!-- End page detail Informasi -->
+
+
+
+
+
+
+
+  
+  
+  
+    <!-- TAB KANAN detail INFORMASI (dulu modal #IdetailPembelian) -->
+<div id="page4" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+  <div class="row">
+    <div class="col-6 text-left">
+      <h2 id="IdetailPembelianModalLabel">Detail</h2>
+    </div>
+    <div class="col-6 text-right">
+      <button type="button" class="btn btn-danger btn-lg" style="
+      height: 30px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="pbaClosePage()">Close</button>
+    </div>
+  </div>
+
+      <div class="modal-body">
+        <div class="row">
           <input type="hidden" class="form-control" id="Iinput_add_nourut">
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>No Bukti</label>
-              <input type="text" class="form-control text-left" id="IdetailPembelianNobukti" placeholder="" disabled>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No Bukti</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="IdetailPembelianNobukti" placeholder="" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Tanggal</label>
-              <input type="date" class="form-control text-left" id="IdetailDate" value="{!! date('Y-m-d') !!}" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Tanggal</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-left" id="IdetailDate" value="{!! date('Y-m-d') !!}" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="IdetailPembelianKodeSupp" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Supplier</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Kode Pelanggan" id="IdetailPembelianKodeSupp" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>No PO</label>
-              <input type="text" class="form-control text-left" placeholder="No PO" id="IdetailNoPO" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No PO</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="No PO" id="IdetailNoPO" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Surat Jln Supp</label>
-              <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="IdetailFakturSupp" disabled>
-            </div>
-          </div>
-
-          <div class="pba-fcol pba-fcol-wide">
-            <div class="pba-f">
-              <label>Nama Supplier</label>
-              <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="IdetailPembelianSupp" disabled>
-            </div>
-            <div class="pba-f">
-              <label>Alamat</label>
-              <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="IdetailPembelianAlamatSupp" disabled></textarea>
-            </div>
-            <div class="pba-f">
-              <label>Gudang</label>
-              <input type="text" class="form-control text-left" placeholder="Gudang" id="Idetailgudang" disabled>
-            </div>
-            <div class="pba-f">
-              <label>SO Cust</label>
-              <input type="text" class="form-control text-left" id="IdetailSoCustomer" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Surat Jln</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Surat Jalan Supplier" id="IdetailFakturSupp" disabled>
+              </div></div>
             </div>
           </div>
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Valas</label>
-              <input type="text" class="form-control" id="IdetailPembelianvalas" disabled>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Nama Supp</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Nama Pelanggan" id="IdetailPembelianSupp" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Kurs</label>
-              <input type="text" class="form-control" id="IdetailPembeliankurs" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Alamat</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <textarea rows=2 placeholder="Alamat Pelanggan" class="form-control text-left" id="IdetailPembelianAlamatSupp" disabled></textarea>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>TOP</label>
-              <input type="number" class="form-control text-left" id="IdetailPembelianhari" value=0 min=0 disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Gudang</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" placeholder="Gudang" id="Idetailgudang" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>No/Sopir</label>
-              <input type="text" class="form-control text-left" id="IdetailNoSopir" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>SO Cust</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="IdetailSoCustomer" disabled>
+              </div></div>
             </div>
           </div>
 
-          <div class="pba-fcol">
-            <div class="pba-f">
-              <label>Pembayaran</label>
-              <select onchange="onChangeInputAddPembayaran()" id="IdetailPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>Tunai</option>
-                <option value=1>Kredit</option>
-              </select>
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Valas</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="IdetailPembelianvalas" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Jth Tempo</label>
-              <input type="date" class="form-control text-center" id="IdetailPembelianJthTempo" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Kurs</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control" id="IdetailPembeliankurs" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>PPN</label>
-              <select onchange="onChangeTipePPN()" id="IdetailPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
-                <option value=0 selected>None</option>
-                <option value=1>Exclude</option>
-                <option value=2>Include</option>
-              </select>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>TOP</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="IdetailPembelianhari" value=0 min=0 disabled>
+              </div></div>
             </div>
-            <div class="pba-f" hidden>
-              <label>No Uang Muka</label>
-              <input type="text" class="form-control text-left" id="IdetailNoUangMuka" disabled>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>No/Sopir</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="IdetailNoSopir" disabled>
+              </div></div>
             </div>
-            <div class="pba-f">
-              <label>Uang Muka</label>
-              <input type="number" class="form-control text-left" id="IdetailNuangmuka" disabled>
+          </div>
+
+          <div class="col-md-3">
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Bayar</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeInputAddPembayaran()" id="IdetailPembeliantipebayar" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>Tunai</option>
+                  <option value=1>Kredit</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Jth Tempo</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="date" class="form-control text-center" id="IdetailPembelianJthTempo" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>PPN</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <select onchange="onChangeTipePPN()" id="IdetailPembeliantipeppn" class="form-control text-center form-select-lg" aria-label=".form-select-lg example" disabled>
+                  <option value=0 selected>None</option>
+                  <option value=1>Exclude</option>
+                  <option value=2>Include</option>
+                </select>
+              </div></div>
+            </div>
+            <div class="row" hidden>
+              <div class="col-md-4" style="margin-top:5px;"><label>No Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="text" class="form-control text-left" id="IdetailNoUangMuka" disabled>
+              </div></div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
+              <div class="col-md-8"><div class="form-group">
+                <input type="number" class="form-control text-left" id="IdetailNuangmuka" disabled>
+              </div></div>
             </div>
           </div>
         </div>
@@ -1104,42 +1252,53 @@
         </div>
 
         <!-- PPN GRANDTOTAL -->
-        <div class="pba-tgrid">
-          <div class="pba-f">
-            <label>Disc %</label>
-            <input type="number" class="form-control text-right" id="Iinput_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+        <div class="row mt-4">
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>Disc %</label>
+              <input type="number" class="form-control text-right" id="Iinput_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>DiscRp</label>
-            <input type="number" class="form-control text-right" id="Iinput_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DiscRp</label>
+              <input type="number" class="form-control text-right" id="Iinput_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>DPP</label>
-            <input type="text" class="form-control text-right" id="Iinput_det_dpp" value="0.00" disabled>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
+              <label>DPP</label>
+              <input type="text" class="form-control text-right" id="Iinput_det_dpp" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>PPN</label>
-            <input type="text" class="form-control text-right" id="Iinput_det_ppn" value="0.00" disabled>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>PPN</label>
+              <input type="text" class="form-control text-right" id="Iinput_det_ppn" value="0.00" disabled>
+            </div>
           </div>
-          <div class="pba-f">
-            <label>GrandTotal</label>
-            <input type="text" class="form-control text-right" id="Iinput_det_grandtotal" value="0.00" disabled>
+          <div class="col-md-3 col-6">
+            <div class="form-group">
+              <label>Grand Total</label>
+              <input type="text" class="form-control text-right" id="Iinput_det_grandtotal" value="0.00" disabled>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- PPN GRANDTOTAL -->
 
       <div class="modal-footer">
         <button type="button" id="btnotokanan" class="btn btn-primary" onclick="submitUnOtorisasi1()">Batal Oto</button>
         <!-- submitUnOtorisasi1   -->
         <!-- submitOtorisasi1 -->
       </div>
-    </div>
-  </div>
 </div>
+  <!-- End page detail INFORMASI tab kanan -->
+
+  <!-- Satu penutup div di bawah ini BUKAN milik page di atas. Blok modal lama menutup satu div
+       lebih banyak daripada yang dibukanya sendiri, dan kelebihan itu menutup elemen yang
+       dibuka di atas blok. Dipertahankan apa adanya supaya susunan DOM halaman tidak berubah
+       saat modal diganti jadi page. -->
   </div>
-  <!-- End modal editpembelian-->
 
   <!-- start modal edit pembelian  -->
   <div class="modal fade" id="tes1234" tabindex="-2" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -1168,6 +1327,29 @@
   @section('js')
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
     <script type="text/javascript">
+
+      // Form edit dan detail dulunya modal Bootstrap. Sekarang jadi page terpisah seperti
+      // #page3 di menu invoicepembelian: hanya satu page yang tampil dalam satu waktu.
+      //   #page1 = daftar, #page2 = edit, #page3 = detail (tab kiri), #page4 = detail (tab kanan)
+      // Dibuat idempotent - beda dengan .modal('toggle') yang dulu bisa membuka kembali form
+      // yang baru saja ditutup kalau dipanggil dua kali berurutan.
+      function pbaShowPage (idPage) {
+        $('#page1, #page2, #page3, #page4').hide();
+        $('#' + idPage).show();
+        window.scrollTo(0, 0);
+
+        // pbaAturTinggiTabel() mengukur lewat getBoundingClientRect(). Beberapa pemanggil
+        // menjalankan loadAll() selagi #page1 masih tersembunyi (mis. sesudah otorisasi),
+        // dan pengukuran pada elemen tersembunyi menghasilkan 0 sehingga tinggi tabel
+        // terkunci di nilai minimum. Jadi ukur ulang sesudah #page1 benar-benar tampil.
+        if (idPage === 'page1') {
+          pbaAturTinggiTabel();
+        }
+      }
+
+      function pbaClosePage () {
+        pbaShowPage('page1');
+      }
 
       let row_id = "";
       let action = "";
@@ -1731,7 +1913,7 @@ function detailPembelian1(index) {
         
         $("#IdetailDate").val(date1);
         $("#btnotokanan").hide();
-        $("#IdetailPembelian").modal('toggle');
+        pbaShowPage('page4')
 
          document.getElementById("detailPembelianTableData").innerHTML = table_row_detail_inf
 
@@ -1769,7 +1951,7 @@ function detailPembelian1(index) {
                 loadAll()
                 // $("#formOtorisasi1").modal('toggle')
                 console.log('xxxx');
-                $("#detail").modal('toggle')
+                pbaClosePage()
                 alertify.success('Berhasil update otorisasi')
 
               }
@@ -1807,7 +1989,7 @@ function detailPembelian1(index) {
                 loadAll()
 
                 alertify.success('Berhasil update otorisasi')
-                $("#IdetailPembelian").modal('toggle')
+                pbaClosePage()
               }
 
 
@@ -1924,7 +2106,7 @@ function detailPembelian1(index) {
 
           $("#IdetailDate").val(date1);
           $("#btnotokanan").show();
-          $("#IdetailPembelian").modal('toggle');
+          pbaShowPage('page4')
           document.getElementById("detailPembelianTableData").innerHTML = table_row_detail_inf
 
 
@@ -1959,7 +2141,7 @@ function detailPembelian1(index) {
                   loadAll()
 
                   alertify.success('Berhasil update otorisasi')
-                  $("#detail").modal('toggle')
+                  pbaClosePage()
                 }
 
 
@@ -2225,7 +2407,7 @@ function formatAngkaX (angka) {
           console.log('=================44444===============!!!!!!')
           // window.location.href = "newpo";
           // editPembelian
-          $("#editPembelian").modal('toggle');
+          pbaClosePage()
 
 
         } else {
@@ -2589,7 +2771,7 @@ function formatAngkaX (angka) {
             loadAll()
             resetDetailPembelian(reqNoBukti,reqNoPO)
             alertify.success('Faktur dan keterangan telah diupdate');
-              $("#editPembelian").modal('toggle');
+              pbaClosePage()
           }
         })
 
@@ -3446,7 +3628,7 @@ if (pcekglobal) {
 
             console.log('date1', date1)
             $('#editPembelianDate').val(date1)
-            $("#editPembelian").modal('toggle');
+            pbaShowPage('page2')
           }
 
       function buttonOtoPembelian (nobukti, pjasa) {
@@ -3540,7 +3722,7 @@ if (pcekglobal) {
         document.getElementById("detailTableData").innerHTML = table_row_detail
 
 
-        $("#detail").modal('toggle');
+        pbaShowPage('page3')
       }
 
       function buttonAdd1(index) {
@@ -3648,7 +3830,7 @@ if (pcekglobal) {
         // })
 
         $('#editPembelianDate').val(date1)
-        $("#editPembelian").modal('toggle');
+        pbaShowPage('page2')
       }
       function buttonDetail1(index) {
         let tempDataDetail = dataRefreshPO[index]
@@ -3778,7 +3960,7 @@ if (pcekglobal) {
         document.getElementById("detailTableData").innerHTML = table_row_detail
 
 
-        $("#detail").modal('toggle');
+        pbaShowPage('page3')
       }
 
       function buttonAdd1(index) {
