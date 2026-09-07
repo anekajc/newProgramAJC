@@ -1251,6 +1251,10 @@ $(document).ready(function () {
       return
     }
 
+    const barisTotal = dataPrint.find(function (r) {
+      return parseFloat(r.TSUBTOTALRpbatal) || parseFloat(r.nnetrpbatal)
+    }) || dataPrint[0]
+
     let arrayDataPrint = []
 
     const isA4 = dataPrint.length > 7;
@@ -1868,11 +1872,11 @@ tempPrintStr += `</table>`;
     tempPrintStr += `
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> JUMLAH </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TSUBTOTALRpbatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TSUBTOTALRpbatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 4px; position: relative;">
       <div style="width: 5%; text-align:left;"> DISKON </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].Tdiscbatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.Tdiscbatal).toFixed(2))}</div>
 
       <div style="
       position: absolute;
@@ -1883,7 +1887,7 @@ tempPrintStr += `</table>`;
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> DPP </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TndpprpBatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TndpprpBatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 6px; position: relative;">
       <div style="width: 5%; text-align:left;"> PPN </div>
@@ -1903,11 +1907,11 @@ tempPrintStr += `</table>`;
         width: 35%;
         border-bottom: 1px solid #000;">
       </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TnppnRpBatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TnppnRpBatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 8px; font-weight: bold;">
       <div style="width: 5%; text-align:left;"> TOTAL </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].nnetrpbatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.nnetrpbatal).toFixed(2))}</div>
     </div>`
   };
 
