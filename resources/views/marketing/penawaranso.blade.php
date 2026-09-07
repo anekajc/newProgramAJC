@@ -259,9 +259,9 @@
   background-repeat: no-repeat; background-position: right center;
 }
 
-{{-- Kolom Aksi tabel2/tabel3 -- pastel round-button treatment, copied
+/* {{-- Kolom Aksi tabel2/tabel3 -- pastel round-button treatment, copied
      verbatim from so.blade.php's @section('css'). Actions ada di kolom
-     pertama di kedua tabel, sesuai markup lama. --}}
+     pertama di kedua tabel, sesuai markup lama. --}} */
 #tabel2 td:first-child, #tabel3 td:first-child {
   display: flex; gap: 4px; justify-content: center; align-items: center;
 }
@@ -305,47 +305,7 @@
   <img src="img/sml1.png" style="height: 50px; width: 280px" alt="">
 </div>
 
-<div id="imagecontainerTtd" class="d-none">
-  <img src="" style="height: 95px; width: 200px" alt="">
-</div>
-
 <div id="page1" class="container-fluid">
-    <!-- <div id="qrcode"></div> -->
-    <div class="row">
-      <div class="col-6 text-left">
-        <h2 style="margin-top:-85px;">Penawaran SO</h2>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px;
-            margin-top: -150px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add Penawaran
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px;
-            margin-top: -150px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
-    </div>
 
   <div id="contentContainer" class="">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
@@ -5482,6 +5442,12 @@ function tabel3ActionsCell (row) {
 }
 
 function renderTabel2Rows (rows) {
+  // window.gcart_header dipakai ReportTable.headHtml() untuk mencari index global
+  // (data-gidx) tiap kolom lewat indexOf() -- kalau ini masih menunjuk cart tabel
+  // LAIN (mis. karena psoAktifkanTabel(2) dipanggil belakangan di psoSetupSekali),
+  // semua th tabel ini dapat data-gidx="-1" dan drag-reorder-nya diam saja.
+  // Disamakan di sini supaya render tabel2 tidak bergantung urutan pemanggilan.
+  window.gcart_header = psoCart[1]
   let cols = (psoCart[1].length ? psoCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
@@ -5494,6 +5460,7 @@ function renderTabel2Rows (rows) {
 }
 
 function renderTabel3Rows (rows) {
+  window.gcart_header = psoCart[2]
   let cols = (psoCart[2].length ? psoCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
@@ -5601,6 +5568,13 @@ function loadAll () {
       lastTabel3Rows = res.tempOutstanding5 || []
       reinitTabel2()
       reinitTabel3()
+      // renderTabel2Rows()/renderTabel3Rows() masing-masing menimpa window.gcart_header
+      // supaya th-nya sendiri dapat data-gidx yang benar -- begitu keduanya selesai,
+      // gcart_header tertinggal di cart tabel yang digambar TERAKHIR (tabel3), padahal
+      // tab yang kelihatan di layar bisa saja tabel2. drag-reorder & menu roda gigi
+      // sama-sama baca window.gcart_header saat diklik, jadi disamakan lagi di sini ke
+      // cart milik tab yang benar-benar aktif.
+      psoAktifkanTabel(activeVisibleTabKeyPSO());
       console.log('loadall selesai');
     },
     error: function (err) {
