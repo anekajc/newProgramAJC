@@ -17,6 +17,9 @@
     .pba-f label{display:block;font-size:11px;font-weight:700;letter-spacing:.03em;color:#6b7280;text-transform:uppercase;margin-bottom:4px;white-space:nowrap;}
     .pba-f .form-control,.pba-f select{width:100%;}
     .pba-f textarea.form-control{resize:none;}
+    #page2 textarea.form-control,
+    #page3 textarea.form-control,
+    #page4 textarea.form-control { resize: none; }
     .pba-tgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px 16px;margin-top:14px;}
     #page2 .btn,#page3 .btn,#page4 .btn{border-radius:9px;font-weight:600;border:none;}
     #page2 .btn-success,#page3 .btn-success,#page4 .btn-success{background:#e6f6ec;color:#16a34a;}
@@ -456,7 +459,6 @@
         </div>
       </div>
      </div>
-    </div>
 
 
   <!-- End modal add-->
@@ -465,10 +467,7 @@
   <!-- start page edit pembelian (dulu modal #editPembelian) -->
 <div id="page2" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
   <div class="row">
-    <div class="col-6 text-left">
-      <h2 id="editPembelianModalLabel">Detail</h2>
-    </div>
-    <div class="col-6 text-right">
+    <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
       height: 30px;
       padding: 4px 12px;
@@ -742,7 +741,7 @@
             <div class="row">
               <div class="col-md-12 text-right">
                 <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="submitPembelianEdit()">Edit Item</button>
+                <button type="button" class="btn btn-primary" onclick="submitPembelianEdit()">Simpan</button>
               </div>
             </div>
           </div>
@@ -822,23 +821,13 @@
 </div>
   <!-- End page edit pembelian -->
 
-  <!-- Dua penutup div di bawah ini BUKAN milik page di atas. Blok modal lama menutup dua div
-       lebih banyak daripada yang dibukanya sendiri, dan kelebihan itu menutup elemen yang
-       dibuka di atas blok. Dipertahankan apa adanya supaya susunan DOM halaman tidak berubah
-       saat modal diganti jadi page. -->
-    </div>
-    </div>
-
   <!-- //TAB KIRI -->
 
 
   <!-- start page tab kiri detail INFORMASI (dulu modal #detail) -->
 <div id="page3" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
   <div class="row">
-    <div class="col-6 text-left">
-      <h2 id="detailModalLabel">Detail</h2>
-    </div>
-    <div class="col-6 text-right">
+    <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
       height: 30px;
       padding: 4px 12px;
@@ -1069,10 +1058,7 @@
     <!-- TAB KANAN detail INFORMASI (dulu modal #IdetailPembelian) -->
 <div id="page4" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
   <div class="row">
-    <div class="col-6 text-left">
-      <h2 id="IdetailPembelianModalLabel">Detail</h2>
-    </div>
-    <div class="col-6 text-right">
+    <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
       height: 30px;
       padding: 4px 12px;
@@ -1293,12 +1279,6 @@
       </div>
 </div>
   <!-- End page detail INFORMASI tab kanan -->
-
-  <!-- Satu penutup div di bawah ini BUKAN milik page di atas. Blok modal lama menutup satu div
-       lebih banyak daripada yang dibukanya sendiri, dan kelebihan itu menutup elemen yang
-       dibuka di atas blok. Dipertahankan apa adanya supaya susunan DOM halaman tidak berubah
-       saat modal diganti jadi page. -->
-  </div>
 
   <!-- start modal edit pembelian  -->
   <div class="modal fade" id="tes1234" tabindex="-2" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -2437,7 +2417,6 @@ function formatAngkaX (angka) {
 
             <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
             });
-          document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  dataLPB.NoBukti;
           document.getElementById("editPembelianNoPO").value = dataLPB.NoPO
           document.getElementById("editPembelianSupp").value = dataLPB.NamaSupplier
           document.getElementById("editPembelianFakturSupp").value = dataLPB.FAKTURSUPP
@@ -3124,8 +3103,7 @@ function refreshUpdateHeader () {
 
 
 
-function refreshDataTableAdd (NOBUKTI = "") {
-
+        function refreshDataTableAdd (NOBUKTI = "") {
 
             console.log("KOREKSI BELI")
             console.log(NOBUKTI)
@@ -3193,7 +3171,6 @@ function refreshDataTableAdd (NOBUKTI = "") {
               <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
                   
             });
-            document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
 
             document.getElementById("EditNobukti").value = edit_pembelian_row_data[0].NoBukti
             document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
@@ -3272,8 +3249,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
             $('#editPembelianDate').val(date1)
             // $("#editPembelian").modal('toggle');
 
-
-}
+        }
 
 
 function onchangekurs () {
@@ -3557,7 +3533,6 @@ if (pcekglobal) {
             });
 
 // <button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button> Ini tombol delete, di comment di sini
-            document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
             document.getElementById("EditNobukti").value = edit_pembelian_row_data[0].NoBukti
             document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
             document.getElementById("editPembelianKodeSupp").value = edit_pembelian_row_data[0].KODESUPP
@@ -3680,7 +3655,6 @@ if (pcekglobal) {
         <td class="text-right">${detail_row.NDPP ? formatAngkaX(detail_row.NDPP) : '0.00' }</td></tr>`   
         });
 
-        document.getElementById("detailModalLabel").innerHTML = "Detail " +  detail_row_data[0].NoBukti;
 
         document.getElementById("detailPembelianNobukti").value = detail_row_data[0].NoBukti;
         document.getElementById("detailPembelianKodeSupp").value = detail_row_data[0].KODESUPP;
@@ -3765,7 +3739,6 @@ if (pcekglobal) {
           }
           table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.Qnt}</td><td>${r.QNTPO}</td><td>${satuan}</td><td>${Number(r.Qnt) ? r.Qnt : "0.00"}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
           });
-        document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
         document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
         document.getElementById("editPembelianSupp").value = edit_pembelian_row_data[0].NamaSupplier
         // let fakturSupp = ""
@@ -3913,7 +3886,6 @@ if (pcekglobal) {
         
          });
 
-        document.getElementById("detailModalLabel").innerHTML = "Detail " +  detail_row_data[0].NoBukti;
 
         document.getElementById("detailPembelianNobukti").value = detail_row_data[0].NoBukti;
         document.getElementById("detailPembelianKodeSupp").value = detail_row_data[0].KODESUPP;
