@@ -458,26 +458,27 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
-        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
 
     } else if (base == modereport_barang){
       gcart_header = [
-        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
-        ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+        // ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
-        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 0;
@@ -486,14 +487,15 @@
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+        // ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
-        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 1;
@@ -515,6 +517,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['sat', 'Satuan', 1, 'varchar', 0, 0],
         ['QNTPR', 'QTYPR', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['QNTPO', 'QTYPO', 1, 'float', 1, 2],
         ['Qnt', 'Qty', 1, 'float', 1, 2]
       ];
@@ -529,6 +532,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['sat', 'Satuan', 1, 'varchar', 0, 0],
         ['QNTPR', 'QTYPR', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['QNTPO', 'QTYPO', 1, 'float', 1, 2],
         ['Qnt', 'Qty', 1, 'float', 1, 2]
       ];

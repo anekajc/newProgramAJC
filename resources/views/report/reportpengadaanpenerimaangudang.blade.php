@@ -63,7 +63,7 @@
                   <th style="min-width:130px">Nama Barang</th>
                   <th style="min-width:110px">PO Customer</th>
                   <th style="min-width:130px">Nama Customer</th>
-                  <th class="num" style="min-width:10px">QNT</th>
+                  <th class="num" style="min-width:10px">QTY</th>
                   <th style="min-width:80px">Satuan</th>
                   <th style="min-width:110px">Lokasi</th>
                 </tr>
@@ -153,7 +153,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['NOPOCUST', 'PO Customer', 1, 'varchar', 0, 0],
         ['namacust', 'Nama Customer', 1, 'varchar', 0, 0],
-        ['Qntx', 'QNT', 1, 'float', 1, 2],
+        ['Qntx', 'Qty', 1, 'float', 1, 2],
         ['satuan', 'Satuan', 1, 'varchar', 0, 0],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
@@ -168,7 +168,7 @@
         ['PartNumber', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['NOPOCUST', 'PO Customer', 1, 'varchar', 0, 0],
-        ['Qntx', 'QNT', 1, 'float', 1, 2],
+        ['Qntx', 'Qty', 1, 'float', 1, 2],
         ['satuan', 'Satuan', 1, 'varchar', 0, 0],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
@@ -182,9 +182,9 @@
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'QNT', 1, 'float', 1, 2],
+        ['qnt', 'Qty', 1, 'float', 1, 2],
         ['satuan', 'Satuan', 1, 'varchar', 0, 0],
-        ['Qnt2', 'QNT', 1, 'float', 1, 2],
+        ['Qnt2', 'Qty', 1, 'float', 1, 2],
         ['satuan2', 'Satuan', 1, 'varchar', 0, 0],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
@@ -198,9 +198,9 @@
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
         ['PartNumber', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'QNT', 1, 'float', 1, 2],
+        ['qnt', 'Qty', 1, 'float', 1, 2],
         ['satuan', 'Satuan', 1, 'varchar', 0, 0],
-        ['Qnt2', 'QNT', 1, 'float', 1, 2],
+        ['Qnt2', 'Qty', 1, 'float', 1, 2],
         ['satuan2', 'Satuan', 1, 'varchar', 0, 0],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];

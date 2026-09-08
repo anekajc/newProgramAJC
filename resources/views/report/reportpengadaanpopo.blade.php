@@ -432,6 +432,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Batal', 1, 'float', 1, 2],
         ['HARGA', 'Harga', 1, 'float', 1, 2],
         ['KODEVLS', 'VLS', 1, 'varchar', 0, 0],
         ['DISCP', 'Disc', 1, 'float', 1, 2],
@@ -451,6 +452,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Batal', 1, 'float', 1, 2],
         ['HARGA', 'Harga', 1, 'float', 1, 2],
         ['KODEVLS', 'VLS', 1, 'varchar', 0, 0],
         ['DISCP', 'Disc', 1, 'float', 1, 2],
@@ -460,7 +462,7 @@
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
         ['DiTerima', 'Di Terima', 1, 'varchar', 0, 0]
       ];
-      gsum_issubtotal = 0; gsum_isgrandtotal = 0;
+      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
 
     } else {
       gcart_header = [
@@ -470,6 +472,7 @@
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
         ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QntBatal', 'Qty Batal', 1, 'float', 1, 2],
         ['HARGA', 'Harga', 1, 'float', 1, 2],
         ['KODEVLS', 'VLS', 1, 'varchar', 0, 0],
         ['DISCP', 'Disc', 1, 'float', 1, 2],
@@ -479,7 +482,7 @@
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
         ['DiTerima', 'Di Terima', 1, 'varchar', 0, 0]
       ];
-      gsum_issubtotal = 0; gsum_isgrandtotal = 1;
+      gsum_issubtotal = 1; gsum_isgrandtotal = 1;
     }
   }
 
