@@ -136,7 +136,7 @@
       <div class="modal-body">
 
         <div class="rt-section">
-          <div class="rt-group-label">Pengaturan Laporan</div>
+          {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
           {{-- Tidak ada switcher "Tampilan": Report Mode (Detail/Rekap) dan varian Order By
                (Merk/PIC/Group Customer, plus cabang "Nomor Barang" yang bahkan tidak pernah
                jadi opsi di dropdown) sebelumnya mengganti gcart_header ke boilerplate generik
@@ -167,10 +167,10 @@
             <div>
               <label class="rt-field-label" for="modalOrder">Order By</label>
               <select class="rt-native" id="modalOrder">
-                <option value="H">Customer</option>
-                <option value="HM">Merk</option>
-                <option value="HP">PIC</option>
-                <option value="GC">Group Customer</option>
+                <option value="H">Customer</option> <!-- Subtotal by KodeCustSupp -->
+                <option value="HM">Merk</option> <!-- Subtotal by KOdeMerk -->
+                <option value="HP">PIC</option> <!-- Subtotal by KodePIC -->
+                <option value="GC">Group Customer</option> <!-- Subtotal by KodeHDGrp -->
               </select>
             </div>
           </div>
@@ -231,12 +231,24 @@
   let globalOrderBy = "H";   // default: Customer
 
   let lastRows = [];        // hasil fetch terakhir (dipakai render / export / search)
-  let currentGroupby = 'NOBUKTI'; // groupby aktif untuk render ulang saat search
+
+  // Order By (inputOrd) -> kolom pengelompokan subtotal + kolom nama untuk label barisnya.
+  // key  = kolom kode yang dipakai memecah grup (nilai apa adanya dari proc)
+  // name = kolom nama yang tampil di baris "Subtotal <nama>"; fallback ke kode kalau kosong.
+  const ORDER_GROUP = {
+    'H' : { key: 'KodeCustSupp', name: 'NAMACUSTSUPP' }, // Customer
+    'HM': { key: 'KOdeMerk',     name: 'NAMAMERK'     }, // Merk
+    'HP': { key: 'KodePIC',      name: 'namaPIC'      }, // PIC
+    'GC': { key: 'KodeHDGrp',    name: 'NAMAHDGRP'    }, // Group Customer
+  };
+  let currentGroup = ORDER_GROUP['H']; // grup aktif untuk render ulang saat search, ikut default globalOrderBy
 
   const reportUrl = "{{ url('laporanmarketinganalisakotor_doReport') }}";
 
   // Satu-satunya mode: Detail + Customer (default). Rekap dan varian Order By lain dihapus
-  // (lihat komentar di modal Filter) -- tidak ada switcher "Tampilan" di halaman ini.
+  // (lihat komentar di modal Filter) -- tidak ada switcher "Tampilan" di halaman ini. Order By
+  // TETAP memengaruhi tampilan: tidak lagi menukar gcart_header, tapi memilih ORDER_GROUP
+  // (kolom & label subtotal) lewat makeTable().
   g_modeReport = 0;
 
   $(document).ready(function() {
@@ -430,6 +442,26 @@
     return undefined;
   }
 
+  // Nilai grup ternormalisasi (case-insensitive lewat pickCI + trim) -- BUKAN r[key]:
+  // casing kolom dari proc tidak konsisten (NoBukti/KOdeMerk/namaPIC).
+  function groupKeyOf(r, key) {
+    const v = pickCI(r, key);
+    return (v == null ? '' : String(v).trim());
+  }
+
+  // Kelompokkan baris menurut kolom grup TANPA mengubah urutan relatif di dalam tiap grup:
+  // urutan grup mengikuti kemunculan pertamanya. Kalau proc sudah ORDER BY kolom yang sama,
+  // ini no-op; kalau tidak, subtotal tetap utuh (tidak pecah jadi beberapa potongan).
+  function groupRows(rows, key) {
+    const order = [], bucket = {};
+    rows.forEach(function(r) {
+      const g = groupKeyOf(r, key);
+      if (!(g in bucket)) { bucket[g] = []; order.push(g); }
+      bucket[g].push(r);
+    });
+    return order.reduce(function(acc, g) { return acc.concat(bucket[g]); }, []);
+  }
+
   // Kolom dari mode Detail + Customer (satu-satunya yang dipertahankan). NAMAHDGRP dulu
   // berlabel "Kategorix" (sisa ketikan) -- dikoreksi jadi "Kategori". qnt dulu bertipe
   // 'varchar' (tidak konsisten dengan kolom angka lain di baris yang sama) -- dikoreksi ke
@@ -455,8 +487,6 @@
   }
 
   function makeTable(_mode) {
-    // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
-    let groupby = '';
     let _date1    = $("#inputDate1").val();
     let _date2    = $("#inputDate2").val();
     let inputOto = globalOtorisasi;
@@ -469,11 +499,8 @@
     let _inputMerk = $("#inputMerk").val();
     let input_order = globalOrderBy;
 
-    if (input_order == "H") {
-      groupby = 'NOBUKTI';
-    } else {
-      groupby = 'KodeCustSupp';
-    }
+    // kolom pengelompokan subtotal + kolom nama untuk labelnya, mengikuti Order By yang dipilih
+    const grp = ORDER_GROUP[input_order] || ORDER_GROUP['H'];
 
     setDefaultHeader();
     if (typeof doSetHeader === 'function') {
@@ -502,13 +529,13 @@
       data: data,
       success: function(res) {
         lastRows = res || [];
-        currentGroupby = groupby;
+        currentGroup = grp;
         $('#searchBox2').val('');
         render();
       },
       error: function() {
         lastRows = [];
-        currentGroupby = groupby;
+        currentGroup = grp;
         render();
       }
     });
@@ -526,9 +553,13 @@
     const showGrand = (gsum_isgrandtotal === 1);
 
     const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-    const rows = !search ? (lastRows || []) : (lastRows || []).filter(function(r) {
+    let rows = !search ? (lastRows || []) : (lastRows || []).filter(function(r) {
       return rowSearchText(r, cols).indexOf(search) !== -1;
     });
+
+    // Kelompokkan baris menurut kolom Order By yang aktif sebelum dirender, supaya subtotal
+    // tidak pecah kalau proc tidak ORDER BY kolom yang sama (lihat groupRows()).
+    if (showSub) { rows = groupRows(rows, currentGroup.key); }
 
     // HEADER dinamis dari gcart_header — dibangun report-table.js (ReportTable) supaya kolom
     // bisa diseret untuk diurutkan & punya menu roda gigi (sembunyikan / desimal / total).
@@ -542,16 +573,16 @@
       return;
     }
 
-    let html = '', prev = null;
+    let html = '', prev = null, prevLabel = '';
     let sub = {}, grand = {};
     keys.forEach(k => { sub[k] = 0; grand[k] = 0; });
 
     rows.forEach(function(r, i) {
-      const now = r[currentGroupby];
+      const now = groupKeyOf(r, currentGroup.key);
 
       // subtotal saat nilai grup berganti (kalau toggle Subtotal aktif)
       if (showSub && i !== 0 && prev !== now) {
-        html += totalRowTotal('Subtotal', sub, cols, keys, 'subtotal-row');
+        html += totalRowTotal('Subtotal ' + prevLabel, sub, cols, keys, 'subtotal-row');
         keys.forEach(k => { sub[k] = 0; });
       }
 
@@ -570,10 +601,11 @@
       }).join('') + '</tr>';
 
       prev = now;
+      prevLabel = nullToEmpty(pickCI(r, currentGroup.name)) || now || '-';
     });
 
     // subtotal grup terakhir + grand total   mengikuti toggle di modal Customize Table
-    if (showSub) html += totalRowTotal('Subtotal', sub, cols, keys, 'subtotal-row');
+    if (showSub) html += totalRowTotal('Subtotal ' + prevLabel, sub, cols, keys, 'subtotal-row');
     if (showGrand) html += totalRowTotal('GRAND TOTAL', grand, cols, keys, 'grand-total');
 
     tbody.innerHTML = html;

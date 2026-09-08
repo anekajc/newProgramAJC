@@ -205,7 +205,7 @@
                 <div class="modal-body">
 
                     <div class="rt-section">
-                        <div class="rt-group-label">Pengaturan Laporan</div>
+                        {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
                         <div class="rt-grid-2">
                             {{-- <div>
                                 <label class="rt-field-label" for="modalReport">Report</label>
@@ -698,14 +698,18 @@
         // (QNT/QNT2, QntSisa/Qnt2Sisa) + NOSAT, tapi tidak ada kolom jadinya. NOSAT=1 -> pasangan
         // pertama, 2 atau 3 -> kedua (ikut CASE di view-nya sendiri). QntSisa sudah dinormalkan ke
         // satuan-1 di view (QNT2*ISI2 untuk NOSAT=2), Qnt2Sisa ada di satuan-2, jadi tiap pasangan
-        // memang sudah sesuai satuannya masing-masing. Dihitung sekali di sini (bukan di render())
-        // supaya render, subtotal, pencarian, dan export semua membaca field yang sama.
+        // memang sudah sesuai satuannya masing-masing. Satuan/SatuanRoll digabung dengan aturan
+        // yang SAMA (nosat=1 -> Satuan, 2/3 -> SatuanRoll) supaya unitnya selalu cocok dengan
+        // angka QTY di atas -- QNT2 itu dalam satuan roll, bukan satuan biasa. Dihitung sekali
+        // di sini (bukan di render()) supaya render, subtotal, pencarian, dan export semua
+        // membaca field yang sama.
         function decorateRows(rows) {
             (rows || []).forEach(function(r) {
                 const nosat = String(pickCI(r, 'NOSAT'));
                 const pakaiKedua = (nosat === '2' || nosat === '3');
                 r.QTY = pickCI(r, pakaiKedua ? 'QNT2' : 'QNT');
                 r.QTYSisa = pickCI(r, pakaiKedua ? 'Qnt2Sisa' : 'QntSisa');
+                r.Satuan = pickCI(r, pakaiKedua ? 'SatuanRoll' : 'Satuan');
             });
             return rows || [];
         }
@@ -799,11 +803,11 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'QTY', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0],
                     ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0],
                     ['outstanding', 'Dikirim', 1, 'varchar', 0, 0]
@@ -819,15 +823,15 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'QTY', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['KODEVLS', 'Valas', 1, 'varchar', 0, 0],
                     ['KURS', 'Kurs', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -840,15 +844,15 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'QTY', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['KODEVLS', 'Valas', 1, 'varchar', 0, 0],
                     ['KURS', 'Kurs', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -861,13 +865,13 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -880,13 +884,13 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -899,13 +903,13 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -918,15 +922,15 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['KODEVLS', 'Valas', 1, 'varchar', 0, 0],
                     ['KURS', 'Kurs', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -949,11 +953,11 @@
                 gcart_header = [
                     ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
                     ['NDPPRPZX', 'DPP PPN', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0]
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0]
                 ];
                 gsum_issubtotal = 0;
                 gsum_isgrandtotal = 1;
@@ -978,13 +982,13 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -1023,15 +1027,15 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 0, 0],
+                    ['QNT', 'Qty', 1, 'float', 0, 0],
                     ['HARGA', 'Harga', 1, 'float', 0, 0],
                     ['DiscTot', 'Diskon Total', 1, 'float', 0, 0],
                     ['KODEVLS', 'Valas', 1, 'varchar', 0, 0],
                     ['KURS', 'Kurs', 1, 'float', 0, 0],
                     ['DPPVLSZX', 'DPP Valas', 1, 'float', 1, 0],
-                    ['NDPPRPZX', 'DPP IDR', 1, 'float', 1, 0],
-                    ['NPPNRPX', 'PPN IDR', 1, 'float', 1, 0],
-                    ['NNETRPZX', 'Total IDR', 1, 'float', 1, 0],
+                    ['NDPPRPZX', 'DPP ', 1, 'float', 1, 0],
+                    ['NPPNRPX', 'PPN ', 1, 'float', 1, 0],
+                    ['NNETRPZX', 'Total ', 1, 'float', 1, 0],
                     ['TglPO', 'Tgl. PO', 1, 'date', 0, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -1045,11 +1049,13 @@
         // VwReportOutStandingSO` apa pun Ordr-nya. View itu TIDAK punya NDPPRPZX/NPPNRPX/
         // NNETRPZX/TglPO/NoSPB/NamaKebun/DiscTot/KODEVLS/KURS/DPPVLSZX/NPPNRPVLSX/NNETRPVLSZX
         // (header lama mengacu ke kolom itu semua -> tampil kosong/0). Yang benar-benar
-        // dikembalikan: NOSAT, QNT/QNT2, Satuan/SatuanRoll, QntSisa/Qnt2Sisa, harga, RPOUt,
-        // NoPesanan. QTY & QTY Sisa digabung dari pasangan itu oleh decorateRows() (nosat=1 ->
-        // QNT/QntSisa, 2 atau 3 -> QNT2/Qnt2Sisa) sebelum sampai ke sini, sama seperti di
-        // reportlaporanmarketingspb.blade.php. QTY tidak di-subtotal (satuan beda-beda per
-        // baris, sama seperti QNT di setHeaderSO) -- hanya RPOUt (uang) yang dijumlahkan.
+        // dikembalikan: NOSAT, QNT/QNT2, Satuan/SatuanRoll, QtySisa/Qty2Sisa, harga, RPOUt,
+        // NoPesanan. QTY, QTY Sisa, DAN Satuan digabung dari pasangan itu oleh decorateRows()
+        // (nosat=1 -> QNT/QtySisa/Satuan, 2 atau 3 -> QNT2/Qty2Sisa/SatuanRoll) sebelum sampai
+        // ke sini, sama seperti di reportlaporanmarketingspb.blade.php -- kolom 'Satuan' di
+        // header bawah ini karena itu sudah berisi hasil gabungan, BUKAN kolom Satuan mentah
+        // dari view. QTY tidak di-subtotal (satuan beda-beda per baris, sama seperti QNT di
+        // setHeaderSO) -- hanya RPOUt (uang) yang dijumlahkan.
         function setHeaderOut(base) {
             if (base == modereport_detailnobukti) {
                 gcart_header = [
@@ -1059,7 +1065,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1075,7 +1080,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1090,7 +1094,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1105,7 +1108,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1120,7 +1122,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1135,7 +1136,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1150,7 +1150,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1165,7 +1164,6 @@
                     ['KODECUSTSUPP', 'Kode', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['RPOUt', 'Total Harga Out', 1, 'float', 1, 2]
@@ -1177,7 +1175,6 @@
                     ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['RPOUt', 'Total Harga Out', 1, 'float', 1, 0]
@@ -1191,7 +1188,6 @@
                     ['KODECUSTSUPP', 'Kode', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['RPOUt', 'Total Harga Out', 1, 'float', 1, 2]
@@ -1205,7 +1201,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],
@@ -1220,7 +1215,6 @@
                     ['KODECUSTSUPP', 'Kode', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['RPOUt', 'Total Harga Out', 1, 'float', 1, 2]
@@ -1234,7 +1228,6 @@
                     ['KODECUSTSUPP', 'Kode', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['RPOUt', 'Total Harga Out', 1, 'float', 1, 2]
@@ -1248,7 +1241,6 @@
                     ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
                     ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-                    ['SatuanRoll', 'Sat Roll', 1, 'varchar', 0, 0],
                     ['QTY', 'QTY', 1, 'float', 0, 0],
                     ['QTYSisa', 'QTY Sisa', 1, 'float', 0, 0],
                     ['harga', 'Harga', 1, 'float', 0, 0],

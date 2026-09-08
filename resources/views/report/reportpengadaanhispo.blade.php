@@ -91,11 +91,11 @@
               <th style="min-width:90px">Tanggal</th>
               <th style="min-width:160px">Nama Supplier</th>
               <th style="min-width:160px">Nama Barang</th>
-              <th class="num" style="min-width:90px">Qnt PO</th>
-              <th style="min-width:110px">No. Po</th>
+              <th class="num" style="min-width:90px">Qty PO</th>
+              <th style="min-width:110px">No. LPB</th>
               <th style="min-width:90px">Tgl. LPB</th>
-              <th class="num" style="min-width:90px">Qnt. Inv</th>
-              <th style="min-width:100px">DUEDATE</th>
+              <th class="num" style="min-width:90px">Qty LPB</th>
+              <th style="min-width:100px">Tgl. Kirim</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -225,11 +225,11 @@
     { key: 'TGLPO',        label: 'Tanggal',        type: 'date', dec: 0, total: false },
     { key: 'NAMACUSTSUPP', label: 'Nama Supplier', type: 'str',  dec: 0, total: false },
     { key: 'NAMABRG',      label: 'Nama Barang',   type: 'str',  dec: 0, total: false },
-    { key: 'QNTPO',        label: 'Qnt PO',        type: 'num',  dec: 2, total: true  },
-    { key: 'NOBELI',       label: 'No. Po',        type: 'str',  dec: 0, total: false },
+    { key: 'QNTPO',        label: 'Qty PO',        type: 'num',  dec: 2, total: true  },
+    { key: 'NOBELI',       label: 'No. LPB',        type: 'str',  dec: 0, total: false },
     { key: 'TGLBELI',      label: 'Tgl. LPB',      type: 'date', dec: 0, total: false },
-    { key: 'QNTBELI',      label: 'Qnt. Inv',      type: 'num',  dec: 2, total: true  },
-    { key: 'tglkirim',     label: 'DUEDATE',       type: 'date', dec: 0, total: false },
+    { key: 'QNTBELI',      label: 'Qty LPB',      type: 'num',  dec: 2, total: true  },
+    { key: 'tglkirim',     label: 'Tgl. Kirim',       type: 'date', dec: 0, total: false },
   ];
 
   $(document).ready(function () {

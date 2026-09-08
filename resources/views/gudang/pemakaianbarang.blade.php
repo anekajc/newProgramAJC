@@ -731,7 +731,7 @@
                                             <button type="button" class="btn btn-pill-secondary"
                                                 onclick="buttonBatalShowHide()">Batal</button>
                                             <button id="" type="button" onclick="submitAddKoreksi()"
-                                                class="btn btn-pill-primary">Add</button>
+                                                class="btn btn-pill-primary">Simpan</button>
 
                                         </div>
 
@@ -859,7 +859,7 @@
                                             <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                                 onclick="buttonBatalShowHide()">Batal</button>
                                             <button id="" type="button" onclick="submitEditKoreksi()"
-                                                class="btn btn-action-primary btn-primary btn-pill-primary">Edit</button>
+                                                class="btn btn-action-primary btn-primary btn-pill-primary">Simpan</button>
                                         </div>
                                     </div>
                                     <div class="line"></div>

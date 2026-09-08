@@ -165,8 +165,6 @@ Route::get('/globalfunctions_doSimpanHeader', [GlobalFunctionsController::class,
 // PR
 Route::get('/laporanpengadaanpr', [LaporanPengadaanPRController::class, 'index']);
 Route::get('/laporanpengadaanpr_doReport', [LaporanPengadaanPRController::class, 'doReport']);
-Route::get('/laporanpengadaanpr_doFilter', [LaporanPengadaanPRController::class, 'doFilter']);
-Route::get('/laporanpengadaanpr_doReportFilter', [LaporanPengadaanPRController::class, 'doReportFilter']);
 
 // Purchase Order OSP
 Route::get('/laporanpurchaseorderosp', [LaporanPurchaseOrderOSPController::class, 'index']);

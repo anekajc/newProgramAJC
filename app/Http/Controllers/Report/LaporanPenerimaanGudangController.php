@@ -41,6 +41,8 @@ class LaporanPenerimaanGudangController extends Controller {
     $res = DB::connection('SML')->select('exec Sp_reportBeliGudangdet ?,?,?,?,?,?,?,?',
       $values);
 
+    //  exec Sp_reportBeliGudangdet 'T', 'N', '2026-07-01', '2026-09-30', '', 1, '', ''
+
     return $res;
   }
 

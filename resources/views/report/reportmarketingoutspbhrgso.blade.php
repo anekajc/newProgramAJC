@@ -102,7 +102,7 @@
       <div class="modal-body">
 
         <div class="rt-section">
-          <div class="rt-group-label">Pengaturan Laporan</div>
+          {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
           {{-- Report (Detail/Rekap) TIDAK ada di sini: sudah jadi switcher "Tampilan" di bar atas
                tabel (ReportTable.init views), lihat setReportMode(). Order By juga tidak ada:
                controller selalu memanggil Sp_ReportOutSpbDet dengan Ordr = "X" (nilai tetap,

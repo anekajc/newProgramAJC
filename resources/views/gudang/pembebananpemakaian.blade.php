@@ -393,9 +393,9 @@
 
     <div class="row mt-3">
       <div class="col-md-12 text-right" id="contentContainer">
-        <button type="button" class="btn btn-danger" onclick="buttonKoreksiItemBatal()">Batal</button>
+        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary" onclick="buttonKoreksiItemBatal()">Batal</button>
 
-        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary" >Submit Edit</button>
+        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-action-primary btn-primary btn-pill-primary" >Submit Edit</button>
       </div>
     </div>
   </div>

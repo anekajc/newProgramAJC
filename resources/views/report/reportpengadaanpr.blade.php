@@ -2,7 +2,7 @@
 
 <style>
   /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
-  .tb-report .table-wrap { min-height: 10vh; }
+  .tb-report .table-wrap { min-height: 12vh; }
 </style>
 
 @section('header2')
@@ -82,15 +82,16 @@
                   <th style="min-width:80px">Kode Barang</th>
                   <th style="min-width:130px">Nama Barang</th>
                   <th class="num" style="min-width:10px">Sat</th>
-                  <th class="num" style="min-width:10px">Qnt</th>
-                  <th class="num" style="min-width:10px">Qnt PO</th>
+                  <th class="num" style="min-width:10px">Qty</th>
+                  <th class="num" style="min-width:10px">Qty PO</th>
                   <th>Keterangan</th>
                   <th>Otorisasi</th>
+                  <th>Qty Close</th>
                   <th>PO</th>
                 </tr>
               </thead>
               <tbody id="tableBody">
-                <tr class="empty-row"><td colspan="10">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+                <tr class="empty-row"><td colspan="11">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
               </tbody>
             </table>
           </div>
@@ -452,14 +453,15 @@
       gcart_header = [
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-        ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
+        // ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2],
-        ['QNTPO', 'Qnt PO', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
@@ -471,10 +473,11 @@
         ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2],
-        ['QNTPO', 'Qnt PO', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 0;
@@ -486,10 +489,11 @@
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Sat', 1, 'varchar', 0, 0],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2],
-        ['QNTPO', 'Qnt PO', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2],
+        ['QNTPO', 'Qty PO', 1, 'float', 1, 2],
         ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
         ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
+        ['QntBatal', 'Qty Close', 1, 'float', 1, 2],
         ['StatusPO', 'PO', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 1;
@@ -510,9 +514,9 @@
         ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['sat', 'Satuan', 1, 'varchar', 0, 0],
-        ['QNTPR', 'QNTPR', 1, 'float', 1, 2],
-        ['QNTPO', 'QNTPO', 1, 'float', 1, 2],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2]
+        ['QNTPR', 'QTYPR', 1, 'float', 1, 2],
+        ['QNTPO', 'QTYPO', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
 
@@ -524,9 +528,9 @@
         ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['sat', 'Satuan', 1, 'varchar', 0, 0],
-        ['QNTPR', 'QNTPR', 1, 'float', 1, 2],
-        ['QNTPO', 'QNTPO', 1, 'float', 1, 2],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2]
+        ['QNTPR', 'QTYPR', 1, 'float', 1, 2],
+        ['QNTPO', 'QTYPO', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
     }

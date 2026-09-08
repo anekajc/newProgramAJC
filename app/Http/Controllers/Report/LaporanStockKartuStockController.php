@@ -65,6 +65,7 @@ class LaporanStockKartuStockController extends Controller {
 
     $res = DB::connection('SML')->select('exec Sp_reportkartuStock ?,?,?,?,?,?,?,?,?',
       $values);
+    // exec Sp_reportkartuStock 'G07', '10202010880044', 9, 9, '2026', '2026', '202609', '202609', 1
 
     return $res;
   }
