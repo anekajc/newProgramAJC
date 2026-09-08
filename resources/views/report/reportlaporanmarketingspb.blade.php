@@ -19,9 +19,10 @@
                 </div> --}}
 
                 <!-- Jenis laporan: Non Outstanding (ke Sp_ReportSPBDet, dua tanggal) atau
-                     Outstanding (ke Sp_ReportOutSpbDet, hanya tanggal pertama -- #inputDate2
-                     disembunyikan & tidak dikirim; LaporanMarketingOutSPPBController TIDAK
-                     diubah, jadi date2 sampai ke SP sebagai NULL apa adanya). -->
+                     Outstanding (ke Sp_ReportOutSpbDet, hanya satu tanggal -- diambil dari
+                     #inputDate2, #inputDate1 disembunyikan & tidak dikirim;
+                     LaporanMarketingOutSPPBController TIDAK diubah, jadi nilai #inputDate2
+                     tetap dikirim sebagai request key `date1` apa adanya -- lihat makeTable()). -->
                 <div class="filter-wrap">
                     <label>Jenis</label>
                     <select class="filter-inp" id="inputMode" onchange="setMode(this.value)">
@@ -161,7 +162,7 @@
                                     <option value="BELUM">Belum</option>
                                     <option value="SUDAH">Sudah</option>
                                 </select>
-                            </div></div>
+                            </div>
                         </div>
                         <div class="rt-grid-2">
                             <div>
@@ -344,15 +345,17 @@
         }
 
         // Jenis laporan: "0" Non Outstanding (Sp_ReportSPBDet, dua tanggal) atau "1" Outstanding
-        // (Sp_ReportOutSpbDet, HANYA tanggal pertama -- lihat komentar di toolbar).
+        // (Sp_ReportOutSpbDet, HANYA satu tanggal, diambil dari #inputDate2 -- lihat komentar
+        // di toolbar dan makeTable()).
         function setMode(val) {
             globalMode = val;
             const isOut = (val === '1');
 
-            // date2 tidak dikirim di mode Outstanding -- LaporanMarketingOutSPPBController TIDAK
-            // diubah (permintaan eksplisit), jadi tetap dibaca $req->get('date2') apa adanya
-            // (jadi NULL di SP kalau tidak dikirim).
-            $('#inputDate2').toggle(!isOut);
+            // #inputDate1 disembunyikan di mode Outstanding -- yang dipakai & dikirim adalah
+            // #inputDate2 (lihat makeTable()). LaporanMarketingOutSPPBController TIDAK diubah
+            // (permintaan eksplisit): dia hanya membaca request key `date1`, jadi nilai
+            // #inputDate2 tetap dikirim dengan key itu apa adanya.
+            $('#inputDate1').toggle(!isOut);
             $('#dateSep').toggle(!isOut);
             $('#periodeLabel').text(isOut ? 'Per Tanggal' : 'Periode');
 
@@ -489,8 +492,10 @@
             });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
+            // Outstanding cuma kirim satu tanggal, dan itu #inputDate2 (globalDate2) -- lihat
+            // makeTable(). globalDate1 di sini akan menampilkan tanggal yang salah.
             a.download = (globalMode === '1')
-                ? 'OutstandingSPPB_' + (globalDate1 || '') + '.' + ext
+                ? 'OutstandingSPPB_' + (globalDate2 || '') + '.' + ext
                 : 'LaporanSPB_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
             document.body.appendChild(a);
             a.click();
@@ -785,15 +790,16 @@
                 doSetHeader(g_modeReport);
             }
 
-            // Sp_ReportOutSpbDet tidak punya parameter @tglterima. date2 SENGAJA tidak dikirim
-            // di mode Outstanding (hanya tanggal pertama yang dipakai) -- LaporanMarketingOutSPPBController
-            // TIDAK diubah, jadi $req->get('date2') otomatis NULL di sisi server, termasuk posisi
-            // tukar date1/date2-nya yang juga dipertahankan apa adanya (lihat komentar di toolbar).
+            // Sp_ReportOutSpbDet tidak punya parameter @tglterima. Cuma satu tanggal yang
+            // dipakai di mode Outstanding, dan itu diambil dari #inputDate2 (bukan #inputDate1
+            // -- lihat setMode()). LaporanMarketingOutSPPBController TIDAK diubah: dia hanya
+            // membaca request key `date1`, jadi _date2 (nilai #inputDate2) tetap dikirim
+            // dengan key `date1` apa adanya -- JANGAN ganti key ini jadi `date2`.
             let url, data;
             if (isOut) {
                 url = reportUrlOut;
                 data = {
-                    date1: _date1,
+                    date1: _date2,
                     inputOto: inputOto,
                     inputOrd: input_order,
                 };

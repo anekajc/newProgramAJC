@@ -18,9 +18,12 @@
            Tgl. Terima & Status semua bisa diatur, kedua tanggal dikirim) atau Outstanding (ke
            Sp_ReportOutSpbDet, tombol Filter disembunyikan -- proc ini tidak punya kolom Status
            & tidak ada UI untuk mengubah Otorisasi/Tgl. Terima di mode ini, sama seperti halaman
-           lama; Otorisasi dipaksa balik ke Semua saat masuk mode ini -- dan #inputDate2
-           disembunyikan & tidak dikirim; LaporanMarketingOutSPBHrgSoController TIDAK diubah,
-           jadi date2 sampai ke SP sebagai NULL apa adanya). -->
+           lama; Otorisasi dipaksa balik ke Semua saat masuk mode ini. Hanya satu tanggal yang
+           dipakai di mode ini, diambil dari #inputDate2 (bukan #inputDate1) -- Sp_ReportOutSpbDet
+           dengan @Ordr='X' cuma memfilter `Tanggal <= @tgl1` dan mengabaikan @tgl2 sama sekali,
+           jadi #inputDate1 disembunyikan & tidak dikirim; LaporanMarketingOutSPBHrgSoController
+           TIDAK diubah, nilai #inputDate2 tetap dikirim sebagai request key `date1` apa adanya
+           -- lihat makeTable()). -->
       <div class="filter-wrap">
         <label>Jenis</label>
         <select class="filter-inp" id="inputMode" onchange="setMode(this.value)">
@@ -264,8 +267,8 @@
   }
 
   // Jenis laporan: "0" Non Outstanding (Sp_ReportSPBDet, tombol Filter aktif, dua tanggal) atau
-  // "1" Outstanding (Sp_ReportOutSpbDet, tombol Filter disembunyikan, HANYA tanggal pertama --
-  // lihat komentar di toolbar).
+  // "1" Outstanding (Sp_ReportOutSpbDet, tombol Filter disembunyikan, HANYA satu tanggal, diambil
+  // dari #inputDate2 -- lihat komentar di toolbar dan makeTable()).
   function setMode(val) {
     globalMode = val;
     const isOut = (val === '1');
@@ -283,10 +286,10 @@
       setOutstanding('2');
     }
 
-    // date2 tidak dikirim di mode Outstanding -- LaporanMarketingOutSPBHrgSoController TIDAK
-    // diubah (permintaan eksplisit), jadi tetap dibaca $req->get('date2') apa adanya (jadi NULL
-    // di SP kalau tidak dikirim).
-    $('#inputDate2').toggle(!isOut);
+    // #inputDate1 disembunyikan di mode Outstanding -- yang dipakai & dikirim adalah
+    // #inputDate2 (lihat makeTable()). LaporanMarketingOutSPBHrgSoController TIDAK diubah:
+    // nilai #inputDate2 tetap dikirim dengan request key `date1` apa adanya.
+    $('#inputDate1').toggle(!isOut);
     $('#dateSep').toggle(!isOut);
     $('#periodeLabel').text(isOut ? 'Per Tanggal' : 'Periode');
 
@@ -364,8 +367,10 @@
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
+    // Outstanding cuma kirim satu tanggal, dan itu #inputDate2 (globalDate2) -- lihat
+    // makeTable(). globalDate1 di sini akan menampilkan tanggal yang salah.
     a.download = (globalMode === '1')
-      ? 'OutstandingSPBHrgSO_' + (globalDate1 || '') + '.' + ext
+      ? 'OutstandingSPBHrgSO_' + (globalDate2 || '') + '.' + ext
       : 'LaporanSPBHrgSO_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('📄', 'Data diekspor sebagai ' + fmt);
@@ -405,6 +410,25 @@
     return undefined;
   }
 
+  // Kedua mode di halaman ini sama-sama berasal dari VwreportOutSPBHRGSO (Non Outstanding
+  // lewat `select *`, Outstanding lewat query ber-alias di Sp_ReportOutSpbDet @Ordr='X') --
+  // keduanya punya NOSAT/SAT_1/SAT_2, tapi nama kolom qty-nya beda: QNT/QNT2 di Non
+  // Outstanding, QntOut1/QntOut2 di Outstanding. NOSAT=1 -> pasangan pertama, 2 atau 3 ->
+  // kedua (ikut CASE HAVING di SP-nya sendiri), sama seperti reportlaporanmarketingspb.blade.php
+  // & reportmarketingso.blade.php. Dihitung sekali di sini (bukan di render()) supaya render,
+  // subtotal, pencarian, dan export semua membaca field yang sama.
+  function decorateRows(rows, isOut) {
+    const q1 = isOut ? 'QntOut1' : 'QNT';
+    const q2 = isOut ? 'QntOut2' : 'QNT2';
+    (rows || []).forEach(function(r) {
+      const nosat = String(pickCI(r, 'NOSAT'));
+      const pakaiKedua = (nosat === '2' || nosat === '3');
+      r.QTY = pickCI(r, pakaiKedua ? q2 : q1);
+      r.Satuan = pickCI(r, pakaiKedua ? 'SAT_2' : 'SAT_1');
+    });
+    return rows || [];
+  }
+
   // Hanya dua mode yang bisa dicapai (globalOrderBy selalu "X"): Detail dan Rekap per NoBukti.
   var modereport_detailnobukti = 0, modereport_rekapnobukti = 1;
   g_modeReport = modereport_detailnobukti;
@@ -426,7 +450,10 @@
   // Nama kolom di bawah ini adalah kolom NYATA dari Sp_ReportSPBDet (dikonfirmasi lewat
   // reportlaporanmarketingspb.blade.php, yang memanggil SP yang sama). Sebelumnya halaman ini
   // meminta NoPesanan/NamaBarangX (tidak ada -> selalu kosong) dan NoSo/TanggalSO (kolom itu
-  // milik Sp_ReportOutSpbDet, SP lain sama sekali) -- sudah dikoreksi di sini.
+  // milik Sp_ReportOutSpbDet, SP lain sama sekali) -- sudah dikoreksi di sini. Kolom 'Satuan'
+  // & 'QTY' BUKAN kolom mentah -- itu hasil gabungan SAT_1/SAT_2 & QNT/QNT2 oleh
+  // decorateRows() (nosat=1 -> pasangan pertama, 2/3 -> kedua). QTY tidak di-subtotal karena
+  // satuan bisa beda-beda per baris.
   function setHeaderHrg(base) {
     if (base == modereport_detailnobukti) {
       gcart_header = [
@@ -436,9 +463,10 @@
         ['NoPOCustomer', 'No. PO Customer', 1, 'varchar', 0, 0],
         ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['QNT', 'Qnt', 1, 'float', 1, 0],
+        ['Satuan', 'Sat', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 0, 0],
         ['HARGA', 'Harga', 1, 'float', 0, 0],
-        ['NDPPRPZX', 'DPP', 1, 'float', 1, 2],
+        ['NDPPRp', 'Total', 1, 'float', 1, 2],
         ['outstanding', 'Status', 1, 'varchar', 0, 0],
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 1;
@@ -449,8 +477,8 @@
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
         ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
         ['NoPOCustomer', 'No. PO Customer', 1, 'varchar', 0, 0],
-        ['HARGA', 'Total', 1, 'float', 1, 0],
-        ['NDPPRPZX', 'DPP', 1, 'float', 1, 2],
+        ['HARGA', 'Harga', 1, 'float', 1, 0],
+        ['NDPPRp', 'Total', 1, 'float', 1, 2],
         ['outstanding', 'Status', 1, 'varchar', 0, 0],
       ];
       gsum_issubtotal = 0; gsum_isgrandtotal = 1;
@@ -459,6 +487,9 @@
 
   // Kolom NYATA dari Sp_ReportOutSpbDet, dipindah dari reportmarketingoutspbhrgso.blade.php.
   // Tidak ada kolom 'outstanding' -- proc ini tidak mengembalikan status kirim sama sekali.
+  // Kolom 'Satuan' & 'QTY' di base===0 BUKAN kolom mentah -- itu hasil gabungan SAT_1/SAT_2 &
+  // QntOut1/QntOut2 oleh decorateRows() (nosat=1 -> pasangan pertama, 2/3 -> kedua), sama
+  // seperti di setHeaderHrg(). QTY tidak di-subtotal karena satuan bisa beda-beda per baris.
   function setHeaderOut(base) {
     if (base === 0) {
       gcart_header = [
@@ -471,8 +502,8 @@
         ['NOPOCUstomer', 'No. PO. Cust', 1, 'varchar', 0, 0],
         ['NoSo', 'No. SO', 1, 'varchar', 0, 0],
         ['TanggalSO', 'Tgl. SO', 1, 'date', 0, 0],
-        ['QntOut1', 'Qty 1', 1, 'float', 1, 0],
-        ['QntOut2', 'Qty 2', 1, 'float', 1, 0],
+        ['Satuan', 'Sat', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 0, 0],
         ['HARGA', 'Harga', 1, 'float', 1, 0],
         ['NDPPRPZX', 'Total', 1, 'float', 1, 0],
       ];
@@ -503,11 +534,16 @@
       doSetHeader(g_modeReport);
     }
 
+    // Sp_ReportOutSpbDet dengan @Ordr='X' cuma memfilter `Tanggal <= @tgl1` dan mengabaikan
+    // @tgl2 sepenuhnya, jadi cuma satu tanggal yang berpengaruh di mode ini -- diambil dari
+    // #inputDate2 (bukan #inputDate1, lihat setMode()). LaporanMarketingOutSPBHrgSoController
+    // TIDAK diubah: dia hanya membaca request key `date1`, jadi _date2 (nilai #inputDate2)
+    // tetap dikirim dengan key `date1` apa adanya -- JANGAN ganti key ini jadi `date2`.
     let url, data;
     if (isOut) {
       url = reportUrlOut;
       data = {
-        date1: _date1,
+        date1: _date2,
         inputOto: globalOtorisasi,
       };
     } else {
@@ -530,7 +566,7 @@
       type: 'get',
       data: data,
       success: function(res) {
-        lastRows = res || [];
+        lastRows = decorateRows(res || [], isOut);
         currentGroupby = groupbyKey;
         $('#searchBox2').val('');
         render();
