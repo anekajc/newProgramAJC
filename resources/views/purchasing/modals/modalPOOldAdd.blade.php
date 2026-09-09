@@ -1,22 +1,3 @@
-{{-- Merged from modalPONewAdd.blade.php and modalPOOldAdd.blade.php.
-     All picker sections, columns, IDs, callbacks and source comments are retained.
-     Both header classes are retained; the scoped Old stylesheet takes precedence.
-     Defaults retain the New initial rows. For the Old empty-table behavior, pass:
-       'poModalShowPlaceholderRows' => false, 'poModalPreloadBarangAll' => false
-     Only include ONE PO picker partial per page: all variants use id="form".
-     The including page still supplies the picker callbacks and data loading.
---}}
-
-<style>
-/* Click-anywhere-on-row picker feedback for every table in this shared modal,
-   same convention as so.blade.php's own picker modals -- kept here (rather than
-   duplicated in each including page's own CSS block) since this partial
-   is reused by penawaranso.blade.php, purchaseOrder.blade.php,
-   pembelianpermintaanagen.blade.php and pembelianpermintaannonagen.blade.php. */
-.pick-row { cursor: pointer; }
-.pick-row:hover { background-color: #f5f3ff !important; }
-</style>
-
 
 {{-- ============================================================
      Picker "klik baris" (mengikuti gudang/permintaanpemakaian).
@@ -152,7 +133,6 @@
   }
 </style>
 
-
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
@@ -181,7 +161,7 @@
               <div class="col-12" style="overflow:auto; margin-top:-60px;">
               <!-- <div class="container-fluid"> -->
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
-                <thead class="data-table text-center">
+                <thead class="text-center">
                   <tr>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
@@ -189,13 +169,6 @@
                   </tr>
                 </thead>
                 <tbody id="tabel_data_add_list_pelanggan" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-                  <tr >
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
-                @endif
                 </tbody>
               </table>
             <!-- </div> -->
@@ -235,19 +208,13 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_Ttd" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Id Backoffice</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_Ttd" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -290,19 +257,13 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_Kebun" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode Kebun</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_Kebun" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -349,21 +310,13 @@
             <div class="col-12" style="overflow:auto; margin-top:-40px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="data-table text-center">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
-                @if (($poModalPreloadBarangAll ?? true) && isset($listBarangAll))
-                @for ($i = 0; $i < count($listBarangAll); $i++)
-                <tr class="pick-row" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')">
-                  <td>{{ $listBarangAll[$i]->Kodebrg }}</td>
-                  <td>{{ $listBarangAll[$i]->NamaBrg }}</td>
-              </tr>
-              @endfor
-                @endif
               </tbody>
             </table>
           <!-- </div> -->
@@ -405,7 +358,7 @@
         <div class="row">
           <div class="col-12" style="overflow:auto;">
             <table id="tabel_add_list_barang_foc" class="table table-bordered table-striped"  >
-              <thead class="data-table text-center" style='white-space:nowrap;'>
+              <thead class="text-center" style='white-space:nowrap;'>
                 <tr>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
@@ -414,14 +367,6 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barang_foc" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-                <tr>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                </tr>
-                @endif
               </tbody>
             </table>
           </div>
@@ -439,7 +384,7 @@
       <div class="row">
         <div class="col-12" style="overflow:auto;">
           <table id="tabel_add_list_barang_nonfoc" class="table table-bordered table-striped"  >
-            <thead class="data-table text-center" style='white-space:nowrap;'>
+            <thead class="text-center" style='white-space:nowrap;'>
               <tr>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
@@ -455,21 +400,6 @@
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_barang_nonfoc" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -487,7 +417,7 @@
         <div class="row">
           <div class="col-12" style="overflow:auto;">
             <table id="tabel_add_list_barang_nonfocplus" class="table table-bordered table-striped"  >
-              <thead class="data-table text-center">
+              <thead class="text-center">
                 <tr>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
@@ -501,19 +431,6 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barang_nonfocplus" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-                <tr>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                </tr>
-                @endif
               </tbody>
             </table>
           </div>
@@ -536,19 +453,13 @@
         <div class="row">
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_pic" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pic" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
           </div>
@@ -586,7 +497,7 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_pwo" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Nomor Bukti</th>
                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -599,18 +510,6 @@
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pwo" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr >
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-            </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -647,19 +546,13 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_lokasipenerima" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kota</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_lokasipenerima" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr >
-                <td>-</td>
-                <td>-</td>
-            </tr>
-                @endif
             </tbody>
           </table>
         <!-- </div> -->
@@ -696,7 +589,7 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_alamatkirim" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Nomor</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
@@ -704,13 +597,6 @@
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_alamatkirim" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -745,7 +631,7 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_noSo" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">No SO</th>
                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -753,13 +639,6 @@
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_noSo" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-                @endif
             </tbody>
           </table>
         </div>
@@ -796,19 +675,13 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_backoffice" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="data-table text-center">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_backoffice" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-              <tr >
-                <td>-</td>
-                <td>-</td>
-            </tr>
-                @endif
             </tbody>
           </table>
         <!-- </div> -->
@@ -848,19 +721,13 @@
             <div class="col-12" style="overflow:auto; margin-top:-60px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_sales" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="data-table text-center">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_sales" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-                <tr >
-                  <td>-</td>
-                  <td>-</td>
-              </tr>
-                @endif
               </tbody>
             </table>
           <!-- </div> -->
@@ -899,7 +766,7 @@
                         <div class="col-12" style="overflow:auto; margin-top:-30px;">
                         <!-- <div class="container-fluid"> -->
                         <table id="tabel_add_list_valas" class="table table-bordered table-hover table-striped table-responsive-lg">
-                            <thead class="data-table text-center">
+                            <thead class="text-center">
                                 <tr>
                                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                                     <th style="padding: 4px 12px;" scope="col">Nama</th>
@@ -907,13 +774,6 @@
                                 </tr>
                             </thead>
                             <tbody id="tabel_data_add_list_valas" class="text-left" >
-                @if ($poModalShowPlaceholderRows ?? true)
-                                <tr>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                </tr>
-                @endif
                             </tbody>
                         </table>
                         <!-- </div> -->
@@ -941,6 +801,7 @@
         </div>
     </div>
 </div>
+
 {{-- Placeholder "Cari Data" untuk kotak pencarian DataTables di dalam modal ini.
      Tulisan "Search:" bawaan DataTables disembunyikan lewat CSS di atas (font-size:0
      pada <label>), jadi di sini tinggal mengisi placeholder input-nya.
