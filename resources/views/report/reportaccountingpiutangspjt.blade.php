@@ -2,16 +2,12 @@
 
 {{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php).
      Piutang Sisa Per Jatuh Tempo: styled .tb-report, dikelompokkan per pelanggan (NamaCust)
-     dengan subtotal + grand total (Jumlah/Bayar/Sisa Rp). Filter: Periode (rentang tanggal),
-     Perkiraan (dropdown), Pelanggan Awal/Akhir (modal). Klik No Nota membuka voucher (Invoice
-     penjualan) di panel bawah (report-table.js). Mode tunggal IDR — tanpa Valas / Order By. --}}
+     dengan subtotal + grand total (Jumlah/Bayar/Sisa Rp). Periode (rentang tanggal) tetap di
+     toolbar; Perkiraan & Plgn Awal/Akhir dipindah ke modal "Filter Laporan". Tabel interaktif
+     (drag/gear/hide/desimal/total) lewat ReportTable -- tanpa "Tampilan" karena mode tunggal
+     IDR (setDefaultHeader tidak bercabang). Klik No Nota membuka voucher (Invoice penjualan)
+     di panel bawah (report-table.js). Tanpa Valas / Order By. --}}
 <style>
-  #inputPerkiraanBtn {
-    border: 0; background: none; padding: 0; box-shadow: none;
-    color: #495057; font-weight: 600;
-  }
-  #inputPerkiraanBtn:hover, #inputPerkiraanBtn:focus { color: #0d6efd; box-shadow: none; }
-
   /* tinggi awal area tabel supaya dropdown tidak terpotong container pendek */
   .tb-report .table-wrap { min-height: 10vh; }
 </style>
@@ -22,10 +18,10 @@
 
     <!-- TOOLBAR -->
     <div class="toolbar">
-      <div>
+      {{-- <div>
         <div class="page-title">Piutang Sisa Per Jatuh Tempo</div>
         <div class="page-sub">Dicetak oleh: {{ $akses['user'] }} &nbsp;&middot;&nbsp; <span id="printTime"></span></div>
-      </div>
+      </div> --}}
 
       <!-- Periode (rentang tanggal) -->
       <div class="filter-wrap">
@@ -35,34 +31,25 @@
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
-      <!-- Perkiraan (dropdown; akun PT) -->
-      <div class="filter-wrap">
-        <label>Perkiraan</label>
-        <input type="hidden" id="inputPerkiraan" value="-">
-        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputPerkiraanBtn"
-                data-bs-toggle="dropdown" aria-expanded="false"><span id="perkiraanLabel">-</span></button>
-        <ul class="dropdown-menu" id="dropdownPerkiraan" aria-labelledby="inputPerkiraanBtn"
-            style="max-height:320px; overflow:auto;"></ul>
-      </div>
-
-      <!-- Pelanggan Awal (modal — data banyak) -->
-      <div class="filter-wrap">
-        <label>Plgn Awal</label>
-        <input type="text" class="filter-inp" id="inputSuppAwal" style="width:90px" value="-" readonly>
-        <button type="button" class="btn-pick" onclick="buttonSelectSuppAwal()" title="Pilih Pelanggan Awal">+</button>
-      </div>
-
-      <!-- Pelanggan Akhir (modal — data banyak) -->
-      <div class="filter-wrap">
-        <label>Plgn Akhir</label>
-        <input type="text" class="filter-inp" id="inputSuppAkhir" style="width:90px" value="-" readonly>
-        <button type="button" class="btn-pick" onclick="buttonSelectSuppAkhir()" title="Pilih Pelanggan Akhir">+</button>
-      </div>
-
-      <!-- Actions: search + customize + tampilkan + export -->
-      <div class="action-group">
+      {{-- search --}}
+      <div>
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:160px">
-        <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button>
+      </div>
+
+      {{-- Perkiraan & Plgn Awal/Akhir dipindah ke modal "Filter Laporan" (lihat di luar
+           .tb-report). Nilai sebenarnya tetap di input hidden, dibaca makeTable(). --}}
+      <input type="hidden" id="inputPerkiraan" value="-">
+      <input type="hidden" id="inputSuppAwal" value="-">
+      <input type="hidden" id="inputSuppAkhir" value="-">
+
+      <!-- Actions: search + filter modal + customize + tampilkan + export -->
+      <div class="action-group">
+        {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) —
+             lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+        {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
           <button class="export-btn" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
@@ -74,6 +61,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
 
     <!-- TABLE (header + rows rendered dynamically from gcart_header; grouped per pelanggan) -->
     <div class="table-outer">
@@ -90,6 +80,12 @@
       <div class="table-footer">
         <span id="footerLabel">Belum ada data dimuat</span>
       </div>
+    </div>
+
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+      sembunyikan kolom atau atur desimal &amp; total.
     </div>
 
   </div><!-- /content -->
@@ -147,6 +143,55 @@
     </div>
   </div>
 </div>
+
+<!-- modal filter -->
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i> Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
+             $.fn.modal milik BS4 (jQuery dimuat sesudah bundle BS5). data-bs-dismiss dibiarkan
+             untuk jaga-jaga. Lihat new-design-all-guide.md §5.1. --}}
+        <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
+                onclick="$('#modalFilter').modal('hide')"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div>
+            <label class="rt-field-label" for="modalPerkiraan">Perkiraan</label>
+            <select class="rt-native" id="modalPerkiraan"></select>
+          </div>
+        </div>
+
+        <div class="rt-section">
+          <div class="rt-group-label">Filter Data
+            <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+          </div>
+          <div class="rt-grid-2" id="pickFields"></div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
+                  onclick="$('#modalFilter').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 @endsection
 
 
@@ -158,7 +203,8 @@
   let g_reportTitle = "";
   let g_inputPerkiraan = "";
 
-  let lastRows = [];   // hasil fetch terakhir (dipakai render / search)
+  let lastRows = [];        // hasil fetch terakhir (dipakai render / search)
+  let perkiraanList = [];   // daftar akun dari loadPerkiraanDropdown (dipakai resetAllFilters)
 
   // Report ini mode tunggal (tanpa Valas). Mode NUMERIK: DBSIMPANHEADER.reportmode itu
   // kolom integer, jadi mode string membuat header (termasuk toggle Subtotal/Grand Total)
@@ -180,11 +226,19 @@
   };
 
   $(document).ready(function () {
-    document.getElementById('printTime').textContent = new Date().toLocaleString('id-ID');
+    // document.getElementById('printTime').textContent = new Date().toLocaleString('id-ID');
     setModeReport();                   // muat gcart_header + customize
     loadPerkiraanDropdown();           // isi dropdown Perkiraan (default akun PT pertama)
 
-    setTimeout(() => { makeTable('REPORT'); }, 100);
+    // Header tabel interaktif (drag/gear/hide/decimal/total). Tanpa "Tampilan": report ini
+    // mode tunggal IDR, setDefaultHeader() tidak bercabang per mode.
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: render
+    });
+
+    // setTimeout(() => { makeTable('REPORT'); }, 100);
   });
 
   /* ── kolom (gcart_header). Tabel styled DI-RENDER dari sini (Customize Table).
@@ -329,11 +383,8 @@
     const showGrand = hasTotal && (gsum_isgrandtotal === 1);
     const search = ($('#searchBox2').val() || '').trim().toLowerCase();
 
-    // HEADER dinamis
-    thead.innerHTML = '<tr>' + cols.map(function (c) {
-      const isNum = (c[3] === 'float' || c[3] === 'int');
-      return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
-    }).join('') + '</tr>';
+    // HEADER dinamis + interaktif (drag/gear/hide/desimal/total) lewat ReportTable
+    thead.innerHTML = ReportTable.headHtml(cols);
 
     // kelompokkan per pelanggan (NamaCust), pertahankan urutan kemunculan
     const order = [], buckets = {};
@@ -427,35 +478,138 @@
       success: function (res) { list = res || []; }
     });
 
+    perkiraanList = list;
+
     let html = '';
     list.forEach((item) => {
-      const ket = (item.Keterangan != null ? String(item.Keterangan) : '').replace(/"/g, '&quot;');
-      html += '<li><a class="dropdown-item perkiraan-item" style="cursor:pointer" ' +
-        'data-value="' + item.Perkiraan + '" data-ket="' + ket + '">' +
-        item.Perkiraan + ' - ' + (item.Keterangan != null ? item.Keterangan : '') +
-        ' <span class="checkmark-red" style="display:none">&#10003;</span></a></li>';
+      const ket = (item.Keterangan != null ? String(item.Keterangan) : '');
+      html += '<option value="' + item.Perkiraan + '" data-ket="' + ket.replace(/"/g, '&quot;') + '">' +
+        item.Perkiraan + ' - ' + ket + '</option>';
     });
-    $("#dropdownPerkiraan").html(html);
+    $("#modalPerkiraan").html(html);
 
     if (list.length) { setPerkiraan(list[0].Perkiraan, list[0].Keterangan != null ? list[0].Keterangan : ''); }
   }
 
   function setPerkiraan(kode, ket) {
     $("#inputPerkiraan").val(kode);
-    $("#perkiraanLabel").text(kode);
-    $("#inputPerkiraanBtn").attr('title', kode + (ket ? ' - ' + ket : ''));
+    $("#modalPerkiraan").val(kode);
     g_inputPerkiraan = kode + (ket ? ' - ' + ket : '');
-
-    // pelanggan difilter per perkiraan → reset pilihan pelanggan saat perkiraan berubah
-    $('#inputSuppAwal').val('-');
-    $('#inputSuppAkhir').val('-');
-
-    $('#dropdownPerkiraan .checkmark-red').hide();
-    $(`#dropdownPerkiraan .perkiraan-item[data-value='${kode}'] .checkmark-red`).show();
   }
 
-  $(document).on('click', '#dropdownPerkiraan .perkiraan-item', function () {
-    setPerkiraan($(this).data('value'), $(this).data('ket'));
+  /* ── FILTER MODAL (Perkiraan, Plgn Awal/Akhir) ──
+     Nilai sebenarnya tetap di input hidden #inputPerkiraan / #inputSuppAwal / #inputSuppAkhir
+     (dibaca makeTable(), ditulis di sini / buttonPilihSuppAwal / buttonPilihSuppAkhir). Kontrol
+     di modal (#modalPerkiraan, .rt-combo) hanya tampilan pending di atasnya sampai "Terapkan"
+     diklik. ── */
+  const PICK_FIELDS = [
+    { id: 'inputSuppAwal',  label: 'Plgn Awal',  open: 'suppAwal' },
+    { id: 'inputSuppAkhir', label: 'Plgn Akhir', open: 'suppAkhir' },
+  ];
+
+  function renderPickFields() {
+    let html = '';
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val() || '-';
+      const isSet = (val !== '-' && val !== '');
+      html += '<div>';
+      html += '<label class="rt-field-label">' + f.label + '</label>';
+      html += '<div class="rt-combo">';
+      html += '<div class="rt-combo-input" onclick="pickFromModal(\'' + f.open + '\')">';
+      if (isSet) {
+        html += '<span class="rt-combo-tag">' + val +
+          '<button type="button" onclick="event.stopPropagation(); clearPickField(\'' + f.id +
+          '\')">&times;</button></span>';
+      } else {
+        html += '<span class="rt-combo-placeholder">Pilih ' + f.label.toLowerCase() + '...</span>';
+      }
+      html += '<span class="rt-combo-chevron">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</span>';
+      html += '</div></div></div>';
+    });
+    $('#pickFields').html(html);
+  }
+
+  function clearPickField(id) {
+    $('#' + id).val('-');
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  // Perkiraan: pilihan wajib (tanpa opsi netral seperti "Semua") -- sengaja tidak dihitung.
+  // Plgn Awal/Akhir: netralnya adalah '-' (belum dipilih) -- dihitung saat diisi.
+  function updateFilterBadge() {
+    let count = 0;
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val();
+      if (val && val !== '-') { count++; }
+    });
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    if (perkiraanList.length) { $('#modalPerkiraan').val(perkiraanList[0].Perkiraan); }
+    PICK_FIELDS.forEach(function (f) { $('#' + f.id).val('-'); });
+    renderPickFields();
+    updateFilterBadge();
+  }
+
+  // Saat modal Filter dibuka ulang otomatis sesudah picker Plgn Awal/Akhir ditutup (lihat
+  // pickFromModal / hidden.bs.modal di bawah), JANGAN timpa ulang pilihan Perkiraan yang
+  // pending dari nilai yang sudah di-Terapkan -- kalau tidak, pilihan Perkiraan yang belum
+  // di-Terapkan hilang begitu user selesai memilih Plgn Awal/Akhir.
+  // g_reopeningFilter ditandai true sesaat sebelum modal dibuka ulang di jalur itu saja.
+  let g_reopeningFilter = false;
+
+  $('#modalFilter').on('show.bs.modal', function () {
+    if (!g_reopeningFilter) {
+      $('#modalPerkiraan').val($('#inputPerkiraan').val());
+    }
+    g_reopeningFilter = false;
+    renderPickFields();
+    updateFilterBadge();
+  });
+
+  $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
+
+  // Ganti Perkiraan (pending, belum Terapkan) membatalkan pilihan Plgn Awal/Akhir yang sedang
+  // pending juga -- daftar pelanggan tergantung Perkiraan yang dipilih.
+  $('#modalFilter').on('change', '#modalPerkiraan', function () {
+    $('#inputSuppAwal').val('-');
+    $('#inputSuppAkhir').val('-');
+    renderPickFields();
+    updateFilterBadge();
+  });
+
+  function applyModalFilter() {
+    const kode = $('#modalPerkiraan').val();
+    const ket  = $('#modalPerkiraan option:selected').data('ket') || '';
+    setPerkiraan(kode, ket);
+    $('#modalFilter').modal('hide');
+  }
+
+  // Jembatan ke modal pilih Plgn Awal/Akhir: sembunyikan modal Filter dulu (hindari Bootstrap
+  // stacked-modal), lalu buka lagi setelah modal pilih ditutup.
+  let g_reopenFilter = false;
+
+  function pickFromModal(which) {
+    g_reopenFilter = true;
+    $('#modalFilter').modal('hide');
+    if (which === 'suppAwal') { buttonSelectSuppAwal(); }
+    else if (which === 'suppAkhir') { buttonSelectSuppAkhir(); }
+  }
+
+  $(document).on('hidden.bs.modal', '#formSelectSuppAwal, #formSelectSuppAkhir', function () {
+    if (g_reopenFilter) {
+      g_reopenFilter = false;
+      g_reopeningFilter = true;
+      $('#modalFilter').modal('show');
+      // 'show.bs.modal' juga memanggil ini, tapi panggil lagi di sini supaya kotak .rt-combo
+      // langsung terupdate walau modal masih dalam proses transisi tampil.
+      renderPickFields();
+      updateFilterBadge();
+    }
   });
 
   /* ── MODAL PELANGGAN AWAL ── */
@@ -463,7 +617,9 @@
   function buttonPilihSuppAwal(kode) { $("#inputSuppAwal").val(kode); $("#formSelectSuppAwal").modal('hide'); }
 
   function loadSelectSuppAwal() {
-    let perkiraan = $("#inputPerkiraan").val();
+    // Baca dari #modalPerkiraan (pending, belum Terapkan), bukan #inputPerkiraan yang sudah
+    // di-commit -- picker dibuka dari dalam modal Filter sebelum Terapkan diklik.
+    let perkiraan = $("#modalPerkiraan").length ? $("#modalPerkiraan").val() : $("#inputPerkiraan").val();
     let dataRefresh = [];
     if ($.fn.DataTable.isDataTable('#tabelSelectSuppAwal')) { $('#tabelSelectSuppAwal').DataTable().destroy(); }
 
@@ -491,7 +647,9 @@
   function buttonPilihSuppAkhir(kode) { $("#inputSuppAkhir").val(kode); $("#formSelectSuppAkhir").modal('hide'); }
 
   function loadSelectSuppAkhir() {
-    let perkiraan = $("#inputPerkiraan").val();
+    // Baca dari #modalPerkiraan (pending, belum Terapkan), bukan #inputPerkiraan yang sudah
+    // di-commit -- picker dibuka dari dalam modal Filter sebelum Terapkan diklik.
+    let perkiraan = $("#modalPerkiraan").length ? $("#modalPerkiraan").val() : $("#inputPerkiraan").val();
     let dataRefresh = [];
     if ($.fn.DataTable.isDataTable('#tabelSelectSuppAkhir')) { $('#tabelSelectSuppAkhir').DataTable().destroy(); }
 

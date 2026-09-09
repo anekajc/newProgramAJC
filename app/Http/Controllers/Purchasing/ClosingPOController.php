@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewMenu;
+use App\Models\NewPeriode;
 use Illuminate\Support\Facades\DB;
-use App\Model\VwPPL;
+use App\Models\VwPPL;
 use Illuminate\Auth;
 
 class ClosingPOController extends Controller
@@ -30,8 +27,8 @@ class ClosingPOController extends Controller
     ['field' => 'NamaBrg',      'label' => 'Nama Barang', 'tipe' => 0],
     ['field' => 'Satuan',       'label' => 'Satuan',      'tipe' => 0],
     ['field' => 'Qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'QntBatal',     'label' => 'Qty Batal',   'tipe' => 1],
+    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'QntSisa',      'label' => 'Qty Sisa',    'tipe' => 1],
   ];
 
@@ -46,8 +43,8 @@ class ClosingPOController extends Controller
     ['field' => 'namabrg',      'label' => 'Nama Barang', 'tipe' => 0],
     ['field' => 'satuan',       'label' => 'Satuan',      'tipe' => 0],
     ['field' => 'qnt',          'label' => 'Qty PO',      'tipe' => 1],
-    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'qntbatal',     'label' => 'Qty Batal',   'tipe' => 1],
+    ['field' => 'qntterima',    'label' => 'Qty Terima',  'tipe' => 1],
     ['field' => 'qntsisa',      'label' => 'Qty Sisa',    'tipe' => 1],
     ['field' => 'UserBatal',    'label' => 'User Close',  'tipe' => 0],
     ['field' => 'TglBatal',     'label' => 'Tgl. Close',  'tipe' => 2],
@@ -74,7 +71,8 @@ class ClosingPOController extends Controller
           B.qnt,
           B.qntterima,
           B.qntbatal,
-          B.qntsisa,
+          -- qntsisa bawaan vwMasterPOOut belum mengurangi qntbatal, jadi dihitung ulang di sini
+          (ISNULL(B.qnt, 0) - ISNULL(B.qntbatal, 0) - ISNULL(B.qntterima, 0)) as qntsisa,
           B.UserBatal,
           B.TglBatal,
           B.KetBatal,
@@ -83,6 +81,12 @@ class ClosingPOController extends Controller
       Left Outer Join vwMasterPOOut B on A.NoBukti = B.NoBukti
       where ISNULL(B.qntbatal, 0) <> 0
     ";
+  }
+
+  // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Purchase Order).
+  private function periodeRange ($periode) {
+    $stamp = mktime(0, 0, 0, (int) $periode->bulan, 1, (int) $periode->tahun);
+    return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
   }
 
   public function index(Request $req) {
@@ -96,6 +100,8 @@ class ClosingPOController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
+    list($cpoTglAwal, $cpoTglAkhir) = $this->periodeRange($periode);
+
     // Isi kedua tabel tidak lagi ditarik di sini. Dulu halaman ini menarik SELURUH isi
     // vwOutPOBatal dan seluruh dbPO+vwMasterPOOut sekali jalan (dua kali malah: sekali di
     // index() untuk @foreach blade, sekali lagi lewat loadAll() dari JS). Sekarang datanya
@@ -104,6 +110,8 @@ class ClosingPOController extends Controller
     return view('purchasing.closingPurchaseOrder' , [
       "menul0" => $menul0,
       "periode" => $periode,
+      "cpoTglAwal" => $cpoTglAwal,
+      "cpoTglAkhir" => $cpoTglAkhir,
       "akses" => $akses
     ]);
 
@@ -192,6 +200,12 @@ class ClosingPOController extends Controller
 
   // Data tab "Outstanding PO" dengan server-side paging DataTables.
   public function dataOutstanding (Request $req) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+
     $draw   = (int) $req->input('draw', 1);
     $start  = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
@@ -212,13 +226,13 @@ class ClosingPOController extends Controller
       $orderBy = 'A.Tanggal DESC, A.NoBukti DESC, A.Urut';
     }
 
-    $where = self::CPO_FILTER_OUTSTANDING;
-    $bind  = [];
+    $where = self::CPO_FILTER_OUTSTANDING . " and A.Tanggal between :tglawal and :tglakhir";
+    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
       $where .= " and (A.NoBukti like :cari1 or A.kodebrg like :cari2 or A.NamaBrg like :cari3 or A.NAMACUSTSUPP like :cari4)";
       $like = '%' . $search . '%';
-      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like];
+      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like]);
     }
 
     $jml = DB::connection("SML")->select("
@@ -240,7 +254,10 @@ class ClosingPOController extends Controller
       select X.* from (
         select ROW_NUMBER() over (order by $orderBy) as NoBaris,
                A.NoBukti+' '+right('00000000'+cast(A.urut as varchar(8)),8) KeyUrut,
-               A.*
+               A.Nobukti, A.TANGGAL, A.NAMACUSTSUPP, A.kodebrg, A.NamaBrg, A.Satuan,
+               A.Qnt, A.qntterima, A.QntBatal, A.urut,
+               -- QntSisa bawaan vwOutPOBatal belum mengurangi QntBatal, jadi dihitung ulang
+               (ISNULL(A.Qnt, 0) - ISNULL(A.QntBatal, 0) - ISNULL(A.qntterima, 0)) as QntSisa
         from vwOutPOBatal A WITH(NOLOCK)
         where $where
       ) X
@@ -258,6 +275,12 @@ class ClosingPOController extends Controller
 
   // Data tab "Closing PO" dengan server-side paging DataTables.
   public function dataClosing (Request $req) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    list($tglawal, $tglakhir) = $this->periodeRange($periode);
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
+
     $draw   = (int) $req->input('draw', 1);
     $start  = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
@@ -278,13 +301,13 @@ class ClosingPOController extends Controller
       $orderBy = 'X.Tanggal DESC, X.NoBukti DESC, X.Urut';
     }
 
-    $where = '1 = 1';
-    $bind  = [];
+    $where = '1 = 1 and X.Tanggal between :tglawal and :tglakhir';
+    $bind  = ["tglawal" => $tglawal, "tglakhir" => $tglakhir];
     $search = trim((string) $req->input('search', ''));
     if ($search !== '') {
       $where .= " and (X.NoBukti like :cari1 or X.kodebrg like :cari2 or X.namabrg like :cari3 or X.NamaCustSupp like :cari4 or X.KetBatal like :cari5)";
       $like = '%' . $search . '%';
-      $bind = ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like, "cari5" => $like];
+      $bind = array_merge($bind, ["cari1" => $like, "cari2" => $like, "cari3" => $like, "cari4" => $like, "cari5" => $like]);
     }
 
     $sqlDasar = $this->sqlDasarClosing();

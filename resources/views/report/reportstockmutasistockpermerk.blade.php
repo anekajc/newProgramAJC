@@ -1,141 +1,307 @@
 @extends('report.masterreportGudang')
+{{-- @include('report.modalbrowsemaster') dihapus: halaman ini sekarang punya picker
+     sendiri (.modal-picker / openPickMaster()) untuk Gudang & Merk, menggantikan popup
+     shared #formBrowseMaster -- pola yang sama dipakai di reportstockmutasistock.blade.php. --}}
 
-@include('report.modalbrowsemaster')
-{{-- @section('reportname')
-      <h3>Report Mutasi Stock Per Merk (Qty +Rp)</h3>
-@endsection --}}
+<style>
+  /* Samakan dengan reportopname.blade.php: supaya area tabel tidak kempes jadi
+     nyaris tak ada tinggi sebelum data pertama dimuat / saat kosong. */
+  .tb-report .table-wrap {
+    min-height: 10vh;
+  }
 
+  /* Popup "Pilih Data" (Gudang/Merk) dari dalam modal Filter Laporan.
+     Sama seperti reportstockmutasistock.blade.php -- dibuat manual karena tidak
+     ada style khusus untuk ini di report-table.css. */
+  .modal-picker-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 1071;
+  }
+  .modal-picker-backdrop.show { display: block; }
+  .modal-picker {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 1072;
+    overflow-x: hidden; overflow-y: auto;
+    outline: 0;
+  }
+  .modal-picker.show { display: block; }
+  .modal-picker .modal-dialog {
+    margin: 1.75rem auto;
+  }
+</style>
 
 @section('header2')
-<div class="w-100 bg-light shadow-sm py-3 px-4 border-bottom d-flex align-items-center justify-content-between"
-     style="margin-top:-20px; margin-bottom:150px;">
+<div class="tb-report main">
+  <div class="content">
 
-  <!-- LEFT SIDE -->
-  <div class="d-flex align-items-center" style="gap:10px;">
+    <!-- TOOLBAR -->
+    <div class="toolbar">
 
-    <!-- PERIODE -->
-    <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" title="Periode">
-        <i class="fas fa-calendar-alt"></i>
-      </button>
-      <div class="dropdown-menu p-3" style="min-width:250px;">
-        <label for="inputDate1" class="mb-1">Periode</label>
-        <input type="month"
-               class="form-control"
-               id="inputDate1"
-               value="{!! date('Y-m') !!}">
+      <!-- Periode -->
+      <div class="filter-wrap">
+        <label>Periode</label>
+        <select class="period-select" id="periodBulan" onchange="changePeriodParts()"></select>
+        <select class="period-select" id="periodTahun" onchange="changePeriodParts()"></select>
+        <input type="hidden" id="inputDate1" value="{!! date('Y-m') !!}">
       </div>
-    </div>
 
-    <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="inputReportMode" data-bs-toggle="dropdown" aria-expanded="false" title="Report Mode" style="cursor: pointer;">
-        <i class="fas fa-book"></i>
-      </button>
-      <ul class="dropdown-menu" id="dropdownReportMode" aria-labelledby="inputReportMode">
-        <li><a class="dropdown-item" style="cursor: pointer;" data-value="1" onclick="setReportMode('1')">Rekap</a></li>
-        <li><a class="dropdown-item" style="cursor: pointer;" data-value="0" onclick="setReportMode('0')">Detail</a></li>
-      </ul>
-    </div>
+      <!-- Tampilan (Detail/Rekap) -->
+      <div class="filter-wrap">
+        <label>Tampilan</label>
+        <select class="period-select" id="selectReportMode" onchange="setReportMode(this.value)">
+          <option value="0" selected>Detail</option>
+          <option value="1">Rekap</option>
+        </select>
+      </div>
 
-    <!-- GUDANG -->
-    <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" title="Gudang">
-        <i class="fas fa-warehouse"></i>
-      </button>
-      <div class="dropdown-menu p-3" style="min-width:300px;">
-        <label for="inputGudang" class="mb-1">Gudang</label>
-        <div class="input-group">
-          <input type="text"
-                 id="inputGudang"
-                 class="form-control"
-                 placeholder="-"
-                 onfocus="doSetInputBrowseMaster('inputGudang', '{!! $gudang !!}')"
-                 onblur="doBlurInputBrowseMaster()"
-                 value="-">
-          <button class="btn btn-primary"
-                  onclick="doBrowseMaster('inputGudang', '{!! $gudang !!}')">
-            <i class="bi bi-search"></i>
-          </button>
+      <!-- Search -->
+      <div>
+        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()" style="width:180px">
+      </div>
+
+      <div class="action-group">
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+        <button class="btn-load" type="button" onclick="doShowFormFilterData()" title="Filter Data">
+          <i class="fas fa-magnifying-glass"></i> Filter Data
+        </button>
+        <button class="btn-load" type="button" onclick="makeTable('REPORT')" title="Tampilkan laporan">
+          <i class="fas fa-check"></i> Tampilkan
+        </button>
+        <div class="export-wrap" id="exportWrap">
+          <button class="export-btn" type="button" onclick="toggleExport()"><i class="bi bi-arrow-down"></i> Export <i class="bi bi-caret-down-fill"></i></button>
+          <div class="export-drop" id="exportDrop">
+            <div class="export-opt" onclick="doExport('Excel')"><i class="bi bi-journals text-success"></i> Ekspor ke <span class="ext">XLSX</span></div>
+            <div class="export-opt" onclick="doExport('CSV')"><i class="bi bi-clipboard"></i> Ekspor ke <span class="ext">CSV</span></div>
+            <div class="export-opt" onclick="doExport('Print')"><i class="bi bi-printer-fill text-warning"></i> Cetak Laporan</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- MERK -->
-    <div class="dropdown">
-      <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" title="Merk">
-        <i class="fas fa-tags"></i>
-      </button>
-      <div class="dropdown-menu p-3" style="min-width:300px;">
-        <label for="inputMerk" class="mb-1">Merk</label>
-        <div class="input-group">
-          <input type="text"
-                 id="inputMerk"
-                 class="form-control"
-                 placeholder="-"
-                 onfocus="doSetInputBrowseMaster('inputMerk', '{!! $merk !!}')"
-                 onblur="doBlurInputBrowseMaster()"
-                 value="-">
-          <button class="btn btn-primary"
-                  onclick="doBrowseMaster('inputMerk', '{!! $merk !!}')">
-            <i class="bi bi-search"></i>
-          </button>
+    <!-- KPI -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-dot" style="background:#1D4ED8;"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Item</div>
+          <div class="kpi-val" id="kpiTotalItem">0</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-dot" style="background:#15803D;"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Item Masuk</div>
+          <div class="kpi-val" id="kpiTotalMasuk">0</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-dot" style="background:#B45309;"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Item Keluar</div>
+          <div class="kpi-val" id="kpiTotalKeluar">0</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-dot" style="background:#7C3AED;"></div>
+        <div class="kpi-body">
+          <div class="kpi-label">Turn Over Stock</div>
+          <div class="kpi-val" id="kpiTOS">0 %</div>
         </div>
       </div>
     </div>
 
+    <!-- Bar kolom tersembunyi + Reset kolom (diisi report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
+
+    <div class="table-outer">
+      <div class="table-wrap" id="showTableReport">
+        <table class="tb" id="tabel">
+          <thead id="tabel_header"><tr><th>&nbsp;</th></tr></thead>
+          <tbody id="tabel_data">
+            <tr class="empty-row">
+              <td>Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="footerLabel">Belum ada data dimuat</span>
+      </div>
+    </div>
+
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+      sembunyikan kolom atau atur desimal &amp; total.
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
+</div><!-- /tb-report -->
+
+<!-- modal filter -->
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i>
+          Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Filter Data
+            <span class="rt-group-hint">&mdash; klik untuk memilih</span>
+          </div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label">Gudang</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputGudang" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGudang', '{!! $gudang !!}', 'Pilih Gudang')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="rt-field-label">Merk</label>
+              <div class="input-group input-group-sm">
+                <input type="text" id="inputMerk" class="form-control" placeholder="-" value="-" readonly>
+                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputMerk', '{!! $merk !!}', 'Pilih Merk')"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" data-bs-dismiss="modal">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
   </div>
-  
-      <div class="d-flex ms-auto" style="gap: 8px;">
-      <button type="button" class="btn btn-outline-primary" onclick="doShowFormFilterData()" title="Filter Data">
-        <i class="fas fa-magnifying-glass"></i>
-      </button>
-      <button type="button" class="btn btn-outline-primary" onclick="makeTable('REPORT')" title="Submit">
-        <i class="fas fa-check"></i>
-      </button>
-    </div>
-
 </div>
+<!-- modal filter -->
+
+<!-- modal pilih data master (Gudang/Merk) -->
+<div class="modal-picker-backdrop" id="modalPickMasterBackdrop" onclick="closePickMaster()"></div>
+<div class="modal-picker" id="modalPickMaster" tabindex="-1" role="dialog" aria-labelledby="modalPickMasterLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 900px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPickMasterLabel">Pilih Data</h5>
+        <button type="button" class="btn-close" aria-label="Close" onclick="closePickMaster()"></button>
+      </div>
+      <div class="modal-body">
+        <table id="tabelPickMaster" class="table table-bordered table-striped">
+          <thead id="tabelPickMaster_header" class="text-center"></thead>
+          <tbody id="tabelPickMaster_data" class="text-left"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closePickMaster()">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modal pilih data master -->
+
 @endsection
 
 @section('jsreport')
-<script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
 <script type="text/javascript">
   var modereport_detail = 0, modereport_rekap = 1;
   g_modeReport = modereport_detail;
 
-    $(document).ready(function() {
-    console.log("Script sudah jalan. Coba klik tombol untuk tes fungsi.");
-    $("#btnFilterData").on("click", function() {
-      if (typeof doShowFormFilterData === "function") doShowFormFilterData();
-      else alert(" Fungsi doShowFormFilterData belum tersedia.");
+  let reportTitle = "LAPORAN STOK BULANAN QTY+RUPIAH";
+  let lastRows = [];              // hasil fetch terakhir (dipakai render / search / export)
+  let currentGroupby = 'pMERK';   // field yang perubahannya memicu band merk + subtotal (mode Detail)
+
+  const reportUrl = "{{ url('laporanstockmutasistockpermerk_doReport') }}";
+
+  // Jumlah kolom yang sedang tampil (untuk colspan baris band merk/ringkasan full-width).
+  // Dihitung ulang tiap panggilan -- BUKAN konstanta -- supaya tetap benar setelah
+  // kolom disembunyikan/ditampilkan lewat gear ReportTable.
+  function getVisibleColCount() {
+    return gcart_header.reduce((sum, c) => sum + (c[2] ? 1 : 0), 0);
+  }
+
+  // Jumlah kolom identitas (Kode/Nama/Part Number/Merk, atau Kode/Merk/Gdg di mode
+  // Rekap) yang sedang tampil -- yaitu kolom sebelum "QntAwal" (kolom numerik pertama).
+  // Dipakai untuk colspan sel label "Total Item" di buildMasukKeluarFooter().
+  function getIdentityColspan() {
+    let count = 0;
+    for (const c of gcart_header) {
+      if (c[0] === 'QntAwal') { break; }
+      if (c[2]) { count++; }
+    }
+    return count || 1;
+  }
+
+  $(document).ready(function() {
+    populatePeriodSelectors();
+
+    ReportTable.init({
+      table: '#tabel',
+      bar: '#rtBar',
+      onChange: render
     });
-
-    $("#btnCustomizeTable").on("click", function() {
-      if (typeof doShowFormCustomizeTable === "function") doShowFormCustomizeTable();
-      else alert(" Fungsi doShowFormCustomizeTable belum tersedia.");
-    });
-
-    $("#btnSubmitReport").on("click", function() {
-      makeTable('REPORT');
-    });
-
-    // setReportMode(globalReportMode);
-    // setOtorisasi(globalOtorisasi);
-    // setOrderBy(globalOrderBy);
-    // setAgen(globalAgen);
-    // showPeriode();
-    // setDefaultHeader();
-
-    setTimeout(() => {
-      makeTable('REPORT');
-    }, 100);
   });
 
-  var colspanRow = 4 + 2 + 16 + 16 + 2   +1;
+  let defaultBulan = new Date().getMonth() + 1;
+  let defaultTahun = new Date().getFullYear();
+  const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-  $(document).ready(function(){
-    $("#gButtonCustomizeTable").hide();
-  });
+  function populatePeriodSelectors() {
+    const selB = document.getElementById('periodBulan');
+    const selT = document.getElementById('periodTahun');
+    if (!selB || !selT) return;
+
+    selB.innerHTML = NAMA_BULAN.map((nama, i) =>
+      `<option value="${i + 1}" ${(i + 1) == defaultBulan ? 'selected' : ''}>${nama}</option>`).join('');
+    const thisYear = new Date().getFullYear();
+    let years = '';
+    for (let y = thisYear; y >= thisYear - 6; y--) {
+      years += `<option value="${y}" ${y == defaultTahun ? 'selected' : ''}>${y}</option>`;
+    }
+    selT.innerHTML = years;
+    changePeriodParts();
+  }
+
+  // Bulan/Tahun -> gabung ke #inputDate1 format "YYYY-MM"
+  function changePeriodParts() {
+    const selB = document.getElementById('periodBulan');
+    const selT = document.getElementById('periodTahun');
+    if (!selB || !selT) return;
+    defaultBulan = parseInt(selB.value, 10);
+    defaultTahun = parseInt(selT.value, 10);
+    const mm = String(defaultBulan).padStart(2, '0');
+    $('#inputDate1').val(defaultTahun + '-' + mm);
+  }
+
+  // Ganti mode Detail/Rekap: muat ulang layout kolom untuk mode ini (tersimpan atau
+  // default dari setDefaultHeader()). SP mengembalikan kolom yang berbeda per mode,
+  // jadi data lama tidak dipakai lagi -- klik Tampilkan untuk mengambil ulang.
+  function setReportMode(val) {
+    g_modeReport = Number(val);
+    doSetHeader(g_modeReport);
+  }
 
   function setDefaultHeader() {
     if (g_modeReport == modereport_detail) {
@@ -146,325 +312,398 @@
           ['pMERK', 'Kode Merk', 0, 'varchar', 0, 0],
           ['pNAMAMERK', 'Nama Merk', 0, 'varchar', 0, 0],
           ['NAMAMERK', 'Merk', 1, 'varchar', 0, 0],
-          ['QntAwal', 'So. Awal', 1, 'float', 1, 2],
-          ['HRGAWAL', 'So. Awal', 1, 'float', 1, 0],
-          ['QNTPBL', 'Pembelian', 1, 'float', 1, 2],
-          ['HRGPBL', 'Pembelian', 1, 'float', 1, 0],
-          ['QNTRPJ', 'Retur Jual', 1, 'float', 1, 2],
-          ['HRGRPJ', 'Retur Jual', 1, 'float', 1, 0],
-          ['QNTADI', 'Kor. Msk', 1, 'float', 1, 2],
-          ['HRGADI', 'Kor. Msk', 1, 'float', 1, 0],
-          ['QNTTRI', 'Trans. Msk', 1, 'float', 1, 2],
-          ['HRGTRI', 'Trans. Msk', 1, 'float', 1, 0],
-          ['QNTRPK', 'R. Pemakaian', 1, 'float', 1, 2],
-          ['HRGRPK', 'R. Pemakaian', 1, 'float', 1, 0],
-          ['QNTUKI', 'Ubah Kemasan In', 1, 'float', 1, 2],
-          ['HRGUKI', 'Ubah Kemasan In', 1, 'float', 1, 0],
-          ['qntrspb', 'Terima dr R.Sjln', 1, 'float', 1, 2],
-          ['hrgrspb', 'Terima dr R.Sjln', 1, 'float', 1, 0],
-          ['QntHPrd', 'Gd TC dr SJ', 1, 'float', 1, 2],
-          ['HRGHPrd', 'Gd TC dr SJ', 1, 'float', 1, 0],
-          ['QNTPNJ', 'S.Jalan', 1, 'float', 1, 2],
-          ['HRGPNJ', 'S.Jalan', 1, 'float', 1, 0],
-          ['qntrgtc', 'Retur Sjln dr GTC', 1, 'float', 1, 2],
-          ['hrgrgtc', 'Retur Sjln dr GTC', 1, 'float', 1, 0],
-          ['QNTPRJ', 'HPP', 1, 'float', 1, 2],
-          ['HRGPRJ', 'HPP', 1, 'float', 1, 0],
-          ['QNTRBP', 'Retur Beli', 1, 'float', 1, 2],
-          ['HRGRBP', 'Retur  Beli', 1, 'float', 1, 0],
-          ['QNTADO', 'Kor. Klr', 1, 'float', 1, 2],
-          ['HRGADO', 'Kor. Klr', 1, 'float', 1, 0],
-          ['QNTTRO', 'Trans. Klr', 1, 'float', 1, 2],
-          ['HRGTRO', 'Trans. Klr', 1, 'float', 1, 0],
-          ['QNTUKO', 'Ubah Kemasan Out', 1, 'float', 1, 2],
-          ['HRGUKO', 'Ubah Kemasan Out', 1, 'float', 1, 0],
-          ['QNTPMK', 'Pemakaian', 1, 'float', 1, 2],
-          ['HRGPMK', 'Pemakaian', 1, 'float', 1, 0],
-          ['SALDOQNT', 'So. Akhir', 1, 'float', 1, 2],
-          ['SALDORP', 'So. Akhir', 1, 'float', 1, 0]
+          ['QntAwal', 'So. Awal (Qty)', 1, 'float', 1, 2],
+          ['HRGAWAL', 'So. Awal (Rp)', 1, 'float', 1, 0],
+          ['QNTPBL', 'Pembelian (Qty)', 1, 'float', 1, 2],
+          ['HRGPBL', 'Pembelian (Rp)', 1, 'float', 1, 0],
+          ['QNTRPJ', 'Retur Jual (Qty)', 1, 'float', 1, 2],
+          ['HRGRPJ', 'Retur Jual (Rp)', 1, 'float', 1, 0],
+          ['QNTADI', 'Kor. Msk (Qty)', 1, 'float', 1, 2],
+          ['HRGADI', 'Kor. Msk (Rp)', 1, 'float', 1, 0],
+          ['QNTTRI', 'Trans. Msk (Qty)', 1, 'float', 1, 2],
+          ['HRGTRI', 'Trans. Msk (Rp)', 1, 'float', 1, 0],
+          ['QNTRPK', 'R. Pemakaian (Qty)', 1, 'float', 1, 2],
+          ['HRGRPK', 'R. Pemakaian (Rp)', 1, 'float', 1, 0],
+          ['QNTUKI', 'Ubah Kemasan In (Qty)', 1, 'float', 1, 2],
+          ['HRGUKI', 'Ubah Kemasan In (Rp)', 1, 'float', 1, 0],
+          ['qntrspb', 'Terima dr R.Sjln (Qty)', 1, 'float', 1, 2],
+          ['hrgrspb', 'Terima dr R.Sjln (Rp)', 1, 'float', 1, 0],
+          ['QntHPrd', 'Gd TC dr SJ (Qty)', 1, 'float', 1, 2],
+          ['HRGHPrd', 'Gd TC dr SJ (Rp)', 1, 'float', 1, 0],
+          ['QNTPNJ', 'S.Jalan (Qty)', 1, 'float', 1, 2],
+          ['HRGPNJ', 'S.Jalan (Rp)', 1, 'float', 1, 0],
+          ['qntrgtc', 'Retur Sjln dr GTC (Qty)', 1, 'float', 1, 2],
+          ['hrgrgtc', 'Retur Sjln dr GTC (Rp)', 1, 'float', 1, 0],
+          ['QNTPRJ', 'HPP (Qty)', 1, 'float', 1, 2],
+          ['HRGPRJ', 'HPP (Rp)', 1, 'float', 1, 0],
+          ['QNTRBP', 'Retur Beli (Qty)', 1, 'float', 1, 2],
+          ['HRGRBP', 'Retur Beli (Rp)', 1, 'float', 1, 0],
+          ['QNTADO', 'Kor. Klr (Qty)', 1, 'float', 1, 2],
+          ['HRGADO', 'Kor. Klr (Rp)', 1, 'float', 1, 0],
+          ['QNTTRO', 'Trans. Klr (Qty)', 1, 'float', 1, 2],
+          ['HRGTRO', 'Trans. Klr (Rp)', 1, 'float', 1, 0],
+          ['QNTUKO', 'Ubah Kemasan Out (Qty)', 1, 'float', 1, 2],
+          ['HRGUKO', 'Ubah Kemasan Out (Rp)', 1, 'float', 1, 0],
+          ['QNTPMK', 'Pemakaian (Qty)', 1, 'float', 1, 2],
+          ['HRGPMK', 'Pemakaian (Rp)', 1, 'float', 1, 0],
+          ['SALDOQNT', 'So. Akhir (Qty)', 1, 'float', 1, 2],
+          ['SALDORP', 'So. Akhir (Rp)', 1, 'float', 1, 0]
       ];
-      
+
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
     } else {
       gcart_header = [
           ['pMERK', 'Kode', 1, 'varchar', 0, 0],
           ['pNAMAMERK', 'Merk', 1, 'varchar', 0, 0],
           ['KodeGDG', 'Gdg', 1, 'varchar', 0, 0],
-          ['QntAwal', 'So. Awal', 1, 'float', 1, 2],
-          ['HRGAWAL', 'So. Awal', 1, 'float', 1, 0],
-          ['QNTPBL', 'Pembelian', 1, 'float', 1, 2],
-          ['HRGPBL', 'Pembelian', 1, 'float', 1, 0],
-          ['QNTRPJ', 'Retur Jual', 1, 'float', 1, 2],
-          ['HRGRPJ', 'Retur Jual', 1, 'float', 1, 0],
-          ['QNTADI', 'Kor. Msk', 1, 'float', 1, 2],
-          ['HRGADI', 'Kor. Msk', 1, 'float', 1, 0],
-          ['QNTTRI', 'Trans. Msk', 1, 'float', 1, 2],
-          ['HRGTRI', 'Trans. Msk', 1, 'float', 1, 0],
-          ['QNTRPK', 'R. Pemakaian', 1, 'float', 1, 2],
-          ['HRGRPK', 'R. Pemakaian', 1, 'float', 1, 0],
-          ['QNTUKI', 'Ubah Kemasan In', 1, 'float', 1, 2],
-          ['HRGUKI', 'Ubah Kemasan In', 1, 'float', 1, 0],
-          ['qntrspb', 'Terima dr R.Sjln', 1, 'float', 1, 2],
-          ['hrgrspb', 'Terima dr R.Sjln', 1, 'float', 1, 0],
-          ['QntHPrd', 'Gd TC dr SJ', 1, 'float', 1, 2],
-          ['HRGHPrd', 'Gd TC dr SJ', 1, 'float', 1, 0],
-          ['QNTPNJ', 'S.Jalan', 1, 'float', 1, 2],
-          ['HRGPNJ', 'S.Jalan', 1, 'float', 1, 0],
-          ['qntrgtc', 'Retur Sjln dr GTC', 1, 'float', 1, 2],
-          ['hrgrgtc', 'Retur Sjln dr GTC', 1, 'float', 1, 0],
-          ['QNTPRJ', 'HPP', 1, 'float', 1, 2],
-          ['HRGPRJ', 'HPP', 1, 'float', 1, 0],
-          ['QNTRBP', 'Retur Beli', 1, 'float', 1, 2],
-          ['HRGRBP', 'Retur  Beli', 1, 'float', 1, 0],
-          ['QNTADO', 'Kor. Klr', 1, 'float', 1, 2],
-          ['HRGADO', 'Kor. Klr', 1, 'float', 1, 0],
-          ['QNTTRO', 'Trans. Klr', 1, 'float', 1, 2],
-          ['HRGTRO', 'Trans. Klr', 1, 'float', 1, 0],
-          ['QNTUKO', 'Ubah Kemasan Out', 1, 'float', 1, 2],
-          ['HRGUKO', 'Ubah Kemasan Out', 1, 'float', 1, 0],
-          ['QNTPMK', 'Pemakaian', 1, 'float', 1, 2],
-          ['HRGPMK', 'Pemakaian', 1, 'float', 1, 0],
-          ['SALDOQNT', 'So. Akhir', 1, 'float', 1, 2],
-          ['SALDORP', 'So. Akhir', 1, 'float', 1, 0]
+          ['QntAwal', 'So. Awal (Qty)', 1, 'float', 1, 2],
+          ['HRGAWAL', 'So. Awal (Rp)', 1, 'float', 1, 0],
+          ['QNTPBL', 'Pembelian (Qty)', 1, 'float', 1, 2],
+          ['HRGPBL', 'Pembelian (Rp)', 1, 'float', 1, 0],
+          ['QNTRPJ', 'Retur Jual (Qty)', 1, 'float', 1, 2],
+          ['HRGRPJ', 'Retur Jual (Rp)', 1, 'float', 1, 0],
+          ['QNTADI', 'Kor. Msk (Qty)', 1, 'float', 1, 2],
+          ['HRGADI', 'Kor. Msk (Rp)', 1, 'float', 1, 0],
+          ['QNTTRI', 'Trans. Msk (Qty)', 1, 'float', 1, 2],
+          ['HRGTRI', 'Trans. Msk (Rp)', 1, 'float', 1, 0],
+          ['QNTRPK', 'R. Pemakaian (Qty)', 1, 'float', 1, 2],
+          ['HRGRPK', 'R. Pemakaian (Rp)', 1, 'float', 1, 0],
+          ['QNTUKI', 'Ubah Kemasan In (Qty)', 1, 'float', 1, 2],
+          ['HRGUKI', 'Ubah Kemasan In (Rp)', 1, 'float', 1, 0],
+          ['qntrspb', 'Terima dr R.Sjln (Qty)', 1, 'float', 1, 2],
+          ['hrgrspb', 'Terima dr R.Sjln (Rp)', 1, 'float', 1, 0],
+          ['QntHPrd', 'Gd TC dr SJ (Qty)', 1, 'float', 1, 2],
+          ['HRGHPrd', 'Gd TC dr SJ (Rp)', 1, 'float', 1, 0],
+          ['QNTPNJ', 'S.Jalan (Qty)', 1, 'float', 1, 2],
+          ['HRGPNJ', 'S.Jalan (Rp)', 1, 'float', 1, 0],
+          ['qntrgtc', 'Retur Sjln dr GTC (Qty)', 1, 'float', 1, 2],
+          ['hrgrgtc', 'Retur Sjln dr GTC (Rp)', 1, 'float', 1, 0],
+          ['QNTPRJ', 'HPP (Qty)', 1, 'float', 1, 2],
+          ['HRGPRJ', 'HPP (Rp)', 1, 'float', 1, 0],
+          ['QNTRBP', 'Retur Beli (Qty)', 1, 'float', 1, 2],
+          ['HRGRBP', 'Retur Beli (Rp)', 1, 'float', 1, 0],
+          ['QNTADO', 'Kor. Klr (Qty)', 1, 'float', 1, 2],
+          ['HRGADO', 'Kor. Klr (Rp)', 1, 'float', 1, 0],
+          ['QNTTRO', 'Trans. Klr (Qty)', 1, 'float', 1, 2],
+          ['HRGTRO', 'Trans. Klr (Rp)', 1, 'float', 1, 0],
+          ['QNTUKO', 'Ubah Kemasan Out (Qty)', 1, 'float', 1, 2],
+          ['HRGUKO', 'Ubah Kemasan Out (Rp)', 1, 'float', 1, 0],
+          ['QNTPMK', 'Pemakaian (Qty)', 1, 'float', 1, 2],
+          ['HRGPMK', 'Pemakaian (Rp)', 1, 'float', 1, 0],
+          ['SALDOQNT', 'So. Akhir (Qty)', 1, 'float', 1, 2],
+          ['SALDORP', 'So. Akhir (Rp)', 1, 'float', 1, 0]
       ];
 
       gsum_issubtotal = 0; gsum_isgrandtotal = 1;
     }
   }
 
-  function setRowHeader(_rowHeader) {
-      let _thopen = "", _thclose = "</th>";
+  // ==================== RENDER (pola docs/report-table-guide.md, sama seperti
+  // reportopname.blade.php) ====================
+  // Kolom dibangun DINAMIS dari gcart_header (hanya yang terlihat, sesuai urutan
+  // tersimpan). Header lewat ReportTable.headHtml() supaya drag & gear tetap jalan;
+  // cols HARUS dari gcart_header.filter(...), bukan .map()/copy, supaya headHtml()
+  // bisa memetakan tiap kolom balik ke index globalnya (drag & gear diam-diam tidak
+  // berfungsi kalau di-copy).
+  function render() {
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const keys = cols.filter(c => (c[3] === 'float' || c[3] === 'int') && c[4] === 1).map(c => c[0]);
+    const thead = document.querySelector('#tabel thead');
+    const tbody = document.getElementById('tabel_data');
 
-      // FIRST ROW
-      _rowHeader += '<tr style="height: 45px; padding: 20px;" class="text-center bg-dark text-light">';
-      _thopen = '<th rowspan="3" scope="col" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">';
+    // Band merk + subtotal per grup: mode Detail saja (gsum_issubtotal). Grand total
+    // tunggal: mode Rekap saja (gsum_isgrandtotal). Lihat komentar di setDefaultHeader().
+    const showGroupBand = (gsum_issubtotal === 1);
+    const showSub   = keys.length > 0 && showGroupBand;
+    const showGrand = keys.length > 0 && (gsum_isgrandtotal === 1);
 
-      if (g_modeReport == modereport_detail) {
-        _rowHeader += _thopen + 'Kode' + _thclose;
-        _rowHeader += _thopen + 'Nama Barang' + _thclose;
-        _rowHeader += _thopen + 'Part Number' + _thclose;
-        _rowHeader += _thopen + 'Merk' + _thclose;
-      } else {
-        _rowHeader += _thopen + 'Kode' + _thclose;
-        _rowHeader += _thopen + 'Merk' + _thclose;
-        _rowHeader += _thopen + 'GDG' + _thclose;
+    thead.innerHTML = ReportTable.headHtml(cols);
+
+    const term = ($('#searchBox2').val() || '').trim().toLowerCase();
+    const rows = !term ? (lastRows || []) : (lastRows || []).filter(r => rowSearchText(r, cols).indexOf(term) !== -1);
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols.length + '">Tidak ada data ditemukan.</td></tr>';
+      document.getElementById('footerLabel').textContent = 'Tidak ada data';
+      // KPI mewakili SELURUH data (lastRows), bukan hasil pencarian -- kalau ini
+      // cuma pencarian yang tidak match apa-apa, biarkan KPI apa adanya. Hanya
+      // nolkan kalau memang belum/tidak ada data sama sekali.
+      if (!lastRows.length) { try { updateKpiWidgets(0, 0, 0, 0); } catch (e) {} }
+      return;
+    }
+
+    let html = '', prev = null, sub = {}, grand = {};
+    keys.forEach(k => { sub[k] = 0; grand[k] = 0; });
+
+    rows.forEach(function (r, i) {
+      const now = r[currentGroupby];
+
+      if (showGroupBand && (i === 0 || prev !== now)) {
+        if (showSub && i !== 0) {
+          html += totalRow('Subtotal', sub, cols, keys, 'subtotal-row');
+          keys.forEach(k => sub[k] = 0);
+        }
+        html += groupBandRow(r);
       }
 
-      _rowHeader += '<th colspan="2" rowspan="2" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">So. Awal</th>';
-      _rowHeader += '<th colspan="16" style="border: 1px solid black; white-space:nowrap;">Masuk</th>';
-      _rowHeader += '<th colspan="16" style="border: 1px solid black; white-space:nowrap;">Keluar</th>';
-      _rowHeader += '<th colspan="2" rowspan="2" style="border: 1px solid black; white-space:nowrap; vertical-align: middle;">So. Akhir</th>';
+      keys.forEach(function (k) {
+        const v = currencyNormalizer(r[k]);
+        sub[k] += v; grand[k] += v;
+      });
 
-      _rowHeader += '</tr>';
+      html += '<tr class="data-row">' + cols.map(function (c) {
+        const key = c[0], type = c[3];
+        if (type === 'date') return '<td>' + format_date(r[key]) + '</td>';
+        if (type === 'float' || type === 'int') return '<td class="num">' + format_number(currencyNormalizer(r[key]), c[5]) + '</td>';
+        return '<td>' + nullToEmpty(r[key]) + '</td>';
+      }).join('') + '</tr>';
 
-      // SECOND ROW
-      _rowHeader += '<tr class="text-center bg-dark text-light">';
+      prev = now;
+    });
 
-      const masukKeluarLabels = [
-          'Pembelian',    'Retur Jual',      'Kor. Msk',         'Trans. Msk', 
-          'R. Pemakaian', 'Ubah Kemasan In', 'Terima dr R.Sjln', 'Gd TC dr SJ',
+    if (showSub)   html += totalRow('Subtotal', sub, cols, keys, 'subtotal-row');
+    if (showGrand) html += totalRow('GRAND TOTAL', grand, cols, keys, 'grand-total');
 
-          'S. Jalan', 'Retur Sjln dr GTC', 'HPP',              'Retur Beli', 
-          'Kor. Klr', 'Trans. Klr',        'Ubah Kemasan Out', 'Pemakaian'
-      ];
-      for (let i = 0; i < masukKeluarLabels.length; i++) {
-          _rowHeader += `<th colspan="2" scope="col" style="border: 1px solid black; white-space:nowrap;">${masukKeluarLabels[i]}</th>`;
-      }
+    // Ringkasan Total Item / Item Masuk / Item Keluar / Turn Over Stock -- khusus mode
+    // Detail (Rekap tidak menghitung ini, lihat setDefaultHeader). Dihitung dari
+    // SELURUH data yang dimuat (lastRows), bukan hasil pencarian, supaya angka ini
+    // tetap mewakili satu bulan penuh walau user sedang mengetik di kotak cari.
+    if (showGroupBand) { html += buildMasukKeluarFooter(lastRows); }
+    else { try { updateKpiWidgets(lastRows.length, 0, 0, 0); } catch (e) {} }
 
-      _rowHeader += '</tr>';
+    tbody.innerHTML = html;
 
-      // THIRD ROW
-      _rowHeader += '<tr class="text-center bg-dark text-light">';
-
-      let _qtyrp = '<th scope="col" style="border: 1px solid black; white-space:nowrap;">Qty</th>';
-      _qtyrp += '<th scope="col" style="border: 1px solid black; white-space:nowrap;">Rp.</th>';
-      _rowHeader += _qtyrp.repeat(1 + 8 + 8 + 1);
-
-      _rowHeader += '</tr>';
-
-      return _rowHeader;
+    const footerMsg = term
+      ? 'Menampilkan ' + rows.length + ' dari ' + lastRows.length + ' baris'
+      : 'Menampilkan ' + rows.length + ' baris';
+    document.getElementById('footerLabel').textContent = footerMsg;
   }
 
-  function setRowSubheader(_item) {
-    if (g_modeReport == modereport_rekap) return;
-
-    _str = _item["pMERK"] + " : " + _item["pNAMAMERK"];
-    return '<tr style="text-align: center"><td colspan="' + (colspanRow) + '" class="cellcompact-left" style="border: 1px solid black; white-space:nowrap; background-color:#515962; color:white">' + _str + '</td></tr>';
-  }
-  
-  function getRowFooter1(_col) {
-    let _sum = gcart_res.reduce((sum, item) => sum + currencyNormalizer(item[_col]), 0);
-    let _decimal = (gcart_header.find(row => row[0] === _col) || [])[5];
-
-    return '  <td class="cellcompact-right" style="border: 1px solid black; white-space:nowrap; font-weight: bold;">' + format_number(_sum, _decimal) + '</td>';
-  }
-  
-  function getRowFooter2(_col) {
-    let _sum = gcart_res.filter(item => currencyNormalizer(item[_col]) !== 0).length;
-    let _str = '  <td colspan="2" class="cellcompact-right" style="border: 1px solid black; white-space:nowrap; font-weight: bold;">' + _sum + '</td>'
-
-    return { _sum, _str };
+  // Band judul grup Merk (banner gelap) sebelum baris pertama tiap merk -- hanya mode
+  // Detail (Rekap sudah menampilkan Merk sebagai kolom biasa, satu baris per merk).
+  // Pakai class "group-row" (padding/uppercase-nya report-table.css) tapi warnanya
+  // di-override manual karena grup "Merk" bukan salah satu kategori g-asset/g-liab/dst.
+  function groupBandRow(item) {
+    const label = nullToEmpty(item['pMERK']) + ' : ' + nullToEmpty(item['pNAMAMERK']);
+    return '<tr class="group-row" style="">' +
+           '<td colspan="' + getVisibleColCount() + '">' + label + '</td></tr>';
   }
 
-  function setRowFooter() {
-    if (g_modeReport == modereport_rekap) { return; }
-    let rowFooter1 = "", rowFooter2 = "";
+  // Baris total: nilai di kolom yang di-subtotal ([4]===1), label di kolom identitas
+  // pertama yang masih terlihat, sel lain dikosongkan. Sama seperti
+  // docs/report-table-guide.md / reportopname.blade.php.
+  function totalRow(label, sums, cols, keys, cls) {
+    const labelIdx = cols.findIndex(c => keys.indexOf(c[0]) === -1);
+    const tds = cols.map(function (c, idx) {
+      if (keys.indexOf(c[0]) !== -1) return '<td class="num">' + format_number(sums[c[0]], c[5]) + '</td>';
+      if (idx === labelIdx) return '<td>' + label + '</td>';
+      return '<td></td>';
+    });
+    return '<tr class="' + cls + '">' + tds.join('') + '</tr>';
+  }
 
-    rowFooter1 += "<tr style='text-align: center'>";
-    rowFooter1 += '  <td colspan="4" class="cellcompact-center" style="border: 1px solid black; white-space:nowrap; font-weight: bold;">Total Item</td>';
+  function rowSearchText(r, cols) {
+    return cols.map(function (c) {
+      const v = r[c[0]];
+      if (c[3] === 'date') return format_date(v);
+      return (v == null ? '' : String(v));
+    }).join(' ').toLowerCase();
+  }
 
-    rowFooter2 += "<tr style='text-align: center'>";
-    rowFooter2 += '  <td colspan="4" class="cellcompact-right" style="border: 1px solid black; white-space:nowrap; font-weight: bold;"></td>';
+  function applyFilters() { if (lastRows.length) { render(); } }
+
+  function updateKpiWidgets(totalItem, totMasuk, totKeluar, tosPct) {
+    $('#kpiTotalItem').text(format_number(totalItem, 0));
+    $('#kpiTotalMasuk').text(format_number(totMasuk, 0));
+    $('#kpiTotalKeluar').text(format_number(totKeluar, 0));
+    $('#kpiTOS').text(tosPct + ' %');
+  }
+
+  // Kembalikan '' (bukan sel kosong) kalau kolomnya sedang disembunyikan lewat gear,
+  // supaya jumlah <td> di baris ringkasan tetap sama dengan jumlah <th> yang tampil.
+  function isColVisible(_col) {
+    const row = gcart_header.find(r => r[0] === _col);
+    return !row || row[2] === 1;
+  }
+
+  function getRowFooter1(_rows, _col) {
+    if (!isColVisible(_col)) { return ''; }
+
+    const sum = _rows.reduce((s, item) => s + currencyNormalizer(item[_col]), 0);
+    const decimal = (gcart_header.find(row => row[0] === _col) || [])[5];
+
+    return '<td class="num">' + format_number(sum, decimal) + '</td>';
+  }
+
+  // Catatan: sel ini punya colspan="2" tetap (mewakili pasangan Qty+Rp). Kalau user
+  // menyembunyikan salah satu kolom pasangan itu saja (bukan keduanya), baris ini
+  // akan sedikit tidak sejajar -- kasus tepi yang jarang terjadi dan sengaja tidak
+  // ditangani penuh di sini. "sum" tetap dihitung dari seluruh data (dipakai juga
+  // oleh KPI), terlepas dari status tampil/sembunyi.
+  function getRowFooter2(_rows, _col) {
+    const sum = _rows.filter(item => currencyNormalizer(item[_col]) !== 0).length;
+    const str = isColVisible(_col) ? '<td colspan="2" class="num">' + sum + '</td>' : '';
+    return { sum, str };
+  }
+
+  // Ringkasan Total Item / Item Masuk / Item Keluar / Turn Over Stock, dihitung dari
+  // SELURUH data satu bulan (_rows = lastRows). Isinya sama seperti sebelumnya, hanya
+  // dipindah ke dalam render() dan dipakaikan kelas report-table.css (grand-total)
+  // alih-alih border hitam manual.
+  function buildMasukKeluarFooter(_rows) {
+    let rowFooter1 = '<tr class="grand-total">';
+    rowFooter1 += '<td colspan="' + getIdentityColspan() + '">Total Item</td>';
+
+    let rowFooter2 = '<tr class="grand-total">';
+    rowFooter2 += '<td colspan="' + getIdentityColspan() + '"></td>';
 
     let tempFooter2;
     let tot_masuk = 0, tot_keluar = 0, tos = 0;
 
     // So. Awal
-    rowFooter1 += getRowFooter1("QntAwal");
-    rowFooter1 += getRowFooter1("HRGAWAL");
-    tempFooter2 = getRowFooter2("QntAwal");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QntAwal");
+    rowFooter1 += getRowFooter1(_rows, "HRGAWAL");
+    tempFooter2 = getRowFooter2(_rows, "QntAwal");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Pembelian
-    rowFooter1 += getRowFooter1("QNTPBL");
-    rowFooter1 += getRowFooter1("HRGPBL");
-    tempFooter2 = getRowFooter2("QNTPBL");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTPBL");
+    rowFooter1 += getRowFooter1(_rows, "HRGPBL");
+    tempFooter2 = getRowFooter2(_rows, "QNTPBL");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Retur Jual
-    rowFooter1 += getRowFooter1("QNTRPJ");
-    rowFooter1 += getRowFooter1("HRGRPJ");
-    tempFooter2 = getRowFooter2("QNTRPJ");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTRPJ");
+    rowFooter1 += getRowFooter1(_rows, "HRGRPJ");
+    tempFooter2 = getRowFooter2(_rows, "QNTRPJ");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Kor. Msk
-    rowFooter1 += getRowFooter1("QNTADI");
-    rowFooter1 += getRowFooter1("HRGADI");
-    tempFooter2 = getRowFooter2("QNTADI");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTADI");
+    rowFooter1 += getRowFooter1(_rows, "HRGADI");
+    tempFooter2 = getRowFooter2(_rows, "QNTADI");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Trans. Msk
-    rowFooter1 += getRowFooter1("QNTTRI");
-    rowFooter1 += getRowFooter1("HRGTRI");
-    tempFooter2 = getRowFooter2("QNTTRI");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTTRI");
+    rowFooter1 += getRowFooter1(_rows, "HRGTRI");
+    tempFooter2 = getRowFooter2(_rows, "QNTTRI");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // R. Pemakaian
-    rowFooter1 += getRowFooter1("QNTRPK");
-    rowFooter1 += getRowFooter1("HRGRPK");
-    tempFooter2 = getRowFooter2("QNTRPK");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTRPK");
+    rowFooter1 += getRowFooter1(_rows, "HRGRPK");
+    tempFooter2 = getRowFooter2(_rows, "QNTRPK");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Ubah Kemasan In
-    rowFooter1 += getRowFooter1("QNTUKI");
-    rowFooter1 += getRowFooter1("HRGUKI");
-    tempFooter2 = getRowFooter2("QNTUKI");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTUKI");
+    rowFooter1 += getRowFooter1(_rows, "HRGUKI");
+    tempFooter2 = getRowFooter2(_rows, "QNTUKI");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // Terima dr R.Sjln
-    rowFooter1 += getRowFooter1("qntrspb");
-    rowFooter1 += getRowFooter1("hrgrspb");
-    tempFooter2 = getRowFooter2("qntrspb");
-    rowFooter2 += tempFooter2._str;
-    // tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "qntrspb");
+    rowFooter1 += getRowFooter1(_rows, "hrgrspb");
+    tempFooter2 = getRowFooter2(_rows, "qntrspb");
+    rowFooter2 += tempFooter2.str;
+    // tot_masuk  += tempFooter2.sum;
 
     // Gd TC dr SJ
-    rowFooter1 += getRowFooter1("QntHPrd");
-    rowFooter1 += getRowFooter1("HRGHPrd");
-    tempFooter2 = getRowFooter2("QntHPrd");
-    rowFooter2 += tempFooter2._str;
-    tot_masuk  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QntHPrd");
+    rowFooter1 += getRowFooter1(_rows, "HRGHPrd");
+    tempFooter2 = getRowFooter2(_rows, "QntHPrd");
+    rowFooter2 += tempFooter2.str;
+    tot_masuk  += tempFooter2.sum;
 
     // S.Jalan
-    rowFooter1 += getRowFooter1("QNTPNJ");
-    rowFooter1 += getRowFooter1("HRGPNJ");
-    tempFooter2 = getRowFooter2("QNTPNJ");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTPNJ");
+    rowFooter1 += getRowFooter1(_rows, "HRGPNJ");
+    tempFooter2 = getRowFooter2(_rows, "QNTPNJ");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // Retur Sjln dr GTC
-    rowFooter1 += getRowFooter1("qntrgtc");
-    rowFooter1 += getRowFooter1("hrgrgtc");
-    tempFooter2 = getRowFooter2("qntrgtc");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "qntrgtc");
+    rowFooter1 += getRowFooter1(_rows, "hrgrgtc");
+    tempFooter2 = getRowFooter2(_rows, "qntrgtc");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // HPP
-    rowFooter1 += getRowFooter1("QNTPRJ");
-    rowFooter1 += getRowFooter1("HRGPRJ");
-    tempFooter2 = getRowFooter2("QNTPRJ");
-    rowFooter2 += tempFooter2._str;
-    // tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTPRJ");
+    rowFooter1 += getRowFooter1(_rows, "HRGPRJ");
+    tempFooter2 = getRowFooter2(_rows, "QNTPRJ");
+    rowFooter2 += tempFooter2.str;
+    // tot_keluar  += tempFooter2.sum;
 
     // Retur Beli
-    rowFooter1 += getRowFooter1("QNTRBP");
-    rowFooter1 += getRowFooter1("HRGRBP");
-    tempFooter2 = getRowFooter2("QNTRBP");
-    rowFooter2 += tempFooter2._str;
-    // tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTRBP");
+    rowFooter1 += getRowFooter1(_rows, "HRGRBP");
+    tempFooter2 = getRowFooter2(_rows, "QNTRBP");
+    rowFooter2 += tempFooter2.str;
+    // tot_keluar  += tempFooter2.sum;
 
     // Kor. Klr
-    rowFooter1 += getRowFooter1("QNTADO");
-    rowFooter1 += getRowFooter1("HRGADO");
-    tempFooter2 = getRowFooter2("QNTADO");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTADO");
+    rowFooter1 += getRowFooter1(_rows, "HRGADO");
+    tempFooter2 = getRowFooter2(_rows, "QNTADO");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // Trans. Klr
-    rowFooter1 += getRowFooter1("QNTTRO");
-    rowFooter1 += getRowFooter1("HRGTRO");
-    tempFooter2 = getRowFooter2("QNTTRO");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTTRO");
+    rowFooter1 += getRowFooter1(_rows, "HRGTRO");
+    tempFooter2 = getRowFooter2(_rows, "QNTTRO");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // Ubah Kemasan Out
-    rowFooter1 += getRowFooter1("QNTUKO");
-    rowFooter1 += getRowFooter1("HRGUKO");
-    tempFooter2 = getRowFooter2("QNTUKO");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTUKO");
+    rowFooter1 += getRowFooter1(_rows, "HRGUKO");
+    tempFooter2 = getRowFooter2(_rows, "QNTUKO");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // Pemakaian
-    rowFooter1 += getRowFooter1("QNTPMK");
-    rowFooter1 += getRowFooter1("HRGPMK");
-    tempFooter2 = getRowFooter2("QNTPMK");
-    rowFooter2 += tempFooter2._str;
-    tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "QNTPMK");
+    rowFooter1 += getRowFooter1(_rows, "HRGPMK");
+    tempFooter2 = getRowFooter2(_rows, "QNTPMK");
+    rowFooter2 += tempFooter2.str;
+    tot_keluar  += tempFooter2.sum;
 
     // So. Akhir
-    rowFooter1 += getRowFooter1("SALDOQNT");
-    rowFooter1 += getRowFooter1("SALDORP");
-    tempFooter2 = getRowFooter2("SALDOQNT");
-    rowFooter2 += tempFooter2._str;
-    // tot_keluar  += tempFooter2._sum;
+    rowFooter1 += getRowFooter1(_rows, "SALDOQNT");
+    rowFooter1 += getRowFooter1(_rows, "SALDORP");
+    tempFooter2 = getRowFooter2(_rows, "SALDOQNT");
+    rowFooter2 += tempFooter2.str;
+    // tot_keluar  += tempFooter2.sum;
 
-    rowFooter1 += "</tr>";
-    rowFooter2 += "</tr>";
+    rowFooter1 += '</tr>';
+    rowFooter2 += '</tr>';
 
-    let rowTOS = "";
-    let _style = 'style="border: none !important; outline: none !important;"';
+    const infoStyle = 'style="border:none !important;color:var(--muted);font-size:12.5px;font-style:italic;"';
+    const visCols = getVisibleColCount();
 
-    rowTOS += '<tr><td colspan="' + (colspanRow) + '" ' + _style + '></td></tr>';
-    rowTOS += '<tr><td colspan="' + (colspanRow) + '" ' + _style + '></td></tr>';
-
+    let totMasukKPI = tot_masuk;
     tot_masuk = (tot_masuk !== 0) ? tot_masuk : 1;
     tos = format_number((tot_keluar / tot_masuk) * 100, 2);
-    let _td = '<td ' + _style + '></td>';
-    rowTOS += '<tr>' + _td + '<td colspan="' + colspanRow + '" class="cellcompact-left" ' + _style + '>Item masuk : ' + tot_masuk + '</td></tr>'
-    rowTOS += '<tr>' + _td + '<td colspan="' + colspanRow + '" class="cellcompact-left" ' + _style + '>Item keluar : ' + tot_keluar + '</td></tr>'
-    rowTOS += '<tr>' + _td + '<td colspan="' + colspanRow + '" class="cellcompact-left" ' + _style + '>Turn over stock : ' + tos + ' %</td></tr>'
-    
-    rowTOS += '<tr><td colspan="' + (colspanRow) + '" ' + _style + '></td></tr>';
-    rowTOS += '<tr><td colspan="' + (colspanRow) + '" ' + _style + '></td></tr>';
 
-    return rowFooter1 + rowFooter2 + rowTOS;
+    let rowInfo = '';
+    rowInfo += '<tr><td colspan="' + visCols + '" ' + infoStyle + '>Item masuk : ' + tot_masuk + '</td></tr>';
+    rowInfo += '<tr><td colspan="' + visCols + '" ' + infoStyle + '>Item keluar : ' + tot_keluar + '</td></tr>';
+    rowInfo += '<tr><td colspan="' + visCols + '" ' + infoStyle + '>Turn over stock : ' + tos + ' %</td></tr>';
+
+    try { updateKpiWidgets(_rows.length, totMasukKPI, tot_keluar, tos); } catch (e) {}
+
+    return rowFooter1 + rowFooter2 + rowInfo;
   }
 
   function makeTable(_mode) {
@@ -482,10 +721,31 @@
       inputTampil   : g_modeReport,
     };
 
-    doMakeTable(_mode, groupby, data, "LAPORAN STOK BULANAN QTY+RUPIAH", _date1);
+    if (_mode !== 'REPORT') {
+      // Mode "FILTER": delegasikan ke engine masterreportGudang supaya modal
+      // "Filter Data" (doShowFormFilterData/doShowFilter, gcart_filter) tetap jalan --
+      // render() di atas tidak menggantikan jalur itu.
+      doMakeTable(_mode, groupby, data, reportTitle, _date1);
+      return;
+    }
 
-    doRenameSubTotal("");
-    doRenameGrandTotal("");
+    document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
+
+    $.ajax({
+      url: reportUrl,
+      type: 'get',
+      data: data,
+      success: function (res) {
+        lastRows = res || [];
+        render();
+        alertify.success("Report ditampilkan");
+      },
+      error: function (xhr) {
+        console.error('laporanstockmutasistockpermerk_doReport gagal:', xhr.status, xhr.responseText);
+        lastRows = [];
+        render();
+      }
+    });
   }
 
   function getKolomFilter() {
@@ -494,16 +754,157 @@
     // berapa pun bisa asal dalam bentuk array
 
     let data = [];
-    // if (g_modeReport == modereport_nobukti) {
-    //   data = ['nobukti', 'Tanggal'];
-    // } else {
-    //   data = ['KODEBRG', 'NAMABRG'];
-    // }
     data = ['pMERK', 'pNAMAMERK'];
 
     return data;
   }
 
+  // ---- Filter Laporan (Gudang / Merk) ----
+  const PICK_FIELD_IDS = ['inputGudang', 'inputMerk'];
+
+  function updateFilterBadge() {
+    let count = 0;
+    PICK_FIELD_IDS.forEach(function (id) {
+      const val = $('#' + id).val();
+      if (val && val !== '-') { count++; }
+    });
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    PICK_FIELD_IDS.forEach(function (id) { $('#' + id).val('-'); });
+    updateFilterBadge();
+  }
+
+  $('#modalFilter').on('show.bs.modal', function () { updateFilterBadge(); });
+
+  // ---- modal "Pilih Data" (Gudang/Merk), menggantikan popup shared
+  //      #formBrowseMaster (search + Submit) dengan Actions berisi tombol "+" per baris. ----
+  let pickerTargetInput = "";
+
+  function openPickMaster(targetInputId, url, title) {
+    pickerTargetInput = targetInputId;
+    $("#modalPickMasterLabel").text(title || "Pilih Data");
+
+    try {
+      if ($.fn.DataTable.isDataTable('#tabelPickMaster')) {
+        $('#tabelPickMaster').DataTable().destroy();
+      }
+    } catch (e) {
+      console.error('openPickMaster: gagal destroy DataTable sebelumnya', e);
+    }
+
+    $("#tabelPickMaster_header").html("");
+    $("#tabelPickMaster_data").html('<tr><td>' + loadingHtml('Memuat data...') + '</td></tr>');
+
+    $('#modalPickMasterBackdrop').addClass('show');
+    $('#modalPickMaster').addClass('show').attr('aria-hidden', 'false');
+
+    $.ajax({
+      url: url,
+      type: 'get',
+      success: function (res) { renderPickMaster(res); },
+      error: function () {
+        $("#tabelPickMaster_data").html('<tr><td class="text-center">Gagal memuat data.</td></tr>');
+      }
+    });
+  }
+
+  function closePickMaster() {
+    $('#modalPickMaster').removeClass('show').attr('aria-hidden', 'true');
+    $('#modalPickMasterBackdrop').removeClass('show');
+  }
+
+  $(document).on('keydown', function (e) {
+    if (e.key === 'Escape' && $('#modalPickMaster').hasClass('show')) {
+      closePickMaster();
+    }
+  });
+
+  function renderPickMaster(res) {
+    const kolom = (res && res.kolom) || [];
+    const rows = (res && res.table) || [];
+
+    let headHtml = '<tr>';
+    kolom.forEach(function (k) { headHtml += '<th class="text-center">' + k[1] + '</th>'; });
+    headHtml += '<th class="text-center">Actions</th></tr>';
+    $("#tabelPickMaster_header").html(headHtml);
+
+    let bodyHtml = '';
+    if (rows.length) {
+      rows.forEach(function (item) {
+        bodyHtml += '<tr>';
+        kolom.forEach(function (k) {
+          let val;
+          if (k[2] === 'date') { val = format_date(item[k[0]]); }
+          else if (k[2] === 'float') { val = format_number(currencyNormalizer(item[k[0]]), k[3]); }
+          else { val = nullToEmpty(item[k[0]]); }
+          bodyHtml += '<td>' + val + '</td>';
+        });
+        const kode = kolom.length ? item[kolom[0][0]] : '';
+        bodyHtml += '<td class="text-center">' +
+          '<button type="button" class="btn btn-primary btn-sm" onclick="pickMasterSelect(\'' + String(kode).replace(/'/g, "\\'") + '\')"><i class="bi bi-plus-lg"></i></button>' +
+          '</td></tr>';
+      });
+    } else {
+      bodyHtml = '<tr><td colspan="' + (kolom.length + 1) + '" class="text-center">Tidak ada data ditemukan</td></tr>';
+    }
+    $("#tabelPickMaster_data").html(bodyHtml);
+
+    try {
+      $('#tabelPickMaster').DataTable({
+        lengthChange: false,
+        paging: rows.length > 10
+      });
+    } catch (e) {
+      console.error('renderPickMaster: gagal inisialisasi DataTable', e);
+    }
+  }
+
+  function pickMasterSelect(kode) {
+    if (pickerTargetInput) { $('#' + pickerTargetInput).val(kode); }
+    closePickMaster();
+    updateFilterBadge();
+  }
+
+  // ---- Export ----
+  function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }
+  document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('exportWrap');
+    if (wrap && !wrap.contains(e.target)) { document.getElementById('exportDrop').classList.remove('open'); }
+  });
+
+  function doExport(fmt) {
+    document.getElementById('exportDrop').classList.remove('open');
+    if (fmt === 'Print') { window.print(); return; }
+    if (!lastRows.length) { return; }
+
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const header = cols.map(c => c[1]);
+    const body = lastRows.map(r => cols.map(function (c) {
+      if (c[3] === 'date') return format_date(r[c[0]]);
+      if (c[3] === 'float' || c[3] === 'int') return currencyNormalizer(r[c[0]]);
+      return (r[c[0]] == null ? '' : r[c[0]]);
+    }));
+    const rowsCsv = [header].concat(body);
+    const csv = rowsCsv.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'LaporanMutasiStokPerMerk_' + ($('#inputDate1').val() || '') + '.' + (fmt === 'Excel' ? 'xls' : 'csv');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('📄', 'Data diekspor sebagai ' + fmt);
+  }
+
+  /* -- TOAST -- */
+  function showToast(icon, msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('ti').textContent = icon;
+    document.getElementById('tm').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
 </script>
 
 @endsection

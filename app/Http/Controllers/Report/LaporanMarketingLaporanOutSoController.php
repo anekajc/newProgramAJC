@@ -28,9 +28,9 @@ class LaporanMarketingLaporanOutSoController extends Controller {
 
   public function doReport(Request $req) {
     $SReport = "T";
-    $Ordr    = $req->get('inputOrd');
+    $Ordr    = $req->query('inputOrd');
     $tgl1    = "2017-08-01";
-    $tgl2    = $req->get('date2');
+    $tgl2    = $req->query('date2');
     $isiList = "";
     $xx = 0;
     $idUser = "";
@@ -45,27 +45,6 @@ class LaporanMarketingLaporanOutSoController extends Controller {
 
     $res = DB::connection('SML')->select('exec Sp_ReportOutStandingSoDet ?,?,?,?,?,?,?,?,?,?,?,?,?',
       $values);
-
-    return $res;
-  }
-
-  public function doFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'NoBukti, Tanggal' : 'KodeBrg, NamaBrg';
-    $listData = DB::connection('MGL')->select('select ' . $kolom . ' from Vwreportpurchasingreqdetclose where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-    return $listData;
-  }
-
-  public function doReportFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'NoBukti' : 'KodeBrg';
-    $res = [];
-
-    for ($i=0; $i < count($req->listdata); $i++) {
-      $row = DB::connection('MGL')->select('select * from Vwreportpurchasingreqdetclose where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-
-      for ($j=0; $j < count($row); $j++) {
-        $res = array_add($res, $i+$j, $row[$j]);
-      }
-    }
 
     return $res;
   }

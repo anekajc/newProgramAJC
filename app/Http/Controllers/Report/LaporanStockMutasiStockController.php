@@ -71,30 +71,30 @@ class LaporanStockMutasiStockController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $date = $req->get('date1');
+    $date = $req->query('date1');
     $dateParts = explode('-', $date);
 
     $Bulan = (int)$dateParts[1];
     $Tahun = $dateParts[0];
-    $isi = $req->get('inputIsi');
-    $Kodegdg = $req->get('inputGudang');
+    $isi = $req->query('inputIsi');
+    $Kodegdg = $req->query('inputGudang');
     $KodeGrp = "-";
     $SReport = "T";
     $IDuser = "";
     $Tipe = "";
-    $IsMinus = $req->get('inputStockMinus');
-    $jenis = $req->get('inputJenis');
-    $KodeHdGrp = $req->get('inputGrup');
-    $Kategori = $req->get('inputKategori');
-    $SubKategori = $req->get('inputSubKategori');
-    $KodeMerk = $req->get('inputMerk');
+    $IsMinus = $req->query('inputStockMinus');
+    $jenis = $req->query('inputJenis');
+    $KodeHdGrp = $req->query('inputGrup');
+    $Kategori = $req->query('inputKategori');
+    $SubKategori = $req->query('inputSubKategori');
+    $KodeMerk = $req->query('inputMerk');
 
     $values  = [$Bulan, $Tahun, $isi, $Kodegdg, $KodeGrp, $SReport, $IDuser, $Tipe, $IsMinus, $jenis, $KodeHdGrp, $Kategori, $SubKategori, $KodeMerk];
 
     $strSP = 'Sp_reportStockQtyRp ';
 
-    if ($req->get('g_modeReport') === 3) {
-      $date2 = $req->get('date2');
+    if ($req->query('g_modeReport') === 3) {
+      $date2 = $req->query('date2');
       $date2Parts = explode('-', $date2);
 
       $Bulan2 = (int)$dateParts[1];
@@ -106,7 +106,7 @@ class LaporanStockMutasiStockController extends Controller {
       $strSP .= 'Sp_reportMutasiperiode ?,?,';
     }
 
-    $res = DB::connection('MGL')->select('exec ' . $strSP . '?,?,?,?,?,?,?,?,?,?,?,?,?,?',
+    $res = DB::connection('SML')->select('exec ' . $strSP . '?,?,?,?,?,?,?,?,?,?,?,?,?,?',
       $values);
 
     return $res;

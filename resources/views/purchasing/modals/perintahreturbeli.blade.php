@@ -149,7 +149,124 @@
   </style>
 {{-- end tampilan search bar modal add pelanggan --}}
 
-{{-- tampilan search sales --}}
+{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
+     filter), disamakan dengan resources/views/purchasing/pembelianpermintaanagen.blade.php,
+     dipakai untuk styling #tabel_add (tabel item form Add PRB) di bawah. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+/* ---------- #tabel_add (tabel item di form Add PRB) - header abu-abu uppercase + zebra
+   + hover, disalin dari purchaseOrder.blade.php / pembelianpermintaanagen.blade.php.
+   Kolom Actions di tabel ini ada di PALING KIRI (first-child), beda dari #tabel_add pada
+   pembelianpermintaanagen.blade.php yang Actions-nya di paling kanan. ---------- */
+#tabel_add thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#tabel_add tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#tabel_add tbody tr:hover { background-color: #f5f3ff; }
+
+/* Qty & Sat rata tengah, header dan isi, supaya lurus segaris (kolomnya masing-masing
+   ada di posisi ke-4 dan ke-5: Actions, Kode Barang, Nama Barang, Qty, Sat, ...). */
+#tabel_add thead th:nth-child(4),
+#tabel_add thead th:nth-child(5),
+#tabel_add tbody td:nth-child(4):not([colspan]),
+#tabel_add tbody td:nth-child(5):not([colspan]) {
+  text-align: center;
+}
+
+/* Kolom Actions ada di paling kiri (first-child) - tombol bulat kecil pastel, disalin
+   dari purchaseOrder.blade.php / #tabel2 di pembelianpermintaanagen.blade.php. */
+#tabel_add td:first-child:not([colspan]) {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+#tabel_add td:first-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+#tabel_add td:first-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+#tabel_add td:first-child .btn-success {
+  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+}
+
+#tabel_add td:first-child .btn-warning {
+  color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+}
+
+#tabel_add td:first-child .btn-primary {
+  color: #2563eb; border-color: #cfdcff; background: #e8edff;
+}
+
+#tabel_add td:first-child .btn-danger {
+  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+}
+
+/* ---------- Tombol chip (latar tint muda + teks berwarna) untuk tombol + Tambah Item,
+   Submit Add/Edit, dan Batal di form Add PRB - disalin dari purchaseOrder.blade.php. ---------- */
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
+
+/* Batal = aksi sekunder, jadi abu-abu muda dengan teks gelap (bukan solid gelap). */
+.btn-batal-add {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.btn-batal-add:hover,
+.btn-batal-add:focus {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #343a40;
+}
+
+.btn-batal-add:active {
+  background-color: #dee2e6 !important;
+  border-color: #ced4da !important;
+  color: #343a40 !important;
+}
+</style>
+{{-- end tampilan search sales --}}
   <style>
     #tabel_add_list_sales_filter{
       display: flex;
@@ -838,16 +955,16 @@
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add" class="data-table">
+              <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Qty</th>
-                  <th style="padding: 4px 12px;" scope="col">Sat</th>
-                  <th style="padding: 4px 12px;" scope="col">No. Retur Jual</th>
-                  <th style="padding: 4px 12px;" scope="col">No. Beli</th>
+                  <th scope="col">Actions</th>
+                  <th scope="col">Kode Barang</th>
+                  <th scope="col">Nama Barang</th>
+                  <th scope="col">Qty</th>
+                  <th scope="col">Sat</th>
+                  <th scope="col">No. Retur Jual</th>
+                  <th scope="col">No. Beli</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
@@ -879,16 +996,16 @@
 
         <div class="row">
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" id='buttonTambahItem' class="btn btn-primary btn-lg" style="
-              height: 30px; 
-              padding: 4px 12px; 
-              border-radius: 20px; 
-              font-size: 0.75rem; 
-              font-weight: 600; 
-              text-transform: uppercase; 
+            <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
           </div>
         </div>
 
@@ -1081,38 +1198,38 @@
 
           <div class="row mt-2">
             <div class="col-md-12 text-right">
-              <button type="button" class="btn btn-danger btn-lg" style="
-              height: 30px; 
-              padding: 4px 12px; 
-              border-radius: 20px; 
-              font-size: 0.75rem; 
-              font-weight: 600; 
-              text-transform: uppercase; 
+              <button type="button" class="btn btn-lg btn-batal-add" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="closeShowHideAdd()" class="btn btn-secondary">Batal</button>
+              onclick="closeShowHideAdd()">Batal</button>
 
-              <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
-              height: 30px; 
-              padding: 4px 12px; 
-              border-radius: 20px; 
-              font-size: 0.75rem; 
-              font-weight: 600; 
-              text-transform: uppercase; 
+              <button type="button" id="submitAddAdd" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()" class="btn btn-secondary">Submit Add</button>
+              onclick="submitAddAdd()">Submit Add</button>
 
-              <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
-              height: 30px; 
-              padding: 4px 12px; 
-              border-radius: 20px; 
-              font-size: 0.75rem; 
-              font-weight: 600; 
-              text-transform: uppercase; 
+              <button type="button" id="submitAddEdit" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+              onclick="submitAddEdit()">Submit Edit</button>
             </div>
 
           </div>

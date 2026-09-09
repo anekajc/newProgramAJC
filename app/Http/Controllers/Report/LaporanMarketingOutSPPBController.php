@@ -30,14 +30,14 @@ class LaporanMarketingOutSPPBController extends Controller {
     $SReport = "T";
     $Ordr    = $req->get('inputOrd');
     $tgl1    = $req->get('date1');
-    $tgl2    = $req->get('date2');
+    // $tgl2    = $req->get('date2');
     $isiList = "";
     $xx = $req->get('inputOto');
     $idUser = "";
     $tipe = "";
     $KodeAgen = "";
 
-    $values  = [$SReport, $Ordr, $tgl2, $tgl1, $isiList, $xx, $idUser, $tipe, $KodeAgen];
+    $values  = [$SReport, $Ordr, $tgl1, $tgl1, $isiList, $xx, $idUser, $tipe, $KodeAgen];
 
     $res = DB::connection('SML')->select('exec Sp_ReportOutSpbDet ?,?,?,?,?,?,?,?,?',
       $values);

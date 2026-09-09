@@ -65,6 +65,14 @@
  *
  *   // di dalam render() halaman, ganti pembuatan <thead> menjadi:
  *   thead.innerHTML = ReportTable.headHtml(cols);
+ *
+ * Dua tabel dalam satu halaman (mis. dua tab, lihat
+ * accounting/penerimaandpp.blade.php): panggil init() sekali untuk tiap tabel dengan
+ * selektor table/bar-nya sendiri, tambahkan onActivate() yang menukar
+ * window.gcart_header + window.g_href ke milik tabel itu, lalu panggil
+ * ReportTable.use('#tabelnya') di awal fungsi render masing-masing tabel. Instance
+ * yang aktif juga ikut berpindah otomatis begitu user menyentuh thead/bar salah satu
+ * tabel. Halaman satu tabel tidak perlu berubah sama sekali.
  * ==========================================================================*/
 (function () {
   'use strict';
@@ -642,10 +650,27 @@
 
   if (window.ReportTable) { return; }
 
-  var cfg      = null;
+  /* cfg = instance yang sedang aktif. Sebuah halaman boleh memanggil init() lebih dari
+     sekali (mis. dua tabel di dua tab, lihat accounting/penerimaandpp.blade.php); tiap
+     panggilan mendaftarkan satu instance di sini dan instance yang aktif mengikuti tabel
+     / bar yang sedang disentuh user. Halaman dengan satu tabel tidak berubah perilakunya
+     karena instance-nya cuma satu. */
+  var cfg       = null;
+  var instances = [];
+  var docBound  = false;
+
   var openGidx = -1;   // index kolom (di gcart_header) yang menunya terbuka
   var dragGidx = -1;   // index kolom yang sedang diseret
   var menuEl   = null; // elemen .rt-colmenu di <body>
+
+  /* Jadikan `inst` instance aktif. onActivate() dipakai halaman multi-tabel untuk
+     menukar window.gcart_header / window.g_href ke milik tabel itu sebelum
+     cart()/saveHeader() dipanggil. */
+  function activate(inst) {
+    if (!inst || cfg === inst) { return; }
+    cfg = inst;
+    if (typeof inst.onActivate === "function") { inst.onActivate(); }
+  }
 
   // Stepper "Desimal" di menu roda gigi kolom numerik DIMATIKAN sementara atas
   // permintaan - fiturnya tetap ada di kode, hanya dipindah jadi command-only lewat
@@ -730,7 +755,13 @@
     });
   }
 
-  function bindHead(thead) {
+  function bindHead(thead, inst) {
+    /* Fase capture, didaftarkan paling awal: begitu user menyentuh <thead> tabel ini,
+       instance-nya dijadikan aktif dulu sebelum penangan di bawah membaca cart(). */
+    ["dragstart", "dragover", "dragleave", "drop", "click"].forEach(function (ev) {
+      thead.addEventListener(ev, function () { activate(inst); }, true);
+    });
+
     thead.addEventListener("dragstart", function (e) {
       var inner = closestEl(e.target, ".th-inner");
       if (!inner) { return; }
@@ -927,10 +958,14 @@
     openGidx = -1;
     destroyMenu();
 
-    var t = tableEl();
-    if (!t) { return; }
-    Array.prototype.forEach.call(t.querySelectorAll("thead .th-gear.active"), function (b) {
-      b.classList.remove("active");
+    // Semua instance dibersihkan, bukan cuma yang aktif, supaya roda gigi di tabel
+    // lain tidak tertinggal dalam keadaan .active.
+    instances.forEach(function (inst) {
+      var t = inst.table ? document.querySelector(inst.table) : null;
+      if (!t) { return; }
+      Array.prototype.forEach.call(t.querySelectorAll("thead .th-gear.active"), function (b) {
+        b.classList.remove("active");
+      });
     });
   }
 
@@ -1047,14 +1082,19 @@
   }
 
   function closeBarMenus() {
-    var bar = barEl();
-    if (!bar) { return; }
-    Array.prototype.forEach.call(bar.querySelectorAll(".rt-drop-menu.open"), function (m) {
-      m.classList.remove("open");
+    instances.forEach(function (inst) {
+      var bar = inst.bar ? document.querySelector(inst.bar) : null;
+      if (!bar) { return; }
+      Array.prototype.forEach.call(bar.querySelectorAll(".rt-drop-menu.open"), function (m) {
+        m.classList.remove("open");
+      });
     });
   }
 
-  function bindBar(bar) {
+  function bindBar(bar, inst) {
+    // Sama seperti bindHead(): aktifkan instance pemilik bar ini lebih dulu.
+    bar.addEventListener("click", function () { activate(inst); }, true);
+
     bar.addEventListener("click", function (e) {
       // Reset ditangani lebih dulu: tombolnya TIDAK punya .rt-drop-menu, jadi kalau
       // jatuh ke cabang [data-rtbar] di bawah ia akan membuka dropdown milik tombol lain.
@@ -1102,33 +1142,64 @@
 
   /* ---------------- init ---------------- */
 
+  /* init() boleh dipanggil sekali per tabel. Instance dengan selektor tabel yang sama
+     menggantikan pendaftaran sebelumnya (bukan menumpuk), dan penangan tingkat
+     document/window hanya dipasang satu kali per halaman. */
   function init(options) {
-    cfg = options || {};
+    var opt = options || {};
+    if (!opt.table) { return; }
 
-    var t = tableEl();
+    var t = document.querySelector(opt.table);
     if (!t) { return; }
 
+    var lama = -1;
+    instances.forEach(function (inst, i) { if (inst.table === opt.table) { lama = i; } });
+    if (lama >= 0) { instances.splice(lama, 1, opt); } else { instances.push(opt); }
+
+    cfg = opt;
+    if (typeof opt.onActivate === "function") { opt.onActivate(); }
+
     var thead = t.querySelector("thead");
-    if (thead) { bindHead(thead); }
+    if (thead && !thead.dataset.rtBound) {
+      thead.dataset.rtBound = "1";
+      bindHead(thead, opt);
+    }
 
-    var bar = barEl();
-    if (bar) { bindBar(bar); }
+    var bar = opt.bar ? document.querySelector(opt.bar) : null;
+    if (bar && !bar.dataset.rtBound) {
+      bar.dataset.rtBound = "1";
+      bindBar(bar, opt);
+    }
 
-    document.addEventListener("click", function () { closeMenu(); closeBarMenus(); });
+    if (!docBound) {
+      docBound = true;
 
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" || e.keyCode === 27) { closeMenu(); closeBarMenus(); }
-    });
+      document.addEventListener("click", function () { closeMenu(); closeBarMenus(); });
 
-    // capture: ikut menangkap scroll di dalam .table-wrap (overflow:auto)
-    window.addEventListener("scroll", function () { closeMenu(); }, true);
-    window.addEventListener("resize", function () { closeMenu(); closeBarMenus(); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" || e.keyCode === 27) { closeMenu(); closeBarMenus(); }
+      });
+
+      // capture: ikut menangkap scroll di dalam .table-wrap (overflow:auto)
+      window.addEventListener("scroll", function () { closeMenu(); }, true);
+      window.addEventListener("resize", function () { closeMenu(); closeBarMenus(); });
+    }
 
     renderBar();
   }
 
+  /* Tunjuk instance mana yang dipakai headHtml()/renderBar() berikutnya. Halaman dengan
+     dua tabel memanggil ini di awal fungsi render masing-masing tabel. */
+  function use(tableSelector) {
+    var pilih = null;
+    instances.forEach(function (inst) { if (inst.table === tableSelector) { pilih = inst; } });
+    if (pilih) { activate(pilih); }
+    return pilih;
+  }
+
   window.ReportTable = {
     init:     init,
+    use:      use,
     headHtml: headHtml,
     refresh:  renderBar,
     reset:    resetHeader,

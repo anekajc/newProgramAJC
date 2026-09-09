@@ -4,6 +4,97 @@
 @endsection
 
 @section('css')
+<style>
+  #contentContainer .toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #contentContainer .toolbar .action-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  #tabelitem_header th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee;
+    border-top: none;
+  }
+
+  #tabelitem.table-bordered th,
+  #tabelitem.table-bordered td {
+    border-color: #e7e9ee !important;
+  }
+
+  #tabelitem tbody tr:nth-of-type(odd) {
+    background-color: #fbfbfc;
+  }
+
+  #tabelitem tbody tr:hover {
+    background-color: #f5f3ff;
+  }
+
+  .btn-pill-action {
+    height: 30px;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-batal-add {
+    background-color: #f1f3f5;
+    border-color: #dee2e6;
+    color: #495057;
+  }
+
+  .btn-batal-add:hover,
+  .btn-batal-add:focus {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #343a40;
+  }
+
+  .btn-close-pill {
+    background-color: #fdeaea;
+    border-color: #f7cfcf;
+    color: #dc2626;
+  }
+
+  .btn-close-pill:hover,
+  .btn-close-pill:focus {
+    background-color: #fbdcdc;
+    border-color: #f2bcbc;
+    color: #b91c1c;
+  }
+</style>
 @endsection
 
 @section('content')
@@ -12,167 +103,154 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="pageHome" class="container-fluid">
-    	<div class="">
-    	  <div class="row">
-    	    <div class="col-6 text-left">
-    	      <h2 style="margin-top:-85px;">Ubah Kemasan Barang</h2>
-    	    </div>
-    	    <div class="col-6 text-right">
-    	      <button type="button" class="btn btn-primary btn-lg button-action" style="margin-top: -150px;" onclick="buttonAdd()">Add KMBJ</button>
-    	    </div>
-    	  </div>
-    	</div>
+<div id="pageHome" class="tb-report main">
+  <div class="content">
 
-    	<div id="contentContainer" class="" >
-    		<input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-        <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+    <div class="tb-report" id="contentContainer">
+      <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
+      <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
-        <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
-        <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
-        <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
-        <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
-        <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
-        <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
+      <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
+      <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
+      <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
+      <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+      <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+      <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
-        <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
+      <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-        <div class="card">
-          <div class="card-header" style="margin-top:-55px;">
-            <div class="row">
-              <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-                <a class="nav-item nav-link active buttonnav-active" id="nav-home-tab" href="#tabhome" role="tab" aria-controls="nav-home" aria-selected="true" onclick="doSetActiveNavTab('home')">
-                  Ubah Kemasan Barang
-                </a>
-                <a class="nav-item nav-link buttonnav-inactive" id="nav-listsdhoto-tab" href="#tablistsdhoto" role="tab" aria-controls="nav-listsdhoto" aria-selected="false" onclick="doSetActiveNavTab('listsdhoto')">
-                  Sudah Otorisasi
-                </a>
-              </div>
-            </div>
+      <div class="toolbar">
+        {{-- <div class="page-title">Ubah Kemasan Barang</div> --}}
+
+        <div class="filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+            onchange="reloadData()">
+          <span class="filter-sep">s/d</span>
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+            onchange="reloadData()">
+        </div>
+
+        {{-- Susunan (Cari data -> Tampilkan -> Filter -> Tambah) disamakan dengan
+             gudang/purchaseOrder.blade.php (po-search-inp/po-len-wrap/po-btn-filter/
+             po-toolbar-act): ditulis sejajar langsung di dalam .toolbar (bukan
+             dibungkus lagi di .action-group), Tambah saja yang dikelompokkan supaya
+             tetap ngambang di ujung kanan (lihat .action-group{margin-left:auto}
+             di @section('css')). --}}
+        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
+          oninput="currentPage = 1; renderTabel()" style="width:200px">
+
+        <div class="period-select-wrap">
+          <label for="tampilLen">Tampilkan</label>
+          <select class="period-select" id="tampilLen" onchange="onChangeTampilLen()">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
+
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="bi bi-filter-lg"></i> Filter
+        </button>
+
+        @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
+          <div class="action-group">
+            <button class="btn btn-primary" type="button" onclick="buttonAdd()">Tambah</button>
           </div>
+        @endif
+      </div>
 
-          <div class="card-body" style="padding:0;">
-            <div class="tab-content" id="myTabContent">
-              <div class="tab-pane fade show active" id="tabhome" role="tabpanel" aria-labelledby="home-tab">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="container-fluid col-sm-12 customTable" style="padding:0; margin:0; width:100%;">
-                      <table id="tabelhome" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
-                          <tr>
-                            <th style="padding: 4px 12px;" scope="col">Actions</th>
-                            <th style="padding: 4px 12px;" scope="col">Group No. Bukti</th>
-                            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tabelhome_data" class="text-left">
-                          @if (count($listKMBJ) > 0)
-                            @for ($i = 0; $i < count($listKMBJ); $i++)
-                              <tr>
-                                <td class="text-center">
-                                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-info"></i>
-                                  </button>
-                                  <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-pencil-fill"></i>
-                                  </button>
-                                  <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $listKMBJ[$i]->Nobukti }}')">
-                                    <i class="bi bi-key-fill"></i>
-                                  </button>
-                                </td>
+      <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+      <div id="rtBar"></div>
 
-                                <td>{{ $listKMBJ[$i]->GroupNobukti }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listKMBJ[$i]->Tanggal)) !!}</td>
+      <div class="table-outer">
+        <div class="table-wrap">
+          <table class="tb" id="mainTable">
+            <thead>
+              <tr>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tabel2_data"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="footerLabel2">Belum ada data</span>
+          <div class="pager-btns" id="pagerBtns"></div>
+        </div>
+      </div>
 
-                                {{-- <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td> --}}
-                              </tr>
-                            @endfor
-                          @else
-                            <tr>
-                              <td colspan="3" class="text-center text-muted">Tidak ada transaksi</td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              {{-- <td style="display: none;"></td> --}}
-                            </tr>
-                          @endif
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+        sembunyikan kolom.
+      </div>
 
-              <div class="tab-pane fade" id="tablistsdhoto" role="tabpanel" aria-labelledby="listsdhoto-tab">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="container-fluid col-sm-12 customTable" style="padding:0; margin:0; width:100%;">
-                      <table id="tabellistsdhoto" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
-                          <tr>
-                            <th style="padding: 4px 12px;" scope="col">Actions</th>
-                            <th style="padding: 4px 12px;" scope="col">Group No. Bukti</th>
-                            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                            {{-- <th style="padding: 4px 12px;" scope="col">Oto</th> --}}
-                            <th style="padding: 4px 12px;" scope="col">User Oto</th>
-                            <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
-                          </tr>
-                        </thead>
-                        <tbody id="tabellistsdhoto_data" class="text-left">
-                          @if (count($listSdhOto) > 0)
-                            @for ($i = 0; $i < count($listSdhOto); $i++)
-                              <tr>
-                                <td class="text-center">
-                                  <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $listSdhOto[$i]->Nobukti }}')">
-                                    <i class="bi bi-info"></i>
-                                  </button>
-                                  <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $listSdhOto[$i]->Nobukti }}')">
-                                    <i class="bi bi-key-fill"></i>
-                                  </button>
-				  <button style="" class="btn btn-primary btn-sm" type="button"   onclick="submitPrint('{{$listSdhOto[$i]->Nobukti}}')" ><i class="bi bi-printer"></i></button>
-                                </td>
+    </div>
+  </div>
+</div>
 
-                                <td>{{ $listSdhOto[$i]->GroupNobukti }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listSdhOto[$i]->Tanggal)) !!}</td>
+{{-- modal filter — DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
 
-                                {{-- <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td> --}}
-                                <td>{{ $listSdhOto[$i]->OtoUser1 }}</td>
-                                <td>{!! date("Y/m/d", strtotime($listSdhOto[$i]->TglOto1)) !!}</td>
-                              </tr>
-                            @endfor
-                          @else
-                            <tr>
-                              <td colspan="5" class="text-center text-muted">Tidak ada transaksi</td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              <td style="display: none;"></td>
-                              {{-- <td style="display: none;"></td> --}}
-                            </tr>
-                          @endif
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i>
+          Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="modalOtorisasi">
+                <option value="2">Semua</option>
+                <option value="1">Sudah Otorisasi</option>
+                <option value="0">Belum Otorisasi</option>
+              </select>
             </div>
           </div>
         </div>
-    	</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
+<!-- modal filter -->
 
 <div id="pageForm" class="container-fluid" style="display: none" >
       <div class="row">
         <div class="col-6 text-left">
-          <h2 style="margin-top: -80px;">Form Ubah Kemasan Barang</h2>
+          {{-- Judul H2 besar dihapus, disamakan dengan #page2 di
+               gudang/purchaseOrder.blade.php (judulnya juga dikosongkan). --}}
         </div>
         <div class="col-6 text-right">
-          <button type="button" class="btn btn-danger btn-lg button-action" style="margin-top: -120px;" onclick="buttonCloseForm()">Close</button>
+          <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" onclick="buttonCloseForm()">Close</button>
         </div>
       </div>
 
       <div id="modalBodyAddMain" class="">
-        <div class="modal-body" style="margin-top:-60px;">
+        <div class="modal-body">
           <div class="row">
 
             <input type="hidden" class="form-control" id="input_nourut">
@@ -208,9 +286,14 @@
                 </div>
                 <div class="col-md-2">
                   <div class="input-group form-group">
-                    <input type="text" class="form-control" id="input_gudang"  disabled>
-                    <button id="buttonbrowse_gudang" onclick="doBrowseMaster('Gudang', '{!! $gudang !!}')" class="btn btn-primary btn-sm text-right lockableHeader lockableModeDetail">
-                      <i class="bi bi-plus"></i>
+                    {{-- Gudang: pola "resolve-or-pick" (lihat guide-update-barang.md) --
+                         bisa diketik langsung + Enter, atau pakai tombol search; match
+                         persis KODEGDG langsung isi field ini, kalau tidak baru modal
+                         #modalPickGudang terbuka (bukan lagi #formBrowseMaster generik). --}}
+                    <input type="text" class="form-control text-left lockableHeader lockableModeDetail" id="input_gudang" placeholder="Kode Gudang"
+                      onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveGudang($('#input_gudang').val()); }">
+                    <button type="button" id="buttonbrowse_gudang" class="btn btn-chip-biru btn-sm lockableHeader lockableModeDetail" style="height:32px; border-radius:0;" onclick="resolveGudang($('#input_gudang').val())">
+                      <i class="bi bi-search"></i>
                     </button>
                   </div>
                 </div>
@@ -239,8 +322,8 @@
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
         <div class="container-fluid" style="overflow:auto;">
           <div class="row">
-            <table id="tabelitem" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead id="tabelitem_header" class="text-center bg-primary text-white">
+            <table id="tabelitem" class="table table-bordered table-hover table-responsive-lg">
+              <thead id="tabelitem_header" class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Deskripsi</th>
@@ -261,7 +344,7 @@
 
         <div class="row ">
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" class="btn btn-primary btn-lg button-action hideableModeDetail" onclick="buttonItemAdd()"><b>+ Tambah Item</b></button>
+            <button type="button" class="btn btn-lg btn-pill-action btn-chip-biru hideableModeDetail" onclick="buttonItemAdd()"><b>+ Tambah Item</b></button>
           </div>
         </div>
 
@@ -424,8 +507,8 @@
 
           <div class="row mt-2">
             <div class="col-md-12 text-right">
-              <button type="button" class="btn btn-danger btn-lg button-action" onclick="closeFormItem()" class="btn btn-secondary">Batal</button>
-              <button type="button" id="buttonSubmitItem" class="btn btn-primary btn-lg button-action" onclick="submitItem()" class="btn btn-secondary">Submit</button>
+              <button type="button" class="btn btn-lg btn-pill-action btn-batal-add" onclick="closeFormItem()">Batal</button>
+              <button type="button" id="buttonSubmitItem" class="btn btn-lg btn-pill-action btn-chip-biru" onclick="submitItem()">Submit</button>
             </div>
 
           </div>
@@ -434,6 +517,147 @@
 </div>
 
 @include('gudang.modalbrowsemaster')
+
+<style>
+  #modalPickGudang tbody tr.pick-row {
+    cursor: pointer;
+    transition: background-color .12s;
+  }
+
+  #modalPickGudang tbody tr.pick-row:hover td {
+    background-color: #eef2ff;
+  }
+
+  #modalPickGudangLabel {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  #modalPickGudang .modal-body {
+    padding: 24px 32px 32px;
+  }
+
+  #modalPickGudang thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid #e7e9ee !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  #modalPickGudang thead th:first-child {
+    width: 30%;
+  }
+
+  #modalPickGudang tbody td {
+    border-top: none !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 18px 16px;
+    vertical-align: middle;
+  }
+
+  #modalPickGudang .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  #modalPickGudang .dataTables_filter {
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 16px;
+  }
+
+  #modalPickGudang .dataTables_filter label {
+    font-size: 0;
+    margin: 0;
+    display: inline-block;
+  }
+
+  #modalPickGudang .dataTables_filter input {
+    font-size: 15px;
+    margin-left: 0;
+    width: 280px;
+    max-width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+  }
+
+  #modalPickGudang .dataTables_filter input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #e8edff;
+  }
+
+  #modalPickGudang .dataTables_info,
+  #modalPickGudang .dataTables_paginate {
+    font-size: 14px;
+    margin-top: 16px !important;
+  }
+</style>
+
+
+<div class="modal fade" id="modalPickGudang" tabindex="-1" role="dialog" aria-labelledby="modalPickGudangLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalPickGudangLabel">Pilih Gudang</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelPickGudang" class="table table-hover table-responsive-lg">
+                <thead class="text-center">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelPickGudang_data" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Placeholder "Cari Data" untuk kotak pencarian DataTables di modal ini - disamakan
+     dengan modalPOAdd.blade.php (dipasang lewat event shown.bs.modal, bukan lewat opsi
+     language.searchPlaceholder, karena kotak pencariannya baru ada setelah DataTables
+     di-init di dalam openGudangPicker()). --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof jQuery === 'undefined') { return }
+
+  jQuery(document).on('shown.bs.modal', '#modalPickGudang', function () {
+    jQuery('#modalPickGudang .dataTables_filter input').attr('placeholder', 'Cari Data')
+  })
+})
+</script>
 
 @endsection
 
@@ -456,37 +680,555 @@
   var dataItem = [];
   var dataBrowse = {};
 
-  $(document).ready(function(){
-    $("#tabelhome").DataTable({
-      "lengthChange": false,
-      "paging": false ,
+  if (typeof doSetFormatDate !== 'function') {
+    window.doSetFormatDate = function(dateVal, sep) {
+      if (!dateVal) return '';
+      sep = sep || '/';
+      let d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal);
+      let yyyy = d.getFullYear();
+      let mm = String(d.getMonth() + 1).padStart(2, '0');
+      let dd = String(d.getDate()).padStart(2, '0');
+      return yyyy + sep + mm + sep + dd;
+    };
+  }
+
+  if (typeof nullToEmpty !== 'function') {
+    window.nullToEmpty = function(v) {
+      return (v === null || v === undefined) ? '' : v;
+    };
+  }
+
+  if (typeof doCekAkses !== 'function') {
+    window.doCekAkses = function(inputId) {
+      let v = $('#' + inputId).val();
+      if (!Number(v)) {
+        alertify.warning('No access');
+        return false;
+      }
+      return true;
+    };
+  }
+
+  // cek status otorisasi terkini ke server sebelum masuk mode edit 
+  // jaga-jaga klo dokumennya baru aja diotorisasi user lain
+  if (typeof doCekOtorisasi !== 'function') {
+    window.doCekOtorisasi = function(nobukti, urlName) {
+      let boleh = true;
+      $.ajax({
+        url: "{!! url('') !!}/" + urlName,
+        type: 'get',
+        async: false,
+        data: { nobukti: nobukti },
+        success: function(res) {
+          let row = Array.isArray(res) ? res[0] : res;
+          let sudahOto = row ? Number(row.isOtorisasi1 ?? row.IsOtorisasi1 ?? 0) : 0;
+          if (sudahOto === 1) {
+            alertify.warning('Sudah diotorisasi, tidak bisa diedit');
+            boleh = false;
+          }
+        },
+        error: function() {
+          alertify.warning('Terjadi kesalahan. Silakan refresh browser.');
+          boleh = false;
+        }
+      });
+      return boleh;
+    };
+  }
+
+  // nyala/matiin field header + item berdasarkan class yang sudah dipasang di
+  // markup form: lockableHeader, lockableModeDetail, hideableModeDetail, lockableItemModeEdit.
+  if (typeof doUnlockHeader !== 'function') {
+    window.doUnlockHeader = function() {
+      $('.lockableHeader').prop('disabled', false);
+      $('.lockableModeDetail').prop('disabled', false);
+      $('.hideableModeDetail').show();
+    };
+  }
+
+  if (typeof doLockModeDetail !== 'function') {
+    window.doLockModeDetail = function() {
+      $('.lockableHeader').prop('disabled', true);
+      $('.lockableModeDetail').prop('disabled', true);
+      $('.hideableModeDetail').hide();
+    };
+  }
+
+  if (typeof doUnlockModeEdit !== 'function') {
+    window.doUnlockModeEdit = function() {
+      $('.lockableItemModeEdit').prop('disabled', false);
+      $('.hideableModeDetail').show();
+    };
+  }
+
+  if (typeof doUnlockModeDetail !== 'function') {
+    window.doUnlockModeDetail = function() {
+      $('.lockableModeDetail').prop('disabled', false);
+      $('.hideableModeDetail').show();
+    };
+  }
+
+  if (typeof doLockHeader !== 'function') {
+    window.doLockHeader = function() {
+      $('.lockableHeader').prop('disabled', true);
+    };
+  }
+
+  if (typeof doLockModeEdit !== 'function') {
+    window.doLockModeEdit = function() {
+      $('.lockableItemModeEdit').prop('disabled', true);
+    };
+  }
+
+  if (typeof doSetEmptyTable !== 'function') {
+    window.doSetEmptyTable = function(colspan, message) {
+      return '<tr><td colspan="' + colspan + '" class="text-center text-muted">' + message + '</td></tr>';
+    };
+  }
+
+  // Format angka ke Rupiah 2 desimal (dipakai nampilin Qty/HPP/Harga di tabel item saat mode Edit/Detail).
+  if (typeof formatCurrency !== 'function') {
+    window.formatCurrency = function(v) {
+      let n = Number(v) || 0;
+      return n.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+  }
+
+  if (typeof cekNotEmpty !== 'function') {
+    window.cekNotEmpty = function(inputId) {
+      let v = $('#' + inputId).val();
+      return v !== undefined && v !== null && String(v).trim() !== '';
+    };
+  }
+
+  if (typeof cekNotZero !== 'function') {
+    window.cekNotZero = function(inputId) {
+      return Number($('#' + inputId).val()) !== 0;
+    };
+  }
+
+  if (typeof messageRequired !== 'function') {
+    window.messageRequired = function(label) {
+      return label + ' harus diisi';
+    };
+  }
+
+  if (typeof setEmptyNumberToZero !== 'function') {
+    window.setEmptyNumberToZero = function(inputId) {
+      if ($('#' + inputId).val() === '') {
+        $('#' + inputId).val(0);
+      }
+    };
+  }
+
+  if (typeof doCekPeriode !== 'function') {
+    window.doCekPeriode = function(bulanId, tahunId, tanggalId) {
+      let bulan = Number($('#' + bulanId).val());
+      let tahun = Number($('#' + tahunId).val());
+      let tgl = $('#' + tanggalId).val();
+      if (!tgl) return true;
+      let d = new Date(tgl);
+      if (isNaN(d.getTime())) return true;
+      if ((d.getMonth() + 1) !== bulan || d.getFullYear() !== tahun) {
+        alertify.warning('Tanggal tidak sesuai periode');
+        return false;
+      }
+      return true;
+    };
+  }
+
+  if (typeof doGenerateNoBukti !== 'function') {
+    window.doGenerateNoBukti = function(kode) {
+      let _token = $('#_token').val();
+      let result = { Nobukti: '', Nourut: '' };
+      $.ajax({
+        url: "{!! url('spnobukti') !!}",
+        type: 'post',
+        async: false,
+        data: { _token, kode },
+        success: function(res) {
+          if (res && res[0]) {
+            result.Nobukti = res[0].Nobukti;
+            result.Nourut = res[0].Nourut;
+          }
+        },
+        error: function(err) {
+          console.log(err);
+          alertify.warning('Terjadi kesalahan. Silakan refresh browser.');
+        }
+      });
+      return result;
+    };
+  }
+
+  let lastRows = (function() {
+    // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
+    let belum = @json($listKMBJ);
+    let sudah = @json($listSdhOto);
+    return belum.concat(sudah);
+  })();
+  let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
+  let pageSize = 10;  
+  let currentPage = 1; // halaman aktif, di-reset ke 1 tiap kali search/filter/tanggal berubah
+
+  var g_href = 'ubahkemasanbarang';
+  var g_modeReport = '2';
+  var gcart_header = [];
+  var gsum_issubtotal = 0;
+  var gsum_isgrandtotal = 0;
+  var gct_desimal_max = 4;
+
+  function setDefaultHeader() {
+    // [ field, label, visible, type, total, decimals ]
+    gcart_header = [
+      ['GroupNobukti', 'No Bukti', 1, 'varchar', 0, 0],
+      ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+      ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
+      ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
+      ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
+    ];
+  }
+
+  function doSetHeader(_modereport, _isReset = false) {
+    let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+
+    if (_strHeader != "") {
+      gcart_header = doGetHeader(_strHeader);
+    } else if ($.isFunction(window.setDefaultHeader)) {
+      setDefaultHeader();
+      doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+    }
+  }
+
+  function doLoadHeader(_href, _mode) {
+    let _header = "";
+
+    $.ajax({
+      url: "{!! url('globalfunctions_doLoadHeader') !!}",
+      type: "get",
+      async: false,
+      data: {
+        href: _href,
+        mode: _mode
+      },
+      success: function(res) {
+        _header = (res.length > 0) ? res[0].header : "";
+        if (res.length > 0) {
+          gsum_issubtotal = Number(res[0].issubtotal);
+          gsum_isgrandtotal = Number(res[0].isgrandtotal);
+        }
+      }
+    })
+
+    return _header;
+  }
+
+  function doGetHeader(_strHeader) {
+    let _cart = [];
+
+    _strHeader.split("||").forEach((item, i) => {
+      let temp = [];
+      temp.push(item.split(";;")[0]);
+      temp.push(item.split(";;")[1]);
+      temp.push(Number(item.split(";;")[2]));
+      temp.push(item.split(";;")[3]);
+      temp.push(Number(item.split(";;")[4]));
+      temp.push(Number(item.split(";;")[5]));
+      _cart.push(temp);
     });
 
-    $("#tabellistsdhoto").DataTable({
-      "lengthChange": false,
-      "paging": false ,
+    return _cart;
+  }
+
+  function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+    let _strHeader = "";
+
+    _cart.forEach((item, i) => {
+      if (i != 0) {
+        _strHeader += '||';
+      }
+      _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
+        item[5];
     });
+
+    $.ajax({
+      url: "{!! url('globalfunctions_doSimpanHeader') !!}",
+      type: "get",
+      async: false,
+      data: {
+        href: _href,
+        mode: _mode,
+        header: _strHeader,
+        issubtotal: _issubtotal,
+        isgrandtotal: _isgrandtotal
+      },
+      success: function(res) {
+        // nothing to do
+      }
+    })
+  }
+
+  function doMoveHeader(_from, _to) {
+    if (_from < 0 || _to < 0 || _from === _to) {
+      return;
+    }
+    if (_from >= gcart_header.length || _to >= gcart_header.length) {
+      return;
+    }
+
+    let _moved = gcart_header.splice(_from, 1)[0];
+    gcart_header.splice(_to, 0, _moved);
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doButtonVisibility(_id) {
+    gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doSetDesimal(_index, _step) {
+    let _next = Number(gcart_header[_index][5]) + _step;
+    if (_next < 0 || _next > gct_desimal_max) {
+      return;
+    }
+
+    gcart_header[_index][5] = _next;
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  function doButtonTotal(_index) {
+    gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+
+  // ambil field dari row tanpa peduli besar/kecil huruf.
+  function pickCI(r, key) {
+    if (r[key] !== undefined) {
+      return r[key];
+    }
+    let lk = String(key).toLowerCase();
+    for (let k in r) {
+      if (k.toLowerCase() === lk) {
+        return r[k];
+      }
+    }
+    return null;
+  }
+
+  function filterByOtorisasi(rows, filterVal) {
+    if (filterVal === '1') { // NeedOtorisasi = 0 itu sudah
+      return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 0);
+    }
+    if (filterVal === '0') { // NeedOtorisasi = 1 itu belum
+      return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 1);
+    }
+    return rows;
+  }
+
+  function aksiButtonsHtml(r) {
+    const nobukti = r.Nobukti;
+    const detailBtn =
+      '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+      nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
+
+    if (Number(pickCI(r, 'NeedOtorisasi')) === 0) {
+      // Sudah otorisasi (Print + Batal Otorisasi)
+      return '<div class="action-buttons">' + detailBtn +
+        '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+        nobukti + '\')"><i class="bi bi-printer"></i></button>' +
+        '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+        nobukti + '\')"><i class="bi bi-key"></i></button>' +
+        '</div>';
+    }
+
+    // Belum otorisasi (Edit + Otorisasi)
+    return '<div class="action-buttons">' + detailBtn +
+      '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
+      nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+      nobukti + '\')"><i class="bi bi-key"></i></button>' +
+      '</div>';
+  }
+
+  function stripTanggalSuffix(v) {
+    if (!v) return v;
+    let idx = String(v).search(/\s*Tanggal\s*:/i);
+    return (idx >= 0) ? String(v).substring(0, idx).trim() : v;
+  }
+
+  function renderTabel() {
+    const cols = gcart_header.filter(c => c[2] === 1);
+    const thead = document.querySelector('#mainTable thead');
+    thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+
+    const search = ($('#searchBox2').val() || '').trim().toLowerCase();
+    let rows = lastRows;
+    if (search) {
+      rows = rows.filter(function(r) {
+        return cols.some(function(c) {
+          const v = pickCI(r, c[0]);
+          return v != null && String(v).toLowerCase().indexOf(search) !== -1;
+        });
+      });
+    }
+    rows = filterByOtorisasi(rows, globalOtorisasi);
+
+    const tbody = document.getElementById('tabel2_data');
+    $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
+      document.getElementById('footerLabel2').textContent = 'Tidak ada data';
+      document.getElementById('pagerBtns').innerHTML = '';
+      return;
+    }
+
+    const total = rows.length;
+    const totalPages = (pageSize === -1) ? 1 : Math.max(1, Math.ceil(total / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    let pageRows = rows;
+    let startIdx = 0;
+    if (pageSize !== -1) {
+      startIdx = (currentPage - 1) * pageSize;
+      pageRows = rows.slice(startIdx, startIdx + pageSize);
+    }
+
+    let html = '';
+    pageRows.forEach(function(r) {
+      html += '<tr class="data-row">';
+      html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+      html += cols.map(function(c) {
+        const v = pickCI(r, c[0]);
+        if (c[0] === 'NeedOtorisasi') {
+          return (Number(v) === 0) ?
+            '<td><span class="sp-badge is-active">Sudah</span></td>' :
+            '<td><span class="sp-badge is-inactive">Belum</span></td>';
+        }
+        if (c[0] === 'GroupNobukti') {
+          return '<td>' + nullToEmpty(stripTanggalSuffix(v)) + '</td>';
+        }
+        if (c[3] === 'date') {
+          return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
+        }
+        return '<td>' + nullToEmpty(v) + '</td>';
+      }).join('');
+      html += '</tr>';
+    });
+
+    tbody.innerHTML = html;
+    document.getElementById('footerLabel2').textContent =
+      'Menampilkan ' + (startIdx + 1) + '-' + (startIdx + pageRows.length) + ' dari ' + total + ' baris';
+    renderPager(totalPages);
+    $('[data-toggle="tooltip"]').tooltip({
+      container: 'body',
+      boundary: 'window'
+    });
+  }
+
+  // Dropdown "Tampilkan"
+  function onChangeTampilLen() {
+    pageSize = Number($('#tampilLen').val());
+    currentPage = 1;
+    renderTabel();
+  }
+
+  function goToPage(p) {
+    currentPage = p;
+    renderTabel();
+  }
+
+  // render tombol Prev/nomor halaman/Next di kanan table-footer 
+  // kelas .pager-btns/.pg sudah ada di report-table.css). 
+  // ditampilkan maksimal 5 nomor halaman sekaligus, digeser mengikuti currentPage biar tidak kepanjangan klo datanya banyak.
+  function renderPager(totalPages) {
+    const el = document.getElementById('pagerBtns');
+    if (!el) return;
+
+    if (totalPages <= 1) {
+      el.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    html += '<div class="pg' + (currentPage === 1 ? ' disabled' : '') +
+      '" onclick="goToPage(' + Math.max(1, currentPage - 1) + ')"><i class="bi bi-chevron-left"></i></div>';
+
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + 4);
+    start = Math.max(1, end - 4);
+
+    for (let p = start; p <= end; p++) {
+      html += '<div class="pg' + (p === currentPage ? ' active' : '') +
+        '" onclick="goToPage(' + p + ')">' + p + '</div>';
+    }
+
+    html += '<div class="pg' + (currentPage === totalPages ? ' disabled' : '') +
+      '" onclick="goToPage(' + Math.min(totalPages, currentPage + 1) + ')"><i class="bi bi-chevron-right"></i></div>';
+
+    el.innerHTML = html;
+  }
+
+  // Filter Modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
+  function updateFilterBadge() {
+    let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
+    $('#filterBadge').text(count + ' aktif');
+  }
+
+  function resetAllFilters() {
+    $('#modalOtorisasi').val('2');
+    updateFilterBadge();
+  }
+
+  $(document).on('show.bs.modal', '#modalFilter', function() {
+    $('#modalOtorisasi').val(globalOtorisasi);
+    updateFilterBadge();
   });
 
-  function loadAll() {
+  $(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
+
+  function applyModalFilter() {
+    globalOtorisasi = $('#modalOtorisasi').val();
+    currentPage = 1;
+    renderTabel();
+    $('#modalFilter').modal('hide');
+  }
+
+  $(document).ready(function(){
+    doSetHeader(g_modeReport);
+    ReportTable.init({
+      table: '#mainTable',
+      bar: '#rtBar',
+      onChange: renderTabel
+    });
+    renderTabel();
+  });
+
+  function reloadData() {
     let listKMBJ = [], listSdhOto = [];
-    let _token = $("#_token").val();
 
     $.ajax({
       url: "{!! url('kmbjloadall') !!}",
       type: "get",
       async: false,
       data: {
+        date1: $('#inputDate1').val(),
+        date2: $('#inputDate2').val()
       },
       success: function(res) {
-        listKMBJ = res.listKMBJ;
-        listSdhOto = res.listSdhOto;
-    }});
+        listKMBJ = res.listKMBJ || [];
+        listSdhOto = res.listSdhOto || [];
+      }
+    });
 
-    // === listKMBJ === //
-    console.log(listSdhOto, "tabellistsdhoto", false);
-    loadKMBJ(listKMBJ, "tabelhome", true);
-    loadKMBJ(listSdhOto, "tabellistsdhoto", false);
+    lastRows = listKMBJ.concat(listSdhOto);
+    currentPage = 1;
+    renderTabel();
   }
 
 function submitPrint (nobukti) {
@@ -511,8 +1253,17 @@ function submitPrint (nobukti) {
 
         // console.log(res[0][0].IsOtorisasi1)
 
+      },
+      error: function(err) {
+        console.log(err);
+        alertify.warning('Terjadi kesalahan. Silakan refresh browser.');
       }
     })
+
+    if (!dataPrint || !dataPrint.length) {
+      alertify.warning('Data cetak tidak ditemukan');
+      return;
+    }
 
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=7) {
@@ -526,7 +1277,7 @@ function submitPrint (nobukti) {
     let hdr = ''
     let str= ''
     let ftr= ''
-    let tanggalOnly = dataPrint[0].tanggal.split(' ')[0];
+    let tanggalOnly = (dataPrint[0].Tanggal || '').split(' ')[0];
 
     css = `<style type="text/css">
       body {
@@ -1167,66 +1918,12 @@ function submitPrint (nobukti) {
 
   }
 
-  function loadKMBJ(_list, _table, _isBlmOto) {
-    if ($.fn.DataTable.isDataTable("#" + _table)) {
-      $("#" + _table).DataTable().destroy();
-    }
-
-    let rowTable = "";
-    if (_list.length > 0) {
-      _list.forEach((item, i) => {
-        let dateKMBJ = doSetFormatDate(item.Tanggal, "/");
-        let dateOto1 = item.TglOto1 ? doSetFormatDate(item.TglOto1, "/") : "";
-
-	console.log("NB:", item.Nobukti);
-        console.log("FULL ITEM:", item);
-
-        rowTable += "<tr>";
-	console.log( _isBlmOto ? 1:2);
-        rowTable += _isBlmOto
-          ? doSetActionBlmOto(item.Nobukti)
-          : doSetActionSdhOto1(item.Nobukti);
-
-        rowTable += "<td>" + item.GroupNobukti + "</td>";
-        rowTable += "<td>" + dateKMBJ + "</td>";
-
-        if (!_isBlmOto) {
-          rowTable += "<td>" + (item.OtoUser1 ?? "") + "</td>";
-          rowTable += "<td>" + (dateOto1 ?? "") + "</td>";
-        }
-
-        rowTable += "</tr>";
-      });
-    } else {
-      let cHeader = _isBlmOto ? 3 : 5;
-      rowTable += doSetEmptyTable(cHeader, "Tidak ada transaksi");
-    }
-
-    $("#" + _table + "_data").html(rowTable);
-
-    $("#" + _table).DataTable({
-      "lengthChange": false,
-      "paging": false
-    });
-  }
-
-    function doSetActionSdhOto1(_nb) {
-        console.log('aa,..');
-        let rowTable = "";
-        rowTable += '<td class="text-center">';
-        rowTable += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + _nb + '\')"><i class="bi bi-info"></i></button>';
-        rowTable += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + _nb + '\')"><i class="bi bi-key-fill"></i></button>';
-        rowTable += '<button class="btn btn-primary btn-sm" type="button" title="Submit Print" onclick="submitPrint(\'' + _nb + '\')"><i class="bi bi-printer"></i></button>';
-        rowTable += "</td>";
-
-        return rowTable;
-      }
-
   function closeFormItem() {
     $('.showhide').hide();
     doUnlockHeader();
     doUnlockModeEdit();
     $("#buttonbrowse_gudang").prop("disabled", dataItem.length > 0);
+    $("#input_gudang").prop("disabled", dataItem.length > 0);
   }
 
   function refreshForm(_nobukti = "") {
@@ -1332,10 +2029,17 @@ function submitPrint (nobukti) {
     $("#input_nobukti").val(nb.Nobukti);
     $("#input_nourut").val(nb.Nourut);
 
-    dataBrowse['gudang']  = "";
+    dataBrowse['gudang'] = "";
 
     $('#pageHome').hide();
     $('#pageForm').show();
+  }
+
+  function cleanFormHeader() {
+    $("#input_nobukti").val("");
+    $("#input_nourut").val("");
+    $("#input_gudang").val("");
+    $("#input_keterangan").val("");
   }
 
   function buttonEdit(_nb) {
@@ -1348,6 +2052,7 @@ function submitPrint (nobukti) {
     refreshForm(_nb);
     doUnlockHeader();
     $("#buttonbrowse_gudang").prop("disabled", dataItem.length > 0);
+    $("#input_gudang").prop("disabled", dataItem.length > 0);
 
     $('#pageHome').hide();
     $('#pageForm').show();
@@ -1368,12 +2073,27 @@ function submitPrint (nobukti) {
   function buttonOtorisasi(_nb) {
     if (!doCekAkses("akses_isotorisasi1")) return;
 
-    doOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdateotorisasi", function (res) {
-      if (res.status === 1) {
-        alertify.success(res.msg);
-        loadAll();
-      } else {
-        alertify.warning(res.msg);
+    let _token = $('#_token').val();
+
+    $.ajax({
+      url: "{!! url('kmbjupdateotorisasi') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token,
+        nobukti: _nb
+      },
+      success: function(res) {
+        if (res > 0) {
+          alertify.success('Berhasil otorisasi');
+          reloadData();
+        } else {
+          alertify.warning('Gagal otorisasi');
+        }
+      },
+      error: function(err) {
+        console.log(err);
+        alertify.warning('Terjadi kesalahan. Silakan refresh browser.');
       }
     });
   }
@@ -1381,21 +2101,38 @@ function submitPrint (nobukti) {
   function buttonBatalOtorisasi(_nb) {
     if (!doCekAkses("akses_isbatal")) return;
 
-    doBatalOtorisasi("Ubah Kemasan Barang", _nb, "kmbjupdatebatalotorisasi", function (res) {
-      if (res.status === 1) {
-        alertify.success(res.msg);
-        loadAll();
-      } else {
-        alertify.warning(res.msg);
-      }
-    });
-  }
+    alertify.confirm(
+      'Batal Otorisasi',
+      'Yakin ingin membatalkan otorisasi No Bukti ' + _nb + ' ?',
+      function() {
+        let _token = $('#_token').val();
 
-  function cleanFormHeader() {
-    $("#input_nobukti").val("");
-    $("#input_nourut").val("");
-    $("#input_gudang").val("");
-    $("#input_keterangan").val("");
+        $.ajax({
+          url: "{!! url('kmbjupdatebatalotorisasi') !!}",
+          type: "post",
+          async: false,
+          data: {
+            _token,
+            nobukti: _nb
+          },
+          success: function(res) {
+            if (res > 0) {
+              alertify.success('Berhasil batal otorisasi');
+              reloadData();
+            } else {
+              alertify.warning('Gagal batal otorisasi');
+            }
+          },
+          error: function(err) {
+            console.log(err);
+            alertify.warning('Terjadi kesalahan. Silakan refresh browser.');
+          }
+        });
+      },
+      function() {
+        alertify.error('Action cancelled');
+      }
+    );
   }
 
   function onChangeKeterangan() {
@@ -1515,6 +2252,114 @@ function submitPrint (nobukti) {
     dataBrowse['gudang'] = _kode;
   }
 
+  let gudangCacheAll = null;
+  let gudangLookupBusy = false;
+  let listGudangPicker = [];
+
+  function fetchGudangList(callback) {
+    let _token = $("#_token").val();
+    gudangLookupBusy = true;
+    $.ajax({
+      url: "{!! url('polistgudang') !!}",
+      type: "post",
+      data: { _token },
+      success: function(res) {
+        gudangLookupBusy = false;
+        gudangCacheAll = res;
+        callback(res);
+      },
+      error: function(err) {
+        gudangLookupBusy = false;
+        console.log(err);
+        alertify.warning('Terjadi kesalahan, silahkan refresh browser');
+      }
+    });
+  }
+
+  function findExactGudang(list, term) {
+    let needle = term.toLowerCase();
+    return list.find(g => String(g.KODEGDG || '').trim().toLowerCase() === needle);
+  }
+
+  function resolveGudang(term) {
+    term = (term || '').trim();
+
+    if (term === '') {
+      openGudangPicker('');
+      return;
+    }
+
+    if (gudangLookupBusy) return;
+
+    if (gudangCacheAll) {
+      let hit = findExactGudang(gudangCacheAll, term);
+      hit ? applyGudangToForm(hit) : openGudangPicker(term);
+      return;
+    }
+
+    fetchGudangList(function(res) {
+      let hit = findExactGudang(res, term);
+      hit ? applyGudangToForm(hit) : openGudangPicker(term);
+    });
+  }
+
+  function applyGudangToForm(item) {
+    $('#input_gudang').val(item.KODEGDG);
+    dataBrowse['gudang'] = item.KODEGDG;
+    $('#modalPickGudang').modal('hide');
+  }
+
+  let gudangTablePending = null;
+  let gudangSearchPending = '';
+
+  function initGudangTable(list, searchTerm) {
+    if (!$('#modalPickGudang').is(':visible')) {
+      gudangTablePending = list;
+      gudangSearchPending = searchTerm || '';
+      return;
+    }
+
+    listGudangPicker = list;
+    let rowTable = '';
+    list.forEach((item, i) => {
+      rowTable += `<tr class="pick-row" onclick="buttonPickGudang(${i})">
+        <td>${item.KODEGDG}</td>
+        <td>${item.NAMA}</td>
+      </tr>`;
+    });
+    $('#tabelPickGudang_data').html(rowTable);
+
+    if ($.fn.DataTable.isDataTable('#tabelPickGudang')) {
+      $('#tabelPickGudang').DataTable().destroy();
+    }
+    $('#tabelPickGudang').DataTable({ lengthChange: false, paging: true })
+      .search(searchTerm || '').draw();
+  }
+
+  $(document).on('shown.bs.modal', '#modalPickGudang', function () {
+    if (gudangTablePending) {
+      initGudangTable(gudangTablePending, gudangSearchPending);
+      gudangTablePending = null;
+    } else if ($.fn.DataTable.isDataTable('#tabelPickGudang')) {
+      let dt = $('#tabelPickGudang').DataTable();
+      dt.columns.adjust();
+      dt.search(gudangSearchPending || '').draw();
+    }
+  });
+
+  function openGudangPicker(term) {
+    let showWith = function(list) {
+      $('#modalPickGudang').modal('show');
+      initGudangTable(list, term);
+    };
+
+    gudangCacheAll ? showWith(gudangCacheAll) : fetchGudangList(showWith);
+  }
+
+  function buttonPickGudang(index) {
+    applyGudangToForm(listGudangPicker[index]);
+  }
+
   function doBrowseBarang() {
     bm_filterMode = true;
     return true;
@@ -1597,9 +2442,6 @@ function submitPrint (nobukti) {
   }
 
   function cekValidate(_choice) {
-    /* Kolom yang wajib diisi harus dicek. Kolom yang tidak wajib di-set ke default value jika perlu.
-       Return pesan jika ada yang tidak valid. Return object cart jika semuanya sudah valid. */
-
     let cart = {};
 
     cart["choice"]       = _choice;
@@ -1672,7 +2514,7 @@ function submitPrint (nobukti) {
   }
 
   function successAdd(_nobukti) {
-    loadAll();
+    reloadData();
     cleanFormItem();
     refreshForm(_nobukti);
 
@@ -1680,14 +2522,14 @@ function submitPrint (nobukti) {
   }
 
   function successEdit(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     cleanFormItem();
     refreshForm(_nobukti);
   }
 
   function successDelete(_nobukti) {
-    loadAll();
+    reloadData();
     $('.showhide').hide();
     refreshForm(_nobukti);
   }

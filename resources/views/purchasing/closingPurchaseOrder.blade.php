@@ -1,11 +1,13 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('page-title', 'Closing Purchase Order')
 
 @section('css')
-{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/pembelianclosingpr.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
-<link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 <style>
 /* Halaman ini dirancang mengisi tinggi layar (lihat cpoAturTinggiTabel()), jadi padding
    atas #content layout dikecilkan supaya tab tidak menggantung jauh dari header. */
@@ -167,15 +169,13 @@
 
 /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
    po-aksi-hover supaya tabel lain tidak ikut terpengaruh. visibility (bukan display)
-   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
-   :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang. Sengaja TIDAK memakai :focus-within: klik mouse membuat tombol tetap fokus sehingga tidak ikut hilang saat kursor sudah pindah. */
 table.data-table.po-aksi-hover tbody td:first-child .btn {
   visibility: hidden;
   opacity: 0;
   transition: opacity .12s ease;
 }
-table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   visibility: visible;
   opacity: 1;
 }
@@ -337,6 +337,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="cpoTglAwal1" value="{!! $cpoTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="cpoTglAkhir1" value="{!! $cpoTglAkhir !!}">
+                    </div>
                     <input type="search" id="cpoSearch1" class="po-search-inp" placeholder="Cari data">
                     {{-- Jumlah baris per halaman. Nilai -1 = tampilkan semua data - lihat
                          ClosingPOController@dataOutstanding. --}}
@@ -374,6 +380,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="cpoTglAwal2" value="{!! $cpoTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="cpoTglAkhir2" value="{!! $cpoTglAkhir !!}">
+                    </div>
                     <input type="search" id="cpoSearch2" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap">
                       <label for="cpoLen2">Tampilkan</label>
@@ -442,7 +454,7 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
 {{-- window.ReportTable: header tabel interaktif (drag kolom, roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
@@ -632,6 +644,29 @@ function cpoIkatPanjangHalaman (urut) {
     cpoPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
     $('#' + CPO_TAB[urut].tabel).DataTable().page.len(cpoPanjangHalaman[urut]).draw()
   })
+}
+
+// Ubah salah satu tanggal periode -> kosongkan cache tab ini lalu reload, supaya
+// halaman pertama tidak menampilkan hasil rentang lama (lihat cpoCacheOut/cpoPakaiCacheOut).
+function cpoIkatPeriode (urut) {
+  let awal  = document.getElementById('cpoTglAwal' + urut)
+  let akhir = document.getElementById('cpoTglAkhir' + urut)
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    cpoCacheOut[urut] = null
+    cpoPakaiCacheOut[urut] = false
+    $('#' + CPO_TAB[urut].tabel).DataTable().ajax.reload()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
 }
 
 function cpoAturTinggiTabel () {
@@ -865,7 +900,9 @@ function initTabelClosingPO (urut, pakaiCache) {
           length : data.length,
           search : data.search ? data.search.value : '',
           orderCol : kolom,
-          orderDir : arah
+          orderDir : arah,
+          tglawal : $('#cpoTglAwal' + urut).val(),
+          tglakhir : $('#cpoTglAkhir' + urut).val()
         },
         success : function (res) {
           cpoCacheOut[urut] = res
@@ -890,6 +927,7 @@ function initTabelClosingPO (urut, pakaiCache) {
 
   cpoIkatSearch(urut)
   cpoIkatPanjangHalaman(urut)
+  cpoIkatPeriode(urut)
   let inputSearch = document.getElementById(cfg.search)
   if (inputSearch) { inputSearch.value = posisi ? posisi.search : '' }
   cpoAturTinggiTabel()
@@ -1213,19 +1251,19 @@ $(document).ready(function () {
       return
     }
 
+    const barisTotal = dataPrint.find(function (r) {
+      return parseFloat(r.TSUBTOTALRpbatal) || parseFloat(r.nnetrpbatal)
+    }) || dataPrint[0]
+
     let arrayDataPrint = []
 
     const isA4 = dataPrint.length > 7;
 
-    if (!isA4) {
+    const maxRowsPerPage = isA4 ? 7 : 7;
 
-        for (let i = 0; i < dataPrint.length; i += 7) {
-            let tempArray = dataPrint.slice(i, i + 7);
-            arrayDataPrint.push(tempArray);
-        }
-    } else {
-        arrayDataPrint.push(dataPrint);
-
+    for (let i = 0; i < dataPrint.length; i += maxRowsPerPage) {
+        let tempArray = dataPrint.slice(i, i + maxRowsPerPage);
+        arrayDataPrint.push(tempArray);
     }
 
     let printContent = ''
@@ -1620,15 +1658,16 @@ $(document).ready(function () {
         margin: 0;
       }
 
+      /* Tinggi kotak sengaja dibiarkan mengikuti isi. Dulu jalur isA4 memaksa
+         min-height:29.7cm, padahal halaman dicetak Landscape (tinggi fisik cuma
+         ~21cm), sehingga tiap chunk tumpah ke halaman berikutnya dan tumpahan
+         kosong itu tercetak sebagai halaman kosong selang-seling. */
       .body-main-prints{
       width:21cm;
       ${isA4 ? `
-          min-height:29.7cm;
           padding:15px;
           box-sizing:border-box;
-      ` : `
-          height:14cm;
-      `}
+      ` : ``}
       position:relative;
       }
 
@@ -1743,14 +1782,13 @@ $(document).ready(function () {
 
       arrayDataPrint.forEach((item, i) => {
         console.log('arrayDataPrint' , i)
-        if (i == 0) {
-
-          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
-        // } else if ( i < 1) {
-        //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
-        } else {
-          tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
-        }
+        const isLastChunk = i == arrayDataPrint.length - 1
+        // Break dikontrol per chunk di sini, bukan lewat CSS :last-of-type yang
+        // tidak reliable - chunk terakhir tidak diberi break supaya tidak ada
+        // halaman kosong di ujung.
+        const breakStyle = isLastChunk ? '' : 'page-break-after: always;'
+        const outerStyle = i == 0 ? 'margin-left: 7px; margin-top:5px;' : 'margin-left: 7px; padding-top:7px;'
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; ${outerStyle} ${breakStyle}">`
         tempPrintStr += hdr
         tempPrintStr += `<tbody border="1">`;
 item.forEach((itemSub, j) => {
@@ -1825,18 +1863,20 @@ tempPrintStr += `</table>`;
     </div>
   </div>`
 
+  tempPrintStr += `
+  <div style="width: 62%; font-family: sans-serif; font-size: 10px;">
+`
+
   if(i == arrayDataPrint.length - 1){
 
     tempPrintStr += `
-  <div style="width: 62%; font-family: sans-serif; font-size: 10px;">
-
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> JUMLAH </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TSUBTOTALRpbatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TSUBTOTALRpbatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 4px; position: relative;">
       <div style="width: 5%; text-align:left;"> DISKON </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].Tdiscbatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.Tdiscbatal).toFixed(2))}</div>
 
       <div style="
       position: absolute;
@@ -1847,7 +1887,7 @@ tempPrintStr += `</table>`;
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> DPP </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TndpprpBatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TndpprpBatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 6px; position: relative;">
       <div style="width: 5%; text-align:left;"> PPN </div>
@@ -1867,12 +1907,13 @@ tempPrintStr += `</table>`;
         width: 35%;
         border-bottom: 1px solid #000;">
       </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TnppnRpBatal).toFixed(2))}</div>
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.TnppnRpBatal).toFixed(2))}</div>
     </div>
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 8px; font-weight: bold;">
       <div style="width: 5%; text-align:left;"> TOTAL </div>
-      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].nnetrpbatal).toFixed(2))}</div>
-    </div>`};
+      <div style="width: 30%; text-align: right">${formatAngka(parseFloat(barisTotal.nnetrpbatal).toFixed(2))}</div>
+    </div>`
+  };
 
      tempPrintStr += `
       <div style="width:50%; margin-top:15px; margin-left:-25px; float:left; text-align:center; font-size:10px;">

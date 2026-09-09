@@ -577,9 +577,15 @@
     // Klik baris data untuk buka drill-down. Delegasi event (bukan onclick/closure per baris)
     // karena render() membangun tbody lewat innerHTML sekarang -- baris dicari lewat kode akun +
     // key grup (unik per baris) daripada nge-serialize seluruh objek akun ke sebuah atribut.
+    //
+    // WAJIB .attr(), BUKAN .data(): jQuery.data() mengonversi tipe nilai atribut -- string
+    // yang bentuknya angka (kode Perkiraan SELALU angka, mis. "110101") dikembalikan sebagai
+    // Number 110101. Padahal a.code disimpan sebagai string oleh buildGroups() (.toString()
+    // .trim()), jadi find(x => x.code === code) tidak pernah ketemu dan handler diam-diam
+    // keluar di `if (!a) return` -- panel tidak terbuka, tanpa error console maupun request.
     $(document).on('click', '#tableBody tr.data-row', function () {
-      const code = $(this).data('acc-code');
-      const gkey = $(this).data('acc-group');
+      const code = $(this).attr('data-acc-code');
+      const gkey = $(this).attr('data-acc-group');
       const g = accountGroups.find(x => x.key === gkey);
       if (!g) return;
       const a = g.accounts.find(x => x.code === code);

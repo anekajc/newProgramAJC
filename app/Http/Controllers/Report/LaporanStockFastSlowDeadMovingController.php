@@ -28,13 +28,13 @@ class LaporanStockFastSlowDeadMovingController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $Tgl     = $req->get('date1');
-    $Tipe    = $req->get('inputTipe');
-    $Kodegdg = $req->get('inputGudang');
+    $Tgl     = $req->query('date1');
+    $Tipe    = $req->query('inputTipe');
+    $Kodegdg = $req->query('inputGudang');
 
     $values  = [$Tgl, $Tipe, $Kodegdg];
-    
-    $res = DB::connection('MGL')->select('exec SP_REPORTMOVING ?,?,?',
+
+    $res = DB::connection('SML')->select('exec SP_REPORTMOVING ?,?,?',
       $values);
 
     return $res;

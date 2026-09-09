@@ -167,7 +167,13 @@ rel="stylesheet">
 
 
         <!-- start modal filter data -->
-        <div class="modal fade"  id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        {{-- Restyle-only pakai skin .rt-picker-v2 (docs/new-cust-supp-modal-guide.md) --
+             #formFilterData TETAP multi-select (klik/shift-klik baris, tombol Submit),
+             bukan diubah jadi picker klik-langsung-pilih seperti #formSelect. .rt-picker-v2
+             adalah class generik (lihat catatan di public/css/report-table.css sekitar
+             baris 1552), aman dipakai di id manapun selama modalnya cuma punya satu <table>.
+             Disamakan dengan masterreportGudang baris 196. --}}
+        <div class="modal fade rt-picker-v2"  id="formFilterData" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-sm modal-dialog-centered"  role="document" style="max-width: 50%">
             <div class="modal-content">
               <div class="modal-header text-right">
@@ -246,15 +252,18 @@ rel="stylesheet">
   var gcart_filterShow = [];
   var gfilter_lastrow = -1, gfilter_totalrow = 0;
   var gfilter_title, gfilter_groupby, gfilter_date1, gfilter_date2;
+  // Kunci baris (nilai kolom pertama getKolomFilter(), mis. NoBukti/KODEBRG) yang
+  // sedang dipilih di modal Filter Data. Beda dari gcart_filterShow (yang dibangun
+  // ulang dari nol tiap modal dibuka) -- var ini TIDAK direset oleh doShowFilter()
+  // atau doCloseFormFilterData(), jadi pilihan tetap ada saat modal dibuka lagi.
+  var gfilter_selectedKeys = new Set();
 
   var gxls_filename = ""; // berikan nilai di Blade jika ingin custom file name excel
 
 
 
   $(document).ready(function(){
-    doSetHeader(g_modeReport);
-    doButtonSubtotal(gsum_issubtotal);
-    doButtonGrandtotal(gsum_isgrandtotal);
+    doSetHeader(g_modeReport);   // doSetHeader() sudah memanggil doButtonSubtotal/doButtonGrandtotal sendiri
 
     $("#tabelfilter").DataTable({
       "lengthChange": false,
@@ -350,28 +359,39 @@ rel="stylesheet">
   }
 
   function doLoadHeader(_href, _mode) {
-    let _header = "";
+    // window.g_headerStore (diisi newmaster2x dari $akses['simpanheader']) memuat
+    // seluruh baris DBSIMPANHEADER milik user+href ini -- baca dari situ dulu
+    // supaya tidak perlu AJAX sinkron (yang mengunci main thread) tiap kali
+    // doSetHeader() dipanggil, termasuk panggilan kedua dari ready master layout.
+    let _key = String(_mode);
+    let _row = window.g_headerStore ? window.g_headerStore[_key] : undefined;
 
-    $.ajax({
-      url     : "{!! url('globalfunctions_doLoadHeader') !!}",
-      type    : "get",
-      async   : false,
-      data    : {
-        href : _href,
-        mode : _mode
-      },
-      success: function(res) {
-        _header = (res.length > 0) ? res[0].header : "";
-        if (res.length > 0) {
+    if (_row === undefined) {   // undefined = belum pernah dicek -> baru ambil dari server
+      $.ajax({
+        url     : "{!! url('globalfunctions_doLoadHeader') !!}",
+        type    : "get",
+        async   : false,
+        data    : {
+          href : _href,
+          mode : _mode
+        },
+        success: function(res) {
           // Number(), bukan toInteger(): kolom int dari DBSIMPANHEADER dikirim
           // sebagai angka di JSON, sedangkan toInteger() memanggil .replace().
-          gsum_issubtotal = Number(res[0].issubtotal);
-          gsum_isgrandtotal = Number(res[0].isgrandtotal);
+          _row = (res.length > 0)
+            ? { header: res[0].header, issubtotal: Number(res[0].issubtotal), isgrandtotal: Number(res[0].isgrandtotal) }
+            : null;   // null = sudah dicek ke server, memang tidak ada baris tersimpan
         }
-      }
-    })
+      })
 
-    return _header;
+      if (window.g_headerStore) { window.g_headerStore[_key] = _row; }
+    }
+
+    if (!_row) { return ""; }
+
+    gsum_issubtotal = Number(_row.issubtotal);
+    gsum_isgrandtotal = Number(_row.isgrandtotal);
+    return _row.header;
   }
 
   function doGetHeader(_strHeader) {
@@ -399,6 +419,19 @@ rel="stylesheet">
       _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' + item[5];
     });
 
+    // Lewati request kalau isinya sama persis dengan yang terakhir diketahui
+    // tersimpan (dari g_headerStore) -- doSetHeader() memanggil ini tiap page
+    // load walau tidak ada perubahan sama sekali, jadi ini menghapus AJAX
+    // sinkron yang percuma.
+    let _key = String(_mode), _store = window.g_headerStore;
+    let _prev = _store ? _store[_key] : undefined;
+
+    if (_prev && _prev.header === _strHeader
+        && Number(_prev.issubtotal) === Number(_issubtotal)
+        && Number(_prev.isgrandtotal) === Number(_isgrandtotal)) {
+      return;
+    }
+
     $.ajax({
       url     : "{!! url('globalfunctions_doSimpanHeader') !!}",
       type    : "get",
@@ -414,6 +447,10 @@ rel="stylesheet">
         // nothing to do
       }
     })
+
+    if (_store) {
+      _store[_key] = { header: _strHeader, issubtotal: Number(_issubtotal), isgrandtotal: Number(_isgrandtotal) };
+    }
   }
 
   // Dipanggil tanpa argumen dari banyak halaman report (mis. setelah doReportMode),
@@ -1397,7 +1434,9 @@ rel="stylesheet">
 
     makeTable("FILTER");
     doShowFilter();
-    $("#tabelfilter_totalrow").html("");
+    // gfilter_totalrow sudah dihitung ulang oleh doShowFilter() dari gfilter_selectedKeys
+    // yang tersimpan -- tampilkan labelnya kalau ada baris yang masih terpilih.
+    $("#tabelfilter_totalrow").html(gfilter_totalrow > 0 ? "Jumlah baris yang dipilih: " + gfilter_totalrow : "");
 
     $("#formFilterData").modal('toggle');
   }
@@ -1436,6 +1475,7 @@ rel="stylesheet">
     _str = "";
     let _prevdata = "", _nowdata = "", _idx = -1;
     gcart_filterShow = [];
+    gfilter_totalrow = 0;
     if (gcart_filter.length > 0) {
       gcart_filter.forEach((item, i) => {
         _nowdata = item[cart_filterHeader[0][0]];
@@ -1443,7 +1483,14 @@ rel="stylesheet">
         if (_prevdata != _nowdata) {
           _idx += 1;
           item._idx = _idx;
-          _str += '<tr id="' + _idx + '-trrowfilter" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
+
+          // Pulihkan status terpilih dari gfilter_selectedKeys (bertahan lintas
+          // buka-tutup modal), bukan selalu mulai dari false.
+          let _isSelected = gfilter_selectedKeys.has(_nowdata);
+          if (_isSelected) { gfilter_totalrow += 1; }
+
+          _str += '<tr id="' + _idx + '-trrowfilter" class="pick-row' + (_isSelected ? ' is-selected' : '') +
+                  '" draggable="true" onclick="doSelectrowfilter(' + _idx + ')">';
           cart_filterHeader.forEach((itemcart, j) => {
             if (itemcart[3] == "index") {
               _str += "  <td>" + (_idx+1) + "</td>";
@@ -1460,8 +1507,9 @@ rel="stylesheet">
           _str += '</tr>';
 
           let temp = [];
-          temp.push(_idx);  // index
-          temp.push(false); // selected or not
+          temp.push(_idx);        // index
+          temp.push(_isSelected); // selected or not
+          temp.push(_nowdata);    // kunci -- dipakai doSelectrowfilter() untuk update gfilter_selectedKeys
           gcart_filterShow.push(temp);
         } else {
           item._idx = _idx;
@@ -1504,15 +1552,17 @@ rel="stylesheet">
     }
 
     while (_row_start <= _row_end) {
+      let _key = gcart_filterShow[_row_start][2];
+
       if (gcart_filterShow[_row_start][1]) {
         // unselect
-        $("#"+_row_start+"-trrowfilter").css('background-color', '');
-        $("#"+_row_start+"-trrowfilter").css('color', '');
+        $("#"+_row_start+"-trrowfilter").removeClass('is-selected');
+        gfilter_selectedKeys.delete(_key);
         gfilter_totalrow -= 1;
       } else {
         // select
-        $("#"+_row_start+"-trrowfilter").css('background-color', '#0069d9');
-        $("#"+_row_start+"-trrowfilter").css('color', 'white');
+        $("#"+_row_start+"-trrowfilter").addClass('is-selected');
+        gfilter_selectedKeys.add(_key);
         gfilter_totalrow += 1;
       }
 

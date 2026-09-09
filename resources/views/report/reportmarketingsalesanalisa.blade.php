@@ -15,12 +15,15 @@
       </div> --}}
 
       {{-- Bulan/Tahun (bukan rentang tanggal seperti laporan lain -- proc Sp_ReportAnalisaSales
-           menerima bulan & tahun, bukan tgl1/tgl2). --}}
-      <div class="filter-wrap">
-        <label>Bulan</label>
-        <input type="text" class="filter-inp" id="inputBulan" placeholder="MM" style="width:60px">
-        <label>Tahun</label>
-        <input type="text" class="filter-inp" id="inputTahun" placeholder="YYYY" style="width:80px">
+           menerima bulan & tahun, bukan tgl1/tgl2). Dropdown Bulan/Tahun, bukan input teks bebas --
+           pola sama seperti reportaccountingneracalajur.blade.php (populatePeriodSelectors()).
+           BEDA dari halaman itu: di sini ganti dropdown TIDAK auto-reload -- cuma menyetel
+           defaultBulan/defaultTahun, tetap perlu klik "Tampilkan" (perilaku lama dipertahankan,
+           cuma gaya input yang diganti). --}}
+      <div class="period-select-wrap">
+        <label>Periode</label>
+        <select class="period-select" id="periodBulan" onchange="changePeriodParts()"></select>
+        <select class="period-select" id="periodTahun" onchange="changePeriodParts()"></select>
       </div>
 
       {{-- Search --}}
@@ -83,6 +86,9 @@
   let currentGroupby = 'Nobukti'; // satu-satunya groupby yang ada di halaman ini (casing
                                    // mengikuti field asli di gcart_header, bukan 'NoBukti')
 
+  let defaultBulan = new Date().getMonth() + 1;  // +1 karena getMonth() balikin 0-11
+  let defaultTahun = new Date().getFullYear();
+
   const reportUrl = "{{ url('laporanmarketingsalesanalisa_doReport') }}";
 
   // Satu-satunya mode yang PERNAH bisa dicapai: Detail/NoBukti. Halaman versi lama punya 14
@@ -97,12 +103,44 @@
     doSetHeader(g_modeReport);
     doShowCustomize();
 
+    populatePeriodSelectors();
+
     ReportTable.init({
       table: '#mainTable',
       bar: '#rtBar',
       onChange: render
     });
   });
+
+  /* -- PERIOD PICKER -- */
+  const NAMA_BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+  // Isi dropdown Bulan (1-12) & Tahun (tahun berjalan dan 6 tahun ke belakang), pilih
+  // defaultBulan/defaultTahun saat ini. Pola sama seperti reportaccountingneracalajur.blade.php.
+  function populatePeriodSelectors() {
+    const selB = document.getElementById('periodBulan');
+    const selT = document.getElementById('periodTahun');
+    if (!selB || !selT) return;
+
+    selB.innerHTML = NAMA_BULAN.map((nama, i) =>
+      `<option value="${i + 1}" ${(i + 1) == defaultBulan ? 'selected' : ''}>${nama}</option>`).join('');
+
+    const thisYear = new Date().getFullYear();
+    let years = '';
+    for (let y = thisYear; y >= thisYear - 6; y--) {
+      years += `<option value="${y}" ${y == defaultTahun ? 'selected' : ''}>${y}</option>`;
+    }
+    selT.innerHTML = years;
+  }
+
+  // BEDA dari reportaccountingneracalajur.blade.php: di sana ganti dropdown langsung
+  // makeTable('REPORT'). Di sini cuma menyimpan pilihan -- user tetap klik "Tampilkan" untuk
+  // memuat ulang, sama seperti perilaku input Bulan/Tahun lama (tidak ada auto-fetch).
+  function changePeriodParts() {
+    defaultBulan = parseInt(document.getElementById('periodBulan').value, 10);
+    defaultTahun = parseInt(document.getElementById('periodTahun').value, 10);
+  }
 
   /* -- EXPORT -- */
   function toggleExport() {
@@ -134,9 +172,7 @@
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    const bulan = $("#inputBulan").val() || '';
-    const tahun = $("#inputTahun").val() || '';
-    a.download = 'SalesAnalisa_' + bulan + '_' + tahun + '.' + ext;
+    a.download = 'SalesAnalisa_' + defaultBulan + '_' + defaultTahun + '.' + ext;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('📄', 'Data diekspor sebagai ' + fmt);
   }
@@ -170,8 +206,8 @@
   }
 
   function makeTable(_mode) {
-    let bulan = $("#inputBulan").val();
-    let tahun = $("#inputTahun").val();
+    let bulan = defaultBulan;
+    let tahun = defaultTahun;
 
     setDefaultHeader();
     if (typeof doSetHeader === 'function') {

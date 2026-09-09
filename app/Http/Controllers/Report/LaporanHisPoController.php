@@ -27,39 +27,18 @@ class LaporanHisPoController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $TGLAWAL = $req->get('date1');
-    $TGLAKHIR = $req->get('date2');
-    $KodeCust    = $req->get('inputCust');
-    $Lokasi    = $req->get('inputLokasi');
+    $TGLAWAL = $req->query('date1');
+    $TGLAKHIR = $req->query('date2');
+    $KodeCust    = $req->query('inputCust');
+    $Lokasi    = $req->query('inputLokasi');
     $IDuser = '';
     $TipeTrans = '';
 
     $values  = [$TGLAWAL, $TGLAKHIR, $KodeCust, $Lokasi, $IDuser, $TipeTrans];
-    
+
     $res = DB::connection('SML')->select('exec SP_REPORTHISPO ?,?,?,?,?,?',
       $values);
 
-    return $res;
-  }
-
-  public function doFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-    $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-    return $listData;
-  }
-
-  public function doReportFilter(Request $req) {
-    $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-    $res = [];
-
-    for ($i=0; $i < count($req->listdata); $i++) {
-      $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
-      for ($j=0; $j < count($row); $j++) {
-        $res = array_add($res, $i+$j, $row[$j]);
-      }
-    }
-    
     return $res;
   }
 

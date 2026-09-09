@@ -1,4 +1,4 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 
 @section('page-title', 'Purchase Order Non Stock')
@@ -10,7 +10,9 @@
      toolbar seragam (search + dropdown "Tampilkan" + tombol Filter), dan tombol aksi bulat
      yang baru muncul saat barisnya di-hover. --}}
   @section('css')
-  <link rel="stylesheet" href="{!! URL::asset('public/css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
   .rodokNdukurTitik{
     margin-top:-12px;
@@ -131,6 +133,34 @@
   #tabel2 td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
   #tabel2 td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
+  /* ---------- Kolom Action tabel item (#tabel_add) - tombol bulat kecil, sama seperti
+     #tabel2 di atas, disamakan dengan menu Purchase Order (stock). Di #tabel_add kolom
+     Actions ada di paling kanan, bukan paling kiri. */
+  #tabel_add td:last-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel_add td:last-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel_add td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel_add td:last-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel_add td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel_add td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel_add td:last-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
   /* ---------- Header & baris tabel - bersih, uppercase abu-abu ---------- */
   #tabel thead th,
   #tabel2 thead th,
@@ -164,15 +194,13 @@
   }
 
   /* Tombol di kolom Action baru muncul saat barisnya di-hover. visibility (bukan display)
-     supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
-     :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+     supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang. Sengaja TIDAK memakai :focus-within: klik mouse membuat tombol tetap fokus sehingga tidak ikut hilang saat kursor sudah pindah. */
   table.data-table.po-aksi-hover tbody td:first-child .btn {
     visibility: hidden;
     opacity: 0;
     transition: opacity .12s ease;
   }
-  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-  table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     visibility: visible;
     opacity: 1;
   }
@@ -422,6 +450,43 @@
     }
   </style>
 {{-- end tampilan search modal barang all --}}
+
+{{-- Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) - gaya sama dengan
+     purchaseOrder.blade.php, tapi 3 kolom (tanpa Outstanding SO, menu ini tidak
+     punya SO). --}}
+<style>
+  .po-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) {
+    .po-kpi-strip { grid-template-columns: 1fr; }
+  }
+  .po-kpi-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .po-kpi-ic {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+  .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
+</style>
 @endsection
 @section('content')
 
@@ -441,6 +506,8 @@
     <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
+
+    <div class="po-kpi-strip" id="poKpiStrip"></div>
 
     <!-- UNTUK TAB -->
     <div class="card mb-3 tab-card">
@@ -545,7 +612,7 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button class="btn btn-primary" onclick="buttonAdd()">+ Add</button>
+                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat ponsPindahBar(). --}}
@@ -588,6 +655,16 @@
               <div class="rt-group-label">Penyaringan Data</div>
               <div class="rt-grid-2">
                 <div>
+                  <label class="rt-field-label" for="ponsModalStatus">Status</label>
+                  <select class="rt-native" id="ponsModalStatus">
+                    <option value="SEMUA">Semua</option>
+                    <option value="Sudah">Sudah</option>
+                    <option value="Belum">Belum</option>
+                    <option value="Sebagian">Sebagian</option>
+                    <option value="Batal">Batal</option>
+                  </select>
+                </div>
+                <div>
                   <label class="rt-field-label" for="ponsModalOtorisasi">Otorisasi</label>
                   <select class="rt-native" id="ponsModalOtorisasi">
                     <option value="SEMUA">Semua</option>
@@ -622,7 +699,7 @@
        dengan #page2 milik purchaseOrder.blade.php: tanpa margin negatif. --}}
   <div class="row">
     <div class="col-6 text-left">
-      <h2>Form PO (Non-Stock)</h2>
+      <!-- <h2>Form PO (Non-Stock)</h2> -->
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -656,8 +733,8 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Supplier" id="input_add_kodesupplier">
-                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" style="height:32px;" onclick="performSearchSupplier()">
-                  <i class="bi bi-plus"></i>
+                <button class="btn btn-chip-biru btn-sm" id="buttonAddListPelanggan" style="height:32px; border-radius:0;" onclick="performSearchSupplier()">
+                  <i class="bi bi-search"></i>
                 </button>
               </div>
             </div>
@@ -685,8 +762,6 @@
                 <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
-
-
 
           </div>
         </div>
@@ -767,7 +842,7 @@
                 <div class="col-md-12">
                   <div class="input-group form-group">
                     <input type="text" class="form-control" id="input_add_perkiraan">
-                    <button onclick="buttonAddListPerkiraan()" id="buttonAddListPerkiraan" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                    <button onclick="buttonAddListPerkiraan()" id="buttonAddListPerkiraan" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -916,7 +991,7 @@
                     <div class="col-md-12">
                       <div class="input-group form-group">
                         <input class="form-control" id="input_add_kodeekspedisi" value="-" readonly>
-                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" value="-" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;"><i class="bi bi-plus"></i></button>
+                        <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" value="-" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                     <div class="col-md-12">
@@ -1124,7 +1199,7 @@
 
         <div class="row">
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" id='buttonTambahItem' class="btn btn-primary btn-lg" style="
+            <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1133,7 +1208,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
           </div>
         </div>
 
@@ -1178,8 +1253,8 @@
                     <div class="col-md-4">
                       <div class="input-group">
                         <input type="text" class="form-control text-left" id="input_add_add_kodebarang">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonBrowseBarangItem" style="height:32px;" onclick="performSearch()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" id="buttonBrowseBarangItem" style="height:32px; border-radius:0;" onclick="performSearch()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -1200,8 +1275,8 @@
                     <div class="col-md-3">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_add_costing">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" onclick="buttonAddListCosting()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick="buttonAddListCosting()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -1209,8 +1284,8 @@
                     <div class="col-md-3">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_add_subcosting">
-                        <button class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" onclick="buttonAddListSubCosting()" tabindex="1">
-                          <i class="bi bi-plus"></i>
+                        <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick="buttonAddListSubCosting()" tabindex="1">
+                          <i class="bi bi-search"></i>
                         </button>
                       </div>
                     </div>
@@ -1363,7 +1438,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd()">Simpan Data</button>
+              onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
               height: 30px;
@@ -1374,7 +1449,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+              onclick="submitAddEdit()" class="btn btn-secondary">Simpan</button>
             </div>
 
           </div>
@@ -1741,7 +1816,7 @@
     <div class="col">
       <div class="form-group">
         <label>DiscRp</label>
-        <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
+        <input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00">
       </div>
     </div>
 
@@ -2530,7 +2605,7 @@
 {{-- window.ReportTable: header tabel interaktif (drag kolom, roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}
-<script src="{!! URL::asset('public/js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataTableAdd = []
@@ -2540,6 +2615,42 @@ let dataAddAddListItem = []
 
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
+
+// Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) di atas tab-content.
+// Jumlah PO & Total DPP dihitung dari dataTampil2 (baris yang sedang tampil di tab
+// Purchase Order, sudah kena filter periode + status/otorisasi). Outstanding PR
+// diambil dari recordsTotal endpoint ponsdataoutstandingpr - satu baris di sana =
+// satu kode barang, jadi 1 nobukti dengan 3 barang terhitung 3. Tidak ada
+// Outstanding SO di sini - menu ini tidak punya SO.
+let ponsKpiDPP = []
+let ponsKpiOut = { 1 : null }
+
+function renderKpiPONS () {
+  let totalDPP = 0
+  let poSet = new Set()
+  ;(ponsKpiDPP || []).forEach((r) => {
+    totalDPP += Number(r.TotDPPRp) || 0
+    if (r.NoBukti) { poSet.add(r.NoBukti) }
+  })
+
+  let cards = [
+    ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
+    ['Outstanding PR', ponsKpiOut[1] === null ? '-' : ponsKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false]
+  ]
+
+  document.getElementById('poKpiStrip').innerHTML = cards.map((c) => `
+    <div class="po-kpi-card">
+      <div class="po-kpi-ic" style="background:${c[3]};color:${c[2]}">
+        <i class="${c[4]}"></i>
+      </div>
+      <div>
+        <div class="po-kpi-label">${c[0]}</div>
+        <div class="po-kpi-val">${c[5] ? 'Rp ' + formatAngka(c[1]) : c[1]}</div>
+      </div>
+    </div>
+  `).join('')
+}
 
 let dataRefreshPenerimaan = []
 
@@ -2568,11 +2679,6 @@ jQuery(function($) {
 $(document).ready(function(){
   muatDropdownAlamatKirim()
   muatDropdownValas()
-
-  $("#tabel_add_list_barang").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-  });
 
   $("#tabel_add_list_barangall").DataTable({
     "lengthChange": false,
@@ -2748,7 +2854,7 @@ function onChangeInputAddDiscRp () {
     // document.getElementById("input_add_disc").value = '0.00'
     console.log('onChangeDiscRp')
       if (tipeform == 'edit') {
-        let value = $("#input_add_discrp").val()
+        let value = formatAngkaVal($("#input_add_discrp").val())
         console.log(dataHeaderAdd)
         let x = Number(value) / Number(dataHeaderAdd.TOtSubtotalRP) * 100
         console.log(x)
@@ -3156,6 +3262,7 @@ function submitAddAdd () {
         refreshDataTableAdd(NoBukti)
 
         alertify.success('Berhasil menambah item')
+        ponsSegarkanOutstanding()
       }
       if(res == 2) {
         setNewNoBukti()
@@ -3471,6 +3578,7 @@ function submitAddEdit () {
       refreshDataTableAdd(NoBukti)
 
       alertify.success('Berhasil edit item')
+      ponsSegarkanOutstanding()
 
     },
     error: function (err) {
@@ -3823,7 +3931,7 @@ function buttonAddAddListBarang () {
 
   if (sumber === 'NONPR') {
 
-    $('#tabel_add_list_barang_jasa').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_jasa')) { $('#tabel_add_list_barang_jasa').DataTable().destroy(); }
 
     $.ajax({
       url: "{!! url('polistbarangjasa') !!}",
@@ -3872,7 +3980,7 @@ function buttonAddAddListBarang () {
     // #modalBodyAddAddListBarangNonFOC yang kolomnya sudah cocok (Sat/Qnt PR/Qnt PO/Sisa
     // PR/No. PR/No. SO Cust), dengan buttonAddAddPickBarangNonFOC() yang mengisi
     // NoPPL/UrutPPL dari baris yang dipilih.
-    $('#tabel_add_list_barang_nonfoc').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfoc')) { $('#tabel_add_list_barang_nonfoc').DataTable().destroy(); }
 
     $.ajax({
       url: "{!! url('ponslistbarangjasaall') !!}",
@@ -4015,7 +4123,7 @@ function buttonAddListGudang () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_alamatkirim').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_alamatkirim')) { $('#tabel_add_list_alamatkirim').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('polistgudang') !!}",
     type: "post",
@@ -4080,7 +4188,7 @@ function buttonAddListLokasiPenerima () {
 
   let _token = $("#_token").val();
 
-  $('#tabel_add_list_lokasipenerima').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_lokasipenerima')) { $('#tabel_add_list_lokasipenerima').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistlokasipenerima') !!}",
@@ -4129,7 +4237,7 @@ function buttonAddListLokasiPenerima () {
 
 function buttonAddListValas () {
 
-  $('#tabel_add_list_valas').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_valas')) { $('#tabel_add_list_valas').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('polistvalas') !!}",
     type: "get",
@@ -4181,7 +4289,7 @@ function buttonAddListValas () {
 
 function buttonAddListPelanggan ()
 {
-  $('#tabel_add_list_pelanggan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistpelanggan') !!}",
@@ -4229,7 +4337,7 @@ function performSearchSupplier () {
 
   buttonAddListPelanggan();
 
-  $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().search(searchValue).draw(); }
 }
 
 document.getElementById('input_add_kodesupplier').addEventListener('keypress', function (event) {
@@ -4247,7 +4355,7 @@ function buttonAddListCosting ()
 
   console.log(perkiraan)
 
-  $('#tabel_add_list_costing').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_costing')) { $('#tabel_add_list_costing').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistcosting') !!}",
@@ -4295,7 +4403,7 @@ function buttonAddListSubCosting ()
   let _token  = $("#_token").val()
   kodeCost = document.getElementById("input_add_add_costing").value
 
-  $('#tabel_add_list_subcosting').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_subcosting')) { $('#tabel_add_list_subcosting').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistsubcosting') !!}",
@@ -4339,7 +4447,7 @@ function buttonAddListSubCosting ()
 
 function buttonAddListPerkiraan ()
 {
-  $('#tabel_add_list_perkiraan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_perkiraan')) { $('#tabel_add_list_perkiraan').DataTable().destroy(); }
 
   $.ajax({
     url: "{!! url('polistperkiraan') !!}",
@@ -4424,7 +4532,7 @@ function buttonAddListBackOffice () {
 }
 
 function buttonAddListSales () {
-  $('#tabel_add_list_sales').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_sales')) { $('#tabel_add_list_sales').DataTable().destroy(); }
   $.ajax({
     url: "{!! url('solistsales') !!}",
     type: "get",
@@ -5049,6 +5157,8 @@ function initTabelOutstandingPons (urut, pakaiCache) {
     },
     "drawCallback" : function () {
       setTimeout(ponsAturTinggiTabel, 0)
+      ponsKpiOut[urut] = this.api().page.info().recordsTotal
+      renderKpiPONS()
     }
   });
 
@@ -5069,21 +5179,51 @@ function initTabelOutstandingPons (urut, pakaiCache) {
   ponsAturTinggiTabel()
 }
 
-// Filter Otorisasi tab "Purchase Order" - client-side, mengikuti pola purchaseOrder.blade.php
-// (kolom Status sengaja belum dikerjakan, dibahas terpisah).
+// Filter Status & Otorisasi tab "Purchase Order" - client-side, mengikuti pola purchaseOrder.blade.php.
 function ponsOtorisasiPO (item) {
   return Number(item.IsOtorisasi1) ? 'Sudah' : 'Belum'
 }
 
+function ponsAngka (v) {
+  let n = Number(v)
+  return isNaN(n) ? 0 : n
+}
+
+function ponsStatusPO (item) {
+  let qnt   = ponsAngka(item.qnt)
+  let qbeli = ponsAngka(item.qntbeli)
+  if (qnt === 0)    { return 'Batal' }
+  if (qbeli === 0)  { return 'Belum' }
+  if (qbeli < qnt)  { return 'Sebagian' }
+  return 'Sudah'
+}
+
+const PONS_BADGE_STATUS = {
+  'Sudah'    : 'is-active',
+  'Belum'    : 'is-user',
+  'Sebagian' : 'is-supervisor',
+  'Batal'    : 'is-inactive'
+}
+
+function ponsBadgeStatus (item) {
+  let status = ponsStatusPO(item)
+  let kelas = PONS_BADGE_STATUS[status] || ''
+  return `<span class="sp-badge ${kelas}">${status}</span>`
+}
+
+let ponsFilterStatus = 'SEMUA'
 let ponsFilterOtorisasi = 'SEMUA'
 
 function ponsUpdateFilterBadge () {
-  let jml = (ponsFilterOtorisasi !== 'SEMUA') ? 1 : 0
+  let jml = 0
+  if (ponsFilterStatus !== 'SEMUA') { jml++ }
+  if (ponsFilterOtorisasi !== 'SEMUA') { jml++ }
   let badge = document.getElementById('ponsFilterBadge')
   if (badge) { badge.textContent = jml + ' aktif' }
 }
 
 function ponsTerapkanFilter () {
+  ponsFilterStatus = $('#ponsModalStatus').val() || 'SEMUA'
   ponsFilterOtorisasi = $('#ponsModalOtorisasi').val() || 'SEMUA'
   ponsUpdateFilterBadge()
   $('#modalFilterPONS').modal('hide')
@@ -5091,7 +5231,9 @@ function ponsTerapkanFilter () {
 }
 
 function ponsResetFilter () {
+  ponsFilterStatus = 'SEMUA'
   ponsFilterOtorisasi = 'SEMUA'
+  $('#ponsModalStatus').val('SEMUA')
   $('#ponsModalOtorisasi').val('SEMUA')
   ponsUpdateFilterBadge()
   $('#modalFilterPONS').modal('hide')
@@ -5170,7 +5312,8 @@ function renderTabelPO () {
 
   headerTable2 += `<th style="padding: 4px 12px;" scope="col">Batal</th>
 <th style="padding: 4px 12px;" scope="col">User Batal</th>
-<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>`
+<th style="padding: 4px 12px;" scope="col">Tanggal Batal</th>
+<th style="padding: 4px 12px;" scope="col">Status</th>`
 
   thead2.innerHTML = ponsHeadHtml(cols2)
   let baris2 = thead2.querySelector('tr')
@@ -5182,13 +5325,16 @@ function renderTabelPO () {
   let rowTable2 = ""
 
   let dataTampil2 = (dataRefreshOutstanding2 && dataRefreshOutstanding2[0]) ? dataRefreshOutstanding2[0] : []
+  if (ponsFilterStatus !== 'SEMUA') {
+    dataTampil2 = dataTampil2.filter(function (r) { return ponsStatusPO(r) === ponsFilterStatus })
+  }
   if (ponsFilterOtorisasi !== 'SEMUA') {
     dataTampil2 = dataTampil2.filter(function (r) { return ponsOtorisasiPO(r) === ponsFilterOtorisasi })
   }
 
   if (dataTampil2.length > 0) {
     dataTampil2.forEach((item, i) => {
-      let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info-circle-fill"></i></button>`
+      let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>`
       if (Number(item.IsOtorisasi1)) {
         tombolAksiPO += `
           <button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key-fill"></i></button>
@@ -5282,6 +5428,7 @@ function renderTabelPO () {
         }
       <td>${item.UserBatal || ''}</td>
       <td>${tglBatalTampil}</td>
+      <td class="text-center">${ponsBadgeStatus(item)}</td>
       </tr>
       `
     });
@@ -5305,6 +5452,9 @@ function renderTabelPO () {
   }
   ponsAturTinggiTabel()
   $('#tabel2_data [data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+
+  ponsKpiDPP = dataTampil2
+  renderKpiPONS()
 }
 
 function loadAll () {
@@ -5351,8 +5501,45 @@ function loadAll () {
   }
 }
 
+// Kartu KPI Outstanding PR tampil di semua tab, tapi tabelnya sendiri baru digambar
+// saat tabnya dibuka (lazy - lihat ponsPerluGambar). Supaya kartunya tidak menunggu
+// itu, total barisnya diambil sendiri di sini dengan payload minimal (length=1),
+// terpisah dari initTabelOutstandingPons() - pola sama dengan purchaseOrder.blade.php
+// (poMuatKpiOutstanding).
+function ponsMuatKpiOutstanding () {
+  $.ajax({
+    url : PONS_OUT[1].url,
+    type : "get",
+    cache : false,
+    data : { draw : 1, start : 0, length : 1, search : '' },
+    success : function (res) {
+      ponsKpiOut[1] = res.recordsTotal
+      renderKpiPONS()
+    },
+    error : function (err) {
+      console.log(PONS_OUT[1].url + ' gagal memuat KPI:', err.status, err.responseText)
+    }
+  })
+}
+ponsMuatKpiOutstanding()
+
+// Dipanggil tiap kali PO berhasil disimpan (tambah/edit/hapus item) supaya barang
+// yang baru saja diambil langsung hilang dari kartu Outstanding PR maupun tabelnya
+// tanpa perlu F5. Cache-nya dikosongkan dulu (ponsCacheOut/ponsPakaiCacheOut) supaya
+// draw berikutnya benar-benar menembak server - lihat initTabelOutstandingPons().
+function ponsSegarkanOutstanding () {
+  ponsCacheOut[1] = null
+  ponsPakaiCacheOut[1] = false
+  let selTabel = '#' + PONS_OUT[1].tabel
+  if ($.fn.DataTable.isDataTable(selTabel)) {
+    $(selTabel).DataTable().ajax.reload(null, false)
+  }
+  ponsMuatKpiOutstanding()
+}
+
 $(function () {
   $('#modalFilterPONS').on('show.bs.modal', function () {
+    $('#ponsModalStatus').val(ponsFilterStatus)
     $('#ponsModalOtorisasi').val(ponsFilterOtorisasi)
     ponsUpdateFilterBadge()
   })
@@ -6021,6 +6208,11 @@ function lockFormAdd () {
 
   document.getElementById("input_add_disc").disabled = true
   document.getElementById("input_add_discrp").disabled = true
+
+  document.getElementById("input_add_perkiraan").disabled = true
+  document.getElementById("buttonAddListPerkiraan").hidden = true
+  document.getElementById("input_add_pph23").disabled = true
+  document.getElementById("input_add_pph21").disabled = true
 }
 
 function buttonShowHideHeader ()
@@ -6078,6 +6270,11 @@ function unlockFormAdd () {
 
   document.getElementById("input_add_disc").disabled = false
   document.getElementById("input_add_discrp").disabled = false
+
+  document.getElementById("input_add_perkiraan").disabled = false
+  document.getElementById("buttonAddListPerkiraan").hidden = false
+  document.getElementById("input_add_pph23").disabled = false
+  document.getElementById("input_add_pph21").disabled = false
 }
 
 function cleanFormAdd () {
@@ -6456,7 +6653,8 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
           document.getElementById("input_add_perkiraan").value = dataHeaderAdd.perkiraan
 
-          document.getElementById("input_add_discrp").value = formatAngka(dataHeaderAdd.DISC ? parseFloat(dataHeaderAdd.DISC).toFixed(2) : '0.00')
+          document.getElementById("input_add_disc").value = dataHeaderAdd.Disc ? parseFloat(dataHeaderAdd.Disc).toFixed(2) : '0.00'
+          document.getElementById("input_add_discrp").value = formatAngka(dataHeaderAdd.TotDiskon ? parseFloat(dataHeaderAdd.TotDiskon).toFixed(2) : '0.00')
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
@@ -6576,6 +6774,7 @@ function buttonAddDeleteItem (i) {
             refreshDataTableAdd(NoBukti)
 
             alertify.success('Berhasil menghapus item')
+            ponsSegarkanOutstanding()
 
           },
           error: function (err) {
@@ -6611,7 +6810,7 @@ function searchBarangAll (e) {
 
     let search = $("#input_search_barang_all").val();
 
-    $('#tabel_add_list_barangall').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_barangall')) { $('#tabel_add_list_barangall').DataTable().destroy(); }
 
   }
 
@@ -6620,19 +6819,38 @@ function searchBarangAll (e) {
 // Membuang pemisah ribuan dari nilai input-partial-number (autoNumeric) sebelum dipakai
 // sebagai angka - tanpa ini parseFloat("1,234") berhenti di koma dan menghasilkan 1.
 function formatAngkaVal (angka) {
-  return Number((angka || '0').split(',').join(''))
+  return Number(String(angka == null ? '' : angka).split(',').join('')) || 0
 }
 
 function formatAngka (angkaString) {
-  console.log('formatAngka' , angkaString);
+  if (angkaString === null || angkaString === undefined || angkaString === '') {
+    return '0.00'
+  }
+  if (isNaN(Number(angkaString))) {
+    return '0.00'
+  }
+  angkaString = parseFloat(angkaString).toFixed(2).toString()
   let tempAngka = angkaString.split('.')
+
+  if (tempAngka[0][0] == '-') {
+    let temp2 = ''
+    let tempAngka1 = tempAngka[0].split('-')
+    for (let i = 0; i < tempAngka1[1].length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        temp2 = ',' + temp2
+      }
+      temp2 = tempAngka1[1][tempAngka1[1].length - i -1] + temp2
+    }
+    temp2 += '.' + tempAngka[1]
+    temp2 = '-' + temp2
+    return temp2
+  }
   let temp1 = ''
   for (let i = 0; i < tempAngka[0].length; i++) {
     if (i != 0 && i % 3 == 0) {
       temp1 = ',' + temp1
     }
     temp1 = tempAngka[0][tempAngka[0].length - i -1] + temp1
-    // console.log(i, temp1)
   }
   temp1 += '.' + tempAngka[1]
   return temp1
@@ -6646,7 +6864,7 @@ function formatAngkaRupiah(angka) {
 
 function reverseCalculateDiscPercent() {
   let harga = formatAngkaVal($('#input_add_add_harga').val()) || 0;
-  let discRp = parseFloat(document.getElementById('input_add_add_discrp').value) || 0;
+  let discRp = formatAngkaVal(document.getElementById('input_add_add_discrp').value) || 0;
 
   // Clear all discount percentage fields first
   document.getElementById('input_add_add_discpersen1').value = 0;
@@ -6664,7 +6882,7 @@ function reverseCalculateDiscPercent() {
   // Validate that discount doesn't exceed 100%
   if (discPercent > 100) {
     alert("Diskon tidak boleh melebihi harga");
-    document.getElementById('input_add_add_discrp').value = "";
+    document.getElementById('input_add_add_discrp').value = '0.00';
     return;
   }
 
@@ -6721,7 +6939,7 @@ function calculateDiscRp() {
     totalDiscount += afterDiskon3
   }
 
-  document.getElementById('input_add_add_discrp').value = totalDiscount
+  document.getElementById('input_add_add_discrp').value = formatAngka(parseFloat(totalDiscount).toFixed(2))
 }
 
 

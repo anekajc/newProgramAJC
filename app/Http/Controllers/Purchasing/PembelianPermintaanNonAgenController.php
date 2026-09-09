@@ -26,121 +26,13 @@ class PembelianPermintaanNonAgenController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(3);
 
-    $outstanding = VwPPL::where('Bulan', $periode->bulan)
-                         ->where('Tahun', $periode->tahun)
-                         ->where('IsJasa', 0)
-                         ->where('pAgen', 0)
-                         ->where(function($query) {
-                             $query->whereNull('isOtorisasi1')->orWhere('isOtorisasi1', 0);
-                         })
-                         ->get()
-                         ->groupBy('NoBukti');
-
-    $tempOutstanding = [];
-    foreach ($outstanding as $groupedData) {
-        $tempOutstanding[] = $groupedData;
-    }
-
-    $otorisasi = DB::connection("SML")->select("select NoBukti , Tanggal  , IsOtorisasi1, TglOto1, OtoUser1  from vwppl where  month(tanggal) = :bulan and year(tanggal) = :tahun and IsJasa = 0 and pAgen = 0 "  , ["bulan" => $periode->bulan , "tahun" => $periode->tahun ]);
-    $otorisasi = collect($otorisasi)->groupBy('NoBukti');
-    $tempOtorisasi = [];
-    foreach ($otorisasi as $groupedData) {
-        $tempOtorisasi[] = $groupedData;
-    }
-
-    $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->path() ]);
-
-    $isnumberheadertable = [];
-    $headertablevalue = [];
-    $headertableheader = [];
-    $headerisshown = [];
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    $aliasOrdered = [];
-
-    $isparsed = 0;
-    $headertablealias = [];
-    $xxx = DB::connection("SML")->select("select * from DBHEADERTABLEALIAS  where  href = :href "  , ["href" => $req->path() ]);
-    if ($xxx ) {
-
-      $headertablealias = json_decode($xxx[0]->value);
-    } else {
-
-      $headertablealias = [];
-    }
-    if (count($headertable) > 0) {
-      $isnumberheadertable = json_decode($headertable[0]->isnumber);
-      $headertablevalue = json_decode($headertable[0]->value);
-      $headertableheader = json_decode($headertable[0]->header);
-      $headerisshown = json_decode($headertable[0]->isshown);
-    } else {
-
-      if(!$tempOtorisasi) {
-
-      } else {
-        foreach ($tempOtorisasi[0][0] as $key => $value) {
-
-          if (str_contains($key, "Oto")) {
-
-
-          } else {
-
-              array_push($headertablevalue, $key);
-            array_push($headertableheader, $key);
-            array_push($headerisshown, 1);
-
-            if (strtotime($value)) {
-
-                  array_push( $isnumberheadertable , 2);
-            } else if (is_numeric($value)) {
-                array_push( $isnumberheadertable , 1);
-            } else {
-
-                  array_push($isnumberheadertable,0);
-            }
-          }
-
-
-
-        }
-      }
-
-
-
-
-    }
-
-    $aliasOrdered = [];
-    if ($headertablealias) {
-      foreach ($headertablevalue as $header) {
-          foreach ($headertablealias as $item) {
-              if ($item->value === $header) {
-
-                    array_push( $aliasOrdered , $item);
-                  break;
-              }
-          }
-      }
-    } else {
-      foreach ($headertablevalue as $header) {
-
-
-                    array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
-
-
-      }
-    }
-
+    // Data tabel (listData1/listData2, header kolom, dsb) TIDAK disiapkan di sini karena
+    // blade memuatnya sendiri lewat AJAX loadAll() saat halaman ready - menyiapkannya di
+    // sini dobel kerja dan bikin buka halaman lemot.
     return view('purchasing.pembelianpermintaannonagen' ,[
-      "aliasordered" => $aliasOrdered,
-      "headertableheader" => $headertableheader ,
-      "isnumeric" => $isnumberheadertable,
-      "headertablevalue" => $headertablevalue,
-      "isshown" => $headerisshown,
         "menul0" => $menul0,
         "periode" => $periode,
         "akses" => $akses,
-        "listData1" => $tempOutstanding,  // Belum Otorisasi
-        "listData2" => $tempOtorisasi     // Sudah Otorisasi
     ]);
 }
 
@@ -151,7 +43,6 @@ class PembelianPermintaanNonAgenController extends Controller
     $queryOtorisasi = ' and IsOtorisasi1 = ' . $req->isoto;
 
   };
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
     // Qnt/QntBatal/QntPO ikut diambil (dengan alias eksplisit, supaya key JSON-nya pasti
     // "Qnt"/"QntBatal"/"QntPO") untuk menghitung badge Status "Sudah/Belum/Batal" di
@@ -166,12 +57,7 @@ class PembelianPermintaanNonAgenController extends Controller
 
 
 
-    $otorisasi = [];
-
     $tempOtorisasi = [];
-    foreach ($otorisasi as $groupedData) {
-        $tempOtorisasi[] = $groupedData;
-    }
 
     $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href]);
     $isnumberheadertable = [];
@@ -179,8 +65,6 @@ class PembelianPermintaanNonAgenController extends Controller
     $headertableheader = [];
     $headerisshown = [];
     $aliasOrdered = [];
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-
 
     $isparsed = 0;
     $headertablealias = [];
@@ -285,7 +169,7 @@ class PembelianPermintaanNonAgenController extends Controller
 
          $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PR',$req->nobukti,'',0,'DBPPL');
 
-    return $res;
+    return ["ok" => $res, "otouser" => \Auth::user()->username, "tgloto" => $tanggal];
 }
   public function updateBatalOtorisasi(Request $req) {
 
@@ -298,7 +182,7 @@ class PembelianPermintaanNonAgenController extends Controller
     );
 
     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PR',$req->nobukti,$req->pket,0,'DBPPL');
-    return $res;
+    return ["ok" => $res];
 }
   public function cekOtorisasi (Request $req) {
     $res = DB::connection('SML')->select("select isOtorisasi1 from DBPPL where nobukti = :nobukti", ["nobukti" => $req->nobukti ]);
@@ -306,12 +190,10 @@ class PembelianPermintaanNonAgenController extends Controller
   }
 
   public function spDetail (Request $req) {
-    $detailOutstanding = VwPPL::all()->where('NoBukti', $req->nobukti )->sortBy('Urut');
-    $tempOutstanding = [];
-    foreach ($detailOutstanding as $do) {
-      array_push($tempOutstanding,$do);
-    }
-    return $tempOutstanding;
+    return DB::connection('SML')->select(
+      "select * from VwPPL where NoBukti = :nobukti order by Urut",
+      ["nobukti" => $req->nobukti]
+    );
   }
 
   public function listDepartemen (Request $req) {

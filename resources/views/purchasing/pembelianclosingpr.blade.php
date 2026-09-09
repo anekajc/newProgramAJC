@@ -1,11 +1,13 @@
-@extends('purchasing.newmasterx')
+@extends('newmasterTest')
 @section('page-title', 'Pembelian Closing PR')
 
 @section('css')
-{{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
+  {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/purchaseOrder.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 <style>
 /* Halaman ini dirancang mengisi tinggi layar (lihat clAturTinggiTabel()), jadi padding
    atas #content layout dikecilkan supaya tab tidak menggantung jauh dari header. */
@@ -162,15 +164,13 @@
 
 /* Tombol di kolom Action baru muncul saat barisnya di-hover. Opt-in lewat kelas
    po-aksi-hover supaya tabel lain tidak ikut terpengaruh. visibility (bukan display)
-   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang.
-   :focus-within supaya tombol tetap bisa dicapai lewat keyboard (Tab), bukan hanya mouse. */
+   supaya lebar kolomnya tetap dipesan - tabel tidak melompat saat tombol muncul/hilang. Sengaja TIDAK memakai :focus-within: klik mouse membuat tombol tetap fokus sehingga tidak ikut hilang saat kursor sudah pindah. */
 table.data-table.po-aksi-hover tbody td:first-child .btn {
   visibility: hidden;
   opacity: 0;
   transition: opacity .12s ease;
 }
-table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn,
-table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   visibility: visible;
   opacity: 1;
 }
@@ -213,6 +213,18 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat: no-repeat;
   background-position: right center;
+}
+
+/* Baris "No data available in table" bawaan DataTables ikut align kiri karena td-nya
+   juga kena rule ":first-child { display:flex; justify-content:flex-start... }" milik
+   kolom Action. Dikembalikan jadi table-cell biasa supaya colspan bawaan DataTables tetap
+   berlaku - kalau dipaksa display:block selnya lepas dari colspan dan menyempit di kiri. */
+#tabel td.dataTables_empty,
+#tabel2 td.dataTables_empty {
+  display: table-cell !important;
+  width: auto !important;
+  text-align: center !important;
+  vertical-align: middle !important;
 }
 
 /* ---- Lapisan "sedang memuat" kedua tabel ----
@@ -326,6 +338,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="clTglAwal1" value="{!! $clTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="clTglAkhir1" value="{!! $clTglAkhir !!}">
+                    </div>
                     <input type="search" id="clSearch1" class="po-search-inp" placeholder="Cari data">
                     {{-- Jumlah baris per halaman. Nilai -1 = tampilkan semua data - lihat
                          PembelianClosingPRController@dataOutstanding. --}}
@@ -363,6 +381,12 @@ table.data-table.po-aksi-hover tbody td:first-child:focus-within .btn {
               <div class="col-md-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" class="po-filter-inp" id="clTglAwal2" value="{!! $clTglAwal !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" class="po-filter-inp" id="clTglAkhir2" value="{!! $clTglAkhir !!}">
+                    </div>
                     <input type="search" id="clSearch2" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap">
                       <label for="clLen2">Tampilkan</label>
@@ -627,6 +651,29 @@ function clIkatPanjangHalaman (urut) {
   })
 }
 
+// Ubah salah satu tanggal periode -> kosongkan cache tab ini lalu reload, supaya
+// halaman pertama tidak menampilkan hasil rentang lama (lihat clCacheOut/clPakaiCacheOut).
+function clIkatPeriode (urut) {
+  let awal  = document.getElementById('clTglAwal' + urut)
+  let akhir = document.getElementById('clTglAkhir' + urut)
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    clCacheOut[urut] = null
+    clPakaiCacheOut[urut] = false
+    $('#' + CL_TAB[urut].tabel).DataTable().ajax.reload()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
 function clAturTinggiTabel () {
   let area = document.getElementById('content')
   let pane = document.querySelector('#myTabContent .tab-pane.active')
@@ -853,7 +900,9 @@ function initTabelClosing (urut, pakaiCache) {
           length : data.length,
           search : data.search ? data.search.value : '',
           orderCol : kolom,
-          orderDir : arah
+          orderDir : arah,
+          tglawal : $('#clTglAwal' + urut).val(),
+          tglakhir : $('#clTglAkhir' + urut).val()
         },
         success : function (res) {
           clCacheOut[urut] = res
@@ -878,6 +927,7 @@ function initTabelClosing (urut, pakaiCache) {
 
   clIkatSearch(urut)
   clIkatPanjangHalaman(urut)
+  clIkatPeriode(urut)
   let inputSearch = document.getElementById(cfg.search)
   if (inputSearch) { inputSearch.value = posisi ? posisi.search : '' }
   clAturTinggiTabel()

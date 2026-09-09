@@ -699,6 +699,64 @@
 <!-- End modal add-->
 
 <!-- start modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data ) -->
+<style>
+  #formModalOpen thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee !important;
+    border-top: none !important;
+  }
+  #formModalOpen tbody td {
+    border-top: none !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  #tabelModalOpen tbody tr.pick-row { cursor: pointer; }
+  #tabelModalOpen tbody tr.pick-row:hover td { background-color: #eef2ff; }
+  #formModalOpen .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  #tabelModalOpen_filter {
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 8px;
+  }
+  #tabelModalOpen_filter label { font-size: 0; margin: 0; display: inline-block; }
+  #tabelModalOpen_filter input {
+    font-size: 13px;
+    margin-left: 0;
+    width: 240px;
+    max-width: 100%;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    box-shadow: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+  }
+  #tabelModalOpen_filter input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px #e8edff; }
+  #modalOpenCustomSearch { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }
+  #modalOpenCustomSearch input {
+    width: 240px;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+  }
+  #modalOpenCustomSearch input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px #e8edff; }
+  #tabelModalOpen.modalOpen-plain tbody { display: block; max-height: 420px; overflow-y: auto; }
+  #tabelModalOpen.modalOpen-plain thead, #tabelModalOpen.modalOpen-plain tbody tr { display: table; width: 100%; table-layout: fixed; }
+</style>
 <div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
     <div class="modal-content">
@@ -709,8 +767,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelModalOpen" class="table table-bordered table-striped">
-          <thead id='theadOpen' class="text-center bg-primary text-white">
+        <div id="modalOpenCustomSearch" style="display:none;">
+          <input type="search" placeholder="Cari data">
+        </div>
+        <table id="tabelModalOpen" class="table table-hover">
+          <thead id='theadOpen' class="text-center">
             <tr></tr>
           </thead>
           <tbody id="tabel_dataModalOpen" class="text-left">
@@ -725,3 +786,11 @@
   </div>
 </div>
 <!-- End modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data )-->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof jQuery === 'undefined') { return }
+  jQuery(document).on('shown.bs.modal', '#formModalOpen', function () {
+    jQuery('#tabelModalOpen_filter input').attr('placeholder', 'Cari Data')
+  })
+})
+</script>

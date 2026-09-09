@@ -13,7 +13,11 @@ use App\Traits\ReportVoucherTrait;
 class LaporanAccountingPiutangOutstandingJTController extends Controller {
   use AksesTrait;
   use GlobalTrait;
-  // doKasharian / doInvoice / doLpb / doBp for the bottom voucher panel.
+  // doLedger / doKasharian / doInvoice / doLpb for the bottom voucher panel.
+  // NOTE: routes/report.php also has a _doBp route for this controller, but no
+  // doBp() exists here, in the trait, or anywhere else in the codebase, and no
+  // matching stored procedure was found on SML either - unimplemented, not a
+  // wiring bug. Left as-is; the "Bp" voucher-panel button will still 404.
   use ReportVoucherTrait;
 
   public function index() {
@@ -31,58 +35,31 @@ class LaporanAccountingPiutangOutstandingJTController extends Controller {
 
   public function doReport(Request $req) {
 
-    $tanggal = $req->get('date1');
-    $awal = $req->get('inputSuppAwal');
-    $akhir= $req->get('inputSuppAkhir');
+    $tanggal = $req->query('date1');
+    $awal = $req->query('inputSuppAwal');
+    $akhir= $req->query('inputSuppAkhir');
     $devisi = 0;
-    $tipe = $req->get('inputOrd');
-    $Perkiraan = $req->get('inputPerkiraan');
-    $KodeVls = $req->get('valas_value');
+    $tipe = $req->query('inputOrd');
+    $Perkiraan = $req->query('inputPerkiraan');
+    $KodeVls = $req->query('valas_value');
     $IsiList = '';
     $Tanggal1 = '12-30-1899';
-    $IsGroup = $req->get('inputGroup');
-    $Lokasi = $req->get('inputLokasi');
-    $PIC = $req->get('inputCust');
+    $IsGroup = $req->query('inputGroup');
+    $Lokasi = $req->query('inputLokasi');
+    $PIC = $req->query('inputCust');
 
-    // $values  = [$tanggal, $awal, $akhir, $devisi, $tipe, $Perkiraan, $KodeVls, $IsiList, $Tanggal1, $IsGroup, $Lokasi, $PIC];
-    
     $res = DB::connection('SML')->select("exec sp_ReportSisaPiutangN '''{$tanggal}''','''{$awal}''','''{$akhir}''','{$KodeVls}',{$devisi},'''{$Perkiraan}''',{$tipe},'{$IsiList}','''{$Tanggal1}''',{$IsGroup},'''{$Lokasi}''','''{$PIC}''' ");
 
     return $res;
   }
 
-  
-// exec sp_ReportSisaPiutangN '''01-31-2026''','''CA001''','''DE024''','IDR',0,'''113100''',0,'','''12-30-1899''',0,'''-''','''-'''
-
-
-  // public function doFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-  //   $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-  //   return $listData;
-  // }
-
-  // public function doReportFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-  //   $res = [];
-
-  //   for ($i=0; $i < count($req->listdata); $i++) {
-  //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
-  //     for ($j=0; $j < count($row); $j++) {
-  //       $res = array_add($res, $i+$j, $row[$j]);
-  //     }
-  //   }
-    
-  //   return $res;
-  // }
-
     public function loadPerkiraan()
   {
-      $kode = 'PT';
-      $userid = auth()->user()->username;
+      $user = auth()->user();
+      if (! $user) { return response()->json([], 401); }
 
-      // $kode = $request->input('kode');
-      // $userid = $request->input('userid');
+      $kode = 'PT';
+      $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
           SELECT a.Perkiraan, b.Keterangan 

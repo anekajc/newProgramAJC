@@ -154,8 +154,13 @@ Route::post('/giroditerimacekgiroexist', [GiroDiterimaController::class, 'cekGir
 Route::post('/giroditerimalistpencairangiro', [GiroDiterimaController::class, 'listPencairanGiro']);
 Route::post('/giroditerimalistpencairangirokoreksi', [GiroDiterimaController::class, 'listPencairanGiroKoreksi']);
 Route::post('/giroditerimalistpencairangirobgt', [GiroDiterimaController::class, 'listPencairanGiroKoreksiBGT']);
+
 Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiroBGT']);
 // Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
+
+
+
+
 Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
 Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
 Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
@@ -164,6 +169,11 @@ Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']
 Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
 Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
 Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
+
+
+
+
+
 Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
 Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
 Route::get('/giroditerimalistdph', [GiroDiterimaController::class, 'listDPH']);
@@ -181,6 +191,9 @@ Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtori
 Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
 Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
 
+
+
+
 // Giro Dibuka
 Route::get('/girodibuka', [GiroDibukaController::class, 'index']);
 Route::get('/girodibukalistperkiraanheader', [GiroDibukaController::class, 'listPerkiraanHeader']);
@@ -195,6 +208,8 @@ Route::post('/girodibukalistpencairangirobgt', [GiroDibukaController::class, 'li
 
 Route::post('/girodibukaspaddgirobgt', [GiroDibukaController::class, 'spGiroBGT']);
 // Route::post('/girodibukaspdeletegirobgt', [GiroDibukaController::class, 'spDeleteGiroBGT']);
+
+
 
 
 Route::get('/girodibukalistdepartemen', [GiroDibukaController::class, 'listDepartemen']);

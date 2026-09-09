@@ -13,7 +13,7 @@ use App\Traits\ReportVoucherTrait;
 class LaporanAccountingNeracaLajurController extends Controller {
   use AksesTrait;
   use GlobalTrait;
-  use ReportVoucherTrait;  // doLedger, doKasharian, doInvoice, doLpb, doFilter, doReportFilter, loadDivisi
+  use ReportVoucherTrait;  // doLedger, doKasharian, doInvoice, doLpb, loadDivisi
 
   public function index() {
     $akses = $this->cekAkses("laporanaccountingneracalajur");
@@ -33,11 +33,10 @@ class LaporanAccountingNeracaLajurController extends Controller {
     // SET NOCOUNT ON so the proc's internal row-count messages don't become the
     // first PDO result set (which would make ->select() return nothing even
     // though the proc works in SSMS).
-    $res = DB::connection('MGL')->select("SET NOCOUNT ON; exec Sp_NerajaLajur 'D',:inputBulan,:inputTahun,'-','sa' ",
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; exec Sp_NerajaLajur 'D',:inputBulan,:inputTahun,'-','sa' ",
     ['inputBulan' => (int) $req->inputBulan, 'inputTahun' => (int) $req->inputTahun]);
     return $res;
   }
 
-  // doLedger, doKasharian, doInvoice, doLpb, doFilter, doReportFilter, loadDivisi
-  // come from App\Traits\ReportVoucherTrait.
+  // doLedger, doKasharian, doInvoice, doLpb, loadDivisi come from App\Traits\ReportVoucherTrait.
 }

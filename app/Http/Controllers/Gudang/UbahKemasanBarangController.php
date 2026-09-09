@@ -24,12 +24,17 @@ class UbahKemasanBarangController extends Controller {
     $akses = app('App\Http\Controllers\GlobalController')->getAkses1($kodemenu , $req->path());
     $menul0   = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
-    $loadAll = $this->loadAll();
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+
+    $loadAll = $this->fetchList($date1, $date2);
 
     return view('gudang.ubahkemasanbarang' , [
       "menul0" => $menul0,
       "periode" => $periode,
       "akses" => $akses,
+      "date1" => $date1,
+      "date2" => $date2,
       "listKMBJ" => $loadAll['listKMBJ'],
       "listSdhOto" => $loadAll['listSdhOto'],
       "gudang" => url('kmbjlistgudang'),
@@ -37,22 +42,30 @@ class UbahKemasanBarangController extends Controller {
     ]);
   }
 
-  public function loadAll() {
-    $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
+  public function loadAll(Request $req) {
+    $date1 = $req->date1;
+    $date2 = $req->date2;
 
+    if (!$date1 || !$date2) {
+      $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
+      $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+      $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    }
+
+    return $this->fetchList($date1, $date2);
+  }
+
+  private function fetchList($date1, $date2) {
     $query = "
-      declare @Tahun int, @Bulan int
-
-      select @Tahun= :tahun, @Bulan= :bulan
-
-      Select * from vwMasterUbahKemasan  where month(tanggal) = @Bulan and year(tanggal) = @Tahun
+      Select * from vwMasterUbahKemasan
+      where cast(Tanggal as date) between :date1 and :date2
       ";
 
     $listBBS = DB::connection("SML")->select($query . " and IsOtorisasi1 = 0
-      ", ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+      ", ["date1" => $date1 , "date2" => $date2]);
 
     $listSdhOto = DB::connection("SML")->select($query . " and IsOtorisasi1 = 1
-      ", ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+      ", ["date1" => $date1 , "date2" => $date2]);
 
     return [
       "listKMBJ" => $listBBS,

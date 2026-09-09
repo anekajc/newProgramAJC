@@ -13,7 +13,7 @@ use App\Traits\ReportVoucherTrait;
 class LaporanAccountingPiutangLPPController extends Controller {
   use AksesTrait;
   use GlobalTrait;
-  use ReportVoucherTrait;   // doKasharian / doInvoice / doLpb / doBp (bottom voucher panel)
+  use ReportVoucherTrait;   // doLedger / doKasharian / doInvoice / doLpb (bottom voucher panel)
 
   public function index() {
     $akses = $this->cekAkses("reportaccountingpiutanglpp");
@@ -30,14 +30,14 @@ class LaporanAccountingPiutangLPPController extends Controller {
 
   public function doReport(Request $req) {
 
-    $Perkiraan = $req->get('inputPerkiraan');
-    $Tanggal1 = $req->get('date1');
-    $Tanggal2 = $req->get('date2');
-    $Awal = $req->get('inputSuppAwal');
-    $Akhir = $req->get('inputSuppAkhir');
+    $Perkiraan = $req->query('inputPerkiraan');
+    $Tanggal1 = $req->query('date1');
+    $Tanggal2 = $req->query('date2');
+    $Awal = $req->query('inputSuppAwal');
+    $Akhir = $req->query('inputSuppAkhir');
     $Devisi = '01';
     $Tipe = 1;
-    $KodeVls = $req->get('valas_value');
+    $KodeVls = $req->query('valas_value');
 
     $values  = [$Perkiraan, $Tanggal1, $Tanggal2, $Awal, $Akhir, $Devisi, $Tipe, $KodeVls];
 
@@ -50,14 +50,14 @@ class LaporanAccountingPiutangLPPController extends Controller {
   // Ledger (kartu piutang) untuk SATU pelanggan — dipanggil saat baris pelanggan diklik.
   // SP sama dengan report Piutang Kartu; kodesupp awal = akhir = pelanggan yang diklik.
   public function doKartu(Request $req) {
-    $awal      = $req->get('date1');
-    $akhir     = $req->get('date2');
-    $kode      = $req->get('kode');            // kode pelanggan yang diklik
+    $awal      = $req->query('date1');
+    $akhir     = $req->query('date2');
+    $kode      = $req->query('kode');            // kode pelanggan yang diklik
     $devisi    = '01';
     $Urut      = '0';                          // urut tanggal
-    $Perkiraan = $req->get('inputPerkiraan');
+    $Perkiraan = $req->query('inputPerkiraan');
     $rekap     = '0';
-    $KodeVls   = $req->get('valas_value');
+    $KodeVls   = $req->query('valas_value');
 
     $values = [$awal, $akhir, $kode, $kode, $devisi, $Urut, $Perkiraan, $rekap, $KodeVls];
 
@@ -67,34 +67,13 @@ class LaporanAccountingPiutangLPPController extends Controller {
     return $res;
   }
 
-  // public function doFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-  //   $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
-  //   return $listData;
-  // }
-
-  // public function doReportFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti' : 'KODEBRG';
-  //   $res = [];
-
-  //   for ($i=0; $i < count($req->listdata); $i++) {
-  //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-
-  //     for ($j=0; $j < count($row); $j++) {
-  //       $res = array_add($res, $i+$j, $row[$j]);
-  //     }
-  //   }
-
-  //   return $res;
-  // }
-
     public function loadPerkiraan()
   {
-      $kode = 'PT';
-      $userid = auth()->user()->username;
+      $user = auth()->user();
+      if (! $user) { return response()->json([], 401); }
 
-      // $kode = $request->input('kode');
-      // $userid = $request->input('userid');
+      $kode = 'PT';
+      $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
           SELECT a.Perkiraan, b.Keterangan

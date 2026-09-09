@@ -15,10 +15,15 @@ class PemakaianBarangController extends Controller
 {
 
     // Outstanding PPI (Permintaan Pemakaian Internal) yang belum sepenuhnya diserahkan,
-    // untuk periode kerja user saat ini. Dipakai bareng oleh index() dan loadAll() supaya
+    // untuk rentang tanggal tertentu. Dipakai bareng oleh index() dan loadAll() supaya
     // keduanya selalu memakai query yang sama persis (tidak ada lagi drift antar dua tempat).
-    private function fetchOutstanding($periode)
+    // TANGGAL membawa komponen waktu, jadi dipakai rentang setengah-terbuka [date1, date2+1hari)
+    // bukan BETWEEN — sama seperti PermintaanPemakaianController::fetchList() — supaya baris
+    // yang timestamp-nya di tanggal akhir tidak ikut terbuang.
+    private function fetchOutstanding(string $date1, string $date2)
     {
+        $date2plus1 = date('Y-m-d', strtotime($date2 . ' +1 day'));
+
         $temp = DB::connection("SML")->select("select YEAR(d.tanggal) Tahun, MONTH(d.tanggal) Bulan ,A.NOBUKTI,D.TANGGAL,A.KODEBRG,C.NAMABRG, D.Kodegdg ,  G.NAMA NamaGudangAsal,a.Sat Satuan , a.Nosat NOSAT, a.ISI ISI,
 CASE WHEN A.NOSAT=1 THEN A.Qnt WHEN A.Nosat=2 THEN A.Qnt2 WHEN A.NoSat=3 THEN A.Qnt2 END QNT, Isnull(A.QntCLose,0) QntCLose
 ,B.QNT QNTPB,CASE WHEN A.NOSAT=1 THEN A.Qnt WHEN A.Nosat=2 THEN A.Qnt2 WHEN A.NoSat=3 THEN A.Qnt2 END- Isnull(A.QntCLose,0)-ISNULL(B.QNT,0) QntOS ,A.Urut
@@ -31,8 +36,8 @@ LEFT OUTER JOIN DBPRPENYERAHANBHN D ON A.NOBUKTI=D.NOBUKTI
 LEFT OUTER JOIN DBGUDANG G ON D.Kodegdg=G.KODEGDG
 
 where  CASE WHEN A.NOSAT=1 THEN A.Qnt WHEN A.Nosat=2 THEN A.Qnt2 WHEN A.NoSat=3 THEN A.Qnt2 END - Isnull(A.QntCLose,0) -ISNULL(B.QNT,0) <>0 and d.IsOtorisasi1 = 1
-and year(D.tanggal)>2022 and year(d.tanggal) = :tahun and month(d.tanggal) = :bulan
-    ", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
+and year(D.tanggal)>2022 and D.Tanggal >= :date1 and D.Tanggal < :date2plus1
+    ", ["date1" => $date1, "date2plus1" => $date2plus1]);
 
         $grouped = collect($temp)->groupBy('NOBUKTI');
         $out = [];
@@ -42,12 +47,15 @@ and year(D.tanggal)>2022 and year(d.tanggal) = :tahun and month(d.tanggal) = :bu
         return $out;
     }
 
-    // Dokumen Pemakaian Barang (dbPenyerahanBhn) yang sudah dibuat pada periode kerja user
-    // saat ini, dikelompokkan per NOBUKTI. QntOS pada header dijumlah dari seluruh baris
+    // Dokumen Pemakaian Barang (dbPenyerahanBhn) yang sudah dibuat pada rentang tanggal
+    // tertentu, dikelompokkan per NOBUKTI. QntOS pada header dijumlah dari seluruh baris
     // detail (lihat catatan di bawah) supaya badge Status konsisten dengan
-    // PermintaanPemakaianController::fetchList().
-    private function fetchPenerimaan($periode)
+    // PermintaanPemakaianController::fetchList(). Rentang setengah-terbuka, lihat catatan
+    // di fetchOutstanding().
+    private function fetchPenerimaan(string $date1, string $date2)
     {
+        $date2plus1 = date('Y-m-d', strtotime($date2 . ' +1 day'));
+
         $temp = DB::connection("SML")->select("
 
         Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL,A.NOBUKTI,  a.NOURUT	,
@@ -73,10 +81,10 @@ and year(D.tanggal)>2022 and year(d.tanggal) = :tahun and month(d.tanggal) = :bu
                   ) b on a.Nobukti=b.NOPRPB and a.urut=b.URUTPRPB
                  ) OS ON B.NOPRPB=OS.NOPRPB AND B.URUTPRPB=OS.URUTPRPB
 
-                 where Year(a.tanggal ) = :tahun and Month(a.Tanggal)  = :bulan
+                 where a.Tanggal >= :date1 and a.Tanggal < :date2plus1
         order by A.NoBukti, B.Urut
 
-", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
+", ["date1" => $date1, "date2plus1" => $date2plus1]);
 
         $grouped = collect($temp)->groupBy('NOBUKTI');
         $out = [];
@@ -121,11 +129,16 @@ and year(D.tanggal)>2022 and year(d.tanggal) = :tahun and month(d.tanggal) = :bu
 
         $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
+        $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+        $date2 = date('Y-m-t', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+
         return view('gudang.pemakaianbarang', [
             "periode" => $periode,
             "menul0" => $menul0,
-            "outstandingArray" => $this->fetchOutstanding($periode),
-            "penerimaanArray" => $this->fetchPenerimaan($periode),
+            "date1" => $date1,
+            "date2" => $date2,
+            "outstandingArray" => $this->fetchOutstanding($date1, $date2),
+            "penerimaanArray" => $this->fetchPenerimaan($date1, $date2),
             "akses" => $akses
         ]);
     }
@@ -233,13 +246,19 @@ where iduser = :username and TRANS = 'PBG'
         return $tempPenerimaan;
     }
 
-    public function loadAll()
+    public function loadAll(Request $req)
     {
-        $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+        $date1 = $req->input('date1');
+        $date2 = $req->input('date2');
+        if (!$date1 || !$date2) {
+            $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+            $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+            $date2 = date('Y-m-t', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+        }
 
         return [
-            "outstandingArray" => $this->fetchOutstanding($periode),
-            "penerimaanArray" => $this->fetchPenerimaan($periode)
+            "outstandingArray" => $this->fetchOutstanding($date1, $date2),
+            "penerimaanArray" => $this->fetchPenerimaan($date1, $date2)
         ];
     }
 

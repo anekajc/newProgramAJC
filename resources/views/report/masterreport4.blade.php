@@ -1,4 +1,4 @@
-@extends('report.newmaster2')
+@extends('report.newmaster2x')
 <!-- Font Awesome CDN -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
 rel="stylesheet">
@@ -368,9 +368,16 @@ rel="stylesheet">
         mode : _mode
       },
       success: function(res) {
-        _header = (res.length > 0) ? res[0].header : "";
-        gsum_issubtotal = toInteger(res[0].issubtotal);
-        gsum_isgrandtotal = toInteger(res[0].isgrandtotal);
+        // res kosong (belum pernah ada baris tersimpan untuk href+mode ini, mis. baru
+        // di-reset/dihapus) -> res[0] undefined, jangan diakses (lihat guard yang sama
+        // di masterreport2.blade.php).
+        if (res.length > 0) {
+          _header = res[0].header;
+          gsum_issubtotal = toInteger(res[0].issubtotal);
+          gsum_isgrandtotal = toInteger(res[0].isgrandtotal);
+        } else {
+          _header = "";
+        }
       }
     })
 

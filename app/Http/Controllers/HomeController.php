@@ -218,6 +218,18 @@ public function getMenuReport($headermenu = 1)
     return response()->json($this->buildReportTree($rows, null, 0));
 }
 
+// Same tree as getMenuReport(), minus the HTTP JSON wrapper -- for
+// server-side consumers (AksesTrait::cekAkses()) that need the plain
+// array/recursion result directly instead of an endpoint response.
+public function getReportMenuTreeArray()
+{
+    $rows = DB::connection('SML')->table('dbmenureportweb')
+        ->orderBy('KODEMENU')
+        ->get();
+
+    return $this->buildReportTree($rows, null, 0);
+}
+
 private function buildReportTree($rows, $parentKode, $depth)
 {
     // Hard depth guard — same safety net you already need after the

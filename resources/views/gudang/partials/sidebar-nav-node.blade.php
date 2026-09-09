@@ -66,7 +66,7 @@
     @else
         {{-- Top-level entry with no children: a single clickable row, no chevron/children. --}}
         <div class="nav-group {{ $isCurrent ? 'active' : '' }}">
-            <div class="nav-item" onclick="window.location.href='{{ url($node->href) }}'">
+            <div class="nav-item" onclick="window.location.href='{{ url($node->href ?? '') }}'">
                 <span class="nav-icon">{!! $iconMap[$node['Keterangan']] ?? '' !!}</span>
                 <span class="nav-label">{{ $node['Keterangan'] }}</span>
             </div>
@@ -87,7 +87,7 @@
         </div>
     @else
         <div class="nav-child {{ $isCurrent ? 'active-child' : '' }}"
-            onclick="window.location.href='{{ url($node->href) }}'">
+            onclick="window.location.href='{{ url($node->href ?? '') }}'">
             {{ $node['Keterangan'] }}
         </div>
     @endif

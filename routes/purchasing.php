@@ -5,21 +5,21 @@ use App\Http\Controllers\Purchasing\PembelianPermintaanNonAgenController;
 use App\Http\Controllers\Purchasing\PembelianPermintaanAgenController;
 use App\Http\Controllers\Purchasing\PembelianPermintaanNonStockController;
 use App\Http\Controllers\Purchasing\PembelianClosingPRController;
-// use App\Http\Controllers\Purchasing\PembelianPermintaanDebetNoteController;
+use App\Http\Controllers\Purchasing\PembelianPermintaanDebetNoteController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaKreditController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccBiayaTunaiController;
 // use App\Http\Controllers\Purchasing\NewPOBeliAccTunaiController;
-// use App\Http\Controllers\Purchasing\NewPOBeliAccController;
-// use App\Http\Controllers\Purchasing\NewPOJasaController;
-// use App\Http\Controllers\Purchasing\NewPOController;
-// use App\Http\Controllers\Purchasing\PerintahReturBeliController;
+use App\Http\Controllers\Purchasing\NewPOBeliAccController;
+use App\Http\Controllers\Purchasing\NewPOJasaController;
+use App\Http\Controllers\Purchasing\NewPOController;
+use App\Http\Controllers\Purchasing\PerintahReturBeliController;
 use App\Http\Controllers\Purchasing\POController;
 use App\Http\Controllers\Purchasing\PONonStockController;
 use App\Http\Controllers\Purchasing\ClosingPOController;
-// use App\Http\Controllers\Purchasing\InvoiceReturBeliController;
-// use App\Http\Controllers\Purchasing\ReturPembelianGudangController;
-// use App\Http\Controllers\Purchasing\InvoicePembelianController;
-// use App\Http\Controllers\Purchasing\UangMukaBeliController;
+use App\Http\Controllers\Purchasing\InvoiceReturBeliController;
+use App\Http\Controllers\Purchasing\ReturPembelianGudangController;
+use App\Http\Controllers\Purchasing\InvoicePembelianController;
+use App\Http\Controllers\Purchasing\UangMukaBeliController;
 
 Route::middleware('auth')->group(function () {
 
@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelianpermintaanagenlistbarang',            [PembelianPermintaanAgenController::class, 'listBarang']);
     Route::post('/pembelianpermintaanagenspadd',                [PembelianPermintaanAgenController::class, 'spAdd']);
     Route::get('/pembelianpermintaanagenspdetail',              [PembelianPermintaanAgenController::class, 'spDetail']);
-    Route::get('/pembelianpermintaanagenloadall',               [PembelianPermintaanAgenController::class, 'loadAll']);
+    Route::post('/pembelianpermintaanagenloadall',              [PembelianPermintaanAgenController::class, 'loadAll']);
     Route::post('/pembelianpermintaanagenspdelete',             [PembelianPermintaanAgenController::class, 'spDelete']);
     Route::get('/pembelianpermintaanagenlistdepartemen',        [PembelianPermintaanAgenController::class, 'listDepartemen']);
     Route::post('/pembelianpermintaanagenupdateotorisasi',      [PembelianPermintaanAgenController::class, 'updateOtorisasi']);
@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelianpermintaannonstocklistbarang',            [PembelianPermintaanNonStockController::class, 'listBarang']);
     Route::post('/pembelianpermintaannonstockspadd',                [PembelianPermintaanNonStockController::class, 'spAdd']);
     Route::get('/pembelianpermintaannonstockspdetail',              [PembelianPermintaanNonStockController::class, 'spDetail']);
-    Route::get('/pembelianpermintaannonstockloadall',               [PembelianPermintaanNonStockController::class, 'loadAll']);
+    Route::post('/pembelianpermintaannonstockloadall',              [PembelianPermintaanNonStockController::class, 'loadAll']);
     Route::post('/pembelianpermintaannonstockspdelete',             [PembelianPermintaanNonStockController::class, 'spDelete']);
     Route::get('/pembelianpermintaannonstocklistdepartemen',        [PembelianPermintaanNonStockController::class, 'listDepartemen']);
     Route::post('/pembelianpermintaannonstockupdateotorisasi',      [PembelianPermintaanNonStockController::class, 'updateOtorisasi']);
@@ -69,23 +69,23 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembelianclosingprlock',  [PembelianClosingPRController::class, 'lock']);
     Route::post('/pembelianclosingprunlock',[PembelianClosingPRController::class, 'unlock']);
 
-    Route::post('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
-    Route::post('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
-    Route::post('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
+    Route::get('/pembelianclosingprdataoutstanding',[PembelianClosingPRController::class, 'dataOutstanding']);
+    Route::get('/pembelianclosingprdataclosing',[PembelianClosingPRController::class, 'dataClosing']);
+    Route::get('/pembelianclosingprceksisa',[PembelianClosingPRController::class, 'cekSisa']);
     Route::post('/pembelianclosingprheadertable',[PembelianClosingPRController::class, 'headerTable']);
 
 
-    // // ── PEMBELIAN DEBET NOTE ──────────────────────────────────────────────
-    // Route::get('/pembelianpermintaandebetnote',     [PembelianPermintaanDebetNoteController::class, 'index']);
-    // Route::get('/debetnotespnobukti',               [PembelianPermintaanDebetNoteController::class, 'getNoBukti']);
-    // Route::get('/debetnotelistcustomer',            [PembelianPermintaanDebetNoteController::class, 'listCustomer']);
-    // Route::post('/debetnotelistinvoice',            [PembelianPermintaanDebetNoteController::class, 'listInvoice']);
-    // Route::post('/debetnotespadd',                  [PembelianPermintaanDebetNoteController::class, 'spAdd']);
-    // Route::post('/debetnotespdetail',               [PembelianPermintaanDebetNoteController::class, 'getDetail']);
-    // Route::post('/debetnotespkoreksi',              [PembelianPermintaanDebetNoteController::class, 'spKoreksi']);
-    // Route::get('/debetnoteloadall',                 [PembelianPermintaanDebetNoteController::class, 'loadAll']);
-    // Route::post('/debetnotespotorisasi',            [PembelianPermintaanDebetNoteController::class, 'updateOtorisasi']);
-    // Route::post('/debetnotespbatalotorisasi',       [PembelianPermintaanDebetNoteController::class, 'updateBatalOtorisasi']);
+    // ── PEMBELIAN DEBET NOTE ──────────────────────────────────────────────
+    Route::get('/pembelianpermintaandebetnote',     [PembelianPermintaanDebetNoteController::class, 'index']);
+    Route::get('/debetnotespnobukti',               [PembelianPermintaanDebetNoteController::class, 'getNoBukti']);
+    Route::get('/debetnotelistcustomer',            [PembelianPermintaanDebetNoteController::class, 'listCustomer']);
+    Route::post('/debetnotelistinvoice',            [PembelianPermintaanDebetNoteController::class, 'listInvoice']);
+    Route::post('/debetnotespadd',                  [PembelianPermintaanDebetNoteController::class, 'spAdd']);
+    Route::post('/debetnotespdetail',               [PembelianPermintaanDebetNoteController::class, 'getDetail']);
+    Route::post('/debetnotespkoreksi',              [PembelianPermintaanDebetNoteController::class, 'spKoreksi']);
+    Route::get('/debetnoteloadall',                 [PembelianPermintaanDebetNoteController::class, 'loadAll']);
+    Route::post('/debetnotespotorisasi',            [PembelianPermintaanDebetNoteController::class, 'updateOtorisasi']);
+    Route::post('/debetnotespbatalotorisasi',       [PembelianPermintaanDebetNoteController::class, 'updateBatalOtorisasi']);
 
     // // ── NEW PO BELI ACC BIAYA KREDIT ──────────────────────────────────────
     // Route::get('/newpobeliaccbiayakredit',          [NewPOBeliAccBiayaKreditController::class, 'index']);
@@ -128,60 +128,69 @@ Route::middleware('auth')->group(function () {
     // Route::post('/sp_beligudangACCtunai',           [NewPOBeliAccTunaiController::class, 'spBeliGudang']);
     // Route::get('/invoicepembelianprint',            [NewPOBeliAccTunaiController::class, 'spCetak']);
 
-    // // ── NEW PO BELI ACC ───────────────────────────────────────────────────
-    // Route::get('/newpobeliacc',                     [NewPOBeliAccController::class, 'index']);
-    // Route::post('/addDBBeli',                       [NewPOBeliAccController::class, 'addDBBeli']);
-    // Route::post('/detailPOBeli',                    [NewPOBeliAccController::class, 'getDetailPO']);
-    // Route::post('/detailPembelianACC',              [NewPOBeliAccController::class, 'getDetailPembelian']);
-    // Route::get('/getNoBuktibeliacc',                [NewPOBeliAccController::class, 'getNoBukti']);
-    // Route::get('/getAksesNewPOAcc',                 [NewPOBeliAccController::class, 'getAkses']);
-    // Route::post('/spotorisasiBeliAcc',              [NewPOBeliAccController::class, 'spOtorisasi1']);
-    // Route::post('/spUnotorisasiBeliAcc',            [NewPOBeliAccController::class, 'spUnOtorisasi1']);
-    // Route::get('/getAllPOBeliAcc',                   [NewPOBeliAccController::class, 'getAllPO']);
-    // Route::get('/getAllPembelianAcc',                [NewPOBeliAccController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudangACC',                [NewPOBeliAccController::class, 'spBeliGudang']);
+    //NewPOBeliAcc (gabungan: Acc Tunai/Kredit + Jasa Acc Tunai/Kredit)
+    Route::get ('/newpobeliacc',            [NewPOBeliAccController::class, 'index'])->middleware('auth');
+    Route::get ('/newpobeliaccloadall',     [NewPOBeliAccController::class, 'loadAll'])->middleware('auth');
+    Route::get ('/getAksesNewPOAcc',        [NewPOBeliAccController::class, 'getAkses'])->middleware('auth');
+    Route::get ('/getNoBukti',              [NewPOBeliAccController::class, 'getNoBukti'])->middleware('auth');
+    Route::post('/addDBBeli',               [NewPOBeliAccController::class, 'addDBBeli'])->middleware('auth');
+    Route::post('/detailPOBeli',            [NewPOBeliAccController::class, 'getDetailPO'])->middleware('auth');
+    Route::post('/detailPembelianACC',      [NewPOBeliAccController::class, 'getDetailPembelian'])->middleware('auth');
+    Route::post('/sp_beligudangACC',        [NewPOBeliAccController::class, 'spBeliGudang'])->middleware('auth');
+    Route::post('/spotorisasiBeliAcc',      [NewPOBeliAccController::class, 'spOtorisasi1'])->middleware('auth');
+    Route::post('/spUnotorisasiBeliAcc',    [NewPOBeliAccController::class, 'spUnOtorisasi1'])->middleware('auth');
+    Route::post('/acconchangeheader',       [NewPOBeliAccController::class, 'onChangeHeader'])->middleware('auth');
+    Route::post('/accspupdateso',           [NewPOBeliAccController::class, 'spUpdateSO'])->middleware('auth');
+    Route::get ('/invoicepembelianprint',   [NewPOBeliAccController::class, 'spCetak'])->middleware('auth');
 
-    // // ── NEW PO JASA (NON STOCK) ───────────────────────────────────────────
-    // Route::get('/newpojasa',                        [NewPOJasaController::class, 'index']);
-    // Route::post('/addDBBelijasa',                   [NewPOJasaController::class, 'addDBBeli']);
-    // Route::post('/detailPOjasa',                    [NewPOJasaController::class, 'getDetailPO']);
-    // Route::post('/detailPembelianjasa',             [NewPOJasaController::class, 'getDetailPembelian']);
-    // Route::get('/getNoBuktijasa',                   [NewPOJasaController::class, 'getNoBukti']);
-    // Route::get('/getAksesNewPOJasa',                [NewPOJasaController::class, 'getAkses']);
-    // Route::get('/getAllPOjasa',                      [NewPOJasaController::class, 'getAllPO']);
-    // Route::get('/getAllPembelianjasa',               [NewPOJasaController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudangjasa',               [NewPOJasaController::class, 'spBeliGudang']);
+    // Menu lama - entri di database masih menunjuk ke sini, diarahkan ke halaman gabungan.
+    Route::get('/newpobeliacctunai',       function () { return redirect('/newpobeliacc'); })->middleware('auth');
+    Route::get('/newpobeliaccbiayatunai',  function () { return redirect('/newpobeliacc'); })->middleware('auth');
+    Route::get('/newpobeliaccbiayakredit', function () { return redirect('/newpobeliacc'); })->middleware('auth');
 
-    // // ── NEW PO ────────────────────────────────────────────────────────────
-    // Route::get('/newpoCetak',                       [NewPOController::class, 'spCetak']);
-    // Route::get('/newpo',                            [NewPOController::class, 'index']);
-    // Route::post('/detailPO',                        [NewPOController::class, 'getDetailPO']);
-    // Route::post('/detailPembelian',                 [NewPOController::class, 'getDetailPembelian']);
-    // Route::post('/detailCetak',                     [NewPOController::class, 'getDetailCetak']);
-    // Route::get('/getNoBukti',                       [NewPOController::class, 'getNoBukti']);
-    // Route::get('/getAksesNewPO',                    [NewPOController::class, 'getAkses']);
-    // Route::get('/getAllPO',                          [NewPOController::class, 'getAllPO']);
-    // Route::get('/getAllPembelian',                   [NewPOController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudang',                   [NewPOController::class, 'spBeliGudang']);
-    // Route::get('/getOutstandingPODetail',           [NewPOController::class, 'getOutstandingPODetail']);
-    // Route::post('/purchaseorderspaddpr',            [NewPOController::class, 'spAddPr']);
+    // ── NEW PO JASA NON STOCK ─────────────────────────────────────────────
+    Route::get('/newpojasa',            [NewPOJasaController::class, 'index']);
+    Route::post('/addDBBelijasa',       [NewPOJasaController::class, 'addDBBeli']);
+    Route::post('/detailPOjasa',        [NewPOJasaController::class, 'getDetailPO']);
+    Route::post('/detailPembelianjasa', [NewPOJasaController::class, 'getDetailPembelian']);
+    Route::get('/getNoBuktijasa',       [NewPOJasaController::class, 'getNoBukti']);
+    Route::get('/getAksesNewPOJasa',    [NewPOJasaController::class, 'getAkses']);
+    Route::get('/getAllPOjasa',         [NewPOJasaController::class, 'getAllPO']);
+    Route::get('/getAllPembelianjasa',  [NewPOJasaController::class, 'getAllPembelian']);
+    Route::post('/sp_beligudangjasa',   [NewPOJasaController::class, 'spBeliGudang']);
 
-    // // ── PERINTAH RETUR BELI ───────────────────────────────────────────────
-    // Route::get('/perintahreturbeliPrint',           [PerintahReturBeliController::class, 'spCetak']);
-    // Route::get('/perintahreturbeli',                [PerintahReturBeliController::class, 'index']);
-    // Route::get('/prbloadall',                       [PerintahReturBeliController::class, 'loadAll']);
-    // Route::get('/prblistnorjual',                   [PerintahReturBeliController::class, 'listNoRJual']);
-    // Route::get('/prblistnobeli',                    [PerintahReturBeliController::class, 'listNoBeli']);
-    // Route::get('/prblistsupplier',                  [PerintahReturBeliController::class, 'listSupplier']);
-    // Route::get('/prblistgudang',                    [PerintahReturBeliController::class, 'listGudang']);
-    // Route::get('/prblistbarangJualDanBeli',         [PerintahReturBeliController::class, 'listBarangJualDanBeli']);
-    // Route::get('/prblistbarangBeliTanpaJual',       [PerintahReturBeliController::class, 'listBarangBeliTanpaJual']);
-    // Route::get('/prblistbarangJualTanpaBeli',       [PerintahReturBeliController::class, 'listBarangJualTanpaBeli']);
-    // Route::post('/prbspadd',                        [PerintahReturBeliController::class, 'spAdd']);
-    // Route::post('/prbgetdetail',                    [PerintahReturBeliController::class, 'getDetail']);
-    // Route::post('/prbcekotorisasi',                 [PerintahReturBeliController::class, 'cekOtorisasi']);
-    // Route::post('/prbupdateotorisasi',              [PerintahReturBeliController::class, 'updateOtorisasi']);
-    // Route::post('/prbupdatebatalotorisasi',         [PerintahReturBeliController::class, 'updateBatalOtorisasi']);
+    // ── NEW PO ────────────────────────────────────────────────────────────
+    Route::get('/newpoCetak',              [NewPOController::class, 'spCetak']);
+    Route::get('/newpo',                   [NewPOController::class, 'index']);
+    Route::post('/addDBBeli',              [NewPOController::class, 'addDBBeli']);
+    Route::post('/detailPO',               [NewPOController::class, 'getDetailPO']);
+    Route::post('/detailPembelian',        [NewPOController::class, 'getDetailPembelian']);
+    Route::post('/detailCetak',            [NewPOController::class, 'getDetailCetak']);
+    Route::get('/getNoBukti',              [NewPOController::class, 'getNoBukti']);
+    Route::get('/getAksesNewPO',           [NewPOController::class, 'getAkses']);
+    Route::get('/getAllPO',                [NewPOController::class, 'getAllPO']);
+    Route::get('/getAllPembelian',         [NewPOController::class, 'getAllPembelian']);
+    Route::post('/sp_beligudang',          [NewPOController::class, 'spBeliGudang']);
+    Route::get('/getOutstandingPODetail',  [NewPOController::class, 'getOutstandingPODetail']);
+    Route::post('/getDetailPembelian',     [NewPOController::class, 'getDetailPembelian']);
+
+    // ── PERINTAH RETUR BELI ───────────────────────────────────────────────
+    Route::get('/perintahreturbeliPrint',           [PerintahReturBeliController::class, 'spCetak']);
+    Route::get('/perintahreturbeli',                [PerintahReturBeliController::class, 'index']);
+    Route::get('/prbloadall',                       [PerintahReturBeliController::class, 'loadAll']);
+    Route::get('/prblistnorjual',                   [PerintahReturBeliController::class, 'listNoRJual']);
+    Route::get('/prblistnobeli',                    [PerintahReturBeliController::class, 'listNoBeli']);
+    Route::get('/prblistsupplier',                  [PerintahReturBeliController::class, 'listSupplier']);
+    Route::get('/prblistgudang',                    [PerintahReturBeliController::class, 'listGudang']);
+    Route::get('/prblistbarangJualDanBeli',         [PerintahReturBeliController::class, 'listBarangJualDanBeli']);
+    Route::get('/prblistbarangBeliTanpaJual',       [PerintahReturBeliController::class, 'listBarangBeliTanpaJual']);
+    Route::get('/prblistbarangJualTanpaBeli',       [PerintahReturBeliController::class, 'listBarangJualTanpaBeli']);
+    Route::post('/prbspadd',                        [PerintahReturBeliController::class, 'spAdd']);
+    Route::post('/prbgetdetail',                    [PerintahReturBeliController::class, 'getDetail']);
+    Route::post('/prbcekotorisasi',                 [PerintahReturBeliController::class, 'cekOtorisasi']);
+    Route::post('/prbupdateotorisasi',              [PerintahReturBeliController::class, 'updateOtorisasi']);
+    Route::post('/prbupdatebatalotorisasi',         [PerintahReturBeliController::class, 'updateBatalOtorisasi']);
+    Route::post('/prbonchangeheader',               [PerintahReturBeliController::class, 'onChangeHeader']);
 
     // ── PURCHASE ORDER ────────────────────────────────────────────────────
     Route::get('/purchaseorder',                    [POController::class, 'index']);
@@ -220,17 +229,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/podataoutstandingso',              [POController::class, 'dataOutstandingSO']);
     Route::post('/purchaseorderspaddpr',            [POController::class, 'spAddPr']);
 
-    // // ── PURCHASE ORDER NON STOCK ──────────────────────────────────────────
-    // Route::get('/pononstock',                       [PONonStockController::class, 'index']);
-    // Route::get('/polistperkiraan',                  [PONonStockController::class, 'listPerkiraan']);
-    // Route::post('/polistcosting',                   [PONonStockController::class, 'listCosting']);
-    // Route::post('/polistsubcosting',                [PONonStockController::class, 'listSubCosting']);
-    // Route::get('/polistbarangjasa',                 [PONonStockController::class, 'listBarangJasa']);
-    // Route::get('/polistbarangjasanobukti',          [PONonStockController::class, 'listBarangJasaNoBukti']);
-    // Route::post('/ponsspadd',                       [PONonStockController::class, 'spAdd']);
-    // Route::get('/ponsloadall',                      [PONonStockController::class, 'loadAll']);
-    // Route::get('/ponslistbarangfoc',                [PONonStockController::class, 'listBarangFOC']);
-    // Route::get('/nonstockcheckhargaddd',            [PONonStockController::class, 'CheckHargaAdd']);
+    // ── PURCHASE ORDER NONSTOCK ───────────────────────────────────────────
+    Route::get('/pononstock',              [PONonStockController::class, 'index']);
+    Route::get('/polistperkiraan',         [PONonStockController::class, 'listPerkiraan']);
+    Route::post('/polistcosting',          [PONonStockController::class, 'listCosting']);
+    Route::post('/polistsubcosting',       [PONonStockController::class, 'listSubCosting']);
+    Route::get('/polistbarangjasa',        [PONonStockController::class, 'listBarangJasa']);
+    Route::get('/polistbarangjasanobukti', [PONonStockController::class, 'listBarangJasaNoBukti']);
+    Route::post('/ponsspadd',              [PONonStockController::class, 'spAdd']);
+    Route::get('/ponsloadall',             [PONonStockController::class, 'loadAll']);
+    Route::get('/ponslistbarangfoc',       [PONonStockController::class, 'listBarangFOC']);
+    Route::get('/nonstockcheckhargaddd',   [PONonStockController::class, 'CheckHargaAdd']);
+    Route::get('/ponsloadpurchaseorder',   [PONonStockController::class, 'loadPurchaseOrder']);
+    Route::get('/ponsdataoutstandingpr',   [PONonStockController::class, 'dataOutstandingPR']);
+    Route::post('/ponslistbarangjasaall',  [PONonStockController::class, 'listBarangJasaAll']);
 
     // ── CLOSING PO ────────────────────────────────────────────────────────
     Route::get('/closingpurchaseorder',             [ClosingPOController::class, 'index']);
@@ -246,57 +258,58 @@ Route::middleware('auth')->group(function () {
     Route::post('/closingpospopenheader',           [ClosingPOController::class, 'updateOpenHeader']);
     Route::get('/closingpoprint',                   [ClosingPOController::class, 'spCetak']);
 
-    // // ── INVOICE RETUR BELI ────────────────────────────────────────────────
-    // Route::get('/invoiceReturBeliCetak',            [InvoiceReturBeliController::class, 'spCetak']);
-    // Route::get('/invoicereturbeli',                 [InvoiceReturBeliController::class, 'index']);
-    // Route::get('/invoicereturbelispnobukti',        [InvoiceReturBeliController::class, 'getNoBukti']);
-    // Route::post('/invoicereturbelionchangeheader',  [InvoiceReturBeliController::class, 'onChangeHeader']);
-    // Route::get('/invoicereturbelilistcustomer',     [InvoiceReturBeliController::class, 'listCustomer']);
-    // Route::post('/invoicereturbelilistnoinvoice',   [InvoiceReturBeliController::class, 'listNoInvoice']);
-    // Route::post('/invoicereturbelilistbarang',      [InvoiceReturBeliController::class, 'listBarang']);
-    // Route::post('/invoicereturbelilistnobeli',      [InvoiceReturBeliController::class, 'listNoBeli']);
-    // Route::post('/invoicereturbeligetdetail',       [InvoiceReturBeliController::class, 'getDetail']);
-    // Route::post('/invoicereturbelispadd',           [InvoiceReturBeliController::class, 'spAdd']);
-    // Route::get('/invoicereturbeliloadall',          [InvoiceReturBeliController::class, 'loadAll']);
-    // Route::post('/invoicereturbelispotorisasi',     [InvoiceReturBeliController::class, 'spOtorisasi']);
-    // Route::post('/invoicereturbelispbatalotorisasi',[InvoiceReturBeliController::class, 'spBatalOtorisasi']);
-    // Route::get('/invoicereturbeligetLPBdetail',     [InvoiceReturBeliController::class, 'getLPBDetail']);
+    // ── INVOICE RETUR BELI ────────────────────────────────────────────────
+    Route::get('/invoiceReturBeliCetak',            [InvoiceReturBeliController::class, 'spCetak']);
+    Route::get('/invoicereturbeli',                 [InvoiceReturBeliController::class, 'index']);
+    Route::get('/invoicereturbelispnobukti',        [InvoiceReturBeliController::class, 'getNoBukti']);
+    Route::post('/invoicereturbelionchangeheader',  [InvoiceReturBeliController::class, 'onChangeHeader']);
+    Route::get('/invoicereturbelilistcustomer',     [InvoiceReturBeliController::class, 'listCustomer']);
+    Route::post('/invoicereturbelilistnoinvoice',   [InvoiceReturBeliController::class, 'listNoInvoice']);
+    Route::post('/invoicereturbelilistbarang',      [InvoiceReturBeliController::class, 'listBarang']);
+    Route::post('/invoicereturbelilistnobeli',      [InvoiceReturBeliController::class, 'listNoBeli']);
+    Route::post('/invoicereturbeligetdetail',       [InvoiceReturBeliController::class, 'getDetail']);
+    Route::post('/invoicereturbelispadd',           [InvoiceReturBeliController::class, 'spAdd']);
+    Route::post('/invoicereturbelispdelete',        [InvoiceReturBeliController::class, 'spDelete']);
+    Route::get('/invoicereturbeliloadall',          [InvoiceReturBeliController::class, 'loadAll']);
+    Route::post('/invoicereturbelispotorisasi',     [InvoiceReturBeliController::class, 'spOtorisasi']);
+    Route::post('/invoicereturbelispbatalotorisasi',[InvoiceReturBeliController::class, 'spBatalOtorisasi']);
+    Route::get('/invoicereturbeligetLPBdetail',     [InvoiceReturBeliController::class, 'getLPBDetail']);
 
-    // // ── RETUR PEMBELIAN GUDANG ────────────────────────────────────────────
-    // Route::get('/returbeli',                        [ReturPembelianGudangController::class, 'index']);
-    // Route::get('/returpembeliangudangprint',        [ReturPembelianGudangController::class, 'spCetak']);
-    // Route::get('/rpgloadAll',                       [ReturPembelianGudangController::class, 'loadAll']);
-    // Route::post('/detailoutstandingreturbeli',      [ReturPembelianGudangController::class, 'getDetailOutstanding']);
-    // Route::get('/getnobuktireturbeli',              [ReturPembelianGudangController::class, 'getNoBukti']);
-    // Route::post('/addreturbeli',                    [ReturPembelianGudangController::class, 'spAdd']);
-    // Route::post('/detailpenerimaanreturbeli',       [ReturPembelianGudangController::class, 'getDetailPenerimaan']);
-    // Route::post('/koreksireturbeli',                [ReturPembelianGudangController::class, 'spKoreksi']);
-    // Route::post('/returbelikoreksiaddlist',         [ReturPembelianGudangController::class, 'getKoreksiAddList']);
+    // ── RETUR PEMBELIAN GUDANG ────────────────────────────────────────────
+    Route::get('/returbeli',                        [ReturPembelianGudangController::class, 'index']);
+    Route::get('/returpembeliangudangprint',        [ReturPembelianGudangController::class, 'spCetak']);
+    Route::get('/rpgloadAll',                       [ReturPembelianGudangController::class, 'loadAll']);
+    Route::post('/detailoutstandingreturbeli',      [ReturPembelianGudangController::class, 'getDetailOutstanding']);
+    Route::get('/getnobuktireturbeli',              [ReturPembelianGudangController::class, 'getNoBukti']);
+    Route::post('/addreturbeli',                    [ReturPembelianGudangController::class, 'spAdd']);
+    Route::post('/detailpenerimaanreturbeli',       [ReturPembelianGudangController::class, 'getDetailPenerimaan']);
+    Route::post('/koreksireturbeli',                [ReturPembelianGudangController::class, 'spKoreksi']);
+    Route::post('/returbelikoreksiaddlist',         [ReturPembelianGudangController::class, 'getKoreksiAddList']);
 
-    // // ── INVOICE PEMBELIAN ─────────────────────────────────────────────────
-    // Route::get('/invoicepembelian',                 [InvoicePembelianController::class, 'index']);
-    // Route::post('/detailbeli',                      [InvoicePembelianController::class, 'getDetailPO']);
-    // Route::post('/detailBeliDet',                   [InvoicePembelianController::class, 'getBeliDet']);
-    // Route::post('/detailInvoiceBeli',               [InvoicePembelianController::class, 'getDetailPembelian']);
-    // Route::get('/getNoBuktiInvoiceBeli',            [InvoicePembelianController::class, 'getNoBukti']);
-    // Route::get('/getAksesInvoiceBeli',              [InvoicePembelianController::class, 'getAkses']);
-    // Route::post('/spotorisasiInvoiceBeli',          [InvoicePembelianController::class, 'spOtorisasi1']);
-    // Route::post('/spUnotorisasiInvoiceBeli',        [InvoicePembelianController::class, 'spUnOtorisasi1']);
-    // Route::get('/getAllInvoiceBeli',                 [InvoicePembelianController::class, 'getAllPO']);
-    // Route::get('/getAlloutbeliinv',                  [InvoicePembelianController::class, 'getAllPembelian']);
-    // Route::post('/sp_beligudangInvoiceBeli',        [InvoicePembelianController::class, 'spBeliGudang']);
-    // Route::post('/sp_edittransaksi',                [InvoicePembelianController::class, 'spedit']);
-    // Route::post('/sp_hapusinvoice',                 [InvoicePembelianController::class, 'deleteinvoice']);
+    // ── INVOICE PEMBELIAN ─────────────────────────────────────────────────
+    Route::get('/invoicepembelian',                 [InvoicePembelianController::class, 'index']);
+    Route::post('/detailbeli',                      [InvoicePembelianController::class, 'getDetailPO']);
+    Route::post('/detailBeliDet',                   [InvoicePembelianController::class, 'getBeliDet']);
+    Route::post('/detailInvoiceBeli',               [InvoicePembelianController::class, 'getDetailPembelian']);
+    Route::get('/getNoBuktiInvoiceBeli',            [InvoicePembelianController::class, 'getNoBukti']);
+    Route::get('/getAksesInvoiceBeli',              [InvoicePembelianController::class, 'getAkses']);
+    Route::post('/spotorisasiInvoiceBeli',          [InvoicePembelianController::class, 'spOtorisasi1']);
+    Route::post('/spUnotorisasiInvoiceBeli',        [InvoicePembelianController::class, 'spUnOtorisasi1']);
+    Route::get('/getAllInvoiceBeli',                 [InvoicePembelianController::class, 'getAllPO']);
+    Route::get('/getAlloutbeliinv',                  [InvoicePembelianController::class, 'getAllPembelian']);
+    Route::post('/sp_beligudangInvoiceBeli',        [InvoicePembelianController::class, 'spBeliGudang']);
+    Route::post('/sp_edittransaksi',                [InvoicePembelianController::class, 'spedit']);
+    Route::post('/sp_hapusinvoice',                 [InvoicePembelianController::class, 'deleteinvoice']);
 
-    // // ── UANG MUKA BELI ────────────────────────────────────────────────────
-    // Route::get('/uangmukabeli',                     [UangMukaBeliController::class, 'index']);
-    // Route::get('/uangmukabeliprint',                [UangMukaBeliController::class, 'spCetak']);
-    // Route::get('/uangmukabelilistpo',               [UangMukaBeliController::class, 'listPO']);
-    // Route::post('/uangmukabelidetail',              [UangMukaBeliController::class, 'getDetail']);
-    // Route::post('/uangmukabelispdelete',            [UangMukaBeliController::class, 'spDelete']);
-    // Route::get('/uangmukabeliloadall',              [UangMukaBeliController::class, 'loadAll']);
-    // Route::post('/uangmukabelispadd',               [UangMukaBeliController::class, 'spAdd']);
-    // Route::post('/uangmukabelispotorisasi',         [UangMukaBeliController::class, 'spOtorisasi']);
-    // Route::post('/uangmukabelispbatalotorisasi',    [UangMukaBeliController::class, 'spBatalOtorisasi']);
+    // ── UANG MUKA BELI ────────────────────────────────────────────────────
+    Route::get('/uangmukabeli',                  [UangMukaBeliController::class, 'index']);
+    Route::get('/uangmukabeliprint',             [UangMukaBeliController::class, 'spCetak']);
+    Route::get('/uangmukabelilistpo',            [UangMukaBeliController::class, 'listPO']);
+    Route::post('/uangmukabelidetail',           [UangMukaBeliController::class, 'getDetail']);
+    Route::post('/uangmukabelispdelete',         [UangMukaBeliController::class, 'spDelete']);
+    Route::get('/uangmukabeliloadall',           [UangMukaBeliController::class, 'loadAll']);
+    Route::post('/uangmukabelispadd',            [UangMukaBeliController::class, 'spAdd']);
+    Route::post('/uangmukabelispotorisasi',      [UangMukaBeliController::class, 'spOtorisasi']);
+    Route::post('/uangmukabelispbatalotorisasi', [UangMukaBeliController::class, 'spBatalOtorisasi']);
 
 });
