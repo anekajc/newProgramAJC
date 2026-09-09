@@ -143,106 +143,106 @@ Route::middleware('auth')->group(function () {
 // Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
 
 
-// // Giro Diterima
-// Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
-// Route::get('/giroditerimalistperkiraanheader', [GiroDiterimaController::class, 'listPerkiraanHeader']);
-// Route::post('/giroditerimalistlawan', [GiroDiterimaController::class, 'listLawan']);
-// Route::post('/giroditerimalistlawanbgc', [GiroDiterimaController::class, 'listLawanBGC']);
-// Route::post('/giroditerimalistgiro', [GiroDiterimaController::class, 'listGiro']);
-// Route::post('/giroditerimaspnobukti', [GiroDiterimaController::class, 'getNoBukti']);
-// Route::post('/giroditerimacekgiroexist', [GiroDiterimaController::class, 'cekGiroExist']);
-// Route::post('/giroditerimalistpencairangiro', [GiroDiterimaController::class, 'listPencairanGiro']);
-// Route::post('/giroditerimalistpencairangirokoreksi', [GiroDiterimaController::class, 'listPencairanGiroKoreksi']);
-// Route::post('/giroditerimalistpencairangirobgt', [GiroDiterimaController::class, 'listPencairanGiroKoreksiBGT']);
+// Giro Diterima
+Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
+Route::get('/giroditerimalistperkiraanheader', [GiroDiterimaController::class, 'listPerkiraanHeader']);
+Route::post('/giroditerimalistlawan', [GiroDiterimaController::class, 'listLawan']);
+Route::post('/giroditerimalistlawanbgc', [GiroDiterimaController::class, 'listLawanBGC']);
+Route::post('/giroditerimalistgiro', [GiroDiterimaController::class, 'listGiro']);
+Route::post('/giroditerimaspnobukti', [GiroDiterimaController::class, 'getNoBukti']);
+Route::post('/giroditerimacekgiroexist', [GiroDiterimaController::class, 'cekGiroExist']);
+Route::post('/giroditerimalistpencairangiro', [GiroDiterimaController::class, 'listPencairanGiro']);
+Route::post('/giroditerimalistpencairangirokoreksi', [GiroDiterimaController::class, 'listPencairanGiroKoreksi']);
+Route::post('/giroditerimalistpencairangirobgt', [GiroDiterimaController::class, 'listPencairanGiroKoreksiBGT']);
 
-// Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiroBGT']);
-// // Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
-
-
-
-
-// Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
-// Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
-// Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
-// Route::post('/giroditerimaspadd', [GiroDiterimaController::class, 'spAdd']);
-// Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']);
-// Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
-// Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
-// Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
+Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiroBGT']);
+// Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
 
 
 
 
-
-// Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
-// Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
-// Route::get('/giroditerimalistdph', [GiroDiterimaController::class, 'listDPH']);
-// Route::get('/giroditerimalistdphuht', [GiroDiterimaController::class, 'listDPHUHT']);
-// Route::get('/giroditerimalistdpp', [GiroDiterimaController::class, 'listDPP']);
-// Route::get('/giroditerimalistcustsupp', [GiroDiterimaController::class, 'listCustsupp']);
-// Route::get('/giroditerimalistcustsuppumb', [GiroDiterimaController::class, 'listCustsuppUMB']);
-// Route::post('/giroditerimaprosesumb', [GiroDiterimaController::class, 'prosesUMB']);
-// Route::post('/giroditerimalistumb', [GiroDiterimaController::class, 'listUMB']);
-// Route::post('/giroditerimaspadddppdph', [GiroDiterimaController::class, 'spAddDPPDPH']);
-// Route::post('/giroditerimaspaddtemprumjual', [GiroDiterimaController::class, 'spAddTempRUMJUAL']);
-// Route::post('/giroditerimaspdeletetemprumjual', [GiroDiterimaController::class, 'spDeleteTempRUMJUAL']);
-// Route::post('/giroditerimaspupdatetemprumjual', [GiroDiterimaController::class, 'spUpdateTempRUMJUAL']);
-// Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtorisasi']);
-// Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
-// Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
-
-
-
-
-// // Giro Dibuka
-// Route::get('/girodibuka', [GiroDibukaController::class, 'index']);
-// Route::get('/girodibukalistperkiraanheader', [GiroDibukaController::class, 'listPerkiraanHeader']);
-// Route::post('/girodibukalistlawan', [GiroDibukaController::class, 'listLawan']);
-// Route::post('/girodibukalistlawanbgc', [GiroDibukaController::class, 'listLawanBGC']);
-// Route::post('/girodibukalistgiro', [GiroDibukaController::class, 'listGiro']);
-// Route::post('/girodibukaspnobukti', [GiroDibukaController::class, 'getNoBukti']);
-// Route::post('/girodibukacekgiroexist', [GiroDibukaController::class, 'cekGiroExist']);
-// Route::post('/girodibukalistpencairangiro', [GiroDibukaController::class, 'listPencairanGiro']);
-// Route::post('/girodibukalistpencairangirokoreksi', [GiroDibukaController::class, 'listPencairanGiroKoreksi']);
-// Route::post('/girodibukalistpencairangirobgt', [GiroDibukaController::class, 'listPencairanGiroKoreksiBGT']);
-
-// Route::post('/girodibukaspaddgirobgt', [GiroDibukaController::class, 'spGiroBGT']);
-// // Route::post('/girodibukaspdeletegirobgt', [GiroDibukaController::class, 'spDeleteGiroBGT']);
-
-
-
-
-// Route::get('/girodibukalistdepartemen', [GiroDibukaController::class, 'listDepartemen']);
-// Route::get('/girodibukalistdevisi', [GiroDibukaController::class, 'listDevisi']);
-// Route::get('/girodibukalistvalas', [GiroDibukaController::class, 'listValas']);
-// Route::post('/girodibukaspadd', [GiroDibukaController::class, 'spAdd']);
-// Route::post('/girodibukaspaddbgc', [GiroDibukaController::class, 'spAddBGC']);
-// Route::post('/girodibukaspaddgirokoreksi', [GiroDibukaController::class, 'spAddGiroKoreksi']);
-// Route::post('/girodibukaspdeletegirokoreksi', [GiroDibukaController::class, 'spDeleteGiroKoreksi']);
-// Route::post('/girodibukaspdelete', [GiroDibukaController::class, 'spDelete']);
+Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
+Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
+Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
+Route::post('/giroditerimaspadd', [GiroDiterimaController::class, 'spAdd']);
+Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']);
+Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
+Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
+Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
 
 
 
 
 
-// Route::post('/girodibukaspdetail', [GiroDibukaController::class, 'getDetail']);
-// Route::get('/girodibukaloadall', [GiroDibukaController::class, 'loadAll']);
-// Route::get('/girodibukalistdph', [GiroDibukaController::class, 'listDPH']);
-// Route::get('/girodibukalistdphbbg', [GiroDibukaController::class, 'listDPHBBG']);
+Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
+Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
+Route::get('/giroditerimalistdph', [GiroDiterimaController::class, 'listDPH']);
+Route::get('/giroditerimalistdphuht', [GiroDiterimaController::class, 'listDPHUHT']);
+Route::get('/giroditerimalistdpp', [GiroDiterimaController::class, 'listDPP']);
+Route::get('/giroditerimalistcustsupp', [GiroDiterimaController::class, 'listCustsupp']);
+Route::get('/giroditerimalistcustsuppumb', [GiroDiterimaController::class, 'listCustsuppUMB']);
+Route::post('/giroditerimaprosesumb', [GiroDiterimaController::class, 'prosesUMB']);
+Route::post('/giroditerimalistumb', [GiroDiterimaController::class, 'listUMB']);
+Route::post('/giroditerimaspadddppdph', [GiroDiterimaController::class, 'spAddDPPDPH']);
+Route::post('/giroditerimaspaddtemprumjual', [GiroDiterimaController::class, 'spAddTempRUMJUAL']);
+Route::post('/giroditerimaspdeletetemprumjual', [GiroDiterimaController::class, 'spDeleteTempRUMJUAL']);
+Route::post('/giroditerimaspupdatetemprumjual', [GiroDiterimaController::class, 'spUpdateTempRUMJUAL']);
+Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtorisasi']);
+Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
+Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
 
-// Route::get('/girodibukalistdphuht', [GiroDibukaController::class, 'listDPHUHT']);
-// Route::get('/girodibukalistdpp', [GiroDibukaController::class, 'listDPP']);
-// Route::get('/girodibukalistcustsupp', [GiroDibukaController::class, 'listCustsupp']);
-// Route::get('/girodibukalistcustsuppumb', [GiroDibukaController::class, 'listCustsuppUMB']);
-// Route::post('/girodibukaprosesumb', [GiroDibukaController::class, 'prosesUMB']);
-// Route::post('/girodibukalistumb', [GiroDibukaController::class, 'listUMB']);
-// Route::post('/girodibukaspadddppdph', [GiroDibukaController::class, 'spAddDPPDPH']);
-// Route::post('/girodibukaspaddtemprumjual', [GiroDibukaController::class, 'spAddTempRUMJUAL']);
-// Route::post('/girodibukaspdeletetemprumjual', [GiroDibukaController::class, 'spDeleteTempRUMJUAL']);
-// Route::post('/girodibukaspupdatetemprumjual', [GiroDibukaController::class, 'spUpdateTempRUMJUAL']);
-// Route::post('/girodibukaspotorisasi', [GiroDibukaController::class, 'spOtorisasi']);
-// Route::post('/girodibukaspbatalotorisasi', [GiroDibukaController::class, 'spBatalOtorisasi']);
-// Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCetak']);
+
+
+
+// Giro Dibuka
+Route::get('/girodibuka', [GiroDibukaController::class, 'index']);
+Route::get('/girodibukalistperkiraanheader', [GiroDibukaController::class, 'listPerkiraanHeader']);
+Route::post('/girodibukalistlawan', [GiroDibukaController::class, 'listLawan']);
+Route::post('/girodibukalistlawanbgc', [GiroDibukaController::class, 'listLawanBGC']);
+Route::post('/girodibukalistgiro', [GiroDibukaController::class, 'listGiro']);
+Route::post('/girodibukaspnobukti', [GiroDibukaController::class, 'getNoBukti']);
+Route::post('/girodibukacekgiroexist', [GiroDibukaController::class, 'cekGiroExist']);
+Route::post('/girodibukalistpencairangiro', [GiroDibukaController::class, 'listPencairanGiro']);
+Route::post('/girodibukalistpencairangirokoreksi', [GiroDibukaController::class, 'listPencairanGiroKoreksi']);
+Route::post('/girodibukalistpencairangirobgt', [GiroDibukaController::class, 'listPencairanGiroKoreksiBGT']);
+
+Route::post('/girodibukaspaddgirobgt', [GiroDibukaController::class, 'spGiroBGT']);
+// Route::post('/girodibukaspdeletegirobgt', [GiroDibukaController::class, 'spDeleteGiroBGT']);
+
+
+
+
+Route::get('/girodibukalistdepartemen', [GiroDibukaController::class, 'listDepartemen']);
+Route::get('/girodibukalistdevisi', [GiroDibukaController::class, 'listDevisi']);
+Route::get('/girodibukalistvalas', [GiroDibukaController::class, 'listValas']);
+Route::post('/girodibukaspadd', [GiroDibukaController::class, 'spAdd']);
+Route::post('/girodibukaspaddbgc', [GiroDibukaController::class, 'spAddBGC']);
+Route::post('/girodibukaspaddgirokoreksi', [GiroDibukaController::class, 'spAddGiroKoreksi']);
+Route::post('/girodibukaspdeletegirokoreksi', [GiroDibukaController::class, 'spDeleteGiroKoreksi']);
+Route::post('/girodibukaspdelete', [GiroDibukaController::class, 'spDelete']);
+
+
+
+
+
+Route::post('/girodibukaspdetail', [GiroDibukaController::class, 'getDetail']);
+Route::get('/girodibukaloadall', [GiroDibukaController::class, 'loadAll']);
+Route::get('/girodibukalistdph', [GiroDibukaController::class, 'listDPH']);
+Route::get('/girodibukalistdphbbg', [GiroDibukaController::class, 'listDPHBBG']);
+
+Route::get('/girodibukalistdphuht', [GiroDibukaController::class, 'listDPHUHT']);
+Route::get('/girodibukalistdpp', [GiroDibukaController::class, 'listDPP']);
+Route::get('/girodibukalistcustsupp', [GiroDibukaController::class, 'listCustsupp']);
+Route::get('/girodibukalistcustsuppumb', [GiroDibukaController::class, 'listCustsuppUMB']);
+Route::post('/girodibukaprosesumb', [GiroDibukaController::class, 'prosesUMB']);
+Route::post('/girodibukalistumb', [GiroDibukaController::class, 'listUMB']);
+Route::post('/girodibukaspadddppdph', [GiroDibukaController::class, 'spAddDPPDPH']);
+Route::post('/girodibukaspaddtemprumjual', [GiroDibukaController::class, 'spAddTempRUMJUAL']);
+Route::post('/girodibukaspdeletetemprumjual', [GiroDibukaController::class, 'spDeleteTempRUMJUAL']);
+Route::post('/girodibukaspupdatetemprumjual', [GiroDibukaController::class, 'spUpdateTempRUMJUAL']);
+Route::post('/girodibukaspotorisasi', [GiroDibukaController::class, 'spOtorisasi']);
+Route::post('/girodibukaspbatalotorisasi', [GiroDibukaController::class, 'spBatalOtorisasi']);
+Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCetak']);
 
  
 // // PENGAJUAN DPH
@@ -281,33 +281,40 @@ Route::post('/pengajuandphtunaispbatalotorisasi' , [PengajuanDPHTunaiController:
 Route::post('/pengajuandphtunaidetailCetak', [PengajuanDPHTunaiController::class, 'getDetailCetak']);
 
 
-// // PENGAJUAN DPP
-// Route::get('/pengajuandpp', [PengajuanDPPController::class, 'index']);
-// Route::post('/pengajuandppspdetail', [PengajuanDPPController::class, 'getDetail']);
-// Route::post('/pengajuandppsplistpengajuan', [PengajuanDPPController::class, 'getListPengajuan']);
-// Route::post('/pengajuandppspadd' , [PengajuanDPPController::class, 'spAdd']);
-// Route::post('/pengajuandppspkoreksi' , [PengajuanDPPController::class, 'spKoreksi']);
-// Route::get('/pengajuandpploadall' , [PengajuanDPPController::class, 'loadAll']);
-// Route::post('/pengajuandppspotorisasi' , [PengajuanDPPController::class, 'spOtorisasi']);
-// Route::post('/pengajuandppspbatalotorisasi' , [PengajuanDPPController::class, 'spBatalOtorisasi']);
-// Route::post('/pengajuandppdetailCetak', [PengajuanDPPController::class, 'getDetailCetak']);
+// PENGAJUAN DPP
+Route::controller(PengajuanDPPController::class)->group(function () {
+    Route::get('/pengajuandpp', 'index');
+    Route::get('/pengajuandpploadall', 'loadAll');
+    Route::post('/pengajuandppresetheader', 'resetHeader');
+    Route::post('/pengajuandppspdetail', 'getDetail');
+    Route::post('/pengajuandppsplistpengajuan', 'getListPengajuan');
+    Route::post('/pengajuandppspadd', 'spAdd');
+    Route::post('/pengajuandppspkoreksi', 'spKoreksi');
+    Route::post('/pengajuandppspotorisasi', 'spOtorisasi');
+    Route::post('/pengajuandppspbatalotorisasi', 'spBatalOtorisasi');
+    Route::post('/pengajuandppdetailCetak', 'getDetailCetak');
+});
 
 
-
-// // PENERIMAAN DPP
-// Route::get('/penerimaandpp' , [PenerimaanDPPController::class, 'index']);
-// Route::get('/penerimaandpplistperkiraanadd' , [PenerimaanDPPController::class, 'listPerkiraanAdd']);
-// Route::get('/penerimaandpplistperkiraanlbkl' , [PenerimaanDPPController::class, 'listPerkiraanLBKL']);
-// Route::post('/penerimaandppdetailkoreksi' , [PenerimaanDPPController::class, 'detailKoreksi']);
-// Route::post('/penerimaandppdetailoutstanding' , [PenerimaanDPPController::class, 'detailOutstanding']);
-// Route::post('/penerimaandpplistproses' , [PenerimaanDPPController::class, 'listProses']);
-// Route::post('/penerimaandppcheckgiro' , [PenerimaanDPPController::class, 'checkGiro']);
-// Route::post('/penerimaandppspgiro' , [PenerimaanDPPController::class, 'spGiro']);
-// Route::post('/penerimaandppspadd' , [PenerimaanDPPController::class, 'spAdd']);
-// Route::post('/penerimaandppspkoreksi' , [PenerimaanDPPController::class, 'spKoreksi']);
-// Route::post('/penerimaandppspproses' , [PenerimaanDPPController::class, 'spProses']);
-// Route::get('/penerimaandpploadall' , [PenerimaanDPPController::class, 'loadAll'] );
-// Route::post('/penerimaandppdetailCetak', [PenerimaanDPPController::class, 'getDetailCetak']);
+// PENERIMAAN DPP
+Route::controller(PenerimaanDPPController::class)->group(function () {
+    Route::get('/penerimaandpp', 'index');
+    Route::get('/penerimaandpploadall', 'loadAll');
+    Route::post('/penerimaandppresetheader', 'resetHeader');
+    Route::get('/penerimaandpplistperkiraanadd', 'listPerkiraanAdd');
+    Route::get('/penerimaandpplistperkiraanlbkl', 'listPerkiraanLBKL');
+    Route::post('/penerimaandppdetailkoreksi', 'detailKoreksi');
+    Route::post('/penerimaandppdetailoutstanding', 'detailOutstanding');
+    Route::post('/penerimaandpplistproses', 'listProses');
+    Route::post('/penerimaandppcheckgiro', 'checkGiro');
+    Route::post('/penerimaandppspgiro', 'spGiro');
+    Route::post('/penerimaandppspadd', 'spAdd');
+    Route::post('/penerimaandppspkoreksi', 'spKoreksi');
+    Route::post('/penerimaandppspproses', 'spProses');
+    Route::post('/penerimaandppspotorisasi', 'spOtorisasi');
+    Route::post('/penerimaandppspbatalotorisasi', 'spBatalOtorisasi');
+    Route::post('/penerimaandppdetailCetak', 'getDetailCetak');
+});
 
 
 // // PELUNASAN PIUTANG DPP
