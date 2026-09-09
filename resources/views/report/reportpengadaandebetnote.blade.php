@@ -60,9 +60,9 @@
                   <th style="min-width:130px">No. Bukti</th>
                   <th style="min-width:130px">No. Invoice</th>
                   <th style="min-width:90px">Tanggal</th>
-                  <th style="min-width:110px">Kode Customer</th>
+                  <th style="min-width:110px">Kode Supplier</th>
                   <th style="min-width:130px">Nama Supplier</th>
-                  <th class="num" style="min-width:10px">Nilai VLS</th>
+                  <th class="num" style="min-width:10px">Nilai</th>
                   <th style="min-width:70px">VLS</th>
                   <th style="min-width:70px">Kurs</th>
                   <th class="num" style="min-width:10px">DPP</th>
@@ -110,7 +110,7 @@
         <div class="modal-body">
 
           <div class="rt-section">
-            <div class="rt-group-label">Filter Data</div>
+            {{-- <div class="rt-group-label">Filter Data</div> --}}
             <div class="rt-grid-1">
               <div class="mb-3">
                 <label class="rt-field-label">Otorisasi</label>
@@ -218,9 +218,9 @@
       ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
       ['NoInv', 'No. Invoice', 1, 'varchar', 0, 0],
       ['tanggal', 'Tanggal', 1, 'date', 0, 0],
-      ['kodecustsupp', 'Kode Customer', 1, 'varchar', 0, 0],
+      ['kodecustsupp', 'Kode Supplier', 1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-      ['NDPP', 'Nilai VLS', 1, 'float', 1, 2],
+      ['NDPP', 'NilaiLS', 1, 'float', 1, 2],
       ['KodeVLS', 'VLS', 1, 'varchar', 0, 0],
       ['Kurs', 'Kurs', 1, 'varchar', 0, 0],
       ['NDPPRP', 'DPP', 1, 'float', 1, 2],
