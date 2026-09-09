@@ -1,4 +1,4 @@
-@extends('accounting.newmaster')
+@extends('newmasterTest')
 @section('buttons')
 @section('page-title', 'Penerimaan DPP')
 
