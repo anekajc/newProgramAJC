@@ -60,7 +60,7 @@
                   <th style="min-width:90px">Tanggal</th>
                   <th style="min-width:130px">Nama Cust Supp</th>
                   <th style="min-width:130px">Nama Barang</th>
-                  <th class="num" style="min-width:10px">Qnt</th>
+                  <th class="num" style="min-width:10px">Qty</th>
                   <th style="min-width:70px">Satuan</th>
                   <th class="num" style="min-width:10px">Harga</th>
                   <th class="num" style="min-width:10px">Disc</th>
@@ -113,7 +113,7 @@
         <div class="modal-body">
 
           <div class="rt-section">
-            <div class="rt-group-label">Filter Data</div>
+            {{-- <div class="rt-group-label">Filter Data</div> --}}
             <div class="rt-grid-1">
               <div class="mb-3">
                 <label class="rt-field-label">Otorisasi</label>
@@ -225,7 +225,9 @@
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
         ['namabrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'Qnt', 1, 'float', 1, 2],
+        ['NoInvoice', 'No. Invoice', 1, 'varchar', 0, 0],
+        ['TglInvoice', 'Tanggal Invoice', 1, 'date', 0, 0],
+        ['qnt', 'Qty', 1, 'float', 1, 2],
         ['SATUAN', 'Sat', 1, 'varchar', 0, 0],
         ['harga', 'Harga', 1, 'float', 1, 2],
         ['DISCTOT', 'Disc', 1, 'float', 1, 2],
@@ -242,7 +244,9 @@
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['NAMACUSTSUPP', 'Nama Cust Supp', 1, 'varchar', 0, 0],
         ['namabrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'Qnt', 1, 'float', 1, 2],
+        ['NoInvoice', 'No. Invoice', 1, 'varchar', 0, 0],
+        ['TglInvoice', 'Tanggal Invoice', 1, 'date', 0, 0],
+        ['qnt', 'Qty', 1, 'float', 1, 2],
         ['SATUAN', 'Sat', 1, 'varchar', 0, 0],
         ['harga', 'Harga', 1, 'float', 1, 2],
         ['DISCTOT', 'Disc', 1, 'float', 1, 2],

@@ -63,7 +63,7 @@
                   <th style="min-width:130px">Nama Supplier</th>
                   <th style="min-width:130px">Nama Barang</th>
                   <th style="min-width:110px">Kode Barang</th>
-                  <th class="num" style="min-width:10px">Qnt</th>
+                  <th class="num" style="min-width:10px">Qty</th>
                   <th style="min-width:70px">Satuan</th>
                   <th style="min-width:100px">Otorisasi</th>
                 </tr>
@@ -219,11 +219,11 @@
       ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
       ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
       ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
-      ['qnt', 'Qnt', 1, 'float', 1, 2],
+      ['qnt', 'Qty', 1, 'float', 1, 2],
       ['satuan', 'Satuan', 1, 'varchar', 0, 0],
       ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0]
     ];
-    gsum_issubtotal = 0; gsum_isgrandtotal = 0;
+    gsum_issubtotal = 1; gsum_isgrandtotal = 1;
   }
 
   const reportUrl = "{{ url('laporanreturpembeliangdg_doReport') }}"
