@@ -144,8 +144,8 @@
 </style>
 
 <style>
-  {{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied and
-       rescoped to this page's own #tabel/#tabel2 from so.blade.php's @section('css'). --}}
+  /* {{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied and
+       rescoped to this page's own #tabel/#tabel2 from so.blade.php's @section('css'). --}} */
   #tabel td:first-child,
   #tabel2 td:first-child {
     display: flex;
@@ -482,37 +482,37 @@
 
   <div class="card">
     <div class="card-body" style="padding:0;">
-  <div class="po-toolbar">
+      <div class="po-toolbar">
 
-    <div class="po-filter-wrap">
-      <label>Periode</label>
-      <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalawal_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-      <span class="po-filter-sep">s/d</span>
-      <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalakhir_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
-    </div>
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalawal_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalakhir_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+        </div>
 
-    <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
+        <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
 
-    <div class="po-len-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="po-len-inp">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
+        <div class="po-len-wrap">
+          <label for="tabel_length_visual">Tampilkan</label>
+          <select id="tabel_length_visual" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
 
-    <button class="po-btn-filter" type="button" onclick="$('#modalFilterRSJ').modal('show')">
-      <i class="bi bi-funnel"></i> Filter
-    </button>
+        <button class="po-btn-filter" type="button" onclick="$('#modalFilterRSJ').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
 
-    <div class="po-toolbar-act">
-      <button type="button" class="btn btn-primary" onclick="buttonAdd()">+ RSPB</button>
-    </div>
+        <div class="po-toolbar-act">
+          <button type="button" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+        </div>
 
-  </div>
+      </div>
     </div>
   </div>
 
@@ -548,10 +548,10 @@
     <!-- <div id="qrcode"></div> -->
     <div class="row d-flex justify-content-between align-items-center">
       <div class="col-auto text-left">
-        <h1>Form Retur SJ</h1>
+        {{-- <h1>Form Retur SJ</h1> --}}
       </div>
       <div class="col-auto text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
+        <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -813,7 +813,7 @@
         text-transform: uppercase;
         transition: background-color 0.3s, box-shadow 0.3s;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-        onclick="buttonAddAdd()" ><b>+ Tambah Item</b></button>
+        onclick="buttonAddAdd()" ><b>Tambah Item</b></button>
       </div>
     </div>
 
@@ -901,7 +901,7 @@
 
   <div class="row mt-2">
     <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary btn-lg" style="
+      <button type="button" class="btn btn-danger btn-lg" style="
       height: 30px;
       padding: 4px 12px;
       border-radius: 20px;
@@ -910,7 +910,7 @@
       text-transform: uppercase;
       transition: background-color 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonBatalAdd()" class="btn btn-secondary">Batal</button>
+      onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
 
       <button type="button" id="buttonSubmitAddAdd" class="btn btn-primary btn-lg" style="
       height: 30px;
@@ -921,7 +921,7 @@
       text-transform: uppercase;
       transition: background-color 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="submitAddAdd()" class="btn btn-secondary">Submit Add</button>
+      onclick="submitAddAdd()" class="btn btn-secondary">Simpan</button>
 </div>
 
   </div>
@@ -1012,7 +1012,7 @@
       <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
 
-      <button type="button" class="btn btn-secondary btn-lg" style="
+      <button type="button" class="btn btn-danger btn-lg" style="
       height: 30px;
       padding: 4px 12px;
       border-radius: 20px;
@@ -1021,7 +1021,7 @@
       text-transform: uppercase;
       transition: background-color 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonBatalAdd()" class="btn btn-secondary">Batal</button>
+      onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
 
       <button type="button" id="buttonSubmitAddEdit" class="btn btn-primary btn-lg" style="
       height: 30px;
@@ -1032,7 +1032,7 @@
       text-transform: uppercase;
       transition: background-color 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="submitAddEdit()" class="btn btn-secondary">Submit Edit</button>
+      onclick="submitAddEdit()" class="btn btn-secondary">Simpan</button>
 
 
     </div>
@@ -1060,7 +1060,7 @@
             <h1 class="" id="modalTitleOto">Otorisasi</h1>
         </div>
         <div class="col-6 text-right">
-          <button type="button" class="btn btn-primary btn-lg" style="
+          <button type="button" class="btn btn-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;

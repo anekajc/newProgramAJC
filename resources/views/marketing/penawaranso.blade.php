@@ -260,7 +260,7 @@
 }
 
 /* {{-- Kolom Aksi tabel2/tabel3 -- pastel round-button treatment, copied
-     verbatim from so.blade.php's @section('css'). Actions ada di kolom
+     verbatim from so.blade.php's own CSS block. Actions ada di kolom
      pertama di kedua tabel, sesuai markup lama. --}} */
 #tabel2 td:first-child, #tabel3 td:first-child {
   display: flex; gap: 4px; justify-content: center; align-items: center;
@@ -296,6 +296,59 @@
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
+}
+
+/* Click-anywhere-on-row picker feedback, same convention as so.blade.php's own picker modals. */
+.pick-row { cursor: pointer; }
+.pick-row:hover { background-color: #f5f3ff !important; }
+
+/* Chip buttons, copied verbatim from so.blade.php's own CSS block. */
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
+
+/* Pastel "Batal" (cancel) button, copied verbatim from so.blade.php's own CSS block. */
+.btn-batal-add {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.btn-batal-add:hover,
+.btn-batal-add:focus {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #343a40;
+}
+
+.btn-batal-add:active {
+  background-color: #dee2e6 !important;
+  border-color: #ced4da !important;
+  color: #343a40 !important;
+}
+
+/* Search-icon button appended flush to an input (e.g. Customer/Valas/Lokasi picker). */
+.btn-icon-search {
+  height: 32px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
 @endsection
@@ -383,7 +436,6 @@
             </div>
           </div> -->
 
-
           <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
             <div class="row">
               <div class="col-12">
@@ -392,6 +444,9 @@
                     <input type="search" id="psoSearch1" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap"><label for="psoLen1">Tampilkan</label>
                       <select id="psoLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
+                    </div>
+                    <div class="po-toolbar-act">
+                      <button id='AddVisibility' class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   <div id="rtBarTabel2"></div>
@@ -486,12 +541,11 @@
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="margin-top: -80px;">Form Penawaran</h2>
+      <h2 style="margin-top: -80px;"></h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
-          margin-top: -120px;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.75rem;
@@ -606,7 +660,7 @@
                 <div class="col-md-12">
                   <div class="input-group form-group">
                     <input type="text" class="form-control" id="input_add_valas"  disabled>
-                    <button onclick="buttonAddListValas()" id="buttonAddListValas"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -727,7 +781,7 @@
           <hr/>
           <div class="row" style='margin-top:5px'>
             <div class="col-md-12 mt-2 text-left">
-              <button type="button" class="btn btn-primary btn-lg" style="
+              <button type="button" class="btn btn-chip-biru btn-lg" style="
                 height: 30px;
                 margin-top: -35px;
                 padding: 4px 12px;
@@ -737,7 +791,7 @@
                 text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                onclick="buttonShowHideHeader()" class="btn btn-secondary"><b>Show/Hide Header</b></button>
+                onclick="buttonShowHideHeader()"><b>Show/Hide Header</b></button>
             </div>
           </div>
             <div class="showhidemodalbodyaddmain mt-4" id="modalBodyAddMainHeader" style="display: none;">
@@ -811,8 +865,8 @@
                         <div class="col-8" style="margin-top:-5px">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_noso" value='-' readonly>
-                            <button onclick="buttonAddListNoSO()" id="buttonAddListNoSo" style="height:32px;" class="btn btn-primary btn-sm text-right">
-                              <i class="bi bi-plus"></i>
+                            <button onclick="buttonAddListNoSO()" id="buttonAddListNoSo" class="btn btn-chip-biru btn-sm btn-icon-search">
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -957,7 +1011,7 @@
                           <div class="input-group form-group">
 
                             <input type="text" class="form-control" id="input_add_lokasipenerima" value='-' readonly>
-                             <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" style="height:32px;" value = '-' class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                             <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                  
 
                           </div>
@@ -1029,7 +1083,7 @@
                           <div class="input-group form-group">
                             <input type="hidden" class="form-control" id="input_add_kodebackoffice" >
                             <input type="text" class="form-control" id="input_add_namabackoffice"  disabled>
-                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                           </div>
                         </div>
                       </div>
@@ -1063,7 +1117,7 @@
                       <div class="input-group form-group">
                         <input type="hidden" class="form-control" id="input_add_kodepic"  >
                         <input type="text" class="form-control" id="input_add_namapic"  disabled>
-                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                   </div>
@@ -1086,7 +1140,7 @@
                   <div class="input-group form-group">
                     <input type="hidden" class="form-control" id="input_add_kodesales" >
                     <input type="text" class="form-control" id="input_add_namasales"  disabled>
-                    <button onclick="buttonAddListSales()" id="buttonAddListSales"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                    <button onclick="buttonAddListSales()" id="buttonAddListSales" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -1166,7 +1220,7 @@
 
         <div class="row">
           <div class="col-md-12 mt-2 text-right">
-            <button type="button" id='buttonTambahItem' class="btn btn-primary btn-lg" style="
+            <button type="button" id='buttonTambahItem' class="btn btn-chip-biru btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1175,7 +1229,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()"><b>Tambah</b></button>
           </div>
         </div>
 
@@ -1312,8 +1366,8 @@
                           <div class="col-md-6">
                             <div class="input-group form-group">
                               <input type="text" class="form-control" id="input_add_add_kodebarang">
-                              <button onclick="performSearch()" id="buttonAddAddListBarang" class="btn btn-primary btn-sm text-right" >
-                                  <i class="bi bi-plus"></i>
+                              <button onclick="performSearch()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm btn-icon-search">
+                                  <i class="bi bi-search"></i>
                               </button>
                             </div>
                           </div>
@@ -1630,7 +1684,7 @@
           <div class="row mt-2">
             <div class="col-md-12 text-right" style="margin-top:-10px;">
 
-              <button type="button" class="btn btn-success btn-lg" style="
+              <button type="button" class="btn btn-chip-biru btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1639,9 +1693,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableHargaTerakhir()" class="btn btn-secondary">Harga Beli Terakhir</button>
+              onclick="showTableHargaTerakhir()">Harga Beli Terakhir</button>
 
-              <button type="button" class="btn btn-info btn-lg" style="
+              <button type="button" class="btn btn-chip-biru btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1650,9 +1704,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="showTableStockProyeksi()" class="btn btn-secondary">Harga Jual Terakhir</button>
+              onclick="showTableStockProyeksi()">Harga Jual Terakhir</button>
 
-              <button type="button" class="btn btn-danger btn-lg" style="
+              <button type="button" class="btn btn-batal-add btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1661,9 +1715,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="closeShowHideAdd()" class="btn btn-secondary">Batal</button>
+              onclick="closeShowHideAdd()">Batal</button>
 
-              <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
+              <button type="button" id="submitAddAdd" class="btn btn-chip-biru btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1672,9 +1726,9 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd('I')" class="btn btn-secondary">Simpan Data</button>
+              onclick="submitAddAdd('I')">Simpan Data</button>
 
-              <button type="button" id="submitAddEdit" class="btn btn-primary btn-lg" style="
+              <button type="button" id="submitAddEdit" class="btn btn-chip-biru btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1683,7 +1737,7 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="submitAddAdd('U')" class="btn btn-secondary">Submit Edit</button>
+              onclick="submitAddAdd('U')">Submit Edit</button>
             </div>
 
           </div>
@@ -1716,7 +1770,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick=""  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus" ></i></button>
+              <button onclick="" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -1743,7 +1797,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick=""  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
+              <button onclick="" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -1771,7 +1825,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang"  class="btn btn-primary btn-sm text-right" disabled><i class="bi bi-plus"></i></button>
+              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -2023,7 +2077,7 @@
 
           <div class="row mt-2">
             <div class="col-md-12 text-right">
-              <button type="button" class="btn btn-secondary" onclick="closeShowHideAdd()" >Batal</button>
+              <button type="button" class="btn btn-batal-add" onclick="closeShowHideAdd()" >Batal</button>
             </div>
           </div>
 
@@ -2169,7 +2223,7 @@
         </div>
         <div class="col-3 text-right">
           <div class="form-group">
-        <button class="btn btn-primary btn-sm text-right" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-plus"></i></button>
+        <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
         </div>
 
       </div>
@@ -2341,14 +2395,14 @@
 
         </div>
       </div>
-    <button type="button" class="btn btn-primary" onclick="buttonAddMainHeader()" class="btn btn-secondary"  >Header</button>
-    <button type="button" class="btn btn-primary" onclick="buttonAddMainItems()" class="btn btn-secondary"  >Items</button>
+    <button type="button" class="btn btn-chip-biru" onclick="buttonAddMainHeader()"  >Header</button>
+    <button type="button" class="btn btn-chip-biru" onclick="buttonAddMainItems()"  >Items</button>
 </div>
 </div> -->
 <hr/>
 <div class="row ">
 <div class="col-md-12 mt-2 text-left">
-  <button type="button" class="btn btn-primary btn-lg" style="
+  <button type="button" class="btn btn-chip-biru btn-lg" style="
   height: 30px;
   margin-top: -40px;
   padding: 4px 12px;
@@ -2358,7 +2412,7 @@
   text-transform: uppercase;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-  onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
+  onclick="buttonShowHideHeaderDetail()"><b>Show Hide Header</b></button>
 </div>
 </div>
   <div class="mt-4" id="modalBodyDetailMainHeader">
@@ -4558,11 +4612,9 @@ function buttonAddListPIC () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPIC('${item.kodepic}' , '${item.nama}')">
         <td>${item.kodepic}</td>
         <td>${item.nama}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPIC('${item.kodepic}' , '${item.nama}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4604,7 +4656,7 @@ function buttonAddAddListPWO () {
     },
     success: function(res) {
       let rowTable = `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPWO('-' , '-')">
           <td>-</td>
           <td>-</td>
           <td>-</td>
@@ -4613,11 +4665,10 @@ function buttonAddAddListPWO () {
           <td>-</td>
           <td>-</td>
           <td>-</td>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPWO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td>
         </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPWO('${item.no_bukti}' , '${item.tanggal}')">
           <td>${item.no_bukti}</td>
           <td>${item.tanggal}</td>
           <td>${item.supplier}</td>
@@ -4626,7 +4677,6 @@ function buttonAddAddListPWO () {
           <td>${item.qty}</td>
           <td>${item.satuan}</td>
           <td>${item.harga}</td>
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPWO('${item.no_bukti}' , '${item.tanggal}')" type="button" ><i class="bi bi-plus"></i></button></td>
         </tr>`
       });
 
@@ -4689,10 +4739,7 @@ function buttonAddAddListBarang () {
                       dataAddAddListItem = res
                       dataAddAddListItem.forEach((item, i) => {
                         rowTable += `
-                        <tr>
-                          <td style="white-space:nowrap;" class="text-center">
-                            <button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangFOCPlus(${i})" type="button" ><i class="bi bi-plus"></i></button>
-                          </td>
+                        <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
                           <td style="white-space:nowrap;">${item.Kodebrg}</td>
                           <td style="white-space:nowrap;">${item.NamaBrg}</td>
                           <td style="white-space:nowrap;">${item.partNumber}</td>
@@ -4749,20 +4796,16 @@ function buttonAddListNoSO () {
     success: function(res) {
          console.log(res)
       let rowTable = `
-        <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickNoSO('-' , '-')">
           <td>-</td>
           <td>-</td>
-   
           </tr>`
 
       listNoSo = res
 
       listNoSo.forEach((item, i) => {
         rowTable += `
-        <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('${item.boffice}' , '${item.Nama}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickNoSO('${item.boffice}' , '${item.Nama}')">
           <td>${item.boffice}</td>
           <td>${item.Nama}</td>
           </tr>`
@@ -4861,17 +4904,13 @@ function buttonAddListLokasiPenerima () {
       _token,kodecustsupp
     },
     success: function(res) {
-      let rowTable = `<tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('-' , '-' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
+      let rowTable = `<tr class="pick-row" onclick="buttonAddPickLokasiPenerima('-' , '-' )">
         <td>-</td>
         <td>-</td>
-
         </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLokasiPenerima('${item.KodeCustsupp}' , '${item.NamaCust}' )" type="button"><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickLokasiPenerima('${item.KodeCustsupp}' , '${item.NamaCust}' )">
         <td>${item.KodeCustsupp}</td>
         <td>${item.NamaCust}</td>
         </tr>`
@@ -4915,12 +4954,10 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )">
         <td>${item.kodevls}</td>
         <td>${item.namavls}</td>
         <td>${formatAngka(item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00')}</td>
-
         </tr>`
       });
 
@@ -4962,13 +4999,10 @@ function buttonAddListPelanggan ()
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="buttonAddPickPelanggan('${item.KodeCustSupp}' , '${item.NamaCustSupp}' , '${item.Alamat}','${item.HARIHUTPIUT}', '${item.PPN}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
+        <tr class="pick-row" onclick="buttonAddPickPelanggan('${item.KodeCustSupp}' , '${item.NamaCustSupp}' , '${item.Alamat}','${item.HARIHUTPIUT}', '${item.PPN}')">
         <td>${item.KodeCustSupp}</td>
         <td>${item.NamaCustSupp}</td>
         <td>${item.Alamat}</td>
-
         </tr>`
       });
 
@@ -5007,11 +5041,9 @@ function buttonAddListBackOffice () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')">
         <td>${item.keynik}</td>
         <td>${item.fullname}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBackOffice('${item.keynik}' , '${item.fullname}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -5049,11 +5081,9 @@ function buttonAddListSales () {
         console.log(item.keynik)
         console.log(item.nama)
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')">
         <td>${item.keynik}</td>
         <td>${item.nama}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSales('${item.keynik}' , '${String(item.nama)}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -6507,11 +6537,6 @@ if (pcekglobal) {
   $('#page1').hide();
   $('#page2').show();
 }
-
-
-
-
-
 
 
 

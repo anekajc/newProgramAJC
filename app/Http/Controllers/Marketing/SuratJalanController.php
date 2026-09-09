@@ -31,6 +31,14 @@ class SuratJalanController extends Controller
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
+    // Periode filter di toolbar (po-filter-wrap, sama seperti so.blade.php/closingso.blade.php)
+    // -- sebelumnya cuma dipakai tab "Surat Jalan Otorisasi" (queryOtorisasiSPB), sekarang
+    // dipindah ke toolbar yang dipakai bersama semua tab jadi ikut menyaring tempOutstanding/
+    // tempOutstanding2/tempOutstanding5 juga (tempOutstanding4 dilewati -- tab "Out SO Booking"
+    // yang menampungnya sudah tidak terhubung ke nav manapun).
+    $tglawalspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhirspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+
     // $listData = DB::connection('SML')->select('SELECT * FROM DBMERK');
 
 
@@ -196,7 +204,8 @@ End
 
 
 
-order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username]);
+and A.Tanggal between :tglawalspb and :tglakhirspb
+order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
     // foreach ($outstanding as $p) {
     //   // code...
     //   array_push($tempOutstanding, $p);
@@ -444,13 +453,11 @@ end>0
 AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
 		  Else   isnull(M63.SALDOQNT,0) End
 >0
+and A.Tanggal between :tglawalspb and :tglakhirspb
+
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
-
-
-$tglawalspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-$tglakhirspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
 $tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, 0);
 
 
@@ -731,13 +738,14 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
 		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
 >0
 and Isnull(B.PUrgent,0)=1
+and A.Tanggal between :tglawalspb and :tglakhirspb
 
 
 
 
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
     return view('marketing.suratjalan' , [
@@ -818,6 +826,9 @@ and Isnull(B.PUrgent,0)=1
   public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+    $tglawalspb = $req->tglawalspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhirspb = $req->tglakhirspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
 
     $tempOutstanding = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
@@ -977,7 +988,8 @@ End
 
 
 
-order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username]);
+and A.Tanggal between :tglawalspb and :tglakhirspb
+order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
     // foreach ($outstanding as $p) {
     //   // code...
     //   array_push($tempOutstanding, $p);
@@ -1225,13 +1237,12 @@ end>0
 AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
       Else   isnull(M63.SALDOQNT,0) End
 >0
+and A.Tanggal between :tglawalspb and :tglakhirspb
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
-$tglawalspb = $req->tglawalspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-$tglakhirspb = $req->tglakhirspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
 $filterspb = $req->filterspb ?: 0;
 $tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, $filterspb);
 
@@ -1498,13 +1509,14 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
 		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
 >0
 and Isnull(B.PUrgent,0)=1
+and A.Tanggal between :tglawalspb and :tglakhirspb
 
 
 
 
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
 

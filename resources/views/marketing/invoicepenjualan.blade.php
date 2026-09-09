@@ -637,6 +637,12 @@
         <div class="col-12">
           <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
             <div class="po-toolbar">
+              <div class="po-filter-wrap">
+                <label>Periode</label>
+                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalawal_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                <span class="po-filter-sep">s/d</span>
+                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalakhir_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+              </div>
               <input type="search" id="ipSearch1" class="po-search-inp" placeholder="Cari data">
               <div class="po-len-wrap">
                 <label for="ipLen1">Tampilkan</label>
@@ -655,7 +661,7 @@
                    tab (it's already active) so the user lands where every row's "+"
                    already works, instead of risking buttonAdd() with missing data. --}}
               <div class="po-toolbar-act">
-                <button type="button" class="btn btn-primary" onclick="printAll()">Print</button>
+                {{-- <button type="button" class="btn btn-primary" onclick="printAll()">Print</button> --}}
               </div>
             </div>
             <div id="rtBarTabel"></div>
@@ -3269,7 +3275,25 @@ function onChangePeriodeIP () {
     alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
     return
   }
-  buttonFilterIP()
+  // #tabel ("Surat Pengiriman Barang") punya widget periode sendiri (ip1) supaya
+  // kelihatan di tab itu juga -- disamakan ke sini karena loadAll() (satu-satunya
+  // yang me-refresh tabel & tabel2 sekaligus) baca dari #input_tanggalawal_ip/
+  // #input_tanggalakhir_ip yang sama, bukan dari input_..._ip1.
+  $('#input_tanggalawal_ip1').val(tglawal)
+  $('#input_tanggalakhir_ip1').val(tglakhir)
+  loadAll()
+}
+
+function onChangePeriodeIP1 () {
+  let tglawal = $('#input_tanggalawal_ip1').val()
+  let tglakhir = $('#input_tanggalakhir_ip1').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  $('#input_tanggalawal_ip').val(tglawal)
+  $('#input_tanggalakhir_ip').val(tglakhir)
+  loadAll()
 }
 
 $(document).ready(function(){
@@ -4518,7 +4542,7 @@ function buttonAddDetail (nobukti) {
   `)
 
   $.ajax({
-    url: "{!! url('invoicepenjualangetdetailadd') !!}",
+    url: "{!! url('invoicepenjualangetdetail') !!}",
     type: 'post',
     data: {
       _token,

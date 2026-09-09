@@ -15,6 +15,15 @@ Route::get('/test', function () {
     return abort(404);
 });
 
+
+
+
+
+
+
+
+
+
 // Login
 Route::get('/', function () {
     if (Auth::check()) {

@@ -486,3 +486,30 @@
   .po-toolbar { flex-wrap: wrap; }
   .po-toolbar-act { margin-left: 0; }
 }
+
+/* ============ Tombol Filter di toolbar ============
+   Disalin dari public/css/po-table-header.css -- hilang dari salinan sj- ini
+   sebelumnya sehingga #modalFilterSPB milik tab "Surat Jalan Otorisasi"
+   tampil sebagai tombol polos tak berwarna alih-alih tombol hijau seperti
+   milik so.blade.php. */
+
+.po-btn-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #16A34A, #15803D);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, .28);
+  transition: all .15s;
+}
+
+.po-btn-filter:hover {
+  box-shadow: 0 6px 20px rgba(22, 163, 74, .4);
+  transform: translateY(-1px);
+}
