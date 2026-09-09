@@ -770,8 +770,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
   <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-        <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="addTable" class="data-table"  >
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Customer</th>
               <th style="padding: 4px 12px;" scope="col">NoFaktur</th>
@@ -1368,8 +1368,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
     <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-          <table id="detailTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="detailTable" class="data-table"  >
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Customer</th>
                 <th style="padding: 4px 12px;" scope="col">NoFaktur</th>
