@@ -526,10 +526,20 @@
   </div>
 
   {{-- Toolbar shared by all five tabs: one search/length control drives whichever tab is
-       visible, same as so.blade.php's shared toolbar. --}}
+       visible, same as so.blade.php's shared toolbar. Periode filter moved here (was
+       previously only shown inside the "Surat Jalan Otorisasi" tab) so it applies to
+       every tab, same as it already drove every tab's data via the shared loadAll()
+       call -- it just wasn't visible outside that one tab before. --}}
   <div class="card">
     <div class="card-body" style="padding:0;">
   <div class="po-toolbar">
+
+    <div class="po-filter-wrap">
+      <label>Periode</label>
+      <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+      <span class="po-filter-sep">s/d</span>
+      <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalakhir_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+    </div>
 
     <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
 
@@ -545,11 +555,6 @@
     </div>
 
   </div>
-    </div>
-  </div>
-
-  <div class="card">
-  <div class="card-body" style="padding:0;">
   <div class="tab-content" id="myTabContent">
 
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -637,18 +642,10 @@
         </div>
       </div>
 
-      <div class="po-toolbar">
-        <div class="po-filter-wrap">
-          <label>Periode</label>
-          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-          <span class="po-filter-sep">s/d</span>
-          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalakhir_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
-        </div>
+      <div class="rt-bar-row">
         <button class="po-btn-filter" type="button" onclick="$('#modalFilterSPB').modal('show')">
           <i class="bi bi-funnel"></i> Filter
         </button>
-      </div>
-      <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
         </button>

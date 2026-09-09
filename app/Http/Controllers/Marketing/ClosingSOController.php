@@ -30,6 +30,17 @@ class ClosingSOController extends Controller
     // $users = DB::connection("SML")->select('select * from new_users');
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
+    // Periode filter di toolbar (po-filter-wrap, sama seperti so.blade.php) mengirim
+    // tglawal/tglakhir sebagai date-range bebas -- kalau tidak dikirim (initial load),
+    // jatuh ke default bulan/tahun periode yang sedang aktif.
+    if ($req->tglawal && $req->tglakhir) {
+      $tglawal = $req->tglawal;
+      $tglakhir = $req->tglakhir;
+    } else {
+      $tglawal = \Carbon\Carbon::now()->year((int) $periode->tahun)->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+      $tglakhir = \Carbon\Carbon::now()->year((int) $periode->tahun)->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    }
+
     // $listData = DB::connection('SML')->select('SELECT * FROM DBMERK');
 
 
@@ -109,10 +120,11 @@ case when b.NOSAT=1 then
 			+ Isnull(cast(m4.QNT2RSPB as numeric(18,3)),0)
 end>0.00
 and ISnull(B.Isbatal,0)=0
+and A.Tanggal between :tglawal and :tglakhir
 order by A.NOBUKTI,B.Urut
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
 
 
 $tempOutstanding2 = DB::connection("SML")->select("select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
@@ -168,8 +180,9 @@ where
             end As Bit)=0
 and
 isnull(B.Isbatal,0)=1
+and A.Tanggal between :tglawal and :tglakhir
 order by A.NOBUKTI,B.Urut
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
 
     return view('marketing.closingso' , [
       "menul0" => $menul0,
@@ -183,10 +196,17 @@ order by A.NOBUKTI,B.Urut
   }
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
+    if ($req->tglawal && $req->tglakhir) {
+      $tglawal = $req->tglawal;
+      $tglakhir = $req->tglakhir;
+    } else {
+      $tglawal = \Carbon\Carbon::now()->year((int) $periode->tahun)->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+      $tglakhir = \Carbon\Carbon::now()->year((int) $periode->tahun)->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    }
 
     $tempOutstanding = DB::connection("SML")->select("select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
         case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
@@ -261,10 +281,11 @@ order by A.NOBUKTI,B.Urut
   			+ Isnull(cast(m4.QNT2RSPB as numeric(18,3)),0)
   end>0.00
   and ISnull(B.Isbatal,0)=0
+  and A.Tanggal between :tglawal and :tglakhir
   order by A.NOBUKTI,B.Urut
 
 
-  " , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+  " , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
 
 
 $tempOutstanding2 = DB::connection("SML")->select("select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
@@ -320,10 +341,11 @@ where
             end As Bit)=0
 and
 isnull(B.Isbatal,0)=1
+and A.Tanggal between :tglawal and :tglakhir
 order by A.NOBUKTI,B.Urut
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "tglawal" => $tglawal, "tglakhir" => $tglakhir]);
 
 
     return [

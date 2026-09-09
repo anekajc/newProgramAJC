@@ -279,7 +279,6 @@ input[type=number] {
 </style>
 @endsection
 
-
 @section('content')
 
 

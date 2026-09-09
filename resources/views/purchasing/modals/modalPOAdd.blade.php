@@ -1,4 +1,14 @@
 
+<style>
+/* Click-anywhere-on-row picker feedback for every table in this shared modal,
+   same convention as so.blade.php's own picker modals -- kept here (rather than
+   duplicated in each including page's own CSS block) since this partial
+   is reused by penawaranso.blade.php, purchaseOrder.blade.php,
+   pembelianpermintaanagen.blade.php and pembelianpermintaannonagen.blade.php. */
+.pick-row { cursor: pointer; }
+.pick-row:hover { background-color: #f5f3ff !important; }
+</style>
+
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
@@ -27,9 +37,8 @@
               <div class="col-12" style="overflow:auto; margin-top:-60px;">
               <!-- <div class="container-fluid"> -->
               <table id="tabel_add_list_pelanggan" class="table table-bordered table-hover table-striped table-responsive-lg">
-                <thead class="text-center bg-primary text-white">
+                <thead class="data-table">
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                     <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -40,10 +49,6 @@
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
-                      <td class="text-center">
-                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                      </td>
                 </tr>
                 </tbody>
               </table>
@@ -84,9 +89,8 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_Ttd" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Id Backoffice</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
@@ -95,9 +99,6 @@
               <tr>
                 <td>-</td>
                 <td>-</td>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -141,9 +142,8 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_Kebun" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode Kebun</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
@@ -152,9 +152,6 @@
               <tr>
                 <td>-</td>
                 <td>-</td>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -202,19 +199,17 @@
             <div class="col-12" style="overflow:auto; margin-top:-40px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead class="data-table">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
                 @for ($i = 0; $i < count($listBarangAll); $i++)
-                <tr >
+                <tr class="pick-row" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')">
                   <td>{{ $listBarangAll[$i]->Kodebrg }}</td>
                   <td>{{ $listBarangAll[$i]->NamaBrg }}</td>
-                      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->Kodebrg }}')" type="button" ><i class="bi bi-plus"></i></button></td>
               </tr>
               @endfor
               </tbody>
@@ -249,9 +244,8 @@
         <div class="row">
           <div class="col-12" style="overflow:auto;">
             <table id="tabel_add_list_barang_foc" class="table table-bordered table-striped"  >
-              <thead class="text-center text-white bg-primary" style='white-space:nowrap;'>
+              <thead class="data-table" style='white-space:nowrap;'>
                 <tr>
-                  <th style="white-space:nowrap;" scope="col">Actions</th>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
                   <th style="white-space:nowrap;" scope="col">Part Number</th>
@@ -264,9 +258,6 @@
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-                  <td class="text-center">
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -285,9 +276,8 @@
       <div class="row">
         <div class="col-12" style="overflow:auto;">
           <table id="tabel_add_list_barang_nonfoc" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white" style='white-space:nowrap;'>
+            <thead class="data-table" style='white-space:nowrap;'>
               <tr>
-                <th scope="col">Actions</th>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
                 <th scope="col">Part Number</th>
@@ -314,9 +304,6 @@
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus"></i></button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -335,9 +322,8 @@
         <div class="row">
           <div class="col-12" style="overflow:auto;">
             <table id="tabel_add_list_barang_nonfocplus" class="table table-bordered table-striped"  >
-              <thead class="text-center">
+              <thead class="data-table">
                 <tr>
-                  <th style="white-space:nowrap;" scope="col">Actions</th>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
                   <th style="white-space:nowrap;" scope="col">QNT Sat 1</th>
@@ -360,9 +346,6 @@
                   <td>-</td>
                   <td>-</td>
                   <td>-</td>
-                  <td class="text-center">
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -386,20 +369,16 @@
         <div class="row">
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_pic" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pic" class="text-left" >
               <tr>
                 <td>-</td>
                 <td>-</td>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -438,7 +417,7 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_pwo" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Nomor Bukti</th>
                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -448,7 +427,6 @@
                 <th style="padding: 4px 12px;" scope="col">Qty</th>
                 <th style="padding: 4px 12px;" scope="col">Satuan</th>
                 <th style="padding: 4px 12px;" scope="col">Harga</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_pwo" class="text-left" >
@@ -461,10 +439,6 @@
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -502,9 +476,8 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_lokasipenerima" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kota</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
               </tr>
@@ -513,10 +486,6 @@
               <tr >
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -554,9 +523,8 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_alamatkirim" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Nomor</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
                 <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -567,9 +535,6 @@
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
               </tr>
             </tbody>
           </table>
@@ -605,9 +570,8 @@
       <div class="row">
         <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <table id="tabel_add_list_noSo" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">No SO</th>
                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                 <th style="padding: 4px 12px;" scope="col">No. PO Cust</th>
@@ -618,9 +582,6 @@
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -658,21 +619,16 @@
           <div class="col-12" style="overflow:auto; margin-top:-30px;">
           <!-- <div class="container-fluid"> -->
           <table id="tabel_add_list_backoffice" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+            <thead class="data-table">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_backoffice" class="text-left" >
               <tr >
                 <td>-</td>
                 <td>-</td>
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
           </table>
@@ -713,21 +669,16 @@
             <div class="col-12" style="overflow:auto; margin-top:-60px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_sales" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead class="data-table">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_sales" class="text-left" >
                 <tr >
                   <td>-</td>
                   <td>-</td>
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
             </table>
@@ -767,9 +718,8 @@
                         <div class="col-12" style="overflow:auto; margin-top:-30px;">
                         <!-- <div class="container-fluid"> -->
                         <table id="tabel_add_list_valas" class="table table-bordered table-hover table-striped table-responsive-lg">
-                            <thead class="text-center bg-primary text-white">
+                            <thead class="data-table">
                                 <tr>
-                                    <th style="padding: 4px 12px;" scope="col">Actions</th>
                                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                                     <th style="padding: 4px 12px;" scope="col">Kurs</th>
@@ -780,10 +730,6 @@
                                     <td>-</td>
                                     <td>-</td>
                                     <td>-</td>
-                                    <td class="text-center">
-                                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                        <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>

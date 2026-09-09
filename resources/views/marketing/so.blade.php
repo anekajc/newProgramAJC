@@ -1127,7 +1127,7 @@
               <th style="padding: 4px 12px;" scope="col" class="text-center">Tax</th>
               <th style="padding: 4px 12px;" scope="col" class="text-center">Harga</th>
               <th style="padding: 4px 12px;" scope="col" class="text-center">Diskon</th>
-              <th style="padding: 4px 12px;" scope="col" class="text-center">NDPP</th>
+              <th style="padding: 4px 12px;" scope="col" class="text-center">Sub Total</th>
               <th style="padding: 4px 12px;" scope="col">No SPK</th>
               <th style="padding: 4px 12px;" scope="col" class="text-center">Actions</th>
             </tr>
@@ -1973,7 +1973,6 @@
       <div id="modalBodyAddListPelanggan" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Pelanggan</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_pelanggan" class="data-table">
@@ -2001,7 +2000,6 @@
       <div id="modalBodyAddListNoPenyerahan" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>No Penyerahan</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_nopenyerahan" class="data-table">
@@ -2020,7 +2018,6 @@
       <div id="modalBodyAddListRefPR" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Ref PR</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_refpr" class="data-table">
@@ -2039,7 +2036,6 @@
       <div id="modalBodyAddListNoPo" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>No PO</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_nopo" class="data-table">
@@ -2069,7 +2065,7 @@
         <div class="modal-body">
           <div class="container-fluid mt-4">
             <div class="row">
-              <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="margin-top:-30px;"><h3>Barang</h3></div>
+              <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="margin-top:-30px;"></div>
               <div class="col-3 text-right form-group">
                 <input id="input_search_barang_all" style="margin-top:-30px;" type="text" class="form-control" onkeypress="searchBarangAll(event)">
                 <label for="input_search_barang_all" style="margin-top:-20px;" class="search-label">SEARCH:</label>
@@ -2114,9 +2110,6 @@
         <div class="modal-body">
           <div class="container-fluid mt-4">
             <div class="row">
-              <div class="col-12" style="margin-top:-30px;"><h3>Barang</h3></div>
-            </div>
-            <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_barangrefpr" class="data-table">
                   <thead class="text-center">
@@ -2145,7 +2138,6 @@
       <div id="modalBodyAddAddListSattax" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div id="modalBodyAddAddListSattaxTitle" class="col-md-12" style="margin-top:-20px;"><h3>Sattax</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_sattax" class="data-table">
@@ -2171,7 +2163,6 @@
       <div id="modalBodyAddListPIC" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>PIC</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_pic" class="data-table">
@@ -2190,7 +2181,6 @@
       <div id="modalBodyAddListLokasiPenerima" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Lokasi Penerima</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_lokasipenerima" class="data-table">
@@ -2209,7 +2199,6 @@
       <div id="modalBodyAddListAlamatKirim" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Alamat Kirim</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_alamatkirim" class="data-table">
@@ -2228,7 +2217,6 @@
       <div id="modalBodyAddListValas" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Valas</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_valas" class="data-table">
@@ -2249,7 +2237,6 @@
       <div id="modalBodyAddListBackOffice" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Back Office</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_backoffice" class="data-table">
@@ -2272,7 +2259,6 @@
       <div id="modalBodyAddListSales" class="showhidemodalbodyadd">
         <div class="modal-body">
           <div class="container-fluid mt-4">
-            <div class="row"><div class="col-md-4" style="margin-top:-40px;"><h3>Sales</h3></div></div>
             <div class="row">
               <div class="col-12" style="overflow:auto; margin-top:-30px;">
                 <table id="tabel_add_list_sales" class="data-table">
@@ -5886,6 +5872,7 @@ function buttonAddListPIC () {
       });
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('PIC');
       $('#modalBodyAddListPIC').show();
 
       $("#form").modal('toggle')
@@ -5945,6 +5932,7 @@ function buttonAddListNoPo () {
       document.getElementById("tabel_data_add_list_nopo").innerHTML = rowTable
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('No PO');
       $('#modalBodyAddListNoPo').show();
 
       $("#form").modal('toggle')
@@ -6014,6 +6002,7 @@ function onKeyPressBarang (e) {
       });
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Barang');
       $('#modalBodyAddAddListBarangAll').show();
 
       $("#form").modal('toggle')
@@ -6034,6 +6023,7 @@ function buttonAddAddListSattax () {
   // }
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Sattax');
       $('#modalBodyAddAddListSattax').show();
 
       $("#form").modal('toggle')
@@ -6103,6 +6093,7 @@ function buttonAddAddListBarang () {
         });
 
         $('.showhidemodalbodyadd').hide();
+        $('#exampleModalLabel').text('Barang');
         $('#modalBodyAddListBarangRefPR').show();
         $("#form").modal('show')
       }
@@ -6113,6 +6104,7 @@ function buttonAddAddListBarang () {
 
   // Baik nopenyerahan maupun refpr kosong -> tampilkan modal search barang-all.
   $('.showhidemodalbodyadd').hide();
+  $('#exampleModalLabel').text('Barang');
   $('#modalBodyAddAddListBarangAll').show();
 
   $('#tabel_add_list_barangall').DataTable().destroy();
@@ -6198,6 +6190,7 @@ function buttonAddAddListRefPr () {
           "searching" : true
     });
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Ref PR');
       $('#modalBodyAddListRefPR').show();
 
       $("#form").modal('toggle')
@@ -6281,6 +6274,7 @@ function buttonAddAddListNoPenyerahan () {
     //         ]
     // });
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('No Penyerahan');
       $('#modalBodyAddListNoPenyerahan').show();
 
       $("#form").modal('toggle')
@@ -6355,6 +6349,7 @@ function buttonAddListAlamatKirim () {
       });
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Alamat Kirim');
       $('#modalBodyAddListAlamatKirim').show();
 
       $("#form").modal('toggle')
@@ -6425,6 +6420,7 @@ function buttonAddListLokasiPenerima () {
       });
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Lokasi Penerima');
       $('#modalBodyAddListLokasiPenerima').show();
 
       $("#form").modal('toggle')
@@ -6474,6 +6470,7 @@ function buttonAddListValas () {
       document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Valas');
       $('#modalBodyAddListValas').show();
 
       $("#form").modal('toggle')
@@ -6547,6 +6544,7 @@ function buttonAddListPelanggan () {
       });
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Pelanggan');
       $('#modalBodyAddListPelanggan').show();
       $("#form").modal('toggle')
 
@@ -6652,6 +6650,7 @@ function buttonAddListBackOffice () {
       document.getElementById("tabel_data_add_list_backoffice").innerHTML = rowTable
 
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Back Office');
       $('#modalBodyAddListBackOffice').show();
 
       $("#form").modal('toggle')
@@ -6710,6 +6709,7 @@ function buttonAddListSales () {
             ]
     });
       $('.showhidemodalbodyadd').hide();
+      $('#exampleModalLabel').text('Sales');
       $('#modalBodyAddListSales').show();
       $("#form").modal('toggle')
 

@@ -11,11 +11,15 @@
      returpenjualangudang/kreditnote/notareturpenjualan before it. Only
      layout/toolbar/column-header interactivity changed -- business logic
      (buttonAdd/buttonAddAll/buttonOpenSO/buttonOpenAllSO, submitAdd/
-     submitAddAll/submitOpenSO/submitOpenAllSO) is untouched. Neither tab has
-     a periode/date-range concept in the underlying query (Outstanding SO is
-     driven purely by outstanding qty > 0, Closing SO by isbatal=1), so no
-     periode picker was invented for either toolbar -- just search + Tampilkan,
-     same shape as returpenjualangudang.blade.php's own untouched #tabel tab. --}}
+     submitAddAll/submitOpenSO/submitOpenAllSO) is untouched.
+     Periode filter added later (tanggalawal/tanggalakhir, same widget as
+     so.blade.php's own): shown once on the "Outstanding SO" toolbar, same as
+     so.blade.php only shows it on its "SO" tab, but drives both #tabel and
+     #tabel2 together via loadAll() -- ClosingSOController's Outstanding SO
+     and Closing SO queries both got a new `and A.Tanggal between :tglawal
+     and :tglakhir` clause (additive, alongside their existing outstanding
+     qty > 0 / isbatal=1 filters), defaulting to the current periode's month
+     range when no range is sent. --}}
 @section('css')
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <style>
@@ -77,9 +81,9 @@
   background-repeat: no-repeat; background-position: right center;
 }
 
-{{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied verbatim
+/* {{-- Kolom Aksi tabel/tabel2 -- pastel round-button treatment, copied verbatim
      from so.blade.php's @section('css'). Both tabel dan tabel2 punya Actions
-     di kolom pertama (sesuai markup lama). --}}
+     di kolom pertama (sesuai markup lama). --}} */
 #tabel td:first-child, #tabel2 td:first-child {
   display: flex; gap: 4px; justify-content: center; align-items: center;
 }
@@ -154,6 +158,12 @@
             <div class="col-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="onChangePeriodeCSO()" class="po-filter-inp" id="input_tanggalawal" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="onChangePeriodeCSO()" class="po-filter-inp" id="input_tanggalakhir" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="csoSearch1" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap"><label for="csoLen1">Tampilkan</label>
                     <select id="csoLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
@@ -175,6 +185,12 @@
             <div class="col-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="onChangePeriodeCSO2()" class="po-filter-inp" id="input_tanggalawal2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="onChangePeriodeCSO2()" class="po-filter-inp" id="input_tanggalakhir2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="csoSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap"><label for="csoLen2">Tampilkan</label>
                     <select id="csoLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
@@ -978,13 +994,46 @@ function buttonAddAll (NOBUKTI , kodebrg , urut , qntout) {
 
 }
 
+function onChangePeriodeCSO () {
+  let awal = $("#input_tanggalawal").val()
+  let akhir = $("#input_tanggalakhir").val()
+  if (!awal || !akhir) { return }
+  if (awal > akhir) {
+    alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+    return
+  }
+  // Kedua tab pakai satu sumber tanggal yang sama (loadAll() memuat #tabel dan
+  // #tabel2 sekaligus dari satu ajax) -- disamakan supaya widget periode di tab
+  // manapun yang diubah tetap konsisten dilihat dari tab satunya.
+  $("#input_tanggalawal2").val(awal)
+  $("#input_tanggalakhir2").val(akhir)
+  loadAll()
+}
+
+function onChangePeriodeCSO2 () {
+  let awal = $("#input_tanggalawal2").val()
+  let akhir = $("#input_tanggalakhir2").val()
+  if (!awal || !akhir) { return }
+  if (awal > akhir) {
+    alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+    return
+  }
+  $("#input_tanggalawal").val(awal)
+  $("#input_tanggalakhir").val(akhir)
+  loadAll()
+}
+
 function loadAll () {
+  let tglawal = $("#input_tanggalawal").val()
+  let tglakhir = $("#input_tanggalakhir").val()
 
   $.ajax({
     url: "{!! url('closingsoloadall') !!}",
     type: "get",
     async: false,
     data: {
+      tglawal,
+      tglakhir,
     },
     success: function(res) {
       console.log(res)
