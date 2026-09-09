@@ -116,7 +116,7 @@
             { value: 'N', label: 'No Bukti',  desc: 'Dikelompokkan per No Bukti' },
             { value: 'B', label: 'Barang',    desc: 'Dikelompokkan per Kode Barang' },
             { value: 'S', label: 'Supplier',  desc: 'Dikelompokkan per Nama Supplier' },
-            { value: 'G', label: 'Gudang',    desc: 'Dikelompokkan per Lokasi' }
+            { value: 'G', label: 'Gudang',    desc: 'Dikelompokkan per Kode Gudang' }
           ],
           get: function () { return globalOrderBy; },
           set: function (v) {
@@ -142,6 +142,24 @@
   var modereport_detailnobukti = 0, modereport_detailbarang = 1, modereport_detailcustomer = 2, modereport_detailgudang = 3;
   g_modeReport = modereport_detailnobukti;
 
+  // VwReportBeliGudang (lewat Sp_reportBeliGudangdet) mengembalikan sepasang qty+satuan
+  // (qnt/satuan, Qnt2/satuan2) + NOSAT -- NOSAT=1 -> pasangan pertama, 2 atau 3 -> kedua
+  // (dikonfirmasi dari data nyata, sama pola dengan reportlaporanmarketingspb.blade.php,
+  // reportmarketingso.blade.php & reportlaporanmarketingspbhrgso.blade.php). Beda dengan
+  // ketiga halaman itu: qnt/Qnt2 di sini TETAP dijumlahkan di Subtotal/Grand Total (lihat
+  // renderRows()) -- itu satu-satunya kolom angka di laporan ini, jadi baris Total akan
+  // kosong kalau QTY tidak dijumlahkan. Dihitung sekali di sini (bukan di renderRows())
+  // supaya render, subtotal, dan pencarian semua membaca field yang sama.
+  function decorateRows(rows) {
+    (rows || []).forEach(function (r) {
+      const nosat = String(r.NOSAT);
+      const pakaiKedua = (nosat === '2' || nosat === '3');
+      r.QTY = pakaiKedua ? r.Qnt2 : r.qnt;
+      r.Satuan = pakaiKedua ? r.satuan2 : r.satuan;
+    });
+    return rows || [];
+  }
+
   function setDefaultHeader() {
     if (g_modeReport == modereport_detailnobukti) {
       gcart_header = [
@@ -149,15 +167,14 @@
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['NoPO', 'No PO', 1, 'varchar', 0, 0],
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-        ['NAMAMERK', 'Merk', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['NOPOCUST', 'PO Customer', 1, 'varchar', 0, 0],
-        ['namacust', 'Nama Customer', 1, 'varchar', 0, 0],
-        ['Qntx', 'Qty', 1, 'float', 1, 2],
-        ['satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['KodeGdg', 'Kode Gudang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 1, 2],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
-      gsum_issubtotal = 0; gsum_isgrandtotal = 0;
+      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
 
     } else if (g_modeReport == modereport_detailbarang){
       gcart_header = [
@@ -165,11 +182,11 @@
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['NoPO', 'No PO', 1, 'varchar', 0, 0],
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-        ['PartNumber', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['NOPOCUST', 'PO Customer', 1, 'varchar', 0, 0],
-        ['Qntx', 'Qty', 1, 'float', 1, 2],
-        ['satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['KodeGdg', 'Kode Gudang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 1, 2],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
@@ -182,10 +199,9 @@
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'Qty', 1, 'float', 1, 2],
-        ['satuan', 'Satuan', 1, 'varchar', 0, 0],
-        ['Qnt2', 'Qty', 1, 'float', 1, 2],
-        ['satuan2', 'Satuan', 1, 'varchar', 0, 0],
+        ['KodeGdg', 'Kode Gudang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 1, 2],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
       gsum_issubtotal = 1; gsum_isgrandtotal = 0;
@@ -196,15 +212,14 @@
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['NoPO', 'No PO', 1, 'varchar', 0, 0],
         ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-        ['PartNumber', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['qnt', 'Qty', 1, 'float', 1, 2],
-        ['satuan', 'Satuan', 1, 'varchar', 0, 0],
-        ['Qnt2', 'Qty', 1, 'float', 1, 2],
-        ['satuan2', 'Satuan', 1, 'varchar', 0, 0],
+        ['KodeGdg', 'Kode Gudang', 1, 'varchar', 0, 0],
+        ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+        ['QTY', 'QTY', 1, 'float', 1, 2],
         ['KODELOKASI', 'Lokasi', 1, 'varchar', 0, 0]
       ];
-      gsum_issubtotal = 0; gsum_isgrandtotal = 0;
+      gsum_issubtotal = 1; gsum_isgrandtotal = 0;
     }
   }
 
@@ -228,9 +243,10 @@
       // Gudang -- sebelumnya g_modeReport tidak pernah di-set di sini (bug: dropdown lama
       // sudah dihapus total sehingga cabang ini tidak pernah tersentuh), jadi kolom yang
       // tampil mengikuti mode terakhir yang aktif, bukan bentuk khusus Gudang. Dikelompokkan
-      // per KODELOKASI (Lokasi), bukan NoBukti, karena order-nya memang per gudang.
+      // per KodeGdg (Kode Gudang), BUKAN KODELOKASI (Lokasi) -- keduanya kolom berbeda; opsi
+      // ini bernama "Gudang" jadi harus subtotal per gudang, bukan per lokasi di dalamnya.
       g_modeReport = modereport_detailgudang;
-      groupby = 'KODELOKASI';
+      groupby = 'KodeGdg';
     }
 
     setDefaultHeader();
@@ -252,7 +268,7 @@
       type   : 'get',
       data   : data,
       success: function (res) {
-        lastRows = res || [];
+        lastRows = decorateRows(res || []);
         currentGroupby = groupby;        // simpan utk render ulang saat search
         $('#searchBox2').val('');        // reset kotak cari tiap muat data baru
         renderRows(lastRows, groupby);   // <-- render ke .tb-report #tableBody
@@ -270,19 +286,20 @@
   // item[2]===1, sesuai urutan simpanan). Jadi hasil "Customize Table"
   // (show/hide + urutan kolom) langsung tampil. <thead> ditulis ulang tiap
   // render lewat ReportTable.headHtml() (drag-reorder + gear per kolom).
-  // Subtotal/Grand Total = jumlah kolom Qntx/qnt/Qnt2, dikelompokkan per
-  // `groupby`. (Data sudah terurut dari proc sesuai inputOrd, jadi cukup
-  // deteksi pergantian nilai grup. Jika kolom qnt disembunyikan, baris total
-  // tidak ditampilkan.)
+  // Subtotal/Grand Total = jumlah kolom QTY (hasil gabungan qnt/Qnt2 oleh
+  // decorateRows(), lihat komentar di sana), dikelompokkan per `groupby`.
+  // (Data sudah terurut dari proc sesuai inputOrd, jadi cukup deteksi
+  // pergantian nilai grup. Jika kolom QTY disembunyikan, baris total tidak
+  // ditampilkan.)
   function renderRows(rows, groupby) {
     const cols  = gcart_header.filter(c => c[2] === 1); // kolom terlihat, terurut
     const thead = document.querySelector('#mainTable thead');
     const tbody = document.getElementById('tableBody');
-    const qntVisible = cols.some(c => c[0] === 'Qntx' || c[0] === 'qnt' || c[0] === 'Qnt2');
+    const qntVisible = cols.some(c => c[0] === 'QTY');
     // Baris Subtotal & Grand Total mengikuti toggle di modal Customize Table
     // (#buttonSubtotal -> gsum_issubtotal, #buttonGrandtotal -> gsum_isgrandtotal).
     // gsum_* dimuat oleh doSetHeader() saat klik Tampilkan, jadi pilihan user
-    // (sudah tersimpan) langsung berlaku. Total hanya tampil bila kolom qnt ada.
+    // (sudah tersimpan) langsung berlaku. Total hanya tampil bila kolom QTY ada.
     const showSub   = qntVisible && (gsum_issubtotal === 1);
     const showGrand = qntVisible && (gsum_isgrandtotal === 1);
 
@@ -294,7 +311,7 @@
       return;
     }
 
-    let html = '', prev = null, sub = { Qntx: 0, qnt: 0, Qnt2: 0 }, grand = { Qntx: 0, qnt: 0, Qnt2: 0 };
+    let html = '', prev = null, sub = { QTY: 0 }, grand = { QTY: 0 };
 
     rows.forEach(function (r, i) {
       const now = r[groupby];
@@ -302,16 +319,11 @@
       // subtotal saat nilai grup berganti (kalau toggle Subtotal aktif)
       if (showSub && i !== 0 && prev !== now) {
         html += totalRowTotal('Subtotal', sub, cols, 'subtotal-row');
-        sub = { Qntx: 0, qnt: 0, Qnt2: 0 };
+        sub = { QTY: 0 };
       }
 
-      sub.Qntx += currencyNormalizer(r.Qntx);
-      sub.qnt  += currencyNormalizer(r.qnt);
-      sub.Qnt2 += currencyNormalizer(r.Qnt2);
-
-      grand.Qntx += currencyNormalizer(r.Qntx);
-      grand.qnt  += currencyNormalizer(r.qnt);
-      grand.Qnt2 += currencyNormalizer(r.Qnt2);
+      sub.QTY  += currencyNormalizer(r.QTY);
+      grand.QTY += currencyNormalizer(r.QTY);
 
       // satu sel per kolom terlihat, format menurut tipe (item[3]) & desimal (item[5])
       html += '<tr class="data-row">' + cols.map(function (c) {
@@ -332,11 +344,10 @@
     document.getElementById('footerLabel').textContent = 'Menampilkan ' + rows.length + ' baris';
   }
 
-  // Baris total (Qntx/qnt/Qnt2 -- kolom mana yang ada tergantung mode aktif): nilai di
-  // kolomnya masing-masing, label di kolom pertama non-total, sel lain dikosongkan
-  // mengikuti urutan kolom terlihat saat ini.
+  // Baris total (QTY, satu-satunya kolom angka di laporan ini): nilai di kolomnya, label
+  // di kolom pertama non-total, sel lain dikosongkan mengikuti urutan kolom terlihat saat ini.
   function totalRowTotal(label, total, cols, cls) {
-    const totalKeys = ['Qntx', 'Qnt2', 'qnt'];
+    const totalKeys = ['QTY'];
     const labelIdx = cols.findIndex(c => !totalKeys.includes(c[0]));
 
     const tds = cols.map(function(c, idx) {
