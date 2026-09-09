@@ -27,11 +27,21 @@ class LaporanTransferKeCabangBlmDiterimaController extends Controller {
   }
 
   public function doReport(Request $req) {
-    $tgl1 = $req->get('date1');
+    // 0 = Semua, 1 = Diterima, 2 = Outstanding (lihat inputJenis di blade)
+    $jenis = $req->get('inputJenis', 0);
+    $tgl2 = $req->get('date2');
 
-    $values  = [$tgl1];
-    
-    $res = DB::connection('MGL')->select('exec SP_TransferBlmTerima ?',
+    // Outstanding = snapshot "per tanggal2", jadi date1 dipatok = date2. Blade sengaja
+    // tidak mengirim date1 sama sekali di mode ini.
+    if ( $jenis == 2) {
+        $tgl1 = $tgl2;
+    } else {
+        $tgl1 = $req->get('date1');
+    }
+
+    $values  = [$tgl1, $tgl2, (int) $jenis];
+
+    $res = DB::connection('SML')->select('exec SP_TransferBlmTerima ?, ?, ?',
       $values);
 
     return $res;
@@ -39,7 +49,7 @@ class LaporanTransferKeCabangBlmDiterimaController extends Controller {
 
   public function doFilter(Request $req) {
     $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
-    $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VWREPORToutSERAHSAMPLE where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
+    $listData = DB::connection('SML')->select('select ' . $kolom . ' from VWREPORToutSERAHSAMPLE where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
     return $listData;
   }
 
@@ -48,13 +58,13 @@ class LaporanTransferKeCabangBlmDiterimaController extends Controller {
     $res = [];
 
     for ($i=0; $i < count($req->listdata); $i++) {
-      $row = DB::connection('MGL')->select('select * from VWREPORToutSERAHSAMPLE where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
+      $row = DB::connection('SML')->select('select * from VWREPORToutSERAHSAMPLE where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
+
       for ($j=0; $j < count($row); $j++) {
         $res = array_add($res, $i+$j, $row[$j]);
       }
     }
-    
+
     return $res;
   }
 

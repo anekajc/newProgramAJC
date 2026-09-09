@@ -13,10 +13,26 @@
         <div class="page-title">Laporan Transfer Ke Cabang Belum Diterima</div>
       </div> --}}
 
-      <!-- Single Date (Hanya 1 tanggal, tanpa range s/d) -->
+      <!-- Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2) -- ketiganya mengembalikan kolom
+           yang SAMA dari SP_TransferBlmTerima, cuma nilainya beda, jadi tidak ada header/mode
+           switching di sini (beda dengan reportpengadaanpopo.blade.php yang dua modenya adalah
+           dua proc berbeda). Outstanding = snapshot "per tanggal2" -- tanggal1 disembunyikan &
+           dipatok controller sendiri (date1 = date2), lihat setJenis(). -->
       <div class="filter-wrap">
-        <label>Tanggal</label>
+        <label>Jenis</label>
+        <select class="filter-inp" id="inputJenis" onchange="setJenis(this.value)">
+          <option value="0">Semua</option>
+          <option value="1">Diterima</option>
+          <option value="2">Outstanding</option>
+        </select>
+      </div>
+
+      <!-- Periode (date range) -->
+      <div class="filter-wrap">
+        <label id="periodeLabel">Periode</label>
         <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+        <span class="filter-sep" id="dateSep">s/d</span>
+        <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
 
       {{-- Search --}}
@@ -26,10 +42,9 @@
 
       {{-- Otorisasi & Order By TIDAK ada di sini: input hidden-nya di halaman lama tidak pernah
            dibaca JS manapun (globalOtorisasi/globalOrderBy sudah hardcode "2"/"N" di JS-nya),
-           dan controller (doReport) cuma pernah baca date1 -- proc SP_TransferBlmTerima cuma
-           menerima 1 parameter (tgl1). Tidak ada yang genuinely bisa difilter selain Tanggal,
-           jadi tombol "Filter Data" & "Customize Table" (modal lama) tidak ada lagi di halaman
-           ini -- digantikan #rtBar untuk atur kolom. --}}
+           dan controller (doReport) tidak pernah membacanya. Tidak ada yang genuinely bisa
+           difilter selain Jenis & Tanggal, jadi tombol "Filter Data" & "Customize Table" (modal
+           lama) tidak ada lagi di halaman ini -- digantikan #rtBar untuk atur kolom. --}}
 
       <!-- search + tampilkan + export -->
       <div class="action-group">
@@ -55,7 +70,7 @@
           <thead>
           </thead>
           <tbody id="tableBody">
-            <tr class="empty-row"><td>Pilih tanggal lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
+            <tr class="empty-row"><td>Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
           </tbody>
         </table>
       </div>
@@ -81,9 +96,11 @@
 <script type="text/javascript">
   let globalDate1 = "{!! date('Y-m-d') !!}";
   let globalDate2 = "{!! date('Y-m-d') !!}";
+  let globalJenis = "0"; // 0 Semua, 1 Diterima, 2 Outstanding -- lihat setJenis()
   // Otorisasi & Order By tidak pernah punya kontrol UI sungguhan (input hidden-nya di halaman
-  // lama tidak dibaca JS manapun), dan doReport() di controller cuma baca date1 -- dipertahankan
-  // sebagai nilai tetap yang dikirim (harmless, tidak dibaca server) sama seperti sebelum migrasi.
+  // lama tidak dibaca JS manapun), dan doReport() di controller tidak pernah membacanya --
+  // dipertahankan sebagai nilai tetap yang dikirim (harmless, tidak dibaca server) sama seperti
+  // sebelum migrasi.
   let globalOtorisasi = "2";
   let globalOrderBy = "N";
 
@@ -104,6 +121,7 @@
     setDefaultHeader();
     doSetHeader(g_modeReport);
     doShowCustomize();
+    setJenis(globalJenis); // set visibilitas tanggal sesuai default Jenis (Semua)
 
     // Header tabel interaktif: drag-reorder + gear (sembunyikan/desimal/total) + bar
     // "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan" switcher -- Order By tidak
@@ -157,6 +175,26 @@
     }
   }
 
+  // Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2) -- lihat komentar di toolbar. Ketiganya
+  // pakai kolom yang sama, jadi TIDAK menyentuh g_modeReport/setDefaultHeader/doShowCustomize di
+  // sini (beda dengan setMode() di reportpengadaanpopo.blade.php) -- kalau ikut disentuh, kolom
+  // tersimpan (DBSIMPANHEADER, dikunci per href+reportmode) akan direset padahal modenya cuma
+  // beda nilai tanggal/jenis, bukan beda struktur kolom.
+  function setJenis(val) {
+    globalJenis = val;
+    const isOut = (val === '2');
+
+    // date1 tidak dikirim di mode Outstanding -- controller mematok tgl1 = tgl2 sendiri.
+    $('#inputDate1').toggle(!isOut);
+    $('#dateSep').toggle(!isOut);
+    $('#periodeLabel').text(isOut ? 'Sampai Tanggal' : 'Periode');
+
+    // Ganti jenis tidak langsung fetch ulang -- tabel (termasuk header) dikosongkan, user tekan
+    // Tampilkan. Pakai renderRows([]) supaya header & footer ikut disegarkan secara konsisten.
+    lastRows = [];
+    renderRows(lastRows, currentGroupby);
+  }
+
   // EXPORT ENGINE
   function toggleExport() { document.getElementById('exportDrop').classList.toggle('open'); }
   document.addEventListener('click', function (e) {
@@ -172,7 +210,7 @@
     const cols = gcart_header.filter(c => c[2] === 1);
     const header = cols.map(c => c[1]);
     const body = (lastRows || []).map(r => cols.map(function (c) {
-      const v = pickCI(r, c[0]);
+      const v = (c[0] === 'TOTHARGA') ? pickTotal(r) : pickCI(r, c[0]);
       if (c[3] === 'date') return format_date(v);
       if (c[3] === 'float' || c[3] === 'int') return currencyNormalizer(v);
       return (v == null ? '' : v);
@@ -183,7 +221,9 @@
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'TransferCabang_' + (globalDate1 || '') + '.' + ext;
+    a.download = (globalJenis === '2')
+      ? 'TransferCabangOS_' + (globalDate2 || '') + '.' + ext
+      : 'TransferCabang_' + (globalDate1 || '') + '_' + (globalDate2 || '') + '.' + ext;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('📄', 'Data diekspor sebagai ' + fmt);
   }
@@ -191,17 +231,15 @@
   // MAKE TABLE ENGINE
   function makeTable(_mode) {
     globalDate1 = $("#inputDate1").val();
-    globalDate2 = globalDate1;
+    globalDate2 = $("#inputDate2").val();
+    const isOut = (globalJenis === '2');
 
     setDefaultHeader();
     if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
 
-    const filterData = {
-      date1: globalDate1,
-      date2: globalDate2,
-      inputOto: globalOtorisasi,
-      inputOrd: globalOrderBy
-    };
+    // date1 sengaja tidak dikirim di mode Outstanding -- controller mematok tgl1 = tgl2 sendiri.
+    const filterData = { date2: globalDate2, inputJenis: globalJenis };
+    if (!isOut) { filterData.date1 = globalDate1; }
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
@@ -253,12 +291,13 @@
       }
 
       totalKeys.forEach(function (k) {
-        const v = currencyNormalizer(pickCI(r, k));
+        const v = currencyNormalizer(k === 'TOTHARGA' ? pickTotal(r) : pickCI(r, k));
         sub[k] += v; grand[k] += v;
       });
 
       html += '<tr class="data-row">' + cols.map(function (c) {
         const key = c[0], type = c[3];
+        if (key === 'TOTHARGA') return '<td class="num">' + format_number(currencyNormalizer(pickTotal(r)), c[5]) + '</td>';
         if (type === 'date') return '<td>' + format_date(pickCI(r, key)) + '</td>';
         if (type === 'float' || type === 'int') return '<td class="num">' + format_number(currencyNormalizer(pickCI(r, key)), c[5]) + '</td>';
         return '<td>' + nullToEmpty(pickCI(r, key)) + '</td>';
@@ -289,6 +328,15 @@
     const lk = String(key).toLowerCase();
     for (const k in r) { if (k.toLowerCase() === lk) return r[k]; }
     return undefined;
+  }
+
+  // Kolom Total (key 'TOTHARGA' di gcart_header, label "Total") sengaja dipertahankan generik --
+  // field ASLI dari SP_TransferBlmTerima beda nama per Jenis (hppkirim utk Semua/Outstanding,
+  // TOTHPP utk Diterima), padahal kolom tersimpan (DBSIMPANHEADER) dikunci per g_modeReport yang
+  // TIDAK berubah antar Jenis (lihat komentar di setJenis()). Jadi resolusi field asli dilakukan
+  // di sini saat dipakai, BUKAN dengan mengganti key gcart_header per Jenis.
+  function pickTotal(r) {
+    return (globalJenis === '1') ? pickCI(r, 'TOTHPP') : pickCI(r, 'hppkirim');
   }
 
   function applyFilters() {
