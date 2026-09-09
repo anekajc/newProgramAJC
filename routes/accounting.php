@@ -221,10 +221,6 @@ Route::post('/girodibukaspaddgirokoreksi', [GiroDibukaController::class, 'spAddG
 Route::post('/girodibukaspdeletegirokoreksi', [GiroDibukaController::class, 'spDeleteGiroKoreksi']);
 Route::post('/girodibukaspdelete', [GiroDibukaController::class, 'spDelete']);
 
-
-
-
-
 Route::post('/girodibukaspdetail', [GiroDibukaController::class, 'getDetail']);
 Route::get('/girodibukaloadall', [GiroDibukaController::class, 'loadAll']);
 Route::get('/girodibukalistdph', [GiroDibukaController::class, 'listDPH']);
@@ -244,7 +240,6 @@ Route::post('/girodibukaspotorisasi', [GiroDibukaController::class, 'spOtorisasi
 Route::post('/girodibukaspbatalotorisasi', [GiroDibukaController::class, 'spBatalOtorisasi']);
 Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCetak']);
 
- 
 // // PENGAJUAN DPH
 // Route::get('/pengajuandph', [PengajuanDPHController::class, 'index']);
 // Route::post('/pengajuandphspdetail', [PengajuanDPHController::class, 'getDetail']);
@@ -261,7 +256,6 @@ Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCe
 // Route::post('/pengajuandphspotorisasi' , [PengajuanDPHController::class, 'spOtorisasi']);
 // Route::post('/pengajuandphspbatalotorisasi' , [PengajuanDPHController::class, 'spBatalOtorisasi']);
 // Route::post('/pengajuandphdetailCetak', [PengajuanDPHController::class, 'getDetailCetak']);
-
 
 // PENGAJUAN DPH
 Route::get('/pengajuandphtunai', [PengajuanDPHTunaiController::class, 'index']);

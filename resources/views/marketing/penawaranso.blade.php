@@ -276,7 +276,8 @@
 #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
 #tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 
-#tabel2 thead th, #tabel3 thead th {
+#tabel2 thead th, #tabel3 thead th, #tabel_data_header th,
+#tabel_add_harga_terakhir thead th, #tabel_add_stock_proyeksi thead th, #tabel_modal_otorisasi thead th {
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px; text-transform: uppercase;
   letter-spacing: .04em; font-weight: 600; border-bottom: 1px solid #e7e9ee; border-top: none;
 }
@@ -441,6 +442,12 @@
               <div class="col-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" onchange="onChangePeriodePSO1()" class="po-filter-inp" id="input_tanggalawal_pso1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" onchange="onChangePeriodePSO1()" class="po-filter-inp" id="input_tanggalakhir_pso1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                    </div>
                     <input type="search" id="psoSearch1" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap"><label for="psoLen1">Tampilkan</label>
                       <select id="psoLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
@@ -465,11 +472,65 @@
               <div class="col-12">
                 <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                   <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" onchange="onChangePeriodePSO2()" class="po-filter-inp" id="input_tanggalawal_pso2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" onchange="onChangePeriodePSO2()" class="po-filter-inp" id="input_tanggalakhir_pso2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                    </div>
                     <input type="search" id="psoSearch2" class="po-search-inp" placeholder="Cari data">
                     <div class="po-len-wrap"><label for="psoLen2">Tampilkan</label>
                       <select id="psoLen2" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                     </div>
+                    <button class="po-btn-filter" type="button" onclick="$('#modalFilterPSO').modal('show')">
+                      <i class="bi bi-funnel"></i> Filter
+                    </button>
                   </div>
+
+                  {{-- Filter modal: so.blade.php's exact modalFilter markup/classes (rt-filter,
+                       rt-section, rt-active-badge, rt-footer-buttons, rt-btn), just one Status
+                       Otorisasi field instead of SO's multi-field filter. --}}
+                  <div class="modal fade rt-filter" id="modalFilterPSO">
+                    <div class="modal-dialog modal-md">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">
+                            <i class="bi bi-funnel"></i>
+                            Filter Data
+                            <span class="rt-active-badge" id="psoFilterBadge">0 aktif</span>
+                          </h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterPSO').modal('hide')">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+
+                        <div class="modal-body">
+                          <div class="rt-section">
+                            <div class="rt-group-label">Status</div>
+                            <div>
+                              <label class="rt-field-label" for="psoStatusOtorisasi">Status Otorisasi</label>
+                              <select class="rt-native" id="psoStatusOtorisasi">
+                                <option value="2" selected>Sudah Otorisasi</option>
+                                <option value="1">Belum Otorisasi</option>
+                                <option value="0">Semua</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="modal-footer">
+                          <button type="button" class="rt-reset-link" onclick="psoResetFilterFieldsPSO()">Reset semua</button>
+                          <div class="rt-footer-buttons">
+                            <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                              onclick="$('#modalFilterPSO').modal('hide')">Batal</button>
+                            <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterPSO(); $('#modalFilterPSO').modal('hide');">Terapkan</button>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
                   <div id="rtBarTabel3"></div>
                   <table id="tabel3" class="data-table">
                     <thead style="white-space:nowrap;"></thead>
@@ -541,7 +602,7 @@
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
-      <h2 style="margin-top: -80px;"></h2>
+      {{-- <h2>Add</h2> --}}
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -560,7 +621,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="margin-top:-60px;">
+    <div class="modal-body" style="">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
         <div class="col-md-3">
@@ -575,8 +636,8 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Customer" id="input_add_kodesupplier" onkeyup="checkKodeSupplier()">
-                <button class="btn btn-primary btn-sm rounded-end shadow-sm" id="buttonAddListPelanggan" onclick="performSearchSupplier()">
-                  <i class="bi bi-plus"></i>
+                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListPelanggan" onclick="performSearchSupplier()">
+                  <i class="bi bi-search"></i>
                 </button>
               </div>
             </div>
@@ -1175,8 +1236,8 @@
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead id='tabel_data_header' class="text-center bg-primary text-white">
+            <table id="tabel_add" class="data-table">
+              <thead id='tabel_data_header' class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
@@ -1605,8 +1666,8 @@
 
                   <div class="col-md-12 mb-4" style="overflow:auto;">
                     <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                      <table id="tabel_add_harga_terakhir" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
+                      <table id="tabel_add_harga_terakhir" class="data-table">
+                        <thead class="text-center">
                           <tr>
                             <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                             <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
@@ -1646,8 +1707,8 @@
 
                   <div class="col-md-12 mb-4" style="overflow:auto;">
                     <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                      <table id="tabel_add_stock_proyeksi" class="table table-bordered table-hover table-striped table-responsive-lg">
-                        <thead class="text-center bg-primary text-white">
+                      <table id="tabel_add_stock_proyeksi" class="data-table">
+                        <thead class="text-center">
                           <tr>
                             <th style="padding: 4px 12px;" scope="col">Tgl INVC</th>
                             <th style="padding: 4px 12px;" scope="col">No INVC</th>
@@ -1684,7 +1745,7 @@
           <div class="row mt-2">
             <div class="col-md-12 text-right" style="margin-top:-10px;">
 
-              <button type="button" class="btn btn-chip-biru btn-lg" style="
+              <button type="button" class="btn btn-histori-harga" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1695,7 +1756,7 @@
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
               onclick="showTableHargaTerakhir()">Harga Beli Terakhir</button>
 
-              <button type="button" class="btn btn-chip-biru btn-lg" style="
+              <button type="button" class="btn btn-histori-harga" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -2895,9 +2956,9 @@
         </button>
       </div>
       <div class="modal-body" style="overflow-x: auto;">
-        <table class="table table-bordered table-lg">
+        <table class="data-table" id="tabel_modal_otorisasi">
           <thead>
-            <tr class="bg-primary text-white">
+            <tr>
               <th>Kode Barang</th>
               <th>Nama Barang</th>
               <th>Qnt</th>
@@ -5584,6 +5645,28 @@ $(document).ready(function(){
   psoSetupSekali();
 });
 
+function onChangePeriodePSO1 () {
+  loadAll();
+}
+
+function onChangePeriodePSO2 () {
+  loadAll();
+}
+
+function psoResetFilterFieldsPSO () {
+  $('#psoStatusOtorisasi').val('2');
+}
+
+function psoUpdateFilterBadgePSO () {
+  let n = Number($('#psoStatusOtorisasi').val());
+  $('#psoFilterBadge').text(n === 2 ? '0 aktif' : '1 aktif');
+}
+
+function buttonFilterPSO () {
+  loadAll();
+  psoUpdateFilterBadgePSO();
+}
+
 function loadAll () {
   psoSetupSekali();
 
@@ -5592,6 +5675,11 @@ function loadAll () {
     type: "get",
     async: false,
     data: {
+      tglawal: $('#input_tanggalawal_pso1').val(),
+      tglakhir: $('#input_tanggalakhir_pso1').val(),
+      tglawal2: $('#input_tanggalawal_pso2').val(),
+      tglakhir2: $('#input_tanggalakhir_pso2').val(),
+      statusOtorisasi: $('#psoStatusOtorisasi').val(),
     },
     success: function(res) {
       lastTabel2Rows = res.tempOutstanding3 || []

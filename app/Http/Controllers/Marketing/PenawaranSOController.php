@@ -144,15 +144,33 @@ order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
     //
-   
 
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
+    $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tglawal2 = $req->tglawal2 ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhir2 = $req->tglakhir2 ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
 
-select @Tahun= :tahun, @Bulan= :bulan
+    // 0 = Semua (tanpa filter status), 1 = Belum Otorisasi, 2 = Sudah Otorisasi (default,
+    // sama seperti perilaku lama sebelum filter ini ada).
+    $statusOtorisasi = $req->statusOtorisasi !== null ? (int) $req->statusOtorisasi : 2;
+    $otorisasiCaseExpr = "Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                 else 1
+            end As Bit)";
+    $otorisasiCondition = $statusOtorisasi === 0
+      ? ""
+      : "and {$otorisasiCaseExpr}=" . ($statusOtorisasi === 1 ? "1" : "0");
+
+    $tempOutstanding2 = DB::connection("SML")->select("declare @Awal date, @Akhir date
+
+select @Awal= :tglawal, @Akhir= :tglakhir
 
 Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(a.NAMACUSTomer,'-') NamaCustSupp,
         sum(isnull(b.SUBTOTAL,0))   TotSubTotal, sum(isnull(b.NDISKON,0)) TotDiskon, sum(isnull(b.SUBTOTAL,0)) TotTotal
@@ -174,10 +192,10 @@ Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(a.NAMACUSTome
             end As Bit) NeedOtorisasi,A.IsOtorisasi2
        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
       A.tglKirim,A.MaxOL
-From dbpenawaranso a 
+From dbpenawaranso a
 Left Outer Join DBPENAWARANSODET b on a.NoBukti=b.NoBukti
 left outer join DBCUSTSUPP c on a.KODECUST=c.KODECUSTSUPP
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
+where a.Tanggal between @Awal and @Akhir
 and Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                       Case when A.IsOtorisasi2=1 then 1 else 0 end+
                       Case when A.IsOtorisasi3=1 then 1 else 0 end+
@@ -195,7 +213,7 @@ group by a.NoBukti, a.Tanggal,a.KODECUST , a.namacustomer,
 order by NoBukti
 
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+" , ["tglawal" => $tglawal , "tglakhir" => $tglakhir]);
 
 // $collection2 = collect($tempOutstanding2)->groupBy('NoBukti');
 $tempOutstanding3 = [];
@@ -207,13 +225,13 @@ foreach ($tempOutstanding2 as $p) {
 
 
 
-  $tempOutstanding4 = DB::connection("SML")->select("declare @Tahun int, @Bulan int  ,@pJasa Bit
+  $tempOutstanding4 = DB::connection("SML")->select("declare @Awal date, @Akhir date
 
-select @Tahun= :tahun, @Bulan= :bulan
+select @Awal= :tglawal2, @Akhir= :tglakhir2
 
 Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(a.namacustomer,'-') NamaCustSupp,
         sum(isnull(b.SUBTOTAL,0))   TotSubTotal, sum(isnull(b.NDISKON,0)) TotDiskon, sum(isnull(b.SUBTOTAL,0)) TotTotal
-        ,sum(isnull(NDPP,0)) TotDPP, 
+        ,sum(isnull(NDPP,0)) TotDPP,
         sum(isnull(b.NPPN,0)) TotPPN,SUM(isnull(b.NNET,0)) TotNet,
         sum(isnull(b.SUBTOTALRP,0)) TotSubTotalRp,SUM(isnull(b.NDISKON,0)) TotDiskonRp,sum(isnull(b.SUBTOTALRP,0)) TotTotalRp,
         sum(isnull(NDPPRP,0)) TotDPPRp, sum(isnull(b.NPPNRP,0))TotPPNRp,SUM(isnull(b.NNETRP,0))  TotNetRp,
@@ -231,17 +249,11 @@ Select a.NoBukti, a.Tanggal,isnull(a.KODECUST,'-') KodeSupp,isnull(a.namacustome
             end As Bit) NeedOtorisasi,A.IsOtorisasi2
        ,Isnull(A.IsBatal,0) Isbatal,A.UserBatal,A.TglBatal,
       A.tglKirim,A.MaxOL
-From dbpenawaranso a 
+From dbpenawaranso a
 Left Outer Join DBPENAWARANSODET b on a.NoBukti=b.NoBukti
 left outer join DBCUSTSUPP c on a.KODECUST=c.KODECUSTSUPP
-where year(a.Tanggal)=@Tahun and month(a.Tanggal)=@Bulan
-and Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0 and a.tanggal>='06/08/2026'
+where a.Tanggal between @Awal and @Akhir
+{$otorisasiCondition} and a.tanggal>='06/08/2026'
 
 group by a.NoBukti, a.Tanggal,a.KODECUST , a.namacustomer,
  A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
@@ -249,7 +261,7 @@ group by a.NoBukti, a.Tanggal,a.KODECUST , a.namacustomer,
        A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
        A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,a.MAXOL,a.ISBATAL,a.USERBATAL,a.TglBatal,a.TglKirim
-order by NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+order by NoBukti" , ["tglawal2" => $tglawal2 , "tglakhir2" => $tglakhir2]);
 
 // $collection3 = collect($tempOutstanding4)->groupBy('NoBukti');
 $tempOutstanding5 = [];

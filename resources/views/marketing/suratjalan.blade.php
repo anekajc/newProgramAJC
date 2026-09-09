@@ -467,6 +467,19 @@
     visibility: visible;
     transform: translateX(0);
   }
+
+  /* Pastel round-button treatment for the Otorisasi tab's action buttons, copied
+     verbatim from so.blade.php/penawaranso.blade.php's own #tabelN td:first-child .btn-*
+     pattern -- same palette, just scoped to #tabel6's .action-buttons-wrap instead. */
+  #tabel6 .action-buttons-wrap .btn {
+    width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
+    justify-content: center; border-radius: 7px; font-size: 13px; border: 1px solid transparent;
+    box-shadow: none; transition: all .12s ease;
+  }
+  #tabel6 .action-buttons-wrap .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+  #tabel6 .action-buttons-wrap .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel6 .action-buttons-wrap .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel6 .action-buttons-wrap .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 </style>
 
 @endsection
@@ -526,15 +539,15 @@
   </div>
 
   {{-- Toolbar shared by all five tabs: one search/length control drives whichever tab is
-       visible, same as so.blade.php's shared toolbar. Periode filter moved here (was
-       previously only shown inside the "Surat Jalan Otorisasi" tab) so it applies to
-       every tab, same as it already drove every tab's data via the shared loadAll()
-       call -- it just wasn't visible outside that one tab before. --}}
+       visible, same as so.blade.php's shared toolbar. Periode + Filter only make sense on
+       "Surat Jalan Otorisasi" (the other tabs aren't periode/status-filtered), so both are
+       kept in the DOM (still drive that tab's data the same way) but hidden/shown per
+       active tab via the shown.bs.tab handlers below -- see sjToggleOtorisasiTools(). --}}
   <div class="card">
     <div class="card-body" style="padding:0;">
   <div class="po-toolbar">
 
-    <div class="po-filter-wrap">
+    <div class="po-filter-wrap" id="sjPeriodeWrap" style="display:none;">
       <label>Periode</label>
       <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
       <span class="po-filter-sep">s/d</span>
@@ -553,6 +566,10 @@
         <option value="-1">Semua</option>
       </select>
     </div>
+
+    <button class="po-btn-filter" id="sjFilterBtn" type="button" style="display:none;" onclick="$('#modalFilterSPB').modal('show')">
+      <i class="bi bi-funnel"></i> Filter
+    </button>
 
   </div>
   <div class="tab-content" id="myTabContent">
@@ -643,9 +660,6 @@
       </div>
 
       <div class="rt-bar-row">
-        <button class="po-btn-filter" type="button" onclick="$('#modalFilterSPB').modal('show')">
-          <i class="bi bi-funnel"></i> Filter
-        </button>
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
         </button>
@@ -3662,25 +3676,36 @@ $(document).ready(function(){
       // (same call reinitTabelX() itself makes) WITHOUT the DataTables destroy+rebuild --
       // matches exactly what HeaderEngine.bindEngineDom() used to do, so switching tabs
       // doesn't lose the table's current search/sort/page state like a full reinit would.
+      // Periode + Filter only apply to "Surat Jalan Otorisasi" -- shown only while that
+      // tab is active, hidden (not removed -- still drives that tab's own data) otherwise.
+      function sjToggleOtorisasiTools (tampil) {
+        $('#sjPeriodeWrap').css('display', tampil ? 'flex' : 'none');
+        $('#sjFilterBtn').css('display', tampil ? 'inline-flex' : 'none');
+      }
+
       $('#nav-home-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel');
         ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
         sjAturTinggiTabel();
+        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel2');
         ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
         sjAturTinggiTabel();
+        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile3-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel5');
         ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
         sjAturTinggiTabel();
+        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile4-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel6');
         ReportTable.init({ table: '#tabel6', bar: '#rtBarTabel6', onChange: reinitTabel6 });
         sjAturTinggiTabel();
+        sjToggleOtorisasiTools(true);
       });
 
       // Shared toolbar controls (one search box + one Tampilkan dropdown for all five

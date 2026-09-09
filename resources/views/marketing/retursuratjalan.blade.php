@@ -804,7 +804,7 @@
   <div class="row">
     <div class="col-12  text-right">
 
-      <button type="button" class="btn btn-primary btn-lg" style="
+      <button type="button" class="btn btn-chip-biru btn-lg" style="
         height: 30px;
         padding: 4px 12px;
         border-radius: 20px;
@@ -839,7 +839,7 @@
       <div class="input-group">
 
         <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
-        <button type="button" id="buttonAddListBarang" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
+        <button type="button" id="buttonAddListBarang" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
       </div>
     </div>
 
@@ -912,7 +912,7 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
       onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
 
-      <button type="button" id="buttonSubmitAddAdd" class="btn btn-primary btn-lg" style="
+      <button type="button" id="buttonSubmitAddAdd" class="btn btn-chip-biru btn-lg" style="
       height: 30px;
       padding: 4px 12px;
       border-radius: 20px;
@@ -1023,7 +1023,7 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
       onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
 
-      <button type="button" id="buttonSubmitAddEdit" class="btn btn-primary btn-lg" style="
+      <button type="button" id="buttonSubmitAddEdit" class="btn btn-chip-biru btn-lg" style="
       height: 30px;
       padding: 4px 12px;
       border-radius: 20px;
@@ -1399,13 +1399,8 @@
         <div class="modal-body" >
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top: -40px">
-              <h3>Barang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row" style="margin-top: -20px">
+          <div class="row">
             <div class="col-12" style="overflow:auto;">
             <!-- <div class="container-fluid"> -->
 
@@ -1451,13 +1446,8 @@
       <div class="modal-body" >
 
       <div class="container-fluid" >
-        <div class="row">
-          <div class="col-12">
-            <h3>SJ</h3>
-          </div>
-        </div>
         <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-        <div class="row" style="margin-top: -60px">
+        <div class="row">
           <div class="col-12" style="overflow:auto;">
           <!-- <div class="container-fluid"> -->
 
@@ -1508,13 +1498,8 @@
     <div class="modal-body" >
 
     <div class="container-fluid" >
-      <div class="row">
-        <div class="col-12">
-          <h3>Custsupp</h3>
-        </div>
-      </div>
       <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-      <div class="row" style="margin-top: -60px">
+      <div class="row">
         <div class="col-12" style="overflow:auto;">
         <!-- <div class="container-fluid"> -->
 
@@ -2759,6 +2744,7 @@ function buttonAddListBarang () {
       }
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
       loadAll()
+      $('#exampleModalLabel').text('Add Barang');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListBarang').show();
       // showhidemodalfooteradd
@@ -2816,6 +2802,7 @@ function buttonAddListCustSupp () {
             "order": [[0, 'asc']],
         });
 
+      $('#exampleModalLabel').text('Add Custsupp');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListCust').show();
       // showhidemodalfooteradd
@@ -2884,6 +2871,7 @@ function buttonAddListNoSJ () {
             "order": [[0, 'asc']],
         });
 
+      $('#exampleModalLabel').text('Add SJ');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListNoSJ').show();
       // showhidemodalfooteradd
