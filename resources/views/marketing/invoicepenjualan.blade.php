@@ -152,6 +152,7 @@
 #tabel3 thead th,
 #tabelListInvoice thead th,
 #koreksiTable thead th,
+#detailAddTable thead th,
 #tabel_data_header th,
 #addTable_data_header th {
   background: #f8f9fb !important;
@@ -639,6 +640,9 @@
             <div class="po-toolbar">
               <div class="po-filter-wrap">
                 <label>Periode</label>
+              {{-- <button class="btn btn-primary" type="button" onclick="loadAll()"> --}}
+                {{-- <i class="bi bi-funnel"></i> Load All --}}
+              {{-- </button> --}}
                 <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalawal_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
                 <span class="po-filter-sep">s/d</span>
                 <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalakhir_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
@@ -1787,7 +1791,7 @@
         <!-- <div id="qrcode"></div> -->
         <div class="row">
           <div class="col-6 text-left">
-            <h1>Form Detail</h1>
+            {{-- <h1>Form Detail</h1> --}}
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
@@ -1930,8 +1934,8 @@
 
     <div class="container-fluid mt-4" style="overflow-x: auto;padding:0; margin:0; width:100%;" >
 
-          <table id="detailAddTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="detailAddTable" class="data-table"  >
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
@@ -3108,7 +3112,7 @@ function ipValueCell (row, col) {
 function tabelActionsCell (row) {
   let nobukti = ipPickCI(row, 'NoBukti');
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonAddDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetailSPB(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + ipPickCI(row, 'Noso') + '\' , \'' + ipPickCI(row, 'NamaCustSupp') + '\' , \'' + ipPickCI(row, 'KodeCustSupp') + '\' , \'' + ipPickCI(row, 'TglSO') + '\' , \'' + ipPickCI(row, 'PPNCUST') + '\')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
   return html;
@@ -4600,6 +4604,79 @@ function buttonAddDetail (nobukti) {
   })
 }
 
+// Details button for the "Surat Pengiriman Barang" (outstanding, not-yet-invoiced) tab.
+// buttonAddDetail() looks up dbInvoicePL by nobukti -- but every row on this tab is an
+// SPB that the tab's own query (InvoicePenjualanController::loadAll, tempOutstanding)
+// deliberately filters to "F.NoSPB is null", i.e. has NO invoice yet. Calling
+// buttonAddDetail() here can never find a match ("Data tidak ditemukan" every time).
+// This instead looks up the SPB itself (DBSPB/DBSPBDET via spAddDetailKoreksi), which
+// returns the same header/line-item shape so it can reuse the #page5 detail panel.
+function buttonDetailSPB (nobukti) {
+  console.log('buttonDetailSPB', nobukti)
+
+  let _token = $("#_token").val()
+
+  $('#detailAddTableData').html(`
+    <tr>
+      <td colspan="7" class="text-center">Loading...</td>
+    </tr>
+  `)
+
+  $.ajax({
+    url: "{!! url('invoicepenjualangetspbdetail') !!}",
+    type: 'post',
+    data: {
+      _token,
+      nobukti
+    },
+    success: function(res) {
+      console.log('spb detail res:', res)
+
+      if (!res.length) {
+        alertify.warning('Data tidak ditemukan')
+        return
+      }
+
+      let header = res[0]
+
+      $('#input_add_detail_customer').val(header.NAMACUSTSUPP)
+      $('#input_add_detail_alamat').val(header.Alamat1A)
+
+      $('#input_add_detail_nobukti').val(header.NOBUKTI)
+      $('#input_add_detail_nopo').val(header.Nosc || '')
+
+      $('#input_add_detail_tanggal').val(formatDate(header.TANGGAL, '-'))
+
+      let html = ''
+
+      res.forEach(item => {
+        html += `
+          <tr>
+            <td>${item.KODEBRG}</td>
+            <td>${item.NamaBrg}</td>
+            <td>${item.NAMAPRODUK || ''}</td>
+            <td>${item.Kodegdg || ''}</td>
+            <td class="text-center">${item.Satuan}</td>
+            <td class="text-right">${formatAngka(item.QNT)}</td>
+            <td class="text-right">${formatAngka(item.QNTRSPB)}</td>
+
+          </tr>
+        `
+      })
+
+      $('#detailAddTableData').html(html)
+
+      $('.mainpage').hide()
+      $('#page5').show()
+
+    },
+    error: function(err) {
+      console.log(err)
+      alertify.error('Gagal load detail')
+    }
+  })
+}
+
 function buttonCloseFormDetail () {
   $('#page4').hide();
   $('#page1').show();
@@ -4631,13 +4708,15 @@ function loadAll () {
               res.tempOutstanding.forEach((item, i) => {
                 rowTable += `<tr>
                 <td class="text-center">
+                  <div class="action-buttons-wrap">
                    <button class="btn btn-warning btn-sm"
                     type="button"
                     title="Details"
-                    onclick="buttonAddDetail('${item.NoBukti}')">
+                    onclick="buttonDetailSPB('${item.NoBukti}')">
                     <i class="bi bi-info"></i>
                    </button>
                    <button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd('${item.Noso }' , '${item.NamaCustSupp }' , '${item.KodeCustSupp }' , '${item.TglSO }' , ${item.PPNCUST })"><i class="bi bi-plus"></i></button>
+                  </div>
                 </td>
                   <td>${item.NoBukti}</td>
                   <td>${ formatDate(item.Tanggal , '/')}</td>
@@ -4653,6 +4732,7 @@ function loadAll () {
 
 
               $("#tabel").DataTable({
+        "dom": IP_DOM_STRING,
         "lengthChange": false,
           "paging": false ,
           "order": [[1, 'asc']],
@@ -4676,7 +4756,7 @@ function loadAll () {
 
                   rowTable2 += `
                   <tr>
-                  <td class='text-center' style="vertical-align:middle">`
+                  <td class='text-center' style="vertical-align:middle"><div class="action-buttons-wrap">`
 
                     if (Number(item.IsOtorisasi1)) {
                       rowTable2 += `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${ item.NoBukti }')"><i class="bi bi-key"></i></button>`
@@ -4697,6 +4777,7 @@ function loadAll () {
                         onclick="buttonDetail('${item.NoBukti}')">
                         <i class="bi bi-info"></i>
                       </button>
+                      </div>
                       </td>
                       <td>${item.NoBukti }</td>
                       <td>${formatDate(item.Tanggal , '/')}</td>
@@ -4727,6 +4808,7 @@ function loadAll () {
                 document.getElementById("tabel2_data").innerHTML = rowTable2
 
                 $("#tabel2").DataTable({
+          "dom": IP_DOM_STRING,
           "lengthChange": false,
             "paging": false ,
             "order": [[1, 'asc']],

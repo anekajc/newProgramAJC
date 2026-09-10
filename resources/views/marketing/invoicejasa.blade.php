@@ -1018,7 +1018,7 @@
             </div>
 
             <div class="col-md-3">
-              <input id="AddAddInputHarga" type="number" value='0.00' class="form-control text-right">
+              <input id="AddAddInputHarga" type="text" data-a-sign="" data-a-dec="." data-a-sep="," value='0.00' class="form-control text-right input-partial-number">
               <input id="AddAddInputIsi" type="hidden"  class="form-control  " disabled>
               <input id="AddAddInputSatuan" type="hidden"  class="form-control  " disabled>
             </div>
@@ -1158,7 +1158,7 @@
             </div>
             <div class="col-md-8">
               <input id="AddEditInputUrutItem" type="hidden"  class="form-control  " disabled>
-              <input id="AddEditInputHarga" type="number" value='0.00' class="form-control text-right">
+              <input id="AddEditInputHarga" type="text" data-a-sign="" data-a-dec="." data-a-sep="," value='0.00' class="form-control text-right input-partial-number">
               <input id="AddEditInputIsi" type="hidden"  class="form-control  " disabled>
               <input id="AddEditInputSatuan" type="hidden"  class="form-control  " disabled>
             </div>
@@ -2386,6 +2386,12 @@ function buttonHeaderTable (key) {
 }
 
 $(document).ready(function(){
+      $('.input-partial-number').autoNumeric('init',
+        {
+          minimumValue : '0',
+        }
+      );
+
       window.doSetHeader(1, false);
       lastTabelRows = @json($tempOutstanding);
       reinitTabel();
@@ -2609,7 +2615,7 @@ function submitAddAdd () {
   let kodebarang = $("#AddAddKodeBrg").val();
   let namabarang = $("#AddAddNamaBrg").val();
   let qty = $("#AddAddInputQty").val();
-  let harga = $("#AddAddInputHarga").val();
+  let harga = Number(($("#AddAddInputHarga").val() || '0').replace(/,/g, ''));
   let keterangan = $("#AddAddKeterangan").val();
 
   if (kodebarang != tempKode) {
@@ -2797,7 +2803,7 @@ function submitAddEdit () {
   let kodebarang = $("#AddEditKodeBrg").val();
   let namabarang = $("#AddEditNamaBrg").val();
   let qty = $("#AddEditInputQty").val();
-  let harga = $("#AddEditInputHarga").val();
+  let harga = Number(($("#AddEditInputHarga").val() || '0').replace(/,/g, ''));
   let keterangan = $("#AddEditKeterangan").val();
 
   let urut = $("#AddEditInputUrutItem").val();
