@@ -29,6 +29,55 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+/* Desain tab disamakan dengan menu purchasing (purchaseOrder.blade.php): pill group
+   di latar abu, tab aktif biru solid dengan shadow, murni lewat class - bukan inline style. */
+.custom-tabs {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  padding: 3px;
+}
+
+.custom-tabs .nav-link {
+  display: inline-block !important;
+  padding: 5px 16px !important;
+  font-size: 0.75rem !important;
+  border: none;
+  border-radius: 17px;
+  color: #495057;
+  background: transparent;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  background: transparent;
+  color: #007bff;
+}
+
+.custom-tabs .nav-link.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+}
+
+/* layout newmasterx punya rule .card global (align-items:center) yang override ini */
+.tab-card {
+  display: block !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  border: none !important;
+  margin-bottom: 6px !important;
+}
+
+.tab-card .card-body {
+  padding: 5px 10px !important;
+}
 </style>
 
 
@@ -334,18 +383,20 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 .btn-dpp-utama:active { background-color: #cfdcff !important; border-color: #a8bdff !important; color: #1d4ed8 !important; }
 
 .btn-dpp-tutup {
-  height: 36px;
-  border-radius: 8px;
-  font-size: 0.78rem;
+  height: 30px;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
   font-weight: 600;
-  padding: 0 16px;
-  background-color: #f1f3f5;
-  border: 1px solid #dee2e6;
-  color: #495057;
-  box-shadow: none;
+  padding: 4px 12px !important;
+  text-transform: uppercase;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .btn-dpp-tutup:hover,
-.btn-dpp-tutup:focus { background-color: #e9ecef; border-color: #ced4da; color: #343a40; }
+.btn-dpp-tutup:focus { background-color: #bb2d3b; border-color: #b02a37; color: #fff; }
+.btn-dpp-tutup:active { background-color: #b02a37 !important; border-color: #a52834 !important; color: #fff !important; }
 
 .btn-chip-biru {
   background-color: #e8edff;
@@ -384,6 +435,27 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 .btn-browsing:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
 .btn-browsing:disabled { background-color: #f1f3f5; border-color: #dee2e6; color: #adb5bd; }
 
+/* ---------- Tabel Invoice/Giro/Rekap di page2 (mengikuti #addTable pengajuandpp) ---------- */
+#addInvoiceTable thead th,
+#addGiroTable thead th,
+#addRekapTable thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#addInvoiceTable tbody tr:nth-of-type(odd),
+#addGiroTable tbody tr:nth-of-type(odd),
+#addRekapTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addInvoiceTable tbody tr:hover,
+#addGiroTable tbody tr:hover,
+#addRekapTable tbody tr:hover { background-color: #f5f3ff; }
+
 /* ---------- Tabel di dalam modal - baris diklik langsung ---------- */
 .tabel-modal-pdpp thead th {
   background: #f8f9fb !important;
@@ -408,6 +480,21 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   transition: background-color .12s;
 }
 .tabel-modal-pdpp tbody tr.pick-row:hover td { background-color: #eef2ff; }
+
+/* Kolom checkbox di modal Proses / Terima DPP: .form-check bawaan Bootstrap 5
+   memberi padding-left pada wadah dan float:left pada inputnya, jadi text-center
+   saja tidak cukup - floatnya harus dimatikan. */
+#prosesModalTable tbody td .form-check,
+#dppModalTable tbody td .form-check {
+  padding-left: 0;
+  margin: 0;
+}
+#prosesModalTable tbody td .form-check-input,
+#dppModalTable tbody td .form-check-input {
+  float: none;
+  margin: 0;
+  vertical-align: middle;
+}
 
 /* ---------- Kotak cari di dalam modal ---------- */
 .cari-modal-pdpp {
@@ -534,22 +621,21 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-<div class="card-header">
-<div class="row">
-  <nav style="width: 100%;">
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="border: 2px solid #007bff;color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; text-align: left;">Outstanding DPP</a>
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        Penerimaan DPP
-      </a>
-      {{-- Tab "Penerimaan DPP Sudah Otorisasi" dihapus: sudah & belum otorisasi kini
-           satu tabel, disaring lewat modal Filter (lihat #modalFilterPdpp). --}}
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
+          Outstanding DPP
+        </a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
+          Penerimaan DPP
+        </a>
+        {{-- Tab "Penerimaan DPP Sudah Otorisasi" dihapus: sudah & belum otorisasi kini
+             satu tabel, disaring lewat modal Filter (lihat #modalFilterPdpp). --}}
+      </div>
     </div>
-  </nav>
-</div>
-</div>
+  </div>
+<div class="card">
 <div class="card-body" style="padding:0;">
 <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -776,9 +862,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Penerimaan DPP</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-dpp-tutup" onclick="buttonCloseForm()">Close</button>
@@ -970,7 +1056,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         font-weight: 600;
         text-transform: uppercase;" >+ Tambah</button>
       </div>
-        <table id="addInvoiceTable" class="mt-4 table table-bordered table-striped"  >
+        <table id="addInvoiceTable" class="mt-4 data-table"  >
           <thead class="text-center bg-primary text-white">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Kas/Bank/Giro</th>
@@ -1007,7 +1093,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         font-weight: 600;
         text-transform: uppercase;" >+ Giro</button>
       </div>
-        <table id="addGiroTable" class="table table-bordered table-striped mt-4"  >
+        <table id="addGiroTable" class="data-table mt-4"  >
           <thead class="text-center bg-primary text-white">
             <tr>
               <th style="padding: 4px 12px;" scope="col">No Giro</th>
@@ -1037,7 +1123,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     </div>
     <div class="row">
       <div class="col-md-7">
-        <table id="addRekapTable" class="table table-bordered table-striped"  >
+        <table id="addRekapTable" class="data-table"  >
           <thead class="text-center bg-primary text-white">
             <tr>
               <th colspan=4 style="padding: 4px 12px;" scope="col">Rekap Bayar</th>
@@ -1262,8 +1348,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         <div class="container-fluid" >
           <div class="row">
               <div class="col-md-12" style="overflow-x: auto; padding:0; margin:0;">
-                <table id="giroModalTable" class="table table-bordered table-striped"  >
-                  <thead class="text-center bg-primary text-white">
+                <table id="giroModalTable" class="data-table tabel-modal-pdpp"  >
+                  <thead class="text-center">
                     <tr>
                       <th style="padding: 4px 12px;" scope="col">No Giro</th>
                       <th style="padding: 4px 12px;" scope="col">Bank</th>
@@ -1602,7 +1688,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
   <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-centered"  role="document" style="">
+    <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
       <div id="" class="modal-content ">
 
         <div id= "" class="">
@@ -1743,8 +1829,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               </div>
               <div class="row">
                   <div class="col-xl-12" style="overflow-x: auto; padding:0; margin:0;">
-                    <table id="prosesModalTable" class="table table-bordered table-striped"  >
-                      <thead class="text-center bg-primary text-white">
+                    <table id="prosesModalTable" class="data-table tabel-modal-pdpp"  >
+                      <thead class="text-center">
                         <tr>
                           <th style="padding: 4px 12px;" scope="col">v</th>
                           <th style="padding: 4px 12px;" scope="col">Faktur</th>
@@ -1823,8 +1909,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             <div class="container-fluid" >
               <div class="row">
                   <div class="col-md-12">
-                    <table id="dppModalTable" class="table table-bordered table-striped"  >
-                      <thead class="text-center bg-primary text-white">
+                    <table id="dppModalTable" class="data-table tabel-modal-pdpp"  >
+                      <thead class="text-center">
                         <tr>
                           <th style="padding: 4px 12px;" scope="col">Terima</th>
                           <th style="padding: 4px 12px;" scope="col">Faktur</th>
@@ -2165,8 +2251,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <!-- <div class="container-fluid"> -->
 
 
-                  <table id="tabel_add_list_modalx" class="table table-bordered table-striped" style="overflow:auto; " >
-                    <thead class="text-center bg-primary text-white" style="position: sticky;
+                  <table id="tabel_add_list_modalx" class="data-table tabel-modal-pdpp" style="overflow:auto; " >
+                    <thead class="text-center" style="position: sticky;
                   top: 0;
                   z-index: 1;">
                       <tr>

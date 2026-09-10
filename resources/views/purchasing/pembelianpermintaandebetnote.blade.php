@@ -319,7 +319,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+          <button class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -431,9 +431,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         <div class="col-md-12 text-right">
           <button id="buttonAddListInvoice" type="button" class="btn btn-lg btn-chip-biru" style="
             height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;
-            font-weight: 600; text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAddListInvoice()"><b>Tambah Invoice</b></button>
+            font-weight: 600; transition: background-color 0.3s, box-shadow 0.3s;"
+            onclick="buttonAddListInvoice()">Tambah Invoice</button>
         </div>
       </div>
     </div>

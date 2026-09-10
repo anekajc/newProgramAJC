@@ -61,6 +61,19 @@
     box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
   }
 
+  /* layout newmasterx punya rule .card global (align-items:center) yang override ini */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
   /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai inline
      style pada <table>, yang mengalahkan `.data-table { width: 100% }`. Dipakai min-width,
      BUKAN width, dan di-scope lewat ID (bukan class) - sama seperti uangmukabeli.blade.php. */
@@ -450,8 +463,8 @@
     <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    <div class="card">
-      <div class="card-header">
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
         <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
           <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
              aria-controls="nav-home" aria-selected="true">
@@ -463,7 +476,9 @@
           </a>
         </div>
       </div>
+    </div>
 
+    <div class="card">
       <div class="card-body" style="padding:0;">
         <div class="tab-content" id="myTabContent">
 
@@ -493,7 +508,7 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                      <button class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
 
@@ -920,10 +935,8 @@
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;
-              transition: background-color 0.3s, box-shadow 0.3s;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
+              transition: background-color 0.3s, box-shadow 0.3s;"
+              onclick="buttonAddAddItem()">Tambah Item</button>
           </div>
         </div>
 

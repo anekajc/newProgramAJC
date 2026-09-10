@@ -44,6 +44,19 @@
     box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
   }
 
+  /* layout newmasterx punya rule .card global (align-items:center) yang override ini */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
   #content { padding-top: 12px; }
 
   #page1 .card {
@@ -300,8 +313,8 @@
 
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
            aria-controls="nav-home" aria-selected="true">
@@ -313,6 +326,8 @@
         </a>
       </div>
     </div>
+  </div>
+  <div class="card">
     <div class="card-body" style="padding:0;">
       <div class="tab-content" id="myTabContent">
 
@@ -877,7 +892,7 @@
             <div class="row">
               <div class="col-md-12 text-right">
                 <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()">Batal</button>
-                <button type="button" onclick="submitPembelianAdd()" class="btn btn-primary">Add Item</button>
+                <button type="button" onclick="submitPembelianAdd()" class="btn btn-chip-biru">Add Item</button>
               </div>
             </div>
           </div>
