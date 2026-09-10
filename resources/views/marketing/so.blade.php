@@ -1520,8 +1520,8 @@
 
     <div class="container-fluid" style="margin-top: -10px;">
       <div class="row">
-        <div class="col"><div class="form-group"><label>Disc %</label><input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00"></div></div>
-        <div class="col"><div class="form-group"><label>DiscRp</label><input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00"></div></div>
+        <div class="col"><div class="form-group"><label>Disc %</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00"></div></div>
+        <div class="col"><div class="form-group"><label>DiscRp</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00"></div></div>
         <div class="col"><div class="form-group"><label>DPP</label><input type="text" class="form-control text-right" id="input_add_dpp" value="0.00" disabled></div></div>
         <div class="col"><div class="form-group"><label>PPN</label><input type="text" class="form-control text-right" id="input_add_ppn" value="0.00" disabled></div></div>
         <div class="col"><div class="form-group"><label>Grand Total</label><input type="text" class="form-control text-right" id="input_add_grandtotal" value="0.00" disabled></div></div>
@@ -2068,7 +2068,7 @@
               <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="margin-top:-30px;"></div>
               <div class="col-3 text-right form-group">
                 <input id="input_search_barang_all" style="margin-top:-30px;" type="text" class="form-control" onkeypress="searchBarangAll(event)">
-                <label for="input_search_barang_all" style="margin-top:-20px;" class="search-label">SEARCH:</label>
+                <label for="input_search_barang_all" class="search-label">SEARCH:</label>
               </div>
             </div>
             <div class="row">
@@ -4433,7 +4433,7 @@ function onChangeInputAddDisc () {
     // document.getElementById("input_add_discrp").value = '0.00'
     console.log('onChangeDisc')
     if (tipeform == 'edit') {
-      let value = $("#input_add_disc").val()
+      let value = Number(($("#input_add_disc").val() || '0').replace(/,/g, ''))
       console.log(value)
       onChangeHeader('DISC' , value)
       refreshUpdateHeader()
@@ -4447,9 +4447,9 @@ function onChangeInputAddDiscRp () {
     // document.getElementById("input_add_disc").value = '0.00'
     console.log('onChangeDiscRp')
       if (tipeform == 'edit') {
-        let value = $("#input_add_discrp").val()
+        let value = Number(($("#input_add_discrp").val() || '0').replace(/,/g, ''))
         console.log(dataHeaderAdd)
-        let x = Number(value) / Number(dataHeaderAdd.TotSubTotal) * 100
+        let x = value / Number(dataHeaderAdd.TotSubTotal) * 100
         console.log(x)
         console.log(value)
         onChangeHeader('DISC' , x)
@@ -4677,8 +4677,8 @@ function submitAddAdd () {
   let booking =  $("#input_add_add_booking").val()
   let urgent =  $("#input_add_add_urgent").val()
   let urut = 0
-  let disc = Number($("#input_add_disc").val())
-  let discrp = Number($("#input_add_discrp").val())
+  let disc = Number(($("#input_add_disc").val() || '0').replace(/,/g, ''))
+  let discrp = Number(($("#input_add_discrp").val() || '0').replace(/,/g, ''))
 
   let tipediskon = 0
   if (disc) {
@@ -5238,7 +5238,7 @@ let xppn=0
       xppn= $("#input_add_add_harga").val() * 0.1
   }
 
- xharga= harga -  $("#input_add_discrp").val() - xppn
+ xharga= harga -  discrp - xppn
   console.log(kodebarang,tanggal,xharga,nosat,choice)
  $.ajax({
     url: "{!! url('socheckhargaddd') !!}",
@@ -8301,6 +8301,7 @@ function unlockFormAdd () {
 
 function cleanFormAdd () {
   document.getElementById("input_add_tanggalpo").valueAsDate = new Date()
+  document.getElementById("input_add_tanggal").valueAsDate = new Date()
   document.getElementById("input_add_tanggalkirim").valueAsDate = new Date()
   document.getElementById("input_add_kodepelanggan").value = ''
   document.getElementById("input_add_namapelanggan").value = ''
@@ -8480,14 +8481,12 @@ let pcekglobal = 0
     async: false,
     data: {
 
-
     },
     success: function(res) {
       if (res.length ) {
         pcekglobal = 1
 
       }
-
 
     },
     error: function (err) {

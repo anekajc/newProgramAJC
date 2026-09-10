@@ -156,13 +156,13 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/closingsospopenso', [ClosingSOController::class, 'spOpenSO']);
   Route::get('/closingsoloadall', [ClosingSOController::class, 'loadAll']);
 
-//   // performance
-//   Route::get('/performance', [PerformanceController::class, 'index']);
-//   Route::post('/performancegetdetail', [PerformanceController::class, 'getDetail']);
-//   Route::get('/performanceloadall', [PerformanceController::class, 'loadAll']);
-//   Route::post('/performancespotoperf', [PerformanceController::class, 'spOtoPerf']);
-//   Route::post('/performancespbatalotoperf', [PerformanceController::class, 'spBatalOtoPerf']);
-//   Route::post('/performancedetailCetak', [PerformanceController::class, 'getDetailCetak']);
+  // performance
+  Route::get('/performance', [PerformanceController::class, 'index']);
+  Route::post('/performancegetdetail', [PerformanceController::class, 'getDetail']);
+  Route::get('/performanceloadall', [PerformanceController::class, 'loadAll']);
+  Route::post('/performancespotoperf', [PerformanceController::class, 'spOtoPerf']);
+  Route::post('/performancespbatalotoperf', [PerformanceController::class, 'spBatalOtoPerf']);
+  Route::post('/performancedetailCetak', [PerformanceController::class, 'getDetailCetak']);
 
   // UANG MUKA JUAL
   Route::get('/uangmukajualprint', [UangMukaJualController::class, 'spCetak']);
@@ -224,6 +224,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/ambilNomorSPB', [InvoicePenjualanController::class, 'getDetailCetakSPB']);
   Route::post('/invoicePenjualanPrintSPB', [InvoicePenjualanController::class, 'getDetailPenerimaancetak']);
   Route::post('/invoicepenjualangetdetail', [InvoicePenjualanController::class, 'spDetailKoreksi']);
+  Route::post('/invoicepenjualangetspbdetail', [InvoicePenjualanController::class, 'spAddDetailKoreksi']);
   Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
   Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
 
@@ -237,10 +238,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/invoicejasaspdetail', [InvoiceJasaController::class, 'spDetail']);
   Route::post('/invoicejasaonchangeheader', [InvoiceJasaController::class, 'onChangeHeader']);
   Route::post('/invoicejasaonchangedetail', [InvoiceJasaController::class, 'onChangeDetail']);
-
   Route::get('/invoicejasaloadall', [InvoiceJasaController::class, 'loadAll']);
-
-
 
   // Faktur Pajak
 

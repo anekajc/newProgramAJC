@@ -215,6 +215,43 @@
   #tabel2 tbody tr:hover {
     background-color: #f5f3ff;
   }
+
+  /* Kolom Aksi #addTable (Add Item cart di page2) -- pastel round-button treatment,
+     sama seperti #tabel/#tabel2 di atas, cuma di sini tombolnya ada di td TERAKHIR
+     (bukan first-child) karena kolom Actions memang ditaruh paling kanan. */
+  #addTable td:last-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #addTable td:last-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #addTable td:last-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #addTable td:last-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #addTable td:last-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
 </style>
 
 <style>
@@ -580,12 +617,28 @@
 
           <div class="row align-items-center mb-2">
             <div class="col-4">
+              <label class="form-label mb-0">Customer</label>
+            </div>
+            <div class="col-8">
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
+                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustSupp" onclick="buttonAddListCustSupp()"><i class="bi bi-search"></i></button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-3">
+
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
               <label class="form-label mb-0">No SJ</label>
             </div>
             <div class="col-8">
               <div class="input-group">
-                <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
-                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-search"></i></button>
+                  <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
+                  <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -631,17 +684,6 @@
 
       <div class="row g-3">
         <div class="col-3">
-          <div class="row align-items-center mb-2">
-            <div class="col-4">
-              <label class="form-label mb-0">Customer</label>
-            </div>
-            <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-                  <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustSupp" onclick="buttonAddListCustSupp()"><i class="bi bi-search"></i></button>
-                </div>
-            </div>
-          </div>
             <div class="row mb-2">
 
             <div class="col-12">
@@ -774,10 +816,8 @@
             <tr>
               <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
               <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
-              <th style="padding: 4px 12px;" scope="col">Qty1</th>
-              <th style="padding: 4px 12px;" scope="col">Sat1</th>
-              <th style="padding: 4px 12px;" scope="col">Qty2</th>
-              <th style="padding: 4px 12px;" scope="col">Sat2</th>
+              <th style="padding: 4px 12px;" scope="col">Qty</th>
+              <th style="padding: 4px 12px;" scope="col">Sat</th>
               <th style="padding: 4px 12px;" scope="col">Actions</th>
 
             </tr>
@@ -787,7 +827,7 @@
           <tbody id="addTableData" class="text-right" >
             <tr >
 
-                <td colspan=7 class="text-center">Belum ada data</td>
+                <td colspan=5 class="text-center">Belum ada data</td>
 
           </tr>
 
@@ -1004,7 +1044,6 @@
 </div>
 
 
-
   <div class="row mt-2">
     <div class="col-md-12 text-right mt-4">
       <!-- <button type="button" class="btn btn-secondary" onclick="buttonBatalAdd()" >Batal</button>
@@ -1046,8 +1085,6 @@
 
   </div>
 
-
-
   <div id="page3" class="container-fluid" style="display: none">
 
     <div class="container-fluid">
@@ -1055,9 +1092,13 @@
       <!-- <div id="qrcode"></div> -->
       <div class="row">
         <div class="col-6 text-left">
-          <h1 class="" id="modalTitleDetail">Detail</h1>
+          <h1 class="" id="modalTitleDetail">
+            {{-- Detail --}}
+          </h1>
 
-            <h1 class="" id="modalTitleOto">Otorisasi</h1>
+          <h1 class="" id="modalTitleOto">
+            {{-- Otorisasi --}}
+          </h1>
         </div>
         <div class="col-6 text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
@@ -1410,9 +1451,7 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-
                   <th style="padding: 4px 12px;" scope="col">Qty</th>
-
                   <th style="padding: 4px 12px;" scope="col">Sat</th>
 
                 </tr>
@@ -2272,21 +2311,17 @@ function refreshDataTableAdd (nobukti) {
       document.getElementById("input_add_tanggal").value = formatDate(dataTableAddHeader.TANGGAL)
       document.getElementById("input_add_nopol").value = dataTableAddHeader.NoPolKend
       document.getElementById("input_add_catatan").value = dataTableAddHeader.Catatan
-
       document.getElementById("input_add_nobukti").value = nobukti
       document.getElementById("input_add_nourut").value = dataTableAddHeader.NOURUT
-
       document.getElementById("input_add_nosj").value = dataForm.NoSPB
       document.getElementById("input_add_noso").value = dataForm.NoSC
       document.getElementById("input_add_customer").value = dataForm.NAMACUSTSUPP + '\n' + dataForm.Alamat
       document.getElementById("input_add_kodecustomer").value = dataForm.KodeCustSupp
       document.getElementById("input_add_gudang").value = dataForm.Nama
       // document.getElementById("input_add_nopol").value = ''
-      //
       // document.getElementById("input_add_tanggal").value = formatDate(new Date())
       document.getElementById("input_add_tanggalsj").value = formatDate(dataForm.TglSPB)
       document.getElementById("input_add_tanggalsc").value = formatDate(dataForm.TglSC)
-
       document.getElementById("input_add_catatan").disabled = true;
       document.getElementById("input_add_nopol").disabled = true;
       document.getElementById("input_add_tanggal").disabled = true;
@@ -2300,8 +2335,6 @@ function refreshDataTableAdd (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
-            <td>${item.SAT_2}</td>
             <td class='text-center'>
               <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
               <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete('${item.NOBUKTI}' ,  ${item.URUT})"><i class="bi bi-trash"></i></button>
@@ -2312,9 +2345,11 @@ function refreshDataTableAdd (nobukti) {
         `
       });
 
+        // <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
+        // <td>${item.SAT_2}</td>
+        // placeholder kalo qty & sat 2 dibutuhkan lagi
 
       document.getElementById("addTableData").innerHTML = rowTable
-
 
     },
     error: function (err) {
