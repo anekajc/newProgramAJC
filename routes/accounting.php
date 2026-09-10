@@ -311,18 +311,19 @@ Route::controller(PenerimaanDPPController::class)->group(function () {
 });
 
 
-// // PELUNASAN PIUTANG DPP
-// Route::get('/pelunasanpiutangdpp', [PelunasanPiutangDPPController::class, 'index']);
-// Route::post('/pelunasanpiutangdppspdetail', [PelunasanPiutangDPPController::class, 'getDetail']);
-// Route::post('/pelunasanpiutangdppspdetailoutstanding', [PelunasanPiutangDPPController::class, 'getDetailOutstanding']);
-// Route::post('/pelunasanpiutangdppgetlistterimadpp', [PelunasanPiutangDPPController::class, 'getListTerimaDPP']);
-// Route::post('/pelunasanpiutangdppspdetailpenerimaan' , [PelunasanPiutangDPPController::class, 'getdetailPenerimaan'] );
-// Route::post('/pelunasanpiutangdppspadd' , [PelunasanPiutangDPPController::class, 'spAdd'] );
-// Route::get('/pelunasanpiutangdpploadall' , [PelunasanPiutangDPPController::class, 'loadAll'] );
-// Route::post('/pelunasanpiutangdppspkoreksi' , [PelunasanPiutangDPPController::class, 'spKoreksi'] );
-// Route::post('/pelunasanpiutangdppspotorisasi' , [PelunasanPiutangDPPController::class, 'spOtorisasi'] );
-// Route::post('/pelunasanpiutangdppspbatalotorisasi' , [PelunasanPiutangDPPController::class, 'spBatalOtorisasi'] );
-// Route::post('/pelunasanpiutangdppdetailCetak', [PelunasanPiutangDPPController::class, 'getDetailCetak']);
+// PELUNASAN PIUTANG DPP
+Route::get('/pelunasanpiutangdpp', [PelunasanPiutangDPPController::class, 'index']);
+Route::post('/pelunasanpiutangdppspdetail', [PelunasanPiutangDPPController::class, 'getDetail']);
+Route::post('/pelunasanpiutangdppspdetailoutstanding', [PelunasanPiutangDPPController::class, 'getDetailOutstanding']);
+Route::post('/pelunasanpiutangdppgetlistterimadpp', [PelunasanPiutangDPPController::class, 'getListTerimaDPP']);
+Route::post('/pelunasanpiutangdppspdetailpenerimaan' , [PelunasanPiutangDPPController::class, 'getdetailPenerimaan'] );
+Route::post('/pelunasanpiutangdppspadd' , [PelunasanPiutangDPPController::class, 'spAdd'] );
+Route::get('/pelunasanpiutangdpploadall' , [PelunasanPiutangDPPController::class, 'loadAll'] );
+Route::post('/pelunasanpiutangdppresetheader', [PelunasanPiutangDPPController::class, 'resetHeader']);
+Route::post('/pelunasanpiutangdppspkoreksi' , [PelunasanPiutangDPPController::class, 'spKoreksi'] );
+Route::post('/pelunasanpiutangdppspotorisasi' , [PelunasanPiutangDPPController::class, 'spOtorisasi'] );
+Route::post('/pelunasanpiutangdppspbatalotorisasi' , [PelunasanPiutangDPPController::class, 'spBatalOtorisasi'] );
+Route::post('/pelunasanpiutangdppdetailCetak', [PelunasanPiutangDPPController::class, 'getDetailCetak']);
 
 
 // // MEMORIAL KOREKSI
