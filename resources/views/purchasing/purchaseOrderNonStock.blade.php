@@ -612,7 +612,7 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                      <button class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   {{-- #rtBar dipindahkan ke sini lewat JS saat tab ini aktif - lihat ponsPindahBar(). --}}
@@ -1205,10 +1205,8 @@
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;
-              transition: background-color 0.3s, box-shadow 0.3s;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
+              transition: background-color 0.3s, box-shadow 0.3s;"
+              onclick="buttonAddAddItem()">Tambah Item</button>
           </div>
         </div>
 

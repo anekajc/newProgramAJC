@@ -42,19 +42,6 @@
     border: none !important;
 }
 
-#tabel2 td, #tabel2 th {
-    border-left: 1px solid #dee2e6;
-    border-top: 1px solid #dee2e6;
-}
-
-#tabel2 td:first-child, #tabel2 th:first-child {
-    border-left: none;
-}
-
-#tabel2 thead tr:first-child th {
-    border-top: none;
-}
-
 /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai inline
    style pada <table>, yang mengalahkan `.data-table { width: 100% }`. Dipakai min-width,
    BUKAN width, dan di-scope lewat ID (bukan class) karena DataTables meng-clone tabel
@@ -357,7 +344,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+          <button class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -468,9 +455,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            transition: background-color 0.3s, box-shadow 0.3s;"
             onclick="buttonAddAddItem()">Tambah Item</button>
         </div>
       </div>

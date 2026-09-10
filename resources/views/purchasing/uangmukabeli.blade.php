@@ -343,7 +343,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <i class="bi bi-funnel"></i> Filter
         </button>
         <div class="po-toolbar-act">
-          <button class="btn btn-primary" onclick="buttonAdd()">+ ADD</button>
+          <button class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
@@ -520,7 +520,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         font-weight: 600;
         text-transform: uppercase;
         transition: background-color 0.3s, box-shadow 0.3s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Submit</button>
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
     </div>
 
   </div>

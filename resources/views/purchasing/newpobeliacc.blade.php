@@ -171,6 +171,25 @@
     }
     .pba-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
     .pba-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
+
+    /* Tombol chip (latar tint muda + teks berwarna) untuk tombol Add Item, disamakan
+       dengan menu purchasing lain (perintahreturbeli.blade.php). */
+    .btn-chip-biru {
+      background-color: #e8edff;
+      border-color: #cfdcff;
+      color: #2563eb;
+    }
+    .btn-chip-biru:hover,
+    .btn-chip-biru:focus {
+      background-color: #dce6ff;
+      border-color: #b9c9ff;
+      color: #1d4ed8;
+    }
+    .btn-chip-biru:active {
+      background-color: #cfdcff !important;
+      border-color: #a8bdff !important;
+      color: #1d4ed8 !important;
+    }
     </style>
   @endsection
 
@@ -686,7 +705,7 @@
             <div class="row">
               <div class="col-md-12 text-right">
                 <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()">Batal</button>
-                <button type="button" onclick="submitPembelianAdd()" class="btn btn-primary">Add Item</button>
+                <button type="button" onclick="submitPembelianAdd()" class="btn btn-chip-biru">Add Item</button>
               </div>
             </div>
           </div>

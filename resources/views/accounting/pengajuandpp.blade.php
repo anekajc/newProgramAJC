@@ -307,15 +307,16 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
    .btn-danger: saat diam merah muda dari layout (#fef2f2 / #fecaca / #b91c1c), saat
    hover jadi merah pekat khas btn-danger Bootstrap (#bb2d3b, teks putih). */
 .btn-dpp-tutup {
-  height: 36px;
-  border-radius: 8px;
-  font-size: 0.78rem;
+  height: 30px;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
   font-weight: 600;
-  padding: 0 16px;
+  padding: 4px 12px !important;
+  text-transform: uppercase;
   background-color: #fef2f2;
   border: 1px solid #fecaca;
   color: #b91c1c;
-  box-shadow: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .btn-dpp-tutup:hover,
 .btn-dpp-tutup:focus { background-color: #bb2d3b; border-color: #b02a37; color: #fff; }
