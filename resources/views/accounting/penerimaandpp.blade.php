@@ -317,6 +317,26 @@ input[type=number] {
 #tabelPdpp td:first-child .btn-danger,  #tabel td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabelPdpp td:first-child .btn-info,    #tabel td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
+#addInvoiceTable td .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+#addInvoiceTable td .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+#addInvoiceTable td .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#addInvoiceTable td .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+
 /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
 table.data-table.po-aksi-hover tbody td:first-child .btn {
   visibility: hidden;
@@ -434,6 +454,19 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 .btn-browsing:hover,
 .btn-browsing:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
 .btn-browsing:disabled { background-color: #f1f3f5; border-color: #dee2e6; color: #adb5bd; }
+
+/* Varian kecil untuk tombol browsing di dalam baris tabel (input tinggi 30px). */
+.btn-browsing-sm { height: 30px; width: 32px; font-size: 13px; border-radius: 0 !important; }
+
+/* Tombol Save di modal Change Invoice - hijau lembut, bukan hijau bootstrap terang. */
+#buttonSaveLB {
+  background-color: #e7f7ed;
+  border-color: #cdebd7;
+  color: #16a34a;
+  box-shadow: none;
+}
+#buttonSaveLB:hover,
+#buttonSaveLB:focus { background-color: #d7f0e1; border-color: #b6e0c6; color: #15803d; }
 
 /* ---------- Tabel Invoice/Giro/Rekap di page2 (mengikuti #addTable pengajuandpp) ---------- */
 #addInvoiceTable thead th,
@@ -576,11 +609,23 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   color: #343a40;
 }
 
-/* Tombol browsing tetap menyatu dengan input di sebelah kirinya. */
-#page2 .input-group .btn-browsing,
-#page3 .input-group .btn-browsing,
-.modal-body .input-group .btn-browsing {
+/* Tombol browsing tetap menyatu dengan input di sebelah kirinya - tinggi disamakan
+   secara eksplisit (bukan mengandalkan flex stretch) supaya tidak lebih besar dari
+   input di sampingnya. */
+#input_modalx_perkiraanlebihbayar,
+#input_modalx_namaperkiraanlebihbayar,
+#input_modalx_perkiraankurangbayar,
+#input_modalx_namaperkiraankurangbayar,
+#buttonAddListPerkiraanLebihBayar,
+#buttonAddListPerkiraanKurangBayar {
+  height: 36px;
+}
+#buttonAddListPerkiraanLebihBayar,
+#buttonAddListPerkiraanKurangBayar {
   border-radius: 0 6px 6px 0 !important;
+  width: 36px;
+  padding: 0;
+  font-size: 14px;
 }
 </style>
 @endsection
@@ -1172,110 +1217,83 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     </div>
 
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="row">
-
-
-          <div class="col-md-2">
+          <div class="col-md-4">
             <div class="form-group">
             <label>Faktur</label>
           </div>
           </div>
-
-          <div class="col-md-4">
+          <div class="col-md-8">
             <div class="input-group form-group">
               <input id="AddNoFaktur" type="text" class="form-control" disabled>
-
             </div>
           </div>
-
-
         </div>
-
       </div>
 
-    </div>
-
-    <div class="row" style="margin-top: -10px">
-      <div class="col-md-4">
-
-
+      <div class="col-md-3">
         <div class="row">
-
-
-          <div class="col-md-2">
+          <div class="col-md-4">
             <div class="form-group">
             <label>Dibayar</label>
           </div>
           </div>
-
-          <div class="col-md-3">
+          <div class="col-md-8">
             <div class="input-group form-group">
               <input id="AddDibayar" type="number" class="form-control text-right" value="">
-
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="col-md-2">
+      <div class="col-md-3">
+        <div class="row">
+          <div class="col-md-4">
             <div class="form-group">
             <label>LBayar</label>
           </div>
           </div>
-
-          <div class="col-md-3">
+          <div class="col-md-8">
             <div class="input-group form-group">
               <input id="AddLebihBayar" type="number"  value="1.00" class="text-right form-control">
-
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
 
     <div class="row" style="margin-top: -10px">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="row">
-
-
-          <div class="col-md-2">
+          <div class="col-md-4">
             <div class="form-group">
             <label>KBayar</label>
           </div>
           </div>
-
-          <div class="col-md-3">
+          <div class="col-md-8">
             <div class="input-group form-group">
               <input id="AddKurangBayar" type="number" class="form-control text-right" value="" disabled>
-
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="row" style="margin-top: -10px">
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="row">
-
-
           <div class="col-md-2">
             <div class="form-group">
             <label>Perkiraan</label>
           </div>
           </div>
-
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="input-group form-group">
               <input id="AddPerkiraan" type="text" class="form-control" value="" disabled>
-
             </div>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-6">
             <div class="input-group form-group">
               <input id="AddNamaPerkiraan" type="text" class="form-control" value="" disabled>
-
             </div>
           </div>
         </div>
@@ -1768,8 +1786,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
         <div class="modal-footer">
           <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
-          <button type="button" id="buttonSubmitAdd" class="btn btn-chip-biru" onclick="submitAdd()">Submit</button>
-          <button type="button" id="buttonSubmitEdit" class="btn btn-chip-biru" onclick="submitEdit()">SubmitE</button>
+          <button type="button" id="buttonSubmitAdd" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
+          <button type="button" id="buttonSubmitEdit" class="btn btn-chip-biru d-none" onclick="submitEdit()">SubmitE</button>
         </div>
         </div>
 
@@ -2328,7 +2346,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
           <div class="modal fade" id="formPerkiraanKLLB" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="min-width: 1400px">
+            <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
               <div id="" class="modal-content ">
 
                 <div id= "" class="">
@@ -2347,15 +2365,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
                   <div class="container-fluid" >
                     <div class="row">
-                      <div class="col-12">
-                        <h3>Perkiraan</h3>
-                      </div>
-
-
                     </div>
                     {{-- Kotak pencarian tabel Perkiraan - lihat pdppIkatCariPerkiraanKLLB(). --}}
                     <div class="row mb-2">
-                      <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
+                      <div class="col-12 d-flex justify-content-end">
                         <input id="input_search_perkiraankllb" type="search" class="form-control cari-modal-pdpp" placeholder="Cari data">
                       </div>
                     </div>
@@ -2405,7 +2418,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
                 <div class="modal-footer">
                   <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
-                  <button type="button" class="btn btn-chip-biru" onclick="submitAdd()">Submit</button>
+                  <button type="button" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
                 </div>
                 </div>
 
@@ -4895,7 +4908,7 @@ function renderTabelOutstanding () {
                     <div class="input-group form-group">
                       <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
 
-                      <button id="buttonChangeDibayar${i}" style="height:30px; padding: 0px; width: 25px; just" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-primary" >+</button>
+                      <button id="buttonChangeDibayar${i}" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-browsing btn-browsing-sm" title="Ubah Dibayar"><i class="bi bi-search"></i></button>
 
                     </div></td>
 
@@ -4976,7 +4989,7 @@ function renderTabelOutstanding () {
                   <div class="input-group form-group">
                     <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
 
-                    <button id="buttonChangeDibayar${i}" style="height:30px; padding: 0px; width: 25px; just" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-primary" >+</button>
+                    <button id="buttonChangeDibayar${i}" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-browsing btn-browsing-sm" title="Ubah Dibayar"><i class="bi bi-search"></i></button>
 
                   </div></td>
 

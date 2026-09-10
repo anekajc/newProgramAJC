@@ -1187,7 +1187,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
       <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru">Submit Add</button>
 
-      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru">Submit Edit</button>
+      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru">Submit</button>
 
 
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
@@ -3239,9 +3239,10 @@ function lockFormAdd (value = true) {
   // document.getElementById("input_add_catatan").disabled = false
   document.getElementById("input_modal_tanggal").disabled = value
   document.getElementById("input_modal_penagih").disabled = value
-  // Valas selalu terkunci (alur lama), tidak ikut nilai `value`: isinya ditentukan
-  // program - 'IDR' saat tambah, valas header DPP saat koreksi.
-  document.getElementById("input_modal_valas").disabled = true
+  // Valas ikut nilai `value`: terbuka saat tambah (buttonAdd memanggil dengan false)
+  // supaya user bisa pilih sendiri, tetap terkunci saat koreksi (default true) karena
+  // valasnya diambil dari header DPP yang dibuka.
+  document.getElementById("input_modal_valas").disabled = value
   //
   //
   // document.getElementById("buttonAddListCustomer").disabled = false
