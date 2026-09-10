@@ -1326,7 +1326,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;">Submit Edit</button>
+      text-transform: uppercase;">Submit</button>
 
   </div>
 
@@ -1669,7 +1669,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 border-radius: 20px;
                 font-size: 0.75rem;
                 font-weight: 600;
-                text-transform: uppercase;">Submit Edit</button>
+                text-transform: uppercase;">Submit</button>
 
             </div>
 
@@ -2243,7 +2243,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                     border-radius: 20px;
                     font-size: 0.75rem;
                     font-weight: 600;
-                    text-transform: uppercase;">Submit Edit</button>
+                    text-transform: uppercase;">Submit</button>
 
 
                     <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()" class="btn btn-primary" style="height: 30px;
