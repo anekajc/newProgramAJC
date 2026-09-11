@@ -632,6 +632,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   padding: 0;
   font-size: 14px;
 }
+
+/* ---------- Tumpukan modal: hanya modal teratas yang terlihat ---------- */
+.modal.pld-modal-tertimbun { display: none !important; }
+.modal-backdrop.pld-backdrop-tertimbun { display: none !important; }
 </style>
 @endsection
 
@@ -2468,6 +2472,42 @@ let indexEditKL = 0
 let saveHeaderInvoice = {}
 let saveHeaderIndex = 0
 
+// ---------- Tumpukan modal ----------
+// Hanya satu modal yang terlihat pada satu waktu. Saat modal anak dibuka, modal
+// induk disembunyikan lewat class (bukan .modal('hide'), supaya isian form dan
+// handler hidden.bs.modal milik induk tidak ikut terpicu). Saat anak ditutup -
+// lewat Batal, tombol x, Esc, maupun klik backdrop - induk muncul lagi.
+// Yang disimpan di tumpukan adalah elemennya, bukan id-nya, karena di halaman ini
+// ada id modal yang kembar (#formPerkiraan).
+var pldTumpukanModal = []
+
+function pldSisakanSatuBackdrop () {
+  var backdrop = $('.modal-backdrop')
+  backdrop.addClass('pld-backdrop-tertimbun')
+  backdrop.last().removeClass('pld-backdrop-tertimbun')
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+  var induk = $('.modal.show').not(this).not('.pld-modal-tertimbun').last()
+  if (induk.length) {
+    pldTumpukanModal.push(induk)
+    induk.addClass('pld-modal-tertimbun')
+  }
+})
+
+$(document).on('shown.bs.modal', '.modal', function () {
+  pldSisakanSatuBackdrop()
+})
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+  var induk = pldTumpukanModal.pop()
+  if (induk) induk.removeClass('pld-modal-tertimbun')
+  // BS4 melepas .modal-open dari <body> begitu satu modal tertutup, padahal masih
+  // ada modal lain yang terbuka - pasang lagi supaya scroll body tetap terkunci.
+  if ($('.modal.show').length) $('body').addClass('modal-open')
+  pldSisakanSatuBackdrop()
+})
+
 $(document).ready(function(){
         // Tabel Outstanding DPP (#tabel) digambar renderTabelOutstanding() setelah
         // loadAll() selesai, sama seperti tabel Penerimaan DPP di tab sebelah.
@@ -3961,7 +4001,7 @@ function renderTabelOutstanding () {
                 refreshDataTable(nobukti)
                 loadAll()
 
-                $("#formProses").modal("toggle")
+                $("#formProses").modal("hide")
 
               }
               if (res == 2) {
@@ -4264,7 +4304,7 @@ function renderTabelOutstanding () {
               tipeform = 'edit'
               refreshDataTable(nobukti)
 
-              $("#formProses").modal("toggle")
+              $("#formProses").modal("hide")
               alertify.success("Berhasil menambah invoice")
               // $(".showhideitemgiro").hide()
             }
@@ -4871,7 +4911,7 @@ function renderTabelOutstanding () {
 
 
         $(".showhideitemgiro").hide()
-        $("#formGiro").modal("toggle")
+        $("#formGiro").modal("show")
 
       }
 
@@ -5017,8 +5057,8 @@ function renderTabelOutstanding () {
             document.getElementById("prosesModalTableData").innerHTML = rowTableProses
             document.getElementById("input_proses_perkiraan").value = perkiraan
             document.getElementById("input_proses_namaperkiraan").value = keterangan ? keterangan : ''
-            $("#formPerkiraan").modal("toggle")
-            $("#formProses").modal("toggle")
+            $("#formPerkiraan").modal("hide")
+            $("#formProses").modal("show")
           },
           error: function (err) {
             console.log(err)
@@ -5073,20 +5113,20 @@ function renderTabelOutstanding () {
           $('.showhideitemKL').hide()
 
 
-          $("#formX").modal('toggle')
+          $("#formX").modal('show')
 
 
       }
 
       function buttonAddListPerkiraanLebihBayar (id) {
         toId = id
-        $("#formPerkiraanKLLB").modal('toggle')
+        $("#formPerkiraanKLLB").modal('show')
       }
 
       function buttonAddPickPerkiraanLebihBayar (perkiraan , nama) {
         document.getElementById(`input_modalx_perkiraan${toId}`).value = perkiraan
         document.getElementById(`input_modalx_namaperkiraan${toId}`).value = nama
-        $("#formPerkiraanKLLB").modal('toggle')
+        $("#formPerkiraanKLLB").modal('hide')
 
       }
 
@@ -5298,7 +5338,7 @@ function renderTabelOutstanding () {
 
             document.getElementById("perkiraanModalTableData").innerHTML = rowTable
 
-            $("#formPerkiraan").modal("toggle")
+            $("#formPerkiraan").modal("show")
           },
           error: function (err) {
             console.log(err)
