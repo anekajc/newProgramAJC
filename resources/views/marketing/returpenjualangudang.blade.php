@@ -71,18 +71,18 @@
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right center;
 }
-#tabel2 td:first-child, #tabel3 td:first-child {
+#tabel td:first-child, #tabel2 td:first-child, #tabel3 td:first-child {
   display: flex; gap: 4px; justify-content: center; align-items: center;
 }
-#tabel2 td:first-child .btn, #tabel3 td:first-child .btn {
+#tabel td:first-child .btn, #tabel2 td:first-child .btn, #tabel3 td:first-child .btn {
   width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
   justify-content: center; border-radius: 7px; font-size: 13px;
   border: 1px solid transparent; box-shadow: none; transition: all .12s ease;
 }
-#tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
-#tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
-#tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
-#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel td:first-child .btn:hover, #tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+#tabel td:first-child .btn-warning, #tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+#tabel td:first-child .btn-primary, #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+#tabel td:first-child .btn-danger, #tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabel thead th, #tabel2 thead th, #tabel3 thead th {
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px;
   text-transform: uppercase; letter-spacing: .04em; font-weight: 600;
@@ -92,22 +92,39 @@
 #tabel tbody tr:hover, #tabel2 tbody tr:hover, #tabel3 tbody tr:hover { background-color: #f5f3ff; }
 
 /* Hide action buttons until the row is hovered/focused, port 1:1 dari pola
-   .action-buttons-wrap milik master (public/css/tableMaster2.css) --
-   scoped ke #tabel2 (satu-satunya tabel di halaman ini yang punya Actions;
-   #tabel tidak punya kolom aksi). */
-#tabel2 tbody .action-buttons-wrap {
+   .action-buttons-wrap milik master (public/css/tableMaster2.css). */
+#tabel tbody .action-buttons-wrap, #tabel2 tbody .action-buttons-wrap {
   opacity: 0;
   visibility: hidden;
   transform: translateX(-6px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
 }
 
-#tabel2 tbody tr:hover .action-buttons-wrap,
-#tabel2 tbody tr:focus-within .action-buttons-wrap {
+#tabel tbody tr:hover .action-buttons-wrap, #tabel tbody tr:focus-within .action-buttons-wrap,
+#tabel2 tbody tr:hover .action-buttons-wrap, #tabel2 tbody tr:focus-within .action-buttons-wrap {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
 }
+
+/* Form SPR modal -- kotak field bersih ala referensi (label di atas, kotak
+   abu-abu utk field readonly) + tabel item dgn header abu-abu penuh & padding
+   lega, konsisten sama look modal "Detail" yang dijadikan acuan user. */
+.spr-modal-body { padding-top: 4px; }
+.spr-field-group { margin-bottom: 20px; }
+.spr-field-label {
+  display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; color: #374151; margin-bottom: 6px;
+}
+.spr-field-box {
+  display: block; width: 100%; max-width: 280px; background: #eef0f3; border: 1px solid #e5e7eb;
+  border-radius: 8px; padding: 7px 12px; font-size: 13px; color: #111827;
+}
+.spr-field-box:disabled { color: #1f2937; opacity: 1; }
+.spr-field-box.spr-field-editable { background: #fff; border-color: #d1d5db; }
+.spr-table thead th { padding: 10px 14px !important; white-space: nowrap; }
+.spr-table tbody td { padding: 10px 14px; vertical-align: middle; }
+.spr-table tbody td:nth-child(3) { white-space: nowrap; }
 </style>
 @endsection
 @section('content')
@@ -174,6 +191,12 @@
       <div class="col-md-12">
         <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
           <div class="po-toolbar">
+            <div class="po-filter-wrap">
+              <label>Periode</label>
+              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalawal_prj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <span class="po-filter-sep">s/d</span>
+              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalakhir_prj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+            </div>
             <input type="search" id="rpgSearch1" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="rpgLen1">Tampilkan</label>
               <select id="rpgLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
@@ -312,104 +335,56 @@
 </div>
 </div>
 
-<div id="page2" style="display: none" class="mainpage container-fluid" >
+<div class="modal fade" id="modalAddPRJ" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document" style="max-width: 92%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Form SPR</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="buttonCloseModalAddPRJ()"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
 
-  <div class="row">
-    <div class="col-8 text-left">
-      <h2>Form SPR</h2>
-    </div>
-    <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
-    </div>
-  </div>
-
-  <div class="container-fluid">
+  <div class="container-fluid spr-modal-body">
     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
     <div class="row">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-3">
-            <div class="row">
-
-
-            <div class="col-md-4">
-
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-            <div class="col-md-4">
-
-              <div class="form-group">
-                <label>No PRJ</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_noprj" placeholder="" disabled>
-              </div>
-            </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-            <div class="col-md-4">
-
-              <div class="form-group">
-                <label>Customer</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_namacustomer" placeholder="" disabled>
-              </div>
-            </div>
-          </div>
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-            <div class="col-md-4">
-
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
-
-              </div>
-            </div>
-          </div>
-          </div>
-
+      <div class="col-md-6">
+        <div class="spr-field-group">
+          <label class="spr-field-label">No Bukti</label>
+          <input type="text" class="spr-field-box" id="input_add_nobukti" placeholder="" disabled>
         </div>
-
+      </div>
+      <div class="col-md-6">
+        <div class="spr-field-group">
+          <label class="spr-field-label">No PRJ</label>
+          <input type="text" class="spr-field-box" id="input_add_noprj" placeholder="" disabled>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="spr-field-group">
+          <label class="spr-field-label">Customer</label>
+          <input type="text" class="spr-field-box" id="input_add_namacustomer" placeholder="" disabled>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="spr-field-group">
+          <label class="spr-field-label">Tanggal</label>
+          <input type="date" class="spr-field-box spr-field-editable" id="input_add_tanggal" value="{!! date('Y-m-d') !!}">
+        </div>
       </div>
     </div>
-    <hr/>
-        <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
+        <div class="container-fluid" style="overflow-x: auto; padding:0; margin:0;">
 
-              <table id="addTable" class="data-table">
+              <table id="addTable" class="data-table spr-table">
                 <thead class="text-center">
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Terima</th>
-                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Sat</th>
-                    <th style="padding: 4px 12px;" scope="col">Sat Produk</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty PR Jual</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty Terima</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty Reject</th>
+                    <th scope="col" class="spr-col-terima">Terima</th>
+                    <th scope="col">Kode Barang</th>
+                    <th scope="col">Nama Barang</th>
+                    <th scope="col">Sat</th>
+                    <th scope="col">Sat Produk</th>
+                    <th scope="col">Qty PR Jual</th>
+                    <th scope="col">Qty Terima</th>
+                    <th scope="col">Qty Reject</th>
 
                   </tr>
                 </thead>
@@ -431,14 +406,17 @@
     <div class="row mt-2" style="margin-top: 0">
       <div class="col-md-12 text-right mt-4">
 
+        <button type="button" class="btn btn-light" style="height: 30px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;" onclick="buttonCloseModalAddPRJ()">Batal</button>
         <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-primary" style="height: 30px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;">Submit</button>
-        <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
       </div>
 
+    </div>
+  </div>
+      </div>
     </div>
   </div>
 </div>
@@ -875,7 +853,6 @@
     </div>
 
 
-
       <div class="row mt-2">
         <div class="col-md-12 text-right mt-4">
           <button type="button" class="btn btn-secondary" onclick="buttonKoreksiItemBatal()" style="height: 30px;
@@ -1180,9 +1157,6 @@ let xppn = 0
 /* ============ Header tabel interaktif (window.ReportTable) ============
  * Port 1:1 dari poCart/poAktifkanTabel milik purchaseOrder.blade.php, sama
  * seperti so/invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual.
- * tabel (urut 1) tidak punya Actions sama sekali di markup lama (dikomentari
- * total), jadi tabelActionsCell() sengaja kosong -- data-only, sama seperti
- * behaviour lama.
  */
 let rpgCart = { 1 : [], 2 : [] }
 let rpgActiveUrut = 0
@@ -1210,7 +1184,7 @@ function rpgDefaultCart (urut) {
   // urut 2: Transaksi Retur Gudang -- gabungan kolom tab lama "Belum Otorisasi"
   // + "Sudah Otorisasi" (OtoUser1/TglOto1), sejak keduanya digabung jadi satu tabel.
   return [
-    ['NoBukti',      'No. Bukti',  1, 'varchar', 0, 0],
+    ['NoBukti',      'No. Bukti',  1, 'varchar', 01, 0],
     ['Tanggal',      'Tanggal',    1, 'date',    0, 0],
     ['NAMACUSTSUPP', 'Nama Cust',  1, 'varchar', 0, 0],
     ['Noinv',        'No Invoice', 1, 'varchar', 0, 0],
@@ -1218,6 +1192,7 @@ function rpgDefaultCart (urut) {
     ['IDUser',       'User',       1, 'varchar', 0, 0],
     ['OtoUser1',     'User Oto',   1, 'varchar', 0, 0],
     ['TglOto1',      'Tgl Oto',    1, 'date',    0, 0],
+    ['xstatus',      'Status',    1, 'varchar',    0, 0]
   ]
 }
 
@@ -1339,9 +1314,25 @@ function tulisTheadHeaderRPG (tableSel, cols, withActions) {
   thead.innerHTML = headRowHtml;
 }
 
+// Belum=merah, Sebagian=kuning, Selesai=biru -- sama seperti badge status xstatus
+// di perintahreturjual.blade.php, pakai .sp-badge yang sudah dimuat lewat
+// po-table-header.css. queryPenerimaan() di ReturPenjualanGudangController
+// menghasilkan xstatus dengan nilai string yang sama persis (Belum/Sebagian/Selesai).
+const RPG_BADGE_STATUS = {
+  'Belum':    'is-inactive',
+  'Sebagian': 'is-supervisor',
+  'Selesai':  'is-user',
+}
+
 function rpgValueCell (row, col) {
   let raw = rpgPickCI(row, col[0]);
   let type = col[3];
+
+  if (col[0] === 'xstatus') {
+    let kelas = RPG_BADGE_STATUS[raw] || '';
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
+  }
+
   if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/') + '</td>'; }
   if (type === 'float') {
     let dp = Number(col[5]) || 0;
@@ -1349,6 +1340,22 @@ function rpgValueCell (row, col) {
     return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+// Actions utk tabel "Outstanding PRJ" -- buttonAdd() sudah ada & cocok (dipakai
+// utk bikin dokumen Retur Gudang baru dari baris PRJ ini). buttonDetail() adalah
+// wrapper tipis di atas buttonAdd() yang sama (data source-nya identik & benar
+// utk baris PRJ), tapi menyembunyikan tombol submit di form-nya supaya cuma
+// dipakai utk lihat detail barangnya, bukan bikin dokumen baru.
+function tabelActionsCell (row) {
+  let nobukti = rpgPickCI(row, 'NoBukti');
+  let namacustsupp = rpgPickCI(row, 'NAMACUSTSUPP');
+  let ppn = rpgPickCI(row, 'PPN');
+  let html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus-lg"></i></button>';
+  html += '</div></td>';
+  return html;
 }
 
 function tabel2ActionsCell (row) {
@@ -1369,12 +1376,12 @@ function renderTabelRows (rows) {
   let cols = (rpgCart[1].length ? rpgCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
-    html += '<tr>';
+    html += '<tr>' + tabelActionsCell(row);
     cols.forEach(function (col) { html += rpgValueCell(row, col); });
     html += '</tr>';
   });
   document.getElementById('tabel_data').innerHTML = html;
-  tulisTheadHeaderRPG('#tabel', cols, false);
+  tulisTheadHeaderRPG('#tabel', cols, true);
 }
 
 function renderTabel2Rows (rows) {
@@ -1481,6 +1488,16 @@ function onChangePeriodeSPR () {
     return
   }
   buttonFilterSPR()
+}
+
+function onChangePeriodePRJ () {
+  let tglawal = $('#input_tanggalawal_prj').val()
+  let tglakhir = $('#input_tanggalakhir_prj').val()
+  if (tglawal && tglakhir && tglawal > tglakhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  loadAll()
 }
 
 $(document).ready(function(){
@@ -2198,9 +2215,11 @@ function loadAll () {
   let tglakhir = $('#input_tanggalakhir_spr').val()
   let filterstatus = $('#input_filterstatus').val()
   let filteroto = $('#input_filteroto').val()
+  let tglawalprj = $('#input_tanggalawal_prj').val()
+  let tglakhirprj = $('#input_tanggalakhir_prj').val()
   $.ajax({
     url: "{!! url('returpenjualangudangloadall') !!}",
-    type: "get", async: false, data: { tglawal, tglakhir, filterstatus, filteroto },
+    type: "get", async: false, data: { tglawal, tglakhir, filterstatus, filteroto, tglawalprj, tglakhirprj },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempPenerimaan;
@@ -2210,7 +2229,7 @@ function loadAll () {
 }
 
 
-function buttonAdd (nobukti , namacustsupp , ppn) {
+function buttonAdd (nobukti , namacustsupp , ppn, mode = 'add') {
 
 let pcekglobal = 0
   $.ajax({
@@ -2276,27 +2295,32 @@ if (pcekglobal) {
         if (res.length == 0) {
           alertify.warning("Data tidak ditemukkan")
         } else {
+          $('#buttonSubmitAdd').show()
           dataTableAdd = res
 
           let rowTable = ""
 
+          $('#addTable thead th.spr-col-terima').toggle(mode !== 'detail')
+
           res.forEach((item, i) => {
             let qnt = item.QNT ? parseFloat(item.QNT).toFixed(2) : '0.00'
             let qntsisa = item.QntSisa ? parseFloat(item.QntSisa).toFixed(2) : '0.00'
+            let terimaCol = mode === 'detail' ? '' : `<td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>`
+            let qntTerimaCol = mode === 'detail'
+              ? `<td class="text-right">${qntsisa}</td>`
+              : `<td class="text-center"><input onchange="" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>`
+            let qntRejectCol = mode === 'detail'
+              ? `<td class="text-right">0.00</td>`
+              : `<td class="text-center"><input onchange="" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="number" min=0 value='0.00'></td>`
             rowTable += `<tr>
-            <td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>
-
+            ${terimaCol}
             <td>${item.KODEBRG}</td>
             <td>${item.NAMABRG}</td>
-
-
             <td>${item.SATUAN}</td>
             <td></td>
             <td class="text-right">${qnt}</td>
-            <td class="text-center"><input onchange="" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>
-            <td class="text-center"><input onchange="" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="number" min=0 value='0.00'></td>
-
-
+            ${qntTerimaCol}
+            ${qntRejectCol}
             </tr>`
           });
 
@@ -2323,8 +2347,7 @@ if (pcekglobal) {
           //
 
 
-          $('.mainpage').hide();
-          $('#page2').show();
+          $('#modalAddPRJ').modal('show');
         }
 
 
@@ -2345,6 +2368,15 @@ if (pcekglobal) {
 
     })
 
+}
+
+// Detail (view-only) utk baris "Outstanding PRJ" -- pakai data fetch yang sama
+// persis dengan buttonAdd() (satu-satunya sumber data yang cocok utk baris
+// ini), tapi sembunyikan tombol submit-nya supaya cuma dipakai utk melihat
+// rincian barang, bukan bikin dokumen Retur Gudang baru.
+function buttonDetail (nobukti, namacustsupp, ppn) {
+  buttonAdd(nobukti, namacustsupp, ppn, 'detail')
+  $('#buttonSubmitAdd').hide()
 }
 
 function submitAdd () {
@@ -2430,7 +2462,7 @@ function submitAdd () {
           // $("#form").modal('toggle')
           alertify.success('SPR telah ditambah');
           loadAll()
-          buttonCloseForm()
+          buttonCloseModalAddPRJ()
 
         }
         // if (res == 2) {
@@ -2476,6 +2508,10 @@ function buttonCloseForm () {
   // $('#page2').hide();
   $('#page1').show();
 
+}
+
+function buttonCloseModalAddPRJ () {
+  $('#modalAddPRJ').modal('hide');
 }
 
 function formatDate(date , pemisah = '-') {

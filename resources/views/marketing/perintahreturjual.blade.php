@@ -1382,7 +1382,7 @@
               </div>
             </div>
           </div>
-          <div class="col-md-12">
+          <div class="col-md-12" style="margin-top:-19px">
             <div class="row">
 
               <div class="col-md-4">
@@ -1400,6 +1400,7 @@
           </div>
             </div>
           </div>
+
           <div class="col-md-3">
             <div class="row">
 
@@ -1996,6 +1997,7 @@ function prjDefaultCart () {
     ['IDUser',       'User',        1, 'varchar', 0, 0],
     ['OtoUser1',     'User Oto1',   1, 'varchar', 0, 0],
     ['TglOto1',      'Tgl Oto1',    1, 'date',    0, 0],
+    ['xstatus',       'Status',      1, 'varchar', 0, 0]
   ]
 }
 
@@ -2120,9 +2122,23 @@ function tulisTheadHeaderPRJ (cols) {
   thead.innerHTML = headRowHtml;
 }
 
+// Belum=merah, Sebagian=kuning, Selesai=biru -- sama seperti badge status di
+// master/newsetpemakai.blade.php, pakai .sp-badge yang sudah dimuat lewat
+// po-table-header.css (lihat juga poBadgeStatus() di purchaseOrder.blade.php).
+const PRJ_BADGE_STATUS = {
+  'Belum':    'is-inactive',
+  'Sebagian': 'is-supervisor',
+  'Selesai':  'is-user',
+}
+
 function prjValueCell (row, col) {
   let raw = prjPickCI(row, col[0]);
   let type = col[3];
+
+  if (col[0] === 'xstatus') {
+    let kelas = PRJ_BADGE_STATUS[raw] || '';
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
+  }
 
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
@@ -2149,12 +2165,12 @@ function tabelActionsCell (row) {
   let isOto = Number(prjPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi " onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak Nota" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" title="Cetak Berita Acara" onclick="submitPrintBA(\'' + nobukti + '\')"><i class="bi bi-printer-fill"></i></button>';
   } else {
+    html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
@@ -3407,8 +3423,6 @@ function refreshDataTableAdd (NOBUKTI = "") {
 
 function buttonDetail (nobukti) {
 
-document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Detail Data'
-
   console.log('buttonDetail' , nobukti)
 
     let _token  = $("#_token").val()
@@ -3465,10 +3479,6 @@ document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jua
             alertify.warning("Data tidak ditemukan")
           }
 
-
-
-
-
       },
       error: function (err) {
         console.log(err)
@@ -3483,8 +3493,6 @@ document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jua
   $('#page3').show();
 }
 function buttonEdit (nobukti) {
-
-document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Edit Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -3534,8 +3542,6 @@ if (pcekglobal) {
 }
 
 function buttonAdd (nobukti) {
-
-document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual / Add Data'
 
 let pcekglobal = 0
   $.ajax({
@@ -3622,8 +3628,6 @@ function buttonAddEditItem (i) {
   }
   document.getElementById("AddEditInputNosat").innerHTML = selectOption
 
-
-
   // let retursupp = $("#AddEditReturSupp").val()
   // let nobeli = $("#AddEditNoBeli").val()
   // let urutbeli = $("#AddEditUrutBeli").val()
@@ -3639,16 +3643,12 @@ function buttonAddEditItem (i) {
   //
   // let nosat = $("#AddEditInputNosat").val();
 
-
-
   $('.showhideitem').hide();
   $('#formAddEdit').show();
 
 }
 
-
 function buttonCloseForm () {
-  document.getElementById('pageTitleBreadcrumb').textContent = 'Perintah Retur Jual'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -3729,13 +3729,6 @@ function buttonBatalOtorisasi (nobukti) {
       alertify.error("Action cancelled");
     });
 
-
-
-
-
-
-
-
 }
 
 function buttonOtorisasi (nobukti) {
@@ -3745,41 +3738,38 @@ function buttonOtorisasi (nobukti) {
     return
   }
 
-  alertify.confirm('Otorisasi', 'Otorisasi PRJ ' + nobukti + ' ?',
-      function() {
-        let _token = $("#_token").val();
+    let _token = $("#_token").val();
 
-        $.ajax({
-          url: "{!! url('perintahreturjualspotorisasi') !!}",
-          type: "post",
-          async: false,
-          data: {
-            _token,
-            nobukti
+    $.ajax({
+      url: "{!! url('perintahreturjualspotorisasi') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token,
+        nobukti
 
-          },
-          success: function(res) {
-            console.log(res)
-            alertify.success('Berhasil update otorisasi')
-            loadAll()
+      },
+      success: function(res) {
+        console.log(res)
+        alertify.success('Berhasil update otorisasi')
+        loadAll()
 
 
 
-          },
-          error: function (err) {
-            console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
-          }
-
-        })
+      },
+      error: function (err) {
+        console.log(err)
+        alertify.warning('Terjadi kesalahan silahkan refresh browser')
       }
-    ,function(){
-      console.log('no')
-    });
+
+    })
+  // alertify.confirm('Otorisasi', 'Otorisasi PRJ ' + nobukti + ' ?',
+  //     function() {
+  //     }
+  //   ,function(){
+  //     console.log('no')
+  //   });
 }
-
-
-
 
 function formatDate(date , pemisah = '-') {
     var d = new Date(date),

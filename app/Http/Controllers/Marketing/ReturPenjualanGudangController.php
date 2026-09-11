@@ -45,11 +45,30 @@ class ReturPenjualanGudangController extends Controller
 //  where MONTH(a.TANGGAL) = :bulan and YEAR(a.TANGGAL) = :tahun
 // ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
 
-$tempOutstanding = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int, @Flagmenu tinyint,@UserID Varchar(30)
+$tglawalprj = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+$tglakhirprj = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+$tempOutstanding = $this->queryOutstanding($tglawalprj, $tglakhirprj);
 
-select @Tahun= :tahun , @Bulan= :bulan, @UserID= :user
+$tglawal = $tglawalprj;
+$tglakhir = $tglakhirprj;
+$tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, 0, 0);
 
+    return view('marketing.returpenjualangudang' , [
+      "menul0" => $menul0,
+      "periode" => $periode,
+      "tempOutstanding" => $tempOutstanding,
+      "tempPenerimaan" => $tempPenerimaan,
+      "akses" => $akses
+    ]);
+
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Outstanding PRJ"
+  // -- dulu difilter fix ke periode aktif (YEAR/MONTH(A.Tanggal)=periode), sekarang
+  // pakai filter rentang tanggal spy halaman ini punya filter periode tanggal juga,
+  // sama seperti "Transaksi Retur Gudang" (queryPenerimaan()).
+  private function queryOutstanding ($tglawal, $tglakhir) {
+    return DB::connection("SML")->select("
 select distinct d.PPN,A.NoBukti, A.NoUrut, A.Tanggal, A.KodeCustSupp, A.NAMACUSTSUPP, A.NamaKota,
 	A.NoRPJ, A.NoSO, A.IDUser,
 	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
@@ -66,25 +85,11 @@ Left Outer Join (  SELECT A.NOBUKTI
 				 GROUP BY A.NoBukti
 				)B ON A.NoBukti=B.NoBukti
 left outer join DBCUSTSUPP d on a.KodeCustSupp = d.KODECUSTSUPP
-where YEAR(A.Tanggal)=@Tahun and MONTH(A.Tanggal)=@Bulan
-and A.Kodegdg In(select KodeGdg from DBPemakaiGdg where UserId=@UserId)
+where A.Tanggal between :tglawal and :tglakhir
+and A.Kodegdg In(select KodeGdg from DBPemakaiGdg where UserId=:user)
 and NeedOtorisasi=0
 AND B.NoBukti IS NOT NULL
-order by A.NoBukti",["tahun" => $periode->tahun , "bulan" =>$periode->bulan, "user" => \Auth::User()->username]);
-
-
-$tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-$tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
-$tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, 0, 0);
-
-    return view('marketing.returpenjualangudang' , [
-      "menul0" => $menul0,
-      "periode" => $periode,
-      "tempOutstanding" => $tempOutstanding,
-      "tempPenerimaan" => $tempPenerimaan,
-      "akses" => $akses
-    ]);
-
+order by A.NoBukti", ["tglawal" => $tglawal, "tglakhir" => $tglakhir, "user" => \Auth::User()->username]);
   }
 
   // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Transaksi Retur
@@ -134,33 +139,9 @@ $tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, 0, 0);
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("
-    declare @Tahun int, @Bulan int, @Flagmenu tinyint,@UserID Varchar(30)
-
-    select @Tahun= :tahun , @Bulan= :bulan, @UserID= :user
-
-    select distinct d.PPN,A.NoBukti, A.NoUrut, A.Tanggal, A.KodeCustSupp, A.NAMACUSTSUPP, A.NamaKota,
-	A.NoRPJ, A.NoSO, A.IDUser,
-	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-	A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-	A.IsOtorisasi5, A.OtoUser5, A.TglOto5, A.NeedOtorisasi,
-    A.ISBATAL, A.USERBATAL, A.TglBatal, A.TipePPn,A.Noinv,A.KodeGdg
-from vwTransPRRJual A
-Left Outer Join (  SELECT A.NOBUKTI
-				 FROM dbPRRJualDet A
-				 LEFT OUTER JOIN (select noprrjual,urutprrjual,sum(QNT1)Qnt1,SUM(QNT2) Qnt2
-                                                from dbSPBRJualDet  group by noprrjual,urutprrjual
-						) B on A.NoBukti=B.NoprRJual AND A.Urut=B.URUTPRRJUAL
-				 WHERE ISNULL(A.QNT1,0)-ISNULL(B.Qnt1,0) >0
-				 GROUP BY A.NoBukti
-				)B ON A.NoBukti=B.NoBukti
-left outer join DBCUSTSUPP d on a.KodeCustSupp = d.KODECUSTSUPP
-where YEAR(A.Tanggal)=@Tahun and MONTH(A.Tanggal)=@Bulan
-and A.Kodegdg In(select KodeGdg from DBPemakaiGdg where UserId=@UserId)
-and NeedOtorisasi=0
-AND B.NoBukti IS NOT NULL
-order by A.NoBukti",["tahun" => $periode->tahun , "bulan" =>$periode->bulan, "user" => \Auth::User()->username]);
-
+    $tglawalprj = $req->tglawalprj ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
+    $tglakhirprj = $req->tglakhirprj ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tempOutstanding = $this->queryOutstanding($tglawalprj, $tglakhirprj);
 
     $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
