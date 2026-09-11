@@ -171,7 +171,7 @@ input[type=number] {
 #tabel2 td:first-child .btn-danger,  #tabel td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabel2 td:first-child .btn-info,    #tabel td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
 
-#addInvoiceTable td .btn {
+#addInvoiceTable td .btn, #addTable td .btn {
   width: 30px;
   height: 30px;
   padding: 0;
@@ -184,12 +184,12 @@ input[type=number] {
   box-shadow: none;
   transition: all .12s ease;
 }
-#addInvoiceTable td .btn:hover {
+#addInvoiceTable td .btn:hover, #addTable td .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
-#addInvoiceTable td .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
-#addInvoiceTable td .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#addInvoiceTable td .btn-success, #addTable td .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#addInvoiceTable td .btn-danger, #addTable td .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 
 /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
 table.data-table.po-aksi-hover tbody td:first-child .btn {
@@ -322,10 +322,11 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 #buttonSaveLB:hover,
 #buttonSaveLB:focus { background-color: #d7f0e1; border-color: #b6e0c6; color: #15803d; }
 
-/* ---------- Tabel Invoice/Giro/Rekap di page2 (mengikuti #addTable pengajuandpp) ---------- */
+/* ---------- Tabel Invoice/Giro/Rekap di page2, dan #addTable (mengikuti #addTable pengajuandpp) ---------- */
 #addInvoiceTable thead th,
 #addGiroTable thead th,
-#addRekapTable thead th {
+#addRekapTable thead th,
+#addTable thead th {
   background: #f8f9fb !important;
   color: #6b7280 !important;
   font-size: 12px;
@@ -338,10 +339,12 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 #addInvoiceTable tbody tr:nth-of-type(odd),
 #addGiroTable tbody tr:nth-of-type(odd),
-#addRekapTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addRekapTable tbody tr:nth-of-type(odd),
+#addTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
 #addInvoiceTable tbody tr:hover,
 #addGiroTable tbody tr:hover,
-#addRekapTable tbody tr:hover { background-color: #f5f3ff; }
+#addRekapTable tbody tr:hover,
+#addTable tbody tr:hover { background-color: #f5f3ff; }
 
 /* ---------- Tabel di dalam modal - baris diklik langsung ---------- */
 .tabel-modal-pdpp thead th {
@@ -481,6 +484,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   padding: 0;
   font-size: 14px;
 }
+
+/* ---------- Tumpukan modal: hanya modal teratas yang terlihat ---------- */
+.modal.pld-modal-tertimbun { display: none !important; }
+.modal-backdrop.pld-backdrop-tertimbun { display: none !important; }
 </style>
 @endsection
 
@@ -917,8 +924,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
   <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-        <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="addTable" class="data-table"  >
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Kas/Bank</th>
               <th style="padding: 4px 12px;" scope="col">Faktur</th>
@@ -2066,7 +2073,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
     <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="min-width: 1400px">
+      <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
         <div id="" class="modal-content ">
 
           <div id= "" class="">
@@ -2084,17 +2091,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <div class="modal-body">
 
             <div class="container-fluid" >
-              <div class="row">
-                <div class="col-12">
-                  <h3>Perkiraan</h3>
-                </div>
-
-
-              </div>
-
-
-
-              <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
               {{-- Kotak pencarian - lihat pldIkatCariPerkiraanModal(). --}}
               <div class="row mb-2">
                 <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
@@ -2106,7 +2102,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 <!-- <div class="container-fluid"> -->
 
 
-                <table id="tabel_add_list_perkiraan" class="data-table" style="overflow:auto; " >
+                <table id="tabel_add_list_perkiraan" class="data-table tabel-modal-pdpp" style="overflow:auto; " >
                   <thead class="text-center" style="position: sticky;
                 top: 0;
                 z-index: 1;">
@@ -2141,8 +2137,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-            <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+            <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+            <button type="button" id="buttonSubmitAdd" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
           </div>
           </div>
 
@@ -2193,6 +2189,42 @@ let saveHeaderIndex = 0
 let toId = ''
 let urutTrans = 0
 let dataEdit = {}
+
+// ---------- Tumpukan modal ----------
+// Hanya satu modal yang terlihat pada satu waktu. Saat modal anak dibuka, modal
+// induk disembunyikan lewat class (bukan .modal('hide'), supaya isian form dan
+// handler hidden.bs.modal milik induk tidak ikut terpicu). Saat anak ditutup -
+// lewat Batal, tombol x, Esc, maupun klik backdrop - induk muncul lagi.
+// Yang disimpan di tumpukan adalah elemennya, bukan id-nya, supaya tetap aman
+// seandainya suatu saat ada id modal yang kembar.
+var pldTumpukanModal = []
+
+function pldSisakanSatuBackdrop () {
+  var backdrop = $('.modal-backdrop')
+  backdrop.addClass('pld-backdrop-tertimbun')
+  backdrop.last().removeClass('pld-backdrop-tertimbun')
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+  var induk = $('.modal.show').not(this).not('.pld-modal-tertimbun').last()
+  if (induk.length) {
+    pldTumpukanModal.push(induk)
+    induk.addClass('pld-modal-tertimbun')
+  }
+})
+
+$(document).on('shown.bs.modal', '.modal', function () {
+  pldSisakanSatuBackdrop()
+})
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+  var induk = pldTumpukanModal.pop()
+  if (induk) induk.removeClass('pld-modal-tertimbun')
+  // BS4 melepas .modal-open dari <body> begitu satu modal tertutup, padahal masih
+  // ada modal lain yang terbuka - pasang lagi supaya scroll body tetap terkunci.
+  if ($('.modal.show').length) $('body').addClass('modal-open')
+  pldSisakanSatuBackdrop()
+})
 
 $(document).ready(function(){
       // Kedua tabel (Outstanding Pembayaran & Pelunasan Piutang) memakai pola
@@ -2838,13 +2870,13 @@ function renderTabelOutstanding () {
 
 function buttonAddListPerkiraanLebihBayar (id) {
   toId = id
-  $("#formPerkiraan").modal('toggle')
+  $("#formPerkiraan").modal('show')
 }
 
 function buttonAddPickPerkiraanLebihBayar (perkiraan , nama) {
   document.getElementById(`input_modalx_perkiraan${toId}`).value = perkiraan
   document.getElementById(`input_modalx_namaperkiraan${toId}`).value = nama
-  $("#formPerkiraan").modal('toggle')
+  $("#formPerkiraan").modal('hide')
 
 }
 
@@ -3277,7 +3309,7 @@ let nobkmbbm = $("#input_add_nobkmbbm").val();
           document.getElementById("input_add_tanggal").disabled = true
 
           tipeform = 'edit'
-          $("#form").modal('toggle')
+          $("#form").modal('hide')
           refreshTableKoreksi(nobukti ,nobkmbbm)
           loadAll()
 
@@ -3362,7 +3394,7 @@ let nobkmbbm = $("#input_add_nobkmbbm").val();
           alertify.success('DPH telah ditambah');
 
           tipeform = 'edit'
-          $("#form").modal('toggle')
+          $("#form").modal('hide')
           buttonKoreksi(nobukti)
 
         }
@@ -4015,7 +4047,7 @@ function buttonAddListBatal () {
   $('.showhidemodalbodyadd').hide();
   // $('#modalBodyAddMain').show();
 
-  $("#form").modal('toggle')
+  $("#form").modal('hide')
 }
 
 // function buttonAddListCustomer () {
@@ -4289,7 +4321,7 @@ function buttonAddItem () {
       document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
 
 
-        $("#form").modal('toggle')
+        $("#form").modal('show')
     },
     error: function (err) {
       console.log(err)
@@ -4393,7 +4425,7 @@ function buttonChangeDibayar (index) {
   $('.showhideitemKL').hide()
 
 
-  $("#formX").modal('toggle')
+  $("#formX").modal('show')
 
 
 }

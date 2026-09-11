@@ -1726,7 +1726,7 @@
         let header = (item && item[0]) ? item[0] : {}
         let tombolAksi = `
           <button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail1(${i})"><i class="bi bi-info-lg"></i></button>
-          <button class="btn btn-success btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})"><i class="bi bi-bag-plus-fill"></i></button>
+          <button class="btn btn-success btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})"><i class="bi bi-plus"></i></button>
         `
         rowTable += `<tr><td class="text-center">${tombolAksi}</td>`
         kolomRender.forEach((c) => {
