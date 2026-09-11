@@ -80,7 +80,6 @@ month(a.TANGGAL) = :bulan and year(a.TANGGAL) = :tahun " , ["bulan" => $periode-
                    else 1
               end As Bit) NeedOtorisasi, A.nopesanan,A.unblock,A.userunblock,A.tglunblock
 
-
     from dbso a
     Left Outer join dbSODet B on B.NoBukti=a.NoBukti
     LEFT outer join DBCUSTSUPP M on M.KODECUSTSUPP = a.kodecust
