@@ -241,10 +241,10 @@
                 gsum_isgrandtotal = 1;
             } else {
                 gcart_header = [
-                    ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['namaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Nobukti', 'No Bukti', 1, 'varchar', 0, 0],
                     ['tanggal', 'Tanggal', 1, 'date', 0, 0],
+                    ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['namaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Kodegdg', 'Gdg', 1, 'varchar', 0, 0],
                     ['Harga', 'Harga', 1, 'float', 1, 2],
                     ['HPPKartu', 'Hpp Kartu', 1, 'float', 1, 2],

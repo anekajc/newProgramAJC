@@ -524,6 +524,8 @@ Route::get('/laporanstockmutasistockrp', [LaporanStockMutasiStockController::cla
 Route::get('/laporanstockmutasistockqtyrp', [LaporanStockMutasiStockController::class, 'indexqtyrp']);
 Route::get('/laporanstockmutasistockperiode', [LaporanStockMutasiStockController::class, 'indexperiode']);
 Route::get('/laporanstockmutasistock_doReport', [LaporanStockMutasiStockController::class, 'doReport']);
+Route::get('/laporanstockmutasistock_doMonthlyGraphics', [LaporanStockMutasiStockController::class, 'doMonthlyGraphics']);
+Route::get('/laporanstockmutasistock_doDeadFastSlow', [LaporanStockMutasiStockController::class, 'doDeadFastSlow']);
 
 // MUTASI STOCK PER MERK
 Route::get('/laporanstockmutasistockpermerk', [LaporanStockMutasiStockPerMerkController::class, 'index']);

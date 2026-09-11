@@ -507,7 +507,7 @@
     return '  <td class="cellcompact-right" style="border: 1px solid black; white-space:nowrap;">' + format_number(_sum, 2) + '</td>';
   }
 
-  function makeTable(_mode) {
+  function makeTable(_mode, _callback) {
     // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
     let groupby = reportGroupBy;
     let _date1  = $("#inputDate1").val();
@@ -522,31 +522,28 @@
       inputMerk        : $("#inputMerk").val(),
     };
 
-    // Mode FILTER dipanggil doShowFormFilterData() di layout, yang LANGSUNG membaca
-    // gcart_filter begitu makeTable() kembali -- jalur itu harus tetap sinkron.
+    // Mode FILTER dipanggil doShowFormFilterData() di layout, yang sekarang membaca
+    // gcart_filter lewat _callback (doMakeTable() sudah async -- lihat catatan di
+    // masterreportGudang.blade.php), jadi teruskan saja _callback apa adanya.
     if (_mode !== 'REPORT') {
-      doMakeTable(_mode, groupby, data, reportTitle, _date1);
+      doMakeTable(_mode, groupby, data, reportTitle, _date1, null, _callback);
       return;
     }
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
-    // doMakeTable() memakai XHR sinkron (async:false di masterreportGudang). Kalau
-    // langsung dipanggil di sini, "Memuat data..." tidak pernah sempat tergambar:
-    // browser baru melukis setelah seluruh task JS habis, dan saat itu labelnya sudah
-    // ditimpa hasil akhir. Dua requestAnimationFrame bersarang memastikan frame berisi
-    // status loading selesai digambar dulu, baru request yang memblokir dijalankan.
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        doMakeTable(_mode, groupby, data, reportTitle, _date1);
+    // doMakeTable() sekarang async (dulu async:false yang membekukan tab sampai response
+    // datang tanpa sempat menggambar "Memuat data..." di atas) -- jadi bagian yang
+    // membaca gcart_res harus jalan di callback ini, bukan lagi lewat trik nested rAF.
+    doMakeTable(_mode, groupby, data, reportTitle, _date1, null, function () {
+      doRenameGrandTotal("Total Item : " + gcart_res.length, galign_left);
 
-        doRenameGrandTotal("Total Item : " + gcart_res.length, galign_left);
+      let footerMsg = (gcart_res && gcart_res.length > 0)
+        ? "Menampilkan " + gcart_res.length + " baris"
+        : "Belum ada data dimuat";
+      document.getElementById('footerLabel').textContent = footerMsg;
 
-        let footerMsg = (gcart_res && gcart_res.length > 0)
-          ? "Menampilkan " + gcart_res.length + " baris"
-          : "Belum ada data dimuat";
-        document.getElementById('footerLabel').textContent = footerMsg;
-      });
+      if (typeof _callback === 'function') { _callback(); }
     });
   }
 

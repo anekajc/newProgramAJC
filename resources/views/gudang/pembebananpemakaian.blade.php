@@ -297,7 +297,7 @@
 <div id="page3" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Koreksi Pembebanan Pemakaian</h2>
+      <h2>Koreksi</h2>
     </div>
     <div class="col-4 text-right" id="contentContainer">
       <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary " onclick="buttonCloseForm()">CLOSE</button>
@@ -486,7 +486,7 @@
 <div id="page4" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Detail Pembebanan Pemakaian</h2>
+      <h2>Detail</h2>
     </div>
     <div class="col-4 text-right action-group" id="contentContainer">
       <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary " onclick="buttonCloseForm()">CLOSE</button>

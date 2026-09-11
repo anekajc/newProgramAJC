@@ -299,7 +299,7 @@
     return rowFooter1 + rowFooter2 + rowTOS;
   }
 
-  function makeTable(_mode) {
+  function makeTable(_mode, _callback) {
     // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
     // mode report menentukan kolom yang dipakai
     let groupby = "KodeBrg";
@@ -313,7 +313,11 @@
       inputIsi         : $("#inputIsi").val(),
     };
 
-    doMakeTable(_mode, groupby, data, "LAPORAN STOK HARIAN", _date1, _date2);
+    // doMakeTable() sudah async (lihat catatan di masterreportGudang.blade.php); halaman
+    // ini tidak membaca gcart_res/gcart_filter langsung sesudah manggil, tapi mode FILTER
+    // dipanggil doShowFormFilterData() di layout yang butuh _callback ini untuk tahu kapan
+    // gcart_filter sudah terisi.
+    doMakeTable(_mode, groupby, data, "LAPORAN STOK HARIAN", _date1, _date2, _callback);
   }
 
   function getKolomFilter() {

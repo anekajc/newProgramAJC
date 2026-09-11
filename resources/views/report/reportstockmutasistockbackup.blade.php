@@ -656,7 +656,7 @@
     return rowFooter1 + rowFooter2 + rowTOS;
   }
 
-  function makeTable (_mode) {
+  function makeTable (_mode, _callback) {
     // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
     // mode report menentukan kolom yang dipakai
     let groupby = "KODEBRG";
@@ -680,7 +680,10 @@
       modeMenu         : g_modeReport,
     };
 
-    doMakeTable(_mode, groupby, data, reportTitle, _date1);
+    // doMakeTable() sudah async (lihat catatan di masterreportGudang.blade.php); teruskan
+    // _callback supaya mode FILTER (dipanggil doShowFormFilterData() di layout) tetap tahu
+    // kapan gcart_filter sudah terisi.
+    doMakeTable(_mode, groupby, data, reportTitle, _date1, null, _callback);
 
     g_href = temp_href;
   }

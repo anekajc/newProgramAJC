@@ -66,6 +66,20 @@
                         <thead>
                             <tr>
                                 <th>No. Bukti</th>
+                                <th>Tanggal</th>
+                                <th>Kode Barang</th>
+                                <th>Nama Barang</th>
+                                <th>Sales</th>
+                                <th>Customer</th>
+                                <th>Sat</th>
+                                <th>Qty</th>
+                                <th>NO SO</th>
+                                <th>Qty SO</th>
+                                <th>NO RSS</th>
+                                <th>Qty RSS</th>
+                                <th>NO BBS</th>
+                                <th>Qty BBS</th>
+                                <th>Sisa</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -205,13 +219,13 @@
                     ['NamaSls', 'Sales', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
                     ['sat', 'Sat', 1, 'varchar', 0, 0],
-                    ['Qnt', 'Qnt', 1, 'float', 1, 0],
-                    ['NOSO', 'NOSO', 1, 'float', 1, 0],
-                    ['QNTSO', 'QntSO', 1, 'float', 1, 0],
-                    ['NORSS', 'NORSS', 1, 'float', 1, 0],
-                    ['QNTRSS', 'QntRSS', 1, 'float', 1, 0],
-                    ['NOBBS', 'NOBBS', 1, 'float', 1, 0],
-                    ['QNTBBS', 'QntBBS', 1, 'float', 1, 0],
+                    ['Qnt', 'Qty', 1, 'float', 1, 0],
+                    ['NOSO', 'NO SO', 1, 'float', 1, 0],
+                    ['QNTSO', 'Qty SO', 1, 'float', 1, 0],
+                    ['NORSS', 'NO RSS', 1, 'float', 1, 0],
+                    ['QNTRSS', 'Qty RSS', 1, 'float', 1, 0],
+                    ['NOBBS', 'NO BBS', 1, 'float', 1, 0],
+                    ['QNTBBS', 'Qty BBS', 1, 'float', 1, 0],
                     ['sISA', 'Sisa', 1, 'float', 1, 0]
                 ];
                 gsum_issubtotal = 1;
@@ -225,13 +239,13 @@
                     ['NamaSls', 'Sales', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
                     ['sat', 'Sat', 1, 'varchar', 0, 0],
-                    ['Qnt', 'Qnt', 1, 'float', 1, 0],
+                    ['Qnt', 'Qty', 1, 'float', 1, 0],
                     ['NOSO', 'NOSO', 1, 'float', 1, 0],
-                    ['QNTSO', 'QntSO', 1, 'float', 1, 0],
+                    ['QNTSO', 'Qty SO', 1, 'float', 1, 0],
                     ['NORSS', 'NORSS', 1, 'float', 1, 0],
-                    ['QNTRSS', 'QntRSS', 1, 'float', 1, 0],
+                    ['QNTRSS', 'Qty RSS', 1, 'float', 1, 0],
                     ['NOBBS', 'NOBBS', 1, 'float', 1, 0],
-                    ['QNTBBS', 'QntBBS', 1, 'float', 1, 0],
+                    ['QNTBBS', 'Qty BBS', 1, 'float', 1, 0],
                     ['sISA', 'Sisa', 1, 'float', 1, 0]
                 ];
                 gsum_issubtotal = 1;
