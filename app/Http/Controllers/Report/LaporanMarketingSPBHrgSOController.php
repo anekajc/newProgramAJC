@@ -28,7 +28,7 @@ class LaporanMarketingSPBHrgSOController extends Controller {
 
   public function doReport(Request $req) {
     $SReport = "T";
-    $Ordr    = "N";
+    $Ordr    = $req->get('inputOrd', 'N');
     $tgl1    = $req->get('date1');
     $tgl2    = $req->get('date2');
     $isiList = "";

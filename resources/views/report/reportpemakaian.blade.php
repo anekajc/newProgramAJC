@@ -19,11 +19,11 @@
         <!-- date range-->
         <div class="filter-wrap">
           <label>Periode</label>
-          <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}"> 
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
           <span class="filter-sep">s/d</span>
           <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
         </div>
-        
+
         <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="applyFilters()">
 
         <div class="action-group">
@@ -73,7 +73,7 @@
 
     <!-- toast-->
     <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
-  </div> 
+  </div>
 
   {{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
    di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
@@ -98,7 +98,7 @@
         <div class="modal-body">
 
           <div class="rt-section">
-            <div class="rt-group-label">Pengaturan Laporan</div>
+            {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
             <div class="rt-grid-2">
               <div>
                 <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -135,14 +135,36 @@
   let globalDate1 = "{!! date('Y-m-d') !!}";
   let globalDate2 = "{!! date('Y-m-d') !!}";
   let globalOtorisasi = "2";
-  let globalOrderBy = "N";
+  let globalOrderBy = "N";  // default: No Bukti
   let globalReportMode = "0";
   var jenisreport = 0;
   let lastRows = [];
   let currentGroupby = 'NoBukti';
 
-  var modereport_detail = 3;
-  g_modeReport = modereport_detail;
+  // Kolom (gcart_header) TIDAK berubah per Order By (lihat setDefaultHeader()) -- hanya
+  // groupby/subtotal & parameter Ordr yang berubah. Tetap satu slot kolom tersimpan per
+  // ordering walau isinya sama, supaya kustomisasi kolom user (DBSIMPANHEADER) tidak bleed
+  // antar ordering. modereport_nobukti mempertahankan angka slot lama (modereport_detail=3)
+  // supaya layout tersimpan milik user yang sudah ada tidak hilang.
+  var modereport_nobukti = 3,
+      modereport_barang  = 4;
+  g_modeReport = modereport_nobukti;
+
+  // Order By: N (No Bukti) / B (Barang) -- parameter nyata (Ordr) yang dikirim ke proc &
+  // dikonfirmasi diterima proc tsb.
+  const ORDER_OPTIONS = [
+    { value: 'N', label: 'No Bukti', desc: 'Dikelompokkan per No Bukti' },
+    { value: 'B', label: 'Barang', desc: 'Dikelompokkan per Kode Barang' },
+  ];
+  let viewsCfg = {
+    label: 'Order By',
+    options: ORDER_OPTIONS,
+    get: function() { return globalOrderBy; },
+    set: function(v) {
+      setOrderBy(String(v));
+      if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+    }
+  };
 
   const reportUrl = "{{ url('laporanpemakaian_doReport') }}";
 
@@ -153,17 +175,19 @@
     $("#showTableReport").empty().hide();
 
     setDefaultHeader();
-    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
+    setOrderBy(globalOrderBy);
 
     // Header tabel interaktif: drag-reorder + gear (sembunyikan/desimal/total) + bar
-    // "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan" switcher -- jenisreport tidak
-    // pernah punya kontrol UI di halaman ini (selalu 0), sama seperti sebelum migrasi.
+    // "Reset kolom"/kolom tersembunyi + switcher "Order By". Tidak ada "Tampilan" switcher --
+    // jenisreport tidak pernah punya kontrol UI di halaman ini (selalu 0), sama seperti
+    // sebelum migrasi.
     ReportTable.init({
       table: '#mainTable',
       bar: '#rtBar',
       onChange: function() {
         if (lastRows.length) { applyFilters(); } else { renderRows([], currentGroupby); }
-      }
+      },
+      views: viewsCfg
     });
 
     // setTimeout(() => {
@@ -195,9 +219,9 @@
           ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
           ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
           ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-          ['Qnt', 'Qnt', 1, 'float', 1, 2],
+          ['Qnt', 'Qty', 1, 'float', 1, 2],
           ['HPP', 'HPP', 1, 'float', 1, 2],
-          ['NilaiHPP', 'HPP X Qnt', 1, 'float', 1, 2]
+          ['NilaiHPP', 'HPP X Qty', 1, 'float', 1, 2]
         ];
       } else {
         gcart_header = [
@@ -207,9 +231,9 @@
           ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
           ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
           ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-          ['Qnt', 'Qnt', 1, 'float', 1, 2],
+          ['Qnt', 'Qty', 1, 'float', 1, 2],
           ['HPP', 'HPP', 1, 'float', 1, 2],
-          ['NilaiHPP', 'HPP X Qnt', 1, 'float', 1, 2],
+          ['NilaiHPP', 'HPP X Qty', 1, 'float', 1, 2],
           ['StatusOto', 'Otorisasi', 1, 'status', 0, 0]
         ];
       }
@@ -221,13 +245,13 @@
         ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
         ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-        ['Qnt', 'Qnt', 1, 'float', 1, 2],
+        ['Qnt', 'Qty', 1, 'float', 1, 2],
         ['HPP', 'HPP', 1, 'float', 1, 2],
-        ['NilaiHPP', 'HPP X Qnt', 1, 'float', 1, 2],
+        ['NilaiHPP', 'HPP X Qty', 1, 'float', 1, 2],
         ['StatusOto', 'Otorisasi', 1, 'status', 0, 0]
       ];
     }
-    gsum_issubtotal = 0; 
+    gsum_issubtotal = 1;
     gsum_isgrandtotal = 1;
 
   }
@@ -241,7 +265,7 @@
       const needTruthy = (need === 1 || need === '1' || need === true || s === 'Y' || s === 'YES' || s === 'TRUE');
       return needTruthy
         ? { text: 'Belum', color: '#B91C1C', bg: '#FEE2E2' }
-        : { text: 'Sudah', color: '#15803D', bg: '#DCFCE7' } 
+        : { text: 'Sudah', color: '#15803D', bg: '#DCFCE7' }
     }
 
     const candidates = ['Otorisasi', 'StatusOtorisasi', 'IsOtorisasi', 'FlagOtorisasi', 'Oto', 'StatusOto', 'Approve', 'Approved', 'IsApproved', 'Disetujui', 'StatusApproval', 'Approval', 'Auth', 'IsAuth', 'Authorized', 'Acc', 'ACC'];
@@ -284,6 +308,21 @@
 
   function setOtorisasi(val) { globalOtorisasi = val; }
 
+  // order by: menentukan groupby subtotal + slot kolom tersimpan (lewat g_modeReport), bukan
+  // susunan kolom itu sendiri -- lihat setDefaultHeader().
+  function setOrderBy(val) {
+    globalOrderBy = val;
+    if (val === 'B') {
+      currentGroupby = 'KodeBrg';
+      g_modeReport = modereport_barang;
+    } else {
+      currentGroupby = 'NoBukti';
+      g_modeReport = modereport_nobukti;
+    }
+    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
+    if (typeof doShowCustomize === 'function') { doShowCustomize(); }
+  }
+
 
   function makeTable(_mode) {
     globalDate1 = $('#inputDate1').val();
@@ -301,8 +340,8 @@
     };
 
     $.ajax({
-      url: reportUrl, 
-      type: 'get', 
+      url: reportUrl,
+      type: 'get',
       data: filterData,
       success: function (res) {
         lastRows = Array.isArray(res) ? res : ((res && res.res1) ? res.res1 : []);
@@ -372,7 +411,7 @@
     tbody.innerHTML = html;
     document.getElementById('footerLabel').textContent = 'Menampilkan ' + rows.length + ' baris';
   }
- 
+
   function totalRow(label, sums, cols, totalKeys, cls) {
     const labelIdx = cols.findIndex(c => totalKeys.indexOf(c[0]) === -1);
     const tds = cols.map(function (c, idx) {

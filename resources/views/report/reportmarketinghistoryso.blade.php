@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <!-- Bar kolom tersembunyi + Tampilan (diisi oleh report-table.js / ReportTable) -->
+            <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
             <div id="rtBar"></div>
 
             <!-- TABLE -->
@@ -185,10 +185,8 @@
         let globalDate2 = "{!! date('Y-m-d') !!}";
         let globalOtorisasi = "2"; // default: Semua
         let globalOrderBy = "N"; // default: Nomor Bukti (SP_REPORTHISSO tidak punya parameter order)
-        let globalReportMode = "0"; // default: Detail
         let globalMode = "0"; // "0" = Non Outstanding (SP_REPORTHISSO), "1" = Outstanding (SP_REPORTHISSOOUTweb)
 
-        var jenisreport = 0; // ini untuk detail dan rekap
         let lastRows = []; // hasil fetch terakhir (dipakai render / export / search)
         let currentGroupby = 'NOBUKTI'; // groupby aktif untuk render ulang saat search
 
@@ -199,38 +197,7 @@
         const reportUrlHis = "{{ url('laporanmarketinghistoryso_doReport') }}";
         const reportUrlOut = "{{ url('laporanmarketinghistoryoutso_doReport') }}";
 
-        // Opsi switcher "Tampilan" (Detail/Rekap) -- disembunyikan di mode Outstanding
-        // (SP_REPORTHISSOOUTweb hanya pernah dipakai untuk Detail No Bukti) dengan menukar
-        // cfg.views.options lalu ReportTable.refresh(), BUKAN init() ulang.
-        const VIEW_OPTIONS = [{
-                value: '0',
-                label: 'Detail',
-                desc: 'Rincian per baris'
-            },
-            {
-                value: '1',
-                label: 'Rekap',
-                desc: 'Ringkasan per grup'
-            }
-        ];
-        const viewsCfg = {
-            label: 'Tampilan',
-            options: VIEW_OPTIONS,
-            get: function() {
-                return globalReportMode;
-            },
-            set: function(v) {
-                setReportMode(String(v));
-                $('#modalReport').val(String(v));
-                // detail/rekap hanya mengubah susunan kolom, bukan query
-                if (lastRows.length) {
-                    render();
-                }
-            }
-        };
-
         $(document).ready(function() {
-            setReportMode(globalReportMode);
             setOtorisasi(globalOtorisasi);
             setOrderBy(globalOrderBy);
             showPeriode();
@@ -244,16 +211,13 @@
 
             setDefaultHeader();
 
-            // Header tabel interaktif. "Tampilan" = filter Report (Detail/Rekap)
-            // yang juga ada di modal Filter; keduanya lewat setReportMode().
+            // Tidak ada switcher (Detail/Rekap dihapus, Order By tidak punya UI di halaman
+            // ini) -- #rtBar cuma menampilkan kolom tersembunyi + Reset kolom.
             ReportTable.init({
                 table: '#mainTable',
                 bar: '#rtBar',
-                onChange: render,
-                views: viewsCfg
+                onChange: render
             });
-
-
         });
 
         // periode
@@ -287,16 +251,7 @@
                 $('#modalOtorisasi').val('2');
                 setOtorisasi('2');
                 // Dropdown atas menggantikan select "Outstanding" bawaan OutSO (isout) --
-                // paksa isout=0 di makeTable(), tanpa switcher Detail/Rekap (SP ini cuma
-                // pernah dipakai utk Detail No Bukti).
-                setReportMode('0');
-                $('#modalReport').val('0');
-                viewsCfg.options = [];
-            } else {
-                viewsCfg.options = VIEW_OPTIONS;
-            }
-            if (typeof ReportTable !== 'undefined' && ReportTable.refresh) {
-                ReportTable.refresh();
+                // paksa isout=0 di makeTable().
             }
 
             // Ganti mode tidak langsung fetch ulang -- tabel dikosongkan, user tekan Tampilkan.
@@ -312,16 +267,6 @@
         // order by
         function setOrderBy(val) {
             globalOrderBy = val;
-            setModeReport();
-        }
-
-        function setReportMode(val) {
-            globalReportMode = val;
-            jenisreport = Number(val); // 0 = Detail, 1 = Rekap
-            DetOrRekap = Number(val); // samakan dengan variabel yang ada di setModeReport
-
-            // update g_modeReport sesuai pilihan order & detail/rekap
-            // setModeReport() sudah mengatur g_modeReport berdasarkan globalOrderBy dan jenisreport/DetOrRekap
             setModeReport();
         }
 
@@ -543,267 +488,83 @@
             };
         }
 
-        var modereport_detailnobukti = 0,
-            modereport_detailbarang = 1,
-            modereport_detailcustomer = 2;
-        var modereport_rekapnobukti = 3,
-            modereport_rekapbarang = 4,
-            modereport_rekapcustomer = 5;
-        g_modeReport = modereport_detailnobukti;
+        // Satu slot -- Detail/Rekap dihapus (Rekap dulu punya kolom DPP/PPN/Total ringkasan,
+        // real feature, tapi sengaja dibuang) dan Order By tidak punya UI di halaman ini
+        // (globalOrderBy selalu "N", lihat setModeReport()).
+        var modereport_nobukti = 0;
+        g_modeReport = modereport_nobukti;
 
-        // Dispatcher: hanya Detail No Bukti yang benar-benar berbeda antara Non Outstanding dan
-        // Outstanding (kolom OUTSTANDING dkk.) -- lima mode lainnya identik di kedua SP, tapi
-        // tetap dipisah jadi dua fungsi supaya konsisten dengan halaman SO yang sudah digabung.
+        // Dispatcher: Detail No Bukti beda antara Non Outstanding dan Outstanding (kolom
+        // OUTSTANDING dkk.), jadi tetap dua fungsi.
         function setDefaultHeader() {
-            const isOut = (globalMode === '1');
-            const base = isOut ? (g_modeReport - OUT_MODE_OFFSET) : g_modeReport;
-            if (isOut) {
-                setHeaderOut(base);
+            if (globalMode === '1') {
+                setHeaderOut();
             } else {
-                setHeaderHis(base);
+                setHeaderHis();
             }
         }
 
-        function setHeaderHis(base) {
-            if (base == modereport_detailnobukti) {
-                gcart_header = [
-                    ['NOBUKTI', 'No. Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['NoPesanan', 'No. PO. Cust', 1, 'varchar', 0, 0],
-                    ['NamaSLS', 'Sales', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt SO', 1, 'float', 1, 0],
-                    ['NOBUKTIPO', 'No. PO', 1, 'varchar', 0, 0],
-                    ['TGLPO', 'Tgl. PO', 1, 'date', 0, 0],
-                    ['NOBUKTISPB', 'No. SPB', 1, 'varchar', 0, 0],
-                    ['TGLSPB', 'Tgl. SPB', 1, 'date', 0, 0],
-                    ['QNTSPB', 'Qnt SPB', 1, 'float', 1, 0],
-                    ['TGLKIRIM', 'Tgl. Kirim', 1, 'date', 0, 0],
-                    ['LeadTime', 'L. Time', 1, 'date', 0, 0],
-                    ['NOBINV', 'No. Inv', 1, 'varchar', 0, 0],
-                    ['TGINV', 'Tgl. Inv', 1, 'date', 0, 0],
-                    ['QNTINV', 'Qnt Inv', 1, 'float', 1, 2],
-                    ['NORSPB', 'No. RSPB', 1, 'varchar', 0, 0],
-                    ['TGLRSPB', 'Tgl. RSPB', 1, 'date', 0, 0],
-                    ['QNTRSPB', 'Qnt RSPB', 1, 'float', 1, 0],
-                    ['SLISIHPOSPB', 'Sls PO-SPB', 1, 'float', 1, 2],
-                    ['NNETRP', 'SLS-SPB', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_detailbarang) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_detailcustomer) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapnobukti) {
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapbarang) {
-                gcart_header = [
-                    ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['Qnt', 'QNT', 1, 'float', 1, 2],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else {
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-            }
+        function setHeaderHis() {
+            gcart_header = [
+                ['NOBUKTI', 'No. Bukti', 1, 'varchar', 0, 0],
+                ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+                ['NoPesanan', 'No. PO. Cust', 1, 'varchar', 0, 0],
+                ['NamaSLS', 'Sales', 1, 'varchar', 0, 0],
+                ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
+                ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                ['QNT', 'Qty SO', 1, 'float', 1, 0],
+                ['NOBUKTIPO', 'No. PO', 1, 'varchar', 0, 0],
+                ['TGLPO', 'Tgl. PO', 1, 'date', 0, 0],
+                ['NOBUKTISPB', 'No. SPB', 1, 'varchar', 0, 0],
+                ['TGLSPB', 'Tgl. SPB', 1, 'date', 0, 0],
+                ['QNTSPB', 'Qty SPB', 1, 'float', 1, 0],
+                ['TGLKIRIM', 'Tgl. Kirim', 1, 'date', 0, 0],
+                ['LeadTime', 'L. Time', 1, 'date', 0, 0],
+                ['NOBINV', 'No. Inv', 1, 'varchar', 0, 0],
+                ['TGINV', 'Tgl. Inv', 1, 'date', 0, 0],
+                ['QNTINV', 'Qty Inv', 1, 'float', 1, 2],
+                ['NORSPB', 'No. RSPB', 1, 'varchar', 0, 0],
+                ['TGLRSPB', 'Tgl. RSPB', 1, 'date', 0, 0],
+                ['QNTRSPB', 'Qty RSPB', 1, 'float', 1, 0],
+                ['SLISIHPOSPB', 'Sls PO-SPB', 1, 'float', 1, 2],
+                ['NNETRP', 'SLS-SPB', 1, 'float', 1, 2]
+            ];
+            gsum_issubtotal = 1;
+            gsum_isgrandtotal = 1;
         }
 
         // Kolom Outstanding (SP_REPORTHISSOOUTweb) -- diambil apa adanya dari
-        // reportmarketinghistoryoutso.blade.php. Hanya Detail No Bukti yang beda dari Non
-        // Outstanding (kolom OUTSTANDING, tanpa NoPesanan/NamaSLS/TGLPO/dst.); lima mode
-        // lainnya identik dan dipertahankan sama persis untuk konsistensi.
-        function setHeaderOut(base) {
-            if (base == modereport_detailnobukti) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['NoPesanan', 'No. PO Cust', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
-                    ['NAMAGROUPCUSTSUPP', 'Nama Group', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['HARGA', 'Harga', 1, 'float', 0, 0],
-                    ['QNTSO', 'Qnt. SO', 1, 'float', 1, 0],
-                    ['NOBUKTISPB', 'No. SPB', 1, 'varchar', 0, 0],
-                    ['TGLSPB', 'Tgl. SPB', 1, 'date', 0, 0],
-                    ['QNTSPB', 'Qnt. SPB', 1, 'float', 1, 0],
-                    ['NOBINV', 'No. Inv', 1, 'varchar', 0, 0],
-                    ['TGLINV', 'Tgl. Inv', 1, 'date', 0, 0],
-                    ['QNTINV', 'Qnt. Inv', 1, 'float', 1, 0],
-                    ['NORSPB', 'No. RSPB', 1, 'varchar', 0, 0],
-                    ['TGLRSPB', 'Tgl. RSPB', 1, 'date', 0, 0],
-                    ['QNTRSPB', 'Qnt. RSPB', 1, 'float', 1, 0],
-                    ['sTOCK', 'Stock Tgl. SO', 1, 'float', 1, 0],
-                    ['QNTBATAL', 'Batal SO', 1, 'float', 1, 0],
-                    ['OSSO', 'Sisa SO-SPB', 1, 'float', 1, 0],
-                    ['OUTSTANDING', 'Outstanding', 1, 'varchar', 0, 0],
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_detailbarang) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_detailcustomer) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapnobukti) {
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapbarang) {
-                gcart_header = [
-                    ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['Qnt', 'QNT', 1, 'float', 1, 2],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else {
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-            }
+        // reportmarketinghistoryoutso.blade.php.
+        function setHeaderOut() {
+            gcart_header = [
+                ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+                ['NoPesanan', 'No. PO Cust', 1, 'varchar', 0, 0],
+                ['NAMACUSTSUPP', 'Nama Cust', 1, 'varchar', 0, 0],
+                ['NAMAGROUPCUSTSUPP', 'Nama Group', 1, 'varchar', 0, 0],
+                ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+                ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                ['HARGA', 'Harga', 1, 'float', 0, 0],
+                ['QNTSO', 'Qty SO', 1, 'float', 1, 0],
+                ['NOBUKTISPB', 'No. SPB', 1, 'varchar', 0, 0],
+                ['TGLSPB', 'Tgl. SPB', 1, 'date', 0, 0],
+                ['QNTSPB', 'Qty SPB', 1, 'float', 1, 0],
+                ['NOBINV', 'No. Inv', 1, 'varchar', 0, 0],
+                ['TGLINV', 'Tgl. Inv', 1, 'date', 0, 0],
+                ['QNTINV', 'Qty Inv', 1, 'float', 1, 0],
+                ['NORSPB', 'No. RSPB', 1, 'varchar', 0, 0],
+                ['TGLRSPB', 'Tgl. RSPB', 1, 'date', 0, 0],
+                ['QNTRSPB', 'Qty RSPB', 1, 'float', 1, 0],
+                ['sTOCK', 'Stock Tgl. SO', 1, 'float', 1, 0],
+                ['QNTBATAL', 'Batal SO', 1, 'float', 1, 0],
+                ['OSSO', 'Sisa SO-SPB', 1, 'float', 1, 0],
+                ['OUTSTANDING', 'Outstanding', 1, 'varchar', 0, 0],
+            ];
+            gsum_issubtotal = 1;
+            gsum_isgrandtotal = 1;
         }
 
         function makeTable(_mode) {
-            // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
-            // mode report menentukan kolom yang dipakai
-            let groupby = '';
             let _date1 = $("#inputDate1").val();
             let _date2 = $("#inputDate2").val();
             let _inputCustomer = $("#inputCustomer").val();
@@ -811,13 +572,9 @@
             let inputOto = globalOtorisasi;
             let input_order = globalOrderBy;
 
-            if (input_order == "N") {
-                groupby = 'NOBUKTI';
-            } else if (input_order == "B") {
-                groupby = 'KODEBRG';
-            } else {
-                groupby = 'KodeCustSupp';
-            }
+            // Satu-satunya groupby yang pernah kepakai -- Order By tidak punya UI di halaman
+            // ini (globalOrderBy selalu "N", lihat setModeReport()).
+            let groupby = 'NOBUKTI';
 
             setDefaultHeader();
             if (typeof doSetHeader === 'function') {
@@ -895,7 +652,7 @@
 
             // HEADER dinamis dari gcart_header — dibangun report-table.js (ReportTable) supaya
             // kolom bisa diseret untuk diurutkan & punya menu roda gigi (sembunyikan / desimal
-            // / total). Juga menyegarkan #rtBar (daftar kolom tersembunyi + Tampilan).
+            // / total). Juga menyegarkan #rtBar (daftar kolom tersembunyi).
             thead.innerHTML = ReportTable.headHtml(cols);
 
             if (!rows.length) {
@@ -990,34 +747,11 @@
             }).join(' ').toLowerCase();
         }
 
-        function getKolomFilter() {
-            // tentukan kolom (sesuai database & gcart_header) yang mau ditampilkan
-            // mode report menentukan kolom yang dipakai
-            // berapa pun bisa asal dalam bentuk array
-
-            let data = [];
-            if (globalOrderBy == "N") {
-                data = ['NOBUKTI', 'Tanggal'];
-            } else if (globalOrderBy == "B") {
-                data = ['KODEBRG', 'NAMABRG'];
-            } else {
-                data = ['KodeCustSupp', 'NAMACUSTSUPP'];
-            }
-
-            return data;
-        }
-
-        // Baca globalOrderBy (BUKAN $("#inputOrder") yang tidak ada di halaman ini — dulu
-        // selalu undefined sehingga mode terjatuh ke detailcustomer). Order By tidak
-        // ditampilkan: SP_REPORTHISSO tak punya parameter urutan, jadi selalu 'N' -> detail no bukti.
+        // Order By tidak ditampilkan di halaman ini: SP_REPORTHISSO tak punya parameter
+        // urutan, jadi globalOrderBy selalu 'N'. Detail/Rekap juga sudah dihapus -- hanya
+        // satu mode (Detail No Bukti) yang pernah dipakai.
         function setModeReport() {
-            if (globalOrderBy == "N") {
-                g_modeReport = (jenisreport === 0) ? modereport_detailnobukti : modereport_rekapnobukti;
-            } else if (globalOrderBy == "B") {
-                g_modeReport = (jenisreport === 0) ? modereport_detailbarang : modereport_rekapbarang;
-            } else {
-                g_modeReport = (jenisreport === 0) ? modereport_detailcustomer : modereport_rekapcustomer;
-            }
+            g_modeReport = modereport_nobukti;
 
             // Kolom tersimpan (DBSIMPANHEADER) dikunci per href+reportmode -- offset mode
             // Outstanding supaya tidak bentrok/menimpa layout tersimpan mode Non Outstanding

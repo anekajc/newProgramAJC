@@ -272,7 +272,7 @@
     gcart_header = [
       ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
       ['Namabrg', 'Nama Barang', 1, 'varchar', 0, 0],
-      ['QNT', 'Qnt', 1, 'float', 1, 0],
+      ['QNT', 'Qty', 1, 'float', 1, 0],
       ['SAT_1', 'Sat', 1, 'varchar', 0, 0],
       ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
       ['TanggalSO', 'Tanggal', 1, 'date', 0, 0],

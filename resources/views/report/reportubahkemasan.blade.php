@@ -30,15 +30,9 @@
                         oninput="applyFilters()" style="width:180px">
                 </div>
 
-                <!-- Actions: search + filter modal + tampilkan + export -->
+                <!-- Actions: tampilkan + export (tidak ada modal Filter -- satu-satunya isinya,
+                     Order By, sudah dipindah ke switcher di bar atas tabel) -->
                 <div class="action-group">
-                    {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5).
-                         Halaman ini memuat dua Bootstrap; jQuery dimuat SESUDAH bundle BS5, jadi
-                         $.fn.modal dipegang BS4. applyModalFilter() menutup modal ini dengan
-                         $('#modalFilter').modal('hide'), jadi pembukanya harus API yang sama. --}}
-                    <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
                     <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i
                             class="fas fa-check"></i> Tampilkan</button>
                     <div class="export-wrap" id="exportWrap">
@@ -57,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+            <!-- Bar kolom tersembunyi + Order By (diisi oleh report-table.js / ReportTable) -->
             <div id="rtBar"></div>
 
             <!-- TABLE -->
@@ -93,57 +87,6 @@
         <div class="toast" id="toast"><span id="ti"></span><span id="tm"></span></div>
     </div><!-- /tb-report -->
 
-    {{-- Modal DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
-     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
-
-    <!-- modal filter -->
-    <div class="modal fade rt-filter" id="modalFilter">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-filter"></i>
-                        Filter Laporan
-                        <span class="rt-active-badge" id="filterBadge">0 aktif</span>
-                    </h5>
-                    {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
-                         $.fn.modal milik BS4. data-bs-dismiss dibiarkan untuk jaga-jaga. --}}
-                    <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
-                        onclick="$('#modalFilter').modal('hide')"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <div class="rt-section">
-                        <div class="rt-group-label">Pengaturan Laporan</div>
-                        <div class="rt-grid-2">
-                            <div>
-                                <label class="rt-field-label" for="modalOrder">Urutkan</label>
-                                <select class="rt-native" id="modalOrder">
-                                    <option value="N">Nomor Bukti</option>
-                                    <option value="B">Nomor Barang</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
-                    <div class="rt-footer-buttons">
-                        <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" data-bs-dismiss="modal"
-                            onclick="$('#modalFilter').modal('hide')">Batal</button>
-                        <button type="button" class="rt-btn rt-btn-primary"
-                            onclick="applyModalFilter()">Terapkan</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    <!-- modal filter -->
 @endsection
 
 @section('jsreport')
@@ -166,16 +109,34 @@
             modereport_barang = 1;
         g_modeReport = modereport_nobukti;
 
+        // Order By: N (Nomor Bukti) / B (Nomor Barang) -- parameter nyata (Ordr) yang dikirim
+        // ke proc. Sebelum ini "B" tidak mengubah kolom/groupby sama sekali (bug pra-migrasi,
+        // sudah dilaporkan) -- diperbaiki di setOrderBy(): kedua nilai sekarang benar-benar
+        // menukar g_modeReport/susunan kolom (lihat setDefaultHeader()) & groupby (makeTable()).
+        const ORDER_OPTIONS = [
+            { value: 'N', label: 'Nomor Bukti', desc: 'Dikelompokkan per No Bukti' },
+            { value: 'B', label: 'Nomor Barang', desc: 'Dikelompokkan per Kode Barang' },
+        ];
+        let viewsCfg = {
+            label: 'Order By',
+            options: ORDER_OPTIONS,
+            get: function() { return globalOrderBy; },
+            set: function(v) {
+                setOrderBy(String(v));
+                if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+            }
+        };
+
         $(document).ready(function() {
             showPeriode();
             setDefaultHeader();
-            doSetHeader(g_modeReport);
-            doShowCustomize();
+            setOrderBy(globalOrderBy);
 
             ReportTable.init({
                 table: '#mainTable',
                 bar: '#rtBar',
-                onChange: render
+                onChange: render,
+                views: viewsCfg
             });
         });
 
@@ -189,30 +150,6 @@
         function setOrderBy(val) {
             globalOrderBy = val;
             setModeReport();
-        }
-
-        /* -- FILTER MODAL -- */
-
-        function updateFilterBadge() {
-            // Urutkan: pilihan wajib tanpa nilai netral -> sengaja tidak dihitung
-            $('#filterBadge').text('0 aktif');
-        }
-
-        function resetAllFilters() {
-            $('#modalOrder').val('N');
-            updateFilterBadge();
-        }
-
-        $('#modalFilter').on('show.bs.modal', function() {
-            $('#modalOrder').val(globalOrderBy);
-            updateFilterBadge();
-        });
-
-        function applyModalFilter() {
-            if ($('#modalOrder').length) {
-                setOrderBy($('#modalOrder').val());
-            }
-            $('#modalFilter').modal('hide');
         }
 
         /* -- EXPORT -- */
@@ -277,13 +214,8 @@
             return undefined;
         }
 
-        // BELUM DIPERBAIKI (di luar cakupan migrasi ini -- lihat catatan yang dilaporkan ke
-        // user): cuma mengubah g_modeReport saat globalOrderBy == "N". Memilih "Nomor Barang"
-        // TIDAK mengubah kolom/groupby sama sekali -- sudah begini sejak sebelum migrasi.
         function setModeReport() {
-            if (globalOrderBy == "N") {
-                g_modeReport = modereport_nobukti;
-            }
+            g_modeReport = (globalOrderBy == "B") ? modereport_barang : modereport_nobukti;
 
             doSetHeader(g_modeReport);
             doShowCustomize();
@@ -328,9 +260,7 @@
         }
 
         function makeTable(_mode) {
-            // groupby tetap "Nobukti" (g_modeReport tidak pernah berubah dari modereport_nobukti
-            // -- lihat catatan di setModeReport()), dipertahankan apa adanya.
-            let groupby = (g_modeReport == modereport_nobukti) ? "Nobukti" : "kodebrg";
+            let groupby = (globalOrderBy == "B") ? "kodebrg" : "Nobukti";
             let _date1 = $("#inputDate1").val();
             let _date2 = $("#inputDate2").val();
 
