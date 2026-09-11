@@ -274,6 +274,15 @@
   #formKoreksiDetail .modal-body .row .col-2 label { margin-bottom: 2px; }
   #formKoreksiDetail .modal-body .row { row-gap: 10px; margin-left: -5px; margin-right: -5px; }
   #formKoreksiDetail .modal-body .row .col-2 { padding-left: 5px; padding-right: 5px; }
+
+  /* Perbesar glyph + pada tombol Add tanpa mengubah ukuran bingkai tombol.
+     line-height: 0 membuat ikon tidak menambah tinggi baris, jadi tinggi
+     tombol tetap sama dengan tombol Detail di sebelahnya. */
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
   </style>
 {{-- end tampilan tampilan baru --}}
 @endsection
@@ -304,7 +313,7 @@
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
            aria-controls="nav-home" aria-selected="true">
-          Outstanding Retur Beli
+          Outstanding Perintah Retur
         </a>
         <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab"
            aria-controls="nav-profile" aria-selected="false">
