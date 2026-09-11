@@ -1,10 +1,33 @@
-@extends('gudang.newmaster')
+@extends('gudang.newmasterx')
 @section('buttons')
 
 @endsection
 {{-- tampilan search bar 1 --}}
   @section('css')
-  
+
+  {{-- Tampilan tabel list pakai styling report-table.css +
+       tableMaster2.css yang biasanya di-load global lewat gudang.newmasterx. --}}
+  <link rel="stylesheet"
+    href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+  <link rel="stylesheet"
+    href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
+
+  <style>
+  #contentContainer .toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #contentContainer .toolbar .action-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  </style>
+
   <style>
   .rodokNdukurTitik{
     margin-top:-12px;
@@ -137,44 +160,16 @@
   <div class="">
     <!-- <div id="qrcode"></div> -->
     <div class="row">
-      <div class="col-6 text-left">
+      <div class="col-12 text-left">
         <h2 style="margin-top:-85px;">Permintaan Transfer Barang</h2>
       </div>
-
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add PRT
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
     </div>
   </div>
 
-  <div id="contentContainer" class="">
+  {{-- PRT Belum Otorisasi & PRT Sudah Otorisasi yang tadinya 2 tab terpisah
+       (#tabel/#tabel2) digabung jadi 1 tabel (#mainTable), status otorisasinya
+       dibedakan lewat kolom badge "Otorisasi" + filter di modal Filter. --}}
+  <div id="contentContainer" class="tb-report">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
     <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
     <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
@@ -185,141 +180,118 @@
     <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    <div class="card">
-      <div class="card-header" style="margin-top:-55px;">
-        <div class="row">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              PRT Belum Otorisasi
-            </a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              PRT Sudah Otorisasi
-            </a>
-            {{-- <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="nav-profile1" aria-selected="false" 
-              style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-              ihh gantengnyo
-            </a> --}}
+    <div class="toolbar">
+      {{-- Date range (.filter-wrap + #inputDate1/#inputDate2, onchange memanggil ulang loadAll()). --}}
+      <div class="filter-wrap">
+        <label>Periode</label>
+        <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+          onchange="loadAll()">
+        <span class="filter-sep">s/d</span>
+        <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+          onchange="loadAll()">
+      </div>
+
+      <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
+        oninput="currentPage = 1; renderTabel()" style="width:200px">
+
+      <div class="period-select-wrap">
+        <label for="tampilLen">Tampilkan</label>
+        <select class="period-select" id="tampilLen" onchange="onChangeTampilLen()">
+          <option value="10" selected>10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="-1">Semua</option>
+        </select>
+      </div>
+
+      <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+        <i class="bi bi-filter-lg"></i> Filter
+      </button>
+
+      @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
+        <div class="action-group">
+          <button class="btn btn-primary" type="button" onclick="buttonAdd()">Tambah</button>
+        </div>
+      @endif
+    </div>
+
+    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <div id="rtBar"></div>
+
+    <div class="table-outer">
+      <div class="table-wrap">
+        <table class="tb" id="mainTable">
+          <thead>
+            <tr>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabel2_data"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="footerLabel2">Belum ada data</span>
+        <div class="pager-btns" id="pagerBtns"></div>
+      </div>
+    </div>
+
+    <div class="rt-hint">
+      <i class="bi bi-info-circle"></i>
+      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+      sembunyikan kolom.
+    </div>
+
+  </div>
+
+</div>
+
+{{-- modal filter — ditaruh di luar #contentContainer supaya reset
+     `.tb-report *{margin:0;padding:0}` di report-table.css tidak merusak
+     padding/margin modal Bootstrap. --}}
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i>
+          Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="modalOtorisasi">
+                <option value="2">Semua</option>
+                <option value="1">Sudah Otorisasi</option>
+                <option value="0">Belum Otorisasi</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="card-body" style="padding:0;">
-        <div class="tab-content" id="myTabContent">
-          {{-- start belum otorisasi --}}
-          <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                  <table id="tabel" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center bg-primary text-white">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Keterangan</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabel_data" class="text-left">
-                      @foreach($tempOutstanding as $dataUtama)
-                      <tr>
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-info"></i>
-                            </button> 
-                            @if($dataUtama->IsOtorisasi1 == 0)
-                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-pencil"></i>
-                            </button>
-                            @endif
-                            @if($dataUtama->IsOtorisasi1 == 0)
-                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-key"></i>
-                            </button>
-                            @else
-                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-key"></i>
-                            </button>
-                            @endif
-                        </td>
-                        <td>{{ $dataUtama->nobukti }}</td>
-                        <td>{!! date("Y/m/d", strtotime($dataUtama->Tanggal)) !!}</td>
-                        <td>{{ $dataUtama->Keterangan }}</td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-          {{-- start sudah otorisasi --}}
-          <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                  <table id="tabel2" class="table table-bordered table-hover table-striped table-responsive-lg">
-                    <thead class="text-center bg-primary text-white">
-                      <tr>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Actions</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">No. Bukti</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Keterangan</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">User Oto</th>
-                        <th style="padding: 4px 12px; white-space:nowrap;" scope="col">Tanggal Oto</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tabel2_data" class="text-left">
-                      @foreach($tempOutstanding2 as $dataUtama)
-                      <tr>
-                        <td class="text-center">
-                            <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-info"></i>
-                            </button>
-                            @if($dataUtama->IsOtorisasi1 == 0)
-                            <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-key"></i>
-                            </button>
-                            @else
-                            <button class="btn btn-danger btn-sm" type="button" title="Otorisasi" onclick="buttonBatalOtorisasi('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-key"></i>
-                            </button>
-                            @endif
-                            @if($dataUtama->IsOtorisasi1 == 0)
-                            <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('{{ $dataUtama->nobukti }}')">
-                              <i class="bi bi-pencil"></i>
-                            </button>
-                            @endif
-			<button style="" class="btn btn-primary btn-sm" type="button"   onclick="submitPrint('{{$dataUtama->nobukti}}')" ><i class="bi bi-printer"></i></button>
-                        </td>
-                        <td>{{ $dataUtama->nobukti }}</td>
-                        <td>{!! date("Y/m/d", strtotime($dataUtama->Tanggal)) !!}</td>
-                        <td>{{ $dataUtama->Keterangan }}</td>
-                        <td>{{ $dataUtama->OtoUser1 }}</td>
-                        <td>
-                          @if($dataUtama->TglOto1 === null)
-                            -
-                          @else
-                            {{ \Carbon\Carbon::parse($dataUtama->TglOto1)->format('d/m/Y') }}
-                          @endif
-                        </td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>{{-- end sudah otorisasi --}}
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
         </div>
       </div>
 
     </div>
   </div>
-  
 </div>
-
+<!-- modal filter -->
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
@@ -1959,7 +1931,358 @@
 @endsection
 
 @section('js')
+{{-- Dipakai untuk tampilan tabel list ala report (search/filter/pager/kolom
+     tersembunyi) disamakan dengan gudang/ubahkemasanbarang.blade.php. --}}
+<script src="{!! URL::asset('js/ajc-func-core.js') !!}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
+
+if (typeof nullToEmpty !== 'function') {
+  window.nullToEmpty = function(v) {
+    return (v === null || v === undefined) ? '' : v;
+  };
+}
+
+if (typeof doSetFormatDate !== 'function') {
+  window.doSetFormatDate = function(dateVal, sep) {
+    if (!dateVal) return '';
+    sep = sep || '/';
+    let d = new Date(dateVal);
+    if (isNaN(d.getTime())) return String(dateVal);
+    let yyyy = d.getFullYear();
+    let mm = String(d.getMonth() + 1).padStart(2, '0');
+    let dd = String(d.getDate()).padStart(2, '0');
+    return yyyy + sep + mm + sep + dd;
+  };
+}
+
+function pickCI(r, key) {
+  if (r[key] !== undefined) {
+    return r[key];
+  }
+  let lk = String(key).toLowerCase();
+  for (let k in r) {
+    if (k.toLowerCase() === lk) {
+      return r[k];
+    }
+  }
+  return null;
+}
+
+let lastRows = (function() {
+  let belum = @json($tempOutstanding);
+  let sudah = @json($tempOutstanding2);
+  return belum.concat(sudah);
+})();
+let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
+let pageSize = 10;
+let currentPage = 1;
+
+var g_href = 'permintaantransferbarang';
+var g_modeReport = '2';
+var gcart_header = [];
+var gsum_issubtotal = 0;
+var gsum_isgrandtotal = 0;
+var gct_desimal_max = 4;
+
+function setDefaultHeader() {
+  // [ field, label, visible, type, total, decimals ]
+  gcart_header = [
+    ['nobukti', 'No Bukti', 1, 'varchar', 0, 0],
+    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+    ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+    ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
+    ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
+    ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
+  ];
+}
+
+function doSetHeader(_modereport, _isReset = false) {
+  let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+
+  if (_strHeader != "") {
+    gcart_header = doGetHeader(_strHeader);
+  } else if ($.isFunction(window.setDefaultHeader)) {
+    setDefaultHeader();
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+}
+
+function doLoadHeader(_href, _mode) {
+  let _header = "";
+
+  $.ajax({
+    url: "{!! url('globalfunctions_doLoadHeader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _href,
+      mode: _mode
+    },
+    success: function(res) {
+      _header = (res.length > 0) ? res[0].header : "";
+      if (res.length > 0) {
+        gsum_issubtotal = Number(res[0].issubtotal);
+        gsum_isgrandtotal = Number(res[0].isgrandtotal);
+      }
+    }
+  })
+
+  return _header;
+}
+
+function doGetHeader(_strHeader) {
+  let _cart = [];
+
+  _strHeader.split("||").forEach((item, i) => {
+    let temp = [];
+    temp.push(item.split(";;")[0]);
+    temp.push(item.split(";;")[1]);
+    temp.push(Number(item.split(";;")[2]));
+    temp.push(item.split(";;")[3]);
+    temp.push(Number(item.split(";;")[4]));
+    temp.push(Number(item.split(";;")[5]));
+    _cart.push(temp);
+  });
+
+  return _cart;
+}
+
+function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+  let _strHeader = "";
+
+  _cart.forEach((item, i) => {
+    if (i != 0) {
+      _strHeader += '||';
+    }
+    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
+      item[5];
+  });
+
+  $.ajax({
+    url: "{!! url('globalfunctions_doSimpanHeader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _href,
+      mode: _mode,
+      header: _strHeader,
+      issubtotal: _issubtotal,
+      isgrandtotal: _isgrandtotal
+    },
+    success: function(res) {
+      // nothing to do
+    }
+  })
+}
+
+function doMoveHeader(_from, _to) {
+  if (_from < 0 || _to < 0 || _from === _to) {
+    return;
+  }
+  if (_from >= gcart_header.length || _to >= gcart_header.length) {
+    return;
+  }
+
+  let _moved = gcart_header.splice(_from, 1)[0];
+  gcart_header.splice(_to, 0, _moved);
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonVisibility(_id) {
+  gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doSetDesimal(_index, _step) {
+  let _next = Number(gcart_header[_index][5]) + _step;
+  if (_next < 0 || _next > gct_desimal_max) {
+    return;
+  }
+
+  gcart_header[_index][5] = _next;
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonTotal(_index) {
+  gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+// IsOtorisasi1 = 0 -> belum otorisasi, IsOtorisasi1 = 1 -> sudah otorisasi
+function filterByOtorisasi(rows, filterVal) {
+  if (filterVal === '1') { // Sudah
+    return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
+  }
+  if (filterVal === '0') { // Belum
+    return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 0);
+  }
+  return rows;
+}
+
+function aksiButtonsHtml(r) {
+  const nobukti = r.nobukti;
+  const detailBtn =
+    '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+    nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
+
+  if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
+    // Sudah otorisasi (Detail + Batal Otorisasi + Print)
+    return '<div class="action-buttons">' + detailBtn +
+      '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+      nobukti + '\')"><i class="bi bi-key"></i></button>' +
+      '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+      nobukti + '\')"><i class="bi bi-printer"></i></button>' +
+      '</div>';
+  }
+
+  // Belum otorisasi (Detail + Edit + Otorisasi)
+  return '<div class="action-buttons">' + detailBtn +
+    '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
+    nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
+    '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+    nobukti + '\')"><i class="bi bi-key"></i></button>' +
+    '</div>';
+}
+
+function renderTabel() {
+  const cols = gcart_header.filter(c => c[2] === 1);
+  const thead = document.querySelector('#mainTable thead');
+  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+
+  const search = ($('#searchBox2').val() || '').trim().toLowerCase();
+  let rows = lastRows;
+  if (search) {
+    rows = rows.filter(function(r) {
+      return cols.some(function(c) {
+        const v = pickCI(r, c[0]);
+        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
+      });
+    });
+  }
+  rows = filterByOtorisasi(rows, globalOtorisasi);
+
+  const tbody = document.getElementById('tabel2_data');
+  $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
+    document.getElementById('footerLabel2').textContent = 'Tidak ada data';
+    document.getElementById('pagerBtns').innerHTML = '';
+    return;
+  }
+
+  const total = rows.length;
+  const totalPages = (pageSize === -1) ? 1 : Math.max(1, Math.ceil(total / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  let pageRows = rows;
+  let startIdx = 0;
+  if (pageSize !== -1) {
+    startIdx = (currentPage - 1) * pageSize;
+    pageRows = rows.slice(startIdx, startIdx + pageSize);
+  }
+
+  let html = '';
+  pageRows.forEach(function(r) {
+    html += '<tr class="data-row">';
+    html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+    html += cols.map(function(c) {
+      const v = pickCI(r, c[0]);
+      if (c[0] === 'IsOtorisasi1') {
+        return (Number(v) === 1) ?
+          '<td><span class="sp-badge is-active">Sudah</span></td>' :
+          '<td><span class="sp-badge is-inactive">Belum</span></td>';
+      }
+      if (c[3] === 'date') {
+        return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
+      }
+      return '<td>' + nullToEmpty(v) + '</td>';
+    }).join('');
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+  document.getElementById('footerLabel2').textContent =
+    'Menampilkan ' + (startIdx + 1) + '-' + (startIdx + pageRows.length) + ' dari ' + total + ' baris';
+  renderPager(totalPages);
+  $('[data-toggle="tooltip"]').tooltip({
+    container: 'body',
+    boundary: 'window'
+  });
+}
+
+// Dropdown "Tampilkan"
+function onChangeTampilLen() {
+  pageSize = Number($('#tampilLen').val());
+  currentPage = 1;
+  renderTabel();
+}
+
+function goToPage(p) {
+  currentPage = p;
+  renderTabel();
+}
+
+// render tombol Prev/nomor halaman/Next di kanan table-footer, maksimal 5
+// nomor halaman sekaligus, digeser mengikuti currentPage.
+function renderPager(totalPages) {
+  const el = document.getElementById('pagerBtns');
+  if (!el) return;
+
+  if (totalPages <= 1) {
+    el.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  html += '<div class="pg' + (currentPage === 1 ? ' disabled' : '') +
+    '" onclick="goToPage(' + Math.max(1, currentPage - 1) + ')"><i class="bi bi-chevron-left"></i></div>';
+
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, start + 4);
+  start = Math.max(1, end - 4);
+
+  for (let p = start; p <= end; p++) {
+    html += '<div class="pg' + (p === currentPage ? ' active' : '') +
+      '" onclick="goToPage(' + p + ')">' + p + '</div>';
+  }
+
+  html += '<div class="pg' + (currentPage === totalPages ? ' disabled' : '') +
+    '" onclick="goToPage(' + Math.min(totalPages, currentPage + 1) + ')"><i class="bi bi-chevron-right"></i></div>';
+
+  el.innerHTML = html;
+}
+
+// Filter Modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
+function updateFilterBadge() {
+  let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
+  $('#filterBadge').text(count + ' aktif');
+}
+
+function resetAllFilters() {
+  $('#modalOtorisasi').val('2');
+  updateFilterBadge();
+}
+
+$(document).on('show.bs.modal', '#modalFilter', function() {
+  $('#modalOtorisasi').val(globalOtorisasi);
+  updateFilterBadge();
+});
+
+$(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
+
+function applyModalFilter() {
+  globalOtorisasi = $('#modalOtorisasi').val();
+  currentPage = 1;
+  renderTabel();
+  $('#modalFilter').modal('hide');
+}
+// === end tabel list PRT ===================================================
 
 let dataTableAdd = []
 let dataTableEdit = []
@@ -1982,16 +2305,13 @@ let tipeformitem = ''
 
 
 $(document).ready(function(){
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-        });
-
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-          });
-
+      doSetHeader(g_modeReport);
+      ReportTable.init({
+        table: '#mainTable',
+        bar: '#rtBar',
+        onChange: renderTabel
+      });
+      renderTabel();
 
         $("#tabel_add_list_barang").DataTable({
           "lengthChange": false,
@@ -3405,104 +3725,29 @@ function onChangeInputAddAddNosat () {
 }
       
 function loadAll () {
-  let _token = $("#_token").val();
-
-  $('#tabel').DataTable().destroy();
-  $('#tabel2').DataTable().destroy();
+  let dataBelum = [], dataSudah = [];
 
   $.ajax({
     url: "{!! url('prtloadall') !!}",
     type: "get",
     async: false,
+    data: {
+      date1: $('#inputDate1').val(),
+      date2: $('#inputDate2').val()
+    },
     success: function(res) {
-
-      let dataBelum = res.tempOutstanding;
-      let dataSudah = res.tempOutstanding2;
-
-      let rowTable = "";
-      let rowTable2 = "";
-
-      // === Belum Otorisasi ===
-      dataBelum.forEach((item, i) => {
-        let date1 = "";
-        if (item.Tanggal) {
-          let date = new Date(item.Tanggal);
-          let day = ("0" + date.getDate()).slice(-2);
-          let month = ("0" + (date.getMonth() + 1)).slice(-2);
-          date1 = date.getFullYear()+"/"+month+"/"+day;
-        }
-
-        rowTable += `
-          <tr>
-            <td class="text-center">
-              <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('${item.nobukti}')">
-                <i class="bi bi-info"></i>
-              </button>
-              <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit('${item.nobukti}')">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi('${item.nobukti}')">
-                <i class="bi bi-key"></i>
-              </button>
-            </td>
-            <td>${item.nobukti}</td>
-            <td>${date1}</td>
-            <td>${item.Keterangan || ""}</td>
-          </tr>
-        `;
-      });
-
-      document.getElementById("tabel_data").innerHTML = rowTable;
-
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": false,
-      });
-
-      // === Sudah Otorisasi ===
-      dataSudah.forEach((item, i) => {
-        let date1 = "";
-        if (item.Tanggal) {
-          let date = new Date(item.Tanggal);
-          let day = ("0" + date.getDate()).slice(-2);
-          let month = ("0" + (date.getMonth() + 1)).slice(-2);
-          date1 = date.getFullYear()+"/"+month+"/"+day;
-        }
-
-        rowTable2 += `
-          <tr>
-            <td class="text-center">
-              <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail('${item.nobukti}')">
-                <i class="bi bi-info"></i>
-              </button>
-              <button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.nobukti}')">
-                <i class="bi bi-key"></i>
-              </button>
-	    <button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint('${item.nobukti}')">
-                <i class="bi bi-printer"></i>
-            </button>
-            </td>
-            <td>${item.nobukti}</td>
-            <td>${date1}</td>
-            <td>${item.Keterangan || ""}</td>
-            <td>${item.OtoUser1}</td>
-            <td>${formatDateTime(item.TglOto1)}</td>
-          </tr>
-        `;
-      });
-
-      document.getElementById("tabel2_data").innerHTML = rowTable2;
-
-      $("#tabel2").DataTable({
-        "lengthChange": false,
-        "paging": false,
-      });
+      dataBelum = res.tempOutstanding || [];
+      dataSudah = res.tempOutstanding2 || [];
     },
     error: function (err) {
       console.log(err);
       alertify.warning('Terjadi kesalahan saat load data');
     }
   });
+
+  lastRows = dataBelum.concat(dataSudah);
+  currentPage = 1;
+  renderTabel();
 
   console.log('load all selesai');
   setFormMode('');
@@ -4883,37 +5128,5 @@ function formatAngka (angkaString) {
 };
 
 </script>
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
-  <script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-
-    function setActiveTab(homeActive) {
-      if (homeActive) {
-        tabHome.style.backgroundColor = '#007bff';
-        tabHome.style.color = '#fff';
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-      } else {
-        tabProfile.style.backgroundColor = '#007bff';
-        tabProfile.style.color = '#fff';
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-      }
-    }
-
-    // Default warna tab
-    setActiveTab(true);
-
-    // buat ganti tab
-    tabHome.addEventListener('click', function () {
-      setActiveTab(true);
-    });
-
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(false);
-    });
-  </script>
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
 
 @endsection
