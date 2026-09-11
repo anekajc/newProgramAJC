@@ -326,7 +326,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 #addInvoiceTable thead th,
 #addGiroTable thead th,
 #addRekapTable thead th,
-#addTable thead th {
+#addTable thead th,
+#detailTable thead th {
   background: #f8f9fb !important;
   color: #6b7280 !important;
   font-size: 12px;
@@ -340,11 +341,13 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 #addInvoiceTable tbody tr:nth-of-type(odd),
 #addGiroTable tbody tr:nth-of-type(odd),
 #addRekapTable tbody tr:nth-of-type(odd),
-#addTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addTable tbody tr:nth-of-type(odd),
+#detailTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
 #addInvoiceTable tbody tr:hover,
 #addGiroTable tbody tr:hover,
 #addRekapTable tbody tr:hover,
-#addTable tbody tr:hover { background-color: #f5f3ff; }
+#addTable tbody tr:hover,
+#detailTable tbody tr:hover { background-color: #f5f3ff; }
 
 /* ---------- Tabel di dalam modal - baris diklik langsung ---------- */
 .tabel-modal-pdpp thead th {
@@ -976,131 +979,85 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     <div class="row">
       <div class="col-md-3">
         <div class="row">
-
-
         <div class="col-md-4">
           <div class="form-group">
           <label>Faktur</label>
         </div>
         </div>
-        <!-- <div class="col-4 text-right">
-
-          </div> -->
         <div class="col-md-8">
           <div class="input-group form-group">
             <input id="AddAddFaktur" type="text" class="form-control" disabled>
-
-
           </div>
         </div>
         </div>
-
       </div>
 
-    </div>
-
-    <div class="row" style="margin-top: -10px">
       <div class="col-md-3">
         <div class="row">
-
-
         <div class="col-md-4">
           <div class="form-group">
           <label>Dibayar</label>
         </div>
         </div>
-        <!-- <div class="col-4 text-right">
-
-          </div> -->
         <div class="col-md-8">
           <div class="input-group form-group">
             <input id="AddAddDibayar" type="number" class="form-control text-right" disabled>
-
-
           </div>
         </div>
         </div>
-
       </div>
+
       <div class="col-md-3">
         <div class="row">
-
-
         <div class="col-md-4">
           <div class="form-group">
           <label>Lebih Bayar</label>
         </div>
         </div>
-        <!-- <div class="col-4 text-right">
-
-          </div> -->
         <div class="col-md-8">
           <div class="input-group form-group">
             <input id="AddAddLebihBayar" type="number" class="form-control text-right" disabled>
-
-
           </div>
         </div>
         </div>
-
       </div>
-
     </div>
-
 
     <div class="row" style="margin-top: -10px">
       <div class="col-md-3">
         <div class="row">
-
-
         <div class="col-md-4">
           <div class="form-group">
           <label>Kurang Bayar</label>
         </div>
         </div>
-        <!-- <div class="col-4 text-right">
-
-          </div> -->
         <div class="col-md-8">
           <div class="input-group form-group">
             <input id="AddAddKurangBayar" type="number" class="form-control text-right" disabled>
-
-
           </div>
         </div>
         </div>
-
       </div>
 
-
-    </div>
-
-    <div class="row" style="margin-top: -10px">
-      <div class="col-md-3">
+      <div class="col-md-6">
         <div class="row">
-
-
-        <div class="col-md-4">
+        <div class="col-md-2">
           <div class="form-group">
           <label>Perkiraan</label>
         </div>
         </div>
-        <!-- <div class="col-4 text-right">
-
-          </div> -->
-        <div class="col-md-8">
+        <div class="col-md-4">
           <div class="input-group form-group">
             <input id="AddAddKodePerkiraan" type="text" class="form-control" disabled>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="input-group form-group">
             <input type="text" class="form-control" id="AddAddNamaPerkiraan" disabled>
-
-            <!-- <button id="buttonAddListPerkiraan" type="button" onclick="" class="btn btn-primary" >+</button> -->
-
           </div>
         </div>
         </div>
-
       </div>
-
     </div>
 
 
@@ -1109,19 +1066,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <div class="row mt-2" style="margin-top: 0">
   <div class="col-md-12 text-right mt-4">
-    <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;">Batal</button>
+    <button type="button" class="btn btn-batal-add" onclick="buttonAddBatal()">Batal</button>
 
-
-    <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-primary" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;">Submit Edit</button>
-
+    <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-chip-biru">Submit Edit</button>
 
   </div>
 
@@ -1190,10 +1137,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
     <div id="page3" style="display: none" class="mainpage container-fluid" >
 
-      <div class="row" style="margin-top: -30px">
+      <div class="row">
         <div class="col-8 text-left">
-          <h2 class="page3showhide detailshowhide"> Detail Piutang DPP</h2>
-          <h2 class="page3showhide otorisasishowhide"> Otorisasi Piutang DPP</h2>
+          <h2 class="page3showhide detailshowhide"></h2>
+          <h2 class="page3showhide otorisasishowhide"></h2>
         </div>
         <div class="col-4 text-right">
           <button type="button" class="btn btn-dpp-tutup" onclick="buttonCloseForm()">Close</button>
@@ -1422,8 +1369,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
       <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-            <table id="detailTable" class="table table-bordered table-striped"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="detailTable" class="data-table">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kas/Bank</th>
                   <th style="padding: 4px 12px;" scope="col">Faktur</th>
