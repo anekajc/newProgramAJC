@@ -14,6 +14,11 @@
 
 
 <style>
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
 /* Jarak kartu ke bar atas. Layout memberi .content padding 28px; halaman purchasing
    memakai 12px, dan halaman ini mengikutinya supaya seragam. */
 #content { padding-top: 12px; }

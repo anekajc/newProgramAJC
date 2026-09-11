@@ -14,6 +14,11 @@
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 
 <style>
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
 /* Jarak kartu ke bar atas. Layout memberi .content padding 28px; halaman purchasing
    memakai 12px, dan halaman ini mengikutinya supaya seragam. */
 #content { padding-top: 12px; }
@@ -677,9 +682,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Pelunasan Piutang DPP</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-dpp-tutup" onclick="buttonCloseForm()">Close</button>
