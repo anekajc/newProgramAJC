@@ -79,7 +79,9 @@ class PerintahReturBeliController extends Controller
     // urut 1 = tabel PRB gabungan (dulu tab "Perintah Retur Beli" + "Sudah Otorisasi") -
     // penyaringan otorisasi dikerjakan di browser lewat modal Filter, sama seperti Purchase
     // Order/Uang Muka Beli. Kolom dialiaskan (NoBukti/Tanggal) supaya sama persis dengan
-    // alias di HeaderTableController@getHeaderTable cabang 'perintahreturbeli'.
+    // alias di HeaderTableController@getHeaderTable cabang 'perintahreturbeli'. Kolom Status
+    // diambil lewat LEFT JOIN ke vwBrowsPrRBeli (Belum/Sebagian/Sudah berdasar qty
+    // DBPRRBELIDET vs DBRBELIDET) - lihat prbBadgeStatus() di perintahreturbeli.blade.php.
     $listPRB = DB::connection("SML")->select("declare @tglawal date, @tglakhir date
 
       select @tglawal= :tglawal, @tglakhir= :tglakhir
@@ -98,7 +100,9 @@ class PerintahReturBeliController extends Controller
                         else 1
                    end As Bit) NeedOtorisasi
               ,Isnull(A.isbatal,0) IsBatal,A.Userbatal,A.Tglbatal
+              ,Isnull(V.status,'Belum') as Status
       From dbPRRBeli A
+      Left Outer Join vwBrowsPrRBeli V on V.NOBUKTI = A.NOBUKTI
       where A.Tanggal between @tglawal and @tglakhir
       order by A.NoBukti
       " , ["tglawal" => $tglawal , "tglakhir" => $tglakhir]);
@@ -761,7 +765,10 @@ having COUNT(*)>1
               B.NOPBL NOBeli, B.KodeGdg, A.KODEEXP, A.HANDLING, A.KETERANGAN, A.FAKTURSUPP,
               A.KODEVLS, A.KURS, A.PPN, A.TIPEBAYAR, A.HARI, A.TipeDisc, A.DISC, A.DISCRP,
               A.NILAIPOT, A.NILAIDPP, A.NILAIPPN, A.NILAINET, A.ISCETAK, A.NilaiCetak,
-              B.URUT, B.KODEBRG,case when B.NOPBL='-' then E.namaBrg else H.NamaBrg End NamaBrg
+              B.URUT, B.KODEBRG,
+              -- Fallback ke dbBarang kalau H.NamaBrg kosong/null - terjadi saat NOPBL
+              -- (nobukti LPB) sudah tidak ada lagi di DBBELIDET (data yatim).
+              Isnull(NullIf(case when B.NOPBL='-' then E.namaBrg else H.NamaBrg end,''), E.NamaBrg) NamaBrg
               , B.QNT, B.NOSAT, B.SATUAN, B.ISI, B.HARGA, B.DISCP, B.DISCTOT,
               B.BYANGKUT, B.NOPBL, B.URUTPBL, B.Qnt2, B.Qnt1, B.HPP,
               B.HRGNETTO, B.NDISKON, B.SUBTOTAL, B.NDPP, B.NPPN, B.NNET,

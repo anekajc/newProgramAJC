@@ -4067,6 +4067,21 @@ let dataRJual = []
 const PRB_LABEL_1 = { NoBukti: 'No. Bukti', Tanggal: 'Tanggal' }
 const PRB_LABEL_2 = { NomorRetur: 'Nomor Retur', KodeBrg: 'Kode Barang', NamaBrg: 'Nama Barang', Satuan: 'Satuan', Qty: 'Qty' }
 
+// Kelas badge disamakan dengan kolom Status di purchaseorder: hijau=selesai,
+// biru=belum, kuning=sebagian. Status datang jadi dari server (vwBrowsPrRBeli),
+// jadi di sini tidak ada perhitungan qnt seperti poStatusPO().
+const PRB_BADGE_STATUS = {
+  'Sudah'    : 'is-active',
+  'Belum'    : 'is-user',
+  'Sebagian' : 'is-supervisor'
+}
+
+function prbBadgeStatus (item) {
+  let status = item.Status || 'Belum'
+  let kelas = PRB_BADGE_STATUS[status] || ''
+  return `<span class="sp-badge ${kelas}">${status}</span>`
+}
+
 window.g_href = PRB_HREF
 window.g_modeReport = 1
 window.gcart_header = []
@@ -4436,6 +4451,7 @@ function renderTabelPRB () {
       <th style="padding: 4px 12px;" scope="col">Oto</th>
       <th style="padding: 4px 12px;" scope="col">User Oto</th>
       <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+      <th style="padding: 4px 12px;" scope="col">Status</th>
     `)
   }
 
@@ -4478,6 +4494,7 @@ function renderTabelPRB () {
       }
       <td>${item.OtoUser1 || ''}</td>
       <td>${item.TglOto1 ? formatDate(item.TglOto1) : ''}</td>
+      <td class="text-center">${prbBadgeStatus(item)}</td>
     </tr>`;
   });
 
