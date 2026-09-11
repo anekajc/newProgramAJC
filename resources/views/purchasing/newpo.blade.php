@@ -12,6 +12,11 @@
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
   .custom-tabs {
     display: inline-flex;
     justify-content: flex-start;

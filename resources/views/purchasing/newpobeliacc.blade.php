@@ -10,6 +10,11 @@
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
     <style>
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
     .pba-fgrid{display:flex;gap:0 20px;margin-bottom:16px;align-items:flex-start;}
     .pba-fcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
     .pba-fcol-wide{flex:2;}
