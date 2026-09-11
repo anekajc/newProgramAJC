@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <!-- Bar kolom tersembunyi + Order By (diisi oleh report-table.js / ReportTable) -->
     <div id="rtBar"></div>
 
     <!-- TABLE -->
@@ -109,8 +109,9 @@
                ditemukan salah di beberapa laporan lain -- tidak spesifik untuk
                Sp_ReportRInvoicePenjualanDet dan tidak pernah diverifikasi. Hanya satu susunan
                kolom (Detail + Nomor Bukti) yang dipertahankan; dihapus, bukan dipindah. Order By
-               TETAP ada: parameter nyata (inputOrd) yang dikirim ke proc, hanya tidak lagi
-               mengubah susunan kolom. --}}
+               juga tidak ada di sini lagi: parameter nyata ini (inputOrd, dikirim ke proc, benar-
+               benar dipakai controller) sudah dipindah ke switcher "Order By" di bar atas tabel
+               (ReportTable.init views), lihat setOrderBy(). --}}
           <div class="rt-grid-1">
             <div>
               <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -118,16 +119,6 @@
                 <option value="0">Non Otorisasi</option>
                 <option value="1">Otorisasi</option>
                 <option value="2">Semua</option>
-              </select>
-            </div>
-          </div>
-          <div class="rt-grid-1">
-            <div>
-              <label class="rt-field-label" for="modalOrder">Order By</label>
-              <select class="rt-native" id="modalOrder">
-                <option value="N">Nomor Bukti</option>
-                <option value="B">Nomor Barang</option>
-                <option value="C">Nomor Customer</option>
               </select>
             </div>
           </div>
@@ -165,22 +156,45 @@
 
   const reportUrl = "{{ url('laporanmarketingreturpenjualan_doReport') }}";
 
-  // Satu-satunya mode: Detail + Nomor Bukti. Rekap dan varian Order By lain dihapus
-  // (lihat komentar di modal Filter) -- tidak ada switcher "Tampilan" di halaman ini.
-  g_modeReport = 0;
+  // Satu-satunya mode: Detail + Nomor Bukti. Rekap dihapus (lihat komentar di modal Filter)
+  // -- tidak ada switcher "Tampilan" di halaman ini. Kolom (gcart_header) TIDAK berubah per
+  // Order By (lihat setDefaultHeader()) -- hanya groupby/subtotal & parameter Ordr yang
+  // berubah. Tetap satu slot kolom tersimpan per ordering walau isinya sama, supaya
+  // kustomisasi kolom user (DBSIMPANHEADER) tidak bleed antar ordering.
+  var modereport_nobukti  = 0,
+      modereport_barang   = 1,
+      modereport_customer = 2;
+  g_modeReport = modereport_nobukti;
+
+  // Order By: N (Nomor Bukti) / B (Nomor Barang) / C (Nomor Customer) -- parameter nyata
+  // (Ordr) yang dikirim ke proc & benar-benar dipakai controller (dikonfirmasi dari kode
+  // makeTable()/komentar yang sudah ada, bukan ditebak).
+  const ORDER_OPTIONS = [
+    { value: 'N', label: 'Nomor Bukti', desc: 'Dikelompokkan per No Bukti' },
+    { value: 'B', label: 'Nomor Barang', desc: 'Dikelompokkan per Kode Barang' },
+    { value: 'C', label: 'Nomor Customer', desc: 'Dikelompokkan per Customer' },
+  ];
+  let viewsCfg = {
+    label: 'Order By',
+    options: ORDER_OPTIONS,
+    get: function() { return globalOrderBy; },
+    set: function(v) {
+      setOrderBy(String(v));
+      if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+    }
+  };
 
   $(document).ready(function() {
     setOtorisasi(globalOtorisasi);
-    setOrderBy(globalOrderBy);
     showPeriode();
     setDefaultHeader();
-    doSetHeader(g_modeReport);
-    doShowCustomize();
+    setOrderBy(globalOrderBy);
 
     ReportTable.init({
       table: '#mainTable',
       bar: '#rtBar',
-      onChange: render
+      onChange: render,
+      views: viewsCfg
     });
   });
 
@@ -195,14 +209,21 @@
     globalOtorisasi = val;
   }
 
-  // order by
+  // order by: ikut menentukan slot kolom tersimpan (lewat g_modeReport), bukan susunan kolom
+  // itu sendiri -- lihat setDefaultHeader().
   function setOrderBy(val) {
     globalOrderBy = val;
+    if (val === 'B') g_modeReport = modereport_barang;
+    else if (val === 'C') g_modeReport = modereport_customer;
+    else g_modeReport = modereport_nobukti;
+    doSetHeader(g_modeReport);
+    doShowCustomize();
   }
 
   /* -- FILTER MODAL -- */
 
-  // Order By TIDAK dihitung: wajib memilih salah satu, tanpa opsi netral.
+  // Order By tidak lagi di modal ini (sudah jadi switcher "Order By" di #rtBar), jadi tidak
+  // dihitung ke badge filter modal.
   function updateFilterBadge() {
     let count = 0;
     if ($('#modalOtorisasi').val() !== '2') { count++; }
@@ -211,13 +232,11 @@
 
   function resetAllFilters() {
     $('#modalOtorisasi').val('0');
-    $('#modalOrder').val('N');
     updateFilterBadge();
   }
 
   $('#modalFilter').on('show.bs.modal', function() {
     $('#modalOtorisasi').val(globalOtorisasi);
-    $('#modalOrder').val(globalOrderBy);
     updateFilterBadge();
   });
 
@@ -225,7 +244,6 @@
 
   function applyModalFilter() {
     setOtorisasi($('#modalOtorisasi').val());
-    setOrderBy($('#modalOrder').val());
 
     $('#modalFilter').modal('hide');
   }
@@ -379,7 +397,7 @@
     keys.forEach(k => { sub[k] = 0; grand[k] = 0; });
 
     rows.forEach(function(r, i) {
-      const now = r[currentGroupby];
+      const now = pickCI(r, currentGroupby);
 
       // subtotal saat nilai grup berganti (kalau toggle Subtotal aktif)
       if (showSub && i !== 0 && prev !== now) {

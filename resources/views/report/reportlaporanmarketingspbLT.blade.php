@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <!-- Bar kolom tersembunyi + Tampilan (diisi oleh report-table.js / ReportTable) -->
+            <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
             <div id="rtBar"></div>
 
             <!-- TABLE -->
@@ -114,8 +114,7 @@
 
                     <div class="rt-section">
                         <div class="rt-group-label">Pengaturan Laporan</div>
-                        {{-- Report (Detail/Rekap) TIDAK ada di sini: sudah jadi switcher "Tampilan" di
-                             bar atas tabel (ReportTable.init views), lihat setReportMode(). --}}
+                        {{-- Report (Detail/Rekap) dihapus (dulu switcher "Tampilan" di bar atas tabel). --}}
                         <div class="rt-grid-2">
                             <div>
                                 <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -164,9 +163,6 @@
         // No Bukti) -- select "Order By" lama cuma punya 1 opsi jadi bukan filter sungguhan.
         // Dihilangkan dari UI & di-hardcode, sama seperti pola di reportmarketinghistoryoutso.blade.php.
         let globalOrderBy = "LT";
-        let globalReportMode = "0"; // default: Detail
-
-        var jenisreport = 0; // 0 = Detail, 1 = Rekap
 
         let lastRows = []; // hasil fetch terakhir (dipakai render / export / search)
         let currentGroupby = 'NOBUKTI'; // groupby aktif untuk render ulang saat search
@@ -174,33 +170,18 @@
         const reportUrl = "{{ url('laporanmarketingspbLT_doReport') }}";
 
         $(document).ready(function() {
-            setReportMode(globalReportMode);
+            setModeReport();
             setOtorisasi(globalOtorisasi);
             setTerima(globalTerima);
             showPeriode();
             setDefaultHeader();
 
-            // Header tabel interaktif. "Tampilan" = Report Mode (Detail/Rekap) -- SATU-SATUNYA
-            // tempat kontrol ini muncul (tidak diulang di modal Filter). Ganti mode cuma mengubah
-            // susunan kolom, bukan query, jadi cukup render() ulang -- tidak perlu makeTable().
+            // Tidak ada switcher (Detail/Rekap dihapus, Order By selalu "LT") -- #rtBar cuma
+            // menampilkan kolom tersembunyi + Reset kolom.
             ReportTable.init({
                 table: '#mainTable',
                 bar: '#rtBar',
-                onChange: render,
-                views: {
-                    label: 'Tampilan',
-                    options: [
-                        { value: '0', label: 'Detail', desc: 'Rincian per baris' },
-                        { value: '1', label: 'Rekap', desc: 'Ringkasan per grup' }
-                    ],
-                    get: function() {
-                        return globalReportMode;
-                    },
-                    set: function(v) {
-                        setReportMode(String(v));
-                        if (lastRows.length) { render(); }
-                    }
-                }
+                onChange: render
             });
         });
 
@@ -217,12 +198,6 @@
 
         function setTerima(val) {
             globalTerima = val;
-        }
-
-        function setReportMode(val) {
-            globalReportMode = val;
-            jenisreport = Number(val); // 0 = Detail, 1 = Rekap
-            setModeReport();
         }
 
         /* -- FILTER MODAL -- */
@@ -316,120 +291,26 @@
             return undefined;
         }
 
-        var modereport_detailnobukti = 0,
-            modereport_detailbarang = 1,
-            modereport_detailcustomer = 2;
-        var modereport_rekapnobukti = 3,
-            modereport_rekapbarang = 4,
-            modereport_rekapcustomer = 5;
-        g_modeReport = modereport_detailnobukti;
+        // Satu slot -- Detail/Rekap dihapus, dan Order By (Barang/Customer) sudah tidak
+        // pernah tercapai sejak sebelum perubahan ini juga (globalOrderBy selalu "LT").
+        var modereport_nobukti = 0;
+        g_modeReport = modereport_nobukti;
 
+        // Field & label diverifikasi terhadap reportlaporanmarketingspb.blade.php, yang memakai
+        // stored proc SAMA (Sp_ReportSPBDet). Versi sebelumnya di halaman ini punya field &
+        // label yang tidak sesuai (mis. field 'nobukti' berlabel "Tanggal", field 'TGLTERIMA'
+        // berlabel "Sat") -- kemungkinan sisa copy-paste dari report lain.
         function setDefaultHeader() {
-            if (g_modeReport == modereport_detailnobukti) {
-                // Field & label diverifikasi terhadap reportlaporanmarketingspb.blade.php, yang
-                // memakai stored proc SAMA (Sp_ReportSPBDet). Versi sebelumnya di halaman ini
-                // punya field & label yang tidak sesuai (mis. field 'nobukti' berlabel "Tanggal",
-                // field 'TGLTERIMA' berlabel "Sat") -- kemungkinan sisa copy-paste dari report lain.
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['NoPOCustomer', 'No. PO Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
-                    ['TGLKIRIM', 'Tanggal Kirim', 1, 'date', 0, 0],
-                    ['TGLTERIMA', 'Tanggal Terima', 1, 'date', 0, 0]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (g_modeReport == modereport_detailbarang) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (g_modeReport == modereport_detailcustomer) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['QNT', 'Qnt', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    ['HARGA', 'Harga', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (g_modeReport == modereport_rekapnobukti) {
-                // BELUM DIVERIFIKASI: kolom DPP/PPN/Vls di bawah ini tidak ada hubungannya dengan
-                // Sp_ReportSPBDet (proc ini tidak mengembalikan field tsb sama sekali) -- sudah
-                // begini sejak sebelum migrasi. Dibiarkan apa adanya (bukan dugaan pengganti),
-                // lihat catatan migrasi yang dilaporkan ke user.
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else if (g_modeReport == modereport_rekapbarang) {
-                gcart_header = [
-                    ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['Qnt', 'QNT', 1, 'float', 1, 2],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else {
-                gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-            }
+            gcart_header = [
+                ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                ['NoPOCustomer', 'No. PO Customer', 1, 'varchar', 0, 0],
+                ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
+                ['TGLKIRIM', 'Tanggal Kirim', 1, 'date', 0, 0],
+                ['TGLTERIMA', 'Tanggal Terima', 1, 'date', 0, 0]
+            ];
+            gsum_issubtotal = 1;
+            gsum_isgrandtotal = 1;
         }
 
         function makeTable(_mode) {
@@ -583,14 +464,9 @@
 
         function setModeReport() {
             // globalOrderBy selalu "LT" -- Sp_ReportSPBDet untuk laporan ini tidak dipanggil
-            // dengan urutan lain lewat halaman ini (lihat deklarasi globalOrderBy di atas).
-            if (globalOrderBy == "LT") {
-                g_modeReport = (jenisreport === 0) ? modereport_detailnobukti : modereport_rekapnobukti;
-            } else if (globalOrderBy == "B") {
-                g_modeReport = (jenisreport === 0) ? modereport_detailbarang : modereport_rekapbarang;
-            } else {
-                g_modeReport = (jenisreport === 0) ? modereport_detailcustomer : modereport_rekapcustomer;
-            }
+            // dengan urutan lain lewat halaman ini (lihat deklarasi globalOrderBy di atas), dan
+            // Detail/Rekap sudah dihapus -- jadi hanya satu slot yang pernah kepakai.
+            g_modeReport = modereport_nobukti;
 
             doSetHeader(g_modeReport);
             doShowCustomize();

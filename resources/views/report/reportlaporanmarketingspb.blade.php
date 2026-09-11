@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <!-- Bar kolom tersembunyi + Tampilan (diisi oleh report-table.js / ReportTable) -->
+            <!-- Bar kolom tersembunyi + Order By (diisi oleh report-table.js / ReportTable) -->
             <div id="rtBar"></div>
 
             <!-- TABLE -->
@@ -134,9 +134,9 @@
 
                     <div class="rt-section">
                         <div class="rt-group-label">Pengaturan Laporan</div>
-                        {{-- Report (Detail/Rekap) TIDAK ada di sini: sudah jadi switcher "Tampilan" di
-               bar atas tabel (ReportTable.init views), lihat setReportMode(). Dobel di
-               modal ini hanya akan membingungkan (dua kontrol untuk satu setting). --}}
+                        {{-- Report (Detail/Rekap) dihapus (dulu sudah pindah ke switcher "Tampilan"
+               di bar atas tabel, sekarang switcher itu sendiri dibuang). Urutkan juga
+               dipindah ke bar (switcher "Order By"), jadi tidak ada lagi di modal ini. --}}
                         <div class="rt-grid-2">
                             <div>
                                 <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -165,14 +165,6 @@
                             </div>
                         </div>
                         <div class="rt-grid-2">
-                            <div>
-                                <label class="rt-field-label" for="modalOrder">Urutkan</label>
-                                <select class="rt-native" id="modalOrder">
-                                    <option value="N">Nomor Bukti</option>
-                                    <option value="B">Nomor Barang</option>
-                                    <option value="C">Nomor Customer</option>
-                                </select>
-                            </div>
                             {{-- Sp_ReportOutSpbDet tidak punya parameter ini -- hanya berlaku
                                  di mode Non Outstanding. --}}
                             <div id="wrapTerima">
@@ -210,12 +202,9 @@
         let globalDate2 = "{!! date('Y-m-d') !!}";
         let globalOtorisasi = "2"; // default: Semua
         let globalOrderBy = "N"; // default: Nomor Bukti
-        let globalReportMode = "0"; // default: Detail
         let globalTerima = "2"; // default: Semua
         let globalStatus = "ALL"; // default: Semua ("SUDAH" / "BELUM" = kolom outstanding)
         let globalMode = "0"; // "0" = Non Outstanding (Sp_ReportSPBDet), "1" = Outstanding (Sp_ReportOutSpbDet)
-
-        var jenisreport = 0; // 0 = Detail, 1 = Rekap
 
         let lastRows = []; // hasil fetch terakhir (dipakai render / export / search)
         let currentGroupby = 'NOBUKTI'; // groupby aktif untuk render ulang saat search
@@ -229,51 +218,72 @@
 
         // Urutkan: Non Outstanding punya 3 opsi (masing-masing mengubah susunan kolom lewat
         // setModeReport()); Outstanding punya 6 (Sp_ReportOutSpbDet mengembalikan field yang
-        // sama apa pun Ordr -- lihat komentar di reportmarketingoutsppb.blade.php -- jadi Ordr
-        // di sana hanya mengubah currentGroupby/subtotal, bukan kolom).
+        // sama apa pun Ordr -- lihat komentar di setHeaderOut() -- jadi Ordr di sana hanya
+        // mengubah currentGroupby/subtotal, bukan kolom).
         const ORDER_OPTIONS_SPB = [{
                 value: 'N',
-                label: 'Nomor Bukti'
+                label: 'Nomor Bukti',
+                desc: 'Dikelompokkan per No Bukti'
             },
             {
                 value: 'B',
-                label: 'Nomor Barang'
+                label: 'Nomor Barang',
+                desc: 'Dikelompokkan per Barang'
             },
             {
                 value: 'C',
-                label: 'Nomor Customer'
+                label: 'Nomor Customer',
+                desc: 'Dikelompokkan per Customer'
             },
         ];
         const ORDER_OPTIONS_OUT = ORDER_OPTIONS_SPB.concat([{
                 value: 'S',
-                label: 'Sales'
+                label: 'Sales',
+                desc: 'Dikelompokkan per Sales'
             },
             {
                 value: 'HG',
-                label: 'Head Group'
+                label: 'Head Group',
+                desc: 'Dikelompokkan per Head Group'
             },
             {
                 value: 'P',
-                label: 'PIC'
+                label: 'PIC',
+                desc: 'Dikelompokkan per PIC'
             },
         ]);
 
-        // Menulis ulang <option> #modalOrder sesuai mode. Kalau nilai globalOrderBy saat ini
-        // tidak ada di daftar mode baru (mis. pindah dari Outstanding 'S'/'HG'/'P' ke Non
-        // Outstanding), jatuhkan ke 'N' -- SP_REPORTSPBDet tidak punya kolom untuk itu.
+        // Objek ini sendiri yang dikirim ke ReportTable.init({ views }) -- disimpan di variabel
+        // supaya renderOrderOptions() bisa menukar .options lalu panggil ReportTable.refresh()
+        // saat ganti mode, BUKAN init() ulang (report-table.js membaca cfg.views by reference).
+        let viewsCfg = {
+            label: 'Order By',
+            options: ORDER_OPTIONS_SPB,
+            get: function() {
+                return globalOrderBy;
+            },
+            set: function(v) {
+                setOrderBy(String(v));
+                if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+            }
+        };
+
+        // Menukar opsi switcher "Order By" di #rtBar sesuai mode. Kalau nilai globalOrderBy
+        // saat ini tidak ada di daftar mode baru (mis. pindah dari Outstanding 'S'/'HG'/'P' ke
+        // Non Outstanding), jatuhkan ke 'N' -- SP_REPORTSPBDet tidak punya kolom untuk itu.
         function renderOrderOptions() {
             const opts = (globalMode === '1') ? ORDER_OPTIONS_OUT : ORDER_OPTIONS_SPB;
             const valid = opts.some(o => o.value === globalOrderBy);
             if (!valid) {
                 globalOrderBy = 'N';
             }
-            $('#modalOrder').html(opts.map(o => '<option value="' + o.value + '">' + o.label + '</option>')
-                .join(''));
-            $('#modalOrder').val(globalOrderBy);
+            viewsCfg.options = opts;
+            if (typeof ReportTable !== 'undefined' && ReportTable.refresh) {
+                ReportTable.refresh();
+            }
         }
 
         $(document).ready(function() {
-            setReportMode(globalReportMode);
             setOtorisasi(globalOtorisasi);
             setTerima(globalTerima);
             setStatus(globalStatus);
@@ -290,36 +300,12 @@
 
             setDefaultHeader();
 
-            // Header tabel interaktif. "Tampilan" = Report Mode (Detail/Rekap) -- SATU-SATUNYA
-            // tempat kontrol ini muncul (tidak diulang di modal Filter). Report Mode hanya
-            // mengubah susunan kolom (bukan query), jadi cukup render() ulang -- tidak perlu makeTable().
+            // Header tabel interaktif + switcher "Order By" di #rtBar (Detail/Rekap dihapus).
             ReportTable.init({
                 table: '#mainTable',
                 bar: '#rtBar',
                 onChange: render,
-                views: {
-                    label: 'Tampilan',
-                    options: [{
-                            value: '0',
-                            label: 'Detail',
-                            desc: 'Rincian per baris'
-                        },
-                        {
-                            value: '1',
-                            label: 'Rekap',
-                            desc: 'Ringkasan per grup'
-                        }
-                    ],
-                    get: function() {
-                        return globalReportMode;
-                    },
-                    set: function(v) {
-                        setReportMode(String(v));
-                        if (lastRows.length) {
-                            render();
-                        }
-                    }
-                }
+                views: viewsCfg
             });
         });
 
@@ -390,12 +376,6 @@
             setModeReport();
         }
 
-        function setReportMode(val) {
-            globalReportMode = val;
-            jenisreport = Number(val); // 0 = Detail, 1 = Rekap
-            setModeReport();
-        }
-
         /* -- FILTER MODAL -- */
 
         function updateFilterBadge() {
@@ -409,7 +389,6 @@
             if ($('#modalStatus').val() !== 'ALL') {
                 count++;
             }
-            // Urutkan: pilihan wajib tanpa nilai netral -> sengaja tidak dihitung
             $('#filterBadge').text(count + ' aktif');
         }
 
@@ -417,7 +396,6 @@
             $('#modalOtorisasi').val('2');
             $('#modalTerima').val('2');
             $('#modalStatus').val('ALL');
-            $('#modalOrder').val('N');
             updateFilterBadge();
         }
 
@@ -425,27 +403,21 @@
             $('#modalOtorisasi').val(globalOtorisasi);
             $('#modalTerima').val(globalTerima);
             $('#modalStatus').val(globalStatus);
-            $('#modalOrder').val(globalOrderBy);
             updateFilterBadge();
         });
 
         $('#modalFilter').on('change', 'select.rt-native', updateFilterBadge);
 
         function applyModalFilter() {
-            // Dibandingkan SEBELUM setter dipanggil: Urutkan (@Ordr) dan Tgl. Terima
-            // (@tglterima) adalah parameter SP -- baris di lastRows tidak bisa disesuaikan di
-            // sisi klien, dan Urutkan bahkan mengubah groupby + susunan kolom. Kalau salah
-            // satunya berubah, tabel dibiarkan apa adanya sampai user menekan Tampilkan.
-            // Otorisasi & Status keduanya punya filter sisi-klien, jadi bisa langsung dirender.
-            const needRefetch = ($('#modalTerima').val() !== globalTerima) ||
-                ($('#modalOrder').length > 0 && $('#modalOrder').val() !== globalOrderBy);
+            // Dibandingkan SEBELUM setter dipanggil: Tgl. Terima (@tglterima) adalah parameter
+            // SP -- baris di lastRows tidak bisa disesuaikan di sisi klien. Kalau berubah,
+            // tabel dibiarkan apa adanya sampai user menekan Tampilkan. Otorisasi & Status
+            // keduanya punya filter sisi-klien, jadi bisa langsung dirender.
+            const needRefetch = ($('#modalTerima').val() !== globalTerima);
 
             setOtorisasi($('#modalOtorisasi').val());
             setTerima($('#modalTerima').val());
             setStatus($('#modalStatus').val());
-            if ($('#modalOrder').length) {
-                setOrderBy($('#modalOrder').val());
-            }
 
             $('#modalFilter').modal('hide');
 
@@ -570,29 +542,29 @@
             return undefined;
         }
 
-        var modereport_detailnobukti = 0,
-            modereport_detailbarang = 1,
-            modereport_detailcustomer = 2;
-        var modereport_rekapnobukti = 3,
-            modereport_rekapbarang = 4,
-            modereport_rekapcustomer = 5;
-        g_modeReport = modereport_detailnobukti;
+        // Detail/Rekap dihapus -- Rekap dulu punya kolom berbeda (real feature: mis. detail
+        // No Bukti punya NoPOCustomer/namaGdg/TGLKIRIM/TGLTERIMA yang tidak ada di rekap), tapi
+        // sengaja dibuang. Order By (N/B/C) tetap punya 3 susunan kolom NYATA berbeda di SPB
+        // (lihat setHeaderSpb()) -- itu tidak disamakan, sesuai instruksi: hanya pindah UI-nya
+        // ke switcher "Order By" di #rtBar, bukan menyatukan kolomnya.
+        var modereport_nobukti = 0,
+            modereport_barang = 1,
+            modereport_customer = 2;
+        g_modeReport = modereport_nobukti;
 
-        // Dispatcher: kedua SP punya set kolom & penomoran mode yang berbeda total (SPB 0-5,
-        // Outstanding hanya 0=Detail/1=Rekap dalam numbering-nya sendiri) -- tetap dipisah jadi
-        // dua fungsi, BUKAN digabung, supaya g_modeReport (dengan offset) tidak salah dibaca.
+        // Dispatcher: kedua SP punya set kolom & penomoran mode yang berbeda total (SPB 0-2,
+        // Outstanding tidak bercabang sama sekali -- lihat setHeaderOut()) -- tetap dipisah
+        // jadi dua fungsi supaya g_modeReport (dengan offset) tidak salah dibaca.
         function setDefaultHeader() {
-            const isOut = (globalMode === '1');
-            const base = isOut ? (g_modeReport - OUT_MODE_OFFSET) : g_modeReport;
-            if (isOut) {
-                setHeaderOut(base);
+            if (globalMode === '1') {
+                setHeaderOut();
             } else {
-                setHeaderSpb(base);
+                setHeaderSpb(g_modeReport);
             }
         }
 
         function setHeaderSpb(base) {
-            if (base == modereport_detailnobukti) {
+            if (base == modereport_nobukti) {
                 gcart_header = [
                     ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
                     ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
@@ -612,7 +584,7 @@
                 gsum_issubtotal = 1;
                 gsum_isgrandtotal = 1;
 
-            } else if (base == modereport_detailbarang) {
+            } else if (base == modereport_barang) {
                 gcart_header = [
                     ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
                     ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
@@ -629,77 +601,21 @@
                     ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0]
                 ];
                 gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_detailcustomer) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-                    ['QTY', 'QTY', 1, 'float', 1, 0],
-                    ['NetW', 'Net W', 1, 'float', 1, 2],
-                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
-                    // ['HARGA', 'Harga', 1, 'float', 1, 2],
-                    ['outstanding', 'Status', 1, 'bool', 0, 0],
-                    ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0]
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapnobukti) {
-                gcart_header = [
-                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['NoPOCustomer', 'No. PO Customer', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
-                    ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-                    ['QTY', 'QTY', 1, 'float', 1, 0],
-                    ['TGLKIRIM', 'Tanggal Kirim', 1, 'date', 0, 0],
-                    ['TGLTERIMA', 'Tanggal Terima', 1, 'date', 0, 0],
-                    ['outstanding', 'Status', 1, 'bool', 0, 0],
-                    ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0]
-                ];
-                gsum_issubtotal = 0;
-                gsum_isgrandtotal = 1;
-
-            } else if (base == modereport_rekapbarang) {
-                gcart_header = [
-                    ['KodeBrg', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['NamaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-                    ['QTY', 'QTY', 1, 'float', 1, 2],
-                    // ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    // ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    // ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    // ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    // ['totalusd', 'Total $', 1, 'float', 1, 2],
-                    ['outstanding', 'Status', 1, 'bool', 0, 0],
-                    ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0]
-                ];
-                gsum_issubtotal = 0;
                 gsum_isgrandtotal = 1;
 
             } else {
                 gcart_header = [
-                    ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
-                    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-                    ['KodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
+                    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                    ['KodeCustSupp', 'Kode Customer', 1, 'varchar', 0, 0],
                     ['NAMACUSTSUPP', 'Nama Supplier', 1, 'varchar', 0, 0],
-                    // ['NDPP', 'DPP IDR', 1, 'float', 1, 2],
-                    // ['NPPN', 'PPN IDR', 1, 'float', 1, 2],
-                    ['TotalIDR', 'Total IDR', 1, 'float', 1, 2],
-                    ['KODEVLS', 'Vls', 1, 'varchar', 0, 0],
-                    ['kurs', 'Kurs', 1, 'varchar', 0, 0],
-                    // ['Ndppusd', 'DPP $', 1, 'float', 1, 2],
-                    // ['NPPNusd', 'PPN $', 1, 'float', 1, 2],
-                    ['totalusd', 'Total $', 1, 'float', 1, 2],
+                    ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+                    ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+                    ['QTY', 'QTY', 1, 'float', 1, 0],
+                    ['NetW', 'Net W', 1, 'float', 1, 2],
+                    ['GrossW', 'Gross W', 1, 'float', 1, 2],
+                    // ['HARGA', 'Harga', 1, 'float', 1, 2],
                     ['outstanding', 'Status', 1, 'bool', 0, 0],
                     ['NeedOtorisasi', 'Otorisasi', 1, 'bool', 0, 0]
                 ];
@@ -711,44 +627,27 @@
         // Kolom Outstanding (Sp_ReportOutSpbDet) -- asalnya dari reportmarketingoutsppb.blade.php,
         // dengan Qty 1/Qty 2 diganti Satuan + QTY gabungan (lihat decorateRows(); proc ini juga
         // mengembalikan NOSAT/SAT_1/SAT_2). Kolom Outstanding (badge) TIDAK ada di sini -- itu
-        // milik VwreportSPB, mode Non Outstanding. Hanya dua mode (Detail/Rekap): proc ini
-        // mengembalikan field yang sama apa pun Ordr, jadi base di sini dipakai dalam
-        // numbering-nya SENDIRI (0=Detail, 1=Rekap) -- BUKAN modereport_* di atas, yang
-        // sudah dipakai untuk 6 mode SPB dan akan salah kalau disamakan.
-        function setHeaderOut(base) {
-            if (base === 0) {
-                gcart_header = [
-                    ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['kodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
-                    ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['Namabrg', 'Nama Barang', 1, 'varchar', 0, 0],
-                    ['NOPOCUstomer', 'No. PO. Cust', 1, 'varchar', 0, 0],
-                    ['NoSo', 'No. SO', 1, 'varchar', 0, 0],
-                    ['TanggalSO', 'Tgl. SO', 1, 'date', 0, 0],
-                    ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
-                    ['QTY', 'QTY', 1, 'float', 1, 0],
-                    // ['HARGA', 'Harga', 1, 'float', 1, 0],
-                    // ['NDPPRPZX', 'Total', 1, 'float', 1, 0],
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-
-            } else {
-                gcart_header = [
-                    ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
-                    ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                    ['NamaSls', 'Sales', 1, 'varchar', 0, 0],
-                    ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
-                    ['NOPOCUstomer', 'No. PO. Customer', 1, 'varchar', 0, 0],
-                    ['NoSo', 'No. SO', 1, 'varchar', 0, 0],
-                    ['TanggalSO', 'Tgl. SO', 1, 'date', 0, 0],
-                    ['NDPPRPZX', 'Total', 1, 'float', 1, 0],
-                ];
-                gsum_issubtotal = 1;
-                gsum_isgrandtotal = 1;
-            }
+        // milik VwreportSPB, mode Non Outstanding. Proc ini mengembalikan field yang sama apa
+        // pun Ordr (Detail/Rekap sudah dihapus juga) -- jadi satu susunan kolom saja, tidak
+        // ada percabangan.
+        function setHeaderOut() {
+            gcart_header = [
+                ['NoBukti', 'No. Bukti', 1, 'varchar', 0, 0],
+                ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
+                ['kodeCustSupp', 'Kode', 1, 'varchar', 0, 0],
+                ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
+                ['KodeBrg', 'Kode Barang', 1, 'varchar', 0, 0],
+                ['Namabrg', 'Nama Barang', 1, 'varchar', 0, 0],
+                ['NOPOCUstomer', 'No. PO. Cust', 1, 'varchar', 0, 0],
+                ['NoSo', 'No. SO', 1, 'varchar', 0, 0],
+                ['TanggalSO', 'Tgl. SO', 1, 'date', 0, 0],
+                ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
+                ['QTY', 'QTY', 1, 'float', 1, 0],
+                // ['HARGA', 'Harga', 1, 'float', 1, 0],
+                // ['NDPPRPZX', 'Total', 1, 'float', 1, 0],
+            ];
+            gsum_issubtotal = 1;
+            gsum_isgrandtotal = 1;
         }
 
         function makeTable(_mode) {
@@ -994,29 +893,16 @@
 
         function setModeReport() {
             if (globalMode === '1') {
-                // Sp_ReportOutSpbDet mengembalikan field yang sama apa pun Ordr -> hanya
-                // Detail/Rekap (numbering sendiri, lihat setHeaderOut()), lalu digeser
-                // OUT_MODE_OFFSET supaya tidak bentrok dengan kolom tersimpan mode SPB
-                // (DBSIMPANHEADER dikunci per href+reportmode, href-nya sama).
-                g_modeReport = (jenisreport === 0 ? 0 : 1) + OUT_MODE_OFFSET;
+                // Sp_ReportOutSpbDet mengembalikan field yang sama apa pun Ordr -- satu slot
+                // saja, digeser OUT_MODE_OFFSET supaya tidak bentrok dengan kolom tersimpan
+                // mode SPB (DBSIMPANHEADER dikunci per href+reportmode, href-nya sama).
+                g_modeReport = OUT_MODE_OFFSET;
             } else if (globalOrderBy == "N") {
-                if (jenisreport === 0) {
-                    g_modeReport = modereport_detailnobukti;
-                } else {
-                    g_modeReport = modereport_rekapnobukti;
-                }
+                g_modeReport = modereport_nobukti;
             } else if (globalOrderBy == "B") {
-                if (jenisreport === 0) {
-                    g_modeReport = modereport_detailbarang;
-                } else {
-                    g_modeReport = modereport_rekapbarang;
-                }
+                g_modeReport = modereport_barang;
             } else {
-                if (jenisreport === 0) {
-                    g_modeReport = modereport_detailcustomer;
-                } else {
-                    g_modeReport = modereport_rekapcustomer;
-                }
+                g_modeReport = modereport_customer;
             }
 
             doSetHeader(g_modeReport);

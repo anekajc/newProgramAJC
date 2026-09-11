@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+    <!-- Bar kolom tersembunyi + Order By (diisi oleh report-table.js / ReportTable) -->
     <div id="rtBar"></div>
 
     <!-- TABLE -->
@@ -144,7 +144,9 @@
                beberapa laporan lain -- tidak spesifik untuk laporan Laba Kotor ini, dihapus
                bukan dipindah. Hanya susunan kolom Detail + Customer (default) yang dipertahankan
                -- satu-satunya yang terlihat dibuat khusus untuk laporan ini (field laba/HPP/
-               margin). Order By TETAP ada: parameter nyata (inputOrd) yang dikirim ke proc. --}}
+               margin). Order By juga tidak ada di sini lagi: parameter nyata ini (inputOrd,
+               dikirim ke proc, benar-benar dipakai controller) sudah dipindah ke switcher
+               "Order By" di bar atas tabel (ReportTable.init views), lihat setOrderBy(). --}}
           <div class="rt-grid-2">
             <div>
               <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -160,17 +162,6 @@
                 <option value="2">Semua</option>
                 <option value="0">Agen</option>
                 <option value="1">Non-Agen</option>
-              </select>
-            </div>
-          </div>
-          <div class="rt-grid-1">
-            <div>
-              <label class="rt-field-label" for="modalOrder">Order By</label>
-              <select class="rt-native" id="modalOrder">
-                <option value="H">Customer</option> <!-- Subtotal by KodeCustSupp -->
-                <option value="HM">Merk</option> <!-- Subtotal by KOdeMerk -->
-                <option value="HP">PIC</option> <!-- Subtotal by KodePIC -->
-                <option value="GC">Group Customer</option> <!-- Subtotal by KodeHDGrp -->
               </select>
             </div>
           </div>
@@ -245,25 +236,48 @@
 
   const reportUrl = "{{ url('laporanmarketinganalisakotor_doReport') }}";
 
-  // Satu-satunya mode: Detail + Customer (default). Rekap dan varian Order By lain dihapus
-  // (lihat komentar di modal Filter) -- tidak ada switcher "Tampilan" di halaman ini. Order By
-  // TETAP memengaruhi tampilan: tidak lagi menukar gcart_header, tapi memilih ORDER_GROUP
-  // (kolom & label subtotal) lewat makeTable().
-  g_modeReport = 0;
+  // Satu-satunya mode: Detail + Customer (default). Rekap dihapus (lihat komentar di modal
+  // Filter) -- tidak ada switcher "Tampilan" di halaman ini. Order By TETAP memengaruhi
+  // tampilan: tidak menukar gcart_header, tapi memilih ORDER_GROUP (kolom & label subtotal)
+  // lewat makeTable(). Tetap satu slot kolom tersimpan per ordering walau isinya sama, supaya
+  // kustomisasi kolom user (DBSIMPANHEADER) tidak bleed antar ordering.
+  var modereport_customer      = 0,
+      modereport_merk          = 1,
+      modereport_pic           = 2,
+      modereport_groupcustomer = 3;
+  g_modeReport = modereport_customer;
+
+  // Order By: H (Customer) / HM (Merk) / HP (PIC) / GC (Group Customer) -- parameter nyata
+  // (Ordr) yang dikirim ke proc & benar-benar dipakai controller (dikonfirmasi dari
+  // ORDER_GROUP/komentar yang sudah ada, bukan ditebak).
+  const ORDER_OPTIONS = [
+    { value: 'H',  label: 'Customer', desc: 'Dikelompokkan per Customer' },
+    { value: 'HM', label: 'Merk', desc: 'Dikelompokkan per Merk' },
+    { value: 'HP', label: 'PIC', desc: 'Dikelompokkan per PIC' },
+    { value: 'GC', label: 'Group Customer', desc: 'Dikelompokkan per Group Customer' },
+  ];
+  let viewsCfg = {
+    label: 'Order By',
+    options: ORDER_OPTIONS,
+    get: function() { return globalOrderBy; },
+    set: function(v) {
+      setOrderBy(String(v));
+      if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+    }
+  };
 
   $(document).ready(function() {
     setOtorisasi(globalOtorisasi);
     setAgen(globalAgen);
-    setOrderBy(globalOrderBy);
     showPeriode();
     setDefaultHeader();
-    doSetHeader(g_modeReport);
-    doShowCustomize();
+    setOrderBy(globalOrderBy);
 
     ReportTable.init({
       table: '#mainTable',
       bar: '#rtBar',
-      onChange: render
+      onChange: render,
+      views: viewsCfg
     });
   });
 
@@ -283,9 +297,16 @@
     globalAgen = val;
   }
 
-  // order by
+  // order by: ikut menentukan slot kolom tersimpan (lewat g_modeReport), bukan susunan kolom
+  // itu sendiri -- lihat setDefaultHeader().
   function setOrderBy(val) {
     globalOrderBy = val;
+    if (val === 'HM') g_modeReport = modereport_merk;
+    else if (val === 'HP') g_modeReport = modereport_pic;
+    else if (val === 'GC') g_modeReport = modereport_groupcustomer;
+    else g_modeReport = modereport_customer;
+    doSetHeader(g_modeReport);
+    doShowCustomize();
   }
 
   /* -- FILTER MODAL -- */
@@ -333,8 +354,9 @@
     updateFilterBadge();
   }
 
-  // Otorisasi netral = '0' (Semua, lihat catatan di atas). Agen netral = '2'. Order By TIDAK
-  // dihitung: wajib memilih salah satu, tanpa opsi netral.
+  // Otorisasi netral = '0' (Semua, lihat catatan di atas). Agen netral = '2'. Order By tidak
+  // lagi di modal ini (sudah jadi switcher "Order By" di #rtBar), jadi tidak dihitung ke
+  // badge filter modal.
   function updateFilterBadge() {
     let count = 0;
     PICK_FIELDS.forEach(function(f) {
@@ -349,7 +371,6 @@
   function resetAllFilters() {
     $('#modalOtorisasi').val('0');
     $('#modalAgen').val('2');
-    $('#modalOrder').val('H');
     PICK_FIELDS.forEach(function(f) { $('#' + f.id).val('-'); });
     renderPickFields();
     updateFilterBadge();
@@ -358,7 +379,6 @@
   $('#modalFilter').on('show.bs.modal', function() {
     $('#modalOtorisasi').val(globalOtorisasi);
     $('#modalAgen').val(globalAgen);
-    $('#modalOrder').val(globalOrderBy);
     renderPickFields();
     updateFilterBadge();
   });
@@ -368,7 +388,6 @@
   function applyModalFilter() {
     setOtorisasi($('#modalOtorisasi').val());
     setAgen($('#modalAgen').val());
-    setOrderBy($('#modalOrder').val());
 
     $('#modalFilter').modal('hide');
   }
