@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Model\NewMenu;
 use App\Model\NewAksesMenu;
 use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Model\VwPPL;
@@ -35,11 +34,14 @@ class PermintaanTransferBarangController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
+    $date1 = $req->date1 ?: date('Y-m-01', strtotime($periode->tahun . '-' . $periode->bulan . '-01'));
+    $date2 = $req->date2 ?: date('Y-m-t', strtotime($periode->tahun . '-' . $periode->bulan . '-01'));
+
     // $outstanding = VwPPL::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('IsJasa', 0)->where('pAgen', 1)->groupBy('NoBukti');
     $tempOutstanding = DB::connection("SML")->select("
-    DECLARE @Tahun int, @Bulan int
+    DECLARE @Date1 date, @Date2 date
 
-    select @Tahun= :tahun, @Bulan= :bulan
+    select @Date1= :date1, @Date2= :date2
 
     Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
             A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
@@ -53,14 +55,14 @@ class PermintaanTransferBarangController extends Controller
                       else 1
                 end As Bit) NeedOtorisasi
     from dbPRTransfer a
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 0
+    where	A.Tanggal between @Date1 and @Date2 and A.IsOtorisasi1 = 0
     order by A.NoBukti
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    ",["date1" => $date1 , "date2" => $date2]);
 
     $tempOutstanding2 = DB::connection("SML")->select("
-    DECLARE @Tahun int, @Bulan int
+    DECLARE @Date1 date, @Date2 date
 
-    select @Tahun= :tahun, @Bulan= :bulan
+    select @Date1= :date1, @Date2= :date2
 
     Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
             A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
@@ -74,13 +76,15 @@ class PermintaanTransferBarangController extends Controller
                       else 1
                 end As Bit) NeedOtorisasi
     from dbPRTransfer a
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 1
+    where	A.Tanggal between @Date1 and @Date2 and A.IsOtorisasi1 = 1
     order by A.NoBukti
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    ",["date1" => $date1 , "date2" => $date2]);
 
     return view('gudang.permintaantransferbarang' , [
       "menul0" => $menul0,
       "periode" => $periode,
+      "date1" => $date1,
+      "date2" => $date2,
       // "users"=> $users,
       "tempOutstanding" => $tempOutstanding,
       "tempOutstanding2" => $tempOutstanding2,
@@ -90,14 +94,20 @@ class PermintaanTransferBarangController extends Controller
 
 }
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
-    $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    //
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+    // Ambil date1/date2 dari filter di toolbar (lihat permintaantransferbarang.blade.php
+    // #inputDate1/#inputDate2 -> loadAll()). Kalau kosong (mis. pertama kali render tanpa
+    // filter), fallback ke satu bulan periode berjalan, disamakan dengan ubahkemasanbarang.
+    $date1 = $req->date1 ?: date('Y-m-01', strtotime($periode->tahun . '-' . $periode->bulan . '-01'));
+    $date2 = $req->date2 ?: date('Y-m-t', strtotime($periode->tahun . '-' . $periode->bulan . '-01'));
+
     $tempOutstanding = DB::connection("SML")->select("
-    DECLARE @Tahun int, @Bulan int
+    DECLARE @Date1 date, @Date2 date
 
-    select @Tahun= :tahun, @Bulan= :bulan
+    select @Date1= :date1, @Date2= :date2
 
     Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
             A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
@@ -111,14 +121,14 @@ class PermintaanTransferBarangController extends Controller
                       else 1
                 end As Bit) NeedOtorisasi
     from dbPRTransfer a
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 0
+    where	A.Tanggal between @Date1 and @Date2 and A.IsOtorisasi1 = 0
     order by A.NoBukti
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    ",["date1" => $date1 , "date2" => $date2]);
 
     $tempOutstanding2 = DB::connection("SML")->select("
-    DECLARE @Tahun int, @Bulan int
+    DECLARE @Date1 date, @Date2 date
 
-    select @Tahun= :tahun, @Bulan= :bulan
+    select @Date1= :date1, @Date2= :date2
 
     Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
             A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
@@ -132,9 +142,9 @@ class PermintaanTransferBarangController extends Controller
                       else 1
                 end As Bit) NeedOtorisasi
     from dbPRTransfer a
-    where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 1
+    where	A.Tanggal between @Date1 and @Date2 and A.IsOtorisasi1 = 1
     order by A.NoBukti
-    ",["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
+    ",["date1" => $date1 , "date2" => $date2]);
 
     return [
       "tempOutstanding" => $tempOutstanding,
