@@ -83,6 +83,26 @@
 #tabel td:first-child .btn-warning, #tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
 #tabel td:first-child .btn-primary, #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
 #tabel td:first-child .btn-danger, #tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel td:first-child .btn-success, #tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success { color: #15803d; border-color: #bfe6c9; background: #e8f7ee; }
+
+#koreksiTable td:last-child .btn {
+  width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
+  justify-content: center; border-radius: 7px; font-size: 13px;
+  border: 1px solid transparent; box-shadow: none; transition: all .12s ease;
+}
+#koreksiTable td:last-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+#koreksiTable td:last-child .btn-success { color: #15803d; border-color: #bfe6c9; background: #e8f7ee; }
+#koreksiTable td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+
+/* Perbesar glyph + pada tombol Add tanpa mengubah ukuran bingkai tombol.
+   line-height: 0 membuat ikon tidak menambah tinggi baris, jadi tinggi
+   tombol tetap sama dengan tombol Detail di sebelahnya. Port 1:1 dari
+   returpembeliangudang.blade.php. */
+.btn .bi-plus {
+  font-size: 1.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
 #tabel thead th, #tabel2 thead th, #tabel3 thead th {
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px;
   text-transform: uppercase; letter-spacing: .04em; font-weight: 600;
@@ -107,24 +127,27 @@
   transform: translateX(0);
 }
 
-/* Form SPR modal -- kotak field bersih ala referensi (label di atas, kotak
-   abu-abu utk field readonly) + tabel item dgn header abu-abu penuh & padding
-   lega, konsisten sama look modal "Detail" yang dijadikan acuan user. */
-.spr-modal-body { padding-top: 4px; }
-.spr-field-group { margin-bottom: 20px; }
-.spr-field-label {
-  display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .04em; color: #374151; margin-bottom: 6px;
+/* Form SPR modal -- port 1:1 dari style #formDetail milik
+   returpembeliangudang.blade.php (thead abu-abu, border tipis antar baris,
+   tombol Batal abu-abu). */
+#addTable thead th {
+  background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px;
+  text-transform: uppercase; letter-spacing: .04em; font-weight: 600;
+  border-bottom: 1px solid #e7e9ee; border-top: none;
 }
-.spr-field-box {
-  display: block; width: 100%; max-width: 280px; background: #eef0f3; border: 1px solid #e5e7eb;
-  border-radius: 8px; padding: 7px 12px; font-size: 13px; color: #111827;
+#addTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addTable tbody tr:hover { background-color: #f5f3ff; }
+#addTable, #addTable td, #addTable th { border-left: none !important; border-right: none !important; }
+#addTable tbody td { border-top: none !important; border-bottom: 1px solid #f1f3f5 !important; font-size: 13px; vertical-align: middle; white-space: nowrap; }
+.btn-batal-add {
+  background-color: #f1f3f5; border-color: #dee2e6; color: #495057;
 }
-.spr-field-box:disabled { color: #1f2937; opacity: 1; }
-.spr-field-box.spr-field-editable { background: #fff; border-color: #d1d5db; }
-.spr-table thead th { padding: 10px 14px !important; white-space: nowrap; }
-.spr-table tbody td { padding: 10px 14px; vertical-align: middle; }
-.spr-table tbody td:nth-child(3) { white-space: nowrap; }
+.btn-batal-add:hover, .btn-batal-add:focus {
+  background-color: #e9ecef; border-color: #ced4da; color: #343a40;
+}
+.btn-batal-add:active {
+  background-color: #dee2e6 !important; border-color: #ced4da !important; color: #343a40 !important;
+}
 </style>
 @endsection
 @section('content')
@@ -335,46 +358,58 @@
 </div>
 </div>
 
-<div class="modal fade" id="modalAddPRJ" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-xl" role="document" style="max-width: 92%;">
+<div class="modal fade" id="modalAddPRJ" tabindex="-1" role="dialog" aria-labelledby="modalAddPRJLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Form SPR</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="buttonCloseModalAddPRJ()"><span aria-hidden="true">&times;</span></button>
+        <h5 class="modal-title" id="modalAddPRJLabel">Form SPR</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="buttonCloseModalAddPRJ()">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+
       <div class="modal-body">
+        <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
+        <div class="container-fluid">
+          <!-- Row 1 -->
+          <div class="row">
+            <div class="col-2">
+              <label>No Bukti</label>
+            </div>
+            <div class="col-2">
+              <input type="text" class="form-control" id="input_add_nobukti" placeholder="" disabled>
+            </div>
 
-  <div class="container-fluid spr-modal-body">
-    <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-    <div class="row">
-      <div class="col-md-6">
-        <div class="spr-field-group">
-          <label class="spr-field-label">No Bukti</label>
-          <input type="text" class="spr-field-box" id="input_add_nobukti" placeholder="" disabled>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="spr-field-group">
-          <label class="spr-field-label">No PRJ</label>
-          <input type="text" class="spr-field-box" id="input_add_noprj" placeholder="" disabled>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="spr-field-group">
-          <label class="spr-field-label">Customer</label>
-          <input type="text" class="spr-field-box" id="input_add_namacustomer" placeholder="" disabled>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="spr-field-group">
-          <label class="spr-field-label">Tanggal</label>
-          <input type="date" class="spr-field-box spr-field-editable" id="input_add_tanggal" value="{!! date('Y-m-d') !!}">
-        </div>
-      </div>
-    </div>
-        <div class="container-fluid" style="overflow-x: auto; padding:0; margin:0;">
+            <div class="col-2">
+              <label>No PRJ</label>
+            </div>
+            <div class="col-2">
+              <input type="text" class="form-control" id="input_add_noprj" placeholder="" disabled>
+            </div>
+          </div>
 
-              <table id="addTable" class="data-table spr-table">
+          <!-- Row 2 -->
+          <div class="row mt-2">
+            <div class="col-2">
+              <label>Customer</label>
+            </div>
+            <div class="col-2">
+              <input type="text" class="form-control" id="input_add_namacustomer" placeholder="" disabled>
+            </div>
+
+            <div class="col-2">
+              <label>Tanggal</label>
+            </div>
+            <div class="col-2">
+              <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <div class="container-fluid" style="overflow-x: auto;">
+
+              <table id="addTable" class="table table-bordered">
                 <thead class="text-center">
                   <tr>
                     <th scope="col" class="spr-col-terima">Terima</th>
@@ -385,37 +420,21 @@
                     <th scope="col">Qty PR Jual</th>
                     <th scope="col">Qty Terima</th>
                     <th scope="col">Qty Reject</th>
-
                   </tr>
                 </thead>
 
-
-                <tbody id="addTableData" class="" >
-                  <tr >
-
-                      <td colspan=8 class="text-center">Belum ada data</td>
-
-                </tr>
-
+                <tbody id="addTableData" class="text-right">
+                  <tr>
+                      <td class="text-center" colspan="8">Belum ada data</td>
+                  </tr>
                 </tbody>
 
-
               </table>
+        </div>
 
-    </div>
-    <div class="row mt-2" style="margin-top: 0">
-      <div class="col-md-12 text-right mt-4">
-
-        <button type="button" class="btn btn-light" style="height: 30px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;" onclick="buttonCloseModalAddPRJ()">Batal</button>
-        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-primary" style="height: 30px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;">Submit</button>
-      </div>
-
-    </div>
-  </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal" onclick="buttonCloseModalAddPRJ()">Batal</button>
+        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-lg btn-primary">Submit</button>
       </div>
     </div>
   </div>
@@ -424,12 +443,12 @@
 
 <div id="page3" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Koreksi SPR</h2>
+      {{-- <h2>Koreksi SPR</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="margin-bottom:20px; height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
     </div>
   </div>
 
@@ -883,10 +902,10 @@
 
   <div class="row mb-4">
     <div class="col-8 text-left">
-      {{-- <h2>Detail SPR</h2> --}}
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >Close</button>
+      <button type="button" class="btn btn-danger btn-lg" style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >Close</button>
     </div>
   </div>
 
@@ -1353,7 +1372,7 @@ function tabelActionsCell (row) {
   let ppn = rpgPickCI(row, 'PPN');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus-lg"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1366,6 +1385,11 @@ function tabel2ActionsCell (row) {
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" title="Batal Otorisasi" type="button" onclick="buttonBatalOtorisasiPenerimaan(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
   } else {
+    // Edit cuma muncul selagi belum diotorisasi -- ini pintu masuk ke form koreksi
+    // (#page3, buttonKoreksi) yang tabel barangnya sudah punya tombol hapus per-item
+    // (buttonKoreksiDeleteItem, choice 'D' ke sp_TransSPBRJUAL) utk mengembalikan
+    // qty barang itu jadi outstanding lagi di tabel "Outstanding PRJ".
+    html += '<button class="btn btn-success btn-sm" title="Edit" type="button" onclick="buttonKoreksi(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
     html += '<button class="btn btn-primary btn-sm" title="Otorisasi" type="button" onclick="buttonOtorisasiPenerimaan(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
