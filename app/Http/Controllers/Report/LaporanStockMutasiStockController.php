@@ -93,7 +93,7 @@ class LaporanStockMutasiStockController extends Controller {
 
     $strSP = 'Sp_reportStockQtyRp ';
 
-    if ($req->query('g_modeReport') === 3) {
+    if ((int)$req->query('modeMenu') === 3) {
       $date2 = $req->query('date2');
       $date2Parts = explode('-', $date2);
 
@@ -112,5 +112,22 @@ class LaporanStockMutasiStockController extends Controller {
     return $res;
   }
 
+  public function doMonthlyGraphics(Request $req) {
+    return DB::connection('SML')->select(
+      'select BULAN, sum(qntpbl) qntpbl, sum(qntpnj) qntpnj
+         from DBSTOCKBRG
+        where TAHUN = :tahun and BULAN <= :bulan
+        group by BULAN
+        order by BULAN',
+      ['tahun' => (int) $req->query('tahun'), 'bulan' => (int) $req->query('bulan')]
+    );
+  }
+
+  public function doDeadFastSlow(Request $req) {
+    return DB::connection('SML')->select('exec sp_DEATFASTSLOW ?,?', [
+      (int) $req->query('bulan'),
+      (int) $req->query('tahun'),
+    ]);
+  }
 
 }

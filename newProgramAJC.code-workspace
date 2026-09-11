@@ -6,6 +6,6 @@
 	],
 	"settings": {
 		"workbench.colorTheme": "Night Owl Black",
-		"workbench.iconTheme": "vscode-modern-icons"
+		"workbench.iconTheme": "material-icon-theme"
 	}
 }

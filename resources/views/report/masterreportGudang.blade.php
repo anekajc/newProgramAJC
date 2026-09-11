@@ -707,14 +707,21 @@ rel="stylesheet">
     }
   }
 
-  function doMakeTable(_mode, _groupby, _data, _title, _date1, _date2 = null) {
+  // async:false dulu (sengaja diganti dari default true) -- efeknya request ini MEMBLOKIR
+  // main thread sampai response datang, jadi browser tidak sempat repaint apa pun (termasuk
+  // spinner loadingHtml() yang dipasang sebelum manggil ini) sampai datanya baru muncul
+  // sekaligus. Sekarang async:true, jadi kode yang tadinya membaca gcart_res/gcart_filter
+  // atau state lain LANGSUNG setelah manggil doMakeTable() (dengan asumsi itu sudah sinkron)
+  // harus pindah ke _callback -- lihat pemanggil doMakeTable() di tiap halaman
+  // reportstock*.blade.php & doShowFormFilterData() di bawah.
+  function doMakeTable(_mode, _groupby, _data, _title, _date1, _date2 = null, _callback) {
     let url = "{!! url('" + g_href + "_doReport') !!}";
 
 
     $.ajax({
       url     : url,
       type    : "get",
-      async   : false,
+      async   : true,
       data    : _data,
       success: function(res) {
         if (_mode == "REPORT") {
@@ -729,6 +736,7 @@ rel="stylesheet">
           gfilter_date1 = _date1;
           gfilter_date2 = _date2;
         }
+        if (typeof _callback === "function") { _callback(res); }
       }
     })
   }
@@ -1132,13 +1140,18 @@ rel="stylesheet">
   function doShowFormFilterData() {
     g_modeModal = gmodal_filterdata;
 
-    makeTable("FILTER");
-    doShowFilter();
-    // gfilter_totalrow sudah dihitung ulang oleh doShowFilter() dari gfilter_selectedKeys
-    // yang tersimpan -- tampilkan labelnya kalau ada baris yang masih terpilih.
-    $("#tabelfilter_totalrow").html(gfilter_totalrow > 0 ? "Jumlah baris yang dipilih: " + gfilter_totalrow : "");
+    // doMakeTable() kini async -- gcart_filter baru terisi setelah response datang, jadi
+    // doShowFilter() (yang membaca gcart_filter) HARUS jalan sebagai callback, bukan
+    // langsung sesudah makeTable("FILTER") seperti dulu. Modal-nya juga dipindah ke sini
+    // (bukan dibuka duluan) supaya tidak sempat kelihatan kosong/isi lama sebelum terisi.
+    makeTable("FILTER", function () {
+      doShowFilter();
+      // gfilter_totalrow sudah dihitung ulang oleh doShowFilter() dari gfilter_selectedKeys
+      // yang tersimpan -- tampilkan labelnya kalau ada baris yang masih terpilih.
+      $("#tabelfilter_totalrow").html(gfilter_totalrow > 0 ? "Jumlah baris yang dipilih: " + gfilter_totalrow : "");
 
-    $("#formFilterData").modal('toggle');
+      $("#formFilterData").modal('toggle');
+    });
   }
 
   function doCloseFormFilterData() {

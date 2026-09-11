@@ -97,6 +97,16 @@
         <div class="table-wrap">
           <table class="tb" id="mainTable">
             <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>No. Bukti</th>
+                    <th>Tipe</th>
+                    <th>Keterangan</th>
+                    <th>Sat</th>
+                    <th>Masuk</th>
+                    <th>Keluar</th>
+                    <th>Saldo</th>
+                </tr>
             </thead>
             <tbody id="tableBody">
               <tr class="empty-row"><td id="emptyColspan" colspan="8">Atur filter lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>

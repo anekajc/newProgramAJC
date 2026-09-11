@@ -706,7 +706,7 @@
     return rowFooter1 + rowFooter2 + rowInfo;
   }
 
-  function makeTable(_mode) {
+  function makeTable(_mode, _callback) {
     // nilai groupby adalah nama kolom (sesuai database) untuk pengelompokan subtotal
     // mode report menentukan kolom yang dipakai
     let groupby = "pMERK";
@@ -724,8 +724,9 @@
     if (_mode !== 'REPORT') {
       // Mode "FILTER": delegasikan ke engine masterreportGudang supaya modal
       // "Filter Data" (doShowFormFilterData/doShowFilter, gcart_filter) tetap jalan --
-      // render() di atas tidak menggantikan jalur itu.
-      doMakeTable(_mode, groupby, data, reportTitle, _date1);
+      // render() di atas tidak menggantikan jalur itu. doMakeTable() sudah async (lihat
+      // catatan di masterreportGudang.blade.php), jadi teruskan _callback apa adanya.
+      doMakeTable(_mode, groupby, data, reportTitle, _date1, null, _callback);
       return;
     }
 

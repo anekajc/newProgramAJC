@@ -110,8 +110,6 @@
         <div class="page-title">
           @if ($mode_menu == 'QTY')
            Stok Quantity
-          @elseif ($mode_menu == 'RP')
-           Stok Rupiah
           @elseif ($mode_menu == 'QTYRP')
             Stok Quantity + Rupiah
           @else
@@ -162,37 +160,8 @@
       </div>
     </div>
 
-    <div id="kpiGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px;">
-      <div style="background: #fff; border: 1.5px solid #E2E8F4; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8;"></div>
-        <div>
-          <div style="font-size: 11px; font-weight: 700; color: #5A6A85; text-transform: uppercase;">TOTAL ITEM</div>
-          <div style="font-size: 14px; font-weight: 800; margin-top: 2px;" id="kpiTotalItem">0</div>
-        </div>
-      </div>
-      <!-- Nilai Stok Total: cuma relevan untuk mode RP / QTYRP (ada nilai Rupiah-nya) -->
-      <div id="kpiNilaiStokCard" style="background: #fff; border: 1.5px solid #E2E8F4; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #15803D;"></div>
-        <div>
-          <div style="font-size: 11px; font-weight: 700; color: #5A6A85; text-transform: uppercase;">NILAI STOK TOTAL</div>
-          <div style="font-size: 14px; font-weight: 800; margin-top: 2px;" id="kpiNilaiStok">0</div>
-        </div>
-      </div>
-      <div style="background: #fff; border: 1.5px solid #E2E8F4; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #B45309;"></div>
-        <div>
-          <div style="font-size: 11px; font-weight: 700; color: #5A6A85; text-transform: uppercase;">STOK MENIPIS</div>
-          <div style="font-size: 14px; font-weight: 800; margin-top: 2px;" id="kpiStokMenipis">0</div>
-        </div>
-      </div>
-      <div style="background: #fff; border: 1.5px solid #E2E8F4; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: #7C3AED;"></div>
-        <div>
-          <div style="font-size: 11px; font-weight: 700; color: #5A6A85; text-transform: uppercase;">TURN OVER STOCK</div>
-          <div style="font-size: 14px; font-weight: 800; margin-top: 2px;" id="kpiTOS">0 %</div>
-        </div>
-      </div>
-    </div>
+    <!-- KPI STRIP (Dead/Slow/Fast/Stock/Kebutuhan dari sp_DEATFASTSLOW, lihat renderKpiStrip()) -->
+    <div class="kpi-strip" id="kpiStrip"></div>
 
     <!-- CHARTS  -->
     <div class="chart-grid" id="chartGrid">
@@ -201,13 +170,13 @@
         <div class="chart-holder"><canvas id="topJualChart"></canvas></div>
       </div>
       <div class="chart-box">
-        <h3>Perbandingan Beli vs Jual</h3>
+        <h3>Perbandingan Pembelian vs Penjualan per Bulan</h3>
         <div class="chart-holder"><canvas id="beliJualChart"></canvas></div>
       </div>
     </div>
 
     <!-- Bar kolom tersembunyi + Reset kolom (diisi report-table.js / ReportTable).
-         Hanya aktif untuk mode QTY & RP -- mode QTYRP/PERIODE pakai header grouping
+         Hanya aktif untuk mode QTY -- mode QTYRP/PERIODE pakai header grouping
          rowspan/colspan manual yang tidak kompatibel, lihat ready() di jsreport. -->
     <div id="rtBar"></div>
 
@@ -257,6 +226,21 @@
     </div>
 
   </div>
+
+  <!-- DRILL PANEL (klik kartu KPI Dead/Slow/Fast/Stock/Kebutuhan) -->
+  <div class="drill-overlay" id="drillOverlay" onclick="closeDfsDrill()"></div>
+  <div class="drill-panel" id="drillPanel">
+    <div class="dp-header">
+      <div>
+        <div class="dp-title" id="dpTitle">-</div>
+        <div class="dp-sub" id="dpSub">-</div>
+      </div>
+      <div class="dp-close" onclick="closeDfsDrill()"><i class="bi bi-x"></i></div>
+    </div>
+    <div class="dp-meta" id="dpMeta"></div>
+    <div class="dp-body" id="dpBody"></div>
+  </div>
+
 </div>
 
 <!-- modal filter -->
@@ -285,43 +269,14 @@
           <div class="rt-group-label">Filter Data
             <span class="rt-group-hint">&mdash; klik untuk memilih</span>
           </div>
-          <div class="rt-grid-2">
-            <div>
-              <label class="rt-field-label">Gudang</label>
-              <div class="input-group input-group-sm">
-                <input type="text" id="inputGudang" class="form-control" placeholder="-" value="-" readonly>
-                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGudang', '{!! $gudang !!}', 'Pilih Gudang')"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
-            <div>
-              <label class="rt-field-label">Grup</label>
-              <div class="input-group input-group-sm">
-                <input type="text" id="inputGrup" class="form-control" placeholder="-" value="-" readonly>
-                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputGrup', '{!! $grup !!}', 'Pilih Grup')"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
-            <div>
-              <label class="rt-field-label">Kategori</label>
-              <div class="input-group input-group-sm">
-                <input type="text" id="inputKategori" class="form-control" placeholder="-" value="-" readonly>
-                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputKategori', '{!! $kategori !!}', 'Pilih Kategori')"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
-            <div>
-              <label class="rt-field-label">Sub Kategori</label>
-              <div class="input-group input-group-sm">
-                <input type="text" id="inputSubKategori" class="form-control" placeholder="-" value="-" readonly>
-                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputSubKategori', '{!! $subkategori !!}', 'Pilih Sub Kategori')"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
-            <div>
-              <label class="rt-field-label">Merk</label>
-              <div class="input-group input-group-sm">
-                <input type="text" id="inputMerk" class="form-control" placeholder="-" value="-" readonly>
-                <button type="button" class="btn btn-primary" onclick="openPickMaster('inputMerk', '{!! $merk !!}', 'Pilih Merk')"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
-          </div>
+          <div class="rt-grid-2" id="pickFields"></div>
+
+          {{-- Nilai sebenarnya (dibaca makeTable() & ditulis pickMasterSelect()) --}}
+          <input type="hidden" id="inputGudang" value="-">
+          <input type="hidden" id="inputGrup" value="-">
+          <input type="hidden" id="inputKategori" value="-">
+          <input type="hidden" id="inputSubKategori" value="-">
+          <input type="hidden" id="inputMerk" value="-">
         </div>
 
         <div class="rt-section">
@@ -404,10 +359,72 @@
     };
   }
 
+  /* KPI strip (sp_DEATFASTSLOW) + grafik bulanan (doMonthlyGraphics) -- keduanya lepas dari
+     filter Gudang/Grup/Kategori/dll, cuma bergantung pada periode Bulan/Tahun yang dipilih.
+     Lihat currentDfsPeriod()/refreshPeriodWidgets() di bawah. */
+  const DFS_URL = "{{ url('laporanstockmutasistock_doDeadFastSlow') }}";
+  const MONTHLY_URL = "{{ url('laporanstockmutasistock_doMonthlyGraphics') }}";
+
+  const DFS_CARDS = [
+    { key: 'dead',  label: 'Dead Stock', qty: 'qtydead',      rp: 'rpdead', color: '#DC2626' },
+    { key: 'slow',  label: 'Slow Stock', qty: 'qtyslow',      rp: 'rpslow', color: '#B45309' },
+    { key: 'fast',  label: 'Fast Stock', qty: 'qtyfast',      rp: 'rpfast', color: '#15803D' },
+    { key: 'stock', label: 'Stock',      qty: 'qtystock',     rp: null,     color: '#1D4ED8' },
+    { key: 'keb',   label: 'Kebutuhan',  qty: 'qtykebutuhan', rp: null,     color: '#7C3AED' },
+  ];
+  let _dfsRows = [];
+  let _monthlyRows = [];
+  let _dfsSeq = 0;
+
   /* modal "Pilih Data" (Gudang/Grup/Kategori/SubKategori/Merk)
      Menggantikan popup shared #formBrowseMaster (search + Submit) dengan
      Actions berisi tombol "+" per baris. */
   let pickerTargetInput = "";
+
+  // Lima field "Filter Data" (Gudang/Grup/Kategori/SubKategori/Merk): nilai sebenarnya
+  // tetap di input hidden #inputXxx (dibaca makeTable(), ditulis pickMasterSelect()) --
+  // kotak .rt-combo di bawah ini hanyalah tampilan di atasnya, mengikuti pola PICK_FIELDS
+  // di new-filter-modal-ui-guide.md #4. Beda dari reference implementation (reportmarketingso):
+  // openPickMaster() buka .modal-picker custom (bukan #formSelect Bootstrap), yang z-index-nya
+  // (1071/1072) sudah di atas modalFilter -- jadi tidak perlu hide/reopen modalFilter seperti
+  // pickFromModal() di guide.
+  const PICK_FIELDS = [
+    { id: 'inputGudang',      label: 'Gudang',        url: '{!! $gudang !!}',      title: 'Pilih Gudang' },
+    { id: 'inputGrup',        label: 'Grup',          url: '{!! $grup !!}',        title: 'Pilih Grup' },
+    { id: 'inputKategori',    label: 'Kategori',      url: '{!! $kategori !!}',    title: 'Pilih Kategori' },
+    { id: 'inputSubKategori', label: 'Sub Kategori',  url: '{!! $subkategori !!}', title: 'Pilih Sub Kategori' },
+    { id: 'inputMerk',        label: 'Merk',          url: '{!! $merk !!}',        title: 'Pilih Merk' },
+  ];
+
+  function renderPickFields() {
+    let html = '';
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val() || '-';
+      const isSet = (val !== '-' && val !== '');
+      html += '<div>';
+      html += '<label class="rt-field-label">' + f.label + '</label>';
+      html += '<div class="rt-combo">';
+      html += '<div class="rt-combo-input" onclick="openPickMaster(\'' + f.id + '\', \'' + f.url + '\', \'' + f.title + '\')">';
+      if (isSet) {
+        html += '<span class="rt-combo-tag">' + val +
+          '<button type="button" onclick="event.stopPropagation(); clearPickField(\'' + f.id +
+          '\')">&times;</button></span>';
+      } else {
+        html += '<span class="rt-combo-placeholder">Pilih ' + f.label.toLowerCase() + '...</span>';
+      }
+      html += '<span class="rt-combo-chevron">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+        '</span>';
+      html += '</div></div></div>';
+    });
+    $('#pickFields').html(html);
+  }
+
+  function clearPickField(id) {
+    $('#' + id).val('-');
+    renderPickFields();
+    updateFilterBadge();
+  }
 
   function openPickMaster(targetInputId, url, title) {
     pickerTargetInput = targetInputId;
@@ -446,6 +463,19 @@
     if (e.key === 'Escape' && $('#modalPickMaster').hasClass('show')) {
       closePickMaster();
     }
+  });
+
+  $(document).on('keydown', function (e) {
+    if (e.key === 'Escape' && $('#drillPanel').hasClass('open')) {
+      closeDfsDrill();
+    }
+  });
+
+  // KPI strip dibangun ulang lewat innerHTML tiap refreshPeriodWidgets(), jadi klik kartu
+  // didelegasikan (bukan onclick inline per kartu) -- sama seperti pola drill row di
+  // reportaccountingneracalajur.blade.php.
+  $(document).on('click', '#kpiStrip .kpi-card', function () {
+    openDfsDrill($(this).attr('data-dfs-key'));
   });
 
   function renderPickMaster(res) {
@@ -491,6 +521,7 @@
   function pickMasterSelect(kode) {
     if (pickerTargetInput) { $('#' + pickerTargetInput).val(kode); }
     closePickMaster();
+    renderPickFields();
     updateFilterBadge();
   }
 
@@ -498,12 +529,10 @@
   // "2"/Semua untuk Status Agen, unchecked untuk Stock Minus) tidak dihitung -- sama
   // seperti aturan di new-filter-modal-ui-guide.md #5. No Satuan dianggap netral di "1"
   // (artinya tidak ada konversi satuan).
-  const PICK_FIELD_IDS = ['inputGudang', 'inputGrup', 'inputKategori', 'inputSubKategori', 'inputMerk'];
-
   function updateFilterBadge() {
     let count = 0;
-    PICK_FIELD_IDS.forEach(function (id) {
-      const val = $('#' + id).val();
+    PICK_FIELDS.forEach(function (f) {
+      const val = $('#' + f.id).val();
       if (val && val !== '-') { count++; }
     });
     if ($('#inputAgenSelect').val() !== '2') { count++; }
@@ -513,15 +542,16 @@
   }
 
   function resetAllFilters() {
-    PICK_FIELD_IDS.forEach(function (id) { $('#' + id).val('-'); });
+    PICK_FIELDS.forEach(function (f) { $('#' + f.id).val('-'); });
     $('#inputAgenSelect').val('2');
     setAgen('2');
     $('#inputIsi').val('1');
     $('#inputStockMinus').prop('checked', false);
+    renderPickFields();
     updateFilterBadge();
   }
 
-  $('#modalFilter').on('show.bs.modal', function () { updateFilterBadge(); });
+  $('#modalFilter').on('show.bs.modal', function () { renderPickFields(); updateFilterBadge(); });
   $('#modalFilter').on('change', 'select.rt-native, #inputStockMinus', updateFilterBadge);
   $('#modalFilter').on('input', '#inputIsi', updateFilterBadge);
 
@@ -555,31 +585,24 @@
     defaultTahun = parseInt(selT.value, 10);
     const mm = String(defaultBulan).padStart(2, '0');
     $('#inputDate1').val(defaultTahun + '-' + mm);
+    refreshPeriodWidgets();
   }
 
   $(document).ready(function() {
 
-    if ("{!! $mode_menu !!}" == "QTY") {
-      g_modeReport = modereport_qty;
-      reportTitle = "LAPORAN STOK QUANTITY";
-    } else if ("{!! $mode_menu !!}" == "RP") {
-      g_modeReport = modereport_rp;
-      reportTitle = "LAPORAN STOK BULANAN DALAM RUPIAH";
-    } else if ("{!! $mode_menu !!}" == "QTYRP") {
+    // Mode RP tidak dipakai lagi -- URL lama /laporanstockmutasistockrp (mode_menu == "RP")
+    // sengaja jatuh ke default QTY di bawah, BUKAN ke PERIODE: PERIODE membaca #inputDate2
+    // yang cuma dirender @@if ($mode_menu == 'PERIODE') (lihat blok "Periode" di atas), jadi
+    // andai fallback dibiarkan ke PERIODE, URL lama itu akan pecah cari input yang tidak ada.
+    if ("{!! $mode_menu !!}" == "QTYRP") {
       g_modeReport = modereport_qtyrp;
       reportTitle = "LAPORAN STOK BULANAN QTY+RUPIAH";
-    } else {
+    } else if ("{!! $mode_menu !!}" == "PERIODE") {
       g_modeReport = modereport_periode;
       reportTitle = "LAPORAN STOK BULANAN QTY+RUPIAH";
-    }
-
-    // Nilai Stok Total cuma relevan kalau ada nilai Rupiah-nya (RP / QTYRP / PERIODE).
-    if (g_modeReport == modereport_qty) {
-      $('#kpiNilaiStokCard').hide();
-      $('#kpiGrid').css('grid-template-columns', 'repeat(3, 1fr)');
     } else {
-      $('#kpiNilaiStokCard').show();
-      $('#kpiGrid').css('grid-template-columns', 'repeat(4, 1fr)');
+      g_modeReport = modereport_qty;
+      reportTitle = "LAPORAN STOK QUANTITY";
     }
 
     $("#gButtonCustomizeTable").hide();
@@ -597,11 +620,11 @@
     setAgen(globalAgen);
     setDefaultHeader();
 
-    // Header interaktif (drag/gear/hide kolom) hanya untuk mode QTY & RP -- header
+    // Header interaktif (drag/gear/hide kolom) hanya untuk mode QTY -- header
     // QTYRP/PERIODE pakai grouping rowspan/colspan manual (setRowHeaderQtyRp) yang
     // tidak bisa direpresentasikan sebagai satu baris <th> per kolom, lihat
     // docs/new-slider-table-guide.md #1.
-    if (g_modeReport == modereport_qty || g_modeReport == modereport_rp) {
+    if (g_modeReport == modereport_qty) {
       ReportTable.init({
         table: '#tabel',
         bar: '#rtBar',
@@ -610,6 +633,13 @@
     } else {
       $('#rtBar').hide();
       $('.rt-hint').hide();
+    }
+
+    // Mode PERIODE pakai input tanggal (#inputDate1/#inputDate2), bukan dropdown
+    // Bulan/Tahun -- KPI strip & grafik bulanan ikut menyegarkan diri saat tanggal itu
+    // berubah (lihat currentDfsPeriod()/refreshPeriodWidgets()).
+    if (g_modeReport == modereport_periode) {
+      $('#inputDate1, #inputDate2').on('change', refreshPeriodWidgets);
     }
 
     // setTimeout(() => {
@@ -651,18 +681,6 @@
         ['QNTTRO', 'Tr (-)', 1, 'float', 1, 2], ['QNTPMK', 'PMK (-)', 1, 'float', 1, 2],
         ['SALDOQNT', 'Akhir', 1, 'float', 1, 2]
       ];
-    } else if (g_modeReport == modereport_rp) {
-      gcart_header = [
-        ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0], ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
-        ['Satuan', 'Sat', 1, 'varchar', 0, 0], ['KODEGDG', 'Gdg', 1, 'varchar', 0, 0],
-        ['HRGAWAL', 'Awal', 1, 'float', 1, 0], ['HRGPBL', 'Beli', 1, 'float', 1, 0],
-        ['HRGRPJ', 'R. Jual', 1, 'float', 1, 0], ['HRGADI', 'Adj (+)', 1, 'float', 1, 0],
-        ['HRGTRI', 'Tr (+)', 1, 'float', 1, 0], ['HRGRPK', 'RPM (+)', 1, 'float', 1, 0],
-        ['HRGHPrd', 'PRD (+)', 1, 'float', 1, 0], ['HRGPNJ', 'Jual', 1, 'float', 1, 0],
-        ['HRGRBP', 'R.Beli', 1, 'float', 1, 0], ['HRGADO', 'Adj (-)', 1, 'float', 1, 0],
-        ['HRGTRO', 'Tr (-)', 1, 'float', 1, 0], ['HRGPMK', 'PMK (-)', 1, 'float', 1, 0],
-        ['SALDORP', 'Akhir', 1, 'float', 1, 0]
-      ];
     } else if (g_modeReport == modereport_qtyrp || g_modeReport == modereport_periode) {
       gcart_header = [
           ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0], ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
@@ -692,7 +710,7 @@
   }
 
   function setRowHeader(_rowHeader) {
-    if (g_modeReport == modereport_qty || g_modeReport == modereport_rp) {
+    if (g_modeReport == modereport_qty) {
       return setRowHeaderQtyOrRp(_rowHeader);
     } else {
       return setRowHeaderQtyRp(_rowHeader);
@@ -742,41 +760,7 @@
     return _rowHeader;
   }
 
-  function getRowFooter1(_col) {
-    let _sum = gcart_res.reduce((sum, item) => sum + currencyNormalizer(item[_col]), 0);
-    let _decimal = (gcart_header.find(row => row[0] === _col) || [])[5];
-    return '  <td class="text-end fw-bold">' + format_number(_sum, _decimal) + '</td>';
-  }
-
-  function getRowFooter2(_col, _colspanRow2) {
-    let _sum = gcart_res.filter(item => currencyNormalizer(item[_col]) !== 0).length;
-    let _str = '  <td colspan="' + _colspanRow2 + '" class="text-end fw-bold">' + _sum + '</td>'
-    return { _sum, _str };
-  }
-
-  function setRowFooter() {
-    let tot_masuk = 0, tot_keluar = 0, tos = 0;
-
-    const kolomMasuk = ["QntAwal", "QNTPBL", "QNTRPJ", "QNTADI", "QNTTRI", "QNTRPK", "QntHPrd"];
-    const kolomKeluar = ["QNTPNJ", "QNTADO", "QNTTRO", "QNTPMK"];
-    if (g_modeReport == modereport_qtyrp || g_modeReport == modereport_periode) {
-      kolomMasuk.push("QNTUKI", "qntrspb", "qntrgtc", "QNTUKO");
-      kolomKeluar.push("QNTPRJ");
-    }
-
-    kolomMasuk.forEach((col) => { tot_masuk += getRowFooter2(col, 1)._sum; });
-    kolomKeluar.forEach((col) => { tot_keluar += getRowFooter2(col, 1)._sum; });
-
-    tot_masuk = (tot_masuk !== 0) ? tot_masuk : 1;
-    tos = format_number((tot_keluar / tot_masuk) * 100, 2);
-    tot_masuk = (gcart_res.length != 0) ? tot_masuk : 0;
-
-    try { updateKpiWidgetsFromRes(gcart_res, tot_masuk, tot_keluar, tos); } catch(e){}
-
-    return "";
-  }
-
-  function makeTable (_mode) {
+  function makeTable (_mode, _callback) {
     let groupby = "KODEBRG";
     let _date1  = $("#inputDate1").val();
     let _date2  = (g_modeReport == modereport_periode) ? $("#inputDate2").val() : null;
@@ -800,8 +784,6 @@
 
     document.getElementById('footerLabel').innerHTML = loadingHtml('Memuat data...');
 
-    doMakeTable(_mode, groupby, data, reportTitle, _date1);
-
     // JANGAN buang baris <tr> dari #tabel_header di sini. Baris itu dulu dipakai untuk
     // membuang 4 baris info (judul/periode/dicetak-oleh) yang dibuat doSetRowHeaderInfo(),
     // tapi pemanggilnya sudah dikomentari di masterreportGudang.blade.php (doSetRowHeader,
@@ -811,14 +793,23 @@
     // dan karena makeTable('FILTER') juga lewat sini, header hilang begitu tombol
     // "Filter Data" ditekan walaupun doShowReport() belum sempat dipanggil.
 
-    setTimeout(() => {
-
+    // doMakeTable() sekarang async (dulu async:false, yang membekukan tab sampai response
+    // datang tanpa sempat menggambar spinner loadingHtml() di atas) -- jadi apa pun yang
+    // membaca gcart_res harus jalan di callback ini, bukan lagi ditebak lewat setTimeout(500ms).
+    doMakeTable(_mode, groupby, data, reportTitle, _date1, null, function () {
       let footerMsg = gcart_res && gcart_res.length > 0 ? "Menampilkan " + gcart_res.length + " baris" : "Belum ada data dimuat";
       document.getElementById('footerLabel').textContent = footerMsg;
 
-      buildCharts(gcart_res || []);
+      buildTopJualChart(gcart_res || []);
       relabelSubtotalRows();
-    }, 500);
+
+      if (typeof _callback === 'function') { _callback(); }
+    });
+
+    // Tampilkan menyegarkan tabel DAN strip KPI/grafik bulanan bersamaan (keduanya lepas
+    // dari filter Gudang/Grup/Kategori/dll -- sp_DEATFASTSLOW & doMonthlyGraphics cuma
+    // menerima bulan+tahun).
+    refreshPeriodWidgets();
 
     g_href = temp_href;
   }
@@ -832,26 +823,10 @@
 
   function getKolomFilter() { return ['KODEBRG', 'NAMABRG']; }
 
-  function updateKpiWidgetsFromRes(resData, totMasuk, totKeluar, tosPercentage) {
-    if(!resData || !resData.length) {
-      $('#kpiTotalItem').text('0'); $('#kpiNilaiStok').text('0');
-      $('#kpiStokMenipis').text('0'); $('#kpiTOS').text('0 %'); return;
-    }
-    let totalStokRp = 0; let stokMenipis = 0;
-    resData.forEach(r => {
-      if(r.SALDORP) totalStokRp += currencyNormalizer(r.SALDORP);
-      else if(r.SALDOQNT && r.HRGAWAL) totalStokRp += (currencyNormalizer(r.SALDOQNT) * currencyNormalizer(r.HRGAWAL));
-      if(r.SALDOQNT && currencyNormalizer(r.SALDOQNT) > 0 && currencyNormalizer(r.SALDOQNT) <= 10) stokMenipis++;
-    });
-    $('#kpiTotalItem').text(format_number(resData.length, 0));
-    $('#kpiNilaiStok').text(format_number(totalStokRp, 0));
-    $('#kpiStokMenipis').text(format_number(stokMenipis, 0));
-    $('#kpiTOS').text(tosPercentage + ' %');
-  }
-
-  /* -- CHARTS (Chart.js v4)
-     Kiri : Penjualan Terbanyak (Qty) Top 10 barang berdasar kolom JUAL
-     Kanan : Beli vs Jual (Qty) rekap KESELURUHAN data 1 bulan itu -- */
+  /* -- functS (Chart.js v4)
+     Kiri : Penjualan Terbanyak (Qty) Top 10 barang berdasar kolom JUAL (buildTopJualChart)
+     Kanan : Perbandingan Pembelian vs Penjualan per Bulan, Bulan 1 s.d. periode terpilih
+             (buildMonthlyChart, dari doMonthlyGraphics) -- */
   const CHART_PALETTE = ['#4F46E5','#7C3AED','#DB2777','#2563eb','#16a34a','#ca8a04','#ea580c','#0891b2','#e11d48','#65a30d'];
   let _charts = {};
 
@@ -879,19 +854,18 @@
     if (holder) holder.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12.5px;text-align:center;padding:0 20px">' + msg + '</div>';
   }
 
-  function buildCharts(rows) {
-    const holders = document.querySelectorAll('#chartGrid .chart-holder');
-    if (holders[0] && !document.getElementById('topJualChart')) holders[0].innerHTML = '<canvas id="topJualChart"></canvas>';
-    if (holders[1] && !document.getElementById('beliJualChart')) holders[1].innerHTML = '<canvas id="beliJualChart"></canvas>';
+  // Kiri: Penjualan Terbanyak (Qty) Top 10 barang berdasar kolom JUAL -- dari baris tabel
+  // yang sedang tampil (gcart_res), jadi ikut Filter/Tampilkan seperti sebelumnya.
+  function buildTopJualChart(rows) {
+    const holder = document.querySelectorAll('#chartGrid .chart-holder')[0];
+    if (holder && !document.getElementById('topJualChart')) holder.innerHTML = '<canvas id="topJualChart"></canvas>';
 
     if (typeof Chart === 'undefined') {
       _chartMsg('topJualChart', 'Chart.js gagal dimuat. Cek path <code>public/plugins/chart.js/chart.umd.min.js</code>.');
-      _chartMsg('beliJualChart', 'Chart.js gagal dimuat. Cek path <code>public/plugins/chart.js/chart.umd.min.js</code>.');
       return;
     }
     if (!rows || !rows.length) {
       _chartMsg('topJualChart', 'Belum ada data untuk grafik.');
-      _chartMsg('beliJualChart', 'Belum ada data untuk grafik.');
       return;
     }
     try {
@@ -914,95 +888,272 @@
       const cvTop = document.getElementById('topJualChart');
       if (!top.length || !cvTop) {
         _chartMsg('topJualChart', 'Belum ada data penjualan (Qty) pada periode ini.');
-      } else {
-        _destroyChart('topJual');
-        _charts.topJual = new Chart(cvTop, {
-          type: 'bar',
-          data: {
-            labels: topLabels,
-            datasets: [{
-              label: 'Jual (Qty)',
-              data: top.map(t => t[1]),
-              backgroundColor: top.map((t, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
-              borderRadius: 6
-            }]
+        return;
+      }
+      _destroyChart('topJual');
+      _charts.topJual = new Chart(cvTop, {
+        type: 'bar',
+        data: {
+          labels: topLabels,
+          datasets: [{
+            label: 'Jual (Qty)',
+            data: top.map(t => t[1]),
+            backgroundColor: top.map((t, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => ' ' + fmtShort(c.parsed.x) } }
           },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            indexAxis: 'y',
-            plugins: {
-              legend: { display: false },
-              tooltip: { callbacks: { label: (c) => ' ' + fmtShort(c.parsed.x) } }
-            },
-            scales: { x: { ticks: { callback: (v) => fmtShort(v) } } }
-          }
-        });
-      }
-
-      // Beli vs Jual (Qty) KESELURUHAN 1 bulan
-      const gdgOrder = [], beliByGdg = {}, jualByGdg = {};
-      rows.forEach(r => {
-        const gdg = String(pickCIChart(r, 'KODEGDG') || '-').trim() || '-';
-        if (!(gdg in beliByGdg)) { beliByGdg[gdg] = 0; jualByGdg[gdg] = 0; gdgOrder.push(gdg); }
-        beliByGdg[gdg] += num(pickCIChart(r, 'QNTPBL'));
-        jualByGdg[gdg] += num(pickCIChart(r, 'QNTPNJ'));
+          scales: { x: { ticks: { callback: (v) => fmtShort(v) } } }
+        }
       });
+    } catch (e) {
+      console.error('buildTopJualChart', e);
+      _chartMsg('topJualChart', 'Gagal menampilkan grafik (lihat console).');
+    }
+  }
 
-      let gdgLabels, beliData, jualData;
-      if (gdgOrder.length > 1) {
-        gdgLabels = gdgOrder;
-        beliData = gdgOrder.map(g => beliByGdg[g]);
-        jualData = gdgOrder.map(g => jualByGdg[g]);
-      } else {
-        const totBeli = gdgOrder.reduce((s, g) => s + beliByGdg[g], 0);
-        const totJual = gdgOrder.reduce((s, g) => s + jualByGdg[g], 0);
-        gdgLabels = ['Total Bulan Ini'];
-        beliData = [totBeli];
-        jualData = [totJual];
-      }
+  // Kanan: Perbandingan Pembelian vs Penjualan per Bulan -- SATU titik per bulan, dari
+  // Bulan 1 sampai periode yang dipilih (doMonthlyGraphics / DBSTOCKBRG), lepas dari
+  // baris tabel yang sedang tampil. Lihat refreshPeriodWidgets().
+  function buildMonthlyChart() {
+    const holder = document.querySelectorAll('#chartGrid .chart-holder')[1];
+    if (holder && !document.getElementById('beliJualChart')) holder.innerHTML = '<canvas id="beliJualChart"></canvas>';
+
+    if (typeof Chart === 'undefined') {
+      _chartMsg('beliJualChart', 'Chart.js gagal dimuat. Cek path <code>public/plugins/chart.js/chart.umd.min.js</code>.');
+      return;
+    }
+    const rows = _monthlyRows || [];
+    if (!rows.length) {
+      _chartMsg('beliJualChart', 'Belum ada data untuk grafik.');
+      return;
+    }
+    try {
+      Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.color = '#64748b';
+
+      const labels = rows.map(r => {
+        const b = num(pickCIChart(r, 'BULAN'));
+        return NAMA_BULAN[b - 1] || ('Bulan ' + b);
+      });
+      const beliData = rows.map(r => num(pickCIChart(r, 'qntpbl')));
+      const jualData = rows.map(r => num(pickCIChart(r, 'qntpnj')));
 
       const cvBJ = document.getElementById('beliJualChart');
       if (!cvBJ) {
         _chartMsg('beliJualChart', 'Belum ada data Beli/Jual pada periode ini.');
-      } else {
-        _destroyChart('beliJual');
-        _charts.beliJual = new Chart(cvBJ, {
-          type: 'line',
-          data: {
-            labels: gdgLabels,
-            datasets: [
-              {
-                label: 'Beli (Qty)',
-                data: beliData,
-                borderColor: '#16a34a', backgroundColor: '#16a34a',
-                tension: .3, fill: false, pointRadius: 5
-              },
-              {
-                label: 'Jual (Qty)',
-                data: jualData,
-                borderColor: '#DB2777', backgroundColor: '#DB2777',
-                tension: .3, fill: false, pointRadius: 5
-              }
-            ]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'top' },
-              tooltip: { callbacks: { label: (c) => ' ' + c.dataset.label + ': ' + fmtShort(c.parsed.y) } }
-            },
-            scales: {
-              x: { ticks: { maxRotation: 40, minRotation: 0, autoSkip: false, font: { size: 10 } } },
-              y: { ticks: { callback: (v) => fmtShort(v) } }
-            }
-          }
-        });
+        return;
       }
+      _destroyChart('beliJual');
+      _charts.beliJual = new Chart(cvBJ, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Beli (Qty)',
+              data: beliData,
+              borderColor: '#16a34a', backgroundColor: '#16a34a',
+              tension: .3, fill: false, pointRadius: 5
+            },
+            {
+              label: 'Jual (Qty)',
+              data: jualData,
+              borderColor: '#DB2777', backgroundColor: '#DB2777',
+              tension: .3, fill: false, pointRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' },
+            tooltip: { callbacks: { label: (c) => ' ' + c.dataset.label + ': ' + fmtShort(c.parsed.y) } }
+          },
+          scales: {
+            x: { ticks: { maxRotation: 40, minRotation: 0, autoSkip: false, font: { size: 10 } } },
+            y: { ticks: { callback: (v) => fmtShort(v) } }
+          }
+        }
+      });
     } catch (e) {
-      console.error('buildCharts', e);
-      _chartMsg('topJualChart', 'Gagal menampilkan grafik (lihat console).');
+      console.error('buildMonthlyChart', e);
       _chartMsg('beliJualChart', 'Gagal menampilkan grafik (lihat console).');
     }
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Bulan/Tahun aktif untuk sp_DEATFASTSLOW & doMonthlyGraphics. Mode PERIODE (input
+  // tanggal, bukan dropdown) pakai bulan/tahun dari tanggal AWAL (#inputDate1).
+  function currentDfsPeriod() {
+    if (g_modeReport == modereport_periode) {
+      const p = ($('#inputDate1').val() || '').split('-'); // format YYYY-MM-DD
+      const tahun = parseInt(p[0], 10), bulan = parseInt(p[1], 10);
+      return { tahun: isNaN(tahun) ? defaultTahun : tahun, bulan: isNaN(bulan) ? defaultBulan : bulan };
+    }
+    return { tahun: defaultTahun, bulan: defaultBulan };
+  }
+
+  // Menyegarkan KPI strip + grafik bulanan bersamaan. Dipanggil saat periode berganti
+  // (changePeriodParts() / ganti tanggal PERIODE) DAN saat Tampilkan ditekan (makeTable()).
+  // Token _dfsSeq mencegah response yang lambat dari periode lama menimpa periode baru.
+  function refreshPeriodWidgets() {
+    const period = currentDfsPeriod();
+    if (!period.bulan || !period.tahun) return;
+    const seq = ++_dfsSeq;
+
+    document.getElementById('kpiStrip').innerHTML = '<div style="padding:12px">' + loadingHtml('Memuat KPI...') + '</div>';
+
+    $.ajax({
+      url: DFS_URL, type: 'get', data: { bulan: period.bulan, tahun: period.tahun },
+      success: function (res) {
+        if (seq !== _dfsSeq) return;
+        _dfsRows = res || [];
+        renderKpiStrip();
+      },
+      error: function () {
+        if (seq !== _dfsSeq) return;
+        _dfsRows = [];
+        document.getElementById('kpiStrip').innerHTML =
+          '<div style="padding:12px;color:#B91C1C;font-size:12.5px">Gagal memuat data KPI.</div>';
+      }
+    });
+
+    $.ajax({
+      url: MONTHLY_URL, type: 'get', data: { bulan: period.bulan, tahun: period.tahun },
+      success: function (res) {
+        if (seq !== _dfsSeq) return;
+        _monthlyRows = res || [];
+        buildMonthlyChart();
+      },
+      error: function () {
+        if (seq !== _dfsSeq) return;
+        _monthlyRows = [];
+        _chartMsg('beliJualChart', 'Gagal memuat data grafik bulanan.');
+      }
+    });
+  }
+
+  // 5 kartu KPI dari sp_DEATFASTSLOW. Mode QTY: qty saja. Mode QTYRP/PERIODE: kartu
+  // Dead/Slow/Fast juga menampilkan Rp (Stock & Kebutuhan tidak punya kolom Rp di SP).
+  function renderKpiStrip() {
+    const el = document.getElementById('kpiStrip');
+    if (!el) return;
+
+    if (!_dfsRows.length) {
+      el.innerHTML = '<div style="padding:12px;color:#94a3b8;font-size:12.5px">Belum ada data untuk periode ini.</div>';
+      return;
+    }
+
+    const showRp = (g_modeReport != modereport_qty);
+
+    el.innerHTML = DFS_CARDS.map(function (card) {
+      const rows = rowsForCard(card.key);
+      const qtySum = _dfsRows.reduce((s, r) => s + num(pickCIChart(r, card.qty)), 0);
+
+      let valHtml = format_number(qtySum, 2);
+      if (showRp && card.rp) {
+        const rpSum = _dfsRows.reduce((s, r) => s + num(pickCIChart(r, card.rp)), 0);
+        valHtml += ' <span style="font-weight:600;color:#5A6A85;font-size:12px">/ Rp ' + format_number(rpSum, 0) + '</span>';
+      }
+
+      return '<div class="kpi-card" data-dfs-key="' + card.key + '" style="cursor:pointer;border-left:3px solid ' + card.color + '">' +
+        '<div class="kpi-dot" style="background:' + card.color + '"></div>' +
+        '<div class="kpi-body">' +
+          '<div class="kpi-label">' + card.label + '</div>' +
+          '<div class="kpi-val" style="color:' + card.color + '">' + valHtml + '</div>' +
+          '<div class="kpi-count">' + rows.length + ' barang</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Filter untuk drill per kartu. Dead/Slow/Fast saling eksklusif (qty & rp != 0 pada
+  // kolomnya sendiri, dan qty = 0 pada dua kolom lain). Stock & Kebutuhan cuma cek
+  // kolomnya sendiri != 0.
+  function rowsForCard(key) {
+    return _dfsRows.filter(function (r) {
+      const dead = num(pickCIChart(r, 'qtydead'));
+      const slow = num(pickCIChart(r, 'qtyslow'));
+      const fast = num(pickCIChart(r, 'qtyfast'));
+      const rpdead = num(pickCIChart(r, 'rpdead'));
+      const rpslow = num(pickCIChart(r, 'rpslow'));
+      const rpfast = num(pickCIChart(r, 'rpfast'));
+      const stock = num(pickCIChart(r, 'qtystock'));
+      const keb = num(pickCIChart(r, 'qtykebutuhan'));
+      switch (key) {
+        case 'dead':  return dead !== 0 && rpdead !== 0 && slow === 0 && fast === 0;
+        case 'slow':  return slow !== 0 && rpslow !== 0 && dead === 0 && fast === 0;
+        case 'fast':  return fast !== 0 && rpfast !== 0 && dead === 0 && slow === 0;
+        case 'stock': return stock !== 0;
+        case 'keb':   return keb !== 0;
+        default:      return false;
+      }
+    });
+  }
+
+  // Ledger slide-over (drill panel) per kartu KPI -- pola sama dgn openDrill() di
+  // reportaccountingneracalajur.blade.php, kolom dikuratori: Kode/Nama + metrik kartu (+ Rp
+  // kalau ada).
+  function openDfsDrill(key) {
+    const card = DFS_CARDS.find(c => c.key === key);
+    if (!card) return;
+
+    const rows = rowsForCard(key);
+    const period = currentDfsPeriod();
+    const periodLabel = (NAMA_BULAN[period.bulan - 1] || period.bulan) + ' ' + period.tahun;
+
+    document.getElementById('dpTitle').textContent = card.label;
+    document.getElementById('dpSub').textContent = 'Periode ' + periodLabel + ' — ' + rows.length + ' barang';
+
+    const qtySum = rows.reduce((s, r) => s + num(pickCIChart(r, card.qty)), 0);
+    let metaHtml = '<div class="dp-meta-item"><span class="dp-meta-label">Total ' + esc(card.label) +
+      '</span><span class="dp-meta-val">' + format_number(qtySum, 2) + '</span></div>';
+    if (card.rp) {
+      const rpSum = rows.reduce((s, r) => s + num(pickCIChart(r, card.rp)), 0);
+      metaHtml += '<div class="dp-meta-item"><span class="dp-meta-label">Total Rp</span><span class="dp-meta-val">Rp ' +
+        format_number(rpSum, 0) + '</span></div>';
+    }
+    metaHtml += '<div class="dp-meta-item"><span class="dp-meta-label">Jumlah Barang</span><span class="dp-meta-val">' +
+      rows.length + '</span></div>';
+    document.getElementById('dpMeta').innerHTML = metaHtml;
+
+    let bodyHtml = '<div class="dp-section-title">Rincian Barang</div>';
+    if (!rows.length) {
+      bodyHtml += '<div style="padding:14px;text-align:center;color:#94a3b8;font-size:12.5px">Tidak ada barang pada kategori ini.</div>';
+    } else {
+      bodyHtml += '<table class="ledger-table"><thead><tr><th>Kode Barang</th><th>Nama Barang</th><th class="num">' +
+        esc(card.label) + '</th>' + (card.rp ? '<th class="num">Rp</th>' : '') + '</tr></thead><tbody>';
+      rows.forEach(function (r) {
+        const kode = pickCIChart(r, 'KODEBRG') ?? pickCIChart(r, 'kode') ?? '';
+        const nama = pickCIChart(r, 'NAMABRG') ?? pickCIChart(r, 'nama') ?? '';
+        bodyHtml += '<tr><td>' + esc(kode) + '</td><td>' + esc(nama) + '</td><td class="num">' +
+          format_number(num(pickCIChart(r, card.qty)), 2) + '</td>';
+        if (card.rp) { bodyHtml += '<td class="num">' + format_number(num(pickCIChart(r, card.rp)), 0) + '</td>'; }
+        bodyHtml += '</tr>';
+      });
+      bodyHtml += '</tbody></table>';
+    }
+    document.getElementById('dpBody').innerHTML = bodyHtml;
+
+    document.getElementById('drillOverlay').classList.add('open');
+    document.getElementById('drillPanel').classList.add('open');
+  }
+
+  function closeDfsDrill() {
+    document.getElementById('drillOverlay').classList.remove('open');
+    document.getElementById('drillPanel').classList.remove('open');
   }
 
   // === PENCARIAN SISI-KLIEN ===

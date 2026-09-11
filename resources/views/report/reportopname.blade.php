@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+            <!-- Bar kolom tersembunyi + Order By (diisi oleh report-table.js / ReportTable) -->
             <div id="rtBar"></div>
 
             <!-- TABLE -->
@@ -116,7 +116,11 @@
                 <div class="modal-body">
 
                     <div class="rt-section">
-                        <div class="rt-group-label">Pengaturan Laporan</div>
+                        {{-- <div class="rt-group-label">Pengaturan Laporan</div> --}}
+                        {{-- Order By tidak ada di sini lagi: parameter nyata ini (inputOrd,
+                             dikirim ke proc, benar-benar dipakai controller) sudah dipindah ke
+                             switcher "Order By" di bar atas tabel (ReportTable.init views),
+                             lihat setOrderBy(). --}}
                         <div class="rt-grid-2">
                             <div>
                                 <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
@@ -124,13 +128,6 @@
                                     <option value="0">Non Otorisasi</option>
                                     <option value="1">Otorisasi</option>
                                     <option value="2">Semua</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="rt-field-label" for="modalOrder">Urutkan</label>
-                                <select class="rt-native" id="modalOrder">
-                                    <option value="N">Nomor Bukti</option>
-                                    <option value="B">Nomor Barang</option>
                                 </select>
                             </div>
                         </div>
@@ -170,16 +167,33 @@
             modereport_barang = 1;
         g_modeReport = modereport_nobukti;
 
+        // Order By: N (Nomor Bukti) / B (Nomor Barang) -- parameter nyata (Ordr) yang dikirim
+        // ke proc & benar-benar dipakai controller (dikonfirmasi dari kode setModeReport()/
+        // makeTable() yang sudah ada, bukan ditebak).
+        const ORDER_OPTIONS = [
+            { value: 'N', label: 'Nomor Bukti', desc: 'Dikelompokkan per No Bukti' },
+            { value: 'B', label: 'Nomor Barang', desc: 'Dikelompokkan per Kode Barang' },
+        ];
+        let viewsCfg = {
+            label: 'Order By',
+            options: ORDER_OPTIONS,
+            get: function() { return globalOrderBy; },
+            set: function(v) {
+                setOrderBy(String(v));
+                if (lastRows.length) { makeTable('REPORT'); } // re-fetch: inputOrd adalah parameter SP
+            }
+        };
+
         $(document).ready(function() {
             showPeriode();
             setDefaultHeader();
-            doSetHeader(g_modeReport);
-            doShowCustomize();
+            setOrderBy(globalOrderBy);
 
             ReportTable.init({
                 table: '#mainTable',
                 bar: '#rtBar',
-                onChange: render
+                onChange: render,
+                views: viewsCfg
             });
         });
 
@@ -202,22 +216,21 @@
 
         /* -- FILTER MODAL -- */
 
+        // Order By tidak lagi di modal ini (sudah jadi switcher "Order By" di #rtBar), jadi
+        // tidak dihitung ke badge filter modal.
         function updateFilterBadge() {
             let count = 0;
             if ($('#modalOtorisasi').val() !== '2') { count++; }
-            // Urutkan: pilihan wajib tanpa nilai netral -> sengaja tidak dihitung
             $('#filterBadge').text(count + ' aktif');
         }
 
         function resetAllFilters() {
             $('#modalOtorisasi').val('2');
-            $('#modalOrder').val('N');
             updateFilterBadge();
         }
 
         $('#modalFilter').on('show.bs.modal', function() {
             $('#modalOtorisasi').val(globalOtorisasi);
-            $('#modalOrder').val(globalOrderBy);
             updateFilterBadge();
         });
 
@@ -225,9 +238,6 @@
 
         function applyModalFilter() {
             setOtorisasi($('#modalOtorisasi').val());
-            if ($('#modalOrder').length) {
-                setOrderBy($('#modalOrder').val());
-            }
             $('#modalFilter').modal('hide');
         }
 
@@ -315,9 +325,9 @@
                     ['NamaGDG', 'Gdg', 1, 'varchar', 0, 0],
                     ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
                     ['SaldoComp', 'Saldo', 1, 'float', 1, 0],
-                    ['QntOpname', 'Qnt', 1, 'float', 1, 0],
-                    ['Qntdb', 'Qnt Debet', 1, 'float', 1, 0],
-                    ['QntCr', 'Qnt Kredit', 1, 'float', 1, 0],
+                    ['QntOpname', 'Qty', 1, 'float', 1, 0],
+                    ['Qntdb', 'Qty Debet', 1, 'float', 1, 0],
+                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 0],
                     ['Selisih', 'Selisih', 1, 'float', 1, 0],
                     ['HPP', 'HPP', 1, 'float', 1, 0],
                     ['Total', 'TOTAL', 1, 'float', 1, 0]
@@ -326,17 +336,17 @@
                 gsum_isgrandtotal = 1;
             } else if (g_modeReport == modereport_barang) {
                 gcart_header = [
-                    ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
-                    ['namaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['Nobukti', 'No Bukti', 1, 'varchar', 0, 0],
                     ['tanggal', 'Tanggal', 1, 'date', 0, 0],
+                    ['kodebrg', 'Kode Barang', 1, 'varchar', 0, 0],
+                    ['namaBrg', 'Nama Barang', 1, 'varchar', 0, 0],
                     ['KodeGrp', 'Grp', 1, 'varchar', 0, 0],
                     ['NamaGDG', 'Gdg', 1, 'varchar', 0, 0],
                     ['Satuan', 'Satuan', 1, 'varchar', 0, 0],
                     ['SaldoComp', 'Saldo', 1, 'float', 1, 0],
-                    ['QntOpname', 'Qnt', 1, 'float', 1, 0],
-                    ['Qntdb', 'Qnt Debet', 1, 'float', 1, 0],
-                    ['QntCr', 'Qnt Kredit', 1, 'float', 1, 0],
+                    ['QntOpname', 'Qty', 1, 'float', 1, 0],
+                    ['Qntdb', 'Qty Debet', 1, 'float', 1, 0],
+                    ['QntCr', 'Qty Kredit', 1, 'float', 1, 0],
                     ['Selisih', 'Selisih', 1, 'float', 1, 0],
                     ['HPP', 'HPP', 1, 'float', 1, 0],
                     ['Total', 'TOTAL', 1, 'float', 1, 0]

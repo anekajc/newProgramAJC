@@ -53,6 +53,19 @@
       <div class="table-wrap">
         <table class="tb" id="mainTable">
           <thead>
+            <tr>
+                <th>No. Bukti</th>
+                <th>Tanggal</th>
+                <th>Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Sales</th>
+                <th>Customer</th>
+                <th>Sat</th>
+                <th>Qty PR</th>
+                <th>Qty Konsi</th>
+                <th>Qty SO</th>
+                <th>Qty Sisa</th>
+            </tr>
           </thead>
           <tbody id="tableBody">
             <tr class="empty-row"><td>Pilih tanggal lalu klik <b>Tampilkan</b> untuk memuat laporan.</td></tr>
@@ -123,17 +136,17 @@
       // Sisa) -- ini bug yang sudah ada sebelum migrasi (kemungkinan salah-tempel field name
       // saat halaman ini dibuat). Dipertahankan apa adanya, tidak diperbaiki di sini.
       gcart_header = [
-        ['NOBUKTI', 'Nomor Bukti', 1, 'varchar', 0, 0],
+        ['NOBUKTI', 'No. Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
         ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
         ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
         ['NamaSls', 'Sales', 1, 'varchar', 0, 0],
         ['NAMACUSTSUPP', 'Customer', 1, 'varchar', 0, 0],
         ['sat', 'Sat', 1, 'varchar', 0, 0],
-        ['QntPR', 'Qnt PR', 1, 'float', 1, 2],
-        ['QntPR', 'Qnt Konsi', 1, 'float', 1, 2],
-        ['QntSO', 'Qnt SO', 1, 'float', 1, 2],
-        ['QntPR', 'Qnt Sisa', 1, 'float', 1, 2]
+        ['QntPR', 'Qty PR', 1, 'float', 1, 2],
+        ['QntPR', 'Qty Konsi', 1, 'float', 1, 2],
+        ['QntSO', 'Qty SO', 1, 'float', 1, 2],
+        ['QntPR', 'Qty Sisa', 1, 'float', 1, 2]
       ];
       gsum_issubtotal = 1;
       gsum_isgrandtotal = 1;
@@ -148,7 +161,7 @@
         ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
         ['Nama', 'Salesman', 1, 'varchar', 0, 0],
         ['NoSerahsample', 'No Serah Sample', 1, 'varchar', 0, 0],
-        ['QNT', 'Qnt', 1, 'float', 0, 2],
+        ['QNT', 'Qty', 1, 'float', 0, 2],
         ['sat_1', 'Sat', 1, 'varchar', 0, 0],
         ['hpp', 'Hpp', 1, 'float', 0, 2],
         ['total', 'Jumlah', 1, 'float', 1, 2],
