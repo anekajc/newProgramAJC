@@ -55,7 +55,7 @@
 }
 #tabel td:first-child, #tabel2 td:first-child, #tabel3 td:first-child { display: flex; gap: 4px; justify-content: center; align-items: center; }
 #tabel td:first-child .btn, #tabel2 td:first-child .btn, #tabel3 td:first-child .btn,
-#koreksiTable td:last-child .btn, #tabel_add_list_pelanggan td:last-child .btn,
+#koreksiTable td:last-child .btn, #addTable td:last-child .btn, #tabel_add_list_pelanggan td:last-child .btn,
 #tabel_add_list_pic td:last-child .btn, #tabel_add_list_lokasipenerima td:last-child .btn,
 #tabel_add_list_alamatkirim td:last-child .btn, #tabel_add_list_backoffice td:last-child .btn,
 #tabel_add_list_sales td:last-child .btn {
@@ -64,21 +64,21 @@
   box-shadow: none; transition: all .12s ease;
 }
 #tabel td:first-child .btn:hover, #tabel2 td:first-child .btn:hover, #tabel3 td:first-child .btn:hover,
-#koreksiTable td:last-child .btn:hover, #tabel_add_list_pelanggan td:last-child .btn:hover,
+#koreksiTable td:last-child .btn:hover, #addTable td:last-child .btn:hover, #tabel_add_list_pelanggan td:last-child .btn:hover,
 #tabel_add_list_pic td:last-child .btn:hover, #tabel_add_list_lokasipenerima td:last-child .btn:hover,
 #tabel_add_list_alamatkirim td:last-child .btn:hover, #tabel_add_list_backoffice td:last-child .btn:hover,
 #tabel_add_list_sales td:last-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
 #tabel td:first-child .btn-primary, #tabel2 td:first-child .btn-primary, #tabel3 td:first-child .btn-primary,
-#koreksiTable td:last-child .btn-primary, #tabel_add_list_pelanggan td:last-child .btn-primary,
+#koreksiTable td:last-child .btn-primary, #addTable td:last-child .btn-primary, #tabel_add_list_pelanggan td:last-child .btn-primary,
 #tabel_add_list_pic td:last-child .btn-primary, #tabel_add_list_lokasipenerima td:last-child .btn-primary,
 #tabel_add_list_alamatkirim td:last-child .btn-primary, #tabel_add_list_backoffice td:last-child .btn-primary,
 #tabel_add_list_sales td:last-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
 #tabel2 td:first-child .btn-warning, #tabel3 td:first-child .btn-warning, #koreksiTable td:last-child .btn-warning,
-#tabel_add_list_pelanggan td:last-child .btn-warning, #tabel_add_list_pic td:last-child .btn-warning,
+#addTable td:last-child .btn-warning, #tabel_add_list_pelanggan td:last-child .btn-warning, #tabel_add_list_pic td:last-child .btn-warning,
 #tabel_add_list_lokasipenerima td:last-child .btn-warning, #tabel_add_list_alamatkirim td:last-child .btn-warning,
 #tabel_add_list_backoffice td:last-child .btn-warning, #tabel_add_list_sales td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
-#tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success, #koreksiTable td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
-#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger, #koreksiTable td:last-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel2 td:first-child .btn-success, #tabel3 td:first-child .btn-success, #koreksiTable td:last-child .btn-success, #addTable td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel2 td:first-child .btn-danger, #tabel3 td:first-child .btn-danger, #koreksiTable td:last-child .btn-danger, #addTable td:last-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabel thead th, #tabel2 thead th, #tabel3 thead th {
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px; text-transform: uppercase;
   letter-spacing: .04em; font-weight: 600; border-bottom: 1px solid #e7e9ee; border-top: none;
@@ -3234,7 +3234,6 @@ function submitAdd () {
 
 
 function buttonCloseForm () {
-document.getElementById('pageTitleBreadcrumb').textContent = 'Nota Retur Penjualan'
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
@@ -3974,8 +3973,6 @@ function onChangePembayaran () {
 
 
 function buttonKoreksi (nobukti , noretur) {
-  
-document.getElementById('pageTitleBreadcrumb').textContent = 'Nota Retur Penjualan / Edit Data'
 
 let pcekglobal = 0
   $.ajax({
