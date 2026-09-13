@@ -153,9 +153,7 @@
     font-weight: 600;
     text-transform: uppercase;
     transition: background-color 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-width: 1px;
-    border-style: solid;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
   }
 
   .btn-pill-flat {
@@ -206,25 +204,25 @@
     border-color: #ced4da !important;
     color: #343a40 !important;
   }
-
-  .btn-close-pill {
-    background-color: #fdeaea;
-    border-color: #f7cfcf;
-    color: #dc2626;
+  .btn-danger-solid:hover,
+  .btn-danger-solid:focus,
+  .btn-danger-solid:active {
+    color: #fff;
   }
 
-  .btn-close-pill:hover,
-  .btn-close-pill:focus {
-    background-color: #fbdcdc;
-    border-color: #f2bcbc;
+  .btn-danger-solid {
     color: #b91c1c;
+    background-color: #fef2f2;
+    border: 1.5px solid #fecaca;
   }
 
-  .btn-close-pill:active {
-    background-color: #f8cfcf !important;
-    border-color: #eda9a9 !important;
-    color: #b91c1c !important;
+  .btn-danger-solid:hover,
+  .btn-danger-solid:focus,
+  .btn-danger-solid:active {
+    background-color: #c82333;
+    border-color: #bd2130;
   }
+
 </style>
 @endsection
 
@@ -283,7 +281,7 @@
 
         @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
           <div class="action-group">
-            <button class="btn btn-primary" type="button" onclick="buttonAdd()">Tambah</button>
+            <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
           </div>
         @endif
       </div>
@@ -371,7 +369,7 @@
                gudang/purchaseOrder.blade.php (judulnya juga dikosongkan). --}}
         </div>
         <div class="col-6 text-right">
-          <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" onclick="buttonCloseForm()">Close</button>
+          <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" onclick="buttonCloseForm()">Close</button>
         </div>
       </div>
 
@@ -502,9 +500,14 @@
                         </div>
                         <div class="col-md-8">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control lockableItemModeEdit" id="inputitem_kodebrg" onkeypress="doBrowseDirectFilter('Barang', '{!! $barang !!}', 'inputitem_kodebrg')">
-                            <button onclick="doBrowseMaster('Barang', '{!! $barang !!}')" class="btn btn-primary btn-sm text-right lockableItemModeEdit" id="btnitem_kodebrg">
-                              <i class="bi bi-plus"></i>
+                            {{-- Barang: pola "resolve-or-pick" sama seperti Gudang (lihat guide-update-barang.md) --
+                                 bisa diketik langsung + Enter, atau pakai tombol search; kalau match
+                                 persis KodeBrg langsung isi field ini, kalau tidak baru modal
+                                 #modalPickBarang terbuka (bukan lagi #formBrowseMaster generik). --}}
+                            <input type="text" class="form-control lockableItemModeEdit" id="inputitem_kodebrg" placeholder="Kode Barang"
+                              onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveBarang($('#inputitem_kodebrg').val()); }">
+                            <button type="button" id="btnitem_kodebrg" class="btn btn-chip-biru btn-sm lockableItemModeEdit" style="height:32px; border-radius:0;" onclick="resolveBarang($('#inputitem_kodebrg').val())">
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -666,29 +669,21 @@
   #modalPickGudang thead th {
     background: #f8f9fb !important;
     color: #6b7280 !important;
-    font-size: 14px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .04em;
     font-weight: 600;
-    padding: 14px 16px !important;
+
     border-bottom: 1px solid #e7e9ee !important;
     border-top: none !important;
-    border-left: none !important;
-    border-right: none !important;
-  }
+    
 
-  #modalPickGudang thead th:first-child {
-    width: 30%;
   }
 
   #modalPickGudang tbody td {
     border-top: none !important;
     border-bottom: 1px solid #f1f3f5 !important;
-    border-left: none !important;
-    border-right: none !important;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 18px 16px;
+    font-size: 13px;
     vertical-align: middle;
   }
 
@@ -702,7 +697,7 @@
     float: none;
     width: 100%;
     text-align: right;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   #modalPickGudang .dataTables_filter label {
@@ -712,17 +707,17 @@
   }
 
   #modalPickGudang .dataTables_filter input {
-    font-size: 15px;
+    font-size: 13px;
     margin-left: 0;
-    width: 280px;
+    width: 240px;
     max-width: 100%;
-    padding: 10px 12px 10px 38px;
+    padding: 7px 10px 7px 32px;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     outline: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: 12px center;
+    background-position: 10px center;
   }
 
   #modalPickGudang .dataTables_filter input:focus {
@@ -730,10 +725,79 @@
     box-shadow: 0 0 0 3px #e8edff;
   }
 
-  #modalPickGudang .dataTables_info,
-  #modalPickGudang .dataTables_paginate {
-    font-size: 14px;
-    margin-top: 16px !important;
+  /* #modalPickBarang: css disamakan persis dengan #modalPickGudang di atas */
+  #modalPickBarang tbody tr.pick-row {
+    cursor: pointer;
+    transition: background-color .12s;
+  }
+
+  #modalPickBarang tbody tr.pick-row:hover td {
+    background-color: #eef2ff;
+  }
+
+  #modalPickBarangLabel {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  #modalPickBarang .modal-body {
+    padding: 24px 32px 32px;
+  }
+
+  #modalPickBarang thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee !important;
+    border-top: none !important;
+  }
+
+  #modalPickBarang tbody td {
+    border-top: none !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  #modalPickBarang .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  #modalPickBarang .dataTables_filter {
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 8px;
+  }
+
+  #modalPickBarang .dataTables_filter label {
+    font-size: 0;
+    margin: 0;
+    display: inline-block;
+  }
+
+  #modalPickBarang .dataTables_filter input {
+    font-size: 13px;
+    margin-left: 0;
+    width: 240px;
+    max-width: 100%;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+
+  #modalPickBarang .dataTables_filter input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #e8edff;
   }
 </style>
 
@@ -751,7 +815,7 @@
         <div class="container-fluid">
           <div class="row">
             <div class="col-12" style="overflow:auto;">
-              <table id="tabelPickGudang" class="table table-hover table-responsive-lg">
+              <table id="tabelPickGudang" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center">
                   <tr>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
@@ -765,16 +829,13 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
 </div>
 
-{{-- Placeholder "Cari Data" untuk kotak pencarian DataTables di modal ini - disamakan
-     dengan modalPOAdd.blade.php (dipasang lewat event shown.bs.modal, bukan lewat opsi
-     language.searchPlaceholder, karena kotak pencariannya baru ada setelah DataTables
-     di-init di dalam openGudangPicker()). --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   if (typeof jQuery === 'undefined') { return }
@@ -784,6 +845,46 @@ document.addEventListener('DOMContentLoaded', function () {
   })
 })
 </script>
+
+<div class="modal fade" id="modalPickBarang" tabindex="-1" role="dialog" aria-labelledby="modalPickBarangLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalPickBarangLabel">Pilih Barang</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12 dataTables_filter" style="margin-bottom:8px;">
+              <label style="width:100%;">
+                <input type="text" id="inputBarangPickerSearch" placeholder="Cari Data" autocomplete="off"
+                  oninput="searchBarangModal(this.value)">
+              </label>
+            </div>
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelPickBarang" class="table table-bordered table-hover table-striped table-responsive-lg">
+                <thead class="text-center">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama</th>
+                    <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelPickBarang_data" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 @endsection
 
@@ -2507,6 +2608,101 @@ function submitPrint (nobukti) {
   function doBrowseBarang() {
     bm_filterMode = true;
     return true;
+  }
+
+  let barangLookupBusy = false;
+  let listBarangPicker = [];
+  let barangSearchDebounce = null;
+
+  function fetchBarangList(term, callback) {
+    if (!cekNotEmpty("input_gudang")) {
+      alertify.warning(messageRequired("Gudang"));
+      return;
+    }
+
+    barangLookupBusy = true;
+    $.ajax({
+      url: "{!! $barang !!}",
+      type: "get",
+      data: { filter: term, kodegdg: $("#input_gudang").val() },
+      success: function(res) {
+        barangLookupBusy = false;
+        callback(res.table || []);
+      },
+      error: function(err) {
+        barangLookupBusy = false;
+        console.log(err);
+        alertify.warning('Terjadi kesalahan, silahkan refresh browser');
+      }
+    });
+  }
+
+  function findExactBarang(list, term) {
+    let needle = term.toLowerCase();
+    return list.find(b => String(b.KodeBrg || '').trim().toLowerCase() === needle);
+  }
+
+  function resolveBarang(term) {
+    term = (term || '').trim();
+
+    if (!cekNotEmpty("input_gudang")) {
+      return alertify.warning(messageRequired("Gudang"));
+    }
+
+    if (term === '') {
+      return openBarangPicker('');
+    }
+
+    if (barangLookupBusy) return;
+
+    fetchBarangList(term, function(res) {
+      let hit = findExactBarang(res, term);
+      hit ? applyBarangToForm(hit) : openBarangPicker(term, res);
+    });
+  }
+
+  function applyBarangToForm(item) {
+    buttonBrowsePickBarang(item.KodeBrg, item.NamaBrg, item.Sat1, item.Sat2, item.sat3, item.isi1, item.isi2, item.isi3);
+    $('#modalPickBarang').modal('hide');
+  }
+
+  function initBarangTable(list) {
+    listBarangPicker = list;
+    let rowTable = '';
+    list.forEach((item, i) => {
+      rowTable += `<tr class="pick-row" onclick="buttonPickBarang(${i})">
+        <td>${item.KodeBrg}</td>
+        <td>${item.NamaBrg}</td>
+        <td>${nullToEmpty(item.Sat1)}</td>
+      </tr>`;
+    });
+    $('#tabelPickBarang_data').html(rowTable);
+
+    if ($.fn.DataTable.isDataTable('#tabelPickBarang')) {
+      $('#tabelPickBarang').DataTable().destroy();
+    }
+    $('#tabelPickBarang').DataTable({ lengthChange: false, paging: true, searching: false, info: list.length > 0 });
+  }
+
+  function openBarangPicker(term, preFetched) {
+    let showWith = function(list) {
+      $('#inputBarangPickerSearch').val(term || '');
+      $('#modalPickBarang').modal('show');
+      initBarangTable(list);
+    };
+
+    preFetched ? showWith(preFetched) : fetchBarangList(term || '', showWith);
+  }
+
+  function searchBarangModal(term) {
+    clearTimeout(barangSearchDebounce);
+    barangSearchDebounce = setTimeout(function() {
+      fetchBarangList(term, initBarangTable);
+    }, 300);
+  }
+
+  function buttonPickBarang(index) {
+    applyBarangToForm(listBarangPicker[index]);
   }
 
   function buttonBrowsePickBarang(_kode, _nama, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
