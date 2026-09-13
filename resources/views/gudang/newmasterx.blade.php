@@ -84,7 +84,12 @@
     <link rel="stylesheet" href="{!! URL::asset('css/semantic.css') !!}">
     <link rel="stylesheet" href="{!! URL::asset('css/select2.min.css') !!}">
     <link rel="stylesheet" href="{!! URL::asset('css/datatables.min.css') !!}">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
+    {{-- CDN jquery.dataTables.css (versi mentah, non-Bootstrap) sengaja dilepas -
+         dia dimuat SETELAH datatables.min.css lokal (yang sudah termasuk integrasi
+         Bootstrap 4, lihat catatan di purchaseOrder.blade.php), jadi rule-nya menang
+         dan bikin elemen seperti .paginate_button (margin, dst) beda dari halaman
+         yang cuma load versi lokal - lihat perbandingan modal Pilih Gudang vs
+         Supplier di purchaseOrder. --}}
     <link rel="stylesheet" href="{!! URL::asset('css/jquery-ui.min.css') !!}">
 
     <link rel="stylesheet" href="{!! URL::asset('css/canvas/bootstrap.css') !!}">
