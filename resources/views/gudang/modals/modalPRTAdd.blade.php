@@ -1,22 +1,12 @@
-{{-- tampilan search gudang --}}
-  <style>
-    #tabel_add_list_gudang_filter{
-      display: flex;
-      align-items: flex-end;
-      margin-bottom: -10px;
-    }
-    #tabel_add_list_gudang_filter label input {
-      width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem;
-    }
-  </style>
-{{-- end tampilan search gudang --}}
+
 
 <style>
-  #tabel_data_add_list_barangall tr:hover td {
+  #modalBodyAddAddListBarangAll tbody tr.pick-row {
+    cursor: pointer;
+    transition: background-color .12s;
+  }
+
+  #modalBodyAddAddListBarangAll tbody tr.pick-row:hover td {
     background-color: #eef2ff;
   }
 
@@ -37,44 +27,6 @@
     font-size: 13px;
     vertical-align: middle;
   }
-
-  #tabel_add_list_barangall_wrapper .dataTables_wrapper > .row:first-child > div {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-
-  #tabel_add_list_barangall_filter {
-    display: block;
-    float: none;
-    width: 100%;
-    text-align: right;
-    margin-bottom: 8px;
-  }
-
-  #tabel_add_list_barangall_filter label {
-    font-size: 0;
-    margin: 0;
-    display: inline-block;
-  }
-
-  #tabel_add_list_barangall_filter input {
-    font-size: 13px;
-    margin-left: 0;
-    width: 240px;
-    max-width: 100%;
-    padding: 7px 10px 7px 32px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    outline: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 10px center;
-  }
-
-  #tabel_add_list_barangall_filter input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px #e8edff;
-  }
 </style>
 {{-- end tabel kode barang --}}
 
@@ -90,59 +42,6 @@
       </div>
 
         <!-- <h1>Tes Modal</h1> -->
-
-      <div id="modalBodyAddListGudang" class="showhidemodalbodyadd">
-        <div class="modal-body" >
-
-          <div class="container-fluid mt-4" >
-
-            <div class="row">
-              <div class="col-md-4" style="margin-top:-40px;">
-                <h2 id="titleGudang">Gudang Asal</h2>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-12" style="overflow:auto; margin-top:-60px;">
-                <table id="tabel_add_list_gudang" class="table table-bordered table-hover table-striped table-responsive-lg">
-                  <thead class="text-center bg-primary text-white">
-                    <tr>
-                      <th style="padding: 4px 12px;" scope="col">Actions</th>
-                      <th style="padding: 4px 12px;" scope="col">Kode</th>
-                      <th style="padding: 4px 12px;" scope="col">Nama Gudang</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tabel_data_add_list_gudang" class="text-left" >
-                    <tr >
-                      <td>-</td>
-                      <td>-</td>
-                      <td class="text-center">
-                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="modal-footer">
-          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-          {{-- <button type="button" class="btn btn-danger btn-lg" 
-          style="
-          margin-top:-10px;
-          height: 30px; 
-          padding: 4px 12px; 
-          border-radius: 20px; 
-          font-size: 0.75rem; 
-          font-weight: 600; 
-          text-transform: uppercase; 
-          transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonAddListBatal()">Batal</button> --}}
-        </div>
-      </div>
 
       <div id="modalBodyAddAddListBarangAll" class="showhidemodalbodyadd">
         <div class="modal-body" >
@@ -164,17 +63,15 @@
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
                 @for ($i = 0; $i < count($listBarangAll); $i++)
-                <tr >
-                  <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangAll('{{ $listBarangAll[$i]->KODEBRG }}','{{ $listBarangAll[$i]->NAMABRG }}')" type="button" ><i class="bi bi-plus"></i></button></td>
+                <tr>
                   <td>{{ $listBarangAll[$i]->KODEBRG }}</td>
-                  <td>{{ $listBarangAll[$i]->NAMABRG }}</td>     
+                  <td>{{ $listBarangAll[$i]->NAMABRG }}</td>
               </tr>
               @endfor
               </tbody>
