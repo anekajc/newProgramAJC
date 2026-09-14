@@ -15,6 +15,69 @@
   </style>
 {{-- end tampilan search gudang --}}
 
+<style>
+  #tabel_data_add_list_barangall tr:hover td {
+    background-color: #eef2ff;
+  }
+
+  #tabel_add_list_barangall thead th {
+    background: #f8f9fb !important;
+    color: #6b7280 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    border-bottom: 1px solid #e7e9ee !important;
+    border-top: none !important;
+  }
+
+  #tabel_add_list_barangall tbody td {
+    border-top: none !important;
+    border-bottom: 1px solid #f1f3f5 !important;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  #tabel_add_list_barangall_wrapper .dataTables_wrapper > .row:first-child > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  #tabel_add_list_barangall_filter {
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 8px;
+  }
+
+  #tabel_add_list_barangall_filter label {
+    font-size: 0;
+    margin: 0;
+    display: inline-block;
+  }
+
+  #tabel_add_list_barangall_filter input {
+    font-size: 13px;
+    margin-left: 0;
+    width: 240px;
+    max-width: 100%;
+    padding: 7px 10px 7px 32px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+
+  #tabel_add_list_barangall_filter input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #e8edff;
+  }
+</style>
+{{-- end tabel kode barang --}}
+
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
@@ -99,7 +162,7 @@
             <div class="col-12" style="overflow:auto; margin-top:-40px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
