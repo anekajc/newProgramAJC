@@ -323,12 +323,8 @@
                       <th style="padding: 4px 12px;" scope="col">Part Number</th>
 
                       <th style="padding: 4px 12px;" scope="col">Merk</th>
-                      <th style="padding: 4px 12px;" scope="col">Qty1</th>
-                      <th style="padding: 4px 12px;" scope="col">Sat1</th>
-                      <th style="padding: 4px 12px;" scope="col">Qty2</th>
-                      <th style="padding: 4px 12px;" scope="col">Sat2</th>
-                      <th style="padding: 4px 12px;" scope="col">Qty3</th>
-                      <th style="padding: 4px 12px;" scope="col">Sat3</th>
+                      <th style="padding: 4px 12px;" scope="col">Qty</th>
+                      <th style="padding: 4px 12px;" scope="col">Sat</th>
                       <th style="padding: 4px 12px;" scope="col">Harga</th>
                       <th style="padding: 4px 12px;" scope="col">Diskon</th>
                       <th style="padding: 4px 12px;" scope="col">Subtotal</th>
@@ -370,8 +366,8 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button id="buttonSubmitAdd" type="button" class="btn btn-primary" onclick="submitAdd()">Otorisasi</button>
-    <button id="buttonSubmitBatalOto" type="button" class="btn btn-primary" onclick="submitBatalOto()">Batal Otorisasi</button>
+    <button id="buttonSubmitAdd" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Otorisasi</button>
+    <button id="buttonSubmitBatalOto" type="button" class="btn btn-danger" onclick="submitBatalOto()">Batal Otorisasi</button>
   </div>
 </div>
 </div>
@@ -701,7 +697,6 @@ function buttonAdd (NOBUKTI , tipe) {
   console.log(NOBUKTI)
   let _token  = $("#_token").val()
 
-
   if (tipe == 'add') {
     tempNoBukti = NOBUKTI
     $('#buttonSubmitAdd').show();
@@ -738,10 +733,6 @@ function buttonAdd (NOBUKTI , tipe) {
           <td>${item.NAMAMERK}</td>
           <td class="text-right">${formatAngka(parseFloat(item.Qnt1x).toFixed(2))}</td>
           <td>${item.SAT1X ? item.SAT1X : ''}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.Qnt2x).toFixed(2))}</td>
-          <td>${item.SAT2X ? item.SAT1X : ''}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.Qnt3x).toFixed(2))}</td>
-          <td>${item.SAT3X ? item.SAT1X : ''}</td>
           <td class="text-right">${formatAngka(parseFloat(item.Harga).toFixed(2))}</td>
           <td class="text-right">${formatAngka(parseFloat(item.DiscTot).toFixed(2))}</td>
           <td class="text-right">${formatAngka(parseFloat(item.Total).toFixed(2))}</td>
@@ -753,6 +744,11 @@ function buttonAdd (NOBUKTI , tipe) {
         `
       });
 
+
+      // <td class="text-right">${formatAngka(parseFloat(item.Qnt2x).toFixed(2))}</td>
+      // <td>${item.SAT2X ? item.SAT1X : ''}</td>
+      // <td class="text-right">${formatAngka(parseFloat(item.Qnt3x).toFixed(2))}</td>
+      // <td>${item.SAT3X ? item.SAT1X : ''}</td>
 
       document.getElementById("input_add_nobukti").value = NOBUKTI
       document.getElementById("input_add_customer").value = res.header[0].NamaCust
