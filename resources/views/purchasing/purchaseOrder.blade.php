@@ -6196,10 +6196,50 @@ function poKunciHargaAwal () {
   document.getElementById('input_add_add_hargaAwal').disabled = (tipeformitem === 'edit')
 }
 
-function buttonAddAddListBarang () {
+// Cari indeks baris di dataAddAddListItem yang cocok dengan keyword yang diketik user di
+// kolom kode barang. Dua tahap: kode barang PERSIS dulu, baru substring kode/nama -
+// supaya kode lengkap yang kebetulan jadi bagian nama barang lain tidak membatalkan
+// auto-pick. Nama field dikirim dari pemanggil karena sumber FOC memakai 'Kodebrg'
+// (huruf b kecil, dari master Dbbarang) sedangkan PR/SO memakai 'KodeBrg'.
+function poCariIndeksBarang (keyword, fieldKode, fieldNama) {
+  let k = String(keyword).trim().toLowerCase()
+  if (!k) { return [] }
+
+  let ambil = (item, f) => String((item[f] === null || item[f] === undefined) ? '' : item[f]).toLowerCase()
+  let persis = []
+  let mirip = []
+
+  dataAddAddListItem.forEach((item, i) => {
+    if (ambil(item, fieldKode) === k) { persis.push(i) }
+    if (ambil(item, fieldKode).includes(k) || ambil(item, fieldNama).includes(k)) { mirip.push(i) }
+  })
+
+  return persis.length ? persis : mirip
+}
+
+// Dipakai setelah auto-pick (hasil pencarian persis satu barang): form item sudah terisi
+// otomatis, jadi kursor langsung dilempar ke Qty - mengikuti pola buttonAddAddInsertItem
+// di pembelianpermintaanagen/nonagen. Diberi jeda karena fungsi pick diakhiri
+// scrollIntoView().
+function poFokusQty () {
+  setTimeout(() => {
+    let el = document.getElementById("input_add_add_qty")
+    if (el && !el.disabled) { el.focus(); el.select() }
+  }, 300)
+}
+
+// opsi.keyword  : kata kunci dari kolom kode barang (kode maupun nama barang)
+// opsi.autoPick : kalau hasil pencarian PERSIS satu baris, barang itu langsung dipilih
+//                 dan modal tidak usah dibuka sama sekali. Hanya diaktifkan oleh Enter,
+//                 bukan oleh tombol browse - menekan tombol browse berarti user memang
+//                 ingin melihat daftarnya.
+// Default {} membuat pemanggil lama berperilaku persis seperti sebelumnya.
+function buttonAddAddListBarang (opsi = {}) {
 
   let _token = $("#_token").val();
   let sumber = poSumberBarang()
+  let keyword = opsi.keyword ? String(opsi.keyword).trim() : ''
+  let autoPick = !!opsi.autoPick
 
   // Kotak pencarian FOC hanya relevan untuk sumber FOC - direset di sini supaya sumber
   // lain (PR/SO/Barang All) selalu mulai dari kondisi tersembunyi.
@@ -6226,6 +6266,19 @@ function buttonAddAddListBarang () {
       success: function(res) {
         let rowTable = ``
         dataAddAddListItem = res
+
+        // Hasil pencarian persis satu baris PR -> langsung dipilih, modal tidak dibuka.
+        // Kalau satu kode barang punya beberapa baris PR (beda No. PR / beda satuan),
+        // cocok.length > 1 sehingga modal tetap dibuka supaya user memilih sendiri.
+        if (autoPick && keyword) {
+          let cocok = poCariIndeksBarang(keyword, 'KodeBrg', 'NamaBrg')
+          if (cocok.length === 1) {
+            buttonAddAddPickBarangNonFOC(cocok[0])
+            poFokusQty()
+            return
+          }
+        }
+
         dataAddAddListItem.forEach((item, i) => {
           // Dikosongkan (bukan 0) kalau nilainya null/undefined, supaya tidak terbaca
           // sebagai "tidak ada yang dibatalkan" padahal datanya memang tidak ada.
@@ -6256,6 +6309,10 @@ function buttonAddAddListBarang () {
             "paging": false ,
         });
 
+        // Kata kunci yang diketik user ikut terbawa ke kotak cari bawaan DataTables,
+        // supaya jelas daftar yang tampil ini hasil pencarian apa dan bisa langsung diubah.
+        if (keyword) { $("#tabel_add_list_barang_nonfoc").DataTable().search(keyword).draw() }
+
         $('.showhidemodalbodyadd').hide();
         $('#modalBodyAddAddListBarangNonFOC').show();
 
@@ -6276,8 +6333,29 @@ function buttonAddAddListBarang () {
     // Enter (searchBarangFOC), mengikuti pola di pembelianpermintaanagen/nonagen.
     if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
 
-    $('#input_search_barang_foc').val('')
-    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+    if (keyword) {
+
+      // Kata kunci dari kolom kode barang dibawa ke kotak cari modal, lalu dicarikan ke
+      // server sekarang juga (poMuatBarangFOC async:false) supaya jumlah hasilnya bisa
+      // dipakai memutuskan auto-pick sebelum modal sempat dibuka.
+      $('#input_search_barang_foc').val(keyword)
+
+      let jml = poMuatBarangFOC(keyword)
+
+      if (autoPick && jml === 1) {
+        buttonAddAddPickBarangFOCPlus(0)
+        poFokusQty()
+        return
+      }
+
+      poRenderBarangFOC()
+
+    } else {
+
+      $('#input_search_barang_foc').val('')
+      document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+
+    }
 
     document.getElementById("namaHeaderTable").textContent = 'Master Barang'
     $('.showhidemodalbodyadd').hide();
@@ -6303,6 +6381,17 @@ function buttonAddAddListBarang () {
       success: function(res) {
         let rowTable = ``
         dataAddAddListItem = res
+
+        // Sama seperti cabang PR: auto-pick hanya kalau hasilnya benar-benar satu baris SO.
+        if (autoPick && keyword) {
+          let cocok = poCariIndeksBarang(keyword, 'KodeBrg', 'NamaBrg')
+          if (cocok.length === 1) {
+            buttonAddAddPickBarangNonFOCPlus(cocok[0])
+            poFokusQty()
+            return
+          }
+        }
+
         dataAddAddListItem.forEach((item, i) => {
           rowTable += `
           <tr class="pick-row" onclick="buttonAddAddPickBarangNonFOCPlus(${i})">
@@ -6325,6 +6414,9 @@ function buttonAddAddListBarang () {
           "lengthChange": false,
             "paging": true ,
         });
+
+        if (keyword) { $("#tabel_add_list_barang_nonfocplus").DataTable().search(keyword).draw() }
+
         document.getElementById("namaHeaderTable").textContent = 'Barang dari SO'
         $('.showhidemodalbodyadd').hide();
         $('#modalBodyAddAddListBarangNonFOCPlus').show();
@@ -9111,11 +9203,14 @@ function buttonAddPickBackOffice (kode, nama ) {
 
 }
 
+// 'hide', bukan 'toggle'. Fungsi ini selalu berniat MENUTUP modal browse, dan sekarang
+// dipanggil juga dari jalur auto-pick (buttonAddAddPickBarang* dijalankan tanpa modal
+// pernah dibuka) - 'toggle' pada kondisi itu justru akan membuka modalnya.
 function buttonAddListBatal () {
   $('.showhidemodalbodyadd').hide();
   $('#modalBodyAddMain').show();
 
-  $("#form").modal('toggle')
+  $("#form").modal('hide')
 }
 
 function cleanFormAddAdd () {
@@ -11517,8 +11612,72 @@ function searchBarangAll (e) {
 
 }
 
+// Ambil hasil pencarian master barang (FOC) dari server ke dataAddAddListItem dan
+// kembalikan jumlah barisnya. Dipisah dari perenderannya supaya buttonAddAddListBarang
+// bisa memakai jumlah itu untuk memutuskan auto-pick SEBELUM modal dibuka.
+// Tetap async:false, mengikuti seluruh AJAX di halaman ini.
+function poMuatBarangFOC (search) {
+  let _token = $("#_token").val()
+  let jml = 0
+
+  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Mencari data...</td></tr>'
+
+  $.ajax({
+    url: "{!! url('polistbarangfoc') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token,
+      search
+    },
+    success: function (res) {
+      dataAddAddListItem = res
+      jml = res.length
+    },
+    error: function (err) {
+      console.log(err)
+      dataAddAddListItem = []
+      jml = 0
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+
+  return jml
+}
+
+// Render isi dataAddAddListItem ke tabel browse FOC.
+function poRenderBarangFOC () {
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
+
+  if (!dataAddAddListItem.length) {
+    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>'
+    return
+  }
+
+  let rowTable = ``
+  dataAddAddListItem.forEach((item, i) => {
+    rowTable += `
+    <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
+      <td style="">${item.Kodebrg}</td>
+      <td style="">${item.NamaBrg}</td>
+      <td style="">${item.partNumber}</td>
+      <td style="">${item.NamaMerk}</td>
+    </tr>`
+  });
+
+  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable
+
+  $("#tabel_add_list_barang_foc").DataTable({
+    "lengthChange": false,
+    "paging": false,
+    "searching": false,
+  });
+}
+
 // Pencarian server-side untuk browse FOC (Master Barang) - mengikuti pola searchBarangAll
 // di pembelianpermintaanagen/nonagen: hanya jalan saat Enter, cari lewat kode+nama barang.
+// Di dalam modal tidak ada auto-pick: satu hasil tetap ditampilkan sebagai satu baris
+// yang harus diklik, sama seperti searchBarangAll di pembelianpermintaanagen.
 function searchBarangFOC (e) {
   if (e.which != 13) { return }
 
@@ -11531,50 +11690,8 @@ function searchBarangFOC (e) {
     return
   }
 
-  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Mencari data...</td></tr>'
-
-  let _token = $("#_token").val()
-
-  $.ajax({
-    url: "{!! url('polistbarangfoc') !!}",
-    type: "get",
-    async: false,
-    data: {
-      _token,
-      search
-    },
-    success: function (res) {
-      dataAddAddListItem = res
-
-      if (!res.length) {
-        document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>'
-        return
-      }
-
-      let rowTable = ``
-      dataAddAddListItem.forEach((item, i) => {
-        rowTable += `
-        <tr class="pick-row" onclick="buttonAddAddPickBarangFOCPlus(${i})">
-          <td style="">${item.Kodebrg}</td>
-          <td style="">${item.NamaBrg}</td>
-          <td style="">${item.partNumber}</td>
-          <td style="">${item.NamaMerk}</td>
-        </tr>`
-      });
-
-      document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable
-
-      $("#tabel_add_list_barang_foc").DataTable({
-        "lengthChange": false,
-        "paging": false,
-        "searching": false,
-      });
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-  })
+  poMuatBarangFOC(search)
+  poRenderBarangFOC()
 }
 
 function generateInputNumber (id , style, classes, onchange) {
@@ -11906,28 +12023,30 @@ function LockFreeOfCharge(){
       }
     });
 
-    function performSearch () {
+    // autoPick hanya true kalau dipanggil dari Enter. Menekan tombol browse berarti user
+    // memang ingin melihat daftarnya, jadi modal selalu dibuka - tetap terfilter kalau
+    // kolom kode barang sudah terisi.
+    //
+    // Penerapan filter ke DataTables tidak lagi dilakukan di sini: dulu fungsi ini
+    // menembak ketiga id tabel picker sekaligus padahal hanya satu yang relevan.
+    // Sekarang tiap cabang di buttonAddAddListBarang() yang memfilter tabel miliknya
+    // sendiri, sesuai pilihan dropdown "+ Dari".
+    function performSearch (autoPick = false) {
       const searchValue = document.getElementById('input_add_add_kodebarang').value.trim();
 
-      buttonAddAddListBarang();
+      if (autoPick && !searchValue) {
+        alertify.warning("Silakan ketik kode atau nama barang terlebih dahulu.")
+        return
+      }
 
-      // Apply search to all DataTables
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfoc')) {
-        $('#tabel_add_list_barang_nonfoc').DataTable().search(searchValue).draw();
-      }
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_nonfocplus')) {
-        $('#tabel_add_list_barang_nonfocplus').DataTable().search(searchValue).draw();
-      }
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) {
-        $('#tabel_add_list_barang_foc').DataTable().search(searchValue).draw();
-      }
+      buttonAddAddListBarang({ keyword: searchValue, autoPick: autoPick });
     }
 
     // Keyboard event
     document.getElementById('input_add_add_kodebarang').addEventListener('keypress', function(event) {
       if (event.key === 'Enter') {
           event.preventDefault();
-          performSearch();
+          performSearch(true);
       }
     });
 
