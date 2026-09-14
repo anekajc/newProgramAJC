@@ -112,23 +112,23 @@
     color: #343a40 !important;
   }
 
-  .btn-close-pill {
-    background-color: #fdeaea;
-    border-color: #f7cfcf;
-    color: #dc2626;
+  .btn-danger-solid:hover,
+  .btn-danger-solid:focus,
+  .btn-danger-solid:active {
+    color: #fff;
   }
 
-  .btn-close-pill:hover,
-  .btn-close-pill:focus {
-    background-color: #fbdcdc;
-    border-color: #f2bcbc;
+  .btn-danger-solid {
     color: #b91c1c;
+    background-color: #fef2f2;
+    border: 1.5px solid #fecaca;
   }
 
-  .btn-close-pill:active {
-    background-color: #f8cfcf !important;
-    border-color: #eda9a9 !important;
-    color: #b91c1c !important;
+  .btn-danger-solid:hover,
+  .btn-danger-solid:focus,
+  .btn-danger-solid:active {
+    background-color: #c82333;
+    border-color: #bd2130;
   }
   </style>
 
@@ -331,7 +331,7 @@
 
       @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
         <div class="action-group">
-          <button class="btn btn-primary" type="button" onclick="buttonAdd()">Tambah</button>
+          <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
         </div>
       @endif
     </div>
@@ -424,7 +424,7 @@
       <h2 id="formTitle" style="display:none;"></h2>
     </div>
     <div class="col-6 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-close-pill"
+      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid"
           onclick="buttonCloseForm()">
         Close
       </button>
@@ -821,7 +821,7 @@
                         <div class="input-group form-group">
                           <input type="text" class="form-control" id="input_add_add_kodebarang">
                           <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" tabindex="1">
-                            <i class="bi bi-plus"></i>
+                            <i class="bi bi-search"></i>
                           </button>
                         </div>
                       </div>
@@ -971,7 +971,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang"  class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" disabled><i class="bi bi-plus"></i></button>
+              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang"  class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -2034,29 +2034,21 @@
   #modalPickGudangPRT thead th {
     background: #f8f9fb !important;
     color: #6b7280 !important;
-    font-size: 14px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .04em;
     font-weight: 600;
-    padding: 14px 16px !important;
+
     border-bottom: 1px solid #e7e9ee !important;
     border-top: none !important;
-    border-left: none !important;
-    border-right: none !important;
-  }
+    
 
-  #modalPickGudangPRT thead th:first-child {
-    width: 30%;
   }
 
   #modalPickGudangPRT tbody td {
     border-top: none !important;
     border-bottom: 1px solid #f1f3f5 !important;
-    border-left: none !important;
-    border-right: none !important;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 18px 16px;
+    font-size: 13px;
     vertical-align: middle;
   }
 
@@ -2070,7 +2062,7 @@
     float: none;
     width: 100%;
     text-align: right;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 
   #modalPickGudangPRT .dataTables_filter label {
@@ -2080,28 +2072,22 @@
   }
 
   #modalPickGudangPRT .dataTables_filter input {
-    font-size: 15px;
+    font-size: 13px;
     margin-left: 0;
-    width: 280px;
+    width: 240px;
     max-width: 100%;
-    padding: 10px 12px 10px 38px;
+    padding: 7px 10px 7px 32px;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     outline: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: 12px center;
+    background-position: 10px center;
   }
 
   #modalPickGudangPRT .dataTables_filter input:focus {
     border-color: #2563eb;
     box-shadow: 0 0 0 3px #e8edff;
-  }
-
-  #modalPickGudangPRT .dataTables_info,
-  #modalPickGudangPRT .dataTables_paginate {
-    font-size: 14px;
-    margin-top: 16px !important;
   }
 </style>
 
@@ -2118,7 +2104,7 @@
         <div class="container-fluid">
           <div class="row">
             <div class="col-12" style="overflow:auto;">
-              <table id="tabelPickGudangPRT" class="table table-hover table-responsive-lg">
+              <table id="tabelPickGudangPRT" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center">
                   <tr>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
@@ -2132,7 +2118,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-pill-action btn-close-pill" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
