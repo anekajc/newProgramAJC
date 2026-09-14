@@ -231,23 +231,16 @@ class PermintaanTransferBarangController extends Controller
 
   public function listGudangAsal (Request $req) {
 
-    $listData = DB::connection('SML')->select(" select a.KodeGdg, a.Nama NamaGdg, a.IsRusak from dbGudang a 
-                                                left outer join dbPemakaiGdg b on b.kodegdg=a.kodegdg 
-                                                WHERE B.UserID='SA' AND a.KODEGDG != :kodeGudangTujuan
-                                                group by a.KodeGdg, a.Nama, a.IsRusak 
-                                                order by a.KodeGdg
-                                                ", ["kodeGudangTujuan" => $req -> kodeGudangTujuan]);
+    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, IsRusak from dbGudang order by KodeGdg ");
+    // TEMP DEBUG: filter exclude dimatikan dulu untuk memastikan tabel/koneksi mengembalikan data.
+    // Kalau ini sudah muncul isinya, filter != :kodeGudangTujuan akan dipasang kembali.
     return $listData;
   }
 
     public function listGudangTujuan (Request $req) {
 
-    $listData = DB::connection('SML')->select(" select a.KodeGdg, a.Nama NamaGdg, a.IsRusak from dbGudang a 
-                                                left outer join dbPemakaiGdg b on b.kodegdg=a.kodegdg 
-                                                WHERE B.UserID='SA' AND a.KODEGDG != :kodeGudangAsal
-                                                group by a.KodeGdg, a.Nama, a.IsRusak 
-                                                order by a.KodeGdg
-                                                ", ["kodeGudangAsal" => $req -> kodeGudangAsal]);
+    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, IsRusak from dbGudang order by KodeGdg ");
+    // TEMP DEBUG: filter exclude dimatikan dulu untuk memastikan tabel/koneksi mengembalikan data.
     return $listData;
   }
 

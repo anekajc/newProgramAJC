@@ -487,17 +487,13 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="input-group mb-3">
-                {{-- Gudang Asal: pola "resolve-or-pick" (lihat guide-update-barang.md,
-                     disamakan dengan #input_gudang di gudang/ubahkemasanbarang.blade.php) --
-                     bisa diketik langsung + Enter, atau pakai tombol search; match persis
-                     KodeGdg langsung isi field ini, kalau tidak baru modal
-                     #modalPickGudangPRT terbuka (bukan lagi modal shared #form). --}}
-                <input type="text" class="form-control text-left" value='-' id="input_add_kodeGudangAsal"
-                  onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveGudangAsal($('#input_add_kodeGudangAsal').val()); }">
-                <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" id="buttonAddListGudangAsal" onclick="resolveGudangAsal($('#input_add_kodeGudangAsal').val())">
-                  <i class="bi bi-search"></i>
-                </button>
+              <div class="form-group">
+                {{-- Gudang Asal: dropdown select, disamakan dengan #input_gudang
+                     di gudang/ubahkemasanbarang.blade.php. Opsi dimuat lewat
+                     muatDropdownGudangAsal() (endpoint prtlistgudangasal), otomatis
+                     exclude Gudang Tujuan yang sedang dipilih supaya asal != tujuan. --}}
+                <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="onChangeGudangAsal()">
+                </select>
               </div>
             </div>
 
@@ -518,13 +514,12 @@
               </div>
             </div>
             <div class="col-md-6">
-              <div class="input-group mb-3">
-                {{-- Gudang Tujuan: pola sama dengan Gudang Asal di atas. --}}
-                <input type="text" class="form-control text-left" value='-' id="input_add_kodeGudangTujuan"
-                  onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveGudangTujuan($('#input_add_kodeGudangTujuan').val()); }">
-                <button class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" id="buttonAddListGudangTujuan" onclick="resolveGudangTujuan($('#input_add_kodeGudangTujuan').val())">
-                  <i class="bi bi-search"></i>
-                </button>
+              <div class="form-group">
+                {{-- Gudang Tujuan: dropdown select, pola sama dengan Gudang Asal di atas.
+                     Opsi dimuat lewat muatDropdownGudangTujuan() (endpoint
+                     prtlistgudangtujuan), otomatis exclude Gudang Asal yang sedang dipilih. --}}
+                <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="onChangeGudangTujuan()">
+                </select>
               </div>
             </div>
 
@@ -790,7 +785,7 @@
         <div class="row">
           <div class="col-md-12 mt-2 text-right">
             <button id='buttonPlusTambahItem' type="button" class="btn btn-lg btn-pill-flat btn-chip-biru"
-              onclick="buttonAddAddItem()"><b>+ Tambah Item</b></button>
+              onclick="buttonAddAddItem()">Tambah Item</button>
           </div>
         </div>
 
@@ -884,7 +879,7 @@
               onclick="closeShowHideAdd()">Batal</button>
 
               <button type="button" id="submitAddAdd" class="btn btn-lg btn-pill-action btn-chip-biru"
-              onclick="submitAddAdd()">Submit Add</button>
+              onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-lg btn-pill-action btn-chip-biru"
               onclick="submitAddEdit()">Submit Edit</button>
@@ -2012,128 +2007,6 @@
 
 @include('gudang.modals/modalPRTAdd')
 
-<style>
-  #modalPickGudangPRT tbody tr.pick-row {
-    cursor: pointer;
-    transition: background-color .12s;
-  }
-
-  #modalPickGudangPRT tbody tr.pick-row:hover td {
-    background-color: #eef2ff;
-  }
-
-  #modalPickGudangPRTLabel {
-    font-size: 1.75rem;
-    font-weight: 700;
-  }
-
-  #modalPickGudangPRT .modal-body {
-    padding: 24px 32px 32px;
-  }
-
-  #modalPickGudangPRT thead th {
-    background: #f8f9fb !important;
-    color: #6b7280 !important;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 600;
-
-    border-bottom: 1px solid #e7e9ee !important;
-    border-top: none !important;
-    
-
-  }
-
-  #modalPickGudangPRT tbody td {
-    border-top: none !important;
-    border-bottom: 1px solid #f1f3f5 !important;
-    font-size: 13px;
-    vertical-align: middle;
-  }
-
-  #modalPickGudangPRT .dataTables_wrapper > .row:first-child > div {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-
-  #modalPickGudangPRT .dataTables_filter {
-    display: block;
-    float: none;
-    width: 100%;
-    text-align: right;
-    margin-bottom: 8px;
-  }
-
-  #modalPickGudangPRT .dataTables_filter label {
-    font-size: 0;
-    margin: 0;
-    display: inline-block;
-  }
-
-  #modalPickGudangPRT .dataTables_filter input {
-    font-size: 13px;
-    margin-left: 0;
-    width: 240px;
-    max-width: 100%;
-    padding: 7px 10px 7px 32px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    outline: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 10px center;
-  }
-
-  #modalPickGudangPRT .dataTables_filter input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px #e8edff;
-  }
-</style>
-
-<div class="modal fade" id="modalPickGudangPRT" tabindex="-1" role="dialog" aria-labelledby="modalPickGudangPRTLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="modalPickGudangPRTLabel">Pilih Gudang</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12" style="overflow:auto;">
-              <table id="tabelPickGudangPRT" class="table table-bordered table-hover table-striped table-responsive-lg">
-                <thead class="text-center">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  </tr>
-                </thead>
-                <tbody id="tabelPickGudangPRT_data" class="text-left"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" data-dismiss="modal">Batal</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  if (typeof jQuery === 'undefined') { return }
-
-  jQuery(document).on('shown.bs.modal', '#modalPickGudangPRT', function () {
-    jQuery('#modalPickGudangPRT .dataTables_filter input').attr('placeholder', 'Cari Data')
-  })
-})
-</script>
-
 @endsection
 
 @section('js')
@@ -2562,7 +2435,7 @@ $(document).ready(function(){
           if (dataAddAddListItem.length === 0) {
             buttonAddAddListBarang();
             $("#tabel_data_add_list_barangall").html(
-              `<tr><td class="text-center" colspan="3">Tidak ada data</td></tr>`
+              `<tr><td class="text-center" colspan="2">Tidak ada data</td></tr>`
             );
             return;
           }
@@ -2577,13 +2450,7 @@ $(document).ready(function(){
           const rows = dataAddAddListItem
             .map(
               (item, i) => `
-              <tr>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button"
-                          onclick="buttonAddAddPickBarangAll(${i})">
-                    <i class="bi bi-plus"></i>
-                  </button>
-                </td>
+              <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
                 <td>${item.KODEBRG}</td>
                 <td>${item.NAMABRG}</td>
               </tr>`
@@ -3610,105 +3477,6 @@ function buttonAddListValas () {
 
 }
 
-function buttonAddListGudangAsal () 
-{
-
-  testValue = document.getElementById('input_add_kodeGudangTujuan').value
-
-  document.getElementById("titleGudang").innerHTML = "Gudang Asal"
-
-  $('#tabel_add_list_gudang').DataTable().destroy();
-  $.ajax({
-    url: "{!! url('prtlistgudangasal') !!}",
-    type: "get",
-    async: false,
-    data: {
-      kodeGudangTujuan : testValue
-    },
-    success: function(res) {
-      let rowTable = ``
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="buttonAddPickGudangAsal('${item.KodeGdg}' , '${item.NamaGdg}')" type="button" ><i class="bi bi-plus"></i></button>
-        </td>
-        <td>${item.KodeGdg}</td>
-        <td>${item.NamaGdg}</td>
-        </tr>`
-      });
-
-      if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
-      }
-      document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable
-      $("#tabel_add_list_gudang").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-      });
-
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListGudang').show();
-      $("#form").modal('toggle')
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-
-  })
-
-}
-
-function buttonAddListGudangTujuan () 
-{
-
-  testValue = document.getElementById('input_add_kodeGudangAsal').value
-  document.getElementById("titleGudang").innerHTML = "Gudang Tujuan"
-
-  $('#tabel_add_list_gudang').DataTable().destroy();
-  $.ajax({
-    url: "{!! url('prtlistgudangtujuan') !!}",
-    type: "get",
-    async: false,
-    data: {
-      kodeGudangAsal : testValue
-    },
-    success: function(res) {
-      let rowTable = ``
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="buttonAddPickGudangTujuan('${item.KodeGdg}' , '${item.NamaGdg}')" type="button" ><i class="bi bi-plus"></i></button>
-        </td>
-        <td>${item.KodeGdg}</td>
-        <td>${item.NamaGdg}</td>
-        </tr>`
-      });
-
-      if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
-      }
-      document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable
-      $("#tabel_add_list_gudang").DataTable({
-        "lengthChange": false,
-          "paging": false,
-      });
-
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListGudang').show();
-      $("#form").modal('toggle')
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-
-  })
-
-}
-
 function buttonAddListBackOffice () {
   $.ajax({
     url: "{!! url('solistbackoffice') !!}",
@@ -4670,20 +4438,14 @@ function buttonAddAddListBarang () {
 
         if (!res.length) {
           document.getElementById("tabel_data_add_list_barangall").innerHTML =
-            `<tr><td class="text-center" colspan="3">Tidak ada data</td></tr>`;
+            `<tr><td class="text-center" colspan="2">Tidak ada data</td></tr>`;
           return;
         }
 
         let rowTable = ""
         res.forEach((item, i) => {
           rowTable += `
-            <tr>
-              <td class="text-center">
-                <button class="btn btn-primary btn-sm"
-                  onclick="buttonAddAddPickBarangAll(${i})" type="button">
-                  <i class="bi bi-plus"></i>
-                </button>
-              </td>
+            <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
             </tr>`;
@@ -4756,150 +4518,105 @@ function cekSatuanBarang (KodeBrg) {
 }
 
 
-function buttonAddPickGudangAsal (kode, nama) {
-  console.log('buttonAddPickPelanggan')
-  console.log(kode,nama)
-  document.getElementById("input_add_kodeGudangAsal").value = kode
-  document.getElementById("input_add_namaGudangAsal").value = nama
-  buttonAddListBatal()
-}
+// Gudang Asal & Tujuan: dropdown select, disamakan dengan #input_gudang
+// di gudang/ubahkemasanbarang.blade.php. Opsi Asal & Tujuan saling
+// exclude (tidak boleh sama kodenya), makanya masing-masing dropdown
+// dimuat ulang setiap kali pasangannya berubah.
+let listGudangAsalDropdown = [];
+let listGudangTujuanDropdown = [];
 
-function buttonAddPickGudangTujuan (kode, nama) {
-  console.log('buttonAddPickPelanggan')
-  console.log(kode,nama)
-  document.getElementById("input_add_kodeGudangTujuan").value = kode
-  document.getElementById("input_add_namaGudangTujuan").value = nama
-  buttonAddListBatal()
-}
-
-let gudangPRTMode = 'asal';
-let gudangPRTLookupBusy = false;
-let listGudangPRTPicker = [];
-let gudangPRTTablePending = null;
-let gudangPRTSearchPending = '';
-
-function fetchGudangPRTList(mode, callback) {
-  gudangPRTLookupBusy = true;
-  let url = mode === 'asal' ? "{!! url('prtlistgudangasal') !!}" : "{!! url('prtlistgudangtujuan') !!}";
-  let data = mode === 'asal'
-    ? { kodeGudangTujuan: document.getElementById('input_add_kodeGudangTujuan').value }
-    : { kodeGudangAsal: document.getElementById('input_add_kodeGudangAsal').value };
+function muatDropdownGudangAsal() {
+  let kodeGudangTujuan = $('#input_add_kodeGudangTujuan').val() || '';
 
   $.ajax({
-    url: url,
+    url: "{!! url('prtlistgudangasal') !!}",
     type: 'get',
-    data: data,
+    async: false,
+    data: { kodeGudangTujuan },
     success: function (res) {
-      gudangPRTLookupBusy = false;
-      callback(res);
+      listGudangAsalDropdown = res;
+
+      let selectEl = document.getElementById('input_add_kodeGudangAsal');
+      let kodeTerpilih = selectEl.value;
+
+      selectEl.innerHTML = '<option value="">Pilih Gudang</option>';
+      listGudangAsalDropdown.forEach((item) => {
+        let opt = document.createElement('option');
+        opt.value = item.KodeGdg;
+        opt.textContent = `${item.KodeGdg} - ${item.NamaGdg}`;
+        selectEl.appendChild(opt);
+      });
+
+      if (listGudangAsalDropdown.some(item => item.KodeGdg === kodeTerpilih)) {
+        selectEl.value = kodeTerpilih;
+      }
+
+      onChangeGudangAsal(false);
     },
     error: function (err) {
-      gudangPRTLookupBusy = false;
       console.log(err);
       alertify.warning('Terjadi kesalahan, silahkan refresh browser');
     }
   });
 }
 
-function findExactGudangPRT(list, term) {
-  let needle = term.toLowerCase();
-  return list.find(g => String(g.KodeGdg || '').trim().toLowerCase() === needle);
-}
+function muatDropdownGudangTujuan() {
+  let kodeGudangAsal = $('#input_add_kodeGudangAsal').val() || '';
 
-function resolveGudangAsal(term) {
-  resolveGudangPRT(term, 'asal');
-}
+  $.ajax({
+    url: "{!! url('prtlistgudangtujuan') !!}",
+    type: 'get',
+    async: false,
+    data: { kodeGudangAsal },
+    success: function (res) {
+      listGudangTujuanDropdown = res;
 
-function resolveGudangTujuan(term) {
-  resolveGudangPRT(term, 'tujuan');
-}
+      let selectEl = document.getElementById('input_add_kodeGudangTujuan');
+      let kodeTerpilih = selectEl.value;
 
-function resolveGudangPRT(term, mode) {
-  term = (term || '').trim();
-  gudangPRTMode = mode;
+      selectEl.innerHTML = '<option value="">Pilih Gudang</option>';
+      listGudangTujuanDropdown.forEach((item) => {
+        let opt = document.createElement('option');
+        opt.value = item.KodeGdg;
+        opt.textContent = `${item.KodeGdg} - ${item.NamaGdg}`;
+        selectEl.appendChild(opt);
+      });
 
-  if (term === '' || term === '-') {
-    openGudangPRTPicker(mode);
-    return;
-  }
+      if (listGudangTujuanDropdown.some(item => item.KodeGdg === kodeTerpilih)) {
+        selectEl.value = kodeTerpilih;
+      }
 
-  if (gudangPRTLookupBusy) return;
-
-  fetchGudangPRTList(mode, function (res) {
-    let hit = findExactGudangPRT(res, term);
-    hit ? applyGudangPRTToForm(hit, mode) : showGudangPRTPickerWithList(res, term, mode);
+      onChangeGudangTujuan(false);
+    },
+    error: function (err) {
+      console.log(err);
+      alertify.warning('Terjadi kesalahan, silahkan refresh browser');
+    }
   });
 }
 
-function applyGudangPRTToForm(item, mode) {
-  if (mode === 'asal') {
-    document.getElementById('input_add_kodeGudangAsal').value = item.KodeGdg;
-    document.getElementById('input_add_namaGudangAsal').value = item.NamaGdg;
-  } else {
-    document.getElementById('input_add_kodeGudangTujuan').value = item.KodeGdg;
-    document.getElementById('input_add_namaGudangTujuan').value = item.NamaGdg;
+// refreshLawan=false dipakai internal (dipanggil dari muatDropdownGudang*)
+// supaya tidak muter tak berujung; saat user yang ganti pilihan (lewat
+// atribut onchange di HTML), refreshLawan default true supaya dropdown
+// pasangannya (Asal<->Tujuan) ikut dimuat ulang untuk exclude kode baru.
+function onChangeGudangAsal(refreshLawan) {
+  let kode = $('#input_add_kodeGudangAsal').val();
+  let item = listGudangAsalDropdown.find(g => g.KodeGdg === kode);
+  document.getElementById('input_add_namaGudangAsal').value = item ? item.NamaGdg : '';
+
+  if (refreshLawan !== false) {
+    muatDropdownGudangTujuan();
   }
-  $('#modalPickGudangPRT').modal('hide');
 }
 
-function openGudangPRTPicker(mode) {
-  gudangPRTMode = mode;
-  fetchGudangPRTList(mode, function (res) {
-    showGudangPRTPickerWithList(res, '', mode);
-  });
-}
+function onChangeGudangTujuan(refreshLawan) {
+  let kode = $('#input_add_kodeGudangTujuan').val();
+  let item = listGudangTujuanDropdown.find(g => g.KodeGdg === kode);
+  document.getElementById('input_add_namaGudangTujuan').value = item ? item.NamaGdg : '';
 
-function showGudangPRTPickerWithList(list, term, mode) {
-  gudangPRTMode = mode;
-  document.getElementById('modalPickGudangPRTLabel').innerText =
-    mode === 'asal' ? 'Pilih Gudang Asal' : 'Pilih Gudang Tujuan';
-
-  $('#modalPickGudangPRT').modal('show');
-  initGudangPRTTable(list, term);
-}
-
-function initGudangPRTTable(list, searchTerm) {
-  if (!$('#modalPickGudangPRT').is(':visible')) {
-    gudangPRTTablePending = list;
-    gudangPRTSearchPending = searchTerm || '';
-    return;
+  if (refreshLawan !== false) {
+    muatDropdownGudangAsal();
   }
-
-  listGudangPRTPicker = list;
-  let rowTable = '';
-  list.forEach((item, i) => {
-    rowTable += `<tr class="pick-row" onclick="buttonPickGudangPRT(${i})">
-      <td>${item.KodeGdg}</td>
-      <td>${item.NamaGdg}</td>
-    </tr>`;
-  });
-
-  if (!list.length) {
-    rowTable = `<tr><td colspan="2">Tidak ada data</td></tr>`;
-  }
-
-  $('#tabelPickGudangPRT_data').html(rowTable);
-
-  if ($.fn.DataTable.isDataTable('#tabelPickGudangPRT')) {
-    $('#tabelPickGudangPRT').DataTable().destroy();
-  }
-  $('#tabelPickGudangPRT').DataTable({ lengthChange: false, paging: true })
-    .search(searchTerm || '').draw();
-}
-
-$(document).on('shown.bs.modal', '#modalPickGudangPRT', function () {
-  if (gudangPRTTablePending) {
-    initGudangPRTTable(gudangPRTTablePending, gudangPRTSearchPending);
-    gudangPRTTablePending = null;
-  } else if ($.fn.DataTable.isDataTable('#tabelPickGudangPRT')) {
-    let dt = $('#tabelPickGudangPRT').DataTable();
-    dt.columns.adjust();
-    dt.search(gudangPRTSearchPending || '').draw();
-  }
-});
-
-function buttonPickGudangPRT(index) {
-  applyGudangPRTToForm(listGudangPRTPicker[index], gudangPRTMode);
 }
 
 function buttonAddPickAlamatKirim (index) {
@@ -5037,8 +4754,6 @@ function cleanFormAddAdd () {
 function lockFormAdd () {
   document.getElementById("input_add_keterangan").disabled = true;
   document.getElementById("buttonPlusTambahItem").hidden = true;
-  document.getElementById("buttonAddListGudangAsal").hidden = true;
-  document.getElementById("buttonAddListGudangTujuan").hidden = true;
   document.getElementById("input_add_kodeGudangAsal").disabled = true;
   document.getElementById("input_add_kodeGudangTujuan").disabled = true;
 }
@@ -5067,18 +4782,18 @@ function buttonShowHideHeaderDetail () {
 function unlockFormAdd () {
   document.getElementById("input_add_keterangan").disabled = false;
   document.getElementById("buttonPlusTambahItem").hidden = false;
-  document.getElementById("buttonAddListGudangAsal").hidden = false;
-  document.getElementById("buttonAddListGudangTujuan").hidden = false;
   document.getElementById("input_add_kodeGudangAsal").disabled = false;
   document.getElementById("input_add_kodeGudangTujuan").disabled = false;
 }
 
 function cleanFormAdd () {
-  document.getElementById("input_add_kodeGudangAsal").value = '-'
+  document.getElementById("input_add_kodeGudangAsal").value = ''
   document.getElementById("input_add_namaGudangAsal").value = ''
-  document.getElementById("input_add_kodeGudangTujuan").value = '-'
+  document.getElementById("input_add_kodeGudangTujuan").value = ''
   document.getElementById("input_add_namaGudangTujuan").value = ''
   document.getElementById("input_add_keterangan").value = ''
+  muatDropdownGudangAsal()
+  muatDropdownGudangTujuan()
 }
 
 function buttonEdit (NOBUKTI) {
@@ -5089,6 +4804,8 @@ function buttonEdit (NOBUKTI) {
   // $('.showhidemodalbodyaddmain').hide();
   $('#buttonSubmitSaveHeader').show();
   unlockFormAdd()
+  muatDropdownGudangAsal()
+  muatDropdownGudangTujuan()
 
   let akses = $("#akses_iskoreksi").val();
 
