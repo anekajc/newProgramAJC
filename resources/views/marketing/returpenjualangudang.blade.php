@@ -434,7 +434,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal" onclick="buttonCloseModalAddPRJ()">Batal</button>
-        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-lg btn-primary">Submit</button>
+        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-lg btn-chip-biru">Simpan</button>
       </div>
     </div>
   </div>
@@ -880,11 +880,11 @@
           font-weight: 600;
           text-transform: uppercase;">Batal</button>
 
-          <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary" style="height: 30px;
+          <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-chip-biru" style="height: 30px;
           border-radius: 20px;
           font-size: 0.75rem;
           font-weight: 600;
-          text-transform: uppercase;">Submit Edit</button>
+          text-transform: uppercase;">Simpan Edit</button>
           <!-- <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary" >Edit</button> -->
         </div>
 
@@ -2120,8 +2120,6 @@ if (pcekglobal) {
 
 function buttonDetailKoreksi (nobukti) {
 
-document.getElementById('pageTitleBreadcrumb').textContent = 'Retur Penjualan Gudang / Detail Data'
-
 let pcekglobal = 0
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",
@@ -2332,10 +2330,10 @@ if (pcekglobal) {
             let terimaCol = mode === 'detail' ? '' : `<td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>`
             let qntTerimaCol = mode === 'detail'
               ? `<td class="text-right">${qntsisa}</td>`
-              : `<td class="text-center"><input onchange="" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>`
+              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>`
             let qntRejectCol = mode === 'detail'
               ? `<td class="text-right">0.00</td>`
-              : `<td class="text-center"><input onchange="" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="number" min=0 value='0.00'></td>`
+              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="number" min=0 value='0.00'></td>`
             rowTable += `<tr>
             ${terimaCol}
             <td>${item.KODEBRG}</td>
@@ -2403,6 +2401,17 @@ function buttonDetail (nobukti, namacustsupp, ppn) {
   $('#buttonSubmitAdd').hide()
 }
 
+// Validasi live per-baris di Form SPR: Qty Reject tidak boleh melebihi Qty
+// Terima. Dipasang di onchange kedua input (Terima & Reject) supaya
+// pengecekan jalan begitu salah satu nilainya diubah, bukan menunggu submit.
+function checkRejectVsTerima (i) {
+  let terima = Number($(`#input_add_qntTerima${i}`).val()) || 0
+  let reject = Number($(`#input_add_qntReject${i}`).val()) || 0
+  if (reject > terima) {
+    alertify.warning("QTY Reject tidak boleh melebihi qty terima")
+  }
+}
+
 function submitAdd () {
   let checkDate = new Date($("#input_add_tanggal").val())
   let periode_bulan = document.getElementById("periode_bulan").value
@@ -2439,8 +2448,6 @@ function submitAdd () {
         if (Number(checkQntReject)  > Number(dataTableAdd[i].QntSisa)) {
           checkQnt = 1
         }
-
-
 
         if(Number(checkQntTerima)  < 0) {
           checkMinus = 1

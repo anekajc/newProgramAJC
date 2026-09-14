@@ -1145,25 +1145,6 @@ class HeaderTableController extends Controller
 
       $headertable  = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 1"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
       $headertable2 = DB::connection("SML")->select("select *  from dbheadertable where  href= :href  and username = :username and urut = 2"  , ["username" => \Auth::user()->username , "href" => $req->href ]);
-    // Generic fallback for every page ported to the "changeable headers"
-    // (window.ReportTable) pattern that isn't one of the hardcoded branches above
-    // (so/invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual, etc.). Those
-    // pages call doSimpanHeader() on first load via saveHeaderTable() (generic,
-    // works for any href already), but without this branch getHeaderTable() never
-    // read a saved config back for them -- headertableheader stayed permanently
-    // empty, so doSetHeader() always fell into its "no saved config" branch and
-    // re-applied the page's own default column set on every reload, silently
-    // discarding any column reorder/hide/show the user made in a previous visit.
-//     else if ($req->href) {
-//       $headertable = $req->urut
-//         ? DB::connection("SML")->select(
-//             "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
-//             ["username" => $username, "href" => $req->href, "urut" => $req->urut]
-//           )
-//         : DB::connection("SML")->select(
-//             "select * from DBHEADERTABLE where username = :username and href = :href",
-//             ["username" => $username, "href" => $req->href]
-//           );
 
       if (count($headertable) > 0) {
         $isnumberheadertable = json_decode($headertable[0]->isnumber);
@@ -1628,6 +1609,39 @@ class HeaderTableController extends Controller
 
       $desimal  = $this->desimalHeaderTable($headertable  , $isnumberheadertable);
       $desimal2 = $this->desimalHeaderTable($headertable2 , $isnumberheadertable2);
+    }
+    // Generic fallback for every page ported to the "changeable headers"
+    // (window.ReportTable) pattern that isn't one of the hardcoded branches above
+    // (returpenjualangudang/perintahreturjual/kreditnote/notareturpenjualan, etc.).
+    // Those pages call doSimpanHeader() on first load via saveHeaderTable() (generic,
+    // works for any href already), but without this branch getHeaderTable() never
+    // read a saved config back for them -- headertableheader stayed permanently
+    // empty, so doSetHeader() always fell into its "no saved config" branch and
+    // re-applied the page's own default column set on every reload, silently
+    // discarding any column reorder/hide/show the user made in a previous visit.
+    else if ($req->href) {
+      $headertable = $req->urut
+        ? DB::connection("SML")->select(
+            "select * from DBHEADERTABLE where username = :username and href = :href and urut = :urut",
+            ["username" => $username, "href" => $req->href, "urut" => $req->urut]
+          )
+        : DB::connection("SML")->select(
+            "select * from DBHEADERTABLE where username = :username and href = :href",
+            ["username" => $username, "href" => $req->href]
+          );
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      }
+      // Kalau belum ada baris tersimpan, headertableheader dibiarkan kosong --
+      // JS halaman (doSetHeader) sudah menangani ini sendiri dengan jatuh ke
+      // default cart miliknya lalu langsung menyimpannya lewat doSimpanHeader().
+
+      $desimal = $this->desimalHeaderTable($headertable, $isnumberheadertable);
     }
     return [
       "aliasordered" => $aliasOrdered ,

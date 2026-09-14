@@ -87,6 +87,35 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+/* Perbesar glyph + pada tombol Add tanpa mengubah ukuran bingkai tombol.
+   line-height: 0 membuat ikon tidak menambah tinggi baris, jadi tinggi
+   tombol tetap sama dengan tombol Detail di sebelahnya. Port 1:1 dari
+   returpenjualangudang.blade.php / returpembeliangudang.blade.php. */
+.btn .bi-plus {
+  font-size: 1.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
 </style>
 @endsection
 
@@ -374,7 +403,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input disabled type="number" class="form-control text-right" id="input_add_kurs" value="0.00">
+                  <input disabled type="text" class="form-control text-right" id="input_add_kurs" value="0.00">
                 </div>
               </div>
 
@@ -399,7 +428,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_add_presentase" onblur="onChangePresentase()" value="0.00">
+                  <input type="text" class="form-control text-right" id="input_add_presentase" onblur="onChangePresentase()" value="0.00">
                 </div>
               </div>
 
@@ -421,7 +450,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_add_dppx" onblur="onChangeDPP()" value="0.00">
+                  <input type="text" class="form-control text-right" id="input_add_dppx" onblur="onChangeDPP()" value="0.00">
                 </div>
               </div>
 
@@ -453,8 +482,8 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button id="buttonSubmitAdd" type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
-    <button id="buttonSubmitEdit" type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
+    <button id="buttonSubmitAdd" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button>
+    <button id="buttonSubmitEdit" type="button" class="btn btn-chip-biru" onclick="submitEdit()">Simpan Edit</button>
   </div>
 </div>
 </div>
@@ -596,7 +625,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input disabled type="number" class="form-control text-right" id="input_detail_kurs" value="0.00">
+                  <input disabled type="text" class="form-control text-right" id="input_detail_kurs" value="0.00">
                 </div>
               </div>
 
@@ -621,7 +650,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_detail_presentase" onblur="onChangePresentase()" value="0.00" disabled>
+                  <input type="text" class="form-control text-right" id="input_detail_presentase" onblur="onChangePresentase()" value="0.00" disabled>
                 </div>
               </div>
 
@@ -643,7 +672,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_detail_dppx" onblur="onChangeDPP()" value="0.00" disabled>
+                  <input type="text" class="form-control text-right" id="input_detail_dppx" onblur="onChangeDPP()" value="0.00" disabled>
                 </div>
               </div>
 
@@ -1188,9 +1217,9 @@ if (pcekglobal) {
       document.getElementById("input_add_customer").value = tempAdd.NamaCust
 
       document.getElementById("input_add_valas").value = tempAdd.kodevls
-      document.getElementById("input_add_kurs").value = tempAdd.kurs
+      document.getElementById("input_add_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
       document.getElementById("input_add_dpp").value = tempAdd.TotDPP ? formatAngka(parseFloat(tempAdd.TotDPP).toFixed(2)) : '0.00'
-      document.getElementById("input_add_dppx").value = tempAdd.DP ? parseFloat(tempAdd.DP).toFixed(2) : '0.00'
+      document.getElementById("input_add_dppx").value = tempAdd.DP ? formatAngka(parseFloat(tempAdd.DP).toFixed(2)) : '0.00'
       onChangeDPP()
       document.getElementById("input_add_ppn").value = tempAdd.TotPPN ? formatAngka(parseFloat(tempAdd.TotPPN).toFixed(2)) : '0.00'
       document.getElementById("input_add_total").value = tempAdd.TotNet ? formatAngka(parseFloat(tempAdd.TotNet).toFixed(2)) : '0.00'
@@ -1273,9 +1302,9 @@ function buttonDetail (NOBUKTI) {
       document.getElementById("input_detail_customer").value = tempAdd.NamaCust
 
       document.getElementById("input_detail_valas").value = tempAdd.kodevls
-      document.getElementById("input_detail_kurs").value = tempAdd.kurs
+      document.getElementById("input_detail_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
       document.getElementById("input_detail_dpp").value = tempAdd.TotDPP ? formatAngka(parseFloat(tempAdd.TotDPP).toFixed(2)) : '0.00'
-      document.getElementById("input_detail_dppx").value = tempAdd.DP ? parseFloat(tempAdd.DP).toFixed(2) : '0.00'
+      document.getElementById("input_detail_dppx").value = tempAdd.DP ? formatAngka(parseFloat(tempAdd.DP).toFixed(2)) : '0.00'
 
       document.getElementById("input_detail_ppn").value = tempAdd.TotPPN ? formatAngka(parseFloat(tempAdd.TotPPN).toFixed(2)) : '0.00'
       document.getElementById("input_detail_total").value = tempAdd.TotNet ? formatAngka(parseFloat(tempAdd.TotNet).toFixed(2)) : '0.00'
@@ -1475,15 +1504,15 @@ function buttonEdit (NOBUKTI, NOSO) {
       document.getElementById("input_add_customer").value = tempAdd.NamaCust
       document.getElementById("input_add_tanggal").value = formatDate(new Date(tempDetail.TANGGAL))
       document.getElementById("input_add_valas").value = tempAdd.kodevls
-      document.getElementById("input_add_kurs").value = tempAdd.kurs
-      document.getElementById("input_add_dpp").value = tempAdd.TotDPP ? parseFloat(tempAdd.TotDPP).toFixed(2) : '0.00'
+      document.getElementById("input_add_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
+      document.getElementById("input_add_dpp").value = tempAdd.TotDPP ? formatAngka(parseFloat(tempAdd.TotDPP).toFixed(2)) : '0.00'
       document.getElementById("input_add_ppn").value = tempAdd.TotPPN ? formatAngka(parseFloat(tempAdd.TotPPN).toFixed(2)) : '0.00'
       document.getElementById("input_add_total").value = tempAdd.TotTotal ? formatAngka(parseFloat(tempAdd.TotTotal).toFixed(2)) : '0.00'
       document.getElementById("input_add_tipeppn").value = Number(tempAdd.TipePPN)
 
-      document.getElementById("input_add_presentase").value = tempDetail.PERSEN
+      document.getElementById("input_add_presentase").value = formatAngka(parseFloat(tempDetail.PERSEN || 0).toFixed(2))
 
-      document.getElementById("input_add_dppx").value = tempDetail.DPP
+      document.getElementById("input_add_dppx").value = formatAngka(parseFloat(tempDetail.DPP || 0).toFixed(2))
 
       document.getElementById("input_add_ppnx").value = formatAngka(parseFloat(tempDetail.PPN).toFixed(2))
       document.getElementById("input_add_subtotal").value = formatAngka(parseFloat(tempDetail.SUBTOTAL).toFixed(2))
@@ -1561,15 +1590,15 @@ if (pcekglobal) {
       document.getElementById("input_detail_customer").value = tempAdd.NamaCust
       document.getElementById("input_detail_tanggal").value = formatDate(new Date(tempDetail.TANGGAL))
       document.getElementById("input_detail_valas").value = tempAdd.kodevls
-      document.getElementById("input_detail_kurs").value = tempAdd.kurs
+      document.getElementById("input_detail_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
       document.getElementById("input_detail_dpp").value = tempAdd.TotDPP ? formatAngka(parseFloat(tempAdd.TotDPP).toFixed(2)) : '0.00'
       document.getElementById("input_detail_ppn").value = tempAdd.TotPPN ? formatAngka(parseFloat(tempAdd.TotPPN).toFixed(2)) : '0.00'
       document.getElementById("input_detail_total").value = tempAdd.TotTotal ? formatAngka(parseFloat(tempAdd.TotTotal).toFixed(2)) : '0.00'
       document.getElementById("input_detail_tipeppn").value = Number(tempAdd.TipePPN)
 
-      document.getElementById("input_detail_presentase").value = tempDetail.PERSEN
+      document.getElementById("input_detail_presentase").value = formatAngka(parseFloat(tempDetail.PERSEN || 0).toFixed(2))
 
-      document.getElementById("input_detail_dppx").value = tempDetail.DPP
+      document.getElementById("input_detail_dppx").value = formatAngka(parseFloat(tempDetail.DPP || 0).toFixed(2))
 
       document.getElementById("input_detail_ppnx").value = formatAngka(parseFloat(tempDetail.PPN).toFixed(2))
       document.getElementById("input_detail_subtotal").value = formatAngka(parseFloat(tempDetail.SUBTOTAL).toFixed(2))
@@ -1611,9 +1640,9 @@ function submitAdd () {
   let nourut = $("#input_add_nourut").val();
   let noso = $("#input_add_noso").val();
   let valas = $("#input_add_valas").val();
-  let kurs = $("#input_add_kurs").val();
-  let dppx = $("#input_add_dppx").val();
-  let presentase = $("#input_add_presentase").val();
+  let kurs = $("#input_add_kurs").val().split(',').join('')
+  let dppx = $("#input_add_dppx").val().split(',').join('')
+  let presentase = $("#input_add_presentase").val().split(',').join('')
   let ppnx = $("#input_add_ppnx").val().split(',').join('')
   let subtotal = $("#input_add_subtotal").val().split(',').join('')
   let tanggal = $("#input_add_tanggal").val();
@@ -1830,9 +1859,9 @@ function submitEdit () {
   let nourut = $("#input_add_nourut").val();
   let noso = $("#input_add_noso").val();
   let valas = $("#input_add_valas").val();
-  let kurs = $("#input_add_kurs").val();
-  let dppx = $("#input_add_dppx").val();
-  let presentase = $("#input_add_presentase").val();
+  let kurs = $("#input_add_kurs").val().split(',').join('')
+  let dppx = $("#input_add_dppx").val().split(',').join('')
+  let presentase = $("#input_add_presentase").val().split(',').join('')
   let ppnx = $("#input_add_ppnx").val().split(',').join('')
   let subtotal = $("#input_add_subtotal").val().split(',').join('')
   let tanggal = $("#input_add_tanggal").val();
@@ -1910,27 +1939,17 @@ function submitEdit () {
 }
 
 function onChangePresentase () {
-  let presentase = $("#input_add_presentase").val();
+  let presentase = $("#input_add_presentase").val().split(',').join('')
   let dpp = $("#input_add_dpp").val().split(',').join('')
   let ppn = $("#input_add_ppn").val().split(',').join('')
   let total = $("#input_add_total").val().split(',').join('')
   console.log(dpp, ppn, total)
 
-
-  // dpp = dpp.replace(',' , '')
-  // dpp= Number(dpp.split(',').join(''))
-  // ppn= ppn.split(',').join('')
-  // total= total.split(',').join('')
-
-  console.log(dpp)
-
-
-
   let dppx = dpp * presentase / 100
   let ppnx = ppn * presentase / 100
   let subtotal = total * presentase / 100
 
-  document.getElementById("input_add_dppx").value = parseFloat(dppx).toFixed(2)
+  document.getElementById("input_add_dppx").value = formatAngka(parseFloat(dppx).toFixed(2))
   document.getElementById("input_add_ppnx").value = formatAngka(parseFloat(ppnx).toFixed(2))
   document.getElementById("input_add_subtotal").value = formatAngka(parseFloat(subtotal).toFixed(2))
 
@@ -1950,8 +1969,8 @@ function onChangeDPP () {
   let ppnx = ppn * presentase / 100
   let subtotal = total * presentase / 100
   // console.log(presentase,ppnx, subtotal)
-  document.getElementById("input_add_presentase").value = presentase
-  document.getElementById("input_add_dppx").value = parseFloat(dppx).toFixed(2)
+  document.getElementById("input_add_presentase").value = formatAngka(parseFloat(presentase).toFixed(2))
+  document.getElementById("input_add_dppx").value = formatAngka(parseFloat(dppx).toFixed(2))
   document.getElementById("input_add_ppnx").value = formatAngka(parseFloat(ppnx).toFixed(2))
   document.getElementById("input_add_subtotal").value = formatAngka(parseFloat(subtotal).toFixed(2))
 

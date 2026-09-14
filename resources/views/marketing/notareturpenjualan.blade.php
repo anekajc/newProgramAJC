@@ -131,6 +131,16 @@
   border-color: #a8bdff !important;
   color: #1d4ed8 !important;
 }
+
+/* Perbesar glyph + pada tombol Add tanpa mengubah ukuran bingkai tombol.
+   line-height: 0 membuat ikon tidak menambah tinggi baris, jadi tinggi
+   tombol tetap sama dengan tombol Detail di sebelahnya. Port 1:1 dari
+   returpenjualangudang.blade.php / returpembeliangudang.blade.php. */
+.btn .bi-plus {
+  font-size: 1.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
 </style>
 @endsection
 
@@ -618,7 +628,7 @@
                 <th style="padding: 4px 12px;" scope="col">Harga</th>
                 <th style="padding: 4px 12px;" scope="col">Diskon</th>
                 <th style="padding: 4px 12px;" scope="col">Sub Total</th>
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
+                <th style="padding: 4px 12px;" scope="col" class="nrp-col-actions">Actions</th>
 
               </tr>
             </thead>
@@ -2925,12 +2935,15 @@ function nrpTabel2Or3ActionsCell (row) {
   let norpj = nrpPickCI(row, 'NORPJ');
   let isOto = Number(nrpPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-pen"></i></button>';
   if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-key"></i></button>';
+    // Sudah diotorisasi -- tidak boleh diedit lagi, jadi cuma Detail (buttonEdit
+    // versi read-only) + Batal Otorisasi.
+    html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-info"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" title="Batal Otorisasi" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-key"></i></button>';
   } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-key"></i></button>';
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="submitDeleteAll(\'' + nobukti + '\')"><i class="bi bi-trash"></i></button>';
+    html += '<button class="btn btn-success btn-sm" title="Edit" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-pen"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" title="Otorisasi" type="button" onclick="buttonOtorisasi(\'' + nobukti + '\' , \'' + norpj + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" title="Hapus" type="button" onclick="submitDeleteAll(\'' + nobukti + '\')"><i class="bi bi-trash"></i></button>';
   }
   html += '</div></td>';
   return html;
@@ -3867,12 +3880,19 @@ function refreshDataTableKoreksi (nobukti , noretur) {
 
       document.getElementById("input_add_hari").value = dataTableKoreksi[0].HARI
       document.getElementById("input_add_namasales").value = dataTableKoreksi[0].NamaSls
+      let isDetailView = tipeform === 'detail'
+      $('#addTable .nrp-col-actions').toggle(!isDetailView)
+
       let xSubtotalD = 0
       let xSubtotal = 0
       let rowTable = ''
       dataTableKoreksi.forEach((item, i) => {
         xSubtotalD += Number(item.SUBTOTALD)
         xSubtotal += Number(item.SUBTOTALRp)
+        let actionsCol = isDetailView ? '' : `
+            <td class="text-center">
+              <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pen"></i></button>
+            </td>`
         rowTable+= `
           <tr>
             <td>${item.Kodebrg}</td>
@@ -3886,10 +3906,7 @@ function refreshDataTableKoreksi (nobukti , noretur) {
 
             <td class="text-right">${formatAngka(parseFloat(item.DiscRp).toFixed(2))}</td>
             <td class="text-right">${formatAngka(parseFloat(item.SUBTOTALRp).toFixed(2))}</td>
-            <td class="text-center">
-              <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pen"></i></button>
-
-            </td>
+            ${actionsCol}
           </tr>
         `
       });
@@ -3898,7 +3915,7 @@ function refreshDataTableKoreksi (nobukti , noretur) {
       rowTable += `<tr style="background-color: ivory; font-weight: bold" >
         <td colspan=8 class="text-right">Total</td>
         <td colspan=1 class="text-right">${formatAngka(parseFloat(xSubtotal).toFixed(2))}</td>
-        <td colspan=1 class="text-right"></td>
+        ${isDetailView ? '' : '<td colspan=1 class="text-right"></td>'}
       </tr>`
 
       document.getElementById("addTableData").innerHTML = rowTable
@@ -4033,6 +4050,57 @@ let pcekglobal = 0
   document.getElementById("input_add_catatan").disabled = false
   document.getElementById("buttonAddListValas").disabled = false
 
+  $('#buttonSubmitAddAdd').show()
+
+  $('.showhideitem').hide();
+  $('#page1').hide();
+  $('.showhideform').hide();
+
+  $('#modalAdd').show();
+  $('#page2').show();
+}
+
+// Detail (view-only) utk baris "Invoice Otorisasi" yang sudah diotorisasi --
+// fetch data & tampilan form-nya sama persis dengan buttonKoreksi() (dipakai
+// ulang lewat refreshDataTableKoreksi), tapi TANPA membuka lagi field header
+// yang dikunci lockFormAdd() (jadi semua field tetap disabled/tertutup) dan
+// tanpa cek "sudah diotorisasi" (di sinilah justru dokumen yang diotorisasi
+// dilihat), serta tombol Submit disembunyikan supaya form ini murni tempat
+// melihat isi nota, bukan mengedit.
+function buttonDetail (nobukti, noretur) {
+
+let pcekglobal = 0
+  $.ajax({
+    url: "{!! url('ceklockperiode') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      if (res.length ) {
+        pcekglobal = 1
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
+
+  if (pcekglobal) {
+    alertify.warning("Periode sudah dikunci")
+    return
+  }
+
+  tipeform = 'detail'
+  cleanFormAdd()
+  lockFormAdd()
+
+  refreshDataTableKoreksi(nobukti, noretur)
+
+  $('#buttonSubmitAddAdd').hide()
+
   $('.showhideitem').hide();
   $('#page1').hide();
   $('.showhideform').hide();
@@ -4044,6 +4112,7 @@ let pcekglobal = 0
 
 
 function cleanFormAdd () {
+  $('#addTable .nrp-col-actions').show()
   document.getElementById("addTableData").innerHTML = `<tr >
 
       <td colspan=10 class="text-center">Belum ada data</td>
@@ -4214,6 +4283,7 @@ if (pcekglobal) {
 
   unlockFormAdd()
   cleanFormAdd()
+  $('#buttonSubmitAddAdd').show()
 
   tipeform = 'add'
 
