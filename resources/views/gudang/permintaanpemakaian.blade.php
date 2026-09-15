@@ -164,7 +164,7 @@
                     </button>
 
                     <div class="po-toolbar-act action-group">
-                        <button type="button" class="btn btn-primary" onclick="buttonAdd()">
+                        <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">
                             {{-- <i class="bi bi-plus-lg"></i>Add</button> --}}
                             Tambah</button>
                     </div>
@@ -375,7 +375,7 @@
                                             <input id="AddAddKodeBrg" type="text" class="form-control text-left"
                                                 placeholder="Kode Barang" onkeypress="onKeyPressBarang(event)">
                                             <button type="button" onclick="buttonAddListBarang()"
-                                                class="btn btn-primary">
+                                                class="btn btn-chip-biru">
                                                 <i class="bi bi-search"></i>
                                             </button>
                                         </div>

@@ -1766,7 +1766,7 @@
     <td class="text-center">
       <div class="action-buttons">
         <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
-        <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg"></i></button>
+        <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg"></i></button>
       </div>
     </td>
     <td>${item[0].NOBUKTI}</td>

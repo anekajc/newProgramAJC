@@ -252,3 +252,26 @@
     .nm-ui .grid-view.visible { display: block; }
     .nm-ui .list-view { display: none; }
     .nm-ui .list-view.visible { display: block; }
+
+      /* ---------- Chip biru: Show/Hide Header (ikon truk), + Tambah Item, Simpan Data ----------
+     Satu kelas dipakai bertiga supaya warnanya tidak lagi jalan sendiri-sendiri. Tint-nya
+     sederet dengan chip hijau/merah/abu di bawah, memakai palet biru yang sudah ada di file
+     ini (dipakai juga oleh tombol aksi di dalam tabel). */
+  .btn-chip-biru {
+    background-color: #e8edff;
+    border-color: #cfdcff;
+    color: #2563eb;
+  }
+
+  .btn-chip-biru:hover,
+  .btn-chip-biru:focus {
+    background-color: #dce6ff;
+    border-color: #b9c9ff;
+    color: #1d4ed8;
+  }
+
+  .btn-chip-biru:active {
+    background-color: #cfdcff !important;
+    border-color: #a8bdff !important;
+    color: #1d4ed8 !important;
+  }

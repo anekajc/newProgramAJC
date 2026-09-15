@@ -297,7 +297,7 @@
 <div id="page3" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Koreksi</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right" id="contentContainer">
       <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary " onclick="buttonCloseForm()">CLOSE</button>
@@ -361,7 +361,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditPerkiraan" type="text" class="form-control text-left" placeholder="Perkiraan" onkeypress="onKeyPressPicker(event,'perkiraan')">
-              <button type="button" onclick="openPicker('perkiraan')" class="btn btn-primary btn-sm rounded-right shadow-sm"><i class="bi bi-plus"></i></button>
+              <button type="button" onclick="openPicker('perkiraan')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
               <input type="hidden" id="KoreksiEditNamaPerkiraan">
             </div>
           </div>
@@ -372,7 +372,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditCosting" type="text" class="form-control text-left" placeholder="Costing" onkeypress="onKeyPressPicker(event,'costing')">
-              <button type="button" onclick="openPicker('costing')" class="btn btn-primary btn-sm rounded-right shadow-sm"><i class="bi bi-plus"></i></button>
+              <button type="button" onclick="openPicker('costing')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
               <input type="hidden" id="input_costing">
             </div>
           </div>
@@ -383,7 +383,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditSubCosting" type="text" class="form-control text-left" placeholder="Sub Costing" onkeypress="onKeyPressPicker(event,'subcosting')">
-              <button type="button" onclick="openPicker('subcosting')" class="btn btn-primary btn-sm rounded-right shadow-sm"><i class="bi bi-plus"></i></button>
+              <button type="button" onclick="openPicker('subcosting')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
               <input type="hidden" id="input_sub_costing">
             </div>
           </div>
@@ -486,7 +486,7 @@
 <div id="page4" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Detail</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right action-group" id="contentContainer">
       <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary " onclick="buttonCloseForm()">CLOSE</button>
