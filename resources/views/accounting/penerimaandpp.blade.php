@@ -1250,7 +1250,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
           <div class="col-md-8">
             <div class="input-group form-group">
-              <input id="AddDibayar" type="number" class="form-control text-right" value="">
+              <input id="AddDibayar" type="text" inputmode="decimal" class="form-control text-right format-number" value="">
             </div>
           </div>
         </div>
@@ -1265,7 +1265,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
           <div class="col-md-8">
             <div class="input-group form-group">
-              <input id="AddLebihBayar" type="number"  value="1.00" class="text-right form-control">
+              <input id="AddLebihBayar" type="text" inputmode="decimal"  value="1.00" class="text-right form-control format-number">
             </div>
           </div>
         </div>
@@ -1282,7 +1282,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
           <div class="col-md-8">
             <div class="input-group form-group">
-              <input id="AddKurangBayar" type="number" class="form-control text-right" value="" disabled>
+              <input id="AddKurangBayar" type="text" inputmode="decimal" class="form-control text-right" value="" disabled>
             </div>
           </div>
         </div>
@@ -1576,7 +1576,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <div class="row" style="margin-top: -15px">
                     <div class="col-md-12">
                       <div class="input-group form-group">
-                        <input id="input_giro_kurs" type="number" class="form-control text-right">
+                        <input id="input_giro_kurs" type="text" inputmode="decimal" class="form-control text-right format-number">
 
                       </div>
                     </div>
@@ -1606,7 +1606,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <div class="row" style="margin-top: -15px">
                     <div class="col-md-12">
                       <div class="input-group form-group">
-                        <input id="input_giro_nilaigiro" type="number" class="form-control text-right" >
+                        <input id="input_giro_nilaigiro" type="text" inputmode="decimal" class="form-control text-right format-number" >
 
                       </div>
                     </div>
@@ -2036,7 +2036,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                       </div>
                       <div class="col-md-8">
                         <div class="form-group">
-                          <input type="number" class="form-control text-right" id="input_modalx_nilainotadibayar" disabled>
+                          <input type="text" inputmode="decimal" class="form-control text-right" id="input_modalx_nilainotadibayar" disabled>
                         </div>
                       </div>
 
@@ -2055,7 +2055,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                     </div>
                     <div class="col-md-8">
                       <div class="form-group">
-                        <input type="number" class="form-control text-right" id="input_modalx_sisanotadibayar" disabled>
+                        <input type="text" inputmode="decimal" class="form-control text-right" id="input_modalx_sisanotadibayar" disabled>
                       </div>
                     </div>
 
@@ -2074,7 +2074,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   </div>
                   <div class="col-md-8">
                     <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_modalx_dibayar" >
+                      <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_modalx_dibayar" >
                     </div>
                   </div>
                 </div>
@@ -2086,7 +2086,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   </div>
                   <div class="col-md-8">
                     <div class="form-group">
-                      <input type="number" class="form-control text-right" id="input_modalx_lebihbayar" >
+                      <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_modalx_lebihbayar" >
                     </div>
                   </div>
                 </div>
@@ -2176,7 +2176,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                           </div> -->
                         <div class="col-md-4">
                           <div class="input-group form-group">
-                            <input id="input_modalx_kurangbayar" type="number" value="0.00" class="text-right form-control" >
+                            <input id="input_modalx_kurangbayar" type="text" inputmode="decimal" value="0.00" class="text-right form-control format-number" >
 
                           </div>
                         </div>
@@ -2509,6 +2509,8 @@ $(document).on('hidden.bs.modal', '.modal', function () {
 })
 
 $(document).ready(function(){
+        $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+
         // Tabel Outstanding DPP (#tabel) digambar renderTabelOutstanding() setelah
         // loadAll() selesai, sama seperti tabel Penerimaan DPP di tab sebelah.
 
@@ -4028,9 +4030,9 @@ function renderTabelOutstanding () {
       function buttonSaveLB () {
 
 
-          let xnilainota = $("#input_modalx_nilainotadibayar").val()
-          let xdibayar = $("#input_modalx_dibayar").val()
-          let xlebihbayar = $("#input_modalx_lebihbayar").val()
+          let xnilainota = toNum($("#input_modalx_nilainotadibayar").val())
+          let xdibayar = toNum($("#input_modalx_dibayar").val())
+          let xlebihbayar = toNum($("#input_modalx_lebihbayar").val())
 
           if (Number(xlebihbayar) > 0 && arrayKL[saveHeaderIndex].length > 0) {
               alertify.warning("Sudah ada kurang bayar")
@@ -4038,9 +4040,9 @@ function renderTabelOutstanding () {
           }
           let xperkiraanlebihbayar = $("#input_modalx_perkiraanlebihbayar").val()
           let xnamaperkiraanlebihbayar = $("#input_modalx_namaperkiraanlebihbayar").val()
-          let xsisa = $("#input_modalx_sisanotadibayar").val()
+          let xsisa = toNum($("#input_modalx_sisanotadibayar").val())
 
-          let xxdibayar = $("#input_modal_dibayar").val()
+          let xxdibayar = toNum($("#input_modal_dibayar").val())
           if (Number(xsisa) + Number(xnilainota) < Number(xdibayar)) {
             alertify.warning('Dibayar melebihi sisa nota')
             return
@@ -4102,10 +4104,10 @@ function renderTabelOutstanding () {
           // let xdibayar = $(`#list_proses_dibayar${saveHeaderIndex}`).val();
           let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
 
-          let xKL = $(`#list_proses_KL${saveHeaderIndex}`).val();
+          let xKL = toNum($(`#list_proses_KL${saveHeaderIndex}`).val());
           let xsdhbayar = saveHeaderInvoice.SDHBAYAR
           sisa =(((Number(xtotfaktur)- Number(xsdhbayar)) -Number(xdibayar))- Number(xKL))
-          document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+          document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
 
 
 
@@ -4120,14 +4122,14 @@ function renderTabelOutstanding () {
 
         refreshTableKL()
         refreshSisa()
-        let xdibayar = $(`#list_proses_dibayar${saveHeaderIndex}`).val();
+        let xdibayar = toNum($(`#list_proses_dibayar${saveHeaderIndex}`).val());
         let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
 
-        let xKL = $(`#list_proses_KL${saveHeaderIndex}`).val();
+        let xKL = toNum($(`#list_proses_KL${saveHeaderIndex}`).val());
 
         let xsdhbayar = saveHeaderInvoice.SDHBAYAR
         sisa =(((Number(xtotfaktur)- Number(xsdhbayar)) -Number(xdibayar))- Number(xKL))
-        document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+        document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
 
         $('.showhideitemKL').hide()
       }
@@ -4135,10 +4137,10 @@ function renderTabelOutstanding () {
       function submitEditKL () {
 
 
-          let kl = $("#input_modalx_kurangbayar").val()
+          let kl = toNum($("#input_modalx_kurangbayar").val())
           let perkkl = $("#input_modalx_perkiraankurangbayar").val()
           let namaperkkl = $("#input_modalx_namaperkiraankurangbayar").val()
-          let xsisanota = $("#input_modalx_sisanotadibayar").val()
+          let xsisanota = toNum($("#input_modalx_sisanotadibayar").val())
           // perkkl = '444'
           // namaperkkl = 'TESTESwiu'
           if (Number(kl) <= 0 || !perkkl) {
@@ -4180,24 +4182,24 @@ function renderTabelOutstanding () {
 
           refreshTableKL()
           refreshSisa()
-          let xdibayar = $(`#list_proses_dibayar${saveHeaderIndex}`).val();
+          let xdibayar = toNum($(`#list_proses_dibayar${saveHeaderIndex}`).val());
           let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
 
-          let xKL = $(`#list_proses_KL${saveHeaderIndex}`).val();
+          let xKL = toNum($(`#list_proses_KL${saveHeaderIndex}`).val());
 
           let xsdhbayar = saveHeaderInvoice.SDHBAYAR
           sisa =(((Number(xtotfaktur)- Number(xsdhbayar)) -Number(xdibayar))- Number(xKL))
-          document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+          document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
 
           $('.showhideitemKL').hide()
 
       }
 
       function submitAddKL () {
-          let kl = $("#input_modalx_kurangbayar").val()
+          let kl = toNum($("#input_modalx_kurangbayar").val())
           let perkkl = $("#input_modalx_perkiraankurangbayar").val()
           let namaperkkl = $("#input_modalx_namaperkiraankurangbayar").val()
-          let xsisanota = $("#input_modalx_sisanotadibayar").val()
+          let xsisanota = toNum($("#input_modalx_sisanotadibayar").val())
           // perkkl = '444'
           // namaperkkl = 'TESTESwiu'
           if (Number(kl) <= 0 || !perkkl) {
@@ -4239,13 +4241,13 @@ function renderTabelOutstanding () {
 
           refreshTableKL()
           refreshSisa()
-          let xdibayar = $(`#list_proses_dibayar${saveHeaderIndex}`).val();
+          let xdibayar = toNum($(`#list_proses_dibayar${saveHeaderIndex}`).val());
           let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
 
-          let xKL = $(`#list_proses_KL${saveHeaderIndex}`).val();
+          let xKL = toNum($(`#list_proses_KL${saveHeaderIndex}`).val());
           let xsdhbayar = saveHeaderInvoice.SDHBAYAR
           let sisa =(((Number(xtotfaktur)- Number(xsdhbayar)) -Number(xdibayar))- Number(xKL))
-          document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+          document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
 
           $('.showhideitemKL').hide()
 
@@ -4328,8 +4330,8 @@ function renderTabelOutstanding () {
         document.getElementById("input_giro_nogiro").value = xgiro.NoGiro
         document.getElementById("input_giro_tanggal").valueAsDate = new Date(xgiro.TglGiro)
         pdppSetValas("input_giro_valas", xgiro.Kodevls)
-        document.getElementById("input_giro_kurs").value = xgiro.Kurs
-        document.getElementById("input_giro_nilaigiro").value = xgiro.Jumlah ? parseFloat(xgiro.Jumlah).toFixed(2) : ''
+        setNum("input_giro_kurs", xgiro.Kurs)
+        document.getElementById("input_giro_nilaigiro").value = xgiro.Jumlah ? formatNumberDisplay(parseFloat(xgiro.Jumlah).toFixed(2)) : ""
         document.getElementById("input_giro_keterangan").value = xgiro.Keterangan
 
 
@@ -4398,8 +4400,8 @@ function renderTabelOutstanding () {
         let bank = $("#input_giro_bank").val()
         let tanggalgiro = $("#input_giro_tanggal").val()
         let valas = $("#input_giro_valas").val()
-        let kurs = $("#input_giro_kurs").val()
-        let nilaigiro = $("#input_giro_nilaigiro").val()
+        let kurs = toNum($("#input_giro_kurs").val())
+        let nilaigiro = toNum($("#input_giro_nilaigiro").val())
         let keterangan = $("#input_giro_keterangan").val()
         let nobukti = $("#input_add_nobukti").val()
         let tanggal = $("#input_add_tanggal").val()
@@ -4444,8 +4446,8 @@ function renderTabelOutstanding () {
         let bank = $("#input_giro_bank").val()
         let tanggalgiro = $("#input_giro_tanggal").val()
         let valas = $("#input_giro_valas").val()
-        let kurs = $("#input_giro_kurs").val()
-        let nilaigiro = $("#input_giro_nilaigiro").val()
+        let kurs = toNum($("#input_giro_kurs").val())
+        let nilaigiro = toNum($("#input_giro_nilaigiro").val())
         let keterangan = $("#input_giro_keterangan").val()
         let nobukti = $("#input_add_nobukti").val()
         let tanggal = $("#input_add_tanggal").val()
@@ -4558,9 +4560,9 @@ function renderTabelOutstanding () {
       function submitAddEdit () {
         let _token = $("#_token").val()
         let choice = 'U'
-        let dibayar = $("#AddDibayar").val()
-        let kl = $("#AddKurangBayar").val()
-        let lb = $("#AddLebihBayar").val()
+        let dibayar = toNum($("#AddDibayar").val())
+        let kl = toNum($("#AddKurangBayar").val())
+        let lb = toNum($("#AddLebihBayar").val())
 
         let perkiraan = $("#AddPerkiraan").val()
         let nofaktur = $("#AddNoFaktur").val()
@@ -4629,9 +4631,9 @@ function renderTabelOutstanding () {
           document.getElementById("AddKurangBayar").disabled = false
         }
 
-        document.getElementById("AddDibayar").value = Number(xinvoice.DIBAYAR) ? parseFloat(xinvoice.DIBAYAR).toFixed(2) : '0.00'
-        document.getElementById("AddKurangBayar").value = Number(xinvoice.KL) ? parseFloat(xinvoice.KL).toFixed(2) : '0.00'
-        document.getElementById("AddLebihBayar").value = Number(xinvoice.LB) ? parseFloat(xinvoice.LB).toFixed(2) : '0.00'
+        document.getElementById("AddDibayar").value = Number(xinvoice.DIBAYAR) ? formatNumberDisplay(parseFloat(xinvoice.DIBAYAR).toFixed(2)) : "0.00"
+        document.getElementById("AddKurangBayar").value = Number(xinvoice.KL) ? formatNumberDisplay(parseFloat(xinvoice.KL).toFixed(2)) : "0.00"
+        document.getElementById("AddLebihBayar").value = Number(xinvoice.LB) ? formatNumberDisplay(parseFloat(xinvoice.LB).toFixed(2)) : "0.00"
 
         $("#formAddEdit").show()
       }
@@ -4645,8 +4647,8 @@ function renderTabelOutstanding () {
         document.getElementById("input_giro_nogiro").value = xgiro.NoGiro
         document.getElementById("input_giro_tanggal").valueAsDate = new Date(xgiro.TglGiro)
         pdppSetValas("input_giro_valas", xgiro.Kodevls)
-        document.getElementById("input_giro_kurs").value = xgiro.Kurs
-        document.getElementById("input_giro_nilaigiro").value = xgiro.Jumlah ? parseFloat(xgiro.Jumlah).toFixed(2) : ''
+        setNum("input_giro_kurs", xgiro.Kurs)
+        document.getElementById("input_giro_nilaigiro").value = xgiro.Jumlah ? formatNumberDisplay(parseFloat(xgiro.Jumlah).toFixed(2)) : ""
         document.getElementById("input_giro_keterangan").value = xgiro.Keterangan
 
 
@@ -4951,7 +4953,7 @@ function renderTabelOutstanding () {
                     <td class="text-right">${formatAngkaX(item.SDHBAYAR)}</td>
                     <td class="text-center">
                     <div class="input-group form-group">
-                      <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
+                      <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.DIBAYAR).toFixed(2))}' class="form-control text-right" disabled>
 
                       <button id="buttonChangeDibayar${i}" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-browsing btn-browsing-sm" title="Ubah Dibayar"><i class="bi bi-search"></i></button>
 
@@ -4959,13 +4961,13 @@ function renderTabelOutstanding () {
 
                     <td class="text-center">
                     <div class="input-group form-group">
-                    <input style="height:30px; width:160px" id="list_proses_LB${i}" type="number" value='${parseFloat(item.inputLB).toFixed(2)}' class="form-control text-right" disabled>
+                    <input style="height:30px; width:160px" id="list_proses_LB${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.inputLB).toFixed(2))}' class="form-control text-right" disabled>
                     </div>
                     </td>
 
                     <td class="text-center">
                     <div class="input-group form-group">
-                    <input style="height:30px; width:160px" id="list_proses_KL${i}" type="number" value='${parseFloat(tempTotalKL).toFixed(2)}' class="form-control text-right" disabled>
+                    <input style="height:30px; width:160px" id="list_proses_KL${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(tempTotalKL).toFixed(2))}' class="form-control text-right" disabled>
                     </div>
                     </td>
 
@@ -5032,7 +5034,7 @@ function renderTabelOutstanding () {
                   <td class="text-right">${formatAngkaX(item.SDHBAYAR)}</td>
                   <td class="text-center">
                   <div class="input-group form-group">
-                    <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
+                    <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.DIBAYAR).toFixed(2))}' class="form-control text-right" disabled>
 
                     <button id="buttonChangeDibayar${i}" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-browsing btn-browsing-sm" title="Ubah Dibayar"><i class="bi bi-search"></i></button>
 
@@ -5040,13 +5042,13 @@ function renderTabelOutstanding () {
 
                   <td class="text-center">
                   <div class="input-group form-group">
-                  <input style="height:30px; width:160px" id="list_proses_LB${i}" type="number" value='${parseFloat(item.LB).toFixed(2)}' class="form-control text-right" disabled>
+                  <input style="height:30px; width:160px" id="list_proses_LB${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.LB).toFixed(2))}' class="form-control text-right" disabled>
                   </div>
                   </td>
 
                   <td class="text-center">
                   <div class="input-group form-group">
-                  <input style="height:30px; width:160px" id="list_proses_KL${i}" type="number" value='${parseFloat(item.KL).toFixed(2)}' class="form-control text-right" disabled>
+                  <input style="height:30px; width:160px" id="list_proses_KL${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.KL).toFixed(2))}' class="form-control text-right" disabled>
                   </div>
                   </td>
 
@@ -5077,9 +5079,9 @@ function renderTabelOutstanding () {
         saveHeaderIndex = index
         console.log('23',saveHeaderInvoice)
 
-        let xdibayar = $(`#list_proses_dibayar${index}`).val();
-        let xLB = $(`#list_proses_LB${index}`).val();
-        let xKL = $(`#list_proses_KL${index}`).val();
+        let xdibayar = toNum($(`#list_proses_dibayar${index}`).val());
+        let xLB = toNum($(`#list_proses_LB${index}`).val());
+        let xKL = toNum($(`#list_proses_KL${index}`).val());
         let sisa = $(`#input_modal_sisa`).val();
         console.log(saveHeaderInvoice.TOTFAKTUR)
         let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
@@ -5092,12 +5094,12 @@ function renderTabelOutstanding () {
         xLB,
         xKL ,
         sisa })
-        document.getElementById("input_modalx_nilainotadibayar").value = parseFloat(Number(xtotfaktur)- Number(xsdhbayar)).toFixed(2)
-        document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+        document.getElementById("input_modalx_nilainotadibayar").value = formatNumberDisplay(parseFloat(Number(xtotfaktur)- Number(xsdhbayar)).toFixed(2))
+        document.getElementById("input_modalx_dibayar").value = formatNumberDisplay(parseFloat(xdibayar).toFixed(2))
 
 
-          document.getElementById("input_modalx_lebihbayar").value = parseFloat(xLB).toFixed(2)
-          document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+          document.getElementById("input_modalx_lebihbayar").value = formatNumberDisplay(parseFloat(xLB).toFixed(2))
+          document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
           if (xLB > 0) {
             // document.getElementById("input_modalx_perkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputPerkiraanLB
             // document.getElementById("input_modalx_namaperkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputNamaPerkiraanLB
@@ -5132,10 +5134,10 @@ function renderTabelOutstanding () {
 
 
             function submitEditKL () {
-                let kl = $("#input_modalx_kurangbayar").val()
+                let kl = toNum($("#input_modalx_kurangbayar").val())
                 let perkkl = $("#input_modalx_perkiraankurangbayar").val()
                 let namaperkkl = $("#input_modalx_namaperkiraankurangbayar").val()
-                let xsisanota = $("#input_modalx_sisanotadibayar").val()
+                let xsisanota = toNum($("#input_modalx_sisanotadibayar").val())
                 // perkkl = '444'
                 // namaperkkl = 'TESTESwiu'
                 if (Number(kl) <= 0 || !perkkl) {
@@ -5177,13 +5179,13 @@ function renderTabelOutstanding () {
 
                 refreshTableKL()
                 refreshSisa()
-                let xdibayar = $(`#list_proses_dibayar${saveHeaderIndex}`).val();
+                let xdibayar = toNum($(`#list_proses_dibayar${saveHeaderIndex}`).val());
                 let xtotfaktur = saveHeaderInvoice.TOTFAKTUR
 
-                let xKL = $(`#list_proses_KL${saveHeaderIndex}`).val();
+                let xKL = toNum($(`#list_proses_KL${saveHeaderIndex}`).val());
                 let xsdhbayar = saveHeaderInvoice.SDHBAYAR
                 let sisa =(((Number(xtotfaktur)- Number(xsdhbayar)) - Number(xdibayar))- Number(xKL))
-                document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+                document.getElementById("input_modalx_sisanotadibayar").value = formatNumberDisplay(parseFloat(sisa).toFixed(2))
 
                 $('.showhideitemKL').hide()
 
@@ -5196,7 +5198,7 @@ function renderTabelOutstanding () {
 
         indexEditKL = index
         document.getElementById("buttonAddListPerkiraanKurangBayar").disabled = true
-        document.getElementById("input_modalx_kurangbayar").value = arrayKL[saveHeaderIndex][index].inputKL
+        setNum("input_modalx_kurangbayar", arrayKL[saveHeaderIndex][index].inputKL)
         document.getElementById("input_modalx_perkiraankurangbayar").value = arrayKL[saveHeaderIndex][index].inputPerkiraanKL
         document.getElementById("input_modalx_namaperkiraankurangbayar").value = arrayKL[saveHeaderIndex][index].inputNamaPerkiraanKL
         // buttonSubmitAddKL
@@ -5235,7 +5237,7 @@ function renderTabelOutstanding () {
 
       function buttonAddKL () {
 
-        let xlb = $("#input_modalx_lebihbayar").val()
+        let xlb = toNum($("#input_modalx_lebihbayar").val())
         let xperklb = $("#input_modalx_perkiraanlebihbayar").val()
 
         if (Number(xlb) || xperklb) {
@@ -5287,7 +5289,7 @@ function renderTabelOutstanding () {
               <tr>
                 <td>${item.inputPerkiraanKL}</td>
                 <td>${item.inputNamaPerkiraanKL}</td>
-                <td class="text-right">${item.inputKL}</td>
+                <td class="text-right">${formatAngkaX(parseFloat(item.inputKL).toFixed(2))}</td>
                 <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="buttonEditKL(${i})"><i class="bi bi-pen"></i></button>
                 <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteKL(${i})"><i class="bi bi-trash"></i></button>
                 </td>
@@ -5298,7 +5300,7 @@ function renderTabelOutstanding () {
           rowTablex += `
             <tr>
               <td class="text-right" colspan=2 >Total :</td>
-              <td class="text-right">${xtotalKL}</td>
+              <td class="text-right">${formatAngkaX(parseFloat(xtotalKL).toFixed(2))}</td>
               <td></td>
             </tr>
           `
@@ -5434,6 +5436,20 @@ function renderTabelOutstanding () {
         return [year, month, day].join(pemisah);
     }
 
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  let n = toNum(v)
+  if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', n)
+  } else {
+    el.value = formatNumberDisplay(n.toFixed(2))
+  }
+}
     function formatAngkaX (angka) {
       if (!Number(angka)) {
         return '0.00'
