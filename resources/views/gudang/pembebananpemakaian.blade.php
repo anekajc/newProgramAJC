@@ -4,14 +4,8 @@
 @endsection
 @section('page-title')Pembebanan Pemakaian @endsection
   @section('css')
-  <link rel="stylesheet"
-      href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
-  <link rel="stylesheet"
-      href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
-{{-- Search box #tabel_filter / #tabel2_filter / #tabel_oto_filter dihapus - DataTables
-     bawaan kedua tab dimatikan (dom:'rt') dan diganti satu #searchBox di toolbar
-     (lihat activeTable()/onToolbarSearch() di bagian JS halaman ini). #tabel_oto sendiri
-     sudah dikomentari total di bawah, jadi CSS-nya memang mati. --}}
+{{-- report-table.css / report-table.js dimuat dari gudang/newmasterx.blade.php (layout
+     bersama), bukan per-halaman — lihat catatan di layout tersebut. --}}
 
 {{-- Search box #tabel_add_list_perkiraan_filter / _costing_filter / _subcosting_filter
      dihapus - modal Perkiraan/Costing/Sub Costing sekarang pakai .rt-picker-v2, yang
@@ -19,6 +13,57 @@
      id-scoped lama di sini punya specificity lebih tinggi dari
      .rt-picker-v2 .dataTables_filter input, jadi kalau dibiarkan bakal menimpanya. --}}
 
+<style>
+    /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar — lihat catatan di
+       gudang/permintaanpemakaian.blade.php soal kenapa ditulis lokal di sini, bukan di
+       report-table.css. Warna/border memakai variabel --white/--border/--muted milik
+       .tb-report di report-table.css supaya tetap seragam dengan kotak search & tombol
+       Filter di sebelahnya. */
+    .len-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 12px;
+    }
+
+    .len-wrap label {
+        margin: 0;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        white-space: nowrap;
+    }
+
+    .len-inp {
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1D2130;
+        outline: none;
+        cursor: pointer;
+        padding: 2px 20px 2px 0;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right center;
+    }
+
+    /* Tombol Prev/Next dinonaktifkan (halaman pertama/terakhir) — .pg/.pg.active sudah
+       ada di report-table.css, .disabled belum. */
+    .tb-report .pg.disabled {
+        opacity: .4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+</style>
 @endsection
 @section('content')
 
@@ -48,162 +93,115 @@
     <div class="content">
 
       <div class="toolbar">
+        <div class="filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+              onchange="reloadData()">
+          <span class="filter-sep">s/d</span>
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+              onchange="reloadData()">
+        </div>
         <div>
-          <input class="search-inp" type="text" id="searchBox" placeholder="Cari data..."
-              oninput="onToolbarSearch()" style="width:200px">
+          <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
+              oninput="renderTabel()" style="width:200px">
+        </div>
+
+        {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — lihat
+             renderTabel()/onLenChange2() di bawah. --}}
+        <div class="len-wrap">
+          <label for="tabelLen2">Tampilkan</label>
+          <select id="tabelLen2" class="len-inp" onchange="onLenChange2()">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
+
+        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+      </div>
+
+      <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
+      <div id="rtBar"></div>
+
+      <div class="table-outer">
+        <div class="table-wrap">
+          <table id="mainTable" class="tb aksi-hover">
+            <thead>
+              <tr>
+                <th class="rt-fixed-th">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tabel2_data" class="text-left"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="footerLabel2">Belum ada data</span>
+          <div class="pager-btns" id="pagerBtns2"></div>
         </div>
       </div>
 
-      {{-- class "nav" WAJIB ada di sini - lihat catatan di gudang/pemakaianbarang.blade.php:
-           Bootstrap Tab plugin mencari kontainer aktif lewat closest(".nav, .list-group"),
-           tanpa itu klik tab kedua tidak melepas active dari pill pertama dan tab macet. --}}
-      <div class="tab-toggle nav" id="nav-tab" role="tablist" style="margin-bottom: 7px">
-        <a class="tab-toggle-btn active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
-            aria-controls="home" aria-selected="true">PP Belum Otorisasi</a>
-        <a class="tab-toggle-btn" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab"
-            aria-controls="profile" aria-selected="false">PP Sudah Otorisasi</a>
+      <div class="rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+        sembunyikan kolom.
       </div>
 
-      <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table id="tabel" class="tb aksi-hover">
-                <thead>
-                  <tr>
-                    <th class="rt-fixed-th">Actions</th>
-                    <th>No.Bukti</th>
-                    <th>Tanggal</th>
-                    <th>Keterangan</th>
-                    <th>Perkiraan</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-left">
-                  @for ($i = 0; $i < count($outstandingArray); $i++)
-                  <tr>
-                    <td class="text-center">
-                      <div class="action-buttons">
-                        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('{{ $outstandingArray[$i][0]->NOBUKTI }}' )"><i class="bi bi-info"></i></button>
-                        <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('{{ $outstandingArray[$i][0]->NOBUKTI }}', '{{ $outstandingArray[$i][0]->IsOtorisasi1 }}')"><i class="bi bi-key"></i></button>
-                        <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi('{{ $outstandingArray[$i][0]->NOBUKTI }}' , 'edit')"><i class="bi bi-pencil-fill"></i></button>
-                      </div>
-                    </td>
-                    <td>{{ $outstandingArray[$i][0]->NOBUKTI}}</td>
-                    <td>{!! date("Y/m/d", strtotime($outstandingArray[$i][0]->TANGGAL)) !!}</td>
-                    <td>{{ $outstandingArray[$i][0]->Keterangan}}</td>
-                    <td>{{ $outstandingArray[$i][0]->Perkiraan}}</td>
-                  </tr>
-                  @endfor
-                </tbody>
-              </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+{{-- modal filter — DILETAKKAN DI LUAR .tb-report supaya reset `.tb-report *{margin:0;padding:0}`
+     di report-table.css tidak merusak padding/margin modal Bootstrap. --}}
+<div class="modal fade rt-filter" id="modalFilter">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-filter"></i>
+          Filter Laporan
+          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Pengaturan Laporan</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="modalOtorisasi">
+                <option value="2">Semua</option>
+                <option value="1">Sudah Otorisasi</option>
+                <option value="0">Belum Otorisasi</option>
+              </select>
             </div>
-            <div class="table-footer"><span id="footerLabel1">Belum ada data</span></div>
           </div>
         </div>
-        {{-- Tab belum oto --}}
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table id="tabel2" class="tb aksi-hover">
-                <thead>
-                  <tr>
-                    <th class="rt-fixed-th">Actions</th>
-                    <th>No.Bukti</th>
-                    <th>Tanggal</th>
-                    <th>Keterangan</th>
-                    <th>Perkiraan</th>
-                    <th>User Oto</th>
-                    <th>Tanggal Oto</th>
-                    {{-- <th scope="col">Oto</th> --}}
-                  </tr>
-                </thead>
-                <tbody id="tabel2_data" class="text-left">
-                  @for ($i = 0; $i < count($penerimaanArray); $i++)
-                  <tr>
-                    <td class="text-center">
-                      <div class="action-buttons">
-                        <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('{{ $penerimaanArray[$i][0]->NOBUKTI }}' )"><i class="bi bi-info"></i></button>
-                        <button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('{{ $penerimaanArray[$i][0]->NOBUKTI}}','{{ $penerimaanArray[$i][0]->IsOtorisasi1 }}')"><i class="bi bi-key-fill"></i></button>
-                        <button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint('{{$penerimaanArray[$i][0]->NOBUKTI}}')"><i class="bi bi-printer"></i></button>
-                      </div>
-                    </td>
-                    <td>{{ $penerimaanArray[$i][0]->NOBUKTI}}</td>
-                    <td>{!! date("Y/m/d", strtotime($penerimaanArray[$i][0]->TANGGAL)) !!}</td>
-                    <td>{{ $penerimaanArray[$i][0]->Keterangan}}</td>
-                    <td>{{ $penerimaanArray[$i][0]->Perkiraan}}</td>
-                    <td>{{ $penerimaanArray[$i][0]->OtoUser1}}</td>
-                    <td>
-                      @if ($penerimaanArray[$i][0]->TglOto1)
-                        {{ \Carbon\Carbon::parse($penerimaanArray[$i][0]->TglOto1)->format('Y/m/d') }}
-                      @endif
-                    </td>
+      </div>
 
-                    {{-- @if ($tempPenerimaan[$i]->IsOtorisasi1)
-                        <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                        @else
-                        <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                        @endif --}}
-                  </tr>
-                  @endfor
-                </tbody>
-              </table>
-            </div>
-            <div class="table-footer"><span id="footerLabel2">Belum ada data</span></div>
-          </div>
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary"
+              onclick="applyModalFilter()">Terapkan</button>
         </div>
-        {{-- Tab sudah oto --}}
-  {{-- <div class="tab-pane fade" id="home2" role="tabpanel" aria-labelledby="home2-tab">
-          <div class="row">
-            <div class="col-12" style="overflow:auto; padding:0; margin:0; width:100%;">
-              <div class="container-fluid">
-                <table id="tabel_oto" class="table table-bordered table-striped">
-                  <thead class="text-center bg-primary text-white">
-                    <tr>
-                      <th style="padding: 4px 12px;"  scope="col">Actions</th>
-                      <th style="padding: 4px 12px;"  scope="col">No. Urut</th>
-                      <th style="padding: 4px 12px;"  scope="col">No. Bukti</th>
-                      <th style="padding: 4px 12px;"  scope="col">Tanggal</th>
-                      <th style="padding: 4px 12px;"  scope="col">Sales</th>
-                      <th style="padding: 4px 12px;"  scope="col">User</th>
-                      <th style="padding: 4px 12px;"  scope="col">No.Ref</th>
-                      <th style="padding: 4px 12px;"  scope="col">User Oto</th>
-                      <th style="padding: 4px 12px;"  scope="col">Tgl Oto</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tabel_oto_data" class="text-left">
-                     @for ($i = 0; $i < count($tempPenerimaan2); $i++)
-                    <tr>
-                      <td class='text-center'>
-                        <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailKoreksi('{{ $tempPenerimaan2[$i]->NOBUKTI }}' )"><i class="bi bi-info"></i></button>
-                        @if ($tempPenerimaan2[$i]->IsOtorisasi1 == 1)
-                        <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('{{ $tempPenerimaan2[$i]->NOBUKTI }}' , 'edit')"><i class="bi bi-key"></i></button>
-                        @else
-                        <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('{{ $tempPenerimaan2[$i]->NOBUKTI }}' , 'add')"><i class="bi bi-key"></i></button>
-                        @endif
-                      </td>
-                      <td>{{ $tempPenerimaan2[$i]->NOURUT}}</td>
-                      <td>{{ $tempPenerimaan2[$i]->NOBUKTI}}</td>
-                      <td>{!! date("Y/m/d", strtotime($tempPenerimaan2[$i]->TANGGAL)) !!}</td>
-                      <td>{{ $tempPenerimaan2[$i]->NAMASLS}}</td>
-                      <td>{{ $tempPenerimaan2[$i]->IDUSER}}</td>
-                      <td>{{ $tempPenerimaan2[$i]->RefPR}}</td>
-                      <td>{{ $tempPenerimaan2[$i]->OtoUser1 }}</td>
-                      <td>{!! $tempPenerimaan2[$i]->TglOto1 ? date("Y/m/d", strtotime($tempPenerimaan2[$i]->TglOto1)) : '' !!}</td>
-                    </tr>
-                @endfor
-                </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div> --}}
-      {{-- end tab sudah oto --}}
+      </div>
 
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
+<!-- modal filter -->
 
 
 
@@ -551,92 +549,405 @@ let dataTableAdd = []
 let dataTableKoreksi = []
 let barangKoreksiEdit = {}
 
-// dom:'rt' membuang search box + info line bawaan DataTables — diganti satu #searchBox
-// di toolbar (lihat activeTable()/onToolbarSearch()) supaya kedua tab pakai satu kotak
-// pencarian. emptyTable dipakai footer draw handler di bawah untuk teks "Tidak ada data".
-const dtOptionsOutstanding = {
-  dom: 'rt',
-  order: [
-    [1, 'asc']
-  ],
-  lengthChange: false,
-  paging: false,
-  language: {
-    emptyTable: 'Tidak ada data'
-  },
-  columnDefs: [{
-      type: 'date',
-      targets: [2]
-    },
-    {
-      className: 'text-center',
-      targets: [0],
-      orderable: false
-    }
-  ]
-};
+/* ============================================================================
+ * Tabel interaktif gabungan (belum + sudah otorisasi) — port dari
+ * gudang/permintaanpemakaian.blade.php (mesin gcart_header, lihat
+ * docs/new-slider-table-guide.md). doShowCustomize()/doButtonSubtotal()/
+ * doButtonGrandtotal() sengaja tidak diikutkan — itu untuk modal "Atur Kolom"
+ * yang tidak ada di halaman ini; report-table.js memanggil onChange sendiri.
+ * ========================================================================= */
+let lastRows = @json($penerimaanArray); // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya
+let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
 
-const dtOptionsPenerimaan = {
-  dom: 'rt',
-  order: [
-    [1, 'asc']
-  ],
-  lengthChange: false,
-  paging: false,
-  language: {
-    emptyTable: 'Tidak ada data'
-  },
-  columnDefs: [{
-      type: 'date',
-      targets: [2]
-    },
-    {
-      className: 'text-center',
-      targets: [0],
-      orderable: false
-    }
-  ]
-};
+// Dropdown "Tampilkan" (#tabelLen2) — jumlah baris per halaman. -1 = semua data,
+// paging murni client-side (renderTabel() sudah memegang seluruh lastRows).
+let tabelLen2 = 10;
+let tabelPage2 = 1;
 
-// Tabel DataTable yang sedang terlihat — dipakai toolbar search supaya satu kotak
-// mengontrol tab manapun yang sedang aktif.
-function activeTable() {
-  return $('.tab-pane.active table').eq(0).DataTable();
+var g_href = 'pembebananpemakaian';
+var g_modeReport = '1';
+var gcart_header = [];
+var gsum_issubtotal = 0;
+var gsum_isgrandtotal = 0;
+var gct_desimal_max = 4;
+
+function setDefaultHeader() {
+  // [ field, label, visible, type, total, decimals ]
+  gcart_header = [
+    ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+    ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+    ['Perkiraan', 'Perkiraan', 1, 'varchar', 0, 0],
+    // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum, jangan
+    // diperlakukan sebagai kolom angka (rata kanan).
+    ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
+    ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
+    ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0],
+    ['Kodegdg', 'Kode Gudang', 0, 'varchar', 0, 0],
+    ['Namagdg', 'Nama Gudang', 0, 'varchar', 0, 0]
+  ];
 }
 
-function onToolbarSearch() {
-  activeTable().search($('#searchBox').val() || '').draw();
+function doSetHeader(_modereport, _isReset = false) {
+  let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+
+  if (_strHeader != "") {
+    gcart_header = doGetHeader(_strHeader);
+  } else if ($.isFunction(window.setDefaultHeader)) {
+    setDefaultHeader();
+    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
 }
 
-function updateFooter(tableId, footerId) {
-  const api = $('#' + tableId).DataTable();
-  const count = api.rows({
-    search: 'applied'
-  }).count();
-  $('#' + footerId).text(count ? ('Menampilkan ' + count + ' baris') : 'Tidak ada data');
+function doLoadHeader(_href, _mode) {
+  let _header = "";
+
+  $.ajax({
+    url: "{!! url('globalfunctions_doLoadHeader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _href,
+      mode: _mode
+    },
+    success: function(res) {
+      _header = (res.length > 0) ? res[0].header : "";
+      if (res.length > 0) {
+        gsum_issubtotal = Number(res[0].issubtotal);
+        gsum_isgrandtotal = Number(res[0].isgrandtotal);
+      }
+    }
+  })
+
+  return _header;
+}
+
+function doGetHeader(_strHeader) {
+  let _cart = [];
+
+  _strHeader.split("||").forEach((item, i) => {
+    let temp = [];
+    temp.push(item.split(";;")[0]);
+    temp.push(item.split(";;")[1]);
+    temp.push(Number(item.split(";;")[2]));
+    temp.push(item.split(";;")[3]);
+    temp.push(Number(item.split(";;")[4]));
+    temp.push(Number(item.split(";;")[5]));
+    _cart.push(temp);
+  });
+
+  return _cart;
+}
+
+function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+  let _strHeader = "";
+
+  _cart.forEach((item, i) => {
+    if (i != 0) {
+      _strHeader += '||';
+    }
+    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
+      item[5];
+  });
+
+  $.ajax({
+    url: "{!! url('globalfunctions_doSimpanHeader') !!}",
+    type: "get",
+    async: false,
+    data: {
+      href: _href,
+      mode: _mode,
+      header: _strHeader,
+      issubtotal: _issubtotal,
+      isgrandtotal: _isgrandtotal
+    },
+    success: function(res) {
+      // nothing to do
+    }
+  })
+}
+
+function doMoveHeader(_from, _to) {
+  if (_from < 0 || _to < 0 || _from === _to) {
+    return;
+  }
+  if (_from >= gcart_header.length || _to >= gcart_header.length) {
+    return;
+  }
+
+  let _moved = gcart_header.splice(_from, 1)[0];
+  gcart_header.splice(_to, 0, _moved);
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonVisibility(_id) {
+  gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doSetDesimal(_index, _step) {
+  let _next = Number(gcart_header[_index][5]) + _step;
+  if (_next < 0 || _next > gct_desimal_max) {
+    return;
+  }
+
+  gcart_header[_index][5] = _next;
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+function doButtonTotal(_index) {
+  gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+}
+
+// Ambil field dari row tanpa peduli besar/kecil huruf — hasil grouping controller
+// mencampur UPPERCASE (NOBUKTI/TANGGAL) dengan PascalCase (OtoUser1/TglOto1).
+function pickCI(r, key) {
+  if (r[key] !== undefined) {
+    return r[key];
+  }
+  let lk = String(key).toLowerCase();
+  for (let k in r) {
+    if (k.toLowerCase() === lk) {
+      return r[k];
+    }
+  }
+  return null;
+}
+
+function nullToEmpty(v) {
+  return (v === null || v === undefined) ? '' : v;
+}
+
+function fmtYMD(v) {
+  if (!v) {
+    return '';
+  }
+  let date = new Date(v);
+  if (isNaN(date)) {
+    return '';
+  }
+  let day = ("0" + date.getDate()).slice(-2);
+  let month = ("0" + (date.getMonth() + 1)).slice(-2);
+  return date.getFullYear() + "/" + month + "/" + day;
+}
+
+// #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum — client-side saja,
+// server selalu mengembalikan seluruh rentang tanggal yang dipilih.
+function filterByOtorisasi(rows, filterVal) {
+  if (filterVal === '1') {
+    return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 1);
+  }
+  if (filterVal === '0') {
+    return rows.filter(r => Number(pickCI(r, 'IsOtorisasi1')) === 0);
+  }
+  return rows;
+}
+
+// Warna, ikon dan urutan tombol sengaja disamakan dengan kolom Actions di
+// purchasing/purchaseOrder.blade.php dan permintaanpemakaian.blade.php supaya
+// konsisten antar halaman: Detail=amber bi-info, Otorisasi=biru bi-key,
+// Edit=hijau bi-pencil-fill, Batal Otorisasi=merah bi-key-fill, Print=cyan bi-printer.
+function aksiButtonsHtml(r) {
+  const nobukti = r.NOBUKTI;
+  const detailBtn =
+    '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi(\'' +
+    nobukti + '\')"><i class="bi bi-info"></i></button>';
+
+  if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
+    // Sudah otorisasi — Batal Otorisasi + Print
+    return '<div class="action-buttons">' + detailBtn +
+      '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+      nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key-fill"></i></button>' +
+      '<button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+      nobukti + '\')"><i class="bi bi-printer"></i></button>' +
+      '</div>';
+  }
+
+  // Belum otorisasi — Otorisasi + Edit
+  return '<div class="action-buttons">' + detailBtn +
+    '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+    nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key"></i></button>' +
+    '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
+    nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>' +
+    '</div>';
+}
+
+// resetPage tidak dikirim (undefined) di semua pemanggilan lama (search/filter/
+// reloadData/onChange report-table.js) sehingga tetap kembali ke halaman 1 — sikap
+// aman kalau data/filter berubah. Hanya gotoPage2() yang mengirim resetPage=false,
+// karena di situ tabelPage2 sudah sengaja diarahkan ke halaman tujuan.
+function renderTabel(resetPage) {
+  if (resetPage !== false) {
+    tabelPage2 = 1;
+  }
+
+  const cols = gcart_header.filter(c => c[2] === 1);
+  const thead = document.querySelector('#mainTable thead');
+  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Actions</th>');
+
+  const search = ($('#searchBox2').val() || '').trim().toLowerCase();
+  let rows = lastRows;
+  if (search) {
+    rows = rows.filter(function(r) {
+      return cols.some(function(c) {
+        const v = pickCI(r, c[0]);
+        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
+      });
+    });
+  }
+  rows = filterByOtorisasi(rows, globalOtorisasi);
+
+  const tbody = document.getElementById('tabel2_data');
+
+  // Buang instance tooltip lama sebelum tombolnya dihapus lewat innerHTML —
+  // tooltip Bootstrap 4 nempel elemen terpisah di <body>, jadi kalau tombol
+  // pemicunya diganti tanpa dispose dulu, tooltip lama nyangkut selamanya
+  // dan bisa menutupi tombol baru (klik jadi tidak berfungsi).
+  $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
+    document.getElementById('footerLabel2').textContent = 'Tidak ada data';
+    renderPager2(0, 0);
+    return;
+  }
+
+  const totalRows = rows.length;
+  const totalPages = tabelLen2 === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLen2));
+  if (tabelPage2 > totalPages) {
+    tabelPage2 = totalPages;
+  }
+  const pageRows = tabelLen2 === -1 ? rows : rows.slice((tabelPage2 - 1) * tabelLen2, tabelPage2 * tabelLen2);
+
+  let html = '';
+  pageRows.forEach(function(r) {
+    html += '<tr class="data-row">';
+    html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+    html += cols.map(function(c) {
+      const v = pickCI(r, c[0]);
+      if (c[0] === 'IsOtorisasi1') {
+        return (Number(v) === 1) ?
+          '<td><span class="sp-badge is-active">Sudah</span></td>' :
+          '<td><span class="sp-badge is-inactive">Belum</span></td>';
+      }
+      if (c[3] === 'date') {
+        return '<td>' + fmtYMD(v) + '</td>';
+      }
+      return '<td>' + nullToEmpty(v) + '</td>';
+    }).join('');
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+  document.getElementById('footerLabel2').textContent = tabelLen2 === -1 ?
+    'Menampilkan ' + totalRows + ' baris' :
+    'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
+  renderPager2(tabelPage2, totalPages);
+  // container:'body', boundary:'window' — lihat penjelasan panjang di
+  // permintaanpemakaian.blade.php renderTabel() soal kenapa keduanya wajib di dalam
+  // kotak scroll pendek (.table-wrap).
+  $('[data-toggle="tooltip"]').tooltip({
+    container: 'body',
+    boundary: 'window'
+  });
+}
+
+// Dropdown "Tampilkan" — ganti jumlah baris/halaman lalu balik ke halaman 1
+// (nomor halaman lama tidak lagi berarti setelah panjang halaman berubah).
+function onLenChange2() {
+  const v = Number(document.getElementById('tabelLen2').value);
+  tabelLen2 = (v === -1 || v > 0) ? v : 10;
+  renderTabel();
+}
+
+// Dipanggil tombol Prev/Next/nomor halaman di #pagerBtns2. resetPage=false supaya
+// renderTabel() tidak langsung membalikkan tabelPage2 ke 1.
+function gotoPage2(p) {
+  tabelPage2 = p;
+  renderTabel(false);
+}
+
+// Gambar ulang tombol pager di footer tabel. totalPages<=1 (atau tabelLen2=-1,
+// "Semua") menyembunyikan pager sepenuhnya — tidak ada gunanya menavigasi satu halaman.
+function renderPager2(page, totalPages) {
+  const el = document.getElementById('pagerBtns2');
+  if (!el) {
+    return;
+  }
+  if (!totalPages || totalPages <= 1) {
+    el.innerHTML = '';
+    return;
+  }
+
+  function pgBtn(label, targetPage, active, disabled) {
+    const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
+    const click = disabled ? '' : ' onclick="gotoPage2(' + targetPage + ')"';
+    return '<div class="' + cls + '"' + click + '>' + label + '</div>';
+  }
+
+  // Jendela nomor halaman: maksimal 5 tombol angka di sekitar halaman aktif,
+  // supaya pager tidak melebar tak terbatas kalau datanya banyak.
+  let start = Math.max(1, page - 2);
+  let end = Math.min(totalPages, start + 4);
+  start = Math.max(1, end - 4);
+
+  let html = pgBtn('&laquo;', page - 1, false, page <= 1);
+  for (let p = start; p <= end; p++) {
+    html += pgBtn(String(p), p, p === page, false);
+  }
+  html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
+
+  el.innerHTML = html;
+}
+
+/* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum) -- */
+function updateFilterBadge() {
+  let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
+  $('#filterBadge').text(count + ' aktif');
+}
+
+function resetAllFilters() {
+  $('#modalOtorisasi').val('2');
+  updateFilterBadge();
+}
+
+$(document).on('show.bs.modal', '#modalFilter', function() {
+  $('#modalOtorisasi').val(globalOtorisasi);
+  updateFilterBadge();
+});
+
+$(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
+
+function applyModalFilter() {
+  globalOtorisasi = $('#modalOtorisasi').val();
+  renderTabel();
+  $('#modalFilter').modal('hide');
+}
+
+// Menggantikan loadAll() lama — satu list gabungan, difilter di server berdasarkan
+// rentang tanggal yang sedang dipilih. Dipanggil saat tanggal berubah dan setelah
+// otorisasi/batal otorisasi/koreksi supaya tabel menyegarkan diri sendiri.
+function reloadData() {
+  $.ajax({
+    url: "{!! url('pembebananpemakaianloadall') !!}",
+    type: "get",
+    async: false,
+    data: {
+      date1: $('#inputDate1').val(),
+      date2: $('#inputDate2').val()
+    },
+    success: function(res) {
+      lastRows = res.penerimaan;
+      renderTabel();
+    }
+  });
 }
 
 $(document).ready(function(){
-  $("#tabel").DataTable(dtOptionsOutstanding);
-  $("#tabel2").DataTable(dtOptionsPenerimaan);
-
-  $("#tabel").on('draw.dt', function() {
-    updateFooter('tabel', 'footerLabel1');
-  });
-  $("#tabel2").on('draw.dt', function() {
-    updateFooter('tabel2', 'footerLabel2');
-  });
-  updateFooter('tabel', 'footerLabel1');
-  updateFooter('tabel2', 'footerLabel2');
-
-  // columns.adjust() wajib dipanggil setelah tab baru terlihat — DataTables mengukur
-  // lebar kolom 0px kalau tabel masih di dalam tab-pane yang hidden saat init.
-  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-    const targetId = $(e.target).attr('href');
-    $(targetId + ' table').DataTable().columns.adjust();
-    activeTable().search($('#searchBox').val() || '').draw();
-  });
-
   $('[data-toggle="tooltip"]').tooltip({
     container: 'body',
     boundary: 'window'
@@ -649,7 +960,17 @@ $(document).ready(function(){
   $('#modalAddListCosting').on('shown.bs.modal', function() { flushPickerPending('costing'); });
   $('#modalAddListSubCosting').on('shown.bs.modal', function() { flushPickerPending('subcosting'); });
 
-  //   formAddListItem
+  // Tabel gabungan — mesin interaktif (drag/gear/bar), lihat
+  // docs/new-slider-table-guide.md. doSetHeader() memuat layout tersimpan milik
+  // user ini untuk halaman+mode ini, atau menyimpan setDefaultHeader() kalau ini
+  // kunjungan pertama.
+  doSetHeader(g_modeReport);
+  ReportTable.init({
+    table: '#mainTable',
+    bar: '#rtBar',
+    onChange: renderTabel
+  });
+  renderTabel();
 });
 
 // ===================== Perkiraan / Costing / Sub Costing picker =====================
@@ -1022,7 +1343,7 @@ function buttonOtorisasi(nobukti, isOtorisasi) {
     success: function (res) {
       if (res.status > 0) {
         alertify.success(res.msg);
-        loadAll();
+        reloadData();
       } else {
         alertify.warning(res.msg);
       }
@@ -1067,7 +1388,7 @@ function buttonBatalOtorisasi (nobukti) {
         },
         success: function (res) {
           alertify.success('Berhasil batal otorisasi');
-          loadAll();
+          reloadData();
         },
         error: function (err) {
           console.error(err);
@@ -1144,7 +1465,7 @@ function submitKoreksiEdit () {
       if (res && res.success) {
         $("#modalKoreksiEdit").modal("hide");
         refreshDataTableKoreksi(nobukti);
-        loadAll();
+        reloadData();
         alertify.success(res.message || 'Koreksi akun berhasil disimpan.');
       } else {
         alertify.warning(res.message || 'Koreksi gagal disimpan.');
@@ -1291,105 +1612,6 @@ function buttonDetailKoreksi (nobukti) {
   });
 }
 
-
-function loadAll () {
-  $.ajax({
-    url: "{!! url('pembebananpemakaianloadall') !!}",
-    type: "get",
-    async: false,
-    success: function (res) {
-      // Buang tooltip lama sebelum tombolnya diganti lewat innerHTML - tooltip
-      // Bootstrap nempel elemen terpisah di <body>, jadi kalau tidak dibuang dulu bisa
-      // nyangkut menutupi tombol baru. Lihat catatan sama di
-      // gudang/pemakaianbarang.blade.php loadAll().
-      $('#tabel_data, #tabel2_data').find('[data-toggle="tooltip"]').tooltip('dispose');
-
-      // ===================== TAB 1 (Outstanding) =====================
-      if ($.fn.DataTable.isDataTable('#tabel')) {
-        $('#tabel').DataTable().clear().destroy();
-      }
-      let rowTable = '';
-
-      res.tempOutstanding.forEach((group) => {
-      let item = group[0];
-        rowTable += `
-          <tr>
-            <td class="text-center">
-              <div class="action-buttons">
-                <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('${item.NOBUKTI}')">
-                  <i class="bi bi-info"></i>
-                </button>
-                <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NOBUKTI}')">
-                  <i class="bi bi-key"></i>
-                </button>
-                <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi('${item.NOBUKTI}', 'edit')">
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
-              </div>
-            </td>
-            <td>${item.NOBUKTI}</td>
-            <td>${item.TANGGAL ? formatDate(item.TANGGAL, '/') : ''}</td>
-            <td>${item.Keterangan || ''}</td>
-            <td>${item.Perkiraan || ''}</td>
-          </tr>`;
-      });
-
-      document.getElementById("tabel_data").innerHTML = rowTable;
-      $("#tabel").DataTable(dtOptionsOutstanding);
-      updateFooter('tabel', 'footerLabel1');
-
-      // ===================== TAB 2 =====================
-      if ($.fn.DataTable.isDataTable('#tabel2')) {
-        $('#tabel2').DataTable().clear().destroy();
-      }
-      let rowTable2 = '';
-
-      res.tempPenerimaan.forEach((group) => {
-      let item = group[0];
-        rowTable2 += `
-          <tr>
-            <td class="text-center">
-              <div class="action-buttons">
-                <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi('${item.NOBUKTI}')">
-                  <i class="bi bi-info"></i>
-                </button>
-                ${
-                  item.IsOtorisasi1 == 1
-                    ? `<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NOBUKTI}', 'edit')">
-                        <i class="bi bi-key-fill"></i>
-                      </button>`
-                    : `<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NOBUKTI}', 'add')">
-                        <i class="bi bi-key"></i>
-                      </button>`
-                }
-                <button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint('${item.NOBUKTI}')">
-                  <i class="bi bi-printer"></i>
-                </button>
-              </div>
-            </td>
-            <td>${item.NOBUKTI}</td>
-            <td>${item.TANGGAL ? formatDate(item.TANGGAL, '/') : ''}</td>
-            <td>${item.Keterangan || ''}</td>
-            <td>${item.Perkiraan || ''}</td>
-            <td>${item.OtoUser1 || ''}</td>
-            <td>${item.TglOto1 ? formatDate(item.TglOto1, '/') : ''}</td>
-          </tr>`;
-      });
-
-      document.getElementById("tabel2_data").innerHTML = rowTable2;
-      $("#tabel2").DataTable(dtOptionsPenerimaan);
-      updateFooter('tabel2', 'footerLabel2');
-
-      // container:'body', boundary:'window' — lihat penjelasan panjang di
-      // permintaanpemakaian.blade.php renderTabel() soal kenapa keduanya wajib di
-      // dalam kotak scroll pendek (.table-wrap).
-      $('[data-toggle="tooltip"]').tooltip({
-        container: 'body',
-        boundary: 'window'
-      });
-    }
-  });
-}
 
 function submitPrint (nobukti) {
     // for (var i = 0; i < 30; i++) {
@@ -2065,7 +2287,7 @@ function buttonCloseForm () {
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
-  loadAll();
+  reloadData();
 }
 
 function formatDate(date , pemisah = '-') {
@@ -2084,40 +2306,5 @@ function formatDate(date , pemisah = '-') {
 
 
 </script>
-
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
-  <script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-
-    function setActiveTab(homeActive) {
-      if (homeActive) {
-        tabHome.style.backgroundColor = '#007bff';
-        tabHome.style.color = '#fff';
-        tabProfile.style.backgroundColor = '#f8f9fa';
-        tabProfile.style.color = '#007bff';
-      } else {
-        tabProfile.style.backgroundColor = '#007bff';
-        tabProfile.style.color = '#fff';
-        tabHome.style.backgroundColor = '#f8f9fa';
-        tabHome.style.color = '#007bff';
-      }
-    }
-
-    // Default warna tab
-    setActiveTab(true);
-
-    // buat ganti tab
-    tabHome.addEventListener('click', function () {
-      setActiveTab(true);
-    });
-
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(false);
-    });
-  </script>
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
-
-
 
 @endsection

@@ -17,6 +17,47 @@ use Illuminate\Support\Facades\DB;
 
 class PembebananPemakaianController extends Controller
 {
+  // Satu list gabungan (belum + sudah otorisasi) untuk rentang tanggal tertentu.
+  // TANGGAL membawa komponen waktu, jadi dipakai rentang setengah-terbuka
+  // [date1, date2+1hari) bukan BETWEEN supaya baris yang timestamp-nya di tanggal
+  // akhir tidak ikut terbuang. Sama seperti PermintaanPemakaianController::fetchList().
+  private function fetchList(string $date1, string $date2)
+  {
+    $rows = DB::connection("SML")->select("
+        Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL,A.NOBUKTI,  a.NOURUT	,
+        	B.URUT, B.KODEBRG, H.NAMABRG, B.QNT, B.QNT2,B.NOSAT, C.SAT1, C.SAT2, B.ISI,C.ISI2, A.Kodegdg, G.Nama Namagdg,
+                case when b.NOSAT=1 then c.SAT1 when b.NOSAT=2 then C.SAT2 end Satuan,
+                case when b.NOSAT=1 then B.QNT when b.NOSAT=2 then b.QNT2 end Qntx , b.NOPRPB NooutBRg
+                ,OS.QntOS,
+        A.Keterangan,
+        A.IsOtorisasi1,
+        A.OtoUser1,
+        A.TglOto1, dbo.DataPerkiraan(A.Nobukti,'BHN') Perkiraan
+        From dbPenyerahanBhn A
+        Left Outer join  dbPenyerahanBhnDet B on B.NoBukti=a.NoBukti
+        left outer join dbBarang C on C.KodeBrg=B.KodeBrg
+        Left Outer join dbBarang H on H.KodeBrg=b.KodeBrg
+        left outer join DBGUDANG G on A.Kodegdg = G.KODEGDG
+        left outer join (select b.Nobukti,b.urut,case when a.NoSat=1 then a.Qnt else a.qnt2 end -
+        				 SUM(isnull(case when A.NoSat=1 then  b.Qnt else b.Qnt2 end,0 )) QntOS
+        				 from DBPRPenyerahanBhnDET a
+        				 left outer join DBPenyerahanBhnDET b on a.Nobukti=b.NOPRPB and a.urut=b.URUTPRPB
+        				 group by b.Nobukti,b.urut,B.NoSat,A.NoSat,A.Qnt,A.Qnt2
+        				 ) OS ON B.Nobukti=OS.Nobukti AND B.URUT=OS.urut
+
+                 where A.Tanggal >= :date1 and A.Tanggal < :date2
+        order by A.Tanggal desc, A.NoBukti asc, B.Urut asc" , [
+            "date1" => $date1,
+            "date2" => date('Y-m-d', strtotime($date2 . ' +1 day')),
+        ]);
+
+    $out = [];
+    foreach (collect($rows)->groupBy('NOBUKTI') as $g) {
+        $out[] = $g[0];
+    }
+    return $out;
+  }
+
   public function index (Request $req) {
 
     $kodemenu = '06013';
@@ -27,182 +68,34 @@ class PembebananPemakaianController extends Controller
        return redirect('/home');
     }
 
-    // $outstanding = VWOutBRGPemakaian::all()->sortBy('URUT')->groupBy('NOBUKTI');
-    //
-    // $tempOutstanding = [];
-    // foreach ($outstanding as $o) {
-    //   // code...
-    //   array_push($tempOutstanding, $o);
-    // }
-
-
-        $tempOutstanding = DB::connection("SML")->select("
-        Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL,A.NOBUKTI,  a.NOURUT	,
-        	B.URUT, B.KODEBRG, H.NAMABRG, B.QNT, B.QNT2,B.NOSAT, C.SAT1, C.SAT2, B.ISI,C.ISI2, A.Kodegdg, G.Nama Namagdg,
-                case when b.NOSAT=1 then c.SAT1 when b.NOSAT=2 then C.SAT2 end Satuan,
-                case when b.NOSAT=1 then B.QNT when b.NOSAT=2 then b.QNT2 end Qntx , b.NOPRPB NooutBRg
-                ,OS.QntOS,
-        A.Keterangan,
-        A.IsOtorisasi1,
-        A.OtoUser1,
-        A.TglOto1, dbo.DataPerkiraan(A.Nobukti,'BHN') Perkiraan
-        From dbPenyerahanBhn A
-        Left Outer join  dbPenyerahanBhnDet B on B.NoBukti=a.NoBukti
-        left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-        Left Outer join dbBarang H on H.KodeBrg=b.KodeBrg
-        left outer join DBGUDANG G on A.Kodegdg = G.KODEGDG
-        left outer join (select b.Nobukti,b.urut,case when a.NoSat=1 then a.Qnt else a.qnt2 end -
-        				 SUM(isnull(case when A.NoSat=1 then  b.Qnt else b.Qnt2 end,0 )) QntOS
-        				 from DBPRPenyerahanBhnDET a
-        				 left outer join DBPenyerahanBhnDET b on a.Nobukti=b.NOPRPB and a.urut=b.URUTPRPB
-        				 group by b.Nobukti,b.urut,B.NoSat,A.NoSat,A.Qnt,A.Qnt2
-        				 ) OS ON B.Nobukti=OS.Nobukti AND B.URUT=OS.urut
-
-                 where Year(a.tanggal ) = :tahun and Month(a.Tanggal)  = :bulan and A.IsOtorisasi1 = 0
-        order by A.NoBukti, B.Urut" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-
-
-
-        $collection1 = collect($tempOutstanding)->groupBy('NOBUKTI');
-        $tempOutstanding1 = [];
-        foreach ($collection1 as $p) {
-          // code...
-          array_push($tempOutstanding1, $p);
-        }
-
-
-
-    //
-    // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $tempPenerimaan = DB::connection("SML")->select("
-
-        Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL,A.NOBUKTI,  a.NOURUT	,
-        	B.URUT, B.KODEBRG, H.NAMABRG, B.QNT, B.QNT2,B.NOSAT, C.SAT1, C.SAT2, B.ISI,C.ISI2, A.Kodegdg, G.Nama Namagdg,
-
-                case when b.NOSAT=1 then c.SAT1 when b.NOSAT=2 then C.SAT2 end Satuan,
-                case when b.NOSAT=1 then B.QNT when b.NOSAT=2 then b.QNT2 end Qntx , b.NOPRPB NooutBRg
-                ,OS.QntOS,
-        A.Keterangan,
-        A.IsOtorisasi1,
-        A.OtoUser1,
-        A.TglOto1, dbo.DataPerkiraan(A.Nobukti,'BHN') Perkiraan
-        From dbPenyerahanBhn A
-        Left Outer join  dbPenyerahanBhnDet B on B.NoBukti=a.NoBukti
-        left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-        Left Outer join dbBarang H on H.KodeBrg=b.KodeBrg
-        left outer join DBGUDANG G on A.Kodegdg = G.KODEGDG
-        left outer join (select b.Nobukti,b.urut,case when a.NoSat=1 then a.Qnt else a.qnt2 end -
-        				 SUM(isnull(case when A.NoSat=1 then  b.Qnt else b.Qnt2 end,0 )) QntOS
-        				 from DBPRPenyerahanBhnDET a
-        				 left outer join DBPenyerahanBhnDET b on a.Nobukti=b.NOPRPB and a.urut=b.URUTPRPB
-        				 group by b.Nobukti,b.urut,B.NoSat,A.NoSat,A.Qnt,A.Qnt2
-        				 ) OS ON B.Nobukti=OS.Nobukti AND B.URUT=OS.urut
-
-                 where Year(a.tanggal ) = :tahun and Month(a.Tanggal)  = :bulan and A.IsOtorisasi1 = 1
-        order by A.NoBukti, B.Urut
-
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-
-
-
-        $collection1 = collect($tempPenerimaan)->groupBy('NOBUKTI');
-        $tempPenerimaan1 = [];
-        foreach ($collection1 as $p) {
-          // code...
-          array_push($tempPenerimaan1, $p);
-        }
-
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
 
     return view('gudang.pembebananpemakaian' , [
       "periode" => $periode,
       "menul0" => $menul0,
-      "outstandingArray" => $tempOutstanding1,
-      "penerimaanArray" => $tempPenerimaan1,
+      "date1" => $date1,
+      "date2" => $date2,
+      "penerimaanArray" => $this->fetchList($date1, $date2),
       "akses" => $akses
     ]);
   }
 
-  public function loadAll(Request $request)
-{
-    $periode = NewPeriode::where('user_id', \Auth::user()->username)->first();
+  public function loadAll(Request $req)
+  {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    // === OUTSTANDING ===
-    $tempOutstanding = DB::connection("SML")->select("
-        Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL, A.NOBUKTI, a.NOURUT,
-            B.URUT, B.KODEBRG, H.NAMABRG, B.QNT, B.QNT2, B.NOSAT, C.SAT1, C.SAT2, B.ISI, C.ISI2,
-            A.Kodegdg, G.Nama Namagdg,
-            case when b.NOSAT=1 then c.SAT1 when b.NOSAT=2 then C.SAT2 end Satuan,
-            case when b.NOSAT=1 then B.QNT when b.NOSAT=2 then b.QNT2 end Qntx,
-            b.NOPRPB NooutBRg, OS.QntOS,
-            A.Keterangan,
-            A.IsOtorisasi1,
-        A.OtoUser1,
-        A.TglOto1, dbo.DataPerkiraan(A.Nobukti,'BHN') Perkiraan
-        From dbPenyerahanBhn A
-        Left Outer join dbPenyerahanBhnDet B on B.NoBukti = A.NoBukti
-        left outer join dbBarang C on C.KodeBrg = B.KodeBrg
-        Left Outer join dbBarang H on H.KodeBrg = B.KodeBrg
-        left outer join DBGUDANG G on A.Kodegdg = G.KODEGDG
-        left outer join (
-            select b.Nobukti, b.urut,
-                case when a.NoSat = 1 then a.Qnt else a.Qnt2 end -
-                SUM(isnull(case when A.NoSat=1 then b.Qnt else b.Qnt2 end,0)) QntOS
-            from DBPRPenyerahanBhnDET a
-            left outer join DBPenyerahanBhnDET b
-                on a.Nobukti = b.NOPRPB and a.urut = b.URUTPRPB
-            group by b.Nobukti, b.urut, B.NoSat, A.NoSat, A.Qnt, A.Qnt2
-        ) OS ON B.Nobukti = OS.Nobukti AND B.URUT = OS.urut
-        where Year(a.tanggal) = :tahun and Month(a.Tanggal) = :bulan and A.IsOtorisasi1 = 0
-        order by A.NoBukti, B.Urut
-    ", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
-
-    $collectionOutstanding = collect($tempOutstanding)->groupBy('NOBUKTI');
-    $tempOutstanding1 = [];
-    foreach ($collectionOutstanding as $p) {
-        array_push($tempOutstanding1, $p);
-    }
-
-    // === PENERIMAAN ===
-    $tempPenerimaan = DB::connection("SML")->select("
-        Select MONTH(A.Tanggal) Bulan, YEAR(A.Tanggal) Tahun, A.TANGGAL, A.NOBUKTI, a.NOURUT,
-            B.URUT, B.KODEBRG, H.NAMABRG, B.QNT, B.QNT2, B.NOSAT, C.SAT1, C.SAT2, B.ISI, C.ISI2,
-            A.Kodegdg, G.Nama Namagdg,
-            case when b.NOSAT=1 then c.SAT1 when b.NOSAT=2 then C.SAT2 end Satuan,
-            case when b.NOSAT=1 then B.QNT when b.NOSAT=2 then b.Qnt2 end Qntx,
-            b.NOPRPB NooutBRg, OS.QntOS,
-            A.Keterangan,
-            A.IsOtorisasi1,
-        A.OtoUser1,
-        A.TglOto1, dbo.DataPerkiraan(A.Nobukti,'BHN') Perkiraan
-        From dbPenyerahanBhn A
-        Left Outer join dbPenyerahanBhnDet B on B.NoBukti = A.NoBukti
-        left outer join dbBarang C on C.KodeBrg = B.KodeBrg
-        Left Outer join dbBarang H on H.KodeBrg = B.KodeBrg
-        left outer join DBGUDANG G on A.Kodegdg = G.KODEGDG
-        left outer join (
-            select b.Nobukti, b.urut,
-                case when a.NoSat = 1 then a.Qnt else a.Qnt2 end -
-                SUM(isnull(case when A.NoSat=1 then b.Qnt else b.Qnt2 end,0)) QntOS
-            from DBPRPenyerahanBhnDET a
-            left outer join DBPenyerahanBhnDET b
-                on a.Nobukti = b.NOPRPB and a.urut = b.URUTPRPB
-            group by b.Nobukti, b.urut, B.NoSat, A.NoSat, A.Qnt, A.Qnt2
-        ) OS ON B.Nobukti = OS.Nobukti AND B.URUT = OS.urut
-        where Year(a.tanggal) = :tahun and Month(a.Tanggal) = :bulan and A.IsOtorisasi1 = 1
-        order by A.NoBukti, B.Urut
-    ", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
-
-    $collectionPenerimaan = collect($tempPenerimaan)->groupBy('NOBUKTI');
-    $tempPenerimaan1 = [];
-    foreach ($collectionPenerimaan as $p) {
-        array_push($tempPenerimaan1, $p);
+    $date1 = $req->input('date1');
+    $date2 = $req->input('date2');
+    if (!$date1 || !$date2) {
+        $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+        $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
     }
 
     return response()->json([
-        "tempOutstanding" => $tempOutstanding1,
-        "tempPenerimaan" => $tempPenerimaan1
+        "penerimaan" => $this->fetchList($date1, $date2),
     ]);
-}
+  }
 
 public function getDetailCetak(Request $req)
   {
