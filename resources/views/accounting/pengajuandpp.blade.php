@@ -902,7 +902,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
           <div class="col-md-2">
             <div class="input-group form-group">
-              <input id="AddAddKurs" type="number"  value="1.00" class="text-right form-control" disabled>
+              <input id="AddAddKurs" type="text" inputmode="decimal" value="1.00" class="text-right form-control" disabled>
 
             </div>
           </div>
@@ -1013,7 +1013,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div> -->
       <div class="col-md-3">
         <div class="input-group form-group">
-          <input id="AddAddJumlah" type="number" value="0.00" class="text-right form-control" >
+          <input id="AddAddJumlah" type="text" inputmode="decimal" value="0.00" class="text-right form-control format-number" >
 
         </div>
       </div>
@@ -1783,6 +1783,8 @@ $(document).ready(function(){
       dppInitReportTableSekali()
       loadAll()
 
+      $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+
         // searching dibiarkan aktif (dulu false) supaya kotak cari
         // #input_search_pengajuan_dpp bisa memfilter lewat API DataTables. Kotak cari
         // bawaan DataTables disembunyikan lewat opsi dom.
@@ -2051,10 +2053,10 @@ function submitAddAdd () {
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
   let valas  = $("#AddAddValas").val()
-  let kurs  = $("#AddAddKurs").val()
+  let kurs  = toNum($("#AddAddKurs").val())
   let lawan  = $("#AddAddLawan").val()
   // let kodelawan  = $("#AddAddKodeLawan").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = toNum($("#AddAddJumlah").val())
   let keterangan  = $("#AddAddKeterangan").val()
   let keterangandetail  = $("#AddAddKeteranganDetail").val()
   let kodedepartemen  = $("#AddAddKodeDepartemen").val()
@@ -2550,9 +2552,9 @@ function submitAddEdit () {
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
   let valas  = $("#AddAddValas").val()
-  let kurs  = $("#AddAddKurs").val()
+  let kurs  = toNum($("#AddAddKurs").val())
   let lawan  = $("#AddAddLawan").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = toNum($("#AddAddJumlah").val())
   let keterangan  = $("#AddAddKeterangan").val()
   let keterangandetail  = $("#AddAddKeteranganDetail").val()
   let kodedepartemen  = $("#AddAddKodeDepartemen").val()
@@ -4097,13 +4099,13 @@ function buttonAddEditItem (i) {
   document.getElementById("AddAddNamaDevisi").value = tempBarangAddEdit.NamaDevisi
 
   document.getElementById("AddAddValas").value = tempBarangAddEdit.Valas
-  document.getElementById("AddAddKurs").value = parseFloat(tempBarangAddEdit.Kurs).toFixed(2)
+  setNum("AddAddKurs", tempBarangAddEdit.Kurs)
 
   document.getElementById("AddAddLawan").value = tempBarangAddEdit.TipeTrans == 'BBK' ? tempBarangAddEdit.Perkiraan : tempBarangAddEdit.Lawan
   document.getElementById("AddAddKeteranganLawan").value = tempBarangAddEdit.TipeTrans == 'BBK' ? tempBarangAddEdit.NamaPerkiraan : tempBarangAddEdit.NamaLawan
 
   console.log(tempBarangAddEdit.Debet)
-  document.getElementById("AddAddJumlah").value = parseFloat(tempBarangAddEdit.Debet).toFixed(2)
+  setNum("AddAddJumlah", tempBarangAddEdit.Debet)
   document.getElementById("AddAddKeterangan").value = tempBarangAddEdit.Keterangan
   document.getElementById("AddAddKeteranganDetail").value = tempBarangAddEdit.KetDetail
 
@@ -5076,7 +5078,12 @@ function submitPrint (nobukti) {
               : ''}
           </td>
           <td class="text-align: left"
-               style="width: 15%;">${itemSub.RETUR ?? ''}</td>
+               style="width: 15%;">${itemSub.RETUR
+                ? Number(itemSub.RETUR).toLocaleString('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })
+                : ''}</td>
           <td style="width: 20%; text-align: right;">
             ${itemSub.Kredit 
               ? Number(itemSub.Kredit).toLocaleString('id-ID', {
@@ -5273,6 +5280,20 @@ function formatDate(date , pemisah = '-') {
         day = '0' + day;
 
     return [year, month, day].join(pemisah);
+}
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  let n = toNum(v)
+  if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', n)
+  } else {
+    el.value = formatNumberDisplay(n.toFixed(2))
+  }
 }
 function formatAngka (angkaString) {
   // console.log('formatAngka' , angkaString);
