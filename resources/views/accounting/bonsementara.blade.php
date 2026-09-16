@@ -222,6 +222,68 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   border-color: #ced4da;
   color: #343a40;
 }
+
+/* ---------- Layout form di modal Bon (mode tambah, tambah kredit, & edit) ----------
+   Label di kiri dengan lebar tetap, input mengisi sisa lebar sampai tepi kanan.
+   Memakai grid 4 kolom: baris biasa isinya label + input yang membentang ke tepi
+   kanan, sedangkan baris Jumlah/Kredit mengisi keempat kolom. */
+#form .modal-content { border: none; border-radius: var(--rt-radius); }
+#form .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--rt-border-soft); }
+#form .modal-body   { padding: 20px 24px; }
+#form .modal-footer { padding: 14px 24px 18px; border-top: 1px solid var(--rt-border-soft); }
+
+#form .bs-form {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 68px minmax(0, 1fr);
+  gap: 14px 12px;
+  align-items: center;
+}
+
+/* Label tema Canvas punya margin-bottom: 10px global - dinetralkan di sini supaya
+   jarak antarbaris diatur gap grid, bukan hack margin-top negatif seperti dulu. */
+#form .bs-form label {
+  margin-bottom: 0;
+  text-align: left;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--rt-ink-soft);
+  white-space: nowrap;
+  cursor: default;
+}
+
+/* Input yang membentang dari kolom input pertama sampai tepi kanan. */
+#form .bs-form .bs-full { grid-column: 2 / -1; }
+
+#form .form-control {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--rt-border);
+  font-size: 13.5px;
+  color: var(--rt-ink);
+  box-shadow: none;
+}
+
+#form .form-control:focus {
+  border-color: var(--rt-indigo);
+  box-shadow: 0 0 0 3px var(--rt-indigo-soft);
+}
+
+/* Field terkunci - abu-abu supaya jelas tidak bisa diisi di mode tersebut.
+   Hanya tampilan; yang mengunci tetap atribut disabled & lockFormAdd(). */
+#form .form-control:disabled,
+#form .form-control[disabled] {
+  background-color: #f1f3f5;
+  border-color: #e3e6ea;
+  color: #8A8F9C;
+  cursor: not-allowed;
+}
+
+/* Layar sempit: label pindah ke atas input, semua jadi satu kolom. */
+@media (max-width: 575.98px) {
+  #form .bs-form { grid-template-columns: 1fr; gap: 4px 0; }
+  #form .bs-form label { text-align: left; margin-top: 8px; }
+  #form .bs-form .bs-full { grid-column: 1 / -1; }
+}
 </style>
 @endsection
 
@@ -481,112 +543,29 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
 
-      <div id="" class="">
       <div class="modal-body">
+        <div class="bs-form">
+          <label for="input_add_tanggal">Tanggal</label>
+          <input type="date" class="form-control bs-full" id="input_add_tanggal">
 
-        <div class="container-fluid" >
-          <div class="row">
+          <label for="input_add_nobon">No Bon</label>
+          <input type="text" class="form-control bs-full" id="input_add_nobon" disabled>
 
+          <label for="input_add_penerima">Penerima</label>
+          <input type="text" class="form-control bs-full" id="input_add_penerima">
 
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Tanggal</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <input type="date" class="form-control text-center" id="input_add_tanggal" placeholder="" >
-          </div>
-        </div>
-      </div>
+          <label for="input_add_keterangan">Keterangan</label>
+          <input type="text" class="form-control bs-full" id="input_add_keterangan">
 
-      <div class="row" style="margin-top: -10px">
+          <label for="input_add_jumlah">Jumlah</label>
+          <input type="text" inputmode="decimal" class="form-control text-right" id="input_add_jumlah">
 
-
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>No</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <input type="text" class="form-control" id="input_add_nobon" placeholder="" disabled>
-          </div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top: -10px">
-
-
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Penerima</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <input type="text" class="form-control" id="input_add_penerima" placeholder="" >
-          </div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top: -10px">
-
-
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Ket</label>
-          </div>
-        </div>
-        <div class="col-md-10">
-          <div class="form-group">
-            <input type="text" class="form-control" id="input_add_keterangan" placeholder="" >
-          </div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top: -10px">
-
-
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Jumlah</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <input type="text" inputmode="decimal" class="form-control text-right" id="input_add_jumlah" placeholder="" >
-          </div>
+          <label for="input_add_kredit">Kredit</label>
+          <input type="text" inputmode="decimal" class="form-control text-right" id="input_add_kredit">
         </div>
 
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Kredit</label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <input type="text" inputmode="decimal" class="form-control text-right" id="input_add_kredit" placeholder="" >
-            <input type="hidden" class="form-control text-right" id="input_add_sisa" placeholder="" >
-          </div>
-        </div>
-      </div>
-
-
-
-
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-
-            </div>
-
-
-
-
-        </div>
-
-
-
-
+        {{-- Sisa bon dipakai buttonAddKredit(); di luar grid supaya tidak membuat sel kosong. --}}
+        <input type="hidden" id="input_add_sisa">
       </div>
 
 
