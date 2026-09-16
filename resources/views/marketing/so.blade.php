@@ -854,7 +854,7 @@
             </div>
             <div class="col-md-8" style="margin-top:-10px;">
               <div class="form-group">
-                <input type="number" class="form-control text-left" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
+                <input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-left input-partial-number" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
               </div>
             </div>
             
@@ -1607,7 +1607,7 @@
             </div>
             <div class="col-md-8" style="margin-top:-10px;">
               <div class="form-group">
-                <input type="number" class="form-control text-left" id="input_detail_dp" value='0.00' disabled>
+                <input type="text" class="form-control text-left" id="input_detail_dp" value='0.00' disabled>
               </div>
             </div>
 
@@ -1868,8 +1868,8 @@
 
   <div class="container-fluid" style="margin-top: -10px;">
     <div class="row">
-      <div class="col"><div class="form-group"><label>Disc %</label><input type="number" class="form-control text-right" id="input_detail_disc" disabled value="0.00"></div></div>
-      <div class="col"><div class="form-group"><label>DiscRp</label><input type="number" class="form-control text-right" id="input_detail_discrp" value="0.00" disabled></div></div>
+      <div class="col"><div class="form-group"><label>Disc %</label><input type="text" class="form-control text-right" id="input_detail_disc" disabled value="0.00"></div></div>
+      <div class="col"><div class="form-group"><label>DiscRp</label><input type="text" class="form-control text-right" id="input_detail_discrp" value="0.00" disabled></div></div>
       <div class="col"><div class="form-group"><label>DPP</label><input type="text" class="form-control text-right" id="input_detail_dpp" value="0.00" disabled></div></div>
       <div class="col"><div class="form-group"><label>PPN</label><input type="text" class="form-control text-right" id="input_detail_ppn" value="0.00" disabled></div></div>
       <div class="col"><div class="form-group"><label>GrandTotal</label><input type="text" class="form-control text-right" id="input_detail_grandtotal" value="0.00" disabled></div></div>
@@ -4390,7 +4390,7 @@ function onChangeTipePPN () {
 function onChangeDP () {
   console.log('onChangeDP')
   if (tipeform == 'edit') {
-    let value = $("#input_add_dp").val()
+    let value = ($("#input_add_dp").val() || '0').replace(/,/g, '')
     console.log(value)
     onChangeHeader('DP' , value)
     refreshUpdateHeader()
@@ -4597,7 +4597,7 @@ function submitAddAdd () {
   let catatan = $("#input_add_catatan").val()
   let valas = $("#input_add_valas").val()
   let kurs = $("#input_add_kurs").val()
-  let dp = $("#input_add_dp").val()
+  let dp = ($("#input_add_dp").val() || '0').replace(/,/g, '')
   let pembayaran = $("#input_add_pembayaran").val()
   let tipeppn = $("#input_add_tipeppn").val()
   let draftpo = $("#input_add_draftpo").val()
@@ -5056,7 +5056,7 @@ function submitAddEdit () {
   let catatan = $("#input_add_catatan").val()
   let valas = $("#input_add_valas").val()
   let kurs = $("#input_add_kurs").val()
-  let dp = $("#input_add_dp").val()
+  let dp = ($("#input_add_dp").val() || '0').replace(/,/g, '')
   let pembayaran = $("#input_add_pembayaran").val()
   let tipeppn = $("#input_add_tipeppn").val()
   let draftpo = $("#input_add_draftpo").val()
@@ -8836,7 +8836,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
           document.getElementById("input_add_kurs").value = dataHeaderAdd.Kurs
           document.getElementById("input_add_kodebackoffice").value = dataHeaderAdd.Boffice
           document.getElementById("input_add_namabackoffice").value = dataHeaderAdd.NamaBoFFice
-          document.getElementById("input_add_dp").value = dataHeaderAdd.DP ? parseFloat(dataHeaderAdd.DP).toFixed(2) : '0.00'
+          document.getElementById("input_add_dp").value = dataHeaderAdd.DP ? formatAngka(parseFloat(dataHeaderAdd.DP).toFixed(2)) : '0.00'
           document.getElementById("input_add_catatan").value = dataHeaderAdd.Catatan
           document.getElementById("input_add_kodealamatkirim").value = dataHeaderAdd.NoAlamatKirim
           document.getElementById("input_add_alamatkirim").value = dataHeaderAdd.AlamatKirim
@@ -8863,8 +8863,8 @@ function refreshDataTableAdd (NOBUKTI = "") {
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalpo").value = formatDate(dataHeaderAdd.TglPO)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
-          document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
-          document.getElementById("input_add_discrp").value = parseFloat(dataHeaderAdd.TotDiskon).toFixed(2)
+          document.getElementById("input_add_disc").value = formatAngka(parseFloat(dataHeaderAdd.Disc).toFixed(2))
+          document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
           document.getElementById("input_add_ppn").value = formatAngka(parseFloat(dataHeaderAdd.TotPPN).toFixed(2))
           document.getElementById("input_add_grandtotal").value = formatAngka(parseFloat(dataHeaderAdd.TotNet).toFixed(2))
