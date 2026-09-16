@@ -1377,8 +1377,6 @@
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
                 <th style="padding: 4px 12px;" scope="col">Qty1</th>
                 <th style="padding: 4px 12px;" scope="col">Sat1</th>
-                <th style="padding: 4px 12px;" scope="col">Qty2</th>
-                <th style="padding: 4px 12px;" scope="col">Sat2</th>
                 <!-- <th scope="col">Actions</th> -->
 
               </tr>
@@ -2165,8 +2163,6 @@ function buttonOto (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
-            <td>${item.SAT_2}</td>
 
           </tr>
         `
@@ -2250,8 +2246,7 @@ function buttonDetail (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
-            <td>${item.SAT_2}</td>
+
 
           </tr>
         `
@@ -2779,7 +2774,7 @@ function buttonAddListBarang () {
       }
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
       loadAll()
-      $('#exampleModalLabel').text('Add Barang');
+      $('#exampleModalLabel').text('Barang');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListBarang').show();
       // showhidemodalfooteradd
@@ -2837,7 +2832,7 @@ function buttonAddListCustSupp () {
             "order": [[0, 'asc']],
         });
 
-      $('#exampleModalLabel').text('Add Custsupp');
+      $('#exampleModalLabel').text('Customer');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListCust').show();
       // showhidemodalfooteradd
@@ -2906,7 +2901,7 @@ function buttonAddListNoSJ () {
             "order": [[0, 'asc']],
         });
 
-      $('#exampleModalLabel').text('Add SJ');
+      $('#exampleModalLabel').text('SJ');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListNoSJ').show();
       // showhidemodalfooteradd

@@ -238,10 +238,11 @@ if ($header) {
         return $listData;
   }
 
-  public function listCustSuppBaru (Request $req) {
+  public function listCustSuppBaru (Request $req)
+  {
 
     $listData = DB::connection('SML')->select("Select  Distinct
-                              A.KodeCustSupp,c.NAMACUSTSUPP , c.ALAMAT1+ '\n' +D.NamaKota Alamat ,A.FlagTipe
+                              A.KodeCustSupp,c.NAMACUSTSUPP , c.ALAMAT1+ '\n' +D.NamaKota Alamat
                               from dbSPB a
                               Left Outer Join (Select Nobukti,NoSO,Kodegdg from dbSPBDet Group By NoBukti,NoSO,Kodegdg) B on  A.NoBukti=B.NoBukti
                               Left Outer join DBSO b1 on B.NoSO=b1.NOBUKTI
@@ -257,7 +258,7 @@ if ($header) {
         		    			where A.QNT - ISNULL(b.QntInv,0)=0
         		    			group by a.NoBukti,A.Urut) F ON A1.NoBukti=F.NoBukti AND A1.Urut=F.Urut
                               where F.NoBukti IS NULL and year(a.tanggal)>=2020 and a.IsOtorisasi1 = 1
-                                    group by A.KodeCustSupp,c.NAMACUSTSUPP ,  Alamat ,A.FlagTipe , c.ALAMAT1, D.NamaKota");
+                                    group by A.KodeCustSupp,c.NAMACUSTSUPP ,  Alamat , c.ALAMAT1, D.NamaKota");
 
         return $listData;
   }
