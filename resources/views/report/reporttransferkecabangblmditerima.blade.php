@@ -13,11 +13,13 @@
         <div class="page-title">Laporan Transfer Ke Cabang Belum Diterima</div>
       </div> --}}
 
-      <!-- Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2) -- ketiganya mengembalikan kolom
-           yang SAMA dari SP_TransferBlmTerima, cuma nilainya beda, jadi tidak ada header/mode
-           switching di sini (beda dengan reportpengadaanpopo.blade.php yang dua modenya adalah
-           dua proc berbeda). Outstanding = snapshot "per tanggal2" -- tanggal1 disembunyikan &
-           dipatok controller sendiri (date1 = date2), lihat setJenis(). -->
+      <!-- Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2). Tiap Jenis punya slot kolom
+           tersimpan sendiri (g_modeReport diikutkan Jenis, lihat setJenis()) -- sama seperti
+           Non Outstanding vs Outstanding di reportpengadaanpopo.blade.php (OUT_MODE_OFFSET),
+           supaya "Customize Table" (show/hide, urutan, desimal, subtotal/grand total) bisa
+           diatur independen per Jenis. Ketiga Jenis defaultnya SAMA (lihat setDefaultHeader()).
+           Outstanding = snapshot "per tanggal2" -- tanggal1 disembunyikan & dipatok controller
+           sendiri (date1 = date2), lihat setJenis(). -->
       <div class="filter-wrap">
         <label>Jenis</label>
         <select class="filter-inp" id="inputJenis" onchange="setJenis(this.value)">
@@ -107,8 +109,10 @@
   let lastRows = []; // hasil fetch terakhir (dipakai render / export / search)
   let currentGroupby = 'NOBUKTI';
 
-  var modereport_nobukti = 0, modereport_barang = 1;
-  g_modeReport = modereport_nobukti;
+  // g_modeReport diikutkan Jenis (dulu dipakai utk Order By No Bukti/Barang yang tidak pernah
+  // punya kontrol UI di halaman ini -- direpurpose di sini, lihat setJenis()).
+  var modereport_semua = 0, modereport_diterima = 1, modereport_outstanding = 2;
+  g_modeReport = modereport_semua;
 
   const reportUrl = "{{ url('laporantransferkecabangblmditerima_doReport') }}";
 
@@ -118,10 +122,9 @@
     // sama seperti reportaccountingkasharian.blade.php.
     $("#showTableReport").empty().hide();
 
-    setDefaultHeader();
-    doSetHeader(g_modeReport);
-    doShowCustomize();
-    setJenis(globalJenis); // set visibilitas tanggal sesuai default Jenis (Semua)
+    // setJenis() sendiri sudah memanggil setDefaultHeader()/doSetHeader()/doShowCustomize()
+    // utk slot kolom Jenis default (Semua), jadi tidak perlu dipanggil terpisah di sini.
+    setJenis(globalJenis);
 
     // Header tabel interaktif: drag-reorder + gear (sembunyikan/desimal/total) + bar
     // "Reset kolom"/kolom tersembunyi. Tidak ada "Tampilan" switcher -- Order By tidak
@@ -137,8 +140,31 @@
     // setTimeout(() => { makeTable('REPORT'); }, 100);
   });
 
+  // Dipanggil oleh doSetHeader() HANYA saat slot kolom Jenis yang aktif (g_modeReport) belum
+  // pernah disimpan (DBSIMPANHEADER) -- lihat setJenis(). Satu array HARDCODE per Jenis (bukan
+  // satu array dibagi bertiga) supaya susunan/visibilitas kolom bawaan tiap Jenis bisa diatur
+  // langsung di kode ini -- ubah elemen ke-3 tiap baris (1 = tampil, 0 = sembunyi bawaan) atau
+  // urutan barisnya sesuai kebutuhan Jenis itu. Ini HANYA dipakai sekali sebagai bibit pertama
+  // kali; setelah itu user bisa mengubahnya sendiri lewat gear kolom (tersimpan independen per
+  // Jenis) -- utk memaksa reset ke bawaan lagi, gunakan "Reset Kolom" di #rtBar.
+  // [ field, label, tampil bawaan (1/0), tipe, pakai total (1/0), desimal ]
   function setDefaultHeader() {
-    if (g_modeReport == modereport_nobukti) {
+    if (g_modeReport == modereport_diterima) {
+      gcart_header = [
+        ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
+        ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+        ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
+        ['GDGASAL', 'Asal', 1, 'varchar', 0, 0],
+        ['GDGTUJUAN', 'Tujuan', 1, 'varchar', 0, 0],
+        ['SATUAN', 'Satuan', 1, 'varchar', 0, 0],
+        ['QNT', 'Qty', 1, 'float', 1, 2],
+        // ['QNTTERIMA', 'Qty Terima', 1, 'float', 1, 2],
+        // ['SISA', 'Qty Sisa', 1, 'float', 1, 2],
+        ['hpp', 'HPP', 1, 'float', 1, 2],
+        ['TOTHARGA', 'Total', 1, 'float', 1, 2]
+      ];
+    } else if (g_modeReport == modereport_outstanding) {
       gcart_header = [
         ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
@@ -153,14 +179,14 @@
         ['hpp', 'HPP', 1, 'float', 1, 2],
         ['TOTHARGA', 'Total', 1, 'float', 1, 2]
       ];
-      gsum_issubtotal = 1;
-      gsum_isgrandtotal = 1;
-    } else {
+    } else { // modereport_semua (default)
       gcart_header = [
-        ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
-        ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
         ['NOBUKTI', 'No Bukti', 1, 'varchar', 0, 0],
         ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
+        ['nobuktiterima', 'No Bukti Terima', 1, 'varchar', 0, 0],
+        ['tglterima', 'Tanggal Terima', 1, 'date', 0, 0],
+        ['KODEBRG', 'Kode Barang', 1, 'varchar', 0, 0],
+        ['NAMABRG', 'Nama Barang', 1, 'varchar', 0, 0],
         ['GDGASAL', 'Asal', 1, 'varchar', 0, 0],
         ['GDGTUJUAN', 'Tujuan', 1, 'varchar', 0, 0],
         ['SATUAN', 'Satuan', 1, 'varchar', 0, 0],
@@ -170,16 +196,15 @@
         ['hpp', 'HPP', 1, 'float', 1, 2],
         ['TOTHARGA', 'Total', 1, 'float', 1, 2]
       ];
-      gsum_issubtotal = 1;
-      gsum_isgrandtotal = 1;
     }
+    gsum_issubtotal = 1;
+    gsum_isgrandtotal = 1;
   }
 
-  // Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2) -- lihat komentar di toolbar. Ketiganya
-  // pakai kolom yang sama, jadi TIDAK menyentuh g_modeReport/setDefaultHeader/doShowCustomize di
-  // sini (beda dengan setMode() di reportpengadaanpopo.blade.php) -- kalau ikut disentuh, kolom
-  // tersimpan (DBSIMPANHEADER, dikunci per href+reportmode) akan direset padahal modenya cuma
-  // beda nilai tanggal/jenis, bukan beda struktur kolom.
+  // Jenis laporan: Semua (0)/Diterima (1)/Outstanding (2) -- lihat komentar di toolbar. g_modeReport
+  // diikutkan Jenis supaya tiap Jenis punya slot kolom tersimpan sendiri (DBSIMPANHEADER dikunci
+  // per href+reportmode) -- sama seperti Non Outstanding vs Outstanding di
+  // reportpengadaanpopo.blade.php (OUT_MODE_OFFSET).
   function setJenis(val) {
     globalJenis = val;
     const isOut = (val === '2');
@@ -189,8 +214,12 @@
     $('#dateSep').toggle(!isOut);
     $('#periodeLabel').text(isOut ? 'Sampai Tanggal' : 'Periode');
 
-    // Ganti jenis tidak langsung fetch ulang -- tabel (termasuk header) dikosongkan, user tekan
-    // Tampilkan. Pakai renderRows([]) supaya header & footer ikut disegarkan secara konsisten.
+    g_modeReport = Number(val);
+    if (typeof doSetHeader === 'function') { doSetHeader(g_modeReport); }
+    if (typeof doShowCustomize === 'function') { doShowCustomize(); }
+
+    // Ganti jenis tidak langsung fetch ulang -- tabel dikosongkan, user tekan Tampilkan. Pakai
+    // renderRows([]) supaya header (sesuai slot kolom Jenis yang baru) & footer ikut disegarkan.
     lastRows = [];
     renderRows(lastRows, currentGroupby);
   }
@@ -330,11 +359,11 @@
     return undefined;
   }
 
-  // Kolom Total (key 'TOTHARGA' di gcart_header, label "Total") sengaja dipertahankan generik --
-  // field ASLI dari SP_TransferBlmTerima beda nama per Jenis (hppkirim utk Semua/Outstanding,
-  // TOTHPP utk Diterima), padahal kolom tersimpan (DBSIMPANHEADER) dikunci per g_modeReport yang
-  // TIDAK berubah antar Jenis (lihat komentar di setJenis()). Jadi resolusi field asli dilakukan
-  // di sini saat dipakai, BUKAN dengan mengganti key gcart_header per Jenis.
+  // Kolom Total (key 'TOTHARGA' di gcart_header, label "Total") sengaja dipertahankan sebagai key
+  // generik di ketiga slot kolom (satu per Jenis, lihat setJenis()) -- field ASLI dari
+  // SP_TransferBlmTerima beda nama per Jenis (hppkirim utk Semua/Outstanding, TOTHPP utk
+  // Diterima). Resolusi field asli dilakukan di sini berdasarkan Jenis yang sedang aktif,
+  // terlepas dari slot kolom (g_modeReport) mana yang sedang ditampilkan/dikustomisasi.
   function pickTotal(r) {
     return (globalJenis === '1') ? pickCI(r, 'TOTHPP') : pickCI(r, 'hppkirim');
   }

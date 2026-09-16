@@ -5,7 +5,8 @@
 		}
 	],
 	"settings": {
-		"workbench.colorTheme": "Night Owl Black",
-		"workbench.iconTheme": "material-icon-theme"
+		"workbench.colorTheme": "Monokai Pro (Filter Spectrum)",
+		"workbench.iconTheme": "material-icon-theme",
+		"workbench.productIconTheme": "fluent-icons"
 	}
 }
