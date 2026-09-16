@@ -135,6 +135,17 @@
   .tb-pagination-outside .dataTables_paginate {
     float: right;
   }
+  .tb-pagination-outside .dataTables_info {
+    float: left;
+    padding-top: 0.5em;
+    font-size: 13px;
+    color: var(--sp-text-soft, #6b7280);
+  }
+  .tb-pagination-outside .paginate_button.disabled.ellipsis {
+    border: none;
+    background: transparent;
+    padding: 0.4em 0.3em;
+  }
   .tb-pagination-outside .paginate_button {
     box-sizing: border-box;
     display: inline-block;
@@ -593,9 +604,10 @@
         </table>
       </div>
       <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo1"></div>
         <div class="dataTables_paginate paging_simple_numbers">
           <a class="paginate_button previous" id="tabelPagerPrev1" onclick="sjGotoPage('tabel', sjPageState.tabel.page - 1)">Previous</a>
-          <span><a class="paginate_button current" id="tabelPagerCurrent1">1</a></span>
+          <span id="tabelPagerNumbers1"></span>
           <a class="paginate_button next" id="tabelPagerNext1" onclick="sjGotoPage('tabel', sjPageState.tabel.page + 1)">Next</a>
         </div>
       </div>
@@ -631,9 +643,10 @@
         </table>
       </div>
       <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo2"></div>
         <div class="dataTables_paginate paging_simple_numbers">
           <a class="paginate_button previous" id="tabelPagerPrev2" onclick="sjGotoPage('tabel2', sjPageState.tabel2.page - 1)">Previous</a>
-          <span><a class="paginate_button current" id="tabelPagerCurrent2">1</a></span>
+          <span id="tabelPagerNumbers2"></span>
           <a class="paginate_button next" id="tabelPagerNext2" onclick="sjGotoPage('tabel2', sjPageState.tabel2.page + 1)">Next</a>
         </div>
       </div>
@@ -807,9 +820,10 @@
         </table>
       </div>
       <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo5"></div>
         <div class="dataTables_paginate paging_simple_numbers">
           <a class="paginate_button previous" id="tabelPagerPrev5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page - 1)">Previous</a>
-          <span><a class="paginate_button current" id="tabelPagerCurrent5">1</a></span>
+          <span id="tabelPagerNumbers5"></span>
           <a class="paginate_button next" id="tabelPagerNext5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page + 1)">Next</a>
         </div>
       </div>
@@ -3707,9 +3721,31 @@ var sjPageState = {
   tabel5: { page: 1, length: 10, search: '', total: 0 }
 }
 var SJ_PAGE_INFO = {
-  tabel:  { rowsVar: 'lastTabelRows',  reinit: 'reinitTabel',  prevId: 'tabelPagerPrev1', curId: 'tabelPagerCurrent1', nextId: 'tabelPagerNext1', searchInpId: 'tabelSearch1', lenSelId: 'tabelLen1' },
-  tabel2: { rowsVar: 'lastTabel2Rows', reinit: 'reinitTabel2', prevId: 'tabelPagerPrev2', curId: 'tabelPagerCurrent2', nextId: 'tabelPagerNext2', searchInpId: 'tabelSearch2', lenSelId: 'tabelLen2' },
-  tabel5: { rowsVar: 'lastTabel5Rows', reinit: 'reinitTabel5', prevId: 'tabelPagerPrev5', curId: 'tabelPagerCurrent5', nextId: 'tabelPagerNext5', searchInpId: 'tabelSearch5', lenSelId: 'tabelLen5' }
+  tabel:  { rowsVar: 'lastTabelRows',  reinit: 'reinitTabel',  prevId: 'tabelPagerPrev1', numbersId: 'tabelPagerNumbers1', nextId: 'tabelPagerNext1', infoId: 'tabelPagerInfo1', searchInpId: 'tabelSearch1', lenSelId: 'tabelLen1' },
+  tabel2: { rowsVar: 'lastTabel2Rows', reinit: 'reinitTabel2', prevId: 'tabelPagerPrev2', numbersId: 'tabelPagerNumbers2', nextId: 'tabelPagerNext2', infoId: 'tabelPagerInfo2', searchInpId: 'tabelSearch2', lenSelId: 'tabelLen2' },
+  tabel5: { rowsVar: 'lastTabel5Rows', reinit: 'reinitTabel5', prevId: 'tabelPagerPrev5', numbersId: 'tabelPagerNumbers5', nextId: 'tabelPagerNext5', infoId: 'tabelPagerInfo5', searchInpId: 'tabelSearch5', lenSelId: 'tabelLen5' }
+}
+
+// Bikin daftar tombol nomor halaman ala DataTables (1 ... 4 5 [6] 7 8 ... 20)
+// -- sebelumnya cuma satu tombol (halaman aktif) tanpa info total, jadi user
+// tidak tahu ada berapa halaman/data sebenarnya. Port pola windowing sederhana,
+// bukan API DataTables asli (datanya per-halaman dari server, bukan di browser).
+function sjBuildPageButtons(key, page, totalPages) {
+  var windowSize = 2
+  var pages = [1]
+  if (page - windowSize > 2) { pages.push('...') }
+  for (var p = Math.max(2, page - windowSize); p <= Math.min(totalPages - 1, page + windowSize); p++) { pages.push(p) }
+  if (page + windowSize < totalPages - 1) { pages.push('...') }
+  if (totalPages > 1) { pages.push(totalPages) }
+  var html = ''
+  pages.forEach(function (p) {
+    if (p === '...') {
+      html += '<span class="paginate_button disabled ellipsis">&hellip;</span>'
+    } else {
+      html += '<a class="paginate_button' + (p === page ? ' current' : '') + '" onclick="sjGotoPage(\'' + key + '\', ' + p + ')">' + p + '</a>'
+    }
+  })
+  return html
 }
 
 // Markup+class-nya sengaja disamakan dengan pager DataTables asli
@@ -3719,7 +3755,10 @@ function sjUpdatePagerUI(key) {
   var st = sjPageState[key]
   var info = SJ_PAGE_INFO[key]
   var totalPages = Math.max(1, Math.ceil(st.total / st.length))
-  $('#' + info.curId).text(st.page)
+  var awal = st.total === 0 ? 0 : (st.page - 1) * st.length + 1
+  var akhir = Math.min(st.page * st.length, st.total)
+  $('#' + info.infoId).text('Showing ' + awal + ' to ' + akhir + ' of ' + st.total + ' entries')
+  $('#' + info.numbersId).html(sjBuildPageButtons(key, st.page, totalPages))
   $('#' + info.prevId).toggleClass('disabled', st.page <= 1)
   $('#' + info.nextId).toggleClass('disabled', st.page >= totalPages)
 }
