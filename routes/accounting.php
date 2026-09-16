@@ -344,6 +344,7 @@ Route::post('/bonsementaraloadall' , [BonSementaraController::class, 'loadAll'])
 Route::post('/bonsementaraspnobukti' , [BonSementaraController::class, 'getNoBukti']);
 Route::post('/bonsementaraspdetail' , [BonSementaraController::class, 'getDetailOutstanding']);
 Route::post('/bonsementaraspadd' , [BonSementaraController::class, 'spAdd']);
+Route::post('/bonsementararesetheader' , [BonSementaraController::class, 'resetHeader']);
 
 
 });
