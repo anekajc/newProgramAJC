@@ -468,20 +468,10 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
     <button id="buttonSubmitAdd" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button>
     <button id="buttonSubmitEdit" type="button" class="btn btn-chip-biru" onclick="submitEdit()">Simpan Edit</button>
   </div>
@@ -703,7 +693,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
   </div>
 </div>
 </div>

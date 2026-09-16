@@ -375,6 +375,16 @@
   min-width: 0;
   max-width: 100%;
 }
+
+/* Perbesar glyph + pada tombol Add tanpa mengubah ukuran bingkai tombol.
+   line-height: 0 membuat ikon tidak menambah tinggi baris, jadi tinggi
+   tombol tetap sama dengan tombol Detail di sebelahnya. Port 1:1 dari
+   returpenjualangudang.blade.php / returpembeliangudang.blade.php. */
+.btn .bi-plus {
+  font-size: 1.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
 </style>
 <div id="imagecontainer" class="d-none" style="">
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
@@ -943,7 +953,7 @@
         <div class="col-12 text-right">
 
           <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-          <button id="" type="button" onclick="submitAdd()" class="btn btn-primary" style="height: 30px;
+          <button id="" type="button" onclick="submitAdd()" class="btn btn-chip-biru" style="height: 30px;
           border-radius: 20px;
           font-size: 0.75rem;
           font-weight: 600;
@@ -3125,6 +3135,7 @@ function tabel2ActionsCell (row) {
   let nobukti = ipPickCI(row, 'NoBukti');
   let isOto = Number(ipPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   } else {
@@ -3132,7 +3143,6 @@ function tabel2ActionsCell (row) {
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   }
   html += '<button class="btn btn-primary btn-sm" title="Print" onclick="openPrintModal(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
-  html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   html += '</div></td>';
   return html;
 }

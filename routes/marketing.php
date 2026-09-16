@@ -183,6 +183,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/suratjalanlistekspedisi', [SuratJalanController::class, 'listEkspedisi']);
   Route::post('/suratjalanspadd', [SuratJalanController::class, 'spAdd']);
   Route::get('/suratjalanloadall', [SuratJalanController::class, 'loadAll']);
+  Route::get('/suratjalanpaginate', [SuratJalanController::class, 'paginateOutstanding']);
   Route::post('/suratjalanspotorisasi', [SuratJalanController::class, 'spOtorisasi']);
   Route::post('/suratjalanspbatalotorisasi', [SuratJalanController::class, 'spBatalOtorisasi']);
   Route::post('/suratjalangetdetailkoreksi', [SuratJalanController::class, 'getDetailKoreksi']);
