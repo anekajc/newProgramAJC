@@ -50,6 +50,40 @@
     vertical-align: middle;
   }
 
+  #tabel_add td:last-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #tabel_add td:last-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel_add td:last-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel_add td:last-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #tabel_add td:last-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
   .btn-pill-action {
     height: 30px;
     padding: 4px 12px;
@@ -437,12 +471,12 @@
         <div class="col-md-3">
           <div class="row">
             <input type="hidden" class="form-control" id="input_add_nourut" placeholder="No Urut" disabled>
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
               </div>
@@ -464,12 +498,12 @@
               </div>
             </div>
 
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
@@ -481,15 +515,17 @@
         <div class="col-md-3">
           <div class="row">
 
-            <div class="col-md-6">
+            <div class="col-6">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group">
-                {{-- Gudang Asal: dropdown select, disamakan dengan #input_gudang
-                     di gudang/ubahkemasanbarang.blade.php. Opsi dimuat lewat
+                {{-- Gudang Asal: dropdown select, dilebarkan jadi col-md-12 (satu baris
+                     penuh di bawah label) supaya kode+nama gudang yang terpilih tidak
+                     terpotong, disamakan dengan pola #input_add_kodealamatkirim di
+                     gudang/purchaseOrder.blade.php. Opsi dimuat lewat
                      muatDropdownGudangAsal() (endpoint prtlistgudangasal), otomatis
                      exclude Gudang Tujuan yang sedang dipilih supaya asal != tujuan. --}}
                 <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="onChangeGudangAsal()">
@@ -497,9 +533,10 @@
               </div>
             </div>
 
-            <div class="col-md-12" style="margin-top:-15px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Asal" class="form-control text-left align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
+        
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal" class="form-control text-left align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
               </div>
             </div>
           </div>
@@ -508,24 +545,23 @@
         <div class="col-md-3">
           <div class="row">
 
-            <div class="col-md-6">
+            <div class="col-6">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group">
-                {{-- Gudang Tujuan: dropdown select, pola sama dengan Gudang Asal di atas.
-                     Opsi dimuat lewat muatDropdownGudangTujuan() (endpoint
-                     prtlistgudangtujuan), otomatis exclude Gudang Asal yang sedang dipilih. --}}
+          
                 <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="onChangeGudangTujuan()">
                 </select>
               </div>
             </div>
 
-            <div class="col-md-12" style="margin-top:-15px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Tujuan" class="form-control text-left align-items-center" id="input_add_namaGudangTujuan"  disabled></textarea>
+
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan" class="form-control text-left align-items-center" id="input_add_namaGudangTujuan"  disabled></textarea>
               </div>
             </div>
           </div>
@@ -533,7 +569,12 @@
 
       <div class="col-md-3">
         <div class="row">
-          <div class="col-md-12" style="margin-top:-5px;">
+          <div class="col-6">
+            <div class="form-group">
+              <label>Keterangan</label>
+            </div>
+          </div>
+          <div class="col-md-12">
             <div class="form-group">
               <textarea style="width: 100%; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
             </div>
@@ -2451,8 +2492,8 @@ $(document).ready(function(){
             .map(
               (item, i) => `
               <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
-                <td>${item.KODEBRG}</td>
-                <td>${item.NAMABRG}</td>
+                <td style="padding:10px 12px;">${item.KODEBRG}</td>
+                <td style="padding:10px 12px;">${item.NAMABRG}</td>
               </tr>`
             )
             .join("");
@@ -4446,8 +4487,8 @@ function buttonAddAddListBarang () {
         res.forEach((item, i) => {
           rowTable += `
             <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
-              <td>${item.KODEBRG}</td>
-              <td>${item.NAMABRG}</td>
+              <td style="padding:10px 12px;">${item.KODEBRG}</td>
+              <td style="padding:10px 12px;">${item.NAMABRG}</td>
             </tr>`;
         });
 
@@ -4602,7 +4643,7 @@ function muatDropdownGudangTujuan() {
 function onChangeGudangAsal(refreshLawan) {
   let kode = $('#input_add_kodeGudangAsal').val();
   let item = listGudangAsalDropdown.find(g => g.KodeGdg === kode);
-  document.getElementById('input_add_namaGudangAsal').value = item ? item.NamaGdg : '';
+  document.getElementById('input_add_namaGudangAsal').value = item ? item.Alamat : '';
 
   if (refreshLawan !== false) {
     muatDropdownGudangTujuan();
@@ -4612,7 +4653,7 @@ function onChangeGudangAsal(refreshLawan) {
 function onChangeGudangTujuan(refreshLawan) {
   let kode = $('#input_add_kodeGudangTujuan').val();
   let item = listGudangTujuanDropdown.find(g => g.KodeGdg === kode);
-  document.getElementById('input_add_namaGudangTujuan').value = item ? item.NamaGdg : '';
+  document.getElementById('input_add_namaGudangTujuan').value = item ? item.Alamat : '';
 
   if (refreshLawan !== false) {
     muatDropdownGudangAsal();
@@ -5062,9 +5103,9 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_nourut").value = dataHeaderAdd.NOURUT
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.TANGGAL)
           document.getElementById("input_add_kodeGudangAsal").value = dataHeaderAdd.gdgAsal
-          document.getElementById("input_add_namaGudangAsal").value = dataHeaderAdd.NamaGgdAsal
+          document.getElementById("input_add_namaGudangAsal").value = dataHeaderAdd.AlamatGdgAsal || dataHeaderAdd.NamaGgdAsal
           document.getElementById("input_add_kodeGudangTujuan").value = dataHeaderAdd.gdgTujuan
-          document.getElementById("input_add_namaGudangTujuan").value = dataHeaderAdd.NamaGgdTujuan
+          document.getElementById("input_add_namaGudangTujuan").value = dataHeaderAdd.AlamatGdgTujuan || dataHeaderAdd.NamaGgdTujuan
           document.getElementById("input_add_keterangan").value = dataHeaderAdd.Keterangan
         }
 
