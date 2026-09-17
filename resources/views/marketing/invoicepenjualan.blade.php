@@ -4490,6 +4490,7 @@ function buttonDetail (nobukti) {
 
       $('#input_detail_pembayaran').val(header.TIPEBAYAR)
       $('#input_detail_hari').val(header.HARI)
+      $('#input_detail_tipeppn').val(header.PPN)
 
       $('#input_detail_tanggal').val(formatDate(header.Tanggal, '-'))
 

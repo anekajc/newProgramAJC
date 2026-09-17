@@ -2327,9 +2327,16 @@ if (pcekglobal) {
           res.forEach((item, i) => {
             let qnt = item.QNT ? parseFloat(item.QNT).toFixed(2) : '0.00'
             let qntsisa = item.QntSisa ? parseFloat(item.QntSisa).toFixed(2) : '0.00'
+            // Detail mode: QntSisa dari server sudah = QNT - qty yang sudah diterima,
+            // jadi itu yang seharusnya tampil di kolom "Qty PR Jual" (sisa yang masih
+            // outstanding), sedangkan "Qty Terima" adalah bagian yang sudah diterima
+            // (QNT - QntSisa) -- sebelumnya QntSisa malah ditaruh langsung di kolom
+            // "Qty Terima" dan "Qty PR Jual" menampilkan QNT mentah, jadi tidak sinkron.
+            let qntPrJualCol = mode === 'detail' ? qntsisa : qnt
+            let qntSudahTerima = mode === 'detail' ? (parseFloat(qnt) - parseFloat(qntsisa)).toFixed(2) : qntsisa
             let terimaCol = mode === 'detail' ? '' : `<td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>`
             let qntTerimaCol = mode === 'detail'
-              ? `<td class="text-right">${qntsisa}</td>`
+              ? `<td class="text-right">${qntSudahTerima}</td>`
               : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>`
             let qntRejectCol = mode === 'detail'
               ? `<td class="text-right">0.00</td>`
@@ -2340,7 +2347,7 @@ if (pcekglobal) {
             <td>${item.NAMABRG}</td>
             <td>${item.SATUAN}</td>
             <td></td>
-            <td class="text-right">${qnt}</td>
+            <td class="text-right">${qntPrJualCol}</td>
             ${qntTerimaCol}
             ${qntRejectCol}
             </tr>`

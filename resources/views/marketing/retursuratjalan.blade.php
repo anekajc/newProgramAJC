@@ -1375,8 +1375,8 @@
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
-                <th style="padding: 4px 12px;" scope="col">Qty1</th>
-                <th style="padding: 4px 12px;" scope="col">Sat1</th>
+                <th style="padding: 4px 12px;" scope="col">Qty</th>
+                <th style="padding: 4px 12px;" scope="col">Sat</th>
                 <!-- <th scope="col">Actions</th> -->
 
               </tr>

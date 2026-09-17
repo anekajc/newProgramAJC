@@ -142,7 +142,6 @@ Route::middleware('auth')->group(function () {
 // Route::get('/cetakpengajuandphloadall' , [CetakPengajuanDphController::class, 'loadAll'] );
 // Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
 
-
 // Giro Diterima
 Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
 Route::get('/giroditerimalistperkiraanheader', [GiroDiterimaController::class, 'listPerkiraanHeader']);
@@ -159,8 +158,6 @@ Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiro
 // Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
 
 
-
-
 Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
 Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
 Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
@@ -169,10 +166,6 @@ Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']
 Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
 Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
 Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
-
-
-
-
 
 Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
 Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
@@ -190,8 +183,6 @@ Route::post('/giroditerimaspupdatetemprumjual', [GiroDiterimaController::class, 
 Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtorisasi']);
 Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
 Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
-
-
 
 
 // Giro Dibuka

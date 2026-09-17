@@ -3795,7 +3795,11 @@ function sjGotoPage(key, page) {
 function sjIkatToolbarTabel(key) {
   var info = SJ_PAGE_INFO[key]
   var searchTimeout
-  $('#' + info.searchInpId).on('keyup', function () {
+  // 'input' (bukan 'keyup') supaya tombol "x" bawaan <input type="search">
+  // ikut ke-tangkap -- klik tombol itu tidak memicu keyup (tidak ada tombol
+  // keyboard yang ditekan), jadi dengan keyup kotak pencarian terlihat kosong
+  // tapi hasil yang difilter sebelumnya tidak pernah direset.
+  $('#' + info.searchInpId).on('input', function () {
     var value = this.value
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(function () {
