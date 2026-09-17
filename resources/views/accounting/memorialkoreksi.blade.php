@@ -838,21 +838,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
       </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </div>
 
 
@@ -972,11 +957,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
         <div class="row">
 
-
-
-
-
-
           <div class="col-md-2">
             <div class="form-group">
             <label>Valas</label>
@@ -1014,10 +994,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
     </div>
-
-
-
-
 
 
 <div class="row" style="margin-top: -10px">
@@ -1181,27 +1157,12 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     </div>
   </div>
 
-
-
 </div>
 </div>
 
 </div>
 
-
-
-
-
 </div>
-
-
-
-
-
-
-
-
-
 
   <!-- <div class="col-6 ">
     <div class="row">
@@ -1300,36 +1261,14 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             <input type="text" class="form-control" id="input_detail_note" placeholder="" disabled style="flex:0 0 390px">
           </div>
 
-
-
-
         </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
-
-
 
   <div class="container-fluid">
     <hr/>
 
   </div>
-
-
 
     <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
@@ -1368,28 +1307,13 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     <button id="buttonOtorisasi" type="button" class="btn btn-dpp-utama" onclick="submitOtorisasi()">Otorisasi</button>
   </div>
 
-
-
-
-
-
     </div>
   </div>
 
       </div>
 
 
-
-
-
-
-
-
-
     </div>
-
-
-
 
 
   </div>
@@ -1406,7 +1330,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
       <div id= "modalAddListValas" class="showhidemodalbodyadd">
       <div class="modal-header">
-
 
           <h5 class="modal-title" id="">Valas</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -1429,7 +1352,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             <div class="col-12" style="overflow:auto; margin-top:-60px; ">
             <!-- <div class="container-fluid"> -->
 
-
             <table id="tabel_add_list_valas" class="table table-bordered table-striped" style="overflow:auto; " >
               <thead class="text-center bg-primary text-white">
                 <tr>
@@ -1437,10 +1359,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
                   <th style="padding: 4px 12px;" scope="col">Kurs</th>
                   <th style="padding: 4px 12px;" scope="col">Actions</th>
-
                 </tr>
               </thead>
-
 
               <tbody id="tabel_data_add_list_valas" class="text-left" >
 
@@ -1466,17 +1386,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             </div>
             </div>
 
-
-
-
         </div>
 
-
-
-
-
       </div>
-
 
       <div id="" class="modal-footer ">
         <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
@@ -1535,7 +1447,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               </tr>
               </tbody>
 
-
             </table>
           <!-- </div> -->
             <!-- <button onclick="buttonSubKategori()">tes</button> -->
@@ -1543,45 +1454,16 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             </div>
             </div>
 
-
-
-
         </div>
 
-
-
-
-
       </div>
-
 
       <div id="" class="modal-footer ">
         <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </div>
-
-
-
-
-
-
 
     </div>
   </div>
@@ -1625,12 +1507,6 @@ $(document).ready(function(){
        ]
       });
 
-
-
-
-
-
-
         $("#tabel_add_list_custsupp").DataTable({
           "lengthChange": false,
             "paging": false ,
@@ -1640,6 +1516,11 @@ $(document).ready(function(){
 
 
 
+// NONAKTIF - alur otorisasi lama (buka form detail dulu, lalu klik tombol Otorisasi
+// di page3). Sejak otorisasi dilakukan langsung dari baris tabel lewat
+// buttonOtorisasiRow(), tidak ada lagi yang memanggil buttonDetail(..., 'otorisasi')
+// sehingga tombol #buttonOtorisasi tidak pernah tampil dan fungsi ini tidak terpakai.
+// Kode sengaja tidak dihapus supaya alur lama bisa dihidupkan lagi bila diperlukan.
 function submitOtorisasi () {
 
   let _token = $("#_token").val();
@@ -1661,8 +1542,6 @@ function submitOtorisasi () {
       }
       loadAll()
       buttonCloseForm()
-
-
 
 
     },
@@ -2015,9 +1894,14 @@ function renderTabelMk () {
         <button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
       `
     } else {
+      // Otorisasi langsung dari baris tabel (pola pembelianpermintaanagen) - tidak lagi
+      // membuka form detail dulu. Alur lama lewat buttonDetail(..., 'otorisasi') +
+      // tombol #buttonOtorisasi di page3 dinonaktifkan, baris aslinya disimpan di bawah
+      // supaya bisa dipakai lagi kalau nanti diperlukan.
+      // <button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonDetail('${item.NoBukti}' , 'otorisasi')"><i class="bi bi-key"></i></button>
       tombolAksi += `
         <button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi('${item.NoBukti}' , 'edit')"><i class="bi bi-pen"></i></button>
-        <button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonDetail('${item.NoBukti}' , 'otorisasi')"><i class="bi bi-key"></i></button>
+        <button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasiRow('${item.NoBukti}', '${item.IsOtorisasi1}')"><i class="bi bi-key"></i></button>
       `
     }
 
@@ -2746,6 +2630,48 @@ function submitPrint (nobukti) {
 
   }
 
+// Otorisasi langsung dari baris tabel - mengikuti buttonOtorisasi() di menu
+// pembelianpermintaanagen: tanpa membuka form detail dan tanpa dialog konfirmasi.
+// Nama fungsi sengaja diberi akhiran "Row" karena id tombol Otorisasi di page3
+// (alur lama) sudah memakai nama "buttonOtorisasi".
+function buttonOtorisasiRow (nobukti, isOtorisasi) {
+  let akses = $("#akses_isotorisasi1").val();
+  if (!Number(akses)) {
+    alertify.warning('No access')
+    return
+  }
+
+  if (Number(isOtorisasi) > 0) {
+    alertify.warning('Sudah diotorisasi')
+    return
+  }
+
+  let _token = $("#_token").val();
+
+  $.ajax({
+    url: "{!! url('memorialkoreksispotorisasi') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      nobukti
+    },
+    success: function(res) {
+      if (res > 0) {
+        alertify.success('Berhasil otorisasi')
+        loadAll()
+      } else {
+        alertify.warning('Gagal otorisasi')
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
+}
+
 function buttonBatalOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
@@ -2753,8 +2679,18 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-  alertify.confirm('Batal Otorisasi', 'Batal Otorisasi Kas ' + nobukti + ' ?',
-      function() {
+  // Batal otorisasi wajib disertai keterangan - mengikuti pola menu
+  // pembelianpermintaanagen: keterangan dikirim sebagai 'pket' dan dicatat oleh
+  // LoggingData di spBatalOtorisasi.
+  alertify.prompt('Masukkan keterangan batal otorisasi nomor   ' + nobukti, '',
+      function(evt, value) {
+        let xpket = (value || '').trim()
+
+        if (xpket == '') {
+          alertify.warning('Keterangan harus diisi.')
+          return false
+        }
+
         let _token = $("#_token").val();
 
         $.ajax({
@@ -2763,15 +2699,12 @@ function buttonBatalOtorisasi (nobukti) {
           async: false,
           data: {
             _token,
-            nobukti
-
+            nobukti,
+            pket: xpket
           },
           success: function(res) {
             alertify.success('Berhasil batal otorisasi')
             loadAll()
-
-
-
           },
           error: function (err) {
             console.log(err)
@@ -2781,7 +2714,8 @@ function buttonBatalOtorisasi (nobukti) {
         })
       }
     ,function(){
-      console.log('no')
+      console.log('Batal konfirmasi batal otorisasi')
+      alertify.error('Action cancelled')
     });
 }
 
@@ -3756,6 +3690,8 @@ function buttonDetail (nobukti , tipe = 'detail') {
 
   }
 
+  // Cabang 'otorisasi' dipertahankan tapi sudah tidak dipakai - lihat catatan di
+  // submitOtorisasi(). Tombol Otorisasi di tabel sekarang memanggil buttonOtorisasiRow().
   if (tipe == 'otorisasi') {
     // Gate akses_isotorisasi1 dinonaktifkan - disamakan dengan pelunasanpiutangdpp
     // yang tidak melakukan pengecekan ini di sisi client. Hak akses halaman tetap
