@@ -17,6 +17,52 @@ class PengajuanDPHTunaiController extends Controller
 
 {
 
+  // Satu rentang tanggal dipakai baik oleh index() (first load) maupun loadAll() (AJAX
+  // reload dari picker Periode di toolbar). C.Tanggal dipakai dengan rentang setengah-terbuka
+  // [date1, date2+1hari) supaya baris yang timestamp-nya persis di tanggal akhir tidak ikut
+  // terbuang, sama seperti PembebananPemakaianController::fetchList(). Hasilnya masih
+  // di-group per NoBukti (bukan diratakan) karena begitulah view ini sudah memakainya
+  // (lastRows = (@json($tempOutstanding)).map(g => g[0])).
+  private function fetchList(string $date1, string $date2)
+  {
+    $rows = DB::connection("SML")->select("
+Select
+ C.NoBukti, C.Tanggal, C.Valas, 0.00 Nilai,d.DIBAYAR, C.IsOtorisasi1, C.OtoUser1, C.TglOto1,
+       C.IsOtorisasi2, C.OtoUser2, C.TglOto2,
+       C.IsOtorisasi3, C.OtoUser3, C.TglOto3,
+       C.IsOtorisasi4, C.OtoUser4, C.TglOto4,
+       C.IsOtorisasi5, C.OtoUser5, C.TglOto5,
+       Cast(Case when Case when C.IsOtorisasi1=1 then 1 else 0 end+
+                      Case when C.IsOtorisasi2=1 then 1 else 0 end+
+                      Case when C.IsOtorisasi3=1 then 1 else 0 end+
+                      Case when C.IsOtorisasi4=1 then 1 else 0 end+
+                      Case when C.IsOtorisasi5=1 then 1 else 0 end=C.MaxOL then 0
+                 else 1
+            end As Bit) NeedOtorisasi
+        ,C.Userbatal,C.TglBatal,B.KODECUSTSUPP,b.NAMACUSTSUPP,
+
+
+b.NAMACUSTSUPP,b.KODECUSTSUPP,d.KL
+From dbDPHDet a
+Left Outer Join DBCUSTSUPP b on a.KODECUSTSUPP=b.KODECUSTSUPP
+LEFT OUTER JOIN DBDPH C ON C.NoBukti=a.NoBukti
+Left Outer Join (select NoBukti,Sum(Dibayar)dibayar,Sum(KL) KL,KODECUSTSUPP from dbDPHdet Group By NoBukti,KODECUSTSUPP)D on C.NoBukti=D.NoBukti
+where
+C.Tanggal >= :date1 and C.Tanggal < :date2
+AND C.Tipe ='DPH' and A.NOFAKTUR not like '%UMB%'
+order by C.NoBukti, A.Urut
+    ", [
+        "date1" => $date1,
+        "date2" => date('Y-m-d', strtotime($date2 . ' +1 day')),
+    ]);
+
+    $out = [];
+    foreach (collect($rows)->groupBy('NoBukti') as $g) {
+        array_push($out, $g);
+    }
+    return $out;
+  }
+
   public function index(Request $req) {
     $kodemenu = '02007';
 
@@ -55,56 +101,18 @@ class PengajuanDPHTunaiController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
 
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-d');
 
-    $tempOutstanding = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-Select
- C.NoBukti, C.Tanggal, C.Valas, 0.00 Nilai,d.DIBAYAR, C.IsOtorisasi1, C.OtoUser1, C.TglOto1,
-       C.IsOtorisasi2, C.OtoUser2, C.TglOto2,
-       C.IsOtorisasi3, C.OtoUser3, C.TglOto3,
-       C.IsOtorisasi4, C.OtoUser4, C.TglOto4,
-       C.IsOtorisasi5, C.OtoUser5, C.TglOto5,
-       Cast(Case when Case when C.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi5=1 then 1 else 0 end=C.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi
-        ,C.Userbatal,C.TglBatal,B.KODECUSTSUPP,b.NAMACUSTSUPP,
-
-
-b.NAMACUSTSUPP,b.KODECUSTSUPP,d.KL
-From dbDPHDet a
-Left Outer Join DBCUSTSUPP b on a.KODECUSTSUPP=b.KODECUSTSUPP
-LEFT OUTER JOIN DBDPH C ON C.NoBukti=a.NoBukti
-Left Outer Join (select NoBukti,Sum(Dibayar)dibayar,Sum(KL) KL,KODECUSTSUPP from dbDPHdet Group By NoBukti,KODECUSTSUPP)D on C.NoBukti=D.NoBukti
-where
--- c.bayar = 2 and
-MONTH(C.Tanggal)=@Bulan AND YEAR(C.Tanggal)=@Tahun AND C.Tipe ='DPH' and A.NOFAKTUR not like '%UMB%'
-order by C.NoBukti, A.Urut
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-        // $tempOutstanding = [];
-        // foreach ($outstanding as $p) {
-        //   // code...
-        //   array_push($tempOutstanding, $p);
-        // }
-        //
-
-        $collection1 = collect($tempOutstanding)->groupBy('NoBukti');
-        $tempOutstanding1 = [];
-        foreach ($collection1 as $p) {
-          // code...
-          array_push($tempOutstanding1, $p);
-        }
+    $tempOutstanding1 = $this->fetchList($date1, $date2);
 
 
 
     return view('accounting.pengajuandphtunai' , [
       "menul0" => $menul0,
       "periode" => $periode,
+      "date1" => $date1,
+      "date2" => $date2,
       "tempOutstanding" => $tempOutstanding1,
       "akses" => $akses,
       "tempListPerkiraanLB" => $tempListPerkiraanLB,
@@ -114,55 +122,18 @@ order by C.NoBukti, A.Urut
 
   }
 
-  public function loadAll () {
-
+  public function loadAll (Request $req) {
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("declare @Tahun int, @Bulan int
+    $date1 = $req->input('date1');
+    $date2 = $req->input('date2');
+    if (!$date1 || !$date2) {
+        $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+        $date2 = date('Y-m-d');
+    }
 
-select @Tahun= :tahun , @Bulan= :bulan
-
-Select
- C.NoBukti, C.Tanggal, C.Valas, 0.00 Nilai,d.DIBAYAR, C.IsOtorisasi1, C.OtoUser1, C.TglOto1,
-       C.IsOtorisasi2, C.OtoUser2, C.TglOto2,
-       C.IsOtorisasi3, C.OtoUser3, C.TglOto3,
-       C.IsOtorisasi4, C.OtoUser4, C.TglOto4,
-       C.IsOtorisasi5, C.OtoUser5, C.TglOto5,
-       Cast(Case when Case when C.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when C.IsOtorisasi5=1 then 1 else 0 end=C.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi
-        ,C.Userbatal,C.TglBatal,B.KODECUSTSUPP,b.NAMACUSTSUPP,
-
-
-b.NAMACUSTSUPP,b.KODECUSTSUPP,d.KL
-From dbDPHDet a
-Left Outer Join DBCUSTSUPP b on a.KODECUSTSUPP=b.KODECUSTSUPP
-LEFT OUTER JOIN DBDPH C ON C.NoBukti=a.NoBukti
-Left Outer Join (select NoBukti,Sum(Dibayar)dibayar,Sum(KL) KL,KODECUSTSUPP from dbDPHdet Group By NoBukti,KODECUSTSUPP)D on C.NoBukti=D.NoBukti
-where
--- c.bayar = 2 and
-MONTH(C.Tanggal)=@Bulan AND YEAR(C.Tanggal)=@Tahun AND C.Tipe ='DPH' and A.NOFAKTUR not like '%UMB%'
-order by C.NoBukti, A.Urut
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-        // $tempOutstanding = [];
-        // foreach ($outstanding as $p) {
-        //   // code...
-        //   array_push($tempOutstanding, $p);
-        // }
-        //
-
-        $collection1 = collect($tempOutstanding)->groupBy('NoBukti');
-        $tempOutstanding1 = [];
-        foreach ($collection1 as $p) {
-          // code...
-          array_push($tempOutstanding1, $p);
-        }
-    return ["tempOutstanding" => $tempOutstanding1];
+    return ["tempOutstanding" => $this->fetchList($date1, $date2)];
   }
 
   public function getListPengajuan (Request $req) {

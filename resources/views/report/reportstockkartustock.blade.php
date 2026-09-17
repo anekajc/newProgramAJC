@@ -544,7 +544,7 @@
 
   // applyModalFilter() dihapus: tombol Batal & Terapkan sekarang memakai data-bs-dismiss.
   // Modal ini dibuka lewat data-bs-toggle (Bootstrap 5), jadi menutupnya juga harus lewat
-  // data-api Bootstrap 5 -- lihat docs/new-design-all-guide.md #5.1.
+  // data-api Bootstrap 5 -- lihat docs/new-design-all-report-guide.md #5.1.
 
   // loadInfoHeader() dan buildInfoRows() dihapus: dua baris "Gudang : ..." /
   // "Barang : ... Lokasi : ..." di atas judul kolom sudah tidak dipakai lagi. Ikut hilang

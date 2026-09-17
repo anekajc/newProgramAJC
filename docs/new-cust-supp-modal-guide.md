@@ -1,6 +1,6 @@
 # New Design â€” Entity Picker Modal Guide (Cust/Supp and friends)
 
-Sub-guide of **[new-design-all-guide.md](new-design-all-guide.md)** â€” read that first. It holds the
+Sub-guide of **[new-design-all-report-guide.md](new-design-all-report-guide.md)** â€” read that first. It holds the
 pre-flight checks, the ask-first protocol, and the cross-cutting constraints. This file only covers
 the `#formSelect` picker modal.
 

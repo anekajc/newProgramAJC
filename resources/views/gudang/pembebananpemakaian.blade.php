@@ -205,9 +205,9 @@
 
 
 
+<!-- modal edit / koreksi -->
 
-
-<div id="page2" style="display: none" class="mainpage container-fluid" >
+<div id="page2" style="display: none; margin-top: 10vh;" class="mainpage container-fluid" >
 
   <div class="row">
     <div class="col-8 text-left">
@@ -292,7 +292,7 @@
 </div>
 
 
-<div id="page3" style="display: none" class="mainpage container-fluid" >
+<div id="page3" style="display: none; margin-top: 10vh;" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
       <h2></h2>
@@ -346,11 +346,11 @@
     </div>
 
     <div id="formKoreksiEdit" class="container-fluid showhideitem">
-    <div class="row">
+    {{-- <div class="row">
       <div class="col-4">
         <h4 id="h4KoreksiEditItem" style="margin-left:-15px;">Edit Item</h4>
       </div>
-    </div>
+    </div> --}}
 
     <div class="row">
       <div class="col-md-6">
@@ -481,7 +481,7 @@
   </div>
 {{-- End Modal List subcosting --}}
 
-<div id="page4" style="display: none" class="mainpage container-fluid" >
+<div id="page4" style="display: none; margin-top: 10vh;" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
       <h2></h2>

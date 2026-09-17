@@ -92,7 +92,7 @@
       <!-- Actions: search + filter + tampilkan + export -->
       <div class="action-group">
         {{-- Dibuka lewat plugin jQuery ($.fn.modal), BUKAN data-bs-toggle —
-             lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+             lihat aturan dua-Bootstrap di new-design-all-report-guide.md §5.1. --}}
         <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
           <i class="fas fa-filter"></i> Filter
         </button>
@@ -184,7 +184,7 @@
         {{-- Dua atribut dismiss sekaligus + onclick: halaman ini memuat Bootstrap 4 (newmaster2x)
              DAN Bootstrap 5 (masterreport4), jadi yang memiliki $.fn.modal tergantung urutan
              eksekusi. Pasang keduanya supaya tombol tutup selalu benar-benar menutup — lihat
-             new-design-all-guide.md §5.1 (dua atribut dismiss bersamaan aman). --}}
+             new-design-all-report-guide.md §5.1 (dua atribut dismiss bersamaan aman). --}}
         <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
                 onclick="$('#modalFilter').modal('hide')"></button>
       </div>

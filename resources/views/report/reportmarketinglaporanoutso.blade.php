@@ -39,7 +39,7 @@
           <i class="fas fa-filter"></i> Filter
         </button>
         {{-- Digantikan oleh menu roda gigi + bar kolom (#rtBar) di bawah toolbar; JS-nya
-             (doShowFormCustomizeTable dst.) tetap dipertahankan, lihat docs/new-design-all-guide.md §5.7. --}}
+             (doShowFormCustomizeTable dst.) tetap dipertahankan, lihat docs/new-design-all-report-guide.md §5.7. --}}
         {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i class="fas fa-cog"></i> Customize Table</button> --}}
         <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i class="fas fa-check"></i> Tampilkan</button>
         <div class="export-wrap" id="exportWrap">
@@ -110,7 +110,7 @@
           <div class="rt-group-label">Pengaturan Laporan</div>
           {{-- 'Report' (Detail/Rekap) dipindah ke switcher "Tampilan" di bar (#rtBar, lihat
                ReportTable.init di bawah) supaya bisa diganti tanpa buka modal Filter. Markup lama
-               disimpan sebagai referensi -- JANGAN dihapus, lihat docs/new-design-all-guide.md §5.7. --}}
+               disimpan sebagai referensi -- JANGAN dihapus, lihat docs/new-design-all-report-guide.md §5.7. --}}
           {{--
           <div class="rt-grid-2">
             <div>

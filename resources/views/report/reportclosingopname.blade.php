@@ -32,7 +32,7 @@
         {{-- Dibuka lewat plugin jQuery, BUKAN data-bs-toggle. Halaman masterreport2 memuat
              dua Bootstrap; tombol Batal/Terapkan menutupnya dengan $('#modalFilter').modal('hide')
              DAN membawa kedua atribut dismiss, jadi pembuka & penutup pasti lewat library
-             yang sama -- lihat docs/new-design-all-guide.md #5.1. JANGAN pasang data-toggle
+             yang sama -- lihat docs/new-design-all-report-guide.md #5.1. JANGAN pasang data-toggle
              dan data-bs-toggle bersamaan (dobel instance + dobel backdrop). --}}
         <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
           <i class="fas fa-filter"></i> Filter

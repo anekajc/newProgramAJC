@@ -1,4 +1,4 @@
-@extends('newmaster')
+@extends('accounting.newmaster')
 @section('buttons')
 
 @endsection
@@ -16,6 +16,7 @@
   align-items: flex-end;
   margin-bottom: -10px;
 }
+
 
 #tabel_add_list_customer_filter label input {
   width: 150px;
@@ -130,19 +131,24 @@
 <div class="container-fluid" >
 
 
+
   <!-- <div id="qrcode"></div> -->
   <div class="row" style="margin-top: -30px">
     <div class="col-6 text-left">
-      <h2>Pelunasan Hutang</h2>
+      <h2>Pelunasan Uang Muka</h2>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="buttonAdd()"  >+ Tambah DPH</button>
     </div>
   </div>
+<!-- <button onclick="loadAll()">tes</button> -->
+
+<!-- <button onclick="setNewNoBukti()">tes</button> -->
+<!-- <button onclick="buttonAdd('nobukti')">Add Tes</button> -->
 </div>
 
-<!-- <button onclick="loadAll()">tes</button> -->
 <div id="printContainer" style="display:none">
+
 
 
 </div>
@@ -156,7 +162,6 @@
   <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
   <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
-  <input type="hidden" id="akses_pembatalan" value="{!! $akses->pembatalan !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <div class="card">
@@ -258,6 +263,7 @@
       </div>
     </div>
   </div>
+
 
 
 
@@ -1087,8 +1093,11 @@
       <div id= "" class="">
       <div class="modal-header">
 
+
           <h5 class="modal-title" id="">DPH</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
 
@@ -1097,6 +1106,9 @@
 
         <div class="container-fluid" >
           <div class="row">
+            <div class="col-12">
+              <h3>DPH</h3>
+            </div>
 
 
           </div>
@@ -1204,7 +1216,7 @@
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_modal" class="table table-bordered table-striped" style="overflow:auto; min-width: 1500px" >
+            <table id="tabel_add_list_modal" class="table table-bordered table-striped" style="overflow:auto; " >
               <thead class="text-center bg-primary text-white" style="position: sticky;
             top: 0;
             z-index: 1;">
@@ -1218,11 +1230,13 @@
                   <th style="padding: 4px 12px;  " scope="col">Dibayar</th>
                   <th style="padding: 4px 12px;" scope="col" class="text-center">K.Bayar</th>
                   <!-- <th style="padding: 4px 12px;" scope="col">Perkiraan</th> -->
+
                   <th style="padding: 4px 12px;" scope="col">No.Invoice</th>
                   <th style="padding: 4px 12px;" scope="col">TglInvoice</th>
 
                 </tr>
               </thead>
+
 
               <tbody id="tabel_data_add_list_modal" class="text-left" >
 
@@ -1250,13 +1264,62 @@
 
 
       <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
         <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
       </div>
       </div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
+
+
+
 
 
 
@@ -1923,109 +1986,102 @@
           </div>
 
 
+          <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="min-width: 1400px">
+              <div id="" class="modal-content ">
+
+                <div id= "" class="">
+                <div class="modal-header">
 
 
+                    <h5 class="modal-title" id="">Perkiraan</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
 
 
-        <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="min-width: 1400px">
-            <div id="" class="modal-content ">
+                <div id="" class="">
+                <div class="modal-body">
 
-              <div id= "" class="">
-              <div class="modal-header">
-
-
-                  <h5 class="modal-title" id="">Perkiraan</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
+                  <div class="container-fluid" >
+                    <div class="row">
+                      <div class="col-12">
+                        <h3>Perkiraan</h3>
+                      </div>
 
 
-              <div id="" class="">
-              <div class="modal-body">
-
-                <div class="container-fluid" >
-                  <div class="row">
-                    <div class="col-12">
-                      <h3>Perkiraan</h3>
                     </div>
 
 
-                  </div>
+
+                    <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+                    <div class="row">
+                      <div class="col-12" style="overflow:auto;  max-height: 400px">
+                      <!-- <div class="container-fluid"> -->
 
 
+                      <table id="tabel_add_list_perkiraan" class="table table-bordered table-striped" style="overflow:auto; " >
+                        <thead class="text-center bg-primary text-white" style="position: sticky;
+                      top: 0;
+                      z-index: 1;">
+                          <tr>
+                            <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+                            <th style="padding: 4px 12px;" scope="col">Nama</th>
+                            <th style="padding: 4px 12px;" scope="col">Actions</th>
 
-                  <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-                  <div class="row">
-                    <div class="col-12" style="overflow:auto;  max-height: 400px">
-                    <!-- <div class="container-fluid"> -->
+                          </tr>
+                        </thead>
 
 
-                    <table id="tabel_add_list_perkiraan" class="table table-bordered table-striped" style="overflow:auto; " >
-                      <thead class="text-center bg-primary text-white" style="position: sticky;
-                    top: 0;
-                    z-index: 1;">
-                        <tr>
-                          <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                          <th style="padding: 4px 12px;" scope="col">Nama</th>
-                          <th style="padding: 4px 12px;" scope="col">Actions</th>
+                        <tbody id="tabel_data_add_list_perkiraan" class="text-left" >
 
+                          @for ($i = 0; $i < count($tempListPerkiraan); $i++)
+                          <tr>
+                            <td>{{ $tempListPerkiraan[$i]->Perkiraan }}</td>
+                            <td>{{ $tempListPerkiraan[$i]->Keterangan }}</td>
+
+
+                              <td class="text-center">
+                                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
+                                <button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraanLebihBayar('{{ $tempListPerkiraan[$i]->Perkiraan }}' , '{{ $tempListPerkiraan[$i]->Keterangan }}')" type="button" ><i class="bi bi-plus"></i></button>
+                              </td>
                         </tr>
-                      </thead>
+                        @endfor
+                        </tbody>
 
 
-                      <tbody id="tabel_data_add_list_perkiraan" class="text-left" >
+                      </table>
+                    <!-- </div> -->
+                      <!-- <button onclick="buttonSubKategori()">tes</button> -->
+                    </div>
+                      </div>
+                      </div>
 
-                        @for ($i = 0; $i < count($tempListPerkiraan); $i++)
-                        <tr>
-                          <td>{{ $tempListPerkiraan[$i]->Perkiraan }}</td>
-                          <td>{{ $tempListPerkiraan[$i]->Keterangan }}</td>
-
-
-                            <td class="text-center">
-                              <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                              <button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraanLebihBayar('{{ $tempListPerkiraan[$i]->Perkiraan }}' , '{{ $tempListPerkiraan[$i]->Keterangan }}')" type="button" ><i class="bi bi-plus"></i></button>
-                            </td>
-                      </tr>
-                      @endfor
-                      </tbody>
-
-
-                    </table>
-                  <!-- </div> -->
-                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
                   </div>
-                    </div>
-                    </div>
 
                 </div>
 
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+                  <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+                </div>
+                </div>
+
+
+
+
+                </div>
+
+
+
+
+
+
+
               </div>
-
-
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-                <!-- <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button> -->
-              </div>
-              </div>
-
-
-
-
-              </div>
-
-
-
-
-
-
-
             </div>
-          </div>
-
-
-
 
 <!-- End modal add-->
 
@@ -2122,34 +2178,143 @@ $(document).ready(function(){
   //   formAddListItem
 });
 
-
-function buttonAddListPerkiraanLebihBayar (id) {
-  toId = id
-  $("#formPerkiraan").modal('toggle')
+function buttonAddBatalKL () {
+  $('.showhideitemKL').hide()
 }
-function buttonAddPickPerkiraanLebihBayar (perkiraan , nama) {
-  document.getElementById(`input_modalx_perkiraan${toId}`).value = perkiraan
-  document.getElementById(`input_modalx_namaperkiraan${toId}`).value = nama
-  $("#formPerkiraan").modal('toggle')
-
+function buttonAddBatalKLEdit () {
+  $('.showhideitemKLEdit').hide()
 }
 
-function buttonSaveLBEdit () {
-  // let xlist = listKLEdit
 
-  let xnilainota = $("#input_modalxinvoice_nilainotadibayar").val()
-  let xtanggalinvoice = $("#input_modalxinvoice_tanggalinvoice").val()
-  let xnoinvoice = $("#input_modalxinvoice_noinvoice").val()
+function buttonChangeDibayar (index) {
+  // sp_TempTerimaDPP
 
-  let xdibayar = $("#input_modalx_dibayar").val()
+  let xcheck = document.getElementById(`pengajuanCheckList${index}`).checked
+  if(!xcheck) {
+    alertify.warning("Pilih invoice terlebih dahulu")
+    return
+  }
 
-  let dibayar = $("#input_modalxedit_dibayar").val()
-  let noinvoice = $("#input_modalxedit_noinvoice").val()
-  let tanggalinvoice = $("#input_modalxedit_tanggalinvoice").val()
+
+  let x = listPengajuan[index]
+  console.log(x)
+
+  if (x.NoFaktur.match('IVRJ')) {
+    console.log('z')
+    alertify.warning("IVRJ tidak bisa diedit")
+
+    return
+
+  }
+
+  if (x.NoFaktur.match('RPB')) {
+    console.log('z')
+    alertify.warning("RPB tidak bisa diedit")
+
+    return
+
+  }
+  // listPengajuan[saveHeaderIndex]
+  saveHeaderInvoice = listPengajuan[index]
+  saveHeaderIndex = index
+  let xdibayar = $(`#list_proses_dibayar${index}`).val();
+  // let xLB = $(`#list_proses_LB${index}`).val();
+  // let sisa = $(`#input_modal_sisa`).val();
+  console.log(saveHeaderInvoice.NoBukti)
+  // console.log(listTambahKL[saveHeaderInvoice.NoBukti])
+
+  console.log(x.TOTFAKTUR)
+  console.log(formatAngka(parseFloat(x.TOTFAKTUR).toFixed(2)))
+  console.log('==')
+  // console.log(xdibayar, xLB , sisa)
+  document.getElementById("input_modalx_nilainotadibayar").value = parseFloat(Number(x.Kredit) - Number(x.JmlDibayar)).toFixed(2)
+  document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+
+  document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+
+  document.getElementById("input_modalx_noinvoice").value = x.noinvoice ? x.noinvoice : ''
+  document.getElementById("input_modalx_tanggalinvoice").value = x.tanggalinvoice
+  // document.getElementById("input_modalx_lebihbayar").value = parseFloat(xLB).toFixed(2)
+  // document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+  // if (xLB > 0) {
+  //   document.getElementById("input_modalx_perkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputPerkiraanLB
+  //   document.getElementById("input_modalx_namaperkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputNamaPerkiraanLB
+  //
+  // } else {
+  //   document.getElementById("input_modalx_perkiraanlebihbayar").value = ''
+  //   document.getElementById("input_modalx_namaperkiraanlebihbayar").value = ''
+  //
+  // }
+
+  refreshTableKL()
+
+
+  $('.showhideitemKL').hide()
+
+
+  $("#formX").modal('toggle')
+
+
+}
+
+
+
+function buttonAddEdit (index) {
+
+
+    barangEdit = listData[index]
+    console.log(barangEdit)
+
+    if (barangEdit.NoFaktur.match('IVRJ')) {
+      console.log('z')
+      alertify.warning("IVRJ tidak bisa diedit")
+
+      return
+
+    }
+
+    if (barangEdit.NoFaktur.match('RPB')) {
+      console.log('z')
+      alertify.warning("RPB tidak bisa diedit")
+
+      return
+
+    }
+    document.getElementById("input_modalxedit_nilainotadibayar").value = parseFloat(Number(barangEdit.NilaiNota)).toFixed(2)
+    document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
+
+    // document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
+
+    document.getElementById("input_modalxedit_noinvoice").value = barangEdit.Noinvoice ? barangEdit.Noinvoice : ''
+    console.log(barangEdit.TglInv)
+
+    console.log(new Date(barangEdit.TglInv))
+    document.getElementById("input_modalxedit_tanggalinvoice").value = formatDate(barangEdit.TglInv , '-')
+    refreshTableKLEdit(barangEdit.NoBukti, barangEdit.NoFaktur)
+
+    $('.showhideitemKLEdit').hide()
+      $("#formXedit").modal('toggle')
+
+
+
+
+
+}
+
+
+function submitAddKLEdit () {
   let nofaktur = barangEdit.NoFaktur
   let nobukti = barangEdit.NoBukti
-  let urut = barangEdit.urut
+  let kodecustsupp = barangEdit.KodeCustSupp
+  let inputKL = $('#input_modalxedit_kurangbayar').val()
+  let perkiraan = $('#input_modalx_perkiraankurangbayaredit').val()
   let _token = $("#_token").val()
+
+  if (Number(inputKL) <= 0 || !perkiraan) {
+
+    alertify.warning("Data tidak lengkap")
+    return
+  }
 
   let xlist = listKLEdit
   console.log(xlist)
@@ -2157,6 +2322,9 @@ function buttonSaveLBEdit () {
     xlist = []
   }
   let xtotalKL = 0
+  let xnilainotadibayar = $("#input_modalxedit_nilainotadibayar").val()
+  let xdibayar = $("#input_modalxedit_dibayar").val()
+
 
   xlist.forEach((item, i) => {
     xtotalKL += Number(item.inputKL)
@@ -2169,27 +2337,26 @@ function buttonSaveLBEdit () {
     return
   }
 
-
   $.ajax({
-    url: "{!! url('pengajuandphtunaispupdatedphdet') !!}",
+    url: "{!! url('pengajuandphspaddkledit') !!}",
     type: "post",
     async: false,
     data: {
       _token,
-      dibayar,
-      noinvoice,
-      tanggalinvoice,
+      nofaktur,
       nobukti,
-      urut
+      kodecustsupp,
+      inputKL,
+      perkiraan
+
 
     },
     success: function(res) {
       console.log(res)
-      // $('.showhideitemKLedit').hide()
-
-      $(".showhideitemKLEdit").hide()
+      $('.showhideitemKLEdit').hide()
+      refreshTableKLEdit(nobukti,nofaktur)
       refreshDataTable(nobukti)
-      alertify.success("Berhasil update DPH")
+      alertify.success("Berhasil menambah KL")
 
     },
     error: function (err) {
@@ -2199,7 +2366,9 @@ function buttonSaveLBEdit () {
     }
 
   })
+
 }
+
 
 
 function submitAddKL () {
@@ -2251,8 +2420,6 @@ function submitAddKL () {
     alertify.success("KL berhasil ditambah")
     let x = { ...saveHeaderInvoice }
     x.inputKL = kl
-
-
     x.inputPerkiraanKL = perkkl
     x.inputNamaPerkiraanKL = namaperkkl
     console.log(x)
@@ -2269,6 +2436,15 @@ function submitAddKL () {
     $('.showhideitemKL').hide()
 
 }
+
+function buttonDeleteKL (index) {
+
+  listTambahKL[saveHeaderInvoice.NoFaktur].splice(index,1)
+
+  refreshTableKL()
+  $('.showhideitemKL').hide()
+}
+
 
 
 function refreshTableKLEdit (nobukti, nofaktur) {
@@ -2362,214 +2538,6 @@ function refreshTableKLEdit (nobukti, nofaktur) {
 
 
   }
-
-}
-
-
-function submitAddKLEdit () {
-  let nofaktur = barangEdit.NoFaktur
-  let nobukti = barangEdit.NoBukti
-  let kodecustsupp = barangEdit.KodeCustSupp
-  let inputKL = $('#input_modalxedit_kurangbayar').val()
-  let perkiraan = $('#input_modalx_perkiraankurangbayaredit').val()
-  let _token = $("#_token").val()
-
-  if (Number(inputKL) <= 0 || !perkiraan) {
-
-    alertify.warning("Data tidak lengkap")
-    return
-  }
-
-  let xlist = listKLEdit
-  console.log(xlist)
-  if (!xlist) {
-    xlist = []
-  }
-  let xtotalKL = 0
-  let xnilainotadibayar = $("#input_modalxedit_nilainotadibayar").val()
-  let xdibayar = $("#input_modalxedit_dibayar").val()
-
-
-  xlist.forEach((item, i) => {
-    xtotalKL += Number(item.inputKL)
-
-
-  });
-  if (Number(xnilainotadibayar) < Number(xdibayar) + Number(xtotalKL)) {
-    alertify.warning('KL + dibayar melebihi nilai nota ')
-
-    return
-  }
-
-  $.ajax({
-    url: "{!! url('pengajuandphtunaispaddkledit') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      nofaktur,
-      nobukti,
-      kodecustsupp,
-      inputKL,
-      perkiraan
-
-
-    },
-    success: function(res) {
-      console.log(res)
-      $('.showhideitemKLEdit').hide()
-      refreshTableKLEdit(nobukti,nofaktur)
-      refreshDataTable(nobukti)
-      alertify.success("Berhasil menambah KL")
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-      resRefresh = 0;
-    }
-
-  })
-
-}
-
-function buttonDeleteKLEdit (index) {
-  let nofaktur = barangEdit.NoFaktur
-  let nobukti = barangEdit.NoBukti
-  let xkledit = listKLEdit[index]
-
-  let urut = xkledit.Urut
-  let _token = $("#_token").val()
-  $.ajax({
-    url: "{!! url('pengajuandphtunaispdeletekledit') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      nofaktur,
-      nobukti,
-      urut
-
-    },
-    success: function(res) {
-      console.log(res)
-      $('.showhideitemKLedit').hide()
-      refreshTableKLEdit(nobukti,nofaktur)
-      refreshDataTable(nobukti)
-      alertify.success("Berhasil update DPH")
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-      resRefresh = 0;
-    }
-
-  })
-
-}
-
-function buttonDeleteKL (index) {
-
-  listTambahKL[saveHeaderInvoice.NoFaktur].splice(index,1)
-
-  refreshTableKL()
-  $('.showhideitemKL').hide()
-}
-
-
-
-function refreshTableKL () {
-
-  console.log(saveHeaderInvoice)
-  console.log('refreshTableKL')
-  console.log(saveHeaderInvoice.NoFaktur)
-  console.log(listTambahKL[saveHeaderInvoice.NoFaktur])
-  let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
-  console.log(xlist)
-  if (!xlist) {
-    xlist = []
-  }
-  console.log(xlist)
-  if (!xlist.length) {
-    document.getElementById("tabel_data_add_list_modalx").innerHTML = `
-    <tr>
-      <td class="text-center" colspan=3>Belum ada data</td>
-    </tr>
-    `
-
-  } else {
-    rowTablex = ''
-    let xTempTotalKL = 0
-    xlist.forEach((item, i) => {
-      xTempTotalKL += Number(item.inputKL)
-      rowTablex += `
-        <tr>
-          <td class="text-right">${item.inputKL}</td>
-          <td>${item.inputPerkiraanKL}</td>
-          <td>${item.inputNamaPerkiraanKL}</td>
-          <td class="text-center"><button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteKL(${i})"><i class="bi bi-trash"></i></button></td>
-
-        </tr>
-      `
-
-    });
-
-    document.getElementById("tabel_data_add_list_modalx").innerHTML = rowTablex
-    document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = parseFloat(xTempTotalKL).toFixed(2)
-
-
-  }
-
-}
-
-
-function buttonSaveLB () {
-  console.log(saveHeaderInvoice)
-    console.log(saveHeaderInvoice.NoFaktur)
-    let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
-    let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur );
-    console.log(check)
-    let xnilainota = $("#input_modalx_nilainotadibayar").val()
-    let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
-    let xnoinvoice = $("#input_modalx_noinvoice").val()
-
-    let xdibayar = $("#input_modalx_dibayar").val()
-    // if (xnilainota < xdibayar ) {
-    //   alertify.warning("Melebihi nilai nota")
-    //   return
-    //
-    // }
-
-    // let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
-    console.log(xlist)
-    if (!xlist) {
-      xlist = []
-    }
-
-    let xtotalKL = 0
-
-    xlist.forEach((item, i) => {
-      xtotalKL += Number(item.inputKL)
-
-
-    });
-
-    if (Number(xnilainota) < Number(xdibayar) + Number(xtotalKL)) {
-      alertify.warning('KL + dibayar melebihi nilai nota ')
-
-      return
-    }
-
-    //pengecekan
-    console.log(listCheckListPengajuan)
-    console.log(listCheckListPengajuan[check])
-    listCheckListPengajuan[check].diBayar = xdibayar
-    listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
-    listCheckListPengajuan[check].noinvoice = xnoinvoice
-
-    document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
-    alertify.success("Berhasil update dibayar")
 
 }
 
@@ -2697,6 +2665,7 @@ function submitAdd () {
     alertify.warning("Tidak ada item dipilih")
 
   }
+
   let xlisttambahkl = []
 
   listCheckListPengajuan.forEach((item, i) => {
@@ -2710,7 +2679,6 @@ function submitAdd () {
 
     }
   });
-
   for (let i = 0; i < listCheckListPengajuan.length; i++) {
     let num = 0
     // console.log(num)
@@ -2731,16 +2699,16 @@ function submitAdd () {
     choice,
     valas,
     nobukti,
-    tempDataKL : xlisttambahkl ,
     nourut,
     tipe,
     tanggal
   })
+  console.log('awuu')
 
   // listCheckListPengajuan
 
   $.ajax({
-      url: "{!! url('pengajuandphtunaispadd') !!}",
+      url: "{!! url('pengajuandphspadd') !!}",
       type: "post",
       async: false,
       data: {
@@ -2748,13 +2716,12 @@ function submitAdd () {
         tempData : listCheckListPengajuan ,
         choice,
         valas,
-
-        tempDataKL : xlisttambahkl ,
         nobukti,
         nourut,
         tipe,
         tanggal,
-        jmlrecord
+        jmlrecord,
+        tempDataKL : xlisttambahkl ,
       },
       success: function(res) {
         console.log(res ,'!')
@@ -3561,45 +3528,82 @@ function submitAddEdit () {
 
 
 
-function buttonAddEdit (index) {
+function buttonAddKL () {
+
+  console.log(saveHeaderInvoice.NoFaktur)
+  let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
+  let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur );
+  console.log(check)
+  let xnilainota = $("#input_modalx_nilainotadibayar").val()
+  let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
+  let xnoinvoice = $("#input_modalx_noinvoice").val()
+
+  let xdibayar = $("#input_modalx_dibayar").val()
+  // if (xnilainota < xdibayar ) {
+  //   alertify.warning("Melebihi nilai nota")
+  //   return
+  //
+  // }
+
+  // let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
+  console.log(xlist)
+  if (!xlist) {
+    xlist = []
+  }
+
+  let xtotalKL = 0
+
+  xlist.forEach((item, i) => {
+    xtotalKL += Number(item.inputKL)
 
 
-    barangEdit = listData[index]
-    console.log(barangEdit)
+  });
 
-    if (barangEdit.NoFaktur.match('IVRJ')) {
-      console.log('z')
-      alertify.warning("IVRJ tidak bisa diedit")
+  if (Number(xnilainota) < Number(xdibayar) + Number(xtotalKL)) {
+    alertify.warning('Save Dibayar / LB terlebih dahulu ')
 
-      return
+    return
+  }
 
-    }
+  //pengecekan
+  console.log(listCheckListPengajuan)
+  console.log(listCheckListPengajuan[check])
+  listCheckListPengajuan[check].diBayar = xdibayar
+  listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
+  listCheckListPengajuan[check].noinvoice = xnoinvoice
 
-    if (barangEdit.NoFaktur.match('RPB')) {
-      console.log('z')
-      alertify.warning("RPB tidak bisa diedit")
-
-      return
-
-    }
-    document.getElementById("input_modalxedit_nilainotadibayar").value = parseFloat(Number(barangEdit.NilaiNota)).toFixed(2)
-    document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
-
-    // document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
-
-    document.getElementById("input_modalxedit_noinvoice").value = barangEdit.Noinvoice ? barangEdit.Noinvoice : ''
-    console.log(barangEdit.TglInv)
-
-    console.log(new Date(barangEdit.TglInv))
-    document.getElementById("input_modalxedit_tanggalinvoice").value = formatDate(barangEdit.TglInv , '-')
-    refreshTableKLEdit(barangEdit.NoBukti, barangEdit.NoFaktur)
-
-    $('.showhideitemKLEdit').hide()
-      $("#formXedit").modal('toggle')
+  document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
+  alertify.success("Berhasil update dibayar")
 
 
 
+  $('.showhideitemKL').show()
 
+  document.getElementById("input_modalx_kurangbayar").value = parseFloat(Number(xnilainota) - Number(xdibayar) - Number(xtotalKL)).toFixed(2)
+  document.getElementById("input_modalx_perkiraankurangbayar").value = ''
+  document.getElementById("input_modalx_namaperkiraankurangbayar").value = ''
+}
+
+
+
+function buttonAddKLEdit () {
+
+  $('.showhideitemKLEdit').show()
+
+  document.getElementById("input_modalxedit_kurangbayar").value = '0.00'
+  document.getElementById("input_modalx_perkiraankurangbayaredit").value = ''
+  document.getElementById("input_modalx_namaperkiraankurangbayaredit").value = ''
+}
+
+
+function buttonAddListPerkiraanLebihBayar (id) {
+  toId = id
+  $("#formPerkiraan").modal('toggle')
+}
+function buttonAddPickPerkiraanLebihBayar (perkiraan , nama) {
+  document.getElementById(`input_modalx_perkiraan${toId}`).value = perkiraan
+  document.getElementById(`input_modalx_namaperkiraan${toId}`).value = nama
+  $("#formPerkiraan").modal('toggle')
 
 }
 
@@ -3641,7 +3645,7 @@ function buttonAddDelete (index) {
 
 
           $.ajax({
-              url: "{!! url('pengajuandphtunaispkoreksi') !!}",
+              url: "{!! url('pengajuandphspkoreksi') !!}",
               type: "post",
               async: false,
               data: {
@@ -4066,12 +4070,12 @@ function closeShowHideItem () {
 }
 
 function unlockFormAdd () {
-  document.getElementById("input_add_catatan").disabled = false
   document.getElementById("input_add_tanggal").disabled = false
+  // document.getElementById("input_add_catatan").disabled = false
 
 
-  document.getElementById("buttonAddListCustomer").disabled = false
-  document.getElementById("buttonAddListNoInvoice").disabled = false
+  // document.getElementById("buttonAddListCustomer").disabled = false
+  // document.getElementById("buttonAddListNoInvoice").disabled = false
 
 }
 
@@ -4105,7 +4109,7 @@ function refreshDataTableDet (nobukti) {
   let _token = $("#_token").val();
   listData = []
   $.ajax({
-    url: "{!! url('pengajuandphtunaispdetail') !!}",
+    url: "{!! url('pengajuandphspdetail') !!}",
     type: "post",
     async: false,
     data: {
@@ -4146,9 +4150,11 @@ function refreshDataTableDet (nobukti) {
                   <td class="text-right">${item.LB ? formatAngka(parseFloat(Number(item.LB)).toFixed(2)) : '0.00'}</td>
 
 
+                  <td>${item.Perkiraan ? item.Perkiraan : '' }</td>
 
                   <td>${item.Noinvoice ? item.Noinvoice : '' }</td>
                   <td>${item.TglInv && new Date(item.TglInv).getFullYear() > 2000 ? formatDate(item.TglInv) : '' }</td>
+
 
 
                 </tr>
@@ -4196,7 +4202,7 @@ function refreshDataTable (nobukti) {
   let _token = $("#_token").val();
   listData = []
   $.ajax({
-    url: "{!! url('pengajuandphtunaispdetail') !!}",
+    url: "{!! url('pengajuandphspdetail') !!}",
     type: "post",
     async: false,
     data: {
@@ -4226,18 +4232,17 @@ function refreshDataTable (nobukti) {
         // <td>${item.TipeTrans == 'BBK' ? item.NamaLawan : item.NamaPerkiraan}</td>
         // <td>${item.TipeTrans == 'BBK' ? item.Perkiraan : item.Lawan }</td>
         // <td>${item.TipeTrans == 'BBK' ?  item.NamaPerkiraan : item.NamaLawan }</td>
-        // <td class="text-right">${formatAngka(parseFloat(Number(item.Nilai) - Number(item.dibayar)).toFixed(2)) }</td>
-        // <td class="text-right">${formatAngka(parseFloat(item.dibayar).toFixed(2))}</td>
-        // <td class="text-right">${formatAngka(parseFloat(Number(item.dibayar) - Number(item.Nilai)).toFixed(2)) }</td>
+
               rowTable += `
                 <tr>
                   <td>${item.NamaCustSupp}</td>
 
                   <td>${item.NoFaktur}</td>
-
                   <td class="text-right">${formatAngka(parseFloat(Number(item.dibayar)).toFixed(2)) }</td>
                   <td class="text-right">${item.KL ? formatAngka(parseFloat(Number(item.KL)).toFixed(2)) : '0.00'}</td>
                   <td class="text-right">${item.LB ? formatAngka(parseFloat(Number(item.LB)).toFixed(2)) : '0.00'}</td>
+
+
 
 
                   <td>${item.Noinvoice ? item.Noinvoice : '' }</td>
@@ -4245,8 +4250,9 @@ function refreshDataTable (nobukti) {
 
 
                   <td class="text-center">
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete(${i})"><i class="bi bi-trash"></i></button>
+                  <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
+
+                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete(${i}  )"><i class="bi bi-trash"></i></button>
                   </td>
                 </tr>
 
@@ -4384,7 +4390,7 @@ function submitOtorisasi () {
   let _token = $("#_token").val();
   let nobukti = $("#input_detail_nobukti").val();
   $.ajax({
-    url: "{!! url('pengajuandphtunaispotorisasi') !!}",
+    url: "{!! url('pengajuandphspotorisasi') !!}",
     type: "post",
     async: false,
     data: {
@@ -4510,7 +4516,7 @@ function buttonDetail (nobukti ) {
 
 
 function buttonOtorisasi (nobukti ) {
-  console.log('buttonOtorisasi' , nobukti )
+  console.log('buttonKoreksi' , nobukti )
 
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
@@ -4545,95 +4551,96 @@ function buttonKoreksi (nobukti ) {
   // cleanFormAdd()
   refreshDataTable(nobukti)
 
+  if (listData.length ) {
+    if (listData[0].IsOtorisasi1 == 1) {
+      alertify.warning("Data sudah diotorisasi")
 
-    if (listData.length ) {
-      if (listData[0].IsOtorisasi1 == 1) {
-        alertify.warning("Data sudah diotorisasi")
-
-      } else {
-        $('#page1').hide();
-        $('#page2').show();
-      }
+    } else {
+      $('#page1').hide();
+      $('#page2').show();
     }
+  }
+
+
 
   return
 
-    // $.ajax({
-    //   url: "{!! url('pengajuandphtunaispdetail') !!}",
-    //   type: "post",
-    //   async: false,
-    //   data: {
-    //     _token,
-    //     tglawal,
-    //     tglakhir,
-    //     valas,
-    //     tipe,
-    //     tipelist,
-    //     kodecustsupp
-    //   },
-    //   success: function(res) {
-    //     console.log(res)
-    //     dataTable = res
-    //     // listPengajuan = res
-    //     // listCheckListPengajuan = []
-    //
-    //     rowTable = ''
-    //
-    //     $('#tabel_add_list').DataTable().destroy();
-    //     res.forEach((item, i) => {
-    //       rowTable += `
-    //     <tr>
-    //     <td><div class="form-check text-center">
-    //         <input id="pengajuanCheckList${i}" onchange="pengajuanCheckList(${i},this.id)" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-    //         </div></td>
-    //     <td>${item.NamaCustSupp}</td>
-    //     <td>${formatDate(item.JatuhTempo)}</td>
-    //     <td>${item.NoFaktur}</td>
-    //     <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
-    //     <td class="text-right">${formatAngka(parseFloat(item.JmlDibayar).toFixed(2))}</td>
-    //     <td class="text-right">${formatAngka(parseFloat(item.diBayar).toFixed(2))}</td>
-    //     <td class="text-right">${formatAngka(parseFloat(item.KL).toFixed(2))}</td>
-    //     <td class="text-right">${formatAngka(parseFloat(item.LB).toFixed(2))}</td>
-    //     <td>${ item.Perkiraan ? item.Perkiraan: ''}</td>
-    //     <td>${ item.NOInvoice ? item.NOInvoice: ''}</td>
-    //     <td>${ item.TglInvoice ? formatDate(item.TglInvoice) : ''}</td>
-    //     </tr>`
-    //     });
-    //
-    //
-    //     document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
-    //     // document.getElementById("tabel_data_add_list_modal").innerHTML = `<td colspan=12 class="text-center">Belum ada data</td>`
-    //
-    //     $('#page1').hide();
-    //     $('#page2').show();
-    //     $('#formAddAdd').show();
-    //   //   $("#tabel_add_list_modal").DataTable({
-    //   //     "lengthChange": false,
-    //   //       "paging": false ,'order': [[1, 'asc']],
-    //   //       "searching" : false,
-    //   //       "columnDefs": [
-    //   //     {"targets" :[0] , 'orderable' : false}
-    //   //    // {  "className": "text-center", "targets": [4] },
-    //   //  ]
-    //   // });
-    //
-    //   },
-    //   error: function (err) {
-    //     console.log(err)
-    //     alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    //   }
-    //
-    // })
-    //
-    //
-  //
-  //
-  //
-  // $('.mainpage').hide();
-  // $('#page2').show();
+    $.ajax({
+      url: "{!! url('pengajuandphspdetail') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token,
+        tglawal,
+        tglakhir,
+        valas,
+        tipe,
+        tipelist,
+        kodecustsupp
+      },
+      success: function(res) {
+        console.log(res)
+        dataTable = res
+        // listPengajuan = res
+        // listCheckListPengajuan = []
+
+        rowTable = ''
+
+        $('#tabel_add_list').DataTable().destroy();
+        res.forEach((item, i) => {
+          rowTable += `
+        <tr>
+        <td><div class="form-check text-center">
+            <input id="pengajuanCheckList${i}" onchange="pengajuanCheckList(${i},this.id)" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+            </div></td>
+        <td>${item.NamaCustSupp}</td>
+        <td>${formatDate(item.JatuhTempo)}</td>
+        <td>${item.NoFaktur}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.JmlDibayar).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.diBayar).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.KL).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.LB).toFixed(2))}</td>
+        <td>${ item.Perkiraan ? item.Perkiraan: ''}</td>
+        <td>${ item.NOInvoice ? item.NOInvoice: ''}</td>
+        <td>${ item.TglInvoice ? formatDate(item.TglInvoice) : ''}</td>
+        </tr>`
+        });
+
+
+        document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
+        // document.getElementById("tabel_data_add_list_modal").innerHTML = `<td colspan=12 class="text-center">Belum ada data</td>`
+
+        $('#page1').hide();
+        $('#page2').show();
+        $('#formAddAdd').show();
+      //   $("#tabel_add_list_modal").DataTable({
+      //     "lengthChange": false,
+      //       "paging": false ,'order': [[1, 'asc']],
+      //       "searching" : false,
+      //       "columnDefs": [
+      //     {"targets" :[0] , 'orderable' : false}
+      //    // {  "className": "text-center", "targets": [4] },
+      //  ]
+      // });
+
+      },
+      error: function (err) {
+        console.log(err)
+        alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      }
+
+    })
+
+
+
+
+
+  $('.mainpage').hide();
+  $('#page2').show();
 }
 
-function pengajuanCheckList ( index ,id)  {
+function pengajuanCheckList( index ,id)  {
   let data = listPengajuan[index]
   console.log(data)
   if (document.getElementById(`pengajuanCheckList${index}`).checked) {
@@ -4686,74 +4693,6 @@ function pengajuanCheckList ( index ,id)  {
 
 }
 
-function buttonAddKL () {
-
-  console.log(saveHeaderInvoice.NoFaktur)
-  let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
-  let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur );
-  console.log(check)
-  let xnilainota = $("#input_modalx_nilainotadibayar").val()
-  let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
-  let xnoinvoice = $("#input_modalx_noinvoice").val()
-
-  let xdibayar = $("#input_modalx_dibayar").val()
-  // if (xnilainota < xdibayar ) {
-  //   alertify.warning("Melebihi nilai nota")
-  //   return
-  //
-  // }
-
-  // let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
-  console.log(xlist)
-  if (!xlist) {
-    xlist = []
-  }
-
-  let xtotalKL = 0
-
-  xlist.forEach((item, i) => {
-    xtotalKL += Number(item.inputKL)
-
-
-  });
-
-  if (Number(xnilainota) < Number(xdibayar) + Number(xtotalKL)) {
-    alertify.warning('Save Dibayar / LB terlebih dahulu ')
-
-    return
-  }
-
-  //pengecekan
-  console.log(listCheckListPengajuan)
-  console.log(listCheckListPengajuan[check])
-  listCheckListPengajuan[check].diBayar = xdibayar
-  listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
-  listCheckListPengajuan[check].noinvoice = xnoinvoice
-
-  document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
-  alertify.success("Berhasil update dibayar")
-
-
-
-  $('.showhideitemKL').show()
-
-  document.getElementById("input_modalx_kurangbayar").value = parseFloat(Number(xnilainota) - Number(xdibayar) - Number(xtotalKL)).toFixed(2)
-  document.getElementById("input_modalx_perkiraankurangbayar").value = ''
-  document.getElementById("input_modalx_namaperkiraankurangbayar").value = ''
-}
-
-
-function buttonAddKLEdit () {
-
-  $('.showhideitemKLEdit').show()
-
-  document.getElementById("input_modalxedit_kurangbayar").value = '0.00'
-  document.getElementById("input_modalx_perkiraankurangbayaredit").value = ''
-  document.getElementById("input_modalx_namaperkiraankurangbayaredit").value = ''
-}
-
-// function updateListPengajuan
-
 function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
   let tglawal = formatDate(new Date())
 
@@ -4762,7 +4701,6 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
 
 
   let tipe = 'HT'
-
 
   if ( tipeform == 'edit') {
     tipelist = 1
@@ -4782,7 +4720,7 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
     }
   )
   $.ajax({
-    url: "{!! url('pengajuandphtunaisplistpengajuan') !!}",
+    url: "{!! url('pengajuandphsplistpengajuan') !!}",
     type: "post",
     async: false,
     data: {
@@ -4797,6 +4735,7 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
     success: function(res) {
       console.log(res)
 
+
       listPengajuan = res
       listCheckListPengajuan = []
 
@@ -4804,16 +4743,14 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
 
       // $('#tabel_add_list_modal').DataTable().destroy();
       res.forEach((item, i) => {
-        // <input style="height:30px; width: 150px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.diBayar).toFixed(2)}' class="form-control text-right" disabled>
-
         rowTable += `
       <tr>
       <td><div class="form-check text-center">
           <input id="pengajuanCheckList${i}" onchange="pengajuanCheckList(${i},this.id)" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
           </div></td>
-          <td style="min-width: 250px">${item.NamaCustSupp}</td>
-          <td style="min-width: 150px">${formatDate(item.JatuhTempo)}</td>
-          <td>${item.NoFaktur}</td>
+      <td style="min-width: 250px">${item.NamaCustSupp}</td>
+      <td style="min-width: 150px">${formatDate(item.JatuhTempo)}</td>
+      <td>${item.NoFaktur}</td>
       <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
       <td class="text-right">${formatAngka(parseFloat(item.JmlDibayar).toFixed(2))}</td>
       <td class="text-center">
@@ -4827,12 +4764,10 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
       <td class="text-center" style="text-align:center; ">
       <input style="height:30px; min-width: 150px" id="list_proses_KL${i}" type="number" value='0.00' class="form-control text-right" disabled>
       </td>
-
       <td>${ item.NOInvoice ? item.NOInvoice: ''}</td>
       <td>${ item.TglInvoice ? formatDate(item.TglInvoice) : ''}</td>
       </tr>`
       });
-      // <td>${ item.Perkiraan ? item.Perkiraan: ''}</td>
 
 
       document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
@@ -4843,7 +4778,7 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
     //       "paging": false ,'order': [[1, 'asc']],
     //       "searching" : false,
     //       "columnDefs": [
-    //     {"targets" :[0] , 'orderable' : false} , { width: '2000px', targets: [6] }
+    //     {"targets" :[0] , 'orderable' : false}
     //    // {  "className": "text-center", "targets": [4] },
     //  ]
     // });
@@ -4861,83 +4796,207 @@ function buttonRefreshListPengajuan ( tipelist = 0 , kodecustsupp = '') {
 
 
 
+function buttonSaveLB () {
+  console.log(saveHeaderInvoice)
+    console.log(saveHeaderInvoice.NoFaktur)
+    let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
+    let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur );
+    console.log(check)
+    let xnilainota = $("#input_modalx_nilainotadibayar").val()
+    let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
+    let xnoinvoice = $("#input_modalx_noinvoice").val()
 
-function buttonAddBatalKL () {
-  $('.showhideitemKL').hide()
-}
-function buttonAddBatalKLEdit () {
-  $('.showhideitemKLEdit').hide()
-}
-function buttonChangeDibayar (index) {
-  // sp_TempTerimaDPP
+    let xdibayar = $("#input_modalx_dibayar").val()
+    // if (xnilainota < xdibayar ) {
+    //   alertify.warning("Melebihi nilai nota")
+    //   return
+    //
+    // }
 
-  let xcheck = document.getElementById(`pengajuanCheckList${index}`).checked
-  if(!xcheck) {
-    alertify.warning("Pilih invoice terlebih dahulu")
+    // let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
+    console.log(xlist)
+    if (!xlist) {
+      xlist = []
+    }
+
+    let xtotalKL = 0
+
+    xlist.forEach((item, i) => {
+      xtotalKL += Number(item.inputKL)
+
+
+    });
+
+    if (Number(xnilainota) < Number(xdibayar) + Number(xtotalKL)) {
+      alertify.warning('KL + dibayar melebihi nilai nota ')
+
+      return
+    }
+
+    //pengecekan
+    console.log(listCheckListPengajuan)
+    console.log(listCheckListPengajuan[check])
+    listCheckListPengajuan[check].diBayar = xdibayar
+    listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
+    listCheckListPengajuan[check].noinvoice = xnoinvoice
+
+    document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
+    alertify.success("Berhasil update dibayar")
+
+}
+
+
+function refreshTableKL () {
+
+  console.log(saveHeaderInvoice)
+  console.log('refreshTableKL')
+  console.log(saveHeaderInvoice.NoFaktur)
+  console.log(listTambahKL[saveHeaderInvoice.NoFaktur])
+  let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
+  console.log(xlist)
+  if (!xlist) {
+    xlist = []
+  }
+  console.log(xlist)
+  if (!xlist.length) {
+    document.getElementById("tabel_data_add_list_modalx").innerHTML = `
+    <tr>
+      <td class="text-center" colspan=3>Belum ada data</td>
+    </tr>
+    `
+
+  } else {
+    rowTablex = ''
+    let xTempTotalKL = 0
+    xlist.forEach((item, i) => {
+      xTempTotalKL += Number(item.inputKL)
+      rowTablex += `
+        <tr>
+          <td class="text-right">${item.inputKL}</td>
+          <td>${item.inputPerkiraanKL}</td>
+          <td>${item.inputNamaPerkiraanKL}</td>
+
+
+          <td class="text-center"><button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteKL(${i})"><i class="bi bi-trash"></i></button></td>
+
+
+        </tr>
+      `
+
+    });
+
+    document.getElementById("tabel_data_add_list_modalx").innerHTML = rowTablex
+    document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = parseFloat(xTempTotalKL).toFixed(2)
+
+
+  }
+
+}
+
+function buttonSaveLBEdit () {
+  // let xlist = listKLEdit
+
+  let xnilainota = $("#input_modalxinvoice_nilainotadibayar").val()
+  let xtanggalinvoice = $("#input_modalxinvoice_tanggalinvoice").val()
+  let xnoinvoice = $("#input_modalxinvoice_noinvoice").val()
+
+  let xdibayar = $("#input_modalx_dibayar").val()
+
+  let dibayar = $("#input_modalxedit_dibayar").val()
+  let noinvoice = $("#input_modalxedit_noinvoice").val()
+  let tanggalinvoice = $("#input_modalxedit_tanggalinvoice").val()
+  let nofaktur = barangEdit.NoFaktur
+  let nobukti = barangEdit.NoBukti
+  let urut = barangEdit.urut
+  let _token = $("#_token").val()
+
+  let xlist = listKLEdit
+  console.log(xlist)
+  if (!xlist) {
+    xlist = []
+  }
+  let xtotalKL = 0
+
+  xlist.forEach((item, i) => {
+    xtotalKL += Number(item.inputKL)
+
+
+  });
+  if (Number(xnilainotadibayar) < Number(xdibayar) + Number(xtotalKL)) {
+    alertify.warning('KL + dibayar melebihi nilai nota ')
+
     return
   }
 
 
-  let x = listPengajuan[index]
-  console.log(x)
+  $.ajax({
+    url: "{!! url('pengajuandphspupdatedphdet') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      dibayar,
+      noinvoice,
+      tanggalinvoice,
+      nobukti,
+      urut
 
-  if (x.NoFaktur.match('IVRJ')) {
-    console.log('z')
-    alertify.warning("IVRJ tidak bisa diedit")
+    },
+    success: function(res) {
+      console.log(res)
+      // $('.showhideitemKLedit').hide()
 
-    return
+      $(".showhideitemKLEdit").hide()
+      refreshDataTable(nobukti)
+      alertify.success("Berhasil update DPH")
 
-  }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      resRefresh = 0;
+    }
 
-  if (x.NoFaktur.match('RPB')) {
-    console.log('z')
-    alertify.warning("RPB tidak bisa diedit")
+  })
+}
 
-    return
+function buttonDeleteKLEdit (index) {
+  let nofaktur = barangEdit.NoFaktur
+  let nobukti = barangEdit.NoBukti
+  let xkledit = listKLEdit[index]
 
-  }
-  // listPengajuan[saveHeaderIndex]
-  saveHeaderInvoice = listPengajuan[index]
-  saveHeaderIndex = index
-  let xdibayar = $(`#list_proses_dibayar${index}`).val();
-  // let xLB = $(`#list_proses_LB${index}`).val();
-  // let sisa = $(`#input_modal_sisa`).val();
-  console.log(saveHeaderInvoice.NoBukti)
-  // console.log(listTambahKL[saveHeaderInvoice.NoBukti])
+  let urut = xkledit.Urut
+  let _token = $("#_token").val()
+  $.ajax({
+    url: "{!! url('pengajuandphspdeletekledit') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      nofaktur,
+      nobukti,
+      urut
 
-  console.log(x.TOTFAKTUR)
-  console.log(formatAngka(parseFloat(x.TOTFAKTUR).toFixed(2)))
-  console.log('==')
-  // console.log(xdibayar, xLB , sisa)
-  document.getElementById("input_modalx_nilainotadibayar").value = parseFloat(Number(x.Kredit) - Number(x.JmlDibayar)).toFixed(2)
-  document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+    },
+    success: function(res) {
+      console.log(res)
+      $('.showhideitemKLedit').hide()
+      refreshTableKLEdit(nobukti,nofaktur)
+      refreshDataTable(nobukti)
+      alertify.success("Berhasil update DPH")
 
-  document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      resRefresh = 0;
+    }
 
-  document.getElementById("input_modalx_noinvoice").value = x.noinvoice ? x.noinvoice : ''
-  document.getElementById("input_modalx_tanggalinvoice").value = x.tanggalinvoice
-  // document.getElementById("input_modalx_lebihbayar").value = parseFloat(xLB).toFixed(2)
-  // document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
-  // if (xLB > 0) {
-  //   document.getElementById("input_modalx_perkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputPerkiraanLB
-  //   document.getElementById("input_modalx_namaperkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputNamaPerkiraanLB
-  //
-  // } else {
-  //   document.getElementById("input_modalx_perkiraanlebihbayar").value = ''
-  //   document.getElementById("input_modalx_namaperkiraanlebihbayar").value = ''
-  //
-  // }
-
-  refreshTableKL()
-
-
-  $('.showhideitemKL').hide()
-
-
-  $("#formX").modal('toggle')
-
+  })
 
 }
+
+
 
 function buttonAddItem () {
 
@@ -4968,8 +5027,22 @@ function buttonAddItem () {
   $("#form").modal('toggle')
 }
 
-function buttonAdd (nobukti) {
-  console.log('buttonAdd' , nobukti)
+// function buttonKoreksi (nobukti) {
+//
+//   let akses = $("#akses_iskoreksi").val();
+//   let _token = $("#_token").val();
+//   if (!Number(akses)) {
+//     alertify.warning('No access')
+//     return
+//   }
+//   lockFormAdd()
+//   tipeform = 'edit'
+//
+//
+// }
+
+function buttonAdd () {
+  console.log('buttonAdd' )
 
   let akses = $("#akses_istambah").val();
   let _token = $("#_token").val();
@@ -4981,6 +5054,7 @@ function buttonAdd (nobukti) {
 
   tipeform = 'add'
   cleanModalAdd()
+  unlockFormAdd()
   setNewNoBukti()
 
   $(".showhidelistpengajuandph").show();
@@ -4996,35 +5070,35 @@ function buttonAdd (nobukti) {
 
   $("#form").modal('toggle')
   return
-  //
-  //
-  // document.getElementById("input_add_tanggal").disabled = false
-  // document.getElementById("input_add_bon").disabled = false
-  // document.getElementById("input_add_kepadaterima").disabled = false
-  // document.getElementById("buttonAddListPerkiraan").disabled = false
-  // document.getElementById("input_add_transaksi").disabled = false
-  //
-  //
-  //
-  //
-  // document.getElementById("addTableData").innerHTML = `<td colspan=12 class="text-center">Belum ada data</td>`
-  //
-  // // unlockFormAdd()
-  // $('.showhideitem').hide();
-  // // $('.showhideform').hide();
-  // $('#formAdd').show();
-  // // $("#form").modal('toggle')
-  //
-  // // input_add_nobukti
-  // // document.getElementById("input_add_nobukti").value = nobukti
-  //
-  // cleanFormAdd()
-  // // setNewNoBukti()
-  // document.getElementById("input_add_transaksi").value = 'BBK'
-  // onChangeTransaksi()
-  //
-  // $('.mainpage').hide();
-  // $('#page2').show();
+
+
+  document.getElementById("input_add_tanggal").disabled = false
+  document.getElementById("input_add_bon").disabled = false
+  document.getElementById("input_add_kepadaterima").disabled = false
+  document.getElementById("buttonAddListPerkiraan").disabled = false
+  document.getElementById("input_add_transaksi").disabled = false
+
+
+
+
+  document.getElementById("addTableData").innerHTML = `<td colspan=12 class="text-center">Belum ada data</td>`
+
+  // unlockFormAdd()
+  $('.showhideitem').hide();
+  // $('.showhideform').hide();
+  $('#formAdd').show();
+  // $("#form").modal('toggle')
+
+  // input_add_nobukti
+  // document.getElementById("input_add_nobukti").value = nobukti
+
+  cleanFormAdd()
+  // setNewNoBukti()
+  document.getElementById("input_add_transaksi").value = 'BBK'
+  onChangeTransaksi()
+
+  $('.mainpage').hide();
+  $('#page2').show();
 
 }
 
@@ -5113,7 +5187,7 @@ function loadAll () {
   $('#tabel').DataTable().destroy();
 
   $.ajax({
-    url: "{!! url('pengajuandphtunailoadall') !!}",
+    url: "{!! url('pengajuandphloadall') !!}",
     type: "get",
     async: false,
     data: {
@@ -5127,18 +5201,16 @@ function loadAll () {
 
 
       res.tempOutstanding.forEach((item, i) => {
-  console.log("====")
-  console.log(item[0].IsOtorisasi1)
+
         rowTable += `
         <tr>
-
           <td class='text-center'>
-            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item[0].NoBukti}' , 'detail')">
+            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.NoBukti}' , 'detail')">
               <i class="bi bi-info"></i>
             </button>
-          
+
             ${
-              Number(item[0].IsOtorisasi1) == 1 ? `
+              item[0].IsOtorisasi1 == 1 ? `
                 <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item[0].NoBukti}' , 'edit')">
                   <i class="bi bi-key"></i>
                 </button>
@@ -5147,17 +5219,15 @@ function loadAll () {
                   <i class="bi bi-printer"></i>
                 </button>` : `
 
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonOtorisasi('${item[0].NoBukti}' , 'edit')">
+                <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item[0].NoBukti}' , 'edit')">
                   <i class="bi bi-pen"></i>
                 </button>
 
-                <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetail('${item[0].NoBukti}' , 'otorisasi')">
+                <button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasi('${item[0].NoBukti}' , 'otorisasi')">
                   <i class="bi bi-key"></i>
                 </button>`
             }
-
-
-
+          </td>
           <td>${item[0].NoBukti}</td>
           <td>${item[0].NAMACUSTSUPP}</td>
           <td>${formatDate(item[0].Tanggal , '/') }</td>
@@ -5167,7 +5237,7 @@ function loadAll () {
           <td class="text-right">${formatAngka(parseFloat(item[0].KL).toFixed(2))}</td>
 
 
-  
+
           ${item[0].IsOtorisasi1 == 1 ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' :
         '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>' }
 
@@ -5176,9 +5246,10 @@ function loadAll () {
           <td>${item[0].Userbatal ?item[0].Userbatal : '' }</td>
           <td>${item[0].TglBatal ? formatDate(item[0].TglBatal , '/') : '' }</td>
 
-      
 
-          </td>
+
+
+          
         </tr>
 
         `
@@ -5209,15 +5280,15 @@ function loadAll () {
 
     }})
 
-} 
- 
+}
+
 function submitPrint (nobukti) {
     // for (var i = 0; i < 30; i++) {
     //   dataPrint.push(dataPrint[0])
     // }
     let _token = $('#_token').val()
     $.ajax({
-      url: "{!! url('pengajuandphtunaidetailCetak') !!}",
+      url: "{!! url('pengajuandphdetailCetak') !!}",
       type: "post",
       async: false,
       data: {
@@ -5654,18 +5725,17 @@ function submitPrint (nobukti) {
       </style>`;
         hdr = `<table style="width:100%; border-collapse:collapse; font-family:sans-serif; font-size:10px;">
             <thead>
-             <tr>
+            <tr>
               <td colspan="9" style="text-align:center; font-weight:bold; font-size:16px; border:none;">
                 DPH
               </td>
-             </tr>
-
+            </tr>
               <!-- TGL DAN NOBUKTI -->
               <tr>
                 <td colspan="4" style="border:1px solid;">
                   Tgl : ${tanggalOnly}
                 </td>
-                <td colspan="6" style="border:1px solid;">
+                <td colspan="5" style="border:1px solid;">
                   No : ${dataPrint[0].NoBukti}
                 </td>
               </tr>
@@ -5673,7 +5743,7 @@ function submitPrint (nobukti) {
               <!-- SUPPLIER -->
               <tr>
                 <td colspan="9" style="border:1px solid;">
-                  Supplier : ${dataPrint[0].Note ? dataPrint[0].Note : '-'}
+                  Supplier : ${dataPrint[0].NAMACUSTSUPP ? dataPrint[0].NAMACUSTSUPP : '-'}
                 </td>
               </tr>
                   <tr>
@@ -5745,7 +5815,7 @@ function submitPrint (nobukti) {
          <td class="text-align: left"
                style="width: 20%;  ">${itemSub.Tgljth ? itemSub.Tgljth.split(' ')[0] : ''}</td>
          <td class="text-align: left"
-               style="width: 20%;">${itemSub.Tglinv ? itemSub.Tglinv.split(' ')[0] : ''}</td>
+               style="width: 15%;">${itemSub.Tglinv ? itemSub.Tglinv.split(' ')[0] : ''}</td>
          <td class="text-align: left"
                style="width: 20%;">${itemSub.Noinv ?? ''}</td>
          <td style="width: 25%; text-align: right;">
@@ -5788,7 +5858,7 @@ function submitPrint (nobukti) {
 
         tempPrintStr += `
         <tr>
-	  <td colspan="5" style="border:1px solid; padding:5px; font-weight:bold;">
+          <td colspan="5" style="border:1px solid; padding:5px; font-weight:bold;">
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold;">
             Total :
@@ -5799,7 +5869,7 @@ function submitPrint (nobukti) {
               maximumFractionDigits: 2
             })}
           </td>
-	  <td colspan="3" style="border:1px solid;"></td>
+          <td colspan="3" style="border:1px solid;"></td>
         </tr>`;
 
          tempPrintStr += `</tbody>`;
@@ -5826,7 +5896,7 @@ function submitPrint (nobukti) {
          <div style="display:flex; justify-content:space-between; width:100%; font-family:sans-serif; font-size:10px;">
 
           <!-- KIRI -->
-          <div style="width:50%; font-size:15px;">
+          <div style="width:50%; font-size:20px;">
             <p class="m-0">No.Rek : ${dataPrint[0].NoAcc ?? '-'}</p>
             <p class="m-0">A/N : ${dataPrint[0].ATN ?? '-'}</p>
             <p class="m-0">Bank : ${dataPrint[0].bank ?? '-'}</p>
@@ -5834,7 +5904,7 @@ function submitPrint (nobukti) {
 
           <!-- KANAN -->
           <div style="width:50%;">
-            <table
+          <table
              class="detail-spb-table mb-2"
              style="width: 100%; margin-top: 20px; font-family: sans-serif;
              font-size: 10px ">
@@ -5910,7 +5980,7 @@ function buttonBatalOtorisasi (nobukti) {
         let _token = $("#_token").val();
 
         $.ajax({
-          url: "{!! url('pengajuandphtunaispbatalotorisasi') !!}",
+          url: "{!! url('pengajuandphspbatalotorisasi') !!}",
           type: "post",
           async: false,
           data: {

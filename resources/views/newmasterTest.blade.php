@@ -26,6 +26,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" />
 
     <link rel="stylesheet" href="{!! URL::asset('css/style.css') !!}" />
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 

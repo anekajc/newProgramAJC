@@ -1,5 +1,5 @@
 > ## ⚠️ SUPERSEDED
-> Use **[new-design-all-guide.md](new-design-all-guide.md)** instead, which routes to
+> Use **[new-design-all-report-guide.md](new-design-all-report-guide.md)** instead, which routes to
 > [new-slider-table-guide.md](new-slider-table-guide.md) for this material.
 >
 > This file is kept as an archive. Don't edit it; edit the new guides.

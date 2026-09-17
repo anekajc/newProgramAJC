@@ -1,6 +1,6 @@
 # New Design — Filter Modal UI Guide
 
-Sub-guide of **[new-design-all-guide.md](new-design-all-guide.md)** — read that first. It holds the
+Sub-guide of **[new-design-all-report-guide.md](new-design-all-report-guide.md)** — read that first. It holds the
 pre-flight checks, the ask-first protocol, and the cross-cutting constraints. This file only covers
 the "Filter Laporan" modal.
 
@@ -57,7 +57,7 @@ pre-flight section first.
           <i class="fas fa-filter"></i> Filter Laporan
           <span class="rt-active-badge" id="filterBadge">0 aktif</span>
         </h5>
-        {{-- Atribut dismiss: lihat aturan Bootstrap di new-design-all-guide.md --}}
+        {{-- Atribut dismiss: lihat aturan Bootstrap di new-design-all-report-guide.md --}}
         <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
       </div>
 

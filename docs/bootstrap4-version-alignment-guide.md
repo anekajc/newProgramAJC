@@ -177,7 +177,18 @@ in `public/css/report-table.css` are what actually style it.
 
 Removing the BS5 CDN tags should be a no-op visually, but those layouts are shared across many
 report pages — treat it as its own change with its own test pass, not a drive-by. See also
-`docs/new-design-all-guide.md` (the "Class A pages" discussion) and `docs/report-table-guide.md`.
+`docs/new-design-all-report-guide.md` (the "Class A pages" discussion) and `docs/report-table-guide.md`.
+
+**A different case: a page on a BS5-*only* layout** (no BS4 fallback at all — e.g. the root
+`resources/views/newmaster.blade.php`, which loads only the Bootstrap 5 CDN and a jQuery→
+`bootstrap.Modal` shim, unlike the seven report layouts above which still run on BS4 underneath).
+Bringing the gudang-style `report-table.css`/`report-table.js` system (see
+`docs/new-design-gudang-style-guide.md`) to a page like that needs real BS4, not just "BS4 wins the
+cascade" — that system's modals assume `data-dismiss`/`$.fn.modal` are owned by BS4. Prefer
+retargeting the page to a sibling layout in the same module that's already BS4 (check what its
+neighbors extend first) over stripping BS5 out of a layout shared by many unrelated pages. Same
+rule either way: never edit a shared layout's Bootstrap tags as a side effect of an unrelated
+styling task — ask first, state the blast radius.
 
 ## BS5 → BS4 class name translation table
 
