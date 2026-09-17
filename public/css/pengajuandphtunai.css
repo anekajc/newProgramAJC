@@ -207,7 +207,10 @@
 }
 
 .dph-tb tbody td {
-    padding: 8px 12px;
+    /* !important: defeats public/css/newmaster.css's blanket
+       `table tbody td { padding: 0 10px !important }` (loaded by the newmasterTest layout
+       this page extends) — see report-table.css's identical note for the same issue. */
+    padding: 8px 12px !important;
     border-bottom: 1px solid #F1F5F9;
     vertical-align: middle;
 }

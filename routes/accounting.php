@@ -241,21 +241,21 @@ Route::post('/girodibukaspbatalotorisasi', [GiroDibukaController::class, 'spBata
 Route::post('/girodibukadetailCetak', [GiroDibukaController::class, 'getDetailCetak']);
 
 // // PENGAJUAN DPH
-// Route::get('/pengajuandph', [PengajuanDPHController::class, 'index']);
-// Route::post('/pengajuandphspdetail', [PengajuanDPHController::class, 'getDetail']);
-// Route::post('/pengajuandphspdetailkledit', [PengajuanDPHController::class, 'getDetailKLEdit']);
+Route::get('/pengajuandph', [PengajuanDPHController::class, 'index']);
+Route::post('/pengajuandphspdetail', [PengajuanDPHController::class, 'getDetail']);
+Route::post('/pengajuandphspdetailkledit', [PengajuanDPHController::class, 'getDetailKLEdit']);
 
-// Route::post('/pengajuandphsplistpengajuan', [PengajuanDPHController::class, 'getListPengajuan']);
-// Route::post('/pengajuandphspaddkledit' , [PengajuanDPHController::class, 'spAddKLEdit']);
-// Route::post('/pengajuandphspdeletekledit' , [PengajuanDPHController::class, 'spDeleteKLEdit']);
-// Route::post('/pengajuandphspupdatedphdet' , [PengajuanDPHController::class, 'spUpdateDPHDet']);
+Route::post('/pengajuandphsplistpengajuan', [PengajuanDPHController::class, 'getListPengajuan']);
+Route::post('/pengajuandphspaddkledit' , [PengajuanDPHController::class, 'spAddKLEdit']);
+Route::post('/pengajuandphspdeletekledit' , [PengajuanDPHController::class, 'spDeleteKLEdit']);
+Route::post('/pengajuandphspupdatedphdet' , [PengajuanDPHController::class, 'spUpdateDPHDet']);
 
-// Route::post('/pengajuandphspadd' , [PengajuanDPHController::class, 'spAdd']);
-// Route::post('/pengajuandphspkoreksi' , [PengajuanDPHController::class, 'spKoreksi']);
-// Route::get('/pengajuandphloadall' , [PengajuanDPHController::class, 'loadAll']);
-// Route::post('/pengajuandphspotorisasi' , [PengajuanDPHController::class, 'spOtorisasi']);
-// Route::post('/pengajuandphspbatalotorisasi' , [PengajuanDPHController::class, 'spBatalOtorisasi']);
-// Route::post('/pengajuandphdetailCetak', [PengajuanDPHController::class, 'getDetailCetak']);
+Route::post('/pengajuandphspadd' , [PengajuanDPHController::class, 'spAdd']);
+Route::post('/pengajuandphspkoreksi' , [PengajuanDPHController::class, 'spKoreksi']);
+Route::get('/pengajuandphloadall' , [PengajuanDPHController::class, 'loadAll']);
+Route::post('/pengajuandphspotorisasi' , [PengajuanDPHController::class, 'spOtorisasi']);
+Route::post('/pengajuandphspbatalotorisasi' , [PengajuanDPHController::class, 'spBatalOtorisasi']);
+Route::post('/pengajuandphdetailCetak', [PengajuanDPHController::class, 'getDetailCetak']);
 
 // PENGAJUAN DPH
 Route::get('/pengajuandphtunai', [PengajuanDPHTunaiController::class, 'index']);
@@ -348,3 +348,4 @@ Route::post('/bonsementararesetheader' , [BonSementaraController::class, 'resetH
 
 
 });
+
