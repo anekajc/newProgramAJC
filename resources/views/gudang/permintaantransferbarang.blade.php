@@ -535,9 +535,7 @@
 
             <div class="col-md-12">
               <div class="form-group">
-                {{-- Box di bawah dropdown menampilkan ALAMAT gudang asal (bukan nama
-                     gudang lagi), pola sama dengan #input_add_alamatkirim di
-                     gudang/purchaseOrder.blade.php. --}}
+        
                 <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal" class="form-control text-left align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
               </div>
             </div>
@@ -554,10 +552,7 @@
             </div>
             <div class="col-md-12">
               <div class="form-group">
-                {{-- Gudang Tujuan: dropdown select, pola sama dengan Gudang Asal di atas
-                     (col-md-12 penuh di bawah label supaya teks tidak terpotong).
-                     Opsi dimuat lewat muatDropdownGudangTujuan() (endpoint
-                     prtlistgudangtujuan), otomatis exclude Gudang Asal yang sedang dipilih. --}}
+          
                 <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="onChangeGudangTujuan()">
                 </select>
               </div>
@@ -565,9 +560,7 @@
 
             <div class="col-md-12">
               <div class="form-group">
-                {{-- Box di bawah dropdown menampilkan ALAMAT gudang tujuan (bukan nama
-                     gudang lagi), pola sama dengan #input_add_alamatkirim di
-                     gudang/purchaseOrder.blade.php. --}}
+
                 <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan" class="form-control text-left align-items-center" id="input_add_namaGudangTujuan"  disabled></textarea>
               </div>
             </div>
@@ -2499,8 +2492,8 @@ $(document).ready(function(){
             .map(
               (item, i) => `
               <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
-                <td>${item.KODEBRG}</td>
-                <td>${item.NAMABRG}</td>
+                <td style="padding:10px 12px;">${item.KODEBRG}</td>
+                <td style="padding:10px 12px;">${item.NAMABRG}</td>
               </tr>`
             )
             .join("");
@@ -4494,8 +4487,8 @@ function buttonAddAddListBarang () {
         res.forEach((item, i) => {
           rowTable += `
             <tr class="pick-row" onclick="buttonAddAddPickBarangAll(${i})">
-              <td>${item.KODEBRG}</td>
-              <td>${item.NAMABRG}</td>
+              <td style="padding:10px 12px;">${item.KODEBRG}</td>
+              <td style="padding:10px 12px;">${item.NAMABRG}</td>
             </tr>`;
         });
 
