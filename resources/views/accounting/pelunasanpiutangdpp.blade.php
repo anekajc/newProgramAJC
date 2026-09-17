@@ -858,7 +858,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   </div> -->
                 <div class="col-md-8">
                   <div class="input-group form-group">
-                    <input id="input_add_jumlah" type="number" class="form-control text-right" disabled>
+                    <input id="input_add_jumlah" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
                   </div>
@@ -879,7 +879,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 </div> -->
               <div class="col-md-8">
                 <div class="input-group form-group">
-                  <input id="input_add_dibayar" type="number" class="form-control text-right" disabled>
+                  <input id="input_add_dibayar" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
                 </div>
@@ -902,7 +902,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               </div> -->
             <div class="col-md-8">
               <div class="input-group form-group">
-                <input id="input_add_sisa" type="number" class="form-control text-right" disabled>
+                <input id="input_add_sisa" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
               </div>
@@ -1001,7 +1001,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
         <div class="col-md-8">
           <div class="input-group form-group">
-            <input id="AddAddDibayar" type="number" class="form-control text-right" disabled>
+            <input id="AddAddDibayar" type="text" inputmode="decimal" class="form-control text-right format-number" disabled>
           </div>
         </div>
         </div>
@@ -1016,7 +1016,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
         <div class="col-md-8">
           <div class="input-group form-group">
-            <input id="AddAddLebihBayar" type="number" class="form-control text-right" disabled>
+            <input id="AddAddLebihBayar" type="text" inputmode="decimal" class="form-control text-right format-number" disabled>
           </div>
         </div>
         </div>
@@ -1033,7 +1033,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
         <div class="col-md-8">
           <div class="input-group form-group">
-            <input id="AddAddKurangBayar" type="number" class="form-control text-right" disabled>
+            <input id="AddAddKurangBayar" type="text" inputmode="decimal" class="form-control text-right format-number" disabled>
           </div>
         </div>
         </div>
@@ -1303,7 +1303,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                       </div> -->
                     <div class="col-md-8">
                       <div class="input-group form-group">
-                        <input id="input_detail_jumlah" type="number" class="form-control text-right" disabled>
+                        <input id="input_detail_jumlah" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
                       </div>
@@ -1324,7 +1324,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                     </div> -->
                   <div class="col-md-8">
                     <div class="input-group form-group">
-                      <input id="input_detail_dibayar" type="number" class="form-control text-right" disabled>
+                      <input id="input_detail_dibayar" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
                     </div>
@@ -1347,7 +1347,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   </div> -->
                 <div class="col-md-8">
                   <div class="input-group form-group">
-                    <input id="input_detail_sisa" type="number" class="form-control text-right" disabled>
+                    <input id="input_detail_sisa" type="text" inputmode="decimal" class="form-control text-right" disabled>
 
 
                   </div>
@@ -1485,7 +1485,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 </div>
                 <div class="col-md-8">
                   <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_modal_jumlah" disabled>
+                    <input type="text" inputmode="decimal" class="form-control text-right" id="input_modal_jumlah" disabled>
                   </div>
                 </div>
               </div>
@@ -1497,7 +1497,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 </div>
                 <div class="col-md-8">
                   <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_modal_dibayar" disabled>
+                    <input type="text" inputmode="decimal" class="form-control text-right" id="input_modal_dibayar" disabled>
                   </div>
                 </div>
               </div>
@@ -1509,7 +1509,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 </div>
                 <div class="col-md-8">
                   <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_modal_sisa" disabled>
+                    <input type="text" inputmode="decimal" class="form-control text-right" id="input_modal_sisa" disabled>
                   </div>
                 </div>
               </div>
@@ -1715,7 +1715,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 </div>
                 <div class="col-md-8">
                   <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_modalx_nilainotadibayar" disabled>
+                    <input type="text" inputmode="decimal" class="form-control text-right" id="input_modalx_nilainotadibayar" disabled>
                   </div>
                 </div>
 
@@ -1734,7 +1734,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               </div>
               <div class="col-md-8">
                 <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_modalx_sisanotadibayar" disabled>
+                  <input type="text" inputmode="decimal" class="form-control text-right" id="input_modalx_sisanotadibayar" disabled>
                 </div>
               </div>
 
@@ -1753,7 +1753,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <input type="number" class="form-control text-right" id="input_modalx_dibayar" >
+                <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_modalx_dibayar" >
               </div>
             </div>
           </div>
@@ -1765,7 +1765,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <input type="number" class="form-control text-right" id="input_modalx_lebihbayar" >
+                <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_modalx_lebihbayar" >
               </div>
             </div>
           </div>
@@ -1851,7 +1851,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                     </div> -->
                   <div class="col-md-4">
                     <div class="input-group form-group">
-                      <input id="input_modalx_kurangbayar" type="number" value="0.00" class="text-right form-control" >
+                      <input id="input_modalx_kurangbayar" type="text" inputmode="decimal" value="0.00" class="text-right form-control format-number" >
 
                     </div>
                   </div>
@@ -2174,6 +2174,8 @@ $(document).on('hidden.bs.modal', '.modal', function () {
 })
 
 $(document).ready(function(){
+      $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+
       // Kedua tabel (Outstanding Pembayaran & Pelunasan Piutang) memakai pola
       // ReportTable (geser + sembunyikan kolom), sama seperti penerimaandpp.
       pldInitReportTableSekali()
@@ -2828,12 +2830,12 @@ function buttonAddPickPerkiraanLebihBayar (perkiraan , nama) {
 }
 
 function buttonSaveLB () {
-    let xnilainota = $("#input_modalx_nilainotadibayar").val()
-    let xdibayar = $("#input_modalx_dibayar").val()
-    let xlebihbayar = $("#input_modalx_lebihbayar").val()
+    let xnilainota = toNum($("#input_modalx_nilainotadibayar").val())
+    let xdibayar = toNum($("#input_modalx_dibayar").val())
+    let xlebihbayar = toNum($("#input_modalx_lebihbayar").val())
     let xperkiraanlebihbayar = $("#input_modalx_perkiraanlebihbayar").val()
     let xnamaperkiraanlebihbayar = $("#input_modalx_namaperkiraanlebihbayar").val()
-    let xsisa = $("#input_modalx_sisanotadibayar").val()
+    let xsisa = toNum($("#input_modalx_sisanotadibayar").val())
 
     let checksisadibayar = Number(listProsesTerimaDPP[saveHeaderIndex].DIBAYAR)
     let checksisalb = Number(listTambahLB[listProsesTerimaDPP[saveHeaderIndex].NOFAKTUR]) ? Number(listTambahLB[listProsesTerimaDPP[saveHeaderIndex].NOFAKTUR]) : 0
@@ -2922,8 +2924,8 @@ function prosesCheckbox (index) {
  console.log(xdata)
  // console.log(listProsesTerimaDPP[index])
  let xcheck = document.getElementById(`list_proses_checkbox${index}`).checked
- let xsisa = Number($("#input_modal_sisa").val())
- let xdibayar = Number($(`#list_proses_dibayar${index}`).val())
+ let xsisa = toNum($("#input_modal_sisa").val())
+ let xdibayar = toNum($(`#list_proses_dibayar${index}`).val())
  console.log(xcheck)
 
 
@@ -2946,10 +2948,10 @@ function prosesCheckbox (index) {
        console.log('2' , Number(xdibayar))
      if (Number(xdibayar) == 0) {
        if (Number(xdata.TOTFAKTUR) - Number(xdata.SDHBAYAR) < Number(xsisa)) {
-         document.getElementById(`list_proses_dibayar${index}`).value = Number(xdata.TOTFAKTUR) - Number(xdata.SDHBAYAR)
+          setNum(`list_proses_dibayar${index}`, Number(xdata.TOTFAKTUR) - Number(xdata.SDHBAYAR))
          listProsesTerimaDPP[index].DIBAYAR = Number(xdata.TOTFAKTUR) - Number(xdata.SDHBAYAR)
        } else {
-         document.getElementById(`list_proses_dibayar${index}`).value = Number(xsisa)
+          setNum(`list_proses_dibayar${index}`, xsisa)
          listProsesTerimaDPP[index].DIBAYAR = Number(xsisa)
        }
        refreshSisa()
@@ -2958,9 +2960,9 @@ function prosesCheckbox (index) {
 
    }
  } else {
-  document.getElementById(`list_proses_dibayar${index}`).value = '0.00'
-  document.getElementById(`list_proses_LB${index}`).value = '0.00'
-  document.getElementById(`list_proses_KL${index}`).value = '0.00'
+  setNum(`list_proses_dibayar${index}`, 0)
+  setNum(`list_proses_LB${index}`, 0)
+  setNum(`list_proses_KL${index}`, 0)
   listProsesTerimaDPP[index].DIBAYAR = 0
   delete listTambahLB[xdata.NOFAKTUR];
   delete listTambahKL[xdata.NOFAKTUR];
@@ -2977,7 +2979,7 @@ function prosesCheckbox (index) {
 
 function refreshSisa () {
   console.log('refreshSisa')
-  let totdibayar = Number($("#input_add_dibayar").val())
+  let totdibayar = toNum($("#input_add_dibayar").val())
   let totlb = 0
   listProsesTerimaDPP.forEach((item, i) => {
     console.log('wwwwwwwwwwwww')
@@ -2986,22 +2988,22 @@ function refreshSisa () {
 
     if (listTambahLB[item.NOFAKTUR]) {
       totlb += Number(listTambahLB[item.NOFAKTUR].inputLB)
-      document.getElementById(`list_proses_LB${i}`).value = parseFloat(listTambahLB[item.NOFAKTUR].inputLB).toFixed(2)
+      setNum(`list_proses_LB${i}`, listTambahLB[item.NOFAKTUR].inputLB)
     }
 
-    document.getElementById(`list_proses_dibayar${i}`).value = parseFloat(item.DIBAYAR).toFixed(2)
+    setNum(`list_proses_dibayar${i}`, item.DIBAYAR)
     console.log(totdibayar)
     console.log(totlb)
 
   });
   let xtot = Number(totdibayar) + Number(totlb)
-  let xjumlah = $("#input_modal_jumlah").val()
+  let xjumlah = toNum($("#input_modal_jumlah").val())
 
   console.log(parseFloat(xtot).toFixed(2))
   console.log(parseFloat(Number(xjumlah) - xtot).toFixed(2))
-  document.getElementById(`input_modal_dibayar`).value = parseFloat(xtot).toFixed(2)
-  document.getElementById(`input_modal_sisa`).value = parseFloat(Number(xjumlah) - xtot).toFixed(2)
-  document.getElementById(`input_modalx_sisanotadibayar`).value = parseFloat(Number(xjumlah) - xtot).toFixed(2)
+  setNum(`input_modal_dibayar`, xtot)
+  setNum(`input_modal_sisa`, Number(xjumlah) - xtot)
+  setNum(`input_modalx_sisanotadibayar`, Number(xjumlah) - xtot)
 
 
 
@@ -3011,14 +3013,14 @@ function buttonAddKL () {
 
   $('.showhideitemKL').show()
 
-  document.getElementById("input_modalx_kurangbayar").value = '0.00'
+  setNum("input_modalx_kurangbayar", 0)
   document.getElementById("input_modalx_perkiraankurangbayar").value = ''
   document.getElementById("input_modalx_namaperkiraankurangbayar").value = ''
 }
 
 
 function submitAddKL () {
-    let kl = $("#input_modalx_kurangbayar").val()
+    let kl = toNum($("#input_modalx_kurangbayar").val())
     let perkkl = $("#input_modalx_perkiraankurangbayar").val()
     let namaperkkl = $("#input_modalx_namaperkiraankurangbayar").val()
     // perkkl = '444'
@@ -3029,8 +3031,8 @@ function submitAddKL () {
       alertify.warning("Data tidak lengkap")
       return
     }
-    let xnilainotadibayar = $("#input_modalx_nilainotadibayar").val()
-    let xdibayar = $("#input_modalx_dibayar").val()
+    let xnilainotadibayar = toNum($("#input_modalx_nilainotadibayar").val())
+    let xdibayar = toNum($("#input_modalx_dibayar").val())
     if (Number(xnilainotadibayar) + Number(xdibayar) < Number(kl)) {
       alertify.warning('KL melebihi nilai nota + dibayar')
 
@@ -3038,7 +3040,7 @@ function submitAddKL () {
     }
 
 
-    let xsisa = $("#input_modalx_sisanotadibayar").val()
+    let xsisa = toNum($("#input_modalx_sisanotadibayar").val())
     if (Number(kl) > Number(xsisa)) {
       alertify.warning('Melebihi sisa nota')
       return
@@ -3873,9 +3875,9 @@ function submitEdit () {
   let tanggal  = $("#input_add_tanggal").val()
 
   let nobkmbbm = $("#input_add_nobkmbbm").val()
-  let dibayar  = $("#AddAddDibayar").val()
-  let kl  = $("#AddAddKurangBayar").val()
-  let lb = $("#AddAddLebihBayar").val()
+  let dibayar  = toNum($("#AddAddDibayar").val())
+  let kl  = toNum($("#AddAddKurangBayar").val())
+  let lb = toNum($("#AddAddLebihBayar").val())
   let perkiraan = $("#AddAddKodePerkiraan").val()
 
   if (Number(dibayar) > 0 || Number(lb) > 0 || Number(kl) >0 ) {
@@ -4234,16 +4236,16 @@ function buttonAddItem () {
 
             <td class="text-center">
             <div class="input-group form-group">
-              <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
+              <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.DIBAYAR).toFixed(2))}' class="form-control text-right" disabled>
 
               <button id="buttonChangeDibayar${i}" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-browsing btn-browsing-sm" title="Ubah Dibayar"><i class="bi bi-search"></i></button>
 
             </div></td>
             <td class="text-center">
-            <input style="height:30px; width:160px" id="list_proses_LB${i}" type="number" value='${parseFloat(item.LB).toFixed(2)}' class="form-control text-right" disabled>
+            <input style="height:30px; width:160px" id="list_proses_LB${i}" type="text" inputmode="decimal" value='${formatNumberDisplay(parseFloat(item.LB).toFixed(2))}' class="form-control text-right" disabled>
             </td>
             <td class="text-center">
-            <input style="height:30px; width:160px" id="list_proses_KL${i}" type="number" value='0.00' class="form-control text-right" disabled>
+            <input style="height:30px; width:160px" id="list_proses_KL${i}" type="text" inputmode="decimal" value='0.00' class="form-control text-right" disabled>
             </td>
           </tr>
         `
@@ -4262,9 +4264,9 @@ function buttonAddItem () {
       }
       document.getElementById("input_modal_nobukti").value = nobkmbbm
       document.getElementById("input_modal_namacust").value = $("#input_add_namacust").val();
-      document.getElementById("input_modal_jumlah").value = $("#input_add_jumlah").val();
-      document.getElementById("input_modal_dibayar").value = $("#input_add_dibayar").val();
-      document.getElementById("input_modal_sisa").value = $("#input_add_sisa").val();
+      setNum("input_modal_jumlah", $("#input_add_jumlah").val());
+      setNum("input_modal_dibayar", $("#input_add_dibayar").val());
+      setNum("input_modal_sisa", $("#input_add_sisa").val());
       document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
 
 
@@ -4311,7 +4313,7 @@ function refreshTableKL () {
       xTempTotalKL += Number(item.inputKL)
       rowTablex += `
         <tr>
-          <td class="text-right">${item.inputKL}</td>
+          <td class="text-right">${formatAngka(parseFloat(item.inputKL).toFixed(2))}</td>
           <td>${item.inputPerkiraanKL}</td>
           <td>${item.inputNamaPerkiraanKL}</td>
         </tr>
@@ -4320,7 +4322,7 @@ function refreshTableKL () {
     });
 
     document.getElementById("tabel_data_add_list_modalx").innerHTML = rowTablex
-    document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = parseFloat(xTempTotalKL).toFixed(2)
+    setNum(`list_proses_KL${saveHeaderIndex}`, xTempTotalKL)
 
 
   }
@@ -4341,9 +4343,9 @@ function buttonChangeDibayar (index) {
   // listProsesTerimaDPP[saveHeaderIndex]
   saveHeaderInvoice = listProsesTerimaDPP[index]
   saveHeaderIndex = index
-  let xdibayar = $(`#list_proses_dibayar${index}`).val();
-  let xLB = $(`#list_proses_LB${index}`).val();
-  let sisa = $(`#input_modal_sisa`).val();
+  let xdibayar = toNum($(`#list_proses_dibayar${index}`).val());
+  let xLB = toNum($(`#list_proses_LB${index}`).val());
+  let sisa = toNum($(`#input_modal_sisa`).val());
   console.log(saveHeaderInvoice.NoBukti)
   console.log(listTambahKL[saveHeaderInvoice.NoBukti])
 
@@ -4351,11 +4353,11 @@ function buttonChangeDibayar (index) {
   console.log(formatAngka(parseFloat(x.TOTFAKTUR).toFixed(2)))
   console.log('==')
   console.log(xdibayar, xLB , sisa)
-  document.getElementById("input_modalx_nilainotadibayar").value = parseFloat(Number(x.TOTFAKTUR) - Number(x.SDHBAYAR)).toFixed(2)
-  document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+  setNum("input_modalx_nilainotadibayar", Number(x.TOTFAKTUR) - Number(x.SDHBAYAR))
+  setNum("input_modalx_dibayar", xdibayar)
 
-  document.getElementById("input_modalx_lebihbayar").value = parseFloat(xLB).toFixed(2)
-  document.getElementById("input_modalx_sisanotadibayar").value = parseFloat(sisa).toFixed(2)
+  setNum("input_modalx_lebihbayar", xLB)
+  setNum("input_modalx_sisanotadibayar", sisa)
   if (xLB > 0) {
     document.getElementById("input_modalx_perkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputPerkiraanLB
     document.getElementById("input_modalx_namaperkiraanlebihbayar").value = listTambahLB[saveHeaderInvoice.NOFAKTUR].inputNamaPerkiraanLB
@@ -4480,15 +4482,15 @@ function buttonEditItem (index) {
   if (Number(editDibayar) > 0) {
 
     document.getElementById("AddAddDibayar").disabled = false
-    document.getElementById("AddAddDibayar").value = parseFloat(editDibayar).toFixed(2)
+    setNum("AddAddDibayar", editDibayar)
 
   } else if (Number(editKL) > 0) {
     document.getElementById("AddAddKurangBayar").disabled = false
-    document.getElementById("AddAddKurangBayar").value = parseFloat(editKL).toFixed(2)
+    setNum("AddAddKurangBayar", editKL)
 
   } else {
     document.getElementById("AddAddLebihBayar").disabled = false
-    document.getElementById("AddAddLebihBayar").value = parseFloat(editLB).toFixed(2)
+    setNum("AddAddLebihBayar", editLB)
 
   }
   $('.showhideitem').show()
@@ -4544,9 +4546,9 @@ let _token = $("#_token").val();
       let dibayarx = parseFloat(xxx).toFixed(2)
       let jumlahx = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
       console.log(dibayarx , jumlahx)
-      document.getElementById("input_add_dibayar").value = parseFloat(xxx).toFixed(2)
-      document.getElementById("input_add_jumlah").value = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
-      document.getElementById("input_add_sisa").value =  parseFloat(Number(jumlahx) - Number(xxx)).toFixed(2)
+      setNum("input_add_dibayar", xxx)
+      setNum("input_add_jumlah", res.header[0].Debet ? res.header[0].Debet : 0)
+      setNum("input_add_sisa", Number(jumlahx) - Number(xxx))
       let totaldibayarx = 0
       let totallbx = 0
       let totalklx = 0
@@ -4660,9 +4662,9 @@ function buttonDetail (nobukti , tipe = 0 , nodpp = '') {
         let dibayarx = parseFloat(xxx).toFixed(2)
         let jumlahx = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
         console.log(dibayarx , jumlahx)
-        document.getElementById("input_detail_dibayar").value = parseFloat(xxx).toFixed(2)
-        document.getElementById("input_detail_jumlah").value = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
-        document.getElementById("input_detail_sisa").value =  parseFloat(Number(jumlahx) - Number(xxx)).toFixed(2)
+        setNum("input_detail_dibayar", xxx)
+        setNum("input_detail_jumlah", res.header[0].Debet ? res.header[0].Debet : 0)
+        setNum("input_detail_sisa", Number(jumlahx) - Number(xxx))
 
         let rowTable = ``
         res.detail.forEach((item, i) => {
@@ -4767,9 +4769,9 @@ function buttonKoreksi (nobukti , nodpp) {
         let dibayarx = parseFloat(xxx).toFixed(2)
         let jumlahx = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
         console.log(dibayarx , jumlahx)
-        document.getElementById("input_add_dibayar").value = parseFloat(xxx).toFixed(2)
-        document.getElementById("input_add_jumlah").value = res.header[0].Debet ? parseFloat(res.header[0].Debet ).toFixed(2) : '0.00'
-        document.getElementById("input_add_sisa").value =  parseFloat(Number(jumlahx) - Number(xxx)).toFixed(2)
+        setNum("input_add_dibayar", xxx)
+        setNum("input_add_jumlah", res.header[0].Debet ? res.header[0].Debet : 0)
+        setNum("input_add_sisa", Number(jumlahx) - Number(xxx))
         let totaldibayarx = 0
         let totallbx = 0
         let totalklx = 0
@@ -4869,10 +4871,10 @@ function buttonAdd (nobukti) {
       if ( Number(listOutstanding[0].LB)) {
         xxx += Number(listOutstanding[0].LB)
       }
-      document.getElementById("input_add_dibayar").value = parseFloat(xxx).toFixed(2)
+      setNum("input_add_dibayar", xxx)
 
-      document.getElementById("input_add_jumlah").value = listOutstanding[0].JumlahRp ? parseFloat(listOutstanding[0].JumlahRp).toFixed(2) : '0.00'
-      document.getElementById("input_add_sisa").value = listOutstanding[0].Sisa ? parseFloat(listOutstanding[0].Sisa).toFixed(2) : '0.00'
+      setNum("input_add_jumlah", listOutstanding[0].JumlahRp ? listOutstanding[0].JumlahRp : 0)
+      setNum("input_add_sisa", listOutstanding[0].Sisa ? listOutstanding[0].Sisa : 0)
       document.getElementById("input_add_kodecust").value = listOutstanding[0].CustSuppL
       document.getElementById("input_add_namacust").value = listOutstanding[0].namaCustSupp
       urutTrans = listOutstanding[0].urutTrans
@@ -5706,6 +5708,20 @@ function formatAngkaX (angka) {
 
 }
 
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  let n = toNum(v)
+  if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', n)
+  } else {
+    el.value = formatNumberDisplay(n.toFixed(2))
+  }
+}
 function formatAngka (angkaString) {
 
   let tempAngka = angkaString.split('.')

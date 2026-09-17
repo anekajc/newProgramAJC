@@ -46,12 +46,211 @@ class SuratJalanController extends Controller
 
 
     // $outstanding = VwPPL::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('IsJasa', 0)->where('pAgen', 1)->groupBy('NoBukti');
-    $tempOutstanding = DB::connection("SML")->select("
+    $__page1 = $this->queryOutstandingSJ('', 0, 10);
+    $tempOutstanding = $__page1['rows'];
+    $tempOutstandingTotal = $__page1['total'];
+    // foreach ($outstanding as $p) {
+    //   // code...
+    //   array_push($tempOutstanding, $p);
+    // }
+    $__page1 = $this->queryOutstanding2SJ('', 0, 10);
+    $tempOutstanding2 = $__page1['rows'];
+    $tempOutstanding2Total = $__page1['total'];
+
+
+$tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, 0);
+
+
+
+$listBarang = [];
+
+// $listBarang = DB::connection('SML')->select(" select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
+//                 A.Sat1,A.Sat2 ,A.Sat3,A.pPPN,Isnull(A.QntMin,0) QntMin ,a.Hrg1_1 , a.Hrg2_1, a.Hrg3_1
+//                 from DBbarang a
+//                 left OUter JOin DbSubgroup I on A.KodeSubGRp=I.KodeSUbgrp and A.KodeHdGrp=i.KodeHDGrp
+//                 Left Outer join DbMerk J on A.KodeMerk=J.KodeMerk
+//                 where a.isaktif=1 and A.KodeGrp in ('BJ','JS')
+//                  and (A.KodeBrg like '%%') or (a.namaBrg like '%%')
+//                 and isnull(A.Isaktif,0)=1
+//                 order by a.Kodebrg ASC" );
+$listGudang = DB::connection('SML')->select("select KODEGDG, NAMA , ALAMAT from dbgudang" );
+
+
+$tempOutstanding4 = DB::connection("SML")->select("
+Declare @bulan Int,@tahun Int,@IDuser varchar(20)
+select @Bulan= :bulan ,@Tahun= :tahun ,@IDUser= :username
+select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
+        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
+        B.SATUAN,
+		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
+		     when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+                     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+		End QntOut,
+    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
+    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
+    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
+    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
+    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
+    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
+
+    case when ISNULL(B.NOserah,'')  IN ('','-')
+    then
+         case when b.nosat=1 then m6.saldoQnt
+         when b.nosat=2 then m6.saldoqnt/c.isi2
+         when b.nosat=3 then m6.saldoqnt/c.isi3 end
+    else
+         case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
+         when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
+         when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
+    End
+    SaldoQnt ,A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,
+
+    case when
+         case when ISNULL(B.NOserah,'') IN ('','-')
+		 then
+				case when b.nosat=1 then m6.saldoQnt
+				when b.nosat=2 then m6.saldoqnt/c.isi2
+				when b.nosat=3 then m6.saldoqnt/c.isi3 end
+		else
+				case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
+				when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
+				when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
+		End
+         >
+		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
+			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+		End THEN
+		        case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
+			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
+		END
+	ELSE
+	     case when ISNULL(B.NOserah,'')  IN ('','-')
+		 then
+			case when b.nosat=1 then m6.saldoQnt
+			when b.nosat=2 then m6.saldoqnt/c.isi2
+			when b.nosat=3 then m6.saldoqnt/c.isi3 end
+		else
+			case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
+			when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
+			when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
+    End
+
+
+    END QNTXZ
+
+    ,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
+from	dbSO A
+left outer join dBSODet B on B.NoBukti=A.NoBukti
+left outer join dbBarang C on C.KodeBrg=B.KodeBrg
+left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
+lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
+				FROM dbSPBDet
+				GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
+lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
+				FROM dbRSPBDet A
+				LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
+				GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
+left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
+LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
+Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
+LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
+                 Where BUlan=@bulan and Tahun=@Tahun  and KOdeGdg<>'GTC'
+                 and kodegdg in (Select kodegdg from dbPemakaigdg
+                          where userid=@IDuser)
+                 and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
+                 group by KODEBRG,BULAN,TAHUN
+                 ) M6 ON B.KODEBRG=M6.KODEBRG
+
+LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
+				  where BUlan=@bulan and Tahun=@Tahun
+                        and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
+					    and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
+				  group by KODEBRG,BULAN,TAHUN
+				) M61 ON B.KODEBRG=M61.KODEBRG
+
+LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
+where
+      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                 else 1
+            end As Bit)=0
+and
+
+/*B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0  */
+case when b.NOSAT=1 then
+			B.QNT-(Isnull(m1.QNT1SPB,0)+
+			 case when b.nosat=1 then Isnull(B.QntBatal,0)
+			 when b.nosat=2 then isnull(b.qntBatal,0) * B.isi
+			 when b.nosat=3 then isnull(b.qntBatal,0) * B.isi end)
+			+ Isnull(m4.QNT1RSPB,0)
+	 when b.NOSAT=2 then
+			B.QNT2-(Isnull(m1.QNT2SPB,0)+
+			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
+			 when b.nosat=2 then isnull(b.qntBatal,0)
+			 when b.nosat=3 then isnull(b.qntBatal,0) end)
+			+ Isnull(m4.QNT2RSPB,0)
+	when b.NOSAT=3 then
+			B.QNT2-(Isnull(m1.QNT2SPB,0)+
+			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
+			 when b.nosat=2 then isnull(b.qntBatal,0)
+			 when b.nosat=3 then isnull(b.qntBatal,0) end)
+			+ Isnull(m4.QNT2RSPB,0)
+end>0
+AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
+		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
+>0
+and Isnull(B.PBooking,0)=1
+" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
+
+
+
+    $__page1 = $this->queryOutstanding5SJ('', 0, 10);
+    $tempOutstanding5 = $__page1['rows'];
+    $tempOutstanding5Total = $__page1['total'];
+
+
+    return view('marketing.suratjalan' , [
+      "menul0" => $menul0,
+      "periode" => $periode,
+      "tempOutstanding" => $tempOutstanding,
+      "tempOutstandingTotal" => $tempOutstandingTotal,
+      "tempOutstanding2" => $tempOutstanding2,
+      "tempOutstanding2Total" => $tempOutstanding2Total,
+      "tempOutstanding4" => $tempOutstanding4,
+      "tempOutstanding6" => $tempOutstanding6,
+      "tempOutstanding5" => $tempOutstanding5,
+      "tempOutstanding5Total" => $tempOutstanding5Total,
+      "akses" => $akses,
+      "listBarang" => $listBarang,
+      "listGudang" => $listGudang
+    ]);
+
+  }
+
+  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Surat Jalan
+  // Otorisasi" (dulu tabel3=Belum Otorisasi tanpa actions + tabel6=Sudah Otorisasi
+  // dengan actions Kirim/Terima Acc, di tab terpisah) -- digabung jadi satu tabel
+  // dengan filterspb yang menyaring status otorisasi, port 1:1 dari pola
+  // queryOutstanding() milik PerintahReturJualController. Baris Belum Otorisasi
+  // sekarang dapat tombol Otorisasi (tabel6ActionsCell di Blade), baris Sudah
+  // Otorisasi tetap dapat Kirim/Terima Acc plus Batal Otorisasi.
+  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+  private function queryOutstandingSJ ($search, $offset, $fetchlen) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $rows = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
 select @Bulan = :bulan,@Tahun = :tahun ,@IDUser = :username
 DECLARE @TGL DATETIME
 SET @TGL=GETDATE()
+SELECT * FROM (
 select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg, A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
+        COUNT(*) OVER() AS TotalRows,
+        ROW_NUMBER() OVER (ORDER BY A.NOBUKTI, B.URUT) AS RowNum,
         case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
         B.SATUAN,
 		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
@@ -193,30 +392,31 @@ case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnul
 	 when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
      when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
 End
+and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
+) AS PagedResult
+WHERE RowNum BETWEEN :rowstart AND :rowend
+ORDER BY RowNum
+", [
+      "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
+      "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
+      "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
+    ]);
+    $total = $rows ? (int) $rows[0]->TotalRows : 0;
+    return ["rows" => $rows, "total" => $total];
+  }
 
-
-
-
-
-
-
-
-
-
-
-and A.Tanggal between :tglawalspb and :tglakhirspb
-order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
-    // foreach ($outstanding as $p) {
-    //   // code...
-    //   array_push($tempOutstanding, $p);
-    // }
-    $tempOutstanding2 = DB::connection("SML")->select("
+  private function queryOutstanding2SJ ($search, $offset, $fetchlen) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $rows = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
 select @Bulan= :bulan,@Tahun= :tahun ,@IDUser= :username
 
 DECLARE @TGL DATETIME
 SET @TGL=GETDATE()
+SELECT * FROM (
 select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
+        COUNT(*) OVER() AS TotalRows,
+        ROW_NUMBER() OVER (ORDER BY A.NOBUKTI, B.URUT) AS RowNum,
         case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
         B.SATUAN,
 		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
@@ -229,7 +429,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
     D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
     M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
     M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-   A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst,
+   A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst,
 
     case when ISNULL(B.NOserah,'')  IN ('','-')
     then
@@ -254,7 +454,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
          when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
          when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End
-    SaldoQnt ,
+    SaldoQnt2 ,
 
     case when ISNULL(B.NOserah,'')  IN ('','-')
     then
@@ -325,7 +525,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
 			when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End
     END QNTXZ   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
-    ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun,m2.Nama AlamatLokasi
+    ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun KodeKebun2,m2.Nama AlamatLokasi
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
 left outer join dbBarang C on C.KodeBrg=B.KodeBrg
@@ -453,33 +653,28 @@ end>0
 AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
 		  Else   isnull(M63.SALDOQNT,0) End
 >0
-and A.Tanggal between :tglawalspb and :tglakhirspb
+and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
+) AS PagedResult
+WHERE RowNum BETWEEN :rowstart AND :rowend
+ORDER BY RowNum
+", [
+      "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
+      "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
+      "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
+    ]);
+    $total = $rows ? (int) $rows[0]->TotalRows : 0;
+    return ["rows" => $rows, "total" => $total];
+  }
 
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
-
-
-$tempOutstanding6 = $this->queryOtorisasiSPB($tglawalspb, $tglakhirspb, 0);
-
-
-
-$listBarang = [];
-
-// $listBarang = DB::connection('SML')->select(" select a.Kodebrg, a.NamaBrg,I.NamaSubGrp,A.PartNumber,J.NAMAMERK,a.ISI1, a.ISI2, a.ISI3,
-//                 A.Sat1,A.Sat2 ,A.Sat3,A.pPPN,Isnull(A.QntMin,0) QntMin ,a.Hrg1_1 , a.Hrg2_1, a.Hrg3_1
-//                 from DBbarang a
-//                 left OUter JOin DbSubgroup I on A.KodeSubGRp=I.KodeSUbgrp and A.KodeHdGrp=i.KodeHDGrp
-//                 Left Outer join DbMerk J on A.KodeMerk=J.KodeMerk
-//                 where a.isaktif=1 and A.KodeGrp in ('BJ','JS')
-//                  and (A.KodeBrg like '%%') or (a.namaBrg like '%%')
-//                 and isnull(A.Isaktif,0)=1
-//                 order by a.Kodebrg ASC" );
-$listGudang = DB::connection('SML')->select("select KODEGDG, NAMA , ALAMAT from dbgudang" );
-
-
-$tempOutstanding4 = DB::connection("SML")->select("
+  private function queryOutstanding5SJ ($search, $offset, $fetchlen) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $rows = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
 select @Bulan= :bulan ,@Tahun= :tahun ,@IDUser= :username
+SELECT * FROM (
 select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
+        COUNT(*) OVER() AS TotalRows,
+        ROW_NUMBER() OVER (ORDER BY A.NOBUKTI, B.URUT) AS RowNum,
         case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
         B.SATUAN,
 		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
@@ -503,7 +698,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
          when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
          when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
     End
-    SaldoQnt ,A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,
+    SaldoQnt ,A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,
 
     case when
          case when ISNULL(B.NOserah,'') IN ('','-')
@@ -540,140 +735,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
 
     END QNTXZ
 
-    ,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
-from	dbSO A
-left outer join dBSODet B on B.NoBukti=A.NoBukti
-left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
-lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
-				FROM dbSPBDet
-				GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
-lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
-				FROM dbRSPBDet A
-				LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
-				GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
-left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
-LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
-Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-                 Where BUlan=@bulan and Tahun=@Tahun  and KOdeGdg<>'GTC'
-                 and kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=@IDuser)
-                 and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-                 group by KODEBRG,BULAN,TAHUN
-                 ) M6 ON B.KODEBRG=M6.KODEBRG
-
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-				  where BUlan=@bulan and Tahun=@Tahun
-                        and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-					    and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-				  group by KODEBRG,BULAN,TAHUN
-				) M61 ON B.KODEBRG=M61.KODEBRG
-
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-where
-      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0
-and
-
-/*B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0  */
-case when b.NOSAT=1 then
-			B.QNT-(Isnull(m1.QNT1SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)
-			 when b.nosat=2 then isnull(b.qntBatal,0) * B.isi
-			 when b.nosat=3 then isnull(b.qntBatal,0) * B.isi end)
-			+ Isnull(m4.QNT1RSPB,0)
-	 when b.NOSAT=2 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-	when b.NOSAT=3 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-end>0
-AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
-		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
->0
-and Isnull(B.PBooking,0)=1
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username]);
-
-
-
-$tempOutstanding5 = DB::connection("SML")->select("
-Declare @bulan Int,@tahun Int,@IDuser varchar(20)
-select @Bulan= :bulan ,@Tahun= :tahun ,@IDUser= :username
-select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
-        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
-        B.SATUAN,
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-		     when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-                     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End QntOut,
-    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
-    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
-    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
-    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
-    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
-    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m6.saldoQnt
-         when b.nosat=2 then m6.saldoqnt/c.isi2
-         when b.nosat=3 then m6.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-         when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-         when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-    SaldoQnt ,A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,
-
-    case when
-         case when ISNULL(B.NOserah,'') IN ('','-')
-		 then
-				case when b.nosat=1 then m6.saldoQnt
-				when b.nosat=2 then m6.saldoqnt/c.isi2
-				when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-				case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-				when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-				when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-		End
-         >
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End THEN
-		        case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		END
-	ELSE
-	     case when ISNULL(B.NOserah,'')  IN ('','-')
-		 then
-			case when b.nosat=1 then m6.saldoQnt
-			when b.nosat=2 then m6.saldoqnt/c.isi2
-			when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-			case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-			when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-			when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-
-
-    END QNTXZ
-
-    ,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
+    ,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
 left outer join dbBarang C on C.KodeBrg=B.KodeBrg
@@ -738,41 +800,43 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
 		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
 >0
 and Isnull(B.PUrgent,0)=1
-and A.Tanggal between :tglawalspb and :tglakhirspb
-
-
-
-
-
-
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
-
-
-    return view('marketing.suratjalan' , [
-      "menul0" => $menul0,
-      "periode" => $periode,
-      // "users"=> $users,
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding4" => $tempOutstanding4,
-      "tempOutstanding6" => $tempOutstanding6,
-
-      "tempOutstanding5" => $tempOutstanding5,
-      "akses" => $akses,
-      "listBarang" => $listBarang,
-      "listGudang" => $listGudang
+and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
+) AS PagedResult
+WHERE RowNum BETWEEN :rowstart AND :rowend
+ORDER BY RowNum
+", [
+      "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
+      "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
+      "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
     ]);
-
+    $total = $rows ? (int) $rows[0]->TotalRows : 0;
+    return ["rows" => $rows, "total" => $total];
   }
 
-  // Satu query dipakai bareng oleh index() dan loadAll() buat tabel "Surat Jalan
-  // Otorisasi" (dulu tabel3=Belum Otorisasi tanpa actions + tabel6=Sudah Otorisasi
-  // dengan actions Kirim/Terima Acc, di tab terpisah) -- digabung jadi satu tabel
-  // dengan filterspb yang menyaring status otorisasi, port 1:1 dari pola
-  // queryOutstanding() milik PerintahReturJualController. Baris Belum Otorisasi
-  // sekarang dapat tombol Otorisasi (tabel6ActionsCell di Blade), baris Sudah
-  // Otorisasi tetap dapat Kirim/Terima Acc plus Batal Otorisasi.
-  //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
+
+  // Endpoint AJAX generik utk pagination server-side "SO Belum Siap Kirim"/
+  // "SO Siap Kirim"/"Out SO Prioritas" -- ketiganya TIDAK dibatasi periode (beda
+  // dari "Surat Jalan Otorisasi"/queryOtorisasiSPB yang memang periode-scoped),
+  // masing-masing punya search & page sendiri, tidak saling memengaruhi.
+  public function paginateOutstanding (Request $req) {
+    $table = $req->table;
+    $page = max(1, (int) ($req->page ?: 1));
+    $length = (int) ($req->length ?: 10);
+    if ($length <= 0) { $length = 10; }
+    $offset = ($page - 1) * $length;
+    $search = trim((string) $req->search);
+
+    if ($table === 'tabel2') {
+      $res = $this->queryOutstanding2SJ($search, $offset, $length);
+    } else if ($table === 'tabel5') {
+      $res = $this->queryOutstanding5SJ($search, $offset, $length);
+    } else {
+      $res = $this->queryOutstandingSJ($search, $offset, $length);
+    }
+
+    return ["rows" => $res['rows'], "total" => $res['total'], "page" => $page, "length" => $length];
+  }
+
   private function queryOtorisasiSPB ($tglawal, $tglakhir, $filterspb) {
     return DB::connection("SML")->select("
       select * from (
@@ -830,417 +894,10 @@ and A.Tanggal between :tglawalspb and :tglakhirspb
     $tglawalspb = $req->tglawalspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhirspb = $req->tglakhirspb ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
 
-    $tempOutstanding = DB::connection("SML")->select("
-Declare @bulan Int,@tahun Int,@IDuser varchar(20)
-select @Bulan = :bulan,@Tahun = :tahun ,@IDUser = :username
-DECLARE @TGL DATETIME
-SET @TGL=GETDATE()
-select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg, A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
-        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
-        B.SATUAN,
-    case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-         when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-             when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-    End QntOut,
-    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
-    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
-    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
-    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,
-    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,
-    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m62.saldoQnt
-         when b.nosat=2 then m62.saldoqnt/c.isi2
-         when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-         when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-         when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End
-    SaldoQnt,
-
-    A.TglKirim,ISnull(M7.Nama,'-') namakebun,
-    case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-     when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-         when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-  End -
-  case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m62.saldoQnt
-         when b.nosat=2 then m62.saldoqnt/c.isi2
-         when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-         when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-         when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End QNTzx
-    ,A.catatan   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
-from	dbSO A
-left outer join dBSODet B on B.NoBukti=A.NoBukti
-left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
-lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
-        FROM dbSPBDet
-        GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
-lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
-        FROM dbRSPBDet A
-        LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
-        GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
-left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
-LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
-Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
-/*LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG  where kodegdg<>'GTC'
-                            AND    BUlan=@bulan and Tahun=@Tahun
-                             and kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=@IDUser)
-
-                          and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-        group by KODEBRG,BULAN,TAHUN
-        ) M6 ON B.KODEBRG=M6.KODEBRG
-
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-          where BUlan=@bulan and Tahun=@Tahun
-                        and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-              and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          group by KODEBRG,BULAN,TAHUN
-        ) M61 ON B.KODEBRG=M61.KODEBRG*/
-left outer join ( SELECT KODEBRG,SUM(SALDOQNT) SALDOQNT FROM (
-          select  KodeBrg, QntAwal SaldoQnt
-          from 	dbStockBrg
-          where         Tahun=year(@TGL) and Bulan=MONTH(@TGL)
-          --where         Tahun=year(GETDATE()) and Bulan=1
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-          union all
-          select 	KodeBrg,
-          SUM(QntDb)-SUM(QntCr) SaldoQnt
-          from 	vwKartuStock
-          where 	year(Tanggal)=@tahun and month(tanggal)=@bulan and Tanggal<=@TGL
-          --where 	year(Tanggal)=year(GETDATE()) and Tanggal<=GETDATE()
-          and Tipe not in ('AWL')
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-          group by KodeBrg) A
-          GROUP BY A.KODEBRG
-        )M62 ON B.KODEBRG=M62.KODEBRG
-
-left outer join ( SELECT KODEBRG,SUM(SALDOQNT) SALDOQNT FROM (
-            select KodeBrg, QntAwal SaldoQnt
-          from 	dbStockBrg
-          where         Tahun=@tahun and Bulan=@bulan
-          --where         Tahun=@tahun and Bulan=1
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          union all
-          select 	KodeBrg,
-          SUM(QntDb)-SUM(QntCr) SaldoQnt
-          from 	vwKartuStock
-          where 	year(Tanggal)=@tahun and month(tanggal)=@bulan and Tanggal<=@TGL
-          --where 	year(Tanggal)=year(GETDATE()) and Tanggal<=@TGL
-          and KodeGdg = Kodegdg and Tipe not in ('AWL')
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-          and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          group by KodeBrg) A
-          GROUP BY A.KODEBRG
-        )M63 ON B.KODEBRG=M63.KODEBRG
-
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-where
-      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0
-and B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0
-and
-case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then isnull(m62.saldoQnt,0)
-         when b.nosat=2 then isnull(m62.saldoqnt,0)/c.isi2
-         when b.nosat=3 then isnull(m62.saldoqnt,0)/c.isi3 end
-    else
-         case when b.nosat=1 then /*(m62.saldoQnt) +*/ (ISNULL(m63.saldoQnt,0))
-         when b.nosat=2 then /*(m62.saldoqnt/c.isi2) +*/ (m63.saldoqnt/c.isi2)
-         when b.nosat=3 then /*(m62.saldoqnt/c.isi3) + */(m63.saldoqnt/c.isi3) end
-End
-
-<
-case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-   when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-End
-
-
-
-
-
-
-
-
-
-
-
-and A.Tanggal between :tglawalspb and :tglakhirspb
-order by A.NOBUKTI,B.Urut" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun , "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
     // foreach ($outstanding as $p) {
     //   // code...
     //   array_push($tempOutstanding, $p);
     // }
-    $tempOutstanding2 = DB::connection("SML")->select("
-Declare @bulan Int,@tahun Int,@IDuser varchar(20)
-select @Bulan= :bulan,@Tahun= :tahun ,@IDUser= :username
-
-DECLARE @TGL DATETIME
-SET @TGL=GETDATE()
-select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
-        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
-        B.SATUAN,
-    case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-         when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-                     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-    End QntOut,
-    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
-    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
-    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
-    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
-    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
-    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-   A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m62.saldoQnt
-         when b.nosat=2 then m62.saldoqnt/c.isi2
-         when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-         when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-         when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End
-    SaldoQnt ,
-
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then    m62.saldoQnt
-         when b.nosat=2 then m62.saldoqnt/c.isi2
-         when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-         when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-         when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End
-    SaldoQnt ,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then    m62.saldoQntG01
-         when b.nosat=2 then m62.saldoqntG01/c.isi2
-         when b.nosat=3 then m62.saldoqntG01/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.SALDOQNtg01) + (ISNULL(m63.SALDOQNtg01,0))
-         when b.nosat=2 then (m62.SALDOQNtg01/c.isi2) + (m63.SALDOQNtg01/c.isi2)
-         when b.nosat=3 then (m62.SALDOQNtg01/c.isi3) + (m63.SALDOQNtg01/c.isi3) end
-    End
-    SALDOQNtg01 ,
-
-     case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then    m62.saldoQntG02
-         when b.nosat=2 then m62.saldoqntG02/c.isi2
-         when b.nosat=3 then m62.saldoqntG02/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.SALDOQNtg02) + (ISNULL(m63.SALDOQNtg02,0))
-         when b.nosat=2 then (m62.SALDOQNtg02/c.isi2) + (m63.SALDOQNtg02/c.isi2)
-         when b.nosat=3 then (m62.SALDOQNtg02/c.isi3) + (m63.SALDOQNtg02/c.isi3) end
-    End
-    SALDOQNtg02 ,
-
-     case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then    m62.saldoQntG03
-         when b.nosat=2 then m62.saldoqntG03/c.isi2
-         when b.nosat=3 then m62.saldoqntG03/c.isi3 end
-    else
-         case when b.nosat=1 then (m62.SALDOQNtg03) + (ISNULL(m63.SALDOQNtg03,0))
-         when b.nosat=2 then (m62.SALDOQNtg03/c.isi2) + (m63.SALDOQNtg03/c.isi2)
-         when b.nosat=3 then (m62.SALDOQNtg03/c.isi3) + (m63.SALDOQNtg03/c.isi3) end
-    End
-    SALDOQNtg03 ,
-
-
-    case when
-         case when ISNULL(B.NOserah,'')  IN ('','-')
-     then
-        case when b.nosat=1 then m62.saldoQnt
-        when b.nosat=2 then m62.saldoqnt/c.isi2
-        when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-        case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-        when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-        when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End
-         >
-    case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-      when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-      when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-    End THEN
-            case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-      when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-      when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-    END
-  ELSE
-       case when ISNULL(B.NOserah,'')  IN ('','-')
-     then
-      case when b.nosat=1 then m62.saldoQnt
-      when b.nosat=2 then m62.saldoqnt/c.isi2
-      when b.nosat=3 then m62.saldoqnt/c.isi3 end
-    else
-      case when b.nosat=1 then (m62.saldoQnt) + (ISNULL(m63.saldoQnt,0))
-      when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
-      when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
-    End
-    END QNTXZ   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
-    ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun,m2.Nama AlamatLokasi
-from	dbSO A
-left outer join dBSODet B on B.NoBukti=A.NoBukti
-left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
-lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
-        FROM dbSPBDet
-        GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
-lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
-        FROM dbRSPBDet A
-        LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
-        GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
-left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
-LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
-Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
-/*
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-                 Where BUlan=@bulan and Tahun=@Tahun  and KOdeGdg<>'GTC'
-                 and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                 and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-                 group by KODEBRG,BULAN,TAHUN
-                 ) M6 ON B.KODEBRG=M6.KODEBRG
-
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-          where BUlan=@bulan and Tahun=@Tahun
-                  and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-          and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          group by KODEBRG,BULAN,TAHUN
-        ) M61 ON B.KODEBRG=M61.KODEBRG
-*/
-
-left outer join ( SELECT KODEBRG,SUM(SALDOQNT) SALDOQNT,SUM(SALDOQNTG01) SALDOQNtg01,SUM(SALDOQNTG02) SALDOQNtg02,SUM(SALDOQNTG03) SALDOQNtg03
-                FROM (
-          select  KodeBrg, QntAwal SaldoQnt ,
-                          CASE WHEN KODEGDG='G01' THEN QntAwal ELSE 0 END SALDOQNTG01,
-                          CASE WHEN KODEGDG='G02' THEN QntAwal ELSE 0 END SALDOQNTG02,
-                          CASE WHEN KODEGDG='G03' THEN QntAwal ELSE 0 END SALDOQNTG03
-                  from 	dbStockBrg
-          where         Tahun=year(@TGL) and Bulan=MONTH(@TGL)
-          --where         Tahun=year(GETDATE()) and Bulan=1
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-
-
-
-          union all
-          select 	KodeBrg,
-          SUM(QntDb)-SUM(QntCr) SaldoQnt,
-          SUM(case when Kodegdg='G01' then QntDb else 0 end)-SUM(case when Kodegdg='G01' then QntCr else 0 end) SaldoQntG01,
-          SUM(case when Kodegdg='G02' then QntDb else 0 end)-SUM(case when Kodegdg='G02' then QntCr else 0 end) SaldoQntG02,
-          SUM(case when Kodegdg='G03' then QntDb else 0 end)-SUM(case when Kodegdg='G03' then QntCr else 0 end) SaldoQntG03
-          from 	vwKartuStock
-          where 	year(Tanggal)=@tahun and month(tanggal)=@bulan and Tanggal<=@TGL
-          --where 	year(Tanggal)=year(GETDATE()) and Tanggal<=GETDATE()
-          and Tipe not in ('AWL')
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-          group by KodeBrg) A
-          GROUP BY A.KODEBRG
-        )M62 ON B.KODEBRG=M62.KODEBRG
-
-left outer join ( SELECT KODEBRG,SUM(SALDOQNT) SALDOQNT ,SUM(SALDOQNTG01) SALDOQNtg01,SUM(SALDOQNTG02) SALDOQNtg02,SUM(SALDOQNTG03) SALDOQNtg03
-            FROM (
-            select KodeBrg, QntAwal SaldoQnt ,
-            CASE WHEN KODEGDG='G01' THEN QntAwal ELSE 0 END SALDOQNTG01,
-                          CASE WHEN KODEGDG='G02' THEN QntAwal ELSE 0 END SALDOQNTG02,
-                          CASE WHEN KODEGDG='G03' THEN QntAwal ELSE 0 END SALDOQNTG03
-          from 	dbStockBrg
-          where         Tahun=@tahun and Bulan=@bulan
-          --where         Tahun=@tahun and Bulan=1
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDuser)
-                  and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          union all
-          select 	KodeBrg,
-          SUM(QntDb)-SUM(QntCr) SaldoQnt,
-          SUM(case when Kodegdg='G01' then QntDb else 0 end)-SUM(case when Kodegdg='G01' then QntCr else 0 end) SaldoQntG01,
-          SUM(case when Kodegdg='G02' then QntDb else 0 end)-SUM(case when Kodegdg='G02' then QntCr else 0 end) SaldoQntG02,
-          SUM(case when Kodegdg='G03' then QntDb else 0 end)-SUM(case when Kodegdg='G03' then QntCr else 0 end) SaldoQntG03
-          from 	vwKartuStock
-          where 	year(Tanggal)=@tahun and month(tanggal)=@bulan and Tanggal<=@TGL
-          --where 	year(Tanggal)=year(GETDATE()) and Tanggal<=@TGL
-          and KodeGdg = Kodegdg and Tipe not in ('AWL')
-          and KodeGdg <>'GTC'
-          and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-          and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-          group by KodeBrg) A
-          GROUP BY A.KODEBRG
-        )M63 ON B.KODEBRG=M63.KODEBRG
-
-
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-where
-      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0
-and
-
-/*B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0  */
-case when b.NOSAT=1 then
-      B.QNT-(Isnull(m1.QNT1SPB,0)+
-       case when b.nosat=1 then Isnull(B.QntBatal,0)
-       when b.nosat=2 then isnull(b.qntBatal,0) * B.isi
-       when b.nosat=3 then isnull(b.qntBatal,0) * B.isi end)
-      + Isnull(m4.QNT1RSPB,0)
-   when b.NOSAT=2 then
-      B.QNT2-(Isnull(m1.QNT2SPB,0)+
-       case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-       when b.nosat=2 then isnull(b.qntBatal,0)
-       when b.nosat=3 then isnull(b.qntBatal,0) end)
-      + Isnull(m4.QNT2RSPB,0)
-  when b.NOSAT=3 then
-      B.QNT2-(Isnull(m1.QNT2SPB,0)+
-       case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-       when b.nosat=2 then isnull(b.qntBatal,0)
-       when b.nosat=3 then isnull(b.qntBatal,0) end)
-      + Isnull(m4.QNT2RSPB,0)
-end>0
-AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
-      Else   isnull(M63.SALDOQNT,0) End
->0
-and A.Tanggal between :tglawalspb and :tglakhirspb
-
-
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
 $filterspb = $req->filterspb ?: 0;
@@ -1274,7 +931,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
          when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
          when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
     End
-    SaldoQnt ,A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,
+    SaldoQnt ,A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,
 
     case when
          case when ISNULL(B.NOserah,'') IN ('','-')
@@ -1311,7 +968,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
 
     END QNTXZ
 
-    ,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
+    ,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
 left outer join dbBarang C on C.KodeBrg=B.KodeBrg
@@ -1380,152 +1037,12 @@ and Isnull(B.PBooking,0)=1
 
 
 
-$tempOutstanding5 = DB::connection("SML")->select("
-Declare @bulan Int,@tahun Int,@IDuser varchar(20)
-select @Bulan= :bulan ,@Tahun= :tahun ,@IDUser= :username
-select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
-        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
-        B.SATUAN,
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-		     when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-                     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End QntOut,
-    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
-    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
-    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
-    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
-    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
-    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m6.saldoQnt
-         when b.nosat=2 then m6.saldoqnt/c.isi2
-         when b.nosat=3 then m6.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-         when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-         when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-    SaldoQnt ,A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,
-
-    case when
-         case when ISNULL(B.NOserah,'') IN ('','-')
-		 then
-				case when b.nosat=1 then m6.saldoQnt
-				when b.nosat=2 then m6.saldoqnt/c.isi2
-				when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-				case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-				when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-				when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-		End
-         >
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End THEN
-		        case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		END
-	ELSE
-	     case when ISNULL(B.NOserah,'')  IN ('','-')
-		 then
-			case when b.nosat=1 then m6.saldoQnt
-			when b.nosat=2 then m6.saldoqnt/c.isi2
-			when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-			case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-			when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-			when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-
-
-    END QNTXZ
-
-    ,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
-from	dbSO A
-left outer join dBSODet B on B.NoBukti=A.NoBukti
-left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
-lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
-				FROM dbSPBDet
-				GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
-lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
-				FROM dbRSPBDet A
-				LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
-				GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
-left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
-LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
-Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-                 Where BUlan=@bulan and Tahun=@Tahun  and KOdeGdg<>'GTC'
-                 and kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=@IDuser)
-                 and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-                 group by KODEBRG,BULAN,TAHUN
-                 ) M6 ON B.KODEBRG=M6.KODEBRG
-
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-				  where BUlan=@bulan and Tahun=@Tahun
-                        and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-					    and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-				  group by KODEBRG,BULAN,TAHUN
-				) M61 ON B.KODEBRG=M61.KODEBRG
-
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-where
-      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0
-and
-
-/*B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0  */
-case when b.NOSAT=1 then
-			B.QNT-(Isnull(m1.QNT1SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)
-			 when b.nosat=2 then isnull(b.qntBatal,0) * B.isi
-			 when b.nosat=3 then isnull(b.qntBatal,0) * B.isi end)
-			+ Isnull(m4.QNT1RSPB,0)
-	 when b.NOSAT=2 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-	when b.NOSAT=3 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-end>0
-AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
-		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
->0
-and Isnull(B.PUrgent,0)=1
-and A.Tanggal between :tglawalspb and :tglakhirspb
-
-
-
-
-
-
-" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun, "username" =>  \Auth::user()->username, "tglawalspb" => $tglawalspb, "tglakhirspb" => $tglakhirspb]);
 
 
 
     return [
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
       "tempOutstanding4" => $tempOutstanding4,
       "tempOutstanding6" => $tempOutstanding6,
-      "tempOutstanding5" => $tempOutstanding5
     ];
   }
 
@@ -1701,7 +1218,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
     D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
     M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
     M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-   A.tglKirim,A.TglKirim,ISnull(M7.Nama,'-') namakebun,Isnull(A.RefPR,0) RefPR,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst,
+   A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst,
 
     case when ISNULL(B.NOserah,'')  IN ('','-')
     then
@@ -1726,7 +1243,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
          when b.nosat=2 then (m62.saldoqnt/c.isi2) + (m63.saldoqnt/c.isi2)
          when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End
-    SaldoQnt ,
+    SaldoQnt2 ,
 
     case when ISNULL(B.NOserah,'')  IN ('','-')
     then
@@ -1797,7 +1314,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
       when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End
     END QNTXZ   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
-    ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun,m2.Nama AlamatLokasi
+    ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun KodeKebun2,m2.Nama AlamatLokasi
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
 left outer join dbBarang C on C.KodeBrg=B.KodeBrg

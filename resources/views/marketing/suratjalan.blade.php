@@ -135,6 +135,17 @@
   .tb-pagination-outside .dataTables_paginate {
     float: right;
   }
+  .tb-pagination-outside .dataTables_info {
+    float: left;
+    padding-top: 0.5em;
+    font-size: 13px;
+    color: var(--sp-text-soft, #6b7280);
+  }
+  .tb-pagination-outside .paginate_button.disabled.ellipsis {
+    border: none;
+    background: transparent;
+    padding: 0.4em 0.3em;
+  }
   .tb-pagination-outside .paginate_button {
     box-sizing: border-box;
     display: inline-block;
@@ -147,8 +158,8 @@
     cursor: pointer;
   }
   .tb-pagination-outside .paginate_button.current {
-    background: var(--sp-primary, #6f42f3);
-    border-color: var(--sp-primary, #6f42f3);
+    background: #0d9488;
+    border-color: #0d9488;
     color: #fff;
   }
   .tb-pagination-outside .paginate_button.disabled {
@@ -158,6 +169,12 @@
   }
   .tb-pagination-outside .paginate_button:hover:not(.disabled):not(.current) {
     background: var(--sp-bg, #f4f5f7);
+  }
+
+  /* "Surat Jalan Otorisasi" -- data selalu satu baris, tidak boleh terbungkus
+     ke baris baru (beda dari kolom header yang sudah nowrap sejak awal). */
+  #tabel6 tbody td {
+    white-space: nowrap;
   }
 
   .tb-report .toolbar {
@@ -192,6 +209,13 @@
     border-color: #D64550;
     background: #FEF2F2;
   }
+  /* Pager server-side milik tabel/tabel2/tabel5 (SO Belum Siap Kirim/SO Siap
+     Kirim/Out SO Prioritas) -- ketiganya tidak lagi dipaginate DataTables di
+     browser (satu halaman per request lewat suratjalanpaginate), tapi tetap
+     dibikin pakai markup+class .paginate_button/.dataTables_paginate yang
+     sama dengan pager DataTables asli (lihat .tb-pagination-outside di atas)
+     supaya tampilannya identik dengan tabel6 (yang masih pager DataTables
+     asli, periode-scoped). */
 </style>
 
   <style>
@@ -538,43 +562,34 @@
     </div>
   </div>
 
-  {{-- Toolbar shared by all five tabs: one search/length control drives whichever tab is
-       visible, same as so.blade.php's shared toolbar. Periode + Filter only make sense on
-       "Surat Jalan Otorisasi" (the other tabs aren't periode/status-filtered), so both are
-       kept in the DOM (still drive that tab's data the same way) but hidden/shown per
-       active tab via the shown.bs.tab handlers below -- see sjToggleOtorisasiTools(). --}}
+  {{-- Setiap tab sekarang punya toolbar (search+Tampilkan) sendiri-sendiri, tidak lagi
+       berbagi satu toolbar seperti sebelumnya (dulu satu #tabel_filter_visual/
+       #tabel_length_visual menyaring KEEMPAT tabel sekaligus lewat page1Tables).
+       "SO Belum Siap Kirim"/"SO Siap Kirim"/"Out SO Prioritas" (tabel/tabel2/tabel5)
+       juga sekarang TIDAK dibatasi periode sama sekali (dulu ikut ke-filter rentang
+       tanggal yang harusnya cuma milik "Surat Jalan Otorisasi") dan datanya diambil
+       per-halaman dari server (server-side paging, lihat sjLoadPage() / endpoint
+       suratjalanpaginate) supaya tidak berat saat datanya banyak -- bukan lagi
+       "ambil semua lalu paginate di browser" seperti tabel6. Periode + Filter status
+       cuma relevan buat "Surat Jalan Otorisasi" (tabel6), jadi sekarang jadi bagian
+       toolbar tab itu sendiri saja, bukan dibagikan ke tab lain. --}}
   <div class="card">
     <div class="card-body" style="padding:0;">
-  <div class="po-toolbar">
-
-    <div class="po-filter-wrap" id="sjPeriodeWrap" style="display:none;">
-      <label>Periode</label>
-      <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
-      <span class="po-filter-sep">s/d</span>
-      <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalakhir_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
-    </div>
-
-    <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
-
-    <div class="po-len-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="po-len-inp">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
-
-    <button class="po-btn-filter" id="sjFilterBtn" type="button" style="display:none;" onclick="$('#modalFilterSPB').modal('show')">
-      <i class="bi bi-funnel"></i> Filter
-    </button>
-
-  </div>
   <div class="tab-content" id="myTabContent">
 
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <div class="po-toolbar">
+        <input type="search" id="tabelSearch1" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap">
+          <label for="tabelLen1">Tampilkan</label>
+          <select id="tabelLen1" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
@@ -583,10 +598,18 @@
       </div>
       <div class="po-table-wrap">
         <table id="tabel" class="tb data-table">
-          
+
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel_data" class="text-left"></tbody>
         </table>
+      </div>
+      <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo1"></div>
+        <div class="dataTables_paginate paging_simple_numbers">
+          <a class="paginate_button previous" id="tabelPagerPrev1" onclick="sjGotoPage('tabel', sjPageState.tabel.page - 1)">Previous</a>
+          <span id="tabelPagerNumbers1"></span>
+          <a class="paginate_button next" id="tabelPagerNext1" onclick="sjGotoPage('tabel', sjPageState.tabel.page + 1)">Next</a>
+        </div>
       </div>
       <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
@@ -595,6 +618,18 @@
       </div>
   </div>
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="po-toolbar">
+        <input type="search" id="tabelSearch2" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap">
+          <label for="tabelLen2">Tampilkan</label>
+          <select id="tabelLen2" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
@@ -606,6 +641,14 @@
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel2_data" class="text-left"></tbody>
         </table>
+      </div>
+      <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo2"></div>
+        <div class="dataTables_paginate paging_simple_numbers">
+          <a class="paginate_button previous" id="tabelPagerPrev2" onclick="sjGotoPage('tabel2', sjPageState.tabel2.page - 1)">Previous</a>
+          <span id="tabelPagerNumbers2"></span>
+          <a class="paginate_button next" id="tabelPagerNext2" onclick="sjGotoPage('tabel2', sjPageState.tabel2.page + 1)">Next</a>
+        </div>
       </div>
       <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
@@ -659,18 +702,39 @@
         </div>
       </div>
 
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalawal_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" onchange="onChangePeriodeSPB()" class="po-filter-inp" id="input_tanggalakhir_spb" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+        </div>
+        <input type="search" id="tabelSearch6" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap">
+          <label for="tabelLen6">Tampilkan</label>
+          <select id="tabelLen6" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
+        <button class="po-btn-filter" id="sjFilterBtn" type="button" onclick="$('#modalFilterSPB').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+      </div>
+
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel6')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
         </button>
         <div id="rtBarTabel6"></div>
       </div>
-      <div class="po-table-wrap">
         <table id="tabel6" class="tb data-table">
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel6_data" class="text-left"></tbody>
         </table>
-      </div>
       <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
         Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
@@ -731,6 +795,18 @@
     </div>
   </div>
   <div class="tab-pane fade" id="profile3" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="po-toolbar">
+        <input type="search" id="tabelSearch5" class="po-search-inp" placeholder="Cari data">
+        <div class="po-len-wrap">
+          <label for="tabelLen5">Tampilkan</label>
+          <select id="tabelLen5" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel5')">
           <i class="bi bi-arrow-clockwise"></i> Reset kolom
@@ -742,6 +818,14 @@
           <thead style="white-space:nowrap;"></thead>
           <tbody id="tabel5_data" class="text-left"></tbody>
         </table>
+      </div>
+      <div class="tb-pagination-outside">
+        <div class="dataTables_info" id="tabelPagerInfo5"></div>
+        <div class="dataTables_paginate paging_simple_numbers">
+          <a class="paginate_button previous" id="tabelPagerPrev5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page - 1)">Previous</a>
+          <span id="tabelPagerNumbers5"></span>
+          <a class="paginate_button next" id="tabelPagerNext5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page + 1)">Next</a>
+        </div>
       </div>
       <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
@@ -3582,11 +3666,17 @@ function renderTabel6Rows(rows) {
   suratjalanReplaceThead('#tabel6', cols, '<th style="padding: 4px 12px;">Actions</th>');
 }
 
+// tabel/tabel2/tabel5 tidak lagi dipaginate DataTables di browser (server-side
+// paging sekarang, lihat sjGotoPage() di bawah) -- lastTabelRows/dst cuma berisi
+// SATU halaman, jadi DataTable() dipasang dengan paging/searching/info mati,
+// murni buat konsistensi visual saja.
+var SJ_DOM_STRING_NOPAGE = "<'po-table-wrap't>"
+
 function reinitTabel() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
     renderTabelRows(lastTabelRows);
-    $('#tabel').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    $('#tabel').DataTable({ dom: SJ_DOM_STRING_NOPAGE, paging: false, searching: false, info: false, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
     ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
     sjAturTinggiTabel();
   } catch (e) {
@@ -3599,7 +3689,7 @@ function reinitTabel2() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
     renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, order: [[1, 'asc']], ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    $('#tabel2').DataTable({ dom: SJ_DOM_STRING_NOPAGE, paging: false, searching: false, info: false, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
     ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
     sjAturTinggiTabel();
   } catch (e) {
@@ -3612,13 +3702,113 @@ function reinitTabel5() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel5')) { $('#tabel5').DataTable().destroy(); }
     renderTabel5Rows(lastTabel5Rows);
-    $('#tabel5').DataTable({ dom: SJ_DOM_STRING, lengthChange: false, paging: true, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
+    $('#tabel5').DataTable({ dom: SJ_DOM_STRING_NOPAGE, paging: false, searching: false, info: false, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
     ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
     sjAturTinggiTabel();
   } catch (e) {
     console.error('reinitTabel5 failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
   }
+}
+
+// ============ Pagination server-side utk tabel/tabel2/tabel5 ============
+// Masing-masing simpan state (halaman, panjang halaman, kata pencarian) sendiri --
+// mengubah salah satu TIDAK memengaruhi tabel lain, beda dari perilaku lama yang
+// menyaring keempat tabel sekaligus lewat satu kotak pencarian.
+var sjPageState = {
+  tabel:  { page: 1, length: 10, search: '', total: 0 },
+  tabel2: { page: 1, length: 10, search: '', total: 0 },
+  tabel5: { page: 1, length: 10, search: '', total: 0 }
+}
+var SJ_PAGE_INFO = {
+  tabel:  { rowsVar: 'lastTabelRows',  reinit: 'reinitTabel',  prevId: 'tabelPagerPrev1', numbersId: 'tabelPagerNumbers1', nextId: 'tabelPagerNext1', infoId: 'tabelPagerInfo1', searchInpId: 'tabelSearch1', lenSelId: 'tabelLen1' },
+  tabel2: { rowsVar: 'lastTabel2Rows', reinit: 'reinitTabel2', prevId: 'tabelPagerPrev2', numbersId: 'tabelPagerNumbers2', nextId: 'tabelPagerNext2', infoId: 'tabelPagerInfo2', searchInpId: 'tabelSearch2', lenSelId: 'tabelLen2' },
+  tabel5: { rowsVar: 'lastTabel5Rows', reinit: 'reinitTabel5', prevId: 'tabelPagerPrev5', numbersId: 'tabelPagerNumbers5', nextId: 'tabelPagerNext5', infoId: 'tabelPagerInfo5', searchInpId: 'tabelSearch5', lenSelId: 'tabelLen5' }
+}
+
+// Bikin daftar tombol nomor halaman ala DataTables (1 ... 4 5 [6] 7 8 ... 20)
+// -- sebelumnya cuma satu tombol (halaman aktif) tanpa info total, jadi user
+// tidak tahu ada berapa halaman/data sebenarnya. Port pola windowing sederhana,
+// bukan API DataTables asli (datanya per-halaman dari server, bukan di browser).
+function sjBuildPageButtons(key, page, totalPages) {
+  var windowSize = 2
+  var pages = [1]
+  if (page - windowSize > 2) { pages.push('...') }
+  for (var p = Math.max(2, page - windowSize); p <= Math.min(totalPages - 1, page + windowSize); p++) { pages.push(p) }
+  if (page + windowSize < totalPages - 1) { pages.push('...') }
+  if (totalPages > 1) { pages.push(totalPages) }
+  var html = ''
+  pages.forEach(function (p) {
+    if (p === '...') {
+      html += '<span class="paginate_button disabled ellipsis">&hellip;</span>'
+    } else {
+      html += '<a class="paginate_button' + (p === page ? ' current' : '') + '" onclick="sjGotoPage(\'' + key + '\', ' + p + ')">' + p + '</a>'
+    }
+  })
+  return html
+}
+
+// Markup+class-nya sengaja disamakan dengan pager DataTables asli
+// (.paginate_button/.disabled, lihat .tb-pagination-outside di atas) supaya
+// tampilannya identik dengan tabel6 walau datanya diambil per-halaman sendiri.
+function sjUpdatePagerUI(key) {
+  var st = sjPageState[key]
+  var info = SJ_PAGE_INFO[key]
+  var totalPages = Math.max(1, Math.ceil(st.total / st.length))
+  var awal = st.total === 0 ? 0 : (st.page - 1) * st.length + 1
+  var akhir = Math.min(st.page * st.length, st.total)
+  $('#' + info.infoId).text('Showing ' + awal + ' to ' + akhir + ' of ' + st.total + ' entries')
+  $('#' + info.numbersId).html(sjBuildPageButtons(key, st.page, totalPages))
+  $('#' + info.prevId).toggleClass('disabled', st.page <= 1)
+  $('#' + info.nextId).toggleClass('disabled', st.page >= totalPages)
+}
+
+function sjFetchPage(key) {
+  var st = sjPageState[key]
+  var info = SJ_PAGE_INFO[key]
+  $.ajax({
+    url: "{!! url('suratjalanpaginate') !!}",
+    type: "get",
+    async: false,
+    data: { table: key, page: st.page, length: st.length, search: st.search },
+    success: function (res) {
+      window[info.rowsVar] = res.rows
+      st.total = res.total
+      window[info.reinit]()
+      sjUpdatePagerUI(key)
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal memuat data, silahkan refresh browser')
+    }
+  })
+}
+
+function sjGotoPage(key, page) {
+  var st = sjPageState[key]
+  var totalPages = Math.max(1, Math.ceil(st.total / st.length))
+  if (page < 1 || page > totalPages) { return }
+  st.page = page
+  sjFetchPage(key)
+}
+
+function sjIkatToolbarTabel(key) {
+  var info = SJ_PAGE_INFO[key]
+  var searchTimeout
+  $('#' + info.searchInpId).on('keyup', function () {
+    var value = this.value
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(function () {
+      sjPageState[key].search = value
+      sjPageState[key].page = 1
+      sjFetchPage(key)
+    }, 400)
+  })
+  $('#' + info.lenSelId).on('change', function () {
+    sjPageState[key].length = Number(this.value) || 10
+    sjPageState[key].page = 1
+    sjFetchPage(key)
+  })
 }
 
 function reinitTabel6() {
@@ -3659,74 +3849,69 @@ $(document).ready(function(){
       sjAktifkanTabel('tabel2');
       sjDoSetHeader('tabel2', false);
       lastTabel2Rows = @json($tempOutstanding2);
+      sjPageState.tabel2.total = {{ (int) $tempOutstanding2Total }};
       reinitTabel2();
+      sjUpdatePagerUI('tabel2');
+      sjIkatToolbarTabel('tabel2');
 
       sjAktifkanTabel('tabel5');
       sjDoSetHeader('tabel5', false);
       lastTabel5Rows = @json($tempOutstanding5);
+      sjPageState.tabel5.total = {{ (int) $tempOutstanding5Total }};
       reinitTabel5();
+      sjUpdatePagerUI('tabel5');
+      sjIkatToolbarTabel('tabel5');
 
       sjAktifkanTabel('tabel');
       sjDoSetHeader('tabel', false);
       lastTabelRows = @json($tempOutstanding);
+      sjPageState.tabel.total = {{ (int) $tempOutstandingTotal }};
       reinitTabel();
+      sjUpdatePagerUI('tabel');
+      sjIkatToolbarTabel('tabel');
 
       // Re-bind the interactive engine whenever the user switches tabs -- ReportTable's
       // listeners are bound to one table's DOM at a time. Just re-runs ReportTable.init()
       // (same call reinitTabelX() itself makes) WITHOUT the DataTables destroy+rebuild --
       // matches exactly what HeaderEngine.bindEngineDom() used to do, so switching tabs
       // doesn't lose the table's current search/sort/page state like a full reinit would.
-      // Periode + Filter only apply to "Surat Jalan Otorisasi" -- shown only while that
-      // tab is active, hidden (not removed -- still drives that tab's own data) otherwise.
-      function sjToggleOtorisasiTools (tampil) {
-        $('#sjPeriodeWrap').css('display', tampil ? 'flex' : 'none');
-        $('#sjFilterBtn').css('display', tampil ? 'inline-flex' : 'none');
-      }
-
       $('#nav-home-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel');
         ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
         sjAturTinggiTabel();
-        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel2');
         ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
         sjAturTinggiTabel();
-        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile3-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel5');
         ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
         sjAturTinggiTabel();
-        sjToggleOtorisasiTools(false);
       });
       $('#nav-profile4-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel6');
         ReportTable.init({ table: '#tabel6', bar: '#rtBarTabel6', onChange: reinitTabel6 });
         sjAturTinggiTabel();
-        sjToggleOtorisasiTools(true);
       });
 
-      // Shared toolbar controls (one search box + one Tampilkan dropdown for all five
-      // tabs, matching so.blade.php's shared-toolbar pattern) instead of the old
-      // per-tab ones.
-      var page1Tables = ['#tabel', '#tabel2', '#tabel5', '#tabel6'];
-      var tabelFilterVisualTimeout;
-      $('#tabel_filter_visual').on('keyup', function () {
+      // "Surat Jalan Otorisasi" (tabel6) tetap dipaginate DataTables penuh di browser
+      // (datanya sudah dibatasi periode dari server), jadi search/length-nya sendiri
+      // masih lewat DataTable().search()/.page.len() seperti sebelumnya -- cuma
+      // sekarang idnya sendiri (#tabelSearch6/#tabelLen6), tidak berbagi lagi dengan
+      // tabel/tabel2/tabel5.
+      var tabel6SearchTimeout;
+      $('#tabelSearch6').on('keyup', function () {
         var value = this.value;
-        clearTimeout(tabelFilterVisualTimeout);
-        tabelFilterVisualTimeout = setTimeout(function () {
-          page1Tables.forEach(function (id) {
-            if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().search(value).draw(); }
-          });
+        clearTimeout(tabel6SearchTimeout);
+        tabel6SearchTimeout = setTimeout(function () {
+          if ($.fn.DataTable.isDataTable('#tabel6')) { $('#tabel6').DataTable().search(value).draw(); }
         }, 400);
       });
-      $('#tabel_length_visual').on('change', function () {
+      $('#tabelLen6').on('change', function () {
         var len = Number(this.value);
-        page1Tables.forEach(function (id) {
-          if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().page.len(len).draw(); }
-        });
+        if ($.fn.DataTable.isDataTable('#tabel6')) { $('#tabel6').DataTable().page.len(len).draw(); }
       });
 
             $("#tabel4").DataTable({
