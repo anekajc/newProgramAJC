@@ -491,6 +491,90 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 /* ---------- Tumpukan modal: hanya modal teratas yang terlihat ---------- */
 .modal.pld-modal-tertimbun { display: none !important; }
 .modal-backdrop.pld-backdrop-tertimbun { display: none !important; }
+
+/* ---------- Indikator loading - disalin dari closingPurchaseOrder.blade.php ---------- */
+.pld-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, .62);
+  z-index: 40;
+  animation: pldMunculLoading .34s ease-out both;
+}
+
+@keyframes pldMunculLoading {
+  0%, 45% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.po-loading-chip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(31, 36, 48, .92);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+}
+
+.po-loading-spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pldPutarLoading .6s linear infinite;
+}
+
+@keyframes pldPutarLoading {
+  to { transform: rotate(360deg); }
+}
+
+/* Form koreksi customer - layout label/kolom sejajar seperti modal di Bon Sementara. */
+#formKoreksiCustomer .kc-form {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 14px 12px;
+  align-items: center;
+}
+
+#formKoreksiCustomer .kc-form label {
+  margin-bottom: 0;
+  text-align: left;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: #6b7280;
+  white-space: nowrap;
+  cursor: default;
+}
+
+#formKoreksiCustomer .kc-form .form-control {
+  height: 38px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  box-shadow: none;
+}
+
+/* Kolom nama customer + tombol kaca pembesar di sampingnya (pola halaman purchasing). */
+#formKoreksiCustomer .kc-form .input-group { margin-bottom: 0; }
+#formKoreksiCustomer .kc-form .input-group .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Modal daftar customer dibuka di atas modal koreksi - dinaikkan supaya tidak tertutup. */
+#formKoreksiCustomerList { z-index: 1061; }
+.modal-backdrop.kc-backdrop-atas { z-index: 1060; }
 </style>
 @endsection
 
@@ -544,9 +628,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
          ada kolom otorisasi di tab ini). --}}
     <div class="po-toolbar">
       <div class="po-filter-wrap">
-        <label>Periode</label>
-        <input type="date" class="po-filter-inp" id="outTglAwal" value="{!! $outTglAwal !!}">
-        <span class="po-filter-sep">s/d</span>
+        <label>Sampai Tanggal</label>
         <input type="date" class="po-filter-inp" id="outTglAkhir" value="{!! $outTglAkhir !!}">
       </div>
       <input type="search" id="outSearch" class="po-search-inp" placeholder="Cari data">
@@ -564,6 +646,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
     <div id="rtBarOut"></div>
 
+    <div id="outTableWrap" style="position: relative;">
+    <div id="outLoading" class="pld-loading" hidden>
+      <span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span>
+    </div>
     <table id="tabel" class="data-table po-aksi-hover">
       <thead id="tabel_header_out" class="text-center">
         <tr>
@@ -586,6 +672,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
              dan konfigurasi kolom yang dikirim loadAll(). --}}
       </tbody>
     </table>
+    </div>
   </div>
 
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
@@ -615,6 +702,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
     <div id="rtBar"></div>
 
+    <div id="pldTableWrap" style="position: relative;">
+    <div id="pldLoading" class="pld-loading" hidden>
+      <span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span>
+    </div>
     <table id="tabel2" class="data-table po-aksi-hover">
       <thead id="tabel_header_pld" class="text-center">
         <tr>
@@ -633,6 +724,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         {{-- Baris digambar renderTabelPld() lewat JS. --}}
       </tbody>
     </table>
+    </div>
 
   </div>
 
@@ -2104,6 +2196,83 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
 
+<!-- Modal koreksi customer baris outstanding (dari NO NAME ke customer lain). -->
+<div class="modal fade" id="formKoreksiCustomer" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Koreksi Customer</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="kc-form">
+          <label for="input_koreksicust_nobukti">No Bukti</label>
+          <input type="text" class="form-control" id="input_koreksicust_nobukti" disabled>
+
+          <label for="input_koreksicust_customerlama">Customer Lama</label>
+          <input type="text" class="form-control" id="input_koreksicust_customerlama" disabled>
+
+          <label for="input_koreksicust_kode">Kode Customer</label>
+          <input type="text" class="form-control" id="input_koreksicust_kode" disabled>
+
+          <label for="input_koreksicust_nama">Nama Customer</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_koreksicust_nama" disabled>
+            <button type="button" id="buttonAddListKoreksiCustomer" onclick="buttonAddListKoreksiCustomer()" class="btn btn-chip-biru btn-sm" style="height:38px; border-radius:0 8px 8px 0;"><i class="bi bi-search"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" id="buttonSubmitKoreksiCustomer" class="btn btn-primary" onclick="submitKoreksiCustomer()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal daftar customer untuk browse dari modal Koreksi Customer. -->
+<div class="modal fade" id="formKoreksiCustomerList" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Customer</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-12 d-flex justify-content-end">
+              <input id="input_search_koreksicustomer" type="search" class="form-control cari-modal-pdpp" placeholder="Cari customer">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12" style="overflow:auto; max-height: 400px">
+              <table id="tabel_add_list_koreksicustomer" class="data-table tabel-modal-pdpp" style="overflow:auto;">
+                <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama</th>
+                    <th style="padding: 4px 12px;" scope="col">Alamat</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_add_list_koreksicustomer" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 
 
@@ -2693,24 +2862,23 @@ function outKolomTampil () {
   return (outCart || []).filter(c => Number(c[2]) === 1)
 }
 
-// Sama persis dengan pldIkatPeriode() milik tab Penerimaan DPP.
+// Customer belum teridentifikasi: kode CZ999, atau nama kosong/null/"NO NAME".
+function outCustNoName (item) {
+  let kode = String(item.CustSuppL || '').trim().toUpperCase()
+  let nama = String(item.Customer || '').trim().toUpperCase()
+  return kode === 'CZ999' || nama === '' || nama === 'NO NAME'
+}
+
+// Outstanding hanya punya satu batas tanggal (sampai tanggal akhir).
 function outIkatPeriode () {
-  let awal  = document.getElementById('outTglAwal')
   let akhir = document.getElementById('outTglAkhir')
-  if (!awal || !akhir || awal.dataset.rtBound) { return }
-  awal.dataset.rtBound = '1'
+  if (!akhir || akhir.dataset.rtBound) { return }
+  akhir.dataset.rtBound = '1'
 
-  let onUbah = function () {
-    if (!awal.value || !akhir.value) { return }
-    if (awal.value > akhir.value) {
-      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
-      return
-    }
+  akhir.addEventListener('change', function () {
+    if (!akhir.value) { return }
     loadAll()
-  }
-
-  awal.addEventListener('change', onUbah)
-  akhir.addEventListener('change', onUbah)
+  })
 }
 
 function renderTabelOutstanding () {
@@ -2739,8 +2907,13 @@ function renderTabelOutstanding () {
 
   let rowTable = ''
   dataTampil.forEach((item) => {
+    let noName = outCustNoName(item)
+    let btnAdd = noName
+      ? `<button class="btn btn-primary btn-sm" type="button" title="Customer masih NO NAME" onclick="alertify.warning('Customer masih NO NAME - koreksi customer dulu sebelum diproses')"><i class="bi bi-plus"></i></button>`
+      : `<button class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item.NOBUKTI}')"><i class="bi bi-plus"></i></button>`
     rowTable += `<tr><td class="text-center"><div class="po-aksi-wrap">
-        <button class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item.NOBUKTI}')"><i class="bi bi-plus"></i></button>
+        ${btnAdd}
+        <button class="btn btn-success btn-sm" type="button" title="Koreksi Customer" onclick="buttonKoreksiCustomer('${item.NOBUKTI}','${item.urutTrans}')"><i class="bi bi-pencil"></i></button>
       </div></td>`
     kolomRender.forEach((c) => {
       if (c.tipe === 1) {
@@ -2775,6 +2948,13 @@ function renderTabelOutstanding () {
     $('#tabel').DataTable().search(inputSearch.value).draw()
   }
 }
+      function outTampilLoading (tampil) {
+        let outEl = document.getElementById('outLoading')
+        let pldEl = document.getElementById('pldLoading')
+        if (outEl) { outEl.hidden = !tampil }
+        if (pldEl) { pldEl.hidden = !tampil }
+      }
+
       function loadAll () {
 
         let _token = $("#_token").val();
@@ -2782,13 +2962,17 @@ function renderTabelOutstanding () {
         $.ajax({
           url: "{!! url('pelunasanpiutangdpploadall') !!}",
           type: "get",
-          async: false,
           data: {
             tglawal    : $('#pldTglAwal').val(),
             tglakhir   : $('#pldTglAkhir').val(),
-            // Tab Outstanding DPP punya kotak periodenya sendiri.
-            outtglawal : $('#outTglAwal').val(),
+            // Tab Outstanding DPP hanya punya satu batas: sampai tanggal akhir.
             outtglakhir: $('#outTglAkhir').val()
+          },
+          beforeSend: function () {
+            outTampilLoading(true)
+          },
+          complete: function () {
+            outTampilLoading(false)
           },
           success: function(res) {
             // Tabel Outstanding DPP digambar renderTabelOutstanding() dari
@@ -2816,6 +3000,140 @@ function renderTabelOutstanding () {
 // function testes () {
 //   $("#formX").modal('toggle')
 // }
+
+// ---------- Koreksi customer NO NAME (tab Outstanding Pembayaran) ----------
+let koreksiCustCtx = null
+let koreksiCustDaftar = null
+
+function buttonKoreksiCustomer (nobukti, urut) {
+  let akses = $("#akses_iskoreksi").val();
+  if (!Number(akses)) {
+    alertify.warning('No access')
+    return
+  }
+
+  let item = (dataOutstanding || []).find(i => i.NOBUKTI === nobukti && String(i.urutTrans) === String(urut))
+  koreksiCustCtx = { nobukti, urut, customerLama: item ? item.Customer : '', kode: '', nama: '' }
+
+  document.getElementById('input_koreksicust_nobukti').value = nobukti
+  document.getElementById('input_koreksicust_customerlama').value = koreksiCustCtx.customerLama || '(kosong)'
+  document.getElementById('input_koreksicust_kode').value = ''
+  document.getElementById('input_koreksicust_nama').value = ''
+
+  $("#formKoreksiCustomer").modal('show')
+}
+
+// Browse customer dari modal koreksi - daftar dimuat sekali lalu dipakai ulang.
+function buttonAddListKoreksiCustomer () {
+  let render = function () {
+    koreksiCustRenderDaftar(koreksiCustDaftar || [])
+    koreksiCustIkatCari()
+    $("#formKoreksiCustomerList").modal('show')
+  }
+
+  if (koreksiCustDaftar) { render(); return }
+
+  $.ajax({
+    url: "{!! url('pelunasanpiutangdpplistcustomer') !!}",
+    type: "get",
+    success: function (res) {
+      koreksiCustDaftar = res || []
+      render()
+    },
+    error: function () {
+      alertify.warning('Gagal memuat daftar customer')
+    }
+  })
+}
+
+// Modal daftar dibuka di atas modal koreksi. Bootstrap melepas body.modal-open
+// begitu modal daftar ditutup, jadi kelasnya dipasang lagi supaya modal koreksi
+// di belakangnya tetap bisa di-scroll seperti biasa.
+$(function () {
+  $("#formKoreksiCustomerList").on('show.bs.modal', function () {
+    setTimeout(function () {
+      $('.modal-backdrop').not('.kc-backdrop-atas').last().addClass('kc-backdrop-atas')
+    }, 0)
+  })
+  $("#formKoreksiCustomerList").on('hidden.bs.modal', function () {
+    if ($("#formKoreksiCustomer").hasClass('show')) {
+      $('body').addClass('modal-open')
+    }
+  })
+})
+
+function koreksiCustRenderDaftar (list) {
+  let rowTable = ''
+  list.forEach((c) => {
+    rowTable += `<tr class="pick-row" onclick="buttonPickKoreksiCustomer('${c.KODECUSTSUPP}','${(c.NAMACUSTSUPP || '').replace(/'/g, "\\'")}')">
+        <td>${c.KODECUSTSUPP}</td>
+        <td>${c.NAMACUSTSUPP || ''}</td>
+        <td>${c.ALAMAT1 || ''}</td>
+      </tr>`
+  })
+  document.getElementById('tabel_data_add_list_koreksicustomer').innerHTML = rowTable
+}
+
+function koreksiCustIkatCari () {
+  let input = document.getElementById('input_search_koreksicustomer')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_add_list_koreksicustomer tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
+
+// Pilih customer dari daftar - hanya mengisi kolom, simpan lewat tombol Simpan.
+function buttonPickKoreksiCustomer (kode, nama) {
+  if (!koreksiCustCtx) { return }
+
+  koreksiCustCtx.kode = kode
+  koreksiCustCtx.nama = nama
+  document.getElementById('input_koreksicust_kode').value = kode
+  document.getElementById('input_koreksicust_nama').value = nama
+  $("#formKoreksiCustomerList").modal('hide')
+}
+
+function submitKoreksiCustomer () {
+  if (!koreksiCustCtx) { return }
+  let ctx = koreksiCustCtx
+
+  if (!ctx.kode) {
+    alertify.warning('Pilih customer')
+    return
+  }
+
+  alertify.confirm(
+    'Koreksi Customer',
+    `Ubah customer No Bukti ${ctx.nobukti} dari "${ctx.customerLama || '(kosong)'}" menjadi "${ctx.nama}" ?`,
+    function () {
+      let _token = $("#_token").val();
+      $.ajax({
+        url: "{!! url('pelunasanpiutangdppkoreksicustomer') !!}",
+        type: "post",
+        data: { _token, nobukti: ctx.nobukti, urut: ctx.urut, kodecustsupp: ctx.kode },
+        success: function (res) {
+          if (Number(res) === 1) {
+            alertify.success('Customer berhasil dikoreksi')
+            $("#formKoreksiCustomer").modal('hide')
+            loadAll()
+          } else {
+            alertify.warning(res || 'Gagal mengoreksi customer')
+          }
+        },
+        error: function () {
+          alertify.warning('Gagal mengoreksi customer - koneksi ke server terputus')
+        }
+      })
+    },
+    function () {}
+  )
+}
 
 function buttonAddListPerkiraanLebihBayar (id) {
   toId = id
@@ -4838,6 +5156,11 @@ function buttonAdd (nobukti) {
   let akses = $("#akses_istambah").val();
   if (!Number(akses)) {
     alertify.warning('No access')
+    return
+  }
+  let itemOut = (dataOutstanding || []).find(i => i.NOBUKTI === nobukti)
+  if (itemOut && outCustNoName(itemOut)) {
+    alertify.warning('Customer masih NO NAME - koreksi customer dulu sebelum diproses')
     return
   }
   tipeform = 'add'

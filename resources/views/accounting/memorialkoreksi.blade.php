@@ -1,14 +1,17 @@
-@extends('accounting.newmaster')
-@section('buttons')
-
-@endsection
+@extends('newmasterTest')
+@section('page-title', 'Memorial/Koreksi')
 
 @section('css')
-<div id="imagecontainer" class="d-none" style="">
-  <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
-</div>
 
+{{-- Header tabel interaktif (geser kolom + roda gigi sembunyikan kolom + bar kolom
+     tersembunyi + modal filter) - sama seperti menu purchasing / pengajuandpp. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+{{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
+<link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 
+<!-- Blok gaya lama pencarian tabel Bootstrap (#tabel_filter dkk) sudah tidak dipakai -
+     kotak cari sekarang #mkSearch di toolbar. Dibiarkan sebagai komentar, tidak
+     dihapus, supaya jejak halaman lama masih terbaca.
 <style>
 
 #tabel_add_list_customer_filter{
@@ -90,10 +93,9 @@
 </style>
 
 
-{{-- end tampilan search bar 1 --}}
+end tampilan search bar 1
 
-{{-- tampilan search bar 2 --}}
-
+tampilan search bar 2
 
 <style>
 
@@ -125,31 +127,528 @@
     outline: none;
   }
 </style>
+-->
+<style>
+  .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
+/* Jarak kartu ke bar atas. Layout memberi .content padding 28px; halaman purchasing
+   memakai 12px, dan halaman ini mengikutinya supaya seragam. */
+#content { padding-top: 12px; }
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+</style>
+
+
+<style>
+
+#tabel_add_list_customer_filter{
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: -10px;
+}
+
+#tabel_add_list_customer_filter label input {
+  width: 150px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: none;
+  font-size: 0.65rem;
+}
+
+#tabel_add_list_noinvoice_filter{
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: -10px;
+}
+#tabel_add_list_noinvoice_filter label input {
+  width: 150px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: none;
+  font-size: 0.65rem;
+}
+
+#tabel_add_list_barang_filter{
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: -10px;
+}
+#tabel_add_list_barang_filter label input {
+  width: 150px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: none;
+  font-size: 0.65rem;
+}
+
+#tabel_add_list_nobeli_filter{
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: -10px;
+}
+#tabel_add_list_nobeli_filter label input {
+  width: 150px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: none;
+  font-size: 0.65rem;
+}
+
+#tabel_filter {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 8px;
+    margin-right: 10px;
+    margin-bottom: -10px;
+  }
+
+
+#tabel_filter label input {
+    width: 150px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    font-size: 0.65rem;
+  }
+
+#tabel_filter label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+  }
+</style>
+{{-- end tampilan search bar 1 --}}
+
+{{-- tampilan search bar 2 --}}
+<style>
+#tabel2_filter {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 8px;
+    margin-right: 10px;
+    margin-bottom: -10px;
+  }
+
+#tabel2_filter label input {
+    width: 150px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    font-size: 0.65rem;
+  }
+
+#tabel2_filter label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+#tabel2_filter input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+</style>
+
+{{-- ==========================================================================
+     Tampilan baru daftar DPP - menyalin pola menu purchasing
+     (pembelianpermintaandebetnote.blade.php).
+
+     Layout accounting.newmaster tidak mendefinisikan .data-table seperti
+     newmasterTest, jadi gaya dasar tabelnya ditulis di sini supaya halaman ini
+     tidak bergantung pada layout. Semua var CSS diberi nilai cadangan.
+     ========================================================================== --}}
+<style>
+/* Rule .card global di sebagian layout (flex + align-items:center + efek melayang
+   saat hover) diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
+#page1 .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+
+#page1 .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border, #e5e7eb) !important;
+}
+
+/* ---------- Gaya dasar tabel daftar ---------- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead th {
+  background: #f9fafb;
+  padding: 11px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: var(--text-main, #1f2937);
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: #f9fafb; }
+
+/* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
+   inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
+   Dipakai min-width, BUKAN width. */
+#tabel { min-width: 100%; }
+
+/* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
+#tabel td:first-child:not([colspan]) { vertical-align: middle; }
+
+#tabel td:first-child .po-aksi-wrap {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+#tabel td:first-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+#tabel td:first-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+#tabel td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+#tabel td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+#tabel td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+#tabel td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+/* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
+table.data-table.po-aksi-hover tbody td:first-child .btn {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ---------- Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar ---------- */
+.po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card, #fff);
+  border: 1.5px solid var(--rt-border, #E7E8F0);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft, #6B7180);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink, #1D2130);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+/* ---------- Tombol utama halaman (Tambah DPP / Close / Otorisasi) ---------- */
+.btn-dpp-utama {
+  height: 36px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0 16px;
+  background-color: #e8edff;
+  border: 1px solid #cfdcff;
+  color: #2563eb;
+  box-shadow: none;
+}
+.btn-dpp-utama:hover,
+.btn-dpp-utama:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
+.btn-dpp-utama:active { background-color: #cfdcff !important; border-color: #a8bdff !important; color: #1d4ed8 !important; }
+
+/* Tombol Close di page2/page3. Warnanya mengikuti menu purchasing
+   (pembelianpermintaanagen / pembelianpermintaannonagen), yang tombol Closenya memakai
+   .btn-danger: saat diam merah muda dari layout (#fef2f2 / #fecaca / #b91c1c), saat
+   hover jadi merah pekat khas btn-danger Bootstrap (#bb2d3b, teks putih). */
+.btn-dpp-tutup {
+  height: 30px;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600;
+  padding: 4px 12px !important;
+  text-transform: uppercase;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.btn-dpp-tutup:hover,
+.btn-dpp-tutup:focus { background-color: #bb2d3b; border-color: #b02a37; color: #fff; }
+.btn-dpp-tutup:active { background-color: #b02a37 !important; border-color: #a52834 !important; color: #fff !important; }
+
+/* Tombol chip (latar tint muda + teks berwarna) untuk Submit / Batal di form. */
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+.btn-chip-biru:hover,
+.btn-chip-biru:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
+.btn-chip-biru:active { background-color: #cfdcff !important; border-color: #a8bdff !important; color: #1d4ed8 !important; }
+
+.btn-batal-add {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+}
+.btn-batal-add:hover,
+.btn-batal-add:focus { background-color: #e9ecef; border-color: #ced4da; color: #343a40; }
+.btn-batal-add:active { background-color: #dee2e6 !important; border-color: #ced4da !important; color: #343a40 !important; }
+
+/* ---------- Tombol browsing (kaca pembesar) di sebelah input ---------- */
+.btn-browsing {
+  height: 38px;
+  width: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 6px 6px 0;
+  background-color: #e8edff;
+  border: 1px solid #cfdcff;
+  color: #2563eb;
+  font-size: 15px;
+  box-shadow: none;
+}
+.btn-browsing:hover,
+.btn-browsing:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
+.btn-browsing:disabled { background-color: #f1f3f5; border-color: #dee2e6; color: #adb5bd; }
+
+/* ---------- #addTable (form Add) dan #detailTable (form Detail) ---------- */
+#addTable thead th,
+#detailTable thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#addTable tbody tr:nth-of-type(odd),
+#detailTable tbody tr:nth-of-type(odd) { background-color: #fbfbfc; }
+#addTable tbody tr:hover,
+#detailTable tbody tr:hover { background-color: #f5f3ff; }
+
+#addTable td .btn {
+  width: 30px; height: 30px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 7px; font-size: 13px;
+  border: 1px solid transparent; box-shadow: none; transition: all .12s ease;
+}
+#addTable td .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+#addTable td .btn-success { color:#16a34a; border-color:#cdebd7; background:#e7f7ed; }
+#addTable td .btn-danger  { color:#dc2626; border-color:#f7cfcf; background:#fdeaea; }
+
+/* ---------- Modal lookup DPP (#form) - baris diklik langsung ---------- */
+#tabel_add_list_modal thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee !important;
+  border-top: none !important;
+}
+
+#tabel_add_list_modal tbody td {
+  border-top: none !important;
+  border-bottom: 1px solid #f1f3f5 !important;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+#tabel_add_list_modal tbody tr.pick-row {
+  cursor: pointer;
+  transition: background-color .12s;
+}
+#tabel_add_list_modal tbody tr.pick-row:hover td { background-color: #eef2ff; }
+#tabel_add_list_modal tbody tr.pick-row.row-terpilih td { background-color: #e8edff; }
+
+/* Kolom "v" (pilih baris): header dan kotak centang sama-sama rata tengah.
+   .form-check bawaan Bootstrap 5 memberi padding-left pada wadah dan float:left
+   pada inputnya, jadi text-center saja tidak cukup - floatnya harus dimatikan. */
+#tabel_add_list_modal th.kolom-pilih,
+#tabel_add_list_modal tbody td.kolom-pilih {
+  text-align: center;
+}
+#tabel_add_list_modal tbody td.kolom-pilih .form-check-input {
+  float: none;
+  margin: 0;
+  vertical-align: middle;
+}
+
+#input_search_pengajuan_dpp {
+  width: 260px;
+  max-width: 100%;
+  font-size: 13px;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+#input_search_pengajuan_dpp:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #e8edff;
+}
+
+/* Modal filter (.rt-filter) memakai tombol close Bootstrap bawaan - kembalikan
+   gayanya di dalam .rt-filter saja supaya tidak tertimpa aturan halaman. */
+.rt-filter .modal-header .close {
+  opacity: .5;
+  text-shadow: 0 1px 0 #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  background: transparent;
+  border: 0;
+  padding: 1rem;
+  margin: -1rem -1rem -1rem auto;
+}
+.rt-filter .modal-header .close:hover { opacity: .75; }
+
+/* ---------- Tombol aksi di dalam form (page2/page3) dan modal ----------
+   Sebagian tombol lama membawa inline style yang hanya mengatur UKURAN
+   (height/border-radius/font). Warnanya tidak inline, jadi cukup ditimpa di sini;
+   border-radius perlu !important karena inline style menang atas CSS biasa.
+   Tombol ikon di kolom Aksi tabel daftar ada di #page1 sehingga tidak terkena. */
+#page2 .btn-primary,
+#page3 .btn-primary,
+.modal-body .btn-primary,
+.modal-footer .btn-primary {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  box-shadow: none;
+}
+
+#page2 .btn-primary:hover,
+#page3 .btn-primary:hover,
+.modal-body .btn-primary:hover,
+.modal-footer .btn-primary:hover {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+#page2 .btn-secondary,
+#page3 .btn-secondary,
+.modal-body .btn-secondary,
+.modal-footer .btn-secondary {
+  background-color: #f1f3f5;
+  border-color: #dee2e6;
+  color: #495057;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  box-shadow: none;
+}
+
+#page2 .btn-secondary:hover,
+#page3 .btn-secondary:hover,
+.modal-body .btn-secondary:hover,
+.modal-footer .btn-secondary:hover {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #343a40;
+}
+
+/* Tombol browsing tetap menyatu dengan input di sebelah kirinya. */
+#page2 .input-group .btn-browsing,
+#page3 .input-group .btn-browsing,
+.modal-body .input-group .btn-browsing {
+  border-radius: 0 6px 6px 0 !important;
+}
+/* Samakan tinggi kaca pembesar dengan input di sampingnya. */
+#page2 .input-group .form-control,
+#page2 .input-group .btn-browsing {
+  height: 38px;
+}
+</style>
 @endsection
 
 
 @section('content')
 
+<div id="imagecontainer" class="d-none" style="">
+  <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
+</div>
 
 <div id="page1" class="container-fluid mainpage">
-<div class="container-fluid" >
-
-
-
-  <!-- <div id="qrcode"></div> -->
-  <div class="row" style="margin-top: -30px">
-    <div class="col-6 text-left">
-      <h2>Memorial Koreksi</h2>
-    </div>
-    <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="buttonAdd()"  >+ Memorial/Koreksi</button>
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-
-<!-- <button onclick="setNewNoBukti()">tes</button> -->
-<!-- <button onclick="buttonAdd('nobukti')">Add Tes</button> -->
-</div>
 
 <div id="printContainer" style="display:none">
 
@@ -169,100 +668,130 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="row">
-      <div class="col-12" style="overflow:auto; padding:0; margin:0; width:100%;">
-        <div class="container-fluid">
-
-              <table id="tabel" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;"  scope="col">No. Bukti</th>
-                    <th style="padding: 4px 12px;"  scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;"  scope="col">Trans</th>
-                    <th style="padding: 4px 12px;"  scope="col">Perkiraan</th>
-                    <th style="padding: 4px 12px;"  scope="col">Keterangan</th>
-                    <th style="padding: 4px 12px;"  scope="col">Jumlah Rp</th>
-                    <th style="padding: 4px 12px;"  scope="col">Oto</th>
-                    <th style="padding: 4px 12px;"  scope="col">User Oto</th>
-                    <th style="padding: 4px 12px;"  scope="col">Tgl Oto</th>
-                    <th style="padding: 4px 12px;"  scope="col">Actions</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding); $i++)
-                <tr>
-                  <td>{{ $tempOutstanding[$i][0]->NoBukti }}</td>
-                  <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i][0]->Tanggal)) !!}</td>
-                  <td>{{ $tempOutstanding[$i][0]->TipeTransHd }}</td>
-
-                  <td>{{ $tempOutstanding[$i][0]->Perkiraan }}</td>
-                  <td>{{ $tempOutstanding[$i][0]->Note }}</td>
-                  <td class="text-right">{{ number_format($tempOutstanding[$i][0]->TotalRp , 2 ,'.' , ',') }}</td>
-
-
-
-                  @if ($tempOutstanding[$i][0]->IsOtorisasi1)
-                            <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>
-                          @else
-                          <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>
-                          @endif
-
-                  <td>{{ $tempOutstanding[$i][0]->OtoUser1 }}</td>
-                  <td>{!! $tempOutstanding[$i][0]->TglOto1 ? date("Y/m/d", strtotime($tempOutstanding[$i][0]->TglOto1)) : '' !!}</td>
-
-
-		  <td class='text-center'>
-                      <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $tempOutstanding[$i][0]->NoBukti }}' , 'detail')">
-                          <i class="bi bi-info"></i>
-                      </button>
-
-                      @if ($tempOutstanding[$i][0]->IsOtorisasi1 == 1)
-                          <!-- SUDAH OTORISASI -->
-                          <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('{{ $tempOutstanding[$i][0]->NoBukti }}' , 'edit')">
-                              <i class="bi bi-key"></i>
-                          </button>
-
-                          <button class="btn btn-primary btn-sm" type="button" onclick="submitPrint('{{ $tempOutstanding[$i][0]->NoBukti }}')">
-                              <i class="bi bi-printer"></i>
-                          </button>
-                      @else
-                          <!-- BELUM OTORISASI -->
-                          <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('{{ $tempOutstanding[$i][0]->NoBukti }}' , 'edit')">
-                              <i class="bi bi-pen"></i>
-                          </button>
-
-                          <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetail('{{ $tempOutstanding[$i][0]->NoBukti }}' , 'otorisasi')">
-                              <i class="bi bi-key"></i>
-                          </button>
-                      @endif
-                  </td>
-
-                </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="po-filter-inp" id="mkTglAwal" value="{!! $mkTglAwal !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" class="po-filter-inp" id="mkTglAkhir" value="{!! $mkTglAkhir !!}">
+        </div>
+        <input type="search" id="mkSearch" class="po-search-inp" placeholder="Cari data">
+        {{-- Jumlah baris per halaman - lihat mkIkatPanjangHalaman(). --}}
+        <div class="po-len-wrap">
+          <label for="mkLen">Tampilkan</label>
+          <select id="mkLen" class="po-len-inp">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="-1">Semua</option>
+          </select>
+        </div>
+        <button class="po-btn-filter" type="button" id="mkBtnFilter" onclick="$('#modalFilterMk').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        <div class="po-toolbar-act">
+          <button type="button" class="btn btn-dpp-utama" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
+
+      {{-- #rtBar diisi lewat JS oleh ReportTable.init() - lihat mkInitReportTableSekali(). --}}
+      <div id="rtBar"></div>
+
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+            <th style="padding: 4px 12px;" scope="col">Trans</th>
+            <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+            <th style="padding: 4px 12px;" scope="col">Jumlah Rp</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+          {{-- Baris digambar renderTabelMk() lewat JS, supaya susunan kolom hasil
+               geser/sembunyi selalu konsisten dengan hasil render ulang. --}}
+        </tbody>
+      </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom.
+      </div>
+
     </div>
+  </div>
+
+</div>
 </div>
 
+<!-- modal filter otorisasi -->
+<div class="modal fade rt-filter" id="modalFilterMk">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
 
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-funnel"></i>
+          Filter Memorial/Koreksi
+          <span class="rt-active-badge" id="mkFilterBadge">0 aktif</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterMk').modal('hide')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="rt-section">
+          <div class="rt-group-label">Penyaringan Data</div>
+          <div class="rt-grid-2">
+            <div>
+              <label class="rt-field-label" for="mkModalOtorisasi">Otorisasi</label>
+              <select class="rt-native" id="mkModalOtorisasi">
+                <option value="SEMUA">Semua</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+              </select>
+            </div>
+            <div>
+              <label class="rt-field-label" for="mkModalTrans">Trans</label>
+              <select class="rt-native" id="mkModalTrans">
+                <option value="SEMUA">Semua</option>
+                <option value="BMM">BMM</option>
+                <option value="BJK">BJK</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="rt-reset-link" onclick="mkResetFilter()">Reset semua</button>
+        <div class="rt-footer-buttons">
+          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+            onclick="$('#modalFilterMk').modal('hide')">Batal</button>
+          <button type="button" class="rt-btn rt-btn-primary" onclick="mkTerapkanFilter()">Terapkan</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
-</div>
+<!-- end modal filter otorisasi -->
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Memorial Koreksi</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-dpp-tutup" onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
@@ -277,90 +806,35 @@
     <div class="container-fluid">
       <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
 
-      <div class="row">
+      <div class="row g-2 align-items-center">
 
-        <div class="col-md-2">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="form-group">
-              <label>Transaksi</label>
-            </div>
-            </div>
-
-            <div class="col-md-8">
-              <select id="input_add_transaksi" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onChange="onChangeTransaksi()">
-                <option value='BMM' selected>BMM</option>
-                <option value='BJK' >BJK</option>
-              </select>
-            </div>
-
-          </div>
-
-        </div>
-        <div class="col-md-3">
-          <div class="row">
-
-
-        <div class="col-md-4">
-          <div class="form-group">
-            <label>No Bukti</label>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="form-group">
-              <input type="hidden" class="form-control" id="input_add_nourut" placeholder="" disabled>
-            <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled>
-          </div>
-        </div>
-      </div>
-
+        <div class="col-md-3 d-flex align-items-center">
+          <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Transaksi</label>
+          <select id="input_add_transaksi" class="form-control" aria-label=".form-select-lg example" onChange="onChangeTransaksi()" style="flex:0 0 150px">
+            <option value='BMM' selected>BMM</option>
+            <option value='BJK' >BJK</option>
+          </select>
         </div>
 
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">No Bukti</label>
+          <input type="hidden" class="form-control" id="input_add_nourut" placeholder="" disabled>
+          <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled style="flex:0 0 230px">
+        </div>
 
       </div>
 
-      <div class="row" style="margin-top: -10px">
+      <div class="row g-2 align-items-center mt-2">
 
-        <div class="col-md-2">
-          <div class="row">
-
-
-        <div class="col-md-4">
-          <div class="form-group">
-            <label>Tanggal</label>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="form-group">
-            <input type="date" class="form-control text-center" id="input_add_tanggal" placeholder="" >
-          </div>
-        </div>
-      </div>
-
+        <div class="col-md-3 d-flex align-items-center">
+          <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Tanggal</label>
+          <input type="date" class="form-control text-center" id="input_add_tanggal" placeholder="" style="flex:0 0 150px">
         </div>
 
-
-        <div class="col-md-6">
-          <div class="row">
-
-
-        <div class="col-md-2">
-          <div class="form-group">
-            <label>Note</label>
-          </div>
+        <div class="col-md-6 d-flex align-items-center">
+          <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Note</label>
+          <input type="text" class="form-control" id="input_add_note" placeholder="" style="flex:0 0 390px">
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-
-            <input type="text" class="form-control" id="input_add_note" placeholder="" >
-          </div>
-        </div>
-      </div>
-
-        </div>
-
-
-
 
       </div>
 
@@ -392,8 +866,8 @@
 
   <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-        <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+        <table id="addTable" class="data-table">
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Devisi</th>
               <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
@@ -428,11 +902,7 @@
 
 
   <div class="col-md-12 mt-2 text-right">
-  <button id="buttonAddItem" type="button" class="btn btn-primary" onclick="buttonAddItem()" class="btn btn-secondary" style="height: 30px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;" >+ Tambah</button>
+  <button id="buttonAddItem" type="button" class="btn btn-chip-biru" onclick="buttonAddItem()">Tambah</button>
 </div>
 
 
@@ -455,11 +925,6 @@
       <div class="col-md-6">
         <div class="row">
 
-
-
-
-
-
           <div class="col-md-2">
             <div class="form-group">
             <label>Devisi</label>
@@ -481,7 +946,7 @@
             <div class="input-group form-group">
               <input id="AddAddKodeDevisi" type="text" class="form-control" disabled>
 
-              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -522,8 +987,12 @@
             </div> -->
           <div class="col-md-3">
             <div class="input-group form-group">
-              <input id="AddAddValas" type="text" class="form-control" value="IDR" disabled>
-              <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary" >+</button>
+              {{-- Valas jadi dropdown (bukan lagi picker + tombol +), disamakan dengan
+                   purchaseOrder.blade.php. Modal pencarian lama (#modalAddListValas) dan
+                   tombol +-nya dibiarkan di bawah sebagai komentar, tidak dihapus. --}}
+              <select class="form-control" id="AddAddValas" onchange="onChangeValasAdd()"></select>
+              <!-- <input id="AddAddValas" type="text" class="form-control" value="IDR" disabled>
+              <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary" >+</button> -->
 
             </div>
           </div>
@@ -536,7 +1005,7 @@
 
           <div class="col-md-2">
             <div class="input-group form-group">
-              <input id="AddAddKurs" type="number"  value="1.00" class="text-right form-control" disabled>
+              <input id="AddAddKurs" type="text"  value="1.00" class="text-right form-control" disabled>
 
             </div>
           </div>
@@ -557,11 +1026,6 @@
 
     <div class="row">
 
-
-
-
-
-
       <div class="col-md-2">
         <div class="form-group">
         <label>Jumlah</label>
@@ -572,12 +1036,10 @@
         </div> -->
       <div class="col-md-3">
         <div class="input-group form-group">
-          <input id="AddAddJumlah" type="number" value="0.00" class="text-right form-control" >
+          <input id="AddAddJumlah" type="text" value="0.00" class="text-right form-control" onblur="formatAngkaInput(this)" onfocus="unformatAngkaInput(this)">
 
         </div>
       </div>
-
-
 
     </div>
   </div>
@@ -590,11 +1052,6 @@
 
 
     <div class="row">
-
-
-
-
-
 
       <div class="col-md-2">
         <div class="form-group">
@@ -611,8 +1068,6 @@
         </div>
       </div>
 
-
-
     </div>
   </div>
 
@@ -623,11 +1078,6 @@
 
 
     <div class="row">
-
-
-
-
-
 
       <div class="col-md-2">
         <div class="form-group">
@@ -644,8 +1094,6 @@
         </div>
       </div>
 
-
-
     </div>
   </div>
 
@@ -662,11 +1110,6 @@
 
     <div class="row">
 
-
-
-
-
-
       <div class="col-md-2">
         <div class="form-group">
         <label>Debet</label>
@@ -679,7 +1122,7 @@
         <div class="input-group form-group">
           <input id="AddAddDebet" type="text" class="form-control" disabled>
           <input id="AddAddKodeDebet" type="hidden" class="form-control" disabled>
-          <button id="buttonAddListDebet" type="button" onclick="buttonAddListPerkiraan('Debet')" class="btn btn-primary" >+</button>
+          <button id="buttonAddListDebet" type="button" onclick="buttonAddListPerkiraan('Debet')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
 
         </div>
       </div>
@@ -694,8 +1137,6 @@
     </div>
   </div>
 
-
-
 </div>
 </div>
 
@@ -713,11 +1154,6 @@
 
     <div class="row">
 
-
-
-
-
-
       <div class="col-md-2">
         <div class="form-group">
         <label>Kredit</label>
@@ -730,7 +1166,7 @@
         <div class="input-group form-group">
           <input id="AddAddKredit" type="text" class="form-control" disabled>
           <input id="AddAddKodeKredit" type="hidden" class="form-control" disabled>
-          <button id="buttonAddListKredit" type="button" onclick="buttonAddListPerkiraan('Kredit')" class="btn btn-primary" >+</button>
+          <button id="buttonAddListKredit" type="button" onclick="buttonAddListPerkiraan('Kredit')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
 
         </div>
       </div>
@@ -780,23 +1216,11 @@
 
   <div class="row mt-2" style="margin-top: 0">
     <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Batal</button>
+      <button type="button" class="btn btn-batal-add" onclick="buttonAddBatal()">Batal</button>
 
-      <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-primary showhideitem" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Submit Add</button>
+      <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-chip-biru showhideitem">Simpan</button>
 
-      <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-primary showhideitem" style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Submit Edit</button>
+      <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-chip-biru showhideitem">Simpan</button>
 
 
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
@@ -805,13 +1229,6 @@
   </div>
 
 </div>
-
-
-
-
-
-
-
 
     <!-- <div class="line"></div> -->
     <!-- <hr/> -->
@@ -825,41 +1242,26 @@
 
 <!-- </div> -->
 
-
-
     </div>
 
     <!-- <div class="row "> -->
 
 <!-- </div> -->
 
-
-
-
-
-
-
-
-
   </div>
-
-
-
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
 
-    <div class="row" style="margin-top: -30px">
+    <div class="row">
       <div class="col-8 text-left">
-        <h2>Memorial Koreksi</h2>
+        <h2></h2>
       </div>
       <div class="col-4 text-right">
-        <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+        <button type="button" class="btn btn-dpp-tutup" onclick="buttonCloseForm()">Close</button>
       </div>
     </div>
 
     <div id= "" class="">
-
-
 
     <div id="" class="">
     <div class="">
@@ -868,86 +1270,34 @@
       <div class="container-fluid">
         <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
 
-        <div class="row">
+        <div class="row g-2 align-items-center">
 
-          <div class="col-md-2">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                <label>Transaksi</label>
-              </div>
-              </div>
-
-              <div class="col-md-8">
-                <select id="input_detail_transaksi" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" disabled>
-                  <option value='BMM' selected>BMM</option>
-                  <option value='BJK' >BJK</option>
-                </select>
-              </div>
-
-            </div>
-
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-
-
-          <div class="col-md-4">
-            <div class="form-group">
-              <label>No Bukti</label>
-            </div>
-          </div>
-          <div class="col-md-8">
-            <div class="form-group">
-                <input type="hidden" class="form-control" id="input_detail_nourut" placeholder="" disabled>
-              <input type="text" class="form-control" id="input_detail_nobukti" placeholder="No Bukti" disabled>
-            </div>
-          </div>
-        </div>
-
+          <div class="col-md-3 d-flex align-items-center">
+            <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Transaksi</label>
+            <select id="input_detail_transaksi" class="form-control" aria-label=".form-select-lg example" disabled style="flex:0 0 150px">
+              <option value='BMM' selected>BMM</option>
+              <option value='BJK' >BJK</option>
+            </select>
           </div>
 
+          <div class="col-md-4 d-flex align-items-center">
+            <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">No Bukti</label>
+            <input type="hidden" class="form-control" id="input_detail_nourut" placeholder="" disabled>
+            <input type="text" class="form-control" id="input_detail_nobukti" placeholder="No Bukti" disabled style="flex:0 0 230px">
+          </div>
 
         </div>
 
-        <div class="row" style="margin-top: -10px">
+        <div class="row g-2 align-items-center mt-2">
 
-          <div class="col-md-2">
-            <div class="row">
-
-
-          <div class="col-md-4">
-            <div class="form-group">
-              <label>Tanggal</label>
-            </div>
-          </div>
-          <div class="col-md-8">
-            <div class="form-group">
-              <input type="date" class="form-control text-center" id="input_detail_tanggal" placeholder="" disabled>
-            </div>
-          </div>
-        </div>
-
+          <div class="col-md-3 d-flex align-items-center">
+            <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Tanggal</label>
+            <input type="date" class="form-control text-center" id="input_detail_tanggal" placeholder="" disabled style="flex:0 0 150px">
           </div>
 
-
-          <div class="col-md-6">
-            <div class="row">
-
-
-          <div class="col-md-2">
-            <div class="form-group">
-              <label>Note</label>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-
-              <input type="text" class="form-control" id="input_detail_note" placeholder="" disabled>
-            </div>
-          </div>
-        </div>
-
+          <div class="col-md-6 d-flex align-items-center">
+            <label class="mb-0 me-3 text-nowrap" style="flex:0 0 100px">Note</label>
+            <input type="text" class="form-control" id="input_detail_note" placeholder="" disabled style="flex:0 0 390px">
           </div>
 
 
@@ -983,8 +1333,8 @@
 
     <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-          <table id="detailTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+          <table id="detailTable" class="data-table">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Devisi</th>
                 <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
@@ -1015,11 +1365,7 @@
     </div>
 
     <div class="col-md-12 mt-2 text-right showhidepage3 page3otorisasi">
-    <button id="buttonOtorisasi" type="button" class="btn btn-primary" onclick="submitOtorisasi()" class="btn btn-secondary" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;" >Otorisasi</button>
+    <button id="buttonOtorisasi" type="button" class="btn btn-dpp-utama" onclick="submitOtorisasi()">Otorisasi</button>
   </div>
 
 
@@ -1252,6 +1598,7 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let listData = []
@@ -1262,21 +1609,11 @@ let tipeform = ''
 
 $(document).ready(function(){
 
-    // $("#page2").show()
-    // $("#page1").hide()
-
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          // "searching": false,
-          "columnDefs": [
-          // { "type": "date", "targets": [3] },
-          {  "className": "text-right", "targets": [5] },
-          // "columns" : [{"width" : "20px"}]
-
-
-        ]
-        });
+    // Tabel #tabel dibangun renderTabelMk() lewat report-table.js (geser & sembunyikan
+    // kolom) - tidak lagi diinisialisasi manual di sini.
+    muatDropdownValas()
+    mkInitReportTableSekali()
+    loadAll()
 
         $("#tabel_add_list_modal").DataTable({
           "lengthChange": false,
@@ -1302,6 +1639,7 @@ $(document).ready(function(){
 
 
 
+
 function submitOtorisasi () {
 
   let _token = $("#_token").val();
@@ -1316,7 +1654,11 @@ function submitOtorisasi () {
 
     },
     success: function(res) {
-      alertify.success('Berhasil update otorisasi')
+      if (res == 1) {
+        alertify.success('Berhasil update otorisasi')
+      } else {
+        alertify.warning('Otorisasi tidak berhasil, silahkan coba lagi')
+      }
       loadAll()
       buttonCloseForm()
 
@@ -1334,95 +1676,412 @@ function submitOtorisasi () {
 
 }
 
-function loadAll () {
+/* ==========================================================================
+   Tabel daftar Memorial/Koreksi - pola ReportTable (geser kolom + sembunyikan kolom + bar
+   kolom tersembunyi), disalin dari pembelianpermintaandebetnote.blade.php.
 
+   Dipatok, bukan diambil dari window.location - harus sama persis dengan
+   MemorialKoreksiController::HREF.
+   ========================================================================== */
+const MK_HREF = 'memorialkoreksi'
+
+let mkCart = []
+let dataMk = []
+
+function mkBuatCart (headers, values, isnumerics, isshowns, desimals, aliasordered) {
+  let cart = []
+  ;(headers || []).forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let tipeNama = { 0 : 'varchar', 1 : 'float', 2 : 'date' }
+    let label = h
+    if (aliasordered && aliasordered[i] && aliasordered[i].alias) {
+      label = aliasordered[i].alias
+    }
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null)
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+
+    cart.push([
+      tipe === 0 ? h : values[i],
+      label,
+      Number(isshowns[i]) === 1 ? 1 : 0,
+      tipeNama[tipe] || 'varchar',
+      0,
+      isNaN(des) ? 0 : des,
+      h,
+      values[i],
+      tipe
+    ])
+  });
+  return cart
+}
+
+function mkKolomTampil () {
+  return (mkCart || []).filter(c => Number(c[2]) === 1)
+}
+
+function mkKolomRender (c) {
+  return { field : c[0], label : c[1], tipe : Number(c[8]), desimal : Number(c[5]) }
+}
+
+function mkFormatAngkaDes (nilai, des) {
+  let d = Number(des)
+  if (isNaN(d) || d < 0) { d = 0 }
+
+  let mentah = (nilai === null || nilai === undefined || nilai === '') ? 0 : nilai
+  let angka = Number(String(mentah).split(',').join(''))
+  if (isNaN(angka)) {
+    return (nilai === null || nilai === undefined) ? '' : nilai
+  }
+
+  let teks = angka.toFixed(d)
+  let minus = teks.charAt(0) === '-'
+  if (minus) { teks = teks.substring(1) }
+
+  let bagian = teks.split('.')
+  let bulat = bagian[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (minus ? '-' : '') + bulat + (bagian[1] ? '.' + bagian[1] : '')
+}
+
+function mkRenderNilai (col, item) {
+  let nilai = item[col.field]
+  if (col.tipe === 1) {
+    return mkFormatAngkaDes(nilai, col.desimal)
+  }
+  if (col.tipe === 2) {
+    return nilai ? formatDate(nilai) : ""
+  }
+  return (nilai === null || nilai === undefined) ? "" : nilai
+}
+
+function mkHeadHtml (cols) {
+  if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+    return ReportTable.headHtml(cols)
+  }
+  console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.')
+  let html = '<tr>'
+  cols.forEach((c) => {
+    html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`
+  });
+  return html + '</tr>'
+}
+
+let mkRtSudahInit = false
+
+function mkInitReportTableSekali () {
+  if (mkRtSudahInit || typeof ReportTable === 'undefined') { return }
+  mkRtSudahInit = true
+
+  ReportTable.init({
+    table    : '#tabel',
+    bar      : '#rtBar',
+    onChange : renderTabelMk
+  })
+
+  // Sebagian layout memasang penangan klik sendiri di <thead>; teruskan klik pada
+  // roda gigi / pegangan geser ke penangan milik ReportTable.
+  let mkGuardUlangKlik = false
+  let thead = document.getElementById('tabel_header')
+  if (thead) {
+    thead.addEventListener('click', function (e) {
+      if (mkGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+
+      e.stopPropagation()
+      e.preventDefault()
+
+      mkGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles : false, cancelable : true, view : window })
+      Object.defineProperty(ulang, 'target', { value : interaktif, configurable : true })
+      thead.dispatchEvent(ulang)
+      mkGuardUlangKlik = false
+    }, true)
+  }
+}
+
+function mkPindahBar () {
+  let bar = document.getElementById('rtBar')
+  let tabel = document.getElementById('tabel')
+  if (!bar || !tabel) { return }
+
+  let acuan = tabel
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    acuan = document.getElementById('tabel_wrapper') || tabel
+  }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan)
+  }
+}
+
+function mkIkatSearch () {
+  let input = document.getElementById('mkSearch')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    $('#tabel').DataTable().search(input.value).draw()
+  })
+}
+
+let mkPanjangHalaman = 10
+function mkIkatPanjangHalaman () {
+  let sel = document.getElementById('mkLen')
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(mkPanjangHalaman)
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    mkPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    $('#tabel').DataTable().page.len(mkPanjangHalaman).draw()
+  })
+}
+
+function mkIkatPeriode () {
+  let awal  = document.getElementById('mkTglAwal')
+  let akhir = document.getElementById('mkTglAkhir')
+  if (!awal || !akhir || awal.dataset.rtBound) { return }
+  awal.dataset.rtBound = '1'
+
+  let onUbah = function () {
+    if (!awal.value || !akhir.value) { return }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
+      return
+    }
+    loadAll()
+  }
+
+  awal.addEventListener('change', onUbah)
+  akhir.addEventListener('change', onUbah)
+}
+
+/* ---------- Filter (menggantikan tab otorisasi) ---------- */
+let mkFilterOtorisasi = 'SEMUA'
+let mkFilterTrans = 'SEMUA'
+
+function mkOtorisasi (item) {
+  return Number(item.IsOtorisasi1) === 1 ? 'Sudah' : 'Belum'
+}
+
+function mkUpdateFilterBadge () {
+  let jml = (mkFilterOtorisasi !== 'SEMUA' ? 1 : 0) + (mkFilterTrans !== 'SEMUA' ? 1 : 0)
+  let badge = document.getElementById('mkFilterBadge')
+  if (badge) { badge.textContent = jml + ' aktif' }
+}
+
+function mkTerapkanFilter () {
+  mkFilterOtorisasi = $('#mkModalOtorisasi').val() || 'SEMUA'
+  mkFilterTrans = $('#mkModalTrans').val() || 'SEMUA'
+  mkUpdateFilterBadge()
+  $('#modalFilterMk').modal('hide')
+  renderTabelMk()
+}
+
+function mkResetFilter () {
+  mkFilterOtorisasi = 'SEMUA'
+  mkFilterTrans = 'SEMUA'
+  $('#mkModalOtorisasi').val('SEMUA')
+  $('#mkModalTrans').val('SEMUA')
+  mkUpdateFilterBadge()
+  $('#modalFilterMk').modal('hide')
+  renderTabelMk()
+}
+
+/* ---------- Simpan / muat susunan kolom ---------- */
+window.g_href = MK_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  mkCart.forEach((c) => {
+    header.push(c[6])
+    value.push(c[7])
+    isnumber.push(c[8])
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : MK_HREF
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+// Tombol "Reset kolom". Memakai endpoint milik menu ini sendiri karena
+// HeaderTableController belum punya cabang untuk href 'memorialkoreksi'.
+window.doSetHeader = function (mode, reset) {
+  if (!reset) { return }
+
+  $.ajax({
+    url   : "{!! url('memorialkoreksiresetheader') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val()
+    },
+    success : function (res) {
+      mkCart = mkBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered)
+      window.gcart_header = mkCart
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal mengembalikan kolom ke pengaturan awal')
+    }
+  })
+}
+
+function loadAll () {
+  document.getElementById('tabel_data').innerHTML =
+    '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>'
 
   $.ajax({
     url: "{!! url('memorialkoreksiloadall') !!}",
     type: "get",
-    async: false,
+    async: true,
     data: {
+      tglawal: $('#mkTglAwal').val(),
+      tglakhir: $('#mkTglAkhir').val()
     },
     success: function(res) {
-      console.log(res.tempOutstanding)
-      $('#tabel').DataTable().destroy();
-      let rowTable = ""
-
-
-
-
-
-      res.tempOutstanding.forEach((item, i) => {
-        console.log(item)
-        rowTable += `
-        <tr>
-          <td>${item[0].NoBukti}</td>
-          <td>${formatDate(item[0].Tanggal)}</td>
-          <td>${item[0].TipeTransHd}</td>
-
-          <td>${item[0].Perkiraan ? item[0].Perkiraan : ''}</td>
-          <td>${item[0].Note}</td>
-          <td class="text-right">${formatAngkaX(item[0].TotalRp)}</td>
-
-
-
-          ${item[0].IsOtorisasi1 == 1 ?
-            `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>`
-            :
-            `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>`}
-
-          <td>${item[0].OtoUser1}</td>
-          <td>${item[0].TglOto1 ? formatDate(item[0].TglOto1 ,'/') : '' }</td>
-
-
-
-	  <td class='text-center'>
-            <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item[0].NoBukti}' , 'detail')">
-              <i class="bi bi-info"></i>
-            </button>
-
-            ${
-              item[0].IsOtorisasi1 == 1 ? `
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item[0].NoBukti}' , 'edit')">
-                  <i class="bi bi-key"></i>
-                </button>
-
-                <button class="btn btn-primary btn-sm" type="button" onclick="submitPrint('${item[0].NoBukti}')">
-                  <i class="bi bi-printer"></i>
-                </button>` : `
-
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item[0].NoBukti}' , 'edit')">
-                  <i class="bi bi-pen"></i>
-                </button>
-
-                <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetail('${item[0].NoBukti}' , 'otorisasi')">
-                  <i class="bi bi-key"></i>
-                </button>`
-            }
-          </td>
-        </tr>
-        `
-
-      });
-      document.getElementById("tabel_data").innerHTML = rowTable
-
-
-  $("#tabel").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-      // "searching": false,
-      "columnDefs": [
-      // { "type": "date", "targets": [3] },
-      {  "className": "text-right", "targets": [5] },
-      // "columns" : [{"width" : "20px"}]
-
-
-    ]
-    });
-
-  }
+      mkCart = mkBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal, res.aliasordered)
+      window.gcart_header = mkCart
+      dataMk = res.tempOutstanding || []
+      renderTabelMk()
+    },
+    error: function (err) {
+      console.error("Load failed:", err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
   })
+}
 
+function renderTabelMk () {
+  window.g_modeReport = 1
+  window.gcart_header = mkCart
+
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy()
+  }
+
+  let cols = mkKolomTampil()
+  let kolomRender = cols.map(mkKolomRender)
+
+  let thead = document.getElementById('tabel_header')
+  thead.innerHTML = mkHeadHtml(cols)
+  let baris = thead.querySelector('tr')
+  if (baris) {
+    baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
+    baris.insertAdjacentHTML('beforeend', `
+      <th style="padding: 4px 12px;" scope="col">Oto</th>
+      <th style="padding: 4px 12px;" scope="col">User Oto</th>
+      <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+    `)
+  }
+
+  let dataTampil = dataMk || []
+  if (mkFilterOtorisasi !== 'SEMUA') {
+    dataTampil = dataTampil.filter(function (item) { return mkOtorisasi(item) === mkFilterOtorisasi })
+  }
+  if (mkFilterTrans !== 'SEMUA') {
+    dataTampil = dataTampil.filter(function (item) { return item.Trans === mkFilterTrans })
+  }
+
+  let rowTable = ''
+  dataTampil.forEach((item) => {
+    let isOtorisasi = Number(item.IsOtorisasi1) || 0
+
+    let tombolAksi = `<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail('${item.NoBukti}' , 'detail')"><i class="bi bi-info"></i></button>`
+    if (isOtorisasi === 1) {
+      tombolAksi += `
+        <button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}' , 'edit')"><i class="bi bi-key"></i></button>
+        <button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
+      `
+    } else {
+      tombolAksi += `
+        <button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi('${item.NoBukti}' , 'edit')"><i class="bi bi-pen"></i></button>
+        <button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonDetail('${item.NoBukti}' , 'otorisasi')"><i class="bi bi-key"></i></button>
+      `
+    }
+
+    rowTable += `<tr><td class="text-center"><div class="po-aksi-wrap">${tombolAksi}</div></td>`
+    kolomRender.forEach((c) => {
+      if (c.tipe === 1) {
+        rowTable += `<td style="text-align: right;">${mkRenderNilai(c, item)}</td>`
+      } else {
+        rowTable += `<td>${mkRenderNilai(c, item)}</td>`
+      }
+    });
+    rowTable += `
+      ${isOtorisasi ?
+          '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        :
+          '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      }
+      <td>${item.OtoUser1 || ''}</td>
+      <td>${item.TglOto1 ? formatDate(item.TglOto1) : ''}</td>
+    </tr>`
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+
+  $('#tabel').DataTable({
+    lengthChange: false,
+    pageLength: mkPanjangHalaman,
+    order: [],
+    columnDefs: [{ targets: [0], orderable: false }],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
+  });
+
+  mkPindahBar()
+  mkIkatSearch()
+  mkIkatPanjangHalaman()
+  mkIkatPeriode()
+  let inputSearch = document.getElementById('mkSearch')
+  if (inputSearch && inputSearch.value) {
+    $('#tabel').DataTable().search(inputSearch.value).draw()
+  }
+  mkAturTinggiTabel()
+}
+
+// Tinggi tabel mengikuti sisa ruang layar. Aman bila layout tidak punya #content -
+// fungsinya berhenti diam-diam.
+function mkAturTinggiTabel () {
+  let area = document.getElementById('content')
+  let wrap = document.querySelector('#page1 .po-table-wrap')
+  if (!area || !wrap) { return }
+
+  wrap.style.maxHeight = 'none'
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah
+  let kotak = wrap.getBoundingClientRect()
+  let pageEl = document.getElementById('page1')
+  let bawah = pageEl.getBoundingClientRect().bottom - kotak.bottom
+
+  let sisa = batasBawah - kotak.top - bawah - 4
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
 }
 
 function submitPrint (nobukti) {
@@ -2142,10 +2801,10 @@ function submitEdit () {
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
   let valas  = $("#AddAddValas").val()
-  let kurs  = $("#AddAddKurs").val()
+  let kurs  = unformatAngka($("#AddAddKurs").val())
   let lawan  = $("#AddAddKredit").val()
   let perkiraan  = $("#AddAddDebet").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = unformatAngka($("#AddAddJumlah").val())
   let debet = Number(jumlah)
   let kredit = 0
   let keterangan  = $("#AddAddKeterangan").val()
@@ -2333,10 +2992,10 @@ function submitAdd () {
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
   let valas  = $("#AddAddValas").val()
-  let kurs  = $("#AddAddKurs").val()
+  let kurs  = unformatAngka($("#AddAddKurs").val())
   let lawan  = $("#AddAddKredit").val()
   let perkiraan  = $("#AddAddDebet").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = unformatAngka($("#AddAddJumlah").val())
   let debet = Number(jumlah)
   let kredit = 0
   let keterangan  = $("#AddAddKeterangan").val()
@@ -2497,6 +3156,10 @@ function submitAdd () {
 
 }
 
+// Valas sudah jadi dropdown (lihat muatDropdownValas() / onChangeValasAdd()), jadi
+// picker modal lama ini tidak lagi dipanggil dari mana pun. Dibiarkan sebagai
+// komentar, tidak dihapus.
+/*
 function buttonAddListValas () {
   listValas= []
 
@@ -2527,8 +3190,6 @@ function buttonAddListValas () {
 
         </tr>`
       });
-
-
 
 
 
@@ -2567,6 +3228,42 @@ function buttonAddPickValas(index,kode , nama , kurs) {
   document.getElementById("AddAddKurs").value = parseFloat(kurs).toFixed(2)
 
   buttonAddListBatal()
+}
+*/
+
+let listValasDropdown = []
+
+function muatDropdownValas () {
+  $.ajax({
+    url: "{!! url('memorialkoreksilistvalas') !!}",
+    type: "get",
+    async: false,
+    data: {},
+    success: function (res) {
+      listValasDropdown = res || []
+      let sel = document.getElementById('AddAddValas')
+      let terpilih = sel.value
+      sel.innerHTML = ''
+      listValasDropdown.forEach((item) => {
+        let opt = document.createElement('option')
+        opt.value = item.KODEVLS
+        opt.textContent = `${item.KODEVLS} - ${item.NAMAVLS}`
+        sel.appendChild(opt)
+      })
+      if (listValasDropdown.some(item => item.KODEVLS === terpilih)) { sel.value = terpilih }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function onChangeValasAdd () {
+  let kode = document.getElementById('AddAddValas').value
+  let itemX = listValasDropdown.find(item => item.KODEVLS === kode)
+  document.getElementById('AddAddKurs').value =
+    formatAngka(itemX && itemX.KURS ? parseFloat(itemX.KURS).toFixed(2) : '0.00')
 }
 
 function buttonAddListBatal () {
@@ -2611,7 +3308,7 @@ function cleanFormAddAdd () {
 
 function lockFormAddAdd (value = true) {
   document.getElementById("AddAddKodeDevisi").disabled = value
-  document.getElementById("buttonAddListValas").disabled = value
+  document.getElementById("AddAddValas").disabled = value
   document.getElementById("buttonAddListDebet").disabled = value
   document.getElementById("buttonAddListKredit").disabled = value
 }
@@ -2732,10 +3429,10 @@ function buttonDeleteItem (i) {
 
         let kodedevisi  = $("#AddAddKodeDevisi").val()
         let valas  = $("#AddAddValas").val()
-        let kurs  = $("#AddAddKurs").val()
+        let kurs  = unformatAngka($("#AddAddKurs").val())
         let lawan  = $("#AddAddKredit").val()
         let perkiraan  = $("#AddAddDebet").val()
-        let jumlah  = $("#AddAddJumlah").val()
+        let jumlah  = unformatAngka($("#AddAddJumlah").val())
         let debet = Number(jumlah)
         let kredit = 0
         let keterangan  = $("#AddAddKeterangan").val()
@@ -2855,8 +3552,8 @@ function buttonEditItem (i) {
   itemEdit = listData[i]
   document.getElementById("AddAddKodeDevisi").value = itemEdit.Devisi
   document.getElementById("AddAddValas").value = itemEdit.Valas
-  document.getElementById("AddAddKurs").value = parseFloat(itemEdit.Kurs).toFixed(2)
-  document.getElementById("AddAddJumlah").value = parseFloat(itemEdit.JumlahRp).toFixed(2)
+  document.getElementById("AddAddKurs").value = formatAngka(parseFloat(itemEdit.Kurs).toFixed(2))
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(itemEdit.JumlahRp).toFixed(2))
   document.getElementById("AddAddKeterangan").value = itemEdit.Keterangan
   document.getElementById("AddAddKeteranganDetail").value = itemEdit.KetDetail
   document.getElementById("AddAddDebet").value = itemEdit.Perkiraan
@@ -3060,11 +3757,14 @@ function buttonDetail (nobukti , tipe = 'detail') {
   }
 
   if (tipe == 'otorisasi') {
-    let akses = $("#akses_isotorisasi1").val();
-    if (!Number(akses)) {
-      alertify.warning('No access')
-      return
-    }
+    // Gate akses_isotorisasi1 dinonaktifkan - disamakan dengan pelunasanpiutangdpp
+    // yang tidak melakukan pengecekan ini di sisi client. Hak akses halaman tetap
+    // dijaga oleh HASACCESS di MemorialKoreksiController@index.
+    // let akses = $("#akses_isotorisasi1").val();
+    // if (!Number(akses)) {
+    //   alertify.warning('No access')
+    //   return
+    // }
 
     $('#buttonOtorisasi').show()
   } else {
@@ -3160,6 +3860,19 @@ function formatDate (date , pemisah = '-') {
         day = '0' + day;
 
     return [year, month, day].join(pemisah);
+}
+
+function unformatAngka (angka) {
+  if (!angka) return 0
+  return parseFloat(String(angka).replace(/,/g, '')) || 0
+}
+
+function formatAngkaInput (el) {
+  el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+}
+
+function unformatAngkaInput (el) {
+  el.value = unformatAngka(el.value).toFixed(2)
 }
 
 function formatAngkaX (angka) {
