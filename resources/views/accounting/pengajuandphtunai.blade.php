@@ -11,6 +11,7 @@
      forms and the six entity-picker modals (Valas/Devisi/Lawan/Departemen/Custsupp/Perkiraan)
      are untouched on purpose — see the guide's §13 ask-first note on existing picker patterns. --}}
 @extends('newmasterTest')
+@section('page-title', 'Pengajuan DPH Tunai')
 @section('buttons')
 @endsection
 
@@ -195,32 +196,26 @@
 
         <div id="page2" style="display: none" class="mainpage container-fluid">
 
-            <div class="row toolbar" style="margin-top: -30px" id="contentContainer">
+            <div class="row " style="margin-top: 0" id="contentContainer">
                 <div class="col-8 text-left">
-                    <h2>Pengajuan DPH</h2>
+                    {{-- <h2>Pengajuan DPH</h2> --}}
                 </div>
                 <div class="col-4 text-right action-group">
-                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary "
+                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                         onclick="buttonCloseForm()">CLOSE</button>
                 </div>
             </div>
 
             <div id= "formAdd" class="">
-
-
-
                 <div id="" class="">
                     <div class="">
                         <!-- <h1>Tes Modal</h1> -->
-
                         <div class="container-fluid">
                             <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
 
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="row">
-
-
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label>No Bukti</label>
@@ -235,7 +230,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                                 <div class="col-md-3">
                                     <div class="row">
@@ -253,11 +247,8 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
-
                             <div class="row" style="margin-top: -10px">
                                 <div class="col-md-3">
                                     <div class="row">
@@ -266,9 +257,6 @@
                                                 <label>Valas</label>
                                             </div>
                                         </div>
-                                        <!-- <div class="col-4 text-right">
-
-                  </div> -->
                                         <div class="col-md-8">
                                             <div class="input-group form-group">
                                                 <input id="input_add_valas" type="text" class="form-control" disabled>
@@ -280,92 +268,45 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-
-
-
                             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         </div>
-
-
-
                         <div class="container-fluid">
                             <hr />
-
                         </div>
-
-
-
-                        <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-
-                            <table id="addTable" class="table table-bordered table-striped">
-                                <thead class="text-center bg-primary text-white">
-                                    <tr>
-                                        <th style="padding: 4px 12px;" scope="col">Supplier</th>
-                                        <th style="padding: 4px 12px;" scope="col">Faktur</th>
-                                        <th style="padding: 4px 12px;" scope="col">diBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">kurangBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">lebihBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">No.Invoice</th>
-                                        <th style="padding: 4px 12px;" scope="col">Tgl Invoice</th>
-
-
-                                        <th style="padding: 4px 12px;" scope="col">Actions</th>
-
-                                    </tr>
-                                </thead>
-
-
-                                <tbody id="addTableData" class="">
-                                    <tr>
-
-                                        <td colspan=8 class="text-center">Belum ada data</td>
-
-                                    </tr>
-
-                                </tbody>
-
-
-                            </table>
+                        <div class="container-fluid mt-4" style="padding:0; margin:0;">
+                            <div class="dph-table-outer">
+                                <div class="dph-table-wrap">
+                                    <table id="addTable" class="dph-tb">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Supplier</th>
+                                                <th scope="col">Faktur</th>
+                                                <th scope="col" class="num">diBayar</th>
+                                                <th scope="col" class="num">kurangBayar</th>
+                                                <th scope="col" class="num">lebihBayar</th>
+                                                <th scope="col">No.Invoice</th>
+                                                <th scope="col">Tgl Invoice</th>
+                                                <th scope="col">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="addTableData" class="text-left">
+                                            <tr>
+                                                <td colspan="8" class="text-center">Belum ada data</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-
-
                         <div class="col-md-12 mt-2 text-right">
-                            <button id="buttonAddItem" type="button" class="btn btn-primary" onclick="buttonAddItem()"
-                                class="btn btn-secondary"
-                                style="height: 30px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;">+
-                                Tambah</button>
+                            <button id="buttonAddItem" type="button" class="btn btn-chip-biru"
+                                onclick="buttonAddItem()">+ Tambah</button>
                         </div>
-
-
                         <div id="formAddAdd" class="container-fluid showhideitem">
                             <!-- <div class="line"></div> -->
                             <!-- <div class="row"> -->
-
                             <div class="col-12">
-
-
                                 <hr />
                                 <div class="row">
                                     <div class="col-md-12">
@@ -373,31 +314,21 @@
                                         <h4 id="labelAddEditItem">Edit Item</h4>
                                     </div>
                                 </div>
-
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="row">
-
-
-
-
-
-
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Devisi</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                </div> -->
                                             <div class="col-md-3">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeDevisi" type="text" class="form-control"
                                                         disabled>
 
                                                     <button id="buttonAddListDevisi" type="button"
-                                                        onclick="buttonAddListDevisi()" class="btn btn-primary">+</button>
+                                                        onclick="buttonAddListDevisi()" class="btn btn-chip-biru">+</button>
 
                                                 </div>
                                             </div>
@@ -409,34 +340,18 @@
 
                                                 </div>
                                             </div>
-
                                         </div>
-
-
-
                                     </div>
-
                                 </div>
 
                                 <div class="row" style="margin-top: -10px">
                                     <div class="col-md-6">
-
-
                                         <div class="row">
-
-
-
-
-
-
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Valas</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                </div> -->
                                             <div class="col-md-3">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddValas" type="text" class="form-control"
@@ -457,42 +372,21 @@
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKurs" type="number" value="1.00"
                                                         class="text-right form-control" disabled>
-
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
-
-
-
-
                                 <div class="row" style="margin-top: -10px">
-
                                     <div class="col-md-12">
-
                                         <div class="row">
-
                                             <div class="col-md-6">
-
-
                                                 <div class="row">
-
-
-
-
-
-
                                                     <div class="col-md-2">
                                                         <div class="form-group">
                                                             <label>Lawan</label>
                                                         </div>
                                                     </div>
-                                                    <!-- <div class="col-4 text-right">
-
-                </div> -->
                                                     <div class="col-md-3">
                                                         <div class="input-group form-group">
                                                             <input id="AddAddLawan" type="text" class="form-control"
@@ -501,8 +395,7 @@
                                                                 class="form-control" disabled>
                                                             <button id="buttonAddListLawan" type="button"
                                                                 onclick="buttonAddListLawan()"
-                                                                class="btn btn-primary">+</button>
-
+                                                                class="btn btn-chip-biru">+</button>
                                                         </div>
                                                     </div>
 
@@ -516,36 +409,6 @@
 
                                                 </div>
                                             </div>
-
-
-
-                                            <!-- <div class="col-md-3">
-
-
-        <div class="row">
-
-
-
-
-
-
-          <div class="col-md-4">
-            <div class="form-group">
-            <label>Kode Brg</label>
-          </div>
-          </div>
-          <div class="col-md-8">
-            <div class="input-group form-group">
-              <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
-              <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
-
-            </div>
-          </div>
-
-        </div>
-
-      </div> -->
-
                                         </div>
                                     </div>
 
@@ -553,15 +416,7 @@
 
                                 <div class="row" style="margin-top: -10px">
                                     <div class="col-md-6">
-
-
                                         <div class="row">
-
-
-
-
-
-
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Jumlah</label>
@@ -677,7 +532,7 @@
                                                         disabled>
                                                     <button id="buttonAddListDepartemen" type="button"
                                                         onclick="buttonAddListDepartemen()"
-                                                        class="btn btn-primary">+</button>
+                                                        class="btn btn-chip-biru">+</button>
 
                                                 </div>
                                             </div>
@@ -714,7 +569,7 @@
                                                         disabled>
                                                     <button id="buttonAddListCustsupp" type="button"
                                                         onclick="buttonAddListCustsupp()"
-                                                        class="btn btn-primary">+</button>
+                                                        class="btn btn-chip-biru">+</button>
 
                                                 </div>
                                             </div>
@@ -732,59 +587,17 @@
 
                                     </div>
                                 </div>
-
-
                             </div>
-
-
-
-
-
-
-
-
-
-
-                            <!-- <div class="col-6 ">
-        <div class="row">
-
-
-
-        </div> -->
-                            <!-- </div> -->
-
-
-
-
                             <div class="row mt-2" style="margin-top: 0">
                                 <div class="col-md-12 text-right mt-4">
-                                    <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()"
-                                        style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Batal</button>
+                                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                                        onclick="buttonAddBatal()">Batal</button>
 
                                     <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()"
-                                        class="btn btn-primary"
-                                        style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Submit
-                                        Add</button>
+                                        class="btn btn-primary btn-pill-primary">Submit Add</button>
 
                                     <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                        class="btn btn-primary"
-                                        style="height: 30px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;">Submit
-                                        Edit</button>
-
-
-                                    <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
+                                        class="btn btn-primary btn-pill-primary">Submit Edit</button>
                                 </div>
 
                             </div>
@@ -817,13 +630,13 @@
         </div>
         <div id="page3" style="display: none" class="mainpage container-fluid">
 
-            <div class="row toolbar" style="margin-top: -30px" id="contentContainer">
+            <div class="row" style="margin-top: 0" id="contentContainer">
                 <div class="col-8 text-left">
-                    <h2 class="page3showhide detailshowhide"> Detail Pengajuan DPH</h2>
+                    {{-- <h2 class="page3showhide detailshowhide"> Detail Pengajuan DPH</h2> --}}
                     <h2 class="page3showhide otorisasishowhide"> Otorisasi Pengajuan DPH</h2>
                 </div>
                 <div class="col-4 text-right action-group">
-                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary "
+                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                         onclick="buttonCloseForm()">CLOSE</button>
                 </div>
             </div>
@@ -902,34 +715,36 @@
                         <div class="container-fluid">
                             <hr />
                         </div>
-                        <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
+                        <div class="container-fluid mt-4" style="padding:0; margin:0;">
 
-                            <table id="detailTable" class="table table-bordered table-striped">
-                                <thead class="text-center bg-primary text-white">
-                                    <tr>
-                                        <th style="padding: 4px 12px;" scope="col">Supplier</th>
-                                        <th style="padding: 4px 12px;" scope="col">Faktur</th>
-                                        <th style="padding: 4px 12px;" scope="col">diBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">kurangBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">lebihBayar</th>
-                                        <th style="padding: 4px 12px;" scope="col">No.Invoice</th>
-                                        <th style="padding: 4px 12px;" scope="col">Tgl Invoice</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="detailTableData" class="">
-                                    <tr>
-                                        <td colspan=7 class="text-center">Belum ada data</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="dph-table-outer">
+                                <div class="dph-table-wrap">
+                                    <table id="detailTable" class="dph-tb">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Supplier</th>
+                                                <th scope="col">Faktur</th>
+                                                <th scope="col" class="num">diBayar</th>
+                                                <th scope="col" class="num">kurangBayar</th>
+                                                <th scope="col" class="num">lebihBayar</th>
+                                                <th scope="col">No.Invoice</th>
+                                                <th scope="col">Tgl Invoice</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailTableData" class="text-left">
+                                            <tr>
+                                                <td colspan="7" class="text-center">Belum ada data</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         <div class="container-fluid">
-                            <div class="row" style="">
-                                <div class="col-6 text-left">
-                                </div>
-                                <div class="col-6 text-right">
-                                    <button type="button" class="page3showhide otorisasishowhide btn btn-primary btn-lg "
-                                        style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  "
+                            <div class="row" style="margin-top: 12px">
+                                <div class="col-12 text-right">
+                                    <button type="button"
+                                        class="page3showhide otorisasishowhide btn btn-primary btn-pill-primary"
                                         onclick="submitOtorisasi()">Otorisasi</button>
                                 </div>
                             </div>
@@ -945,9 +760,11 @@
             <!-- <div class="row "> -->
             <!-- </div> -->
         </div>
-    </div>
-    </div>
-    <!--  -->
+    <!-- Two stray, unmatched </div> tags used to sit here (pre-existing legacy cruft — harmless
+         before, since everything that followed was a Bootstrap modal, position:fixed and
+         indifferent to DOM nesting). Removed: they were escaping past #content-blade and
+         #content (.content) into .main, which is exactly why #page4 — a real page div, not a
+         modal — rendered as a sibling of #content instead of inside it. -->
 
     <!-- start page4: Tambah DPH (invoice picker) - was modal "#form", converted to a full page so the
          invoice table below can use a real scroll height instead of a modal's max-height:400px box -->
@@ -1100,8 +917,6 @@
 
                 <div id= "" class="">
                     <div class="modal-header">
-
-
                         <h5 class="modal-title" id="">Change Invoice</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -1253,9 +1068,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mt-2" style="margin-top: 0">
+                                <div class="row mt-2" style="margin-top: 0" id="contentContainer">
                                     <div class="col-md-12 text-right mt-4">
-                                        <button type="button" class="btn btn-secondary btn-pill-secondary"
+                                        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                             onclick="buttonAddBatalKL()">Batal</button>
 
                                         <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()"
@@ -1265,41 +1080,37 @@
                                 </div>
                             </div>
                             <div class="row" style="margin-top:20px">
-                                <div class="col-12" style="overflow:auto;  max-height: 400px">
-                                    <!-- <div class="container-fluid"> -->
-                                    <table id="tabel_add_list_modalx" class="table table-bordered table-striped"
-                                        style="overflow:auto; ">
-                                        <thead class="text-center bg-primary text-white"
-                                            style="position: sticky;
-              top: 0;
-              z-index: 1;">
-                                            <tr>
-                                                <th style="padding: 4px 12px;" scope="col">Kurang Bayar</th>
-                                                <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                                                <th style="padding: 4px 12px;" scope="col">Nama perkiraan</th>
-                                                <th style="padding: 4px 12px;" scope="col">Actions</th>
-
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabel_data_add_list_modalx" class="text-left">
-                                            <tr>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
+                                <div class="col-12">
+                                    <div class="dph-table-outer">
+                                        <div class="dph-table-wrap">
+                                            <table id="tabel_add_list_modalx" class="dph-tb">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" class="num">Kurang Bayar</th>
+                                                        <th scope="col">Perkiraan</th>
+                                                        <th scope="col">Nama perkiraan</th>
+                                                        <th scope="col">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tabel_data_add_list_modalx" class="text-left">
+                                                    <tr>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary" data-dismiss="modal">Batal</button>
+                <div class="modal-footer" id="contentContainer">
+                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary" data-dismiss="modal">Batal</button>
                     <!-- <button type="button" class="btn btn-primary" onclick="submitAddModalX()">Submit</button> -->
                 </div>
             </div>
@@ -1477,35 +1288,29 @@
 
 
                             <div class="row" style="margin-top:20px">
-                                <div class="col-12" style="overflow:auto;  max-height: 400px">
-                                    <!-- <div class="container-fluid"> -->
-
-
-                                    <table id="tabel_add_list_modalxedit" class="table table-bordered table-striped"
-                                        style="overflow:auto; ">
-                                        <thead class="text-center bg-primary text-white"
-                                            style="position: sticky;
-                  top: 0;
-                  z-index: 1;">
-                                            <tr>
-                                                <th style="padding: 4px 12px;" scope="col">Kurang Bayar</th>
-                                                <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                                                <th style="padding: 4px 12px;" scope="col">Nama perkiraan</th>
-                                                <th style="padding: 4px 12px;" scope="col">Actions</th>
-
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabel_data_add_list_modalxedit" class="text-left">
-                                            <tr>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                                <td>-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
+                                <div class="col-12">
+                                    <div class="dph-table-outer">
+                                        <div class="dph-table-wrap">
+                                            <table id="tabel_add_list_modalxedit" class="dph-tb">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" class="num">Kurang Bayar</th>
+                                                        <th scope="col">Perkiraan</th>
+                                                        <th scope="col">Nama perkiraan</th>
+                                                        <th scope="col">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tabel_data_add_list_modalxedit" class="text-left">
+                                                    <tr>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                        <td>-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
@@ -1826,10 +1631,10 @@
 
             // Belum otorisasi — Edit + Otorisasi
             return '<div class="action-buttons">' + detailBtn +
-                '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
-                nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>' +
                 '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
                 nobukti + '\')"><i class="bi bi-key"></i></button>' +
+                '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
+                nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>' +
                 '</div>';
         }
 
@@ -4245,17 +4050,18 @@
 
 
                   <td class="text-center">
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete(${i})"><i class="bi bi-trash"></i></button>
+                    <div class="action-buttons">
+                      <button class="btn-action-sm btn-action-success" type="button" data-toggle="tooltip" title="Edit" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
+                      <button class="btn-action-sm btn-action-danger" type="button" data-toggle="tooltip" title="Hapus" onclick="buttonAddDelete(${i})"><i class="bi bi-trash"></i></button>
+                    </div>
                   </td>
                 </tr>
-
               `
-
                         // <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
                     });
 
                     document.getElementById("addTableData").innerHTML = rowTable
+                    $('#addTableData [data-toggle="tooltip"]').tooltip('dispose').tooltip({container: 'body', boundary: 'window'});
 
 
                     document.getElementById("input_add_nobukti").value = listData[0].NoBukti
@@ -4265,16 +4071,6 @@
                     // document.getElementById("input_add_nobukti").value = listData[0].NoBukti
                     document.getElementById("input_add_tanggal").valueAsDate = new Date(listData[0].Tanggal)
                     document.getElementById("input_add_valas").value = listData[0].Valas
-
-
-
-
-
-
-
-
-
-
                 },
                 error: function(err) {
                     console.log(err)
@@ -4818,7 +4614,7 @@
       <div class="input-group form-group dph-dibayar-group">
         <input class="dph-inp-sm form-control text-right" id="list_proses_dibayar${i}" type="number" value='0.00' disabled>
 
-        <button id="buttonChangeDibayar${i}" class="dph-btn-plus btn btn-chip-biru" type="button" onclick="buttonChangeDibayar(${i})">+</button>
+        <button id="buttonChangeDibayar${i}" class="btn btn-chip-biru" type="button" onclick="buttonChangeDibayar(${i})">+</button>
 
       </div></td>
 
@@ -4993,9 +4789,6 @@
             // document.getElementById("input_modal_tanggal").valueAsDate = new Date()
             // document.getElementById("input_modal_valas").value = 'IDR'
             // document.getElementById("input_modal_tanggaljatuhtempo").value = formatDate(lastDayOfMonth)
-
-
-
 
             formPageOrigin = 'page1';
             $('.mainpage').hide();
