@@ -26,6 +26,7 @@
     border-bottom: 1px solid #f1f3f5 !important;
     font-size: 13px;
     vertical-align: middle;
+    padding: 10px 12px !important;
   }
 </style>
 {{-- end tabel kode barang --}}
@@ -49,7 +50,7 @@
         <div class="container-fluid mt-4" >
           <div class="row">
             <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="margin-top:-40px;">
-              {{-- <h3>Barang All</h3> --}}
+              <h3>Barang</h3>
             </div>
             <div class="col-3 text-right form-group" style="margin-top:-30px;">
               <input id="input_search_barang_all" type="text" name="" value="" class="form-control" onkeypress="searchBarangAll(event)">
@@ -63,15 +64,15 @@
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                  <th style="padding: 10px 12px;" scope="col">Kode Barang</th>
+                  <th style="padding: 10px 12px;" scope="col">Nama Barang</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
                 @for ($i = 0; $i < count($listBarangAll); $i++)
                 <tr>
-                  <td>{{ $listBarangAll[$i]->KODEBRG }}</td>
-                  <td>{{ $listBarangAll[$i]->NAMABRG }}</td>
+                  <td style="padding:10px 12px;">{{ $listBarangAll[$i]->KODEBRG }}</td>
+                  <td style="padding:10px 12px;">{{ $listBarangAll[$i]->NAMABRG }}</td>
               </tr>
               @endfor
               </tbody>
