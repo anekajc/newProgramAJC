@@ -982,7 +982,7 @@
               <div class="input-group form-group">
 
                 <input id="AddAddKodeBrg" type="text" class="form-control" onkeypress="onKeyPressBarang(event)">
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru" >+</button>
+                <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
@@ -1238,7 +1238,7 @@
         <!-- <div id="qrcode"></div> -->
         <div class="row">
           <div class="col-6 text-left">
-            <h1>Otorisasi</h1>
+            <h1></h1>
           </div>
           <div class="col-6 text-right">
             <!-- <button type="button" class="btn btn-chip-biru btn-lg " style="height: 60px; " onclick="buttonCloseForm()"  >Close</button> -->
@@ -1689,7 +1689,7 @@
     </div>
 
 
-    <div id="" class="container-fluid mt-2">
+    <div id="" class="container-fluid mt-2 showhidepage3 page3otorisasi">
       <div class="row">
         <div class="text-right col-12">
           <button type="button" class="btn btn-chip-biru btn-lg" style="
@@ -1726,7 +1726,7 @@
       <div class="modal-header">
 
 
-          <h5 class="modal-title" id="">Add</h5>
+          <h5 class="modal-title" id="">Customer</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1737,14 +1737,9 @@
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top:-30px;">
-              <h3>Customer</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto;">
               <table id="tabel_add_list_customer" class="data-table">
                 <thead class="text-center">
                 <tr>
@@ -1807,14 +1802,9 @@
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top:-30px;">
-              <h3>Sales</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto;">
               <table id="tabel_add_list_sales" class="data-table">
                 <thead class="text-center">
                 <tr>
@@ -1876,14 +1866,9 @@
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top:-40px;">
-              <h3>Barang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto;">
               <table id="tabel_add_list_barang" class="data-table">
                 <thead class="text-center">
                 <tr>
@@ -1942,7 +1927,7 @@
       <div class="modal-header">
 
 
-          <h5 class="modal-title" id="">Lokasi</h5>
+          <h5 class="modal-title" id="">Lokasi Penerima</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1953,14 +1938,9 @@
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top:-30px;">
-              <h3>Lokasi Penerima</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="padding:0; margin:0; width:100%; overflow:auto;">
               <table id="tabel_add_list_lokasi" class="data-table">
                 <thead class="text-center">
                 <tr>
@@ -2262,6 +2242,7 @@ function tabelActionsCell (row) {
   let nobukti = ijPickCI(row, 'NoBukti');
   let isOto = Number(ijPickCI(row, 'IsOtorisasi1'));
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   } else {
@@ -3936,6 +3917,8 @@ function buttonOtorisasi (nobukti) {
       document.getElementById("input_otorisasi_nopo").value = res[0].PONo
 
 
+      $('.showhidepage3').hide();
+      $('.page3otorisasi').show();
       $('.mainpage').hide();
       // $('#page1').hide();
       $('#page3').show();
@@ -3954,6 +3937,81 @@ function buttonOtorisasi (nobukti) {
   })
 
 
+
+}
+
+function buttonDetail (nobukti) {
+  console.log('buttonDetail' , nobukti)
+
+  let _token = $("#_token").val();
+
+  $.ajax({
+    url: "{!! url('invoicejasaspdetail') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      nobukti
+
+    },
+    success: function(res) {
+
+      console.log(res)
+
+      let rowTable = ``
+      res.forEach((item, i) => {
+              rowTable += `
+                <tr>
+                  <td>${item.KodeBrg}</td>
+                  <td>${item.NAMABRG}</td>
+                  <td class="text-right">${item.Qnt ? formatAngka(parseFloat(item.Qnt).toFixed(2)) : '0.00'}</td>
+                  <td class="text-right">${item.HARGA ? formatAngka(parseFloat(item.HARGA).toFixed(2)) : '0.00'}</td>
+                  <td class="text-right">${item.SubTotalRp ? formatAngka(parseFloat(item.SubTotalRp).toFixed(2)) : '0.00'}</td>
+
+                  <td>${item.KetDetail ? item.KetDetail : ''}</td>
+
+
+                </tr>
+
+              `
+      });
+
+      document.getElementById("otorisasiTableData").innerHTML = rowTable
+
+      document.getElementById("input_otorisasi_nobukti").value = res[0].NoBukti
+      document.getElementById("input_otorisasi_namacustomer").value = res[0].NamaCustSupp
+      document.getElementById("input_otorisasi_kodecustomer").value = res[0].KodeCustSupp
+      document.getElementById("input_otorisasi_kodelokasipenerima").value = res[0].KodeKebun
+      document.getElementById("input_otorisasi_lokasipenerima").value = res[0].NamaKebun
+      document.getElementById("input_otorisasi_alamatcustomer").value = res[0].Alamat
+      document.getElementById("input_otorisasi_catatan").value = res[0].FootNote
+
+      document.getElementById("input_otorisasi_tanggal").value = formatDate(res[0].Tanggal)
+
+      document.getElementById("input_otorisasi_valas").value = res[0].Valas
+      document.getElementById("input_otorisasi_kurs").value = parseFloat(res[0].Kurs).toFixed(2)
+      document.getElementById("input_otorisasi_tipeppn").value = res[0].PPN
+      document.getElementById("input_otorisasi_kodesales").value = res[0].KODESLS
+      document.getElementById("input_otorisasi_sales").value = res[0].NamaSls
+
+      document.getElementById("input_otorisasi_pembayaran").value = res[0].TIPEBAYAR
+      document.getElementById("input_otorisasi_hari").value = res[0].HARI
+      document.getElementById("input_otorisasi_uangmuka").value = parseFloat(res[0].nUangMuka).toFixed(2)
+      document.getElementById("input_otorisasi_harikredit").value = res[0].harikredit
+      document.getElementById("input_otorisasi_nopo").value = res[0].PONo
+
+
+      $('.showhidepage3').hide();
+      $('.mainpage').hide();
+      $('#page3').show();
+
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
 
 }
 
