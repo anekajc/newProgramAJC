@@ -1,6 +1,6 @@
-# New Design — Interactive Table Guide (draggable columns)
+# New Design ï¿½ Interactive Table Guide (draggable columns)
 
-Sub-guide of **[new-design-all-guide.md](new-design-all-guide.md)** — read that first. It holds the
+Sub-guide of **[new-design-all-report-guide.md](new-design-all-report-guide.md)** ï¿½ read that first. It holds the
 pre-flight checks, the ask-first protocol, and the cross-cutting constraints. This file only covers
 the interactive table itself.
 
@@ -9,7 +9,7 @@ the interactive table itself.
 - drag a column heading to reorder columns
 - per-column gear menu: hide column, decimal places, show/hide total
 - a bar above the table listing hidden columns (click to restore)
-- an optional **"Tampilan"** switcher (Detail ? Rekap, Rp ? Valas, …)
+- an optional **"Tampilan"** switcher (Detail ? Rekap, Rp ? Valas, ï¿½)
 - all of it persisted per user, per page, per report-mode
 
 Reference implementations: `resources/views/report/reportaccountingkasharian.blade.php`,
@@ -21,23 +21,23 @@ Reference implementations: `resources/views/report/reportaccountingkasharian.bla
 
 | Requirement | Where it comes from | If missing |
 |---|---|---|
-| `public/css/report-table.css` | `report/newmaster2.blade.php` | add a `<link>` — **big change, ask first** |
-| `public/js/report-table.js` (`window.ReportTable`) | `report/masterreport2.blade.php` | add a `<script>` — **big change, ask first** |
-| `gcart_header` + `doSetHeader` / `doSimpanHeader` / `doButtonVisibility` / `doSetDesimal` / `doButtonTotal` / `doMoveHeader` | `report/masterreport2.blade.php` | **not portable** — this engine only exists in masterreport2. Stop and ask. |
-| `format_date`, `format_number`, `currencyNormalizer`, `nullToEmpty` | `report/newmaster2.blade.php` | provide equivalents — ask first |
+| `public/css/report-table.css` | `report/newmaster2.blade.php` | add a `<link>` ï¿½ **big change, ask first** |
+| `public/js/report-table.js` (`window.ReportTable`) | `report/masterreport2.blade.php` | add a `<script>` ï¿½ **big change, ask first** |
+| `gcart_header` + `doSetHeader` / `doSimpanHeader` / `doButtonVisibility` / `doSetDesimal` / `doButtonTotal` / `doMoveHeader` | `report/masterreport2.blade.php` | **not portable** ï¿½ this engine only exists in masterreport2. Stop and ask. |
+| `format_date`, `format_number`, `currencyNormalizer`, `nullToEmpty` | `report/newmaster2.blade.php` | provide equivalents ï¿½ ask first |
 | Bootstrap Icons (`bi-gear`) | `report/newmaster2.blade.php` | gear icon renders blank |
 
 A page that already does `@extends('report.masterreport2')` has **all** of this. Any other layout
-does not — see the all-guide's pre-flight section before going further.
+does not ï¿½ see the all-guide's pre-flight section before going further.
 
 ### Does the page qualify?
 
 1. `@extends('report.masterreport2')`
-2. Markup has `<div class="tb-report main">` … `<table class="tb" id="mainTable">`
+2. Markup has `<div class="tb-report main">` ï¿½ `<table class="tb" id="mainTable">`
 3. The page defines `setDefaultHeader()` and its render function starts with
    `gcart_header.filter(c => c[2] === 1)`
 
-If (3) is false — the page prints a hardcoded `<thead>` and hardcoded `<td>`s — the table must be
+If (3) is false ï¿½ the page prints a hardcoded `<thead>` and hardcoded `<td>`s ï¿½ the table must be
 converted to `gcart_header` first. That is a **behaviour change**: stop and ask.
 
 ---
@@ -58,7 +58,7 @@ Everything is driven by one global array. Each column is a 6-element array:
 | 2 | Visible | `1` shown, `0` hidden (appears in the bar) |
 | 3 | Type | `varchar` \| `date` \| `float` \| `int` \| `bool` |
 | 4 | Include in Subtotal / Grand Total | `1` / `0` (numeric columns only) |
-| 5 | Decimal places | `0`–`4` |
+| 5 | Decimal places | `0`ï¿½`4` |
 
 Two companions control the total rows:
 
@@ -81,31 +81,31 @@ automatically the first time a user opens the page. So for anyone who has ever o
 
 | You do | They get |
 |---|---|
-| Add a new column to `setDefaultHeader()` | **nothing** — the new column never appears |
+| Add a new column to `setDefaultHeader()` | **nothing** ï¿½ the new column never appears |
 | Remove a column | it stays visible |
 | Rename a label / change decimals / change the total flag | old value persists |
 
-The saved layout only reloads from `setDefaultHeader()` when it is reset —
+The saved layout only reloads from `setDefaultHeader()` when it is reset ï¿½
 `doSetHeader(mode, true)` forces `_strHeader = ""`, which re-runs `setDefaultHeader()` and saves
 the result. That is what the **"Reset kolom"** button in the bar does.
 
 **So whenever you change `setDefaultHeader()`:**
 
-1. Say so explicitly in your report to the user — the change is invisible until reset.
+1. Say so explicitly in your report to the user ï¿½ the change is invisible until reset.
 2. Make sure the page's bar shows **Reset kolom** (it appears automatically whenever
-   `doSetHeader` exists — see §3 Step 1).
+   `doSetHeader` exists ï¿½ see ï¿½3 Step 1).
 3. Tell them to click it once per report mode, since each `g_modeReport` stores its own layout.
 4. Anyone else already using that page must click it too. It cannot be forced from code without
    wiping layouts everyone deliberately customised.
 
-> Do not "fix" this by making `doSetHeader()` always reload the defaults — that would throw away
+> Do not "fix" this by making `doSetHeader()` always reload the defaults ï¿½ that would throw away
 > every user's saved column layout on every page load.
 
 ---
 
 ## 3. Steps
 
-### Step 1 — bar container
+### Step 1 ï¿½ bar container
 
 Between the toolbar and `.table-outer`:
 
@@ -114,7 +114,7 @@ Between the toolbar and `.table-outer`:
 <div id="rtBar"></div>
 ```
 
-### Step 2 — hint line (optional)
+### Step 2 ï¿½ hint line (optional)
 
 After `.table-outer` closes:
 
@@ -126,16 +126,16 @@ After `.table-outer` closes:
 </div>
 ```
 
-### Step 3 — init
+### Step 3 ï¿½ init
 
 In `$(document).ready`, **after** the page's own setup calls (`setDefaultHeader()`,
-`setReportMode()`, …) so `gcart_header` is populated:
+`setReportMode()`, ï¿½) so `gcart_header` is populated:
 
 ```js
 ReportTable.init({
     table: '#mainTable',   // the <table class="tb">
     bar: '#rtBar',         // the div from Step 1
-    onChange: render       // the page's OWN render function — name varies
+    onChange: render       // the page's OWN render function ï¿½ name varies
 });
 ```
 
@@ -147,12 +147,12 @@ onChange: function () {
 }
 ```
 
-### Step 4 — render the header through `headHtml()`
+### Step 4 ï¿½ render the header through `headHtml()`
 
 This is the step that actually makes the header interactive.
 
 ```js
-// BEFORE — hand-built
+// BEFORE ï¿½ hand-built
 thead.innerHTML = '<tr>' + cols.map(function(c) {
     const isNum = (c[3] === 'float' || c[3] === 'int');
     return '<th' + (isNum ? ' class="num"' : '') + '>' + c[1] + '</th>';
@@ -163,7 +163,7 @@ thead.innerHTML = ReportTable.headHtml(cols);
 ```
 
 `headHtml()` adds the `num` class for numeric columns itself and refreshes `#rtBar` as a side
-effect — nothing else to call.
+effect ï¿½ nothing else to call.
 
 > ?? **The trap that breaks everything silently.** `cols` must come from
 > `gcart_header.filter(...)`, never `.map()` or any copy. `headHtml()` uses `indexOf()` to map
@@ -177,7 +177,7 @@ effect — nothing else to call.
 
 **Stop here if the page has no Detail/Rekap-style mode.**
 
-### Step 5 (optional) — "Tampilan" switcher
+### Step 5 (optional) ï¿½ "Tampilan" switcher
 
 Only when the page *already* has a mode that swaps the column layout. This mirrors existing
 state; it does not create new state.
@@ -199,7 +199,7 @@ views: {
 
 Four rules:
 
-1. **`options` is mandatory.** Without it the switcher silently doesn't render — a `views` block
+1. **`options` is mandatory.** Without it the switcher silently doesn't render ï¿½ a `views` block
    with only `get`/`set` draws nothing.
 2. **`value` must be a string**, matching what `get()` returns (compared via `String()`).
 3. **Decide in `set()` whether to re-query.** Columns only rearranged ? `render()`. Each mode
@@ -215,13 +215,13 @@ Four rules:
 | `ReportTable.init(opts)` | once, in `$(document).ready` |
 | `ReportTable.headHtml(cols)` | inside render, to build `<thead>` |
 | `ReportTable.refresh()` | redraw just the bar (rarely needed) |
-| `ReportTable.reset()` | reset columns to `setDefaultHeader()` — same as the bar's "Reset kolom" |
+| `ReportTable.reset()` | reset columns to `setDefaultHeader()` ï¿½ same as the bar's "Reset kolom" |
 | `ReportTable.close()` | force-close gear menu + bar dropdowns |
 
 ### The "Reset kolom" button
 
 Rendered automatically at the **left end of the bar** whenever `window.doSetHeader` exists, so a
-Class A page gets it for free — no page-level markup needed. Clicking it:
+Class A page gets it for free ï¿½ no page-level markup needed. Clicking it:
 
 1. `alertify.confirm` (falls back to resetting straight away if alertify isn't loaded)
 2. `doSetHeader(g_modeReport, true)` ? re-runs `setDefaultHeader()` and saves
@@ -229,7 +229,7 @@ Class A page gets it for free — no page-level markup needed. Clicking it:
 4. `renderBar()` + an alertify success toast
 
 This differs from masterreport2's `doResetHeader()` (the "Reset ke default" link in the Atur Kolom
-modal), which resets and saves but does **not** re-render the main table — with that one the user
+modal), which resets and saves but does **not** re-render the main table ï¿½ with that one the user
 has to click *Tampilkan* again.
 
 > **Keep this button when the "Atur Kolom" modal is eventually retired.** It is the only remaining
@@ -244,7 +244,7 @@ The gear menu and bar delegate to masterreport2's functions, so the interactive 
 |---|---|---|
 | Hide column / restore from bar | `doButtonVisibility(i)` | flips `[2]`, saves |
 | Drag a heading | `doMoveHeader(from, to)` | reorders array, saves |
-| Decimal ± | `doSetDesimal(i, ±1)` | adjusts `[5]` (0–4), saves |
+| Decimal ï¿½ | `doSetDesimal(i, ï¿½1)` | adjusts `[5]` (0ï¿½4), saves |
 | "Tampilkan total" | `doButtonTotal(i)` | flips `[4]`, saves |
 
 Each calls `doSimpanHeader(...)` ? `globalfunctions_doSimpanHeader` ? `DBSIMPANHEADER`, keyed by
@@ -257,17 +257,17 @@ page href **and** `g_modeReport`. Each report mode remembers its own layout.
 | Symptom | Cause / fix |
 |---|---|
 | Nothing appears above the table | `#rtBar` missing, or `bar:` selector doesn't match its id |
-| Header looks normal, no grip/gear | Step 4 not done — still building `<thead>` by hand |
-| Gear opens but does nothing; drag does nothing | `cols` isn't from `gcart_header.filter(...)` — see Step 4 |
+| Header looks normal, no grip/gear | Step 4 not done ï¿½ still building `<thead>` by hand |
+| Gear opens but does nothing; drag does nothing | `cols` isn't from `gcart_header.filter(...)` ï¿½ see Step 4 |
 | "Tampilan" never shows | `views.options` missing or empty |
 | Tampilan shows "-" | `get()` returns a number but `options[].value` are strings |
-| Gear menu clipped inside the table | Don't restyle `.rt-colmenu` — it is `position:fixed` on `<body>` on purpose, because `.table-wrap` is `overflow:auto` |
+| Gear menu clipped inside the table | Don't restyle `.rt-colmenu` ï¿½ it is `position:fixed` on `<body>` on purpose, because `.table-wrap` is `overflow:auto` |
 | Bar dropdown renders under the table | z-index layering: toolbar 50, `.rt-bar` 45, sticky `thead` 20 |
 | Changes don't survive reload | `g_modeReport` not set before `doSetHeader()`, or `setDefaultHeader()` missing |
-| **A column you just added to `setDefaultHeader()` doesn't appear** | The user's saved layout in `DBSIMPANHEADER` wins — click **Reset kolom**. See §2 |
-| "Reset kolom" button missing from the bar | `window.doSetHeader` doesn't exist — the page isn't on `masterreport2` |
+| **A column you just added to `setDefaultHeader()` doesn't appear** | The user's saved layout in `DBSIMPANHEADER` wins ï¿½ click **Reset kolom**. See ï¿½2 |
+| "Reset kolom" button missing from the bar | `window.doSetHeader` doesn't exist ï¿½ the page isn't on `masterreport2` |
 | Numbers show `NaN` | field name doesn't match the proc's column, or `currencyNormalizer()` was skipped |
-| Blank cells for fields that exist | Proc casing differs (`Debet` vs `debet`) — read via `pickCI(r, key)` |
+| Blank cells for fields that exist | Proc casing differs (`Debet` vs `debet`) ï¿½ read via `pickCI(r, key)` |
 | Subtotals never appear | `gsum_issubtotal !== 1`, no column has `[4] === 1`, or `currentGroupby` isn't a real field |
 | "Filter Data" modal shows no columns | `getKolomFilter()` returns names not present in `gcart_header[i][0]` |
 | `ReportTable is not defined` | page doesn't extend `report.masterreport2` |
@@ -280,7 +280,7 @@ page href **and** `g_modeReport`. Each report mode remembers its own layout.
 - [ ] `.rt-hint` line (optional)
 - [ ] `ReportTable.init({ table, bar, onChange })` after the setup calls
 - [ ] `thead.innerHTML = ReportTable.headHtml(cols)`
-- [ ] `cols` from `gcart_header.filter(...)` — **not** `.map()`
+- [ ] `cols` from `gcart_header.filter(...)` ï¿½ **not** `.map()`
 - [ ] optional `views` with non-empty `options`, string values
-- [ ] Tested: drag, hide, restore, decimals, total — **and that they survive a reload**
+- [ ] Tested: drag, hide, restore, decimals, total ï¿½ **and that they survive a reload**
 - [ ] "Atur Kolom" modal shows the same state as the gear menu

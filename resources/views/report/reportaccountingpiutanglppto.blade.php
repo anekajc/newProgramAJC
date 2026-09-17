@@ -47,7 +47,7 @@
       <!-- Actions: search + filter modal + customize + tampilkan + export -->
       <div class="action-group">
         {{-- Dibuka lewat plugin jQuery (Bootstrap 4), BUKAN data-bs-toggle (Bootstrap 5) —
-             lihat aturan dua-Bootstrap di new-design-all-guide.md §5.1. --}}
+             lihat aturan dua-Bootstrap di new-design-all-report-guide.md §5.1. --}}
         <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
           <i class="fas fa-filter"></i> Filter
         </button>
@@ -181,7 +181,7 @@
         </h5>
         {{-- data-dismiss (BS4) = yang benar-benar menutup, karena modal ini dibuka lewat
              $.fn.modal milik BS4 (jQuery dimuat sesudah bundle BS5). data-bs-dismiss dibiarkan
-             untuk jaga-jaga. Lihat new-design-all-guide.md §5.1. --}}
+             untuk jaga-jaga. Lihat new-design-all-report-guide.md §5.1. --}}
         <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
                 onclick="$('#modalFilter').modal('hide')"></button>
       </div>

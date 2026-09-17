@@ -12,7 +12,7 @@
      @yield('input') (baris 35) berada di dalam blok komentar Blade baris 29-76, jadi
      section itu tidak pernah ikut dirender: #inputDate1/#inputDate2/#inputGudang tidak
      pernah ada di DOM dan makeTable() mengirim undefined ke SP_REPORTKARTUOPNAME
-     (persis jebakan di docs/new-design-all-guide.md #5.4). Sekarang dipindah ke
+     (persis jebakan di docs/new-design-all-report-guide.md #5.4). Sekarang dipindah ke
      @section('header2') yang memang di-yield layout. --}}
 @section('header2')
 <style>

@@ -1,7 +1,7 @@
 @extends('report.masterreport2')
 
 {{-- Table styling lives in public/css/report-table.css (loaded via report/newmaster2.blade.php).
-     Lihat docs/new-design-all-guide.md + docs/new-slider-table-guide.md +
+     Lihat docs/new-design-all-report-guide.md + docs/new-slider-table-guide.md +
      docs/new-filter-modal-ui-guide.md + docs/new-cust-supp-modal-guide.md. --}}
 
 @section('header2')
@@ -84,7 +84,7 @@
           <span class="rt-active-badge" id="filterBadge">0 aktif</span>
         </h5>
         {{-- Kedua atribut dismiss + onclick eksplisit: lihat aturan Bootstrap di
-             new-design-all-guide.md §5.1. --}}
+             new-design-all-report-guide.md §5.1. --}}
         <button type="button" class="btn-close" aria-label="Close" data-dismiss="modal" data-bs-dismiss="modal"
                 onclick="$('#modalFilter').modal('hide')"></button>
       </div>

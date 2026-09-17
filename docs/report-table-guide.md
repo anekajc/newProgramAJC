@@ -1,5 +1,5 @@
 > ## ⚠️ SUPERSEDED
-> Use **[new-design-all-guide.md](new-design-all-guide.md)** instead — it is the entry point, and
+> Use **[new-design-all-report-guide.md](new-design-all-report-guide.md)** instead — it is the entry point, and
 > routes to [new-slider-table-guide.md](new-slider-table-guide.md),
 > [new-filter-modal-ui-guide.md](new-filter-modal-ui-guide.md) and
 > [new-cust-supp-modal-guide.md](new-cust-supp-modal-guide.md).
