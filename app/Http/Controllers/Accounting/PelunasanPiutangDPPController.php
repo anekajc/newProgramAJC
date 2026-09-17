@@ -68,12 +68,12 @@ class PelunasanPiutangDPPController extends Controller
     return [$tglawal, $tglakhir];
   }
 
-  private function rentangTanggalOutstanding (Request $req, $periode) {
-    list($tglawal, $tglakhir) = $this->periodeRange($periode);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('outtglawal')))  { $tglawal  = $req->input('outtglawal'); }
+  // Outstanding hanya pakai satu batas tanggal (sampai tanggal akhir) - tunggakan lama
+  // tidak boleh hilang hanya karena ada batas bawah tanggal.
+  private function tanggalAkhirOutstanding (Request $req, $periode) {
+    list(, $tglakhir) = $this->periodeRange($periode);
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('outtglakhir'))) { $tglakhir = $req->input('outtglakhir'); }
-    if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
-    return [$tglawal, $tglakhir];
+    return $tglakhir;
   }
 
   // Sama persis dengan PenerimaanDPPController@headerTable - susunan/tampil/desimal
@@ -155,7 +155,7 @@ class PelunasanPiutangDPPController extends Controller
     return $this->headerTable(self::HREF, $this->kolomDefault(), true);
   }
 
-  private function queryOutstanding ($tglawal, $tglakhir) {
+  private function queryOutstanding ($tglakhir) {
     return DB::connection('SML')->select("
 select A.NoBukti+B.NOURUT KeyNOBUKTI,
 	A.NOBUKTI,
@@ -183,10 +183,10 @@ LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
 LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
 LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
                  FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
-where A.Lawan='113400' AND A.CustSuppL<>'' and A.TANGGAL between :tglawal and :tglakhir
+where A.Lawan='113400' AND A.CustSuppL<>'' and A.TANGGAL <= :tglakhir
 and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0
 order by A.TANGGAL desc, A.NOBUKTI desc
-" , ["tglawal" => $tglawal, "tglakhir" => $tglakhir]);
+" , ["tglakhir" => $tglakhir]);
   }
 
   private function queryPelunasan ($tglawal, $tglakhir) {
@@ -238,7 +238,7 @@ order by A.Tanggal desc, A.NoBukti desc" , ["tglawal" => $tglawal, "tglakhir" =>
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
 
     list($pldTglAwal, $pldTglAkhir) = $this->periodeRange($periode);
-    list($outTglAwal, $outTglAkhir) = $this->rentangTanggalOutstanding($req, $periode);
+    $outTglAkhir = $this->tanggalAkhirOutstanding($req, $periode);
 
     // Kedua tabel digambar JS lewat loadAll(), jadi tidak ada lagi baris data
     // yang dikirim dari sini.
@@ -249,7 +249,6 @@ order by A.Tanggal desc, A.NoBukti desc" , ["tglawal" => $tglawal, "tglakhir" =>
       "tempListPerkiraan" => $tempListPerkiraan,
       "pldTglAwal" => $pldTglAwal,
       "pldTglAkhir" => $pldTglAkhir,
-      "outTglAwal" => $outTglAwal,
       "outTglAkhir" => $outTglAkhir,
     ]);
 
@@ -279,8 +278,8 @@ order by A.Tanggal desc, A.NoBukti desc" , ["tglawal" => $tglawal, "tglakhir" =>
     list($tglawal, $tglakhir) = $this->rentangTanggal($req, $periode);
     $tempPelunasan = $this->queryPelunasan($tglawal, $tglakhir);
 
-    list($outAwal, $outAkhir) = $this->rentangTanggalOutstanding($req, $periode);
-    $tempOutstanding = $this->queryOutstanding($outAwal, $outAkhir);
+    $outAkhir = $this->tanggalAkhirOutstanding($req, $periode);
+    $tempOutstanding = $this->queryOutstanding($outAkhir);
 
     $header    = $this->headerTable(self::HREF, $this->kolomDefault());
     $headerOut = $this->headerTable(self::HREF_OUT, $this->kolomDefaultOutstanding());
@@ -670,6 +669,62 @@ order by A.KasBank, A.NoFaktur, A.Perkiraan, A.Urut
       return 1;
   }
 
+  // Master customer untuk modal koreksi customer NO NAME di tab Outstanding.
+  public function listCustomer () {
+    return DB::connection('SML')->select("
+      select KODECUSTSUPP, NAMACUSTSUPP, ALAMAT1
+      from DBCUSTSUPP where JENIS = 1 and IsAktif = 1
+      order by NAMACUSTSUPP");
+  }
 
+  // Koreksi customer satu baris outstanding (NoBukti+urut) di dbTransaksi. Tidak ada
+  // stored procedure yang menyediakan ini - dbTransaksi.CustSuppL memang satu-satunya
+  // tempat penyimpanan customer baris outstanding (lihat queryOutstanding()).
+  public function spKoreksiCustomer (Request $req) {
+    $kodemenu = '02031';
+    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, 'pelunasanpiutangdpp');
+    if (!$akses || !$akses->ISKOREKSI) {
+      return 'No access';
+    }
+
+    $nobukti = (string) $req->input('nobukti');
+    $urut    = $req->input('urut');
+    $kode    = (string) $req->input('kodecustsupp');
+
+    if ($kode === '' || $kode === 'CZ999') {
+      return 'Customer tujuan tidak valid';
+    }
+
+    $cust = DB::connection('SML')->select(
+      "select KODECUSTSUPP from DBCUSTSUPP where KODECUSTSUPP = :kode and JENIS = 1 and IsAktif = 1",
+      ["kode" => $kode]
+    );
+    if (count($cust) === 0) {
+      return 'Customer tujuan tidak ditemukan';
+    }
+
+    $baris = DB::connection('SML')->select(
+      "select NoBukti from dbTransaksi where NoBukti = :nobukti and urut = :urut and Lawan = '113400'",
+      ["nobukti" => $nobukti, "urut" => $urut]
+    );
+    if (count($baris) === 0) {
+      return 'Baris outstanding tidak ditemukan';
+    }
+
+    $sudahDibayar = DB::connection('SML')->select(
+      "select UrutDPP from DBTerimaDPPDET where NODPP = :nobukti and UrutDPP = :urut",
+      ["nobukti" => $nobukti, "urut" => $urut]
+    );
+    if (count($sudahDibayar) > 0) {
+      return 'Baris ini sudah ada pelunasan, tidak bisa dikoreksi customernya';
+    }
+
+    DB::connection('SML')->update(
+      "update dbTransaksi set CustSuppL = :kode where NoBukti = :nobukti and urut = :urut and Lawan = '113400'",
+      ["kode" => $kode, "nobukti" => $nobukti, "urut" => $urut]
+    );
+
+    return 1;
+  }
 
 }
