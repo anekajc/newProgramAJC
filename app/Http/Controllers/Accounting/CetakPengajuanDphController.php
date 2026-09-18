@@ -83,36 +83,23 @@ class CetakPengajuanDphController extends Controller
 
 
 
-        $tempPenerimaan = DB::connection("SML")->select("
-        declare @Tahun int, @Bulan int
+        $tempPenerimaan = DB::connection("SML")->select("declare @Tahun int, @Bulan int
 
-select @Tahun=:tahun, @Bulan=:bulan
+    select @Tahun= :tahun , @Bulan= :bulan
 
-Select A.nobukti, a.tanggal, a.valas, 0.00 nilai,b.dibayar, A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-       A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-       A.IsOtorisasi3, A.OtoUser3, A.TglOto3,
-       A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-       A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-       Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit) NeedOtorisasi
-        ,A.Userbatal,A.TglBatal,B.kl,B.KODECUSTSUPP,D.namacustsupp
-        , m1.NOBUKTI NOCETAK,M1.TANGGAL TGLCETAK,M1.USERCETAK ,M1.TGLTERIMA,M1.NAMAPENERIMA
-from dbDPH   a
---Left Outer Join (select NoBukti,NoFaktur,Sum(Dibayar)dibayar from dbDPHdet Group By NoBukti,NoFaktur)b on a.NoBukti=b.NoBukti
-Left Outer Join (select NoBukti,Sum(Dibayar)dibayar,Sum(KL) KL,KODECUSTSUPP from dbDPHdet Group By NoBukti,KODECUSTSUPP)b on a.NoBukti=b.NoBukti
---Left Outer Join (Select NoFaktur,Kredit ,KreditD  from dbHutPiut where Tipe='HT' and TipeTrans in('T','AWL'))c on c.NoFaktur=b.NoFaktur
-Left Outer join DbcustSupp D on B.KodeCustSupp=D.KodeCustSupp
-left outer join DBNOMORDPH M1 on A.NoBukti=M1.NOINVOICE
-where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and
-a.Tipe='DPH'
-AND m1.nobukti is not null
-order by m1.NOBUKTI,A.NoBukti" , 
-["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
+    Select 	A.NoBukti, A.NoUrut, A.Tanggal, A.NoDPP, A.KODECUSTSUPP, A.NamaCustSupp, A.NamaKota, A.Penagih,
+      Round(Sum(A.DIBAYAR),0) TotDIBAYAR, Sum(A.LB) TotLB, Sum(A.KL) TotKL,
+      A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+      A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+      A.IsOtorisasi5, A.OtoUser5, A.TglOto5, A.NeedOtorisasi
+    From vwTransTerimaDPP A
+    where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan  and A.pPLD=1
+    group by A.NoBukti, A.NoUrut, A.Tanggal, A.KODECUSTSUPP, A.NamaCustSupp, A.Penagih,
+      A.NoDPP, A.NamaKota,
+      A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+      A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+      A.IsOtorisasi5, A.OtoUser5, A.TglOto5, A.NeedOtorisasi
+    order by A.NOBUKTI" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
 
 
 
@@ -141,33 +128,23 @@ order by m1.NOBUKTI,A.NoBukti" ,
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("declare @Tahun int, @Bulan int, @Periode Varchar(30)
+    $tempOutstanding = DB::connection("SML")->select("
 
-select @Tahun= :tahun , @Bulan= :bulan
-
-select A.NoBukti+B.NOURUT KeyNOBUKTI,
-  A.NOBUKTI, B.NOURUT, A.TANGGAL,
-  A.Valas, ''Penagih,'' NoBukti ,C.namaCustSupp, A.CustSuppL,
-         case when A.Valas='IDR' then 0.00 else A.Debet+A.Kredit end JumlahD, (A.Debet+A.Kredit)*A.Kurs JumlahRp ,
-        A.urut urutTrans ,A.debet,A.Keterangan  ,a.CustSuppL ,Round(d.DIBAYAR,0) Dibayar , A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa  ,
-        isnull(D.LB,0) LB
-from dbTransaksi A
-LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
-LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
-LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
-LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
-                 FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
-where A.Lawan='113400' AND A.CustSuppL<>''  and A.TANGGAL>'03/28/2016'
-and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-        // $tempOutstanding = [];
-        // foreach ($tempOutstanding as $p) {
-        //   // code...
-        //   array_push($tempOutstanding, $p);
-        // }
+    select A.nobukti,A.tanggal,c.kodecustsupp,D.namacustsupp,B.nobukti nott,B.usercetak,B.TANGGAL tglcetak,
+    a.valas,E.kl,e.dibayar
+    from dbDPH A
+    left outer join DBNOMORDPH B on A.NoBukti=b.NOINVOICE
+    left outer join (select nobukti,kodecustsupp from DBDPHDET group by NoBukti,KODECUSTSUPP) c on a.NoBukti=c.NoBukti
+    left outer join DBCUSTSUPP d on c.KODECUSTSUPP=d.KODECUSTSUPP
+    Left Outer Join (select NoBukti,Sum(Dibayar)dibayar,Sum(KL) KL,KODECUSTSUPP from dbDPHdet Group By NoBukti,KODECUSTSUPP
+    )E on a.NoBukti=E.NoBukti
+    WHERE
+    B.NOBUKTI IS NULL  and A.nobukti like '%DPH%'
+    order by a.NoBukti
+    " , []);
 
 
-        $collection1 = collect($tempOutstanding)->groupBy('NOBUKTI');
+        $collection1 = collect($tempOutstanding)->groupBy('nobukti');
         $tempOutstanding1 = [];
         foreach ($collection1 as $p) {
           // code...

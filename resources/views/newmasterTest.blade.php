@@ -519,6 +519,7 @@
         .btn-primary {
             background: var(--blue);
             color: white;
+            border: 1.5px solid #60a5fa;
         }
 
         .btn-outline {

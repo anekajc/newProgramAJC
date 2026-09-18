@@ -130,17 +130,17 @@ Route::middleware('auth')->group(function () {
 // Route::post('/bankdetailCetak', [BankController::class, 'getDetailCetak']);
 
 // // CETAK PENGAJUAN DPH
-// Route::post('/cetakpengajuandphspnobukti', [BankController::class, 'getNoBukti']);
-// Route::get('/cetakpengajuandph' , [CetakPengajuanDphController::class, 'index']);
-// Route::post('/cetakpengajuandphdetailkoreksi' , [CetakPengajuanDphController::class, 'detailKoreksi']);
-// Route::post('/cetakpengajuandphdetailoutstanding' , [CetakPengajuanDphController::class, 'getDetailOutstanding']);
-// Route::post('/cetakpengajuandphlistproses' , [CetakPengajuanDphController::class, 'listProses']);
+Route::post('/cetakpengajuandphspnobukti', [BankController::class, 'getNoBukti']);
+Route::get('/cetakpengajuandph' , [CetakPengajuanDphController::class, 'index']);
+Route::post('/cetakpengajuandphdetailkoreksi' , [CetakPengajuanDphController::class, 'detailKoreksi']);
+Route::post('/cetakpengajuandphdetailoutstanding' , [CetakPengajuanDphController::class, 'getDetailOutstanding']);
+Route::post('/cetakpengajuandphlistproses' , [CetakPengajuanDphController::class, 'listProses']);
 
-// Route::post('/cetakpengajuandphspadd' , [CetakPengajuanDphController::class, 'spAdd']);
-// Route::post('/cetakpengajuandphspkoreksi' , [CetakPengajuanDphController::class, 'spKoreksi']);
-// Route::post('/cetakpengajuandphspproses' , [CetakPengajuanDphController::class, 'spProses']);
-// Route::get('/cetakpengajuandphloadall' , [CetakPengajuanDphController::class, 'loadAll'] );
-// Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
+Route::post('/cetakpengajuandphspadd' , [CetakPengajuanDphController::class, 'spAdd']);
+Route::post('/cetakpengajuandphspkoreksi' , [CetakPengajuanDphController::class, 'spKoreksi']);
+Route::post('/cetakpengajuandphspproses' , [CetakPengajuanDphController::class, 'spProses']);
+Route::get('/cetakpengajuandphloadall' , [CetakPengajuanDphController::class, 'loadAll'] );
+Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
 
 // Giro Diterima
 Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
