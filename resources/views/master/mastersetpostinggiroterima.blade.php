@@ -6,14 +6,14 @@
 <div class="container-fluid">
 
   <!-- <div id="qrcode"></div> -->
-  <div class="row">
+  {{-- <div class="row">
     <div class="col-6 text-left">
       <h1>Master Set Posting Giro Terima</h1>
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Posting Giro Terima</button>
     </div>
-  </div>
+  </div> --}}
 <!-- <button onclick="loadAll()">tes</button> -->
 </div>
 <div>
@@ -297,7 +297,8 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-
+  document.getElementById('breadcrumb').innerHTML = "Master Posting Giro Terima";
+  
   $('#tabel').DataTable().destroy();
 
   $.ajax({

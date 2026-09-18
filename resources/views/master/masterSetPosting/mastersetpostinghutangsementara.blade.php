@@ -37,12 +37,12 @@
     <span class="sp-crumb-active">Satuan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Posting Hutang Sementara</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Hutang Sementara</button>
-  </div>
+  </div> --}}
 
   <div id="contentContainer" class="container-fluid">
 
@@ -84,7 +84,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('judulPosting').innerHTML = 'Master Posting Hutang Sementara'
+  document.getElementById('breadcrumb').innerHTML = "Master Posting Hutang Sementara";
 
   $('#tabel').DataTable().destroy();
 
@@ -117,9 +117,9 @@ function loadAll () {
   });
 
   if(dataRefresh.length == 1){
-  document.getElementById('divAdd').hidden = true
+  document.getElementById('AddVisibility').hidden = true
 } else {
-  document.getElementById('divAdd').hidden = false
+  document.getElementById('AddVisibility').hidden = false
 }
 
 
