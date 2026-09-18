@@ -137,6 +137,26 @@
     }
 
     .btn-action-sm:hover{ filter: brightness(0.97); transform: translateY(-1px); }
+    /* Deliberately NO !important on these five, even though it is tempting:
+       newmasterTest.blade.php / accounting/newmaster.blade.php / purchasing/newmasterx.blade.php
+       / report/newmasterxreport.blade.php each define their own unscoped
+       .btn-primary/.btn-danger in a <style> placed right after @yield('css') — i.e. loaded
+       AFTER this file. Equal specificity (single class each) + later source order means their
+       generic colors win over this tint at rest on every button that combines both
+       (e.g. class="btn btn-primary btn-action-primary btn-pill-primary", the standard gudang
+       pill-button convention) on any page using one of those four layouts.
+
+       !important here would win that rest state, but it would ALSO outrank
+       canvas/bootstrap.css's .btn-primary:hover / .btn-danger:hover — and those are what
+       supply the solid hover color the pill buttons animate towards (see the
+       `transition: background-color .3s` in the .btn-pill-* rule further down). The result
+       was a correctly-tinted button with no hover response at all, so !important was removed
+       again on purpose. Do not re-add it.
+
+       The fix for an affected page is page-local extra specificity, not !important —
+       e.g. `.mainpage/.modal .btn.btn-action-primary` (0,3,0 at rest, 0,4,0 on :hover) as
+       done in accounting/cetakpengajuandph.blade.php, which has the worked example and the
+       full cascade write-up in its @section('css'). */
     .btn-action-success{ color: var(--sp-green); border-color: #cdebd7; background: var(--sp-green-bg); }
     .btn-action-warning{ color: var(--sp-amber); border-color: #fbe3bd; background: var(--sp-amber-bg); }
     .btn-action-primary{ color: var(--sp-blue); border-color: #cfdcff; background: var(--sp-blue-bg); }
