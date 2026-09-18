@@ -11,15 +11,7 @@ use App\Model\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
-
-
-
-
-
-
 class KasController extends Controller
-
-
 {
 
   public function index(Request $req) {
@@ -31,14 +23,7 @@ class KasController extends Controller
        return redirect('/home');
     }
 
-
-
-
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-
-
-
-
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
 
@@ -175,16 +160,11 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
     where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
     and (a.NoBukti like '%BKK%' or a.NoBukti like '%BKM%' )
 
-
-
-
     group by A.NoUrut, A.NoBukti, A.Tanggal, A.Note, A.TipeTransHd, A.PerkiraanHd,
     	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
     	A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
     	A.IsOtorisasi5, A.OtoUser5, A.TglOto5
     Order by A.Nobukti
-
-
 
     ",[ "tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
 
@@ -209,11 +189,7 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
   }
 
   public function getDetail (Request $req ) {
-
-
-
         $tempOutstanding = DB::connection("SML")->select("
-
 
         declare @NoBukti varchar(30)
 
