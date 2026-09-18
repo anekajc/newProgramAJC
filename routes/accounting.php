@@ -324,18 +324,21 @@ Route::post('/pelunasanpiutangdppspkoreksi' , [PelunasanPiutangDPPController::cl
 Route::post('/pelunasanpiutangdppspotorisasi' , [PelunasanPiutangDPPController::class, 'spOtorisasi'] );
 Route::post('/pelunasanpiutangdppspbatalotorisasi' , [PelunasanPiutangDPPController::class, 'spBatalOtorisasi'] );
 Route::post('/pelunasanpiutangdppdetailCetak', [PelunasanPiutangDPPController::class, 'getDetailCetak']);
+Route::get('/pelunasanpiutangdpplistcustomer', [PelunasanPiutangDPPController::class, 'listCustomer']);
+Route::post('/pelunasanpiutangdppkoreksicustomer', [PelunasanPiutangDPPController::class, 'spKoreksiCustomer']);
 
 
-// // MEMORIAL KOREKSI
-// Route::get('/memorialkoreksi', [MemorialKoreksiController::class, 'index']);
-// Route::post('/memorialkoreksispdetail', [MemorialKoreksiController::class, 'getDetail']);
-// Route::post('/memorialkoreksilistperkiraan', [MemorialKoreksiController::class, 'listPerkiraan']);
-// Route::get('/memorialkoreksilistvalas', [MemorialKoreksiController::class, 'listValas']);
-// Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']);
-// Route::get('/memorialkoreksiloadall', [MemorialKoreksiController::class, 'loadAll']);
-// Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
-// Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
-// Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
+// MEMORIAL KOREKSI
+Route::get('/memorialkoreksi', [MemorialKoreksiController::class, 'index']);
+Route::get('/memorialkoreksiloadall', [MemorialKoreksiController::class, 'loadAll']);
+Route::post('/memorialkoreksiresetheader', [MemorialKoreksiController::class, 'resetHeader']);
+Route::post('/memorialkoreksispdetail', [MemorialKoreksiController::class, 'getDetail']);
+Route::post('/memorialkoreksilistperkiraan', [MemorialKoreksiController::class, 'listPerkiraan']);
+Route::get('/memorialkoreksilistvalas', [MemorialKoreksiController::class, 'listValas']);
+Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']);
+Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
+Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
+Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
 
 
 // BON SEMENTARA
