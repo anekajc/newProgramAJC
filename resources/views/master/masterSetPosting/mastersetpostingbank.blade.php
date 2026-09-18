@@ -38,12 +38,12 @@
     <span class="sp-crumb-active">Satuan</span>
   </div> --}}
 
-  <div class="sp-page-head">
+  {{-- <div class="sp-page-head">
     <div>
       <h1>Master Posting Bank</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Bank</button>
-  </div>
+  </div> --}}
 
   <div id="contentContainer" class="container-fluid">
 
@@ -85,7 +85,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('judulPosting').innerHTML = 'Master Posting Bank'
+  document.getElementById('breadcrumb').innerHTML = "Master Posting Bank";
 
   $('#tabel').DataTable().destroy();
 
