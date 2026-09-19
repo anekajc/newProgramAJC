@@ -373,7 +373,11 @@ Order by a.Nobukti,a.Urut
 
         select @IDUser = :username, @Perkiraan = :perkiraan, @TipeDK = 'D'
 
-        select A.NoFaktur+convert(varchar(8),A.Tanggal,102)+right('00000000'+cast(A.Urut as varchar(8)),8)+A.NoRetur MyKey, A.*
+        select A.NoFaktur+convert(varchar(8),A.Tanggal,102)+right('00000000'+cast(A.Urut as varchar(8)),8)+A.NoRetur MyKey,
+               A.NoFaktur, A.NoRetur, A.TipeTrans, A.KodeCustSupp, A.NoBukti, A.NoMsk, A.Urut,
+               A.Tanggal, A.JatuhTempo, A.Debet, A.Kredit, A.Saldo, A.Valas, A.Kurs,
+               A.DebetD, A.KreditD, A.SaldoD, A.KodeSales, A.Tipe, A.Perkiraan, A.Catatan,
+               A.IDUser, A.StatusUID, A.TipeDK, A.NoInvoice, A.Valas_, A.Kurs_, A.KursBayar
         from dbTempHutPiut A
         left outer join
                 (select NoFaktur, KodeCustSupp, min(Tanggal) Tanggal from dbTempHutPiut

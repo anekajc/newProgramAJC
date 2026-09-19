@@ -3853,21 +3853,15 @@ function mkPickCustomerPT (index) {
   // kerja - termasuk faktur yang sudah ditambahkan user. Cukup buka lagi kartunya apa adanya.
   let custLama = ($("#AddAddCustsuppPT").val() || '').trim()
   let custBaru = (item.KODECUSTSUPP || '').trim()
-  let customerSama = custLama !== '' && custLama === custBaru
 
-  document.getElementById("AddAddCustsuppPT").value = item.KODECUSTSUPP
-  document.getElementById("AddAddNamaCustPT").value = item.NAMACUSTSUPP
-  document.getElementById("AddAddNamaCustPTView").value = item.NAMACUSTSUPP
-  document.getElementById("AddAddKodePT").value = 'PT'
-  $('#rowCustomerPT').show()
+  if (custLama !== '' && custLama === custBaru) {
+    mkKartuBukaLagi()
+    return
+  }
 
   // Modal Customer dibiarkan terbuka sebagai induk: modal Kartu ditumpuk di atasnya,
   // supaya Batal di Kartu mengembalikan user ke daftar customer.
-  if (customerSama) {
-    mkKartuBukaLagi()
-  } else {
-    mkKartuBuka()
-  }
+  mkKartuBuka(item)
 }
 
 // Buka kembali modal Kartu tanpa seed ulang - dipakai kalau customer yang dipilih sama dengan
@@ -3886,10 +3880,10 @@ function mkKartuBukaLagi () {
 // Buka modal Kartu Piutang: seed faktur outstanding customer ini ke dbTempHutPiut lalu
 // tampilkan. Hanya dipanggil sekali per pemilihan customer - refresh berikutnya memakai
 // mkKartuRefresh() supaya baris tambahan user tidak ikut terhapus.
-function mkKartuBuka () {
+function mkKartuBuka (item) {
   let _token = $("#_token").val()
   let perkiraan = mkPerkiraanPT()
-  let kodecustsupp = $("#AddAddCustsuppPT").val()
+  let kodecustsupp = (item.KODECUSTSUPP || '').trim()
   let nobukti = $("#input_add_nobukti").val()
   let urut = mkUrutItemPT()
 
@@ -3899,12 +3893,21 @@ function mkKartuBuka () {
     async: false,
     data: { _token, perkiraan, kodecustsupp, nobukti, urut },
     success: function (res) {
+      // Pilihan customer baru dicatat SETELAH seed berhasil. Kalau dicatat lebih awal dan
+      // seed-nya gagal, pemilihan customer yang sama berikutnya akan dianggap "customer sama"
+      // lalu masuk jalur tanpa seed - kartunya jadi tampil kosong terus.
+      document.getElementById("AddAddCustsuppPT").value = item.KODECUSTSUPP
+      document.getElementById("AddAddNamaCustPT").value = item.NAMACUSTSUPP
+      document.getElementById("AddAddNamaCustPTView").value = item.NAMACUSTSUPP
+      document.getElementById("AddAddKodePT").value = 'PT'
+      $('#rowCustomerPT').show()
+
       // NoMsk yang dipakai baris temp - disimpan supaya tambah/hapus memakai nilai yang sama.
       document.getElementById("AddAddNoMskPT").value = res.nomsk
 
       document.getElementById("mkKartuJudulPerkiraan").innerHTML = perkiraan
       document.getElementById("mkKartuKodeCust").innerHTML = kodecustsupp
-      document.getElementById("mkKartuNamaCust").innerHTML = '[ ' + ($("#AddAddNamaCustPT").val() || '') + ' ]'
+      document.getElementById("mkKartuNamaCust").innerHTML = '[ ' + (item.NAMACUSTSUPP || '') + ' ]'
 
       mkKartuRender(res.data)
       mkKartuTutupFormTambah()
