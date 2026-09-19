@@ -325,11 +325,20 @@ Route::get('/memorialkoreksiloadall', [MemorialKoreksiController::class, 'loadAl
 Route::post('/memorialkoreksiresetheader', [MemorialKoreksiController::class, 'resetHeader']);
 Route::post('/memorialkoreksispdetail', [MemorialKoreksiController::class, 'getDetail']);
 Route::post('/memorialkoreksilistperkiraan', [MemorialKoreksiController::class, 'listPerkiraan']);
+Route::post('/memorialkoreksilisttitipan', [MemorialKoreksiController::class, 'listTitipan']);
+Route::post('/memorialkoreksisisatitipan', [MemorialKoreksiController::class, 'sisaTitipan']);
 Route::get('/memorialkoreksilistvalas', [MemorialKoreksiController::class, 'listValas']);
 Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']);
 Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
 Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
 Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
+// Penambahan piutang usaha saat Debet = perkiraan ber-Kode 'PT'
+Route::post('/memorialkoreksilistcustomerpt', [MemorialKoreksiController::class, 'listCustomerPT']);
+Route::post('/memorialkoreksiloadkartupt', [MemorialKoreksiController::class, 'loadKartuPT']);
+Route::post('/memorialkoreksigetkartupt', [MemorialKoreksiController::class, 'getKartuPT']);
+Route::post('/memorialkoreksiaddkartupt', [MemorialKoreksiController::class, 'addKartuPT']);
+Route::post('/memorialkoreksideletekartupt', [MemorialKoreksiController::class, 'deleteKartuPT']);
+Route::post('/memorialkoreksiclearkartupt', [MemorialKoreksiController::class, 'clearKartuPT']);
 
 
 // BON SEMENTARA
