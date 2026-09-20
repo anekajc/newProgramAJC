@@ -748,6 +748,52 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   font-weight: 600;
   background-color: #f8f9fa;
 }
+
+/* Kolom Action di paling kiri - dibuat sempit supaya tidak memakan ruang kolom data. */
+#tabel_mk_kartupt th:first-child,
+#tabel_mk_kartupt td.kolom-mk-action {
+  width: 52px;
+  white-space: nowrap;
+}
+
+/* Tombol hapus di kolom Action sengaja lebih kecil dari btn-sm bawaan. */
+.btn-mk-hapus {
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+}
+
+/* Tombol + per baris di alur Kredit (pelunasan). Warna biru soft yang sama dengan tombol
+   Tambah di alur Debet, tapi ukurannya disamakan dengan tombol hapus di kolom yang sama. */
+.btn-mk-lunas {
+  background-color: #eaf1ff;
+  border: 1px solid #c7dbff;
+  color: #1d4ed8;
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+  box-shadow: none;
+}
+.btn-mk-lunas:hover {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+.btn-mk-lunas:disabled {
+  opacity: .4;
+}
+
+/* Baris hasil pelunasan dibedakan merah, seperti tampilan form lama. */
+#tabel_mk_kartupt tr.mk-baris-lunas td {
+  color: #dc3545;
+  background-color: #fffbea;
+}
+
+/* Baris outstanding bisa didobel-klik untuk pelunasan otomatis, baris pelunasan untuk
+   menghapusnya - beri petunjuk kursor supaya kelihatan bisa diklik. */
+#tabel_mk_kartupt tr.mk-bisa-dobel { cursor: pointer; }
 </style>
 @endsection
 
@@ -1735,7 +1781,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Penambahan Piutang <span id="mkKartuJudulPerkiraan"></span></h5>
+        {{-- Judul ikut alurnya: "Penambahan Piutang" (Debet) atau "Pelunasan Piutang" (Kredit) --}}
+        <h5 class="modal-title"><span id="mkKartuJudul">Penambahan Piutang</span> <span id="mkKartuJudulPerkiraan"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1753,7 +1800,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
           <div class="row mb-2">
             <div class="col-6">
-              {{-- Tombol tambah baris faktur baru - sengaja di luar kolom Actions. --}}
+              {{-- Alur Debet: tombol tambah faktur di atas tabel. Alur Kredit tidak memakai ini -
+                   tombol + nya ada di tiap baris, lihat mkKartuRender(). --}}
               <button type="button" id="mkKartuButtonTambah" class="btn btn-mk-tambah" onclick="mkKartuBukaFormTambah()" title="Tambah faktur">
                 <i class="bi bi-plus-lg"></i>
               </button>
@@ -1770,6 +1818,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               <table id="tabel_mk_kartupt" class="data-table" style="overflow:auto;">
                 <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
                   <tr>
+                    <th style="padding: 4px 12px;" scope="col">Action</th>
                     <th style="padding: 4px 12px;" scope="col">No. Faktur</th>
                     <th style="padding: 4px 12px;" scope="col">No. Retur</th>
                     <th style="padding: 4px 12px;" scope="col">Tanggal</th>
@@ -1778,7 +1827,6 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                     <th style="padding: 4px 12px;" scope="col">Kredit</th>
                     <th style="padding: 4px 12px;" scope="col">Saldo</th>
                     <th style="padding: 4px 12px;" scope="col">Valas</th>
-                    <th style="padding: 4px 12px;" scope="col">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="tabel_data_mk_kartupt" class="text-left"></tbody>
@@ -1879,7 +1927,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <div class="col-md-4"><div class="form-group"><label>Jumlah</label></div></div>
                   <div class="col-md-8">
                     <div class="input-group form-group">
-                      <input id="mkKartuJumlah" type="text" class="form-control text-right">
+                      {{-- Format ribuan sama seperti #AddAddJumlah supaya angkanya konsisten. --}}
+                      <input id="mkKartuJumlah" type="text" class="form-control text-right" value="0.00" onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
                     </div>
                   </div>
                 </div>
@@ -3231,11 +3280,16 @@ function submitEdit () {
   uruttitipan = titipan.uruttitipan
   custsuppP = titipan.custsuppP
 
-  // Item piutang usaha yang sedang diedit: CustSuppP/KodeP dipertahankan apa adanya supaya
-  // update tidak menghapus keterkaitan baris DBHUTPIUT milik item ini.
+  // Item piutang usaha yang sedang diedit: pasangan CustSupp/Kode dipertahankan apa adanya
+  // supaya update tidak menghapus keterkaitan baris DBHUTPIUT milik item ini. Bisa di sisi
+  // Perkiraan (Debet, menambah piutang) atau sisi Lawan (Kredit, pelunasan).
   if ((itemEdit.KodeP || '').trim() === 'PT') {
     custsuppP = itemEdit.CustSuppP || ''
     kodeP = 'PT'
+  }
+  if ((itemEdit.KodeL || '').trim() === 'PT') {
+    custsuppL = itemEdit.CustSuppL || ''
+    kodeL = 'PT'
   }
 
   console.log({
@@ -3439,14 +3493,26 @@ function submitAdd () {
   uruttitipan = titipan.uruttitipan
   custsuppP = titipan.custsuppP
 
-  // Debet = perkiraan piutang usaha: customer terpilih disimpan ke dbTransaksi.CustSuppP dan
-  // KodeP diisi 'PT'. KodeP inilah yang dipakai spAdd() sebagai penanda untuk membersihkan
-  // dbTempHutPiut setelah sp_TransaksiMemorial memindahkan barisnya ke DBHUTPIUT.
-  let piutang = mkAmbilPiutang(perkiraan)
+  // Perkiraan piutang usaha: customer terpilih disimpan ke dbTransaksi bersama kode 'PT'.
+  // Sisi Debet (menambah piutang) memakai CustSuppP/KodeP, sisi Kredit (pelunasan) memakai
+  // CustSuppL/KodeL - mengikuti kolom mana yang memegang perkiraan piutangnya. Kode itu juga
+  // yang dipakai spAdd() sebagai penanda untuk membersihkan dbTempHutPiut setelah
+  // sp_TransaksiMemorial memindahkan barisnya ke DBHUTPIUT.
+  let piutang = mkAmbilPiutang()
   if (!piutang) { return }
   if (piutang.kodeP === 'PT') {
-    custsuppP = piutang.custsuppP
-    kodeP = piutang.kodeP
+    if (mkModePT === 'K') {
+      custsuppL = piutang.custsuppP
+      kodeL = 'PT'
+    } else {
+      custsuppP = piutang.custsuppP
+      kodeP = 'PT'
+    }
+
+    // Samakan dulu NoBukti/NoMsk baris kerja dengan bukti yang dipakai submit ini - buktinya
+    // bisa berganti setelah kartu disusun (ganti jenis transaksi, atau bukti di-refresh karena
+    // sudah terpakai). Tanpa ini baris piutangnya tidak terangkut dan hilang diam-diam.
+    if (!mkSamakanBuktiPiutang(nobukti)) { return }
   }
 
   console.log({
@@ -3772,9 +3838,20 @@ $(document).on('hidden.bs.modal', '.modal', function () {
 let listCustomerPT = []   // hasil browse customer
 let listKartuPT = []      // isi tabel kartu yang sedang tampil
 
-// Perkiraan PT yang sedang dipakai - dipakai semua endpoint kartu.
+// Alur mana yang sedang berjalan:
+//   'D' = Debet  -> menambah piutang (baris NoInvoice 'TBH')
+//   'K' = Kredit -> pelunasan piutang (baris NoInvoice 'LNS')
+let mkModePT = 'D'
+
+// Indeks baris faktur yang sedang dilunasi lewat form (alur Kredit). -1 = tidak ada.
+let mkBarisLunas = -1
+
+// Perkiraan PT yang sedang dipakai - dipakai semua endpoint kartu. Alur Debet memakai perkiraan
+// di sisi Debet, alur Kredit memakai yang di sisi Kredit (di dbTransaksi jadi kolom Lawan).
 function mkPerkiraanPT () {
-  return ($("#AddAddDebet").val() || '').trim()
+  return mkModePT === 'K'
+    ? ($("#AddAddKredit").val() || '').trim()
+    : ($("#AddAddDebet").val() || '').trim()
 }
 
 // Urut item memorial yang dikirim ke server. Rantai piutang ini hanya bisa dipicu saat
@@ -3891,7 +3968,7 @@ function mkKartuBuka (item) {
     url: "{!! url('memorialkoreksiloadkartupt') !!}",
     type: "post",
     async: false,
-    data: { _token, perkiraan, kodecustsupp, nobukti, urut },
+    data: { _token, perkiraan, kodecustsupp, nobukti, urut, tipedk: mkModePT },
     success: function (res) {
       // Pilihan customer baru dicatat SETELAH seed berhasil. Kalau dicatat lebih awal dan
       // seed-nya gagal, pemilihan customer yang sama berikutnya akan dianggap "customer sama"
@@ -3930,7 +4007,7 @@ function mkKartuRefresh () {
     url: "{!! url('memorialkoreksigetkartupt') !!}",
     type: "post",
     async: false,
-    data: { _token, perkiraan },
+    data: { _token, perkiraan, tipedk: mkModePT },
     success: function (res) { mkKartuRender(res) },
     error: function (err) {
       console.log(err)
@@ -3939,37 +4016,111 @@ function mkKartuRefresh () {
   })
 }
 
-// Gambar isi tabel kartu. Tombol Hapus HANYA untuk baris tambahan user - penandanya
-// NoInvoice = 'TBH', konvensi yang sama dengan data memorial lama. Baris faktur outstanding
-// bawaan tampil tanpa tombol apa pun karena itu data transaksi lain.
+/**
+ * Gambar isi tabel kartu. Kolom Action berbeda per alur:
+ *
+ *   Debet  - baris buatan sesi ini dapat tombol Hapus; baris outstanding tanpa tombol.
+ *   Kredit - baris outstanding dapat tombol + (pelunasan, mati kalau Sisa atau saldo faktur
+ *            sudah habis) dan bisa didobel-klik untuk melunasi otomatis; baris pelunasan
+ *            buatan sesi ini ditandai merah, dapat tombol Hapus, dan dobel-klik = hapus.
+ *
+ * Baris mana yang "buatan sesi ini" ditentukan mkBarisBuatanSesiIni(), bukan dari NoInvoice.
+ */
 function mkKartuRender (res) {
   listKartuPT = res || []
 
+  let sisa = mkKartuSisa()
+
+  // Kolom Saldo adalah saldo BERJALAN (akumulatif dari baris paling atas), bukan selisih per
+  // baris - sama seperti tampilan form lama.
+  let saldoBerjalan = 0
+
   let rowTable = ``
   listKartuPT.forEach((item, i) => {
-    let bisaHapus = (item.NoInvoice || '').trim() === 'TBH'
+    let debet = parseFloat(item.Debet) || 0
+    let kredit = parseFloat(item.Kredit) || 0
+    saldoBerjalan += debet - kredit
 
-    let aksi = bisaHapus
-      ? `<button class="btn btn-danger btn-sm" type="button" onclick="mkKartuHapus(${i})" title="Hapus"><i class="bi bi-trash"></i></button>`
-      : ``
+    let barisBuatanUser = mkBarisBuatanSesiIni(item)
+
+    let aksi = ``
+    let kelas = ``
+
+    if (barisBuatanUser) {
+      // Baris buatan user: bisa dihapus (tombol, dan dobel-klik di alur Kredit).
+      aksi = `<button class="btn btn-danger btn-mk-hapus" type="button" onclick="mkKartuHapus(${i})" title="Hapus"><i class="bi bi-trash"></i></button>`
+      if (mkModePT === 'K') { kelas = ' class="mk-baris-lunas mk-bisa-dobel" ondblclick="mkKartuHapus(' + i + ')"' }
+    } else if (mkModePT === 'K') {
+      // Baris faktur outstanding di alur Kredit: tombol + untuk melunasi. Mati kalau Sisa sudah
+      // habis atau saldo faktur itu sendiri sudah nol.
+      let bisaLunas = sisa > 0 && mkSaldoFaktur(item.NoFaktur) > 0
+      aksi = `<button class="btn btn-mk-lunas" type="button" onclick="mkKartuBukaFormLunas(${i})" title="Pelunasan"${bisaLunas ? '' : ' disabled'}><i class="bi bi-plus-lg"></i></button>`
+      if (bisaLunas) { kelas = ' class="mk-bisa-dobel" ondblclick="mkKartuLunasCepat(' + i + ')"' }
+    }
 
     rowTable += `
-    <tr>
+    <tr${kelas}>
+    <td class="text-center kolom-mk-action">${aksi}</td>
     <td>${item.NoFaktur}</td>
     <td>${item.NoRetur || ''}</td>
     <td>${formatDate(item.Tanggal)}</td>
     <td>${formatDate(item.JatuhTempo)}</td>
-    <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
-    <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
-    <td class="text-right">${formatAngka((parseFloat(item.Debet) - parseFloat(item.Kredit)).toFixed(2))}</td>
+    <td class="text-right">${formatAngka(debet.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(kredit.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(saldoBerjalan.toFixed(2))}</td>
     <td>${item.Valas}</td>
-    <td class="text-center">${aksi}</td>
     </tr>`
   })
+
+  // Tabel ini digambar manual (bukan DataTables), jadi baris placeholder ber-colspan aman.
+  if (!listKartuPT.length) {
+    rowTable = `<tr><td class="text-center" colspan=9>Belum ada data</td></tr>`
+  }
 
   document.getElementById("tabel_data_mk_kartupt").innerHTML = rowTable
 
   mkKartuHitung()
+}
+
+/**
+ * Apakah baris ini dibuat user di sesi kerja ini (bukan bawaan hasil seed)?
+ *
+ * Pembedanya StatusUID, BUKAN NoInvoice. sp_TempHutPiut mengisi StatusUID 'I' untuk baris yang
+ * baru ditambahkan, sedangkan baris hasil seed dari vwHutPiut StatusUID-nya kosong. Ini juga
+ * kondisi yang dipakai sp_TransaksiMemorial untuk memilih baris yang diposting
+ * (StatusUID in ('I','U')), jadi tampilan dan yang benar-benar tersimpan selalu sejalan.
+ *
+ * Memakai NoInvoice ('TBH'/'LNS') saja tidak cukup: faktur yang dulu pernah ditambah atau
+ * dilunasi lewat memorial LAIN ikut ter-seed dengan penanda yang sama, dan akan salah dihitung
+ * sebagai "Dibayar" di sesi ini maupun salah diberi tombol hapus.
+ */
+function mkBarisBuatanSesiIni (item) {
+  return (item.StatusUID || '').trim() === 'I'
+}
+
+// Sisa yang belum dialokasikan = Jumlah item memorial (dalam Rupiah) - yang sudah dipakai.
+function mkKartuSisa () {
+  let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+  let terpakai = 0
+
+  listKartuPT.forEach(function (item) {
+    if (!mkBarisBuatanSesiIni(item)) { return }
+    terpakai += (mkModePT === 'K' ? (parseFloat(item.Kredit) || 0) : (parseFloat(item.Debet) || 0))
+  })
+
+  return total - terpakai
+}
+
+// Saldo satu faktur di dalam kartu ini = seluruh Debet dikurangi seluruh Kredit untuk nomor
+// faktur tsb, termasuk baris pelunasan yang baru dibuat user. Dipakai untuk mematikan tombol +
+// dan membatasi nilai pelunasan supaya saldo faktur tidak pernah minus.
+function mkSaldoFaktur (nofaktur) {
+  let saldo = 0
+  listKartuPT.forEach(function (item) {
+    if (item.NoFaktur !== nofaktur) { return }
+    saldo += (parseFloat(item.Debet) || 0) - (parseFloat(item.Kredit) || 0)
+  })
+  return saldo
 }
 
 // Total kolom + ringkasan Total/Dibayar/Sisa.
@@ -3979,14 +4130,10 @@ function mkKartuRender (res) {
 function mkKartuHitung () {
   let totalDebet = 0
   let totalKredit = 0
-  let dibayar = 0
 
   listKartuPT.forEach(function (item) {
-    let debet = parseFloat(item.Debet) || 0
-    let kredit = parseFloat(item.Kredit) || 0
-    totalDebet += debet
-    totalKredit += kredit
-    if ((item.NoInvoice || '').trim() === 'TBH') { dibayar += debet }
+    totalDebet += parseFloat(item.Debet) || 0
+    totalKredit += parseFloat(item.Kredit) || 0
   })
 
   document.getElementById("mkKartuTotalDebet").innerHTML = formatAngka(totalDebet.toFixed(2))
@@ -3994,10 +4141,21 @@ function mkKartuHitung () {
   document.getElementById("mkKartuTotalSaldo").innerHTML = formatAngka((totalDebet - totalKredit).toFixed(2))
 
   let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+  let sisa = mkKartuSisa()
 
   document.getElementById("mkKartuRingkasTotal").innerHTML = formatAngka(total.toFixed(2))
-  document.getElementById("mkKartuRingkasDibayar").innerHTML = formatAngka(dibayar.toFixed(2))
-  document.getElementById("mkKartuRingkasSisa").innerHTML = formatAngka((total - dibayar).toFixed(2))
+  document.getElementById("mkKartuRingkasDibayar").innerHTML = formatAngka((total - sisa).toFixed(2))
+  document.getElementById("mkKartuRingkasSisa").innerHTML = formatAngka(sisa.toFixed(2))
+
+  // Alur Debet: tombol Tambah di atas tabel. Alur Kredit: tombolnya per baris, dan yang di atas
+  // disembunyikan.
+  let tombolTambah = document.getElementById("mkKartuButtonTambah")
+  if (mkModePT === 'K') {
+    $('#mkKartuButtonTambah').hide()
+  } else {
+    $('#mkKartuButtonTambah').show()
+    tombolTambah.disabled = false
+  }
 }
 
 function mkIkatSearchKartuPT () {
@@ -4014,12 +4172,17 @@ function mkIkatSearchKartuPT () {
   })
 }
 
-// Panel tambah faktur. Jumlah-nya mengikuti Jumlah di form item memorial, sesuai permintaan -
-// bukan mengikuti Sisa. Valas & Kurs ikut item dan dikunci.
+// Panel tambah faktur (alur DEBET). Jumlah-nya mengikuti Jumlah di form item memorial, sesuai
+// permintaan - bukan mengikuti Sisa. Valas & Kurs ikut item dan dikunci.
 function mkKartuBukaFormTambah () {
+  mkBarisLunas = -1
+
   document.getElementById("mkKartuNoFaktur").value = ''
+  document.getElementById("mkKartuNoFaktur").disabled = false
   document.getElementById("mkKartuTanggal").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuTanggal").disabled = false
   document.getElementById("mkKartuJatuhTempo").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuJatuhTempo").disabled = false
   document.getElementById("mkKartuValas").value = $("#AddAddValas").val()
   document.getElementById("mkKartuKurs").value = $("#AddAddKurs").val()
   document.getElementById("mkKartuJumlah").value = $("#AddAddJumlah").val()
@@ -4028,12 +4191,72 @@ function mkKartuBukaFormTambah () {
   $('#mkKartuFormTambah').show()
 }
 
+// Panel pelunasan (alur KREDIT) untuk satu baris faktur. Semua kolom terkunci kecuali Jumlah
+// dan Catatan: No. Faktur & Jatuh Tempo ikut faktur yang dipilih, Tanggal Bukti ikut tanggal
+// memorial - persis seperti form lama.
+function mkKartuBukaFormLunas (index) {
+  let item = listKartuPT[index]
+  if (!item) { return }
+
+  let maks = mkMaksPelunasan(item)
+  if (maks <= 0) {
+    alertify.warning("Sisa sudah habis atau faktur ini sudah lunas")
+    return
+  }
+
+  mkBarisLunas = index
+
+  document.getElementById("mkKartuNoFaktur").value = item.NoFaktur
+  document.getElementById("mkKartuNoFaktur").disabled = true
+  document.getElementById("mkKartuTanggal").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuTanggal").disabled = true
+  document.getElementById("mkKartuJatuhTempo").value = formatDate(item.JatuhTempo)
+  document.getElementById("mkKartuJatuhTempo").disabled = true
+  document.getElementById("mkKartuValas").value = item.Valas
+  document.getElementById("mkKartuKurs").value = formatAngka(parseFloat(item.Kurs).toFixed(2))
+  document.getElementById("mkKartuJumlah").value = formatAngka(maks.toFixed(2))
+  document.getElementById("mkKartuCatatan").value = ''
+
+  $('#mkKartuFormTambah').show()
+}
+
+// Nilai pelunasan terbesar yang boleh untuk satu faktur: tidak melebihi Sisa yang belum
+// dialokasikan, dan tidak melebihi saldo faktur itu sendiri (supaya saldonya tidak minus).
+function mkMaksPelunasan (item) {
+  let sisa = mkKartuSisa()
+  let saldoFaktur = mkSaldoFaktur(item.NoFaktur)
+  return Math.min(sisa, saldoFaktur)
+}
+
+// Dobel-klik di baris faktur outstanding: langsung lunasi sebesar mkMaksPelunasan() tanpa
+// membuka form. Kalau saldo fakturnya lebih kecil dari Sisa, Sisa masih tersisa untuk faktur
+// lain; kalau lebih besar, Sisa langsung habis jadi 0.
+function mkKartuLunasCepat (index) {
+  let item = listKartuPT[index]
+  if (!item) { return }
+
+  let jumlah = mkMaksPelunasan(item)
+  if (jumlah <= 0) {
+    alertify.warning("Sisa sudah habis atau faktur ini sudah lunas")
+    return
+  }
+
+  mkKirimBarisKartu({
+    nofaktur: item.NoFaktur,
+    tanggal: $("#input_add_tanggal").val(),
+    jatuhtempo: formatDate(item.JatuhTempo),
+    jumlah: jumlah,
+    valas: item.Valas,
+    kurs: unformatAngka(item.Kurs),
+    catatan: ''
+  }, "Pelunasan ditambahkan")
+}
+
 function mkKartuTutupFormTambah () {
   $('#mkKartuFormTambah').hide()
 }
 
 function mkKartuSimpanTambah () {
-  let _token = $("#_token").val()
   let nofaktur = ($("#mkKartuNoFaktur").val() || '').trim()
   let tanggal = $("#mkKartuTanggal").val()
   let jatuhtempo = $("#mkKartuJatuhTempo").val()
@@ -4043,28 +4266,70 @@ function mkKartuSimpanTambah () {
   if (!tanggal || !jatuhtempo) { alertify.warning("Tanggal belum lengkap"); return }
   if (Number(jumlah) <= 0) { alertify.warning("Jumlah <= 0"); return }
 
+  let valas = $("#AddAddValas").val()
+  let kurs = unformatAngka($("#AddAddKurs").val())
+  let pesan = "Faktur ditambahkan"
+
+  // Alur Kredit: Jumlah boleh diubah user, tapi tidak boleh melebihi Sisa yang belum
+  // dialokasikan maupun saldo faktur yang sedang dilunasi.
+  if (mkModePT === 'K') {
+    let item = listKartuPT[mkBarisLunas]
+    if (!item) { alertify.warning("Baris faktur tidak ditemukkan"); return }
+
+    let sisa = mkKartuSisa()
+    if (Number(jumlah) > sisa) {
+      alertify.warning("Jumlah melebihi Sisa (" + formatAngka(sisa.toFixed(2)) + ")")
+      return
+    }
+
+    let saldoFaktur = mkSaldoFaktur(item.NoFaktur)
+    if (Number(jumlah) > saldoFaktur) {
+      alertify.warning("Jumlah melebihi saldo faktur (" + formatAngka(saldoFaktur.toFixed(2)) + ")")
+      return
+    }
+
+    valas = item.Valas
+    kurs = unformatAngka(item.Kurs)
+    pesan = "Pelunasan ditambahkan"
+  }
+
+  mkKirimBarisKartu({
+    nofaktur,
+    tanggal,
+    jatuhtempo,
+    jumlah,
+    valas,
+    kurs,
+    catatan: $("#mkKartuCatatan").val()
+  }, pesan)
+}
+
+// Satu pintu untuk menambah baris kartu - dipakai form Tambah (Debet), form Pelunasan (Kredit),
+// dan dobel-klik pelunasan cepat.
+function mkKirimBarisKartu (baris, pesanSukses) {
   $.ajax({
     url: "{!! url('memorialkoreksiaddkartupt') !!}",
     type: "post",
     async: false,
     data: {
-      _token,
-      nofaktur,
-      tanggal,
-      jatuhtempo,
-      jumlah,
-      valas: $("#AddAddValas").val(),
-      kurs: unformatAngka($("#AddAddKurs").val()),
-      catatan: $("#mkKartuCatatan").val(),
+      _token: $("#_token").val(),
+      nofaktur: baris.nofaktur,
+      tanggal: baris.tanggal,
+      jatuhtempo: baris.jatuhtempo,
+      jumlah: baris.jumlah,
+      valas: baris.valas,
+      kurs: baris.kurs,
+      catatan: baris.catatan || '',
       perkiraan: mkPerkiraanPT(),
       kodecustsupp: $("#AddAddCustsuppPT").val(),
       nobukti: $("#input_add_nobukti").val(),
-      urut: mkUrutItemPT()
+      urut: mkUrutItemPT(),
+      tipedk: mkModePT
     },
     success: function (res) {
       mkKartuRender(res)
       mkKartuTutupFormTambah()
-      alertify.success("Faktur ditambahkan")
+      alertify.success(pesanSukses)
     },
     error: function (err) {
       console.log(err)
@@ -4098,7 +4363,8 @@ function mkKartuHapus (index) {
           jatuhtempo: item.JatuhTempo,
           valas: item.Valas,
           kurs: item.Kurs,
-          perkiraan: item.Perkiraan
+          perkiraan: item.Perkiraan,
+          tipedk: mkModePT
         },
         success: function (res) {
           mkKartuRender(res)
@@ -4109,8 +4375,10 @@ function mkKartuHapus (index) {
           alertify.warning('Terjadi kesalahan silahkan refresh browser')
         }
       })
-    },
-    function () {}).set('labels', { ok: 'Ya', cancel: 'Batal' })
+    }
+    , function () {
+      console.log('no')
+    })
 }
 
 // Bersihkan pilihan customer + baris kerja di dbTempHutPiut. Dipanggil kalau Debet berubah
@@ -4124,6 +4392,8 @@ function mkResetPT (bersihkanTemp = true) {
   $('#rowCustomerPT').hide()
 
   listKartuPT = []
+  mkBarisLunas = -1
+  mkModePT = 'D'
 
   if (bersihkanTemp) {
     $.ajax({
@@ -4174,7 +4444,7 @@ function mkAmbilTitipan (perkiraan, jumlah) {
 // usaha, kodeP/custsuppP dikirim kosong seperti semula. Kalau perkiraan piutang usaha, customer
 // wajib sudah dipilih lewat rantai browse Customer -> Kartu Piutang, karena tanpa CustSuppP
 // baris piutangnya tidak punya pemilik.
-function mkAmbilPiutang (perkiraan) {
+function mkAmbilPiutang () {
   let kodeP = ($("#AddAddKodePT").val() || '').trim()
 
   if (kodeP !== 'PT') {
@@ -4188,6 +4458,35 @@ function mkAmbilPiutang (perkiraan) {
   }
 
   return { kodeP, custsuppP }
+}
+
+// Menyamakan NoBukti/NoMsk baris tambahan di dbTempHutPiut dengan bukti yang benar-benar
+// dipakai saat submit - lihat MemorialKoreksiController::retagKartuPT(). Mengembalikan false
+// kalau gagal, supaya submit dibatalkan daripada menyimpan jurnal tanpa rincian piutangnya.
+function mkSamakanBuktiPiutang (nobukti) {
+  if (!nobukti) {
+    alertify.warning("No Bukti belum terbentuk, silahkan refresh browser")
+    return false
+  }
+
+  let berhasil = false
+
+  $.ajax({
+    url: "{!! url('memorialkoreksiretagkartupt') !!}",
+    type: "post",
+    async: false,
+    data: { _token: $("#_token").val(), nobukti, urut: mkUrutItemPT(), tipedk: mkModePT },
+    success: function (res) {
+      document.getElementById("AddAddNoMskPT").value = res.nomsk
+      berhasil = true
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+
+  return berhasil
 }
 
 // Dipanggil dari buttonEditItem() saat item yang dibuka Perkiraan-nya 113400. Mengambil sisa
@@ -4399,7 +4698,7 @@ function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan, kode) 
 
     if (perkiraan === '113400') {
       mkResetTitipan()
-      mkResetPT()
+      mkResetPTSisi('D')
       $('#rowNoTitipan').show();
       buttonAddListTitipan(true)
       return
@@ -4411,17 +4710,53 @@ function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan, kode) 
     // (pane Perkiraan) sengaja DIBIARKAN terbuka supaya jadi induk di tumpukan modal -
     // jangan panggil buttonAddListBatal() di cabang ini.
     if ((kode || '').trim() === 'PT') {
-      mkResetPT()
-      document.getElementById("AddAddKodePT").value = 'PT'
-      buttonAddListCustomerPT()
+      if (!mkMulaiAlurPT('D')) { return }
       return
     } else {
-      mkResetPT()
+      mkResetPTSisi('D')
+    }
+  }
+
+  // Sisi KREDIT dengan perkiraan piutang usaha = pelunasan piutang. Rantai modalnya sama,
+  // hanya isinya yang berbeda (lihat mkKartuRender / mkKartuBukaFormLunas).
+  if (idTujuan === 'Kredit') {
+    if ((kode || '').trim() === 'PT') {
+      if (!mkMulaiAlurPT('K')) { return }
+      return
+    } else {
+      mkResetPTSisi('K')
     }
   }
 
   buttonAddListBatal()
 
+}
+
+// Reset state piutang HANYA kalau yang sedang aktif memang milik sisi itu. Satu item memorial
+// cuma punya satu alur piutang (Debet ATAU Kredit), jadi mengganti perkiraan di sisi yang tidak
+// memegang alur itu tidak boleh ikut menghapus customer & baris kerja milik sisi sebelah.
+function mkResetPTSisi (sisi) {
+  if (!$("#AddAddKodePT").val()) { return }
+  if (mkModePT !== sisi) { return }
+  mkResetPT()
+}
+
+// Mulai rantai Customer -> Kartu untuk perkiraan piutang usaha. mode 'D' = menambah piutang
+// (dari Debet), 'K' = pelunasan (dari Kredit). Mengembalikan false kalau tidak bisa dimulai.
+function mkMulaiAlurPT (mode) {
+  // Tanpa No Bukti, baris kerja piutang tidak punya kunci ke item memorialnya dan tidak akan
+  // pernah terangkut sp_TransaksiMemorial - hentikan di sini daripada lanjut diam-diam.
+  if (!$("#input_add_nobukti").val()) {
+    alertify.warning("No Bukti belum terbentuk, silahkan refresh browser")
+    return false
+  }
+
+  mkResetPT()
+  mkModePT = mode
+  document.getElementById("AddAddKodePT").value = 'PT'
+  document.getElementById("mkKartuJudul").innerHTML = (mode === 'K' ? 'Pelunasan Piutang' : 'Penambahan Piutang')
+  buttonAddListCustomerPT()
+  return true
 }
 
 // Browse No Titipan (dbTransaksi.NOTITIPAN/URUTTITIPAN) - hanya dipanggil saat Debet = 113400.
@@ -4687,11 +5022,16 @@ function buttonEditItem (i) {
   // bisa ikut tertulis ke item ini. Dengan temp kosong, 'U' tidak menyentuh piutang sama sekali.
   mkResetPT()
 
-  if ((itemEdit.KodeP || '').trim() === 'PT') {
+  if ((itemEdit.KodeP || '').trim() === 'PT' || (itemEdit.KodeL || '').trim() === 'PT') {
+    let sisiKredit = (itemEdit.KodeL || '').trim() === 'PT'
+    let kodeCust = (sisiKredit ? itemEdit.CustSuppL : itemEdit.CustSuppP) || ''
+    let namaCust = (sisiKredit ? itemEdit.NamaCustSuppL : itemEdit.NamaCustSuppP) || ''
+
+    mkModePT = sisiKredit ? 'K' : 'D'
     document.getElementById("AddAddKodePT").value = 'PT'
-    document.getElementById("AddAddCustsuppPT").value = itemEdit.CustSuppP || ''
-    document.getElementById("AddAddNamaCustPT").value = itemEdit.NamaCustSuppP || ''
-    document.getElementById("AddAddNamaCustPTView").value = itemEdit.NamaCustSuppP || ''
+    document.getElementById("AddAddCustsuppPT").value = kodeCust
+    document.getElementById("AddAddNamaCustPT").value = namaCust
+    document.getElementById("AddAddNamaCustPTView").value = namaCust
     $('#rowCustomerPT').show();
   }
 

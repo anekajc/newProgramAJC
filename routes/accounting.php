@@ -338,6 +338,7 @@ Route::post('/memorialkoreksiloadkartupt', [MemorialKoreksiController::class, 'l
 Route::post('/memorialkoreksigetkartupt', [MemorialKoreksiController::class, 'getKartuPT']);
 Route::post('/memorialkoreksiaddkartupt', [MemorialKoreksiController::class, 'addKartuPT']);
 Route::post('/memorialkoreksideletekartupt', [MemorialKoreksiController::class, 'deleteKartuPT']);
+Route::post('/memorialkoreksiretagkartupt', [MemorialKoreksiController::class, 'retagKartuPT']);
 Route::post('/memorialkoreksiclearkartupt', [MemorialKoreksiController::class, 'clearKartuPT']);
 
 
