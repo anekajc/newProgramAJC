@@ -25,303 +25,76 @@ class TerimaTransferBarangController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
-    $tempOutstanding = DB::connection("SML")->select("
-    SELECT 	
-        B.NOBUKTI,
-        X.TANGGAL,
-        B.URUT,
-        B.KODEBRG,
-        C.NAMABRG,
-        '' AS Jns_Kertas,
-        '' AS Ukr_Kertas,
-        B.QNT,
-        B.QNT2,
-        B.SAT_1,
-        B.SAT_2,
-        B.ISI,
-        B.GdgAsal,
-        B.GdgTujuan,
-        D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
-        E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
-        0.00 AS GSM,
-        CASE 
-            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0) 
-            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0) 
-        END AS Qntx,
-        CASE 
-            WHEN B.nosat = 1 THEN C.sat1 
-            WHEN B.nosat = 2 THEN C.sat2 
-        END AS Satx,
-        X.NOTE
-    FROM dbTransferDet B    
-    LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
-    LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
-    LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
-    LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
-    LEFT JOIN (
-        SELECT NoTransfer, UrutTransfer, SUM(QNT) Qnt, SUM(QNT2) Qnt2 
-        FROM DBTRANSFERDET 
-        GROUP BY NoTransfer, UrutTransfer
-    ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
-    WHERE	
-        B.QNT - ISNULL(F.Qnt, 0) > 0 
-        AND ISNULL(B.isbatal, 0) = 0
-        AND ISNULL(X.pTERIMA, 0) = 0
-    ORDER BY B.Urut
-");
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
 
-
-    $tempPenerimaan = DB::connection("SML")->select("
-    SELECT 	
-        X.TANGGAL, 
-        B.NOBUKTI,
-        B.URUT,
-        B.KODEBRG,
-        C.NAMABRG,
-        '' AS Jns_Kertas,
-        '' AS Ukr_Kertas,
-        B.QNT,
-        B.QNT2,
-        B.SAT_1,
-        B.SAT_2,
-        B.ISI,
-        B.GdgAsal,
-        B.GdgTujuan,
-        D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
-        E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
-        0.00 AS GSM,
-        CASE 
-            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0) 
-            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0) 
-        END AS Qntx,
-        CASE 
-            WHEN B.nosat = 1 THEN C.sat1 
-            WHEN B.nosat = 2 THEN C.sat2 
-        END AS Satx,
-        X.NOTE
-    FROM dbTransferDet B    
-    LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
-    LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
-    LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
-    LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
-    LEFT JOIN (
-        SELECT NoTransfer, UrutTransfer, SUM(QNT) AS Qnt, SUM(QNT2) AS Qnt2 
-        FROM DBTRANSFERDET 
-        GROUP BY NoTransfer, UrutTransfer
-    ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
-    WHERE	
-        B.QNT - ISNULL(F.Qnt, 0) > 0 
-        AND ISNULL(B.isbatal, 0) = 0
-        AND ISNULL(X.pTERIMA, 0) = 1
-        AND MONTH(X.TANGGAL) = :bulan 
-        AND YEAR(X.TANGGAL) = :tahun
-    ORDER BY B.Urut
-", [
-    "tahun" => $periode->tahun, 
-    "bulan" => $periode->bulan
-]);
-
-    // $tempPenerimaan2 = DB::connection("SML")->select("
-    // SELECT 
-    //     A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-    //     A.NOBUKTI, A.NOURUT, A.TANGGAL, A.note AS Keterangan, 
-    //     A.IDUSER, A.NoPenyerahan,
-    //     A.KODECUSTSUPP, F.NamaCustSupp,
-    //     A.KODESLS, G.Nama AS NAMASLS,
-    //     AA.RefPR,
-    //     COUNT(B.URUT) AS JumlahItem,
-    //     SUM(CASE WHEN B.NOSAT = 1 THEN ISNULL(B.QNT, 0) ELSE ISNULL(B.QNT2, 0) END) AS TotalQntSample,
-    //     SUM(ISNULL(BB.QNTOUTSTANDING, 0)) AS TotalQntOutstanding
-    // FROM DBserahSAMPLE A
-    // LEFT JOIN DBserahSAMPLEDET B ON B.NoBukti = A.NoBukti
-    // LEFT JOIN DbCustSupp F ON F.KodeCustSupp = A.KODECUSTSUPP
-    // LEFT JOIN dbKaryawan G ON A.KODESLS = G.KeyNIK
-    // LEFT JOIN DBPRSAMPLE AA ON B.NOPRSAMPLE = AA.NOBUKTI
-    // LEFT JOIN (
-    //     SELECT 
-    //         A.NOBUKTI, A.URUT,
-    //         CASE 
-    //             WHEN A.NOSAT = 1 THEN ISNULL(A.QNT, 0) - ISNULL(B.Qnt1, 0) 
-    //             ELSE ISNULL(A.QNT2, 0) - ISNULL(B.Qnt2, 0) 
-    //         END AS QNTOUTSTANDING
-    //     FROM DBPRSAMPLEDET A 
-    //     LEFT JOIN (
-    //         SELECT NOPRSAMPLE, URUTPRSAMPLE, SUM(QNT) AS Qnt1, SUM(QNT2) AS Qnt2
-    //         FROM DBSERAHSAMPLEDET
-    //         GROUP BY NOPRSAMPLE, URUTPRSAMPLE
-    //     ) B ON A.NoBukti = B.NOPRSAMPLE AND A.Urut = B.URUTPRSAMPLE
-    // ) BB ON BB.NOBUKTI = B.NOPRSAMPLE AND BB.URUT = B.URUTPRSAMPLE
-    // WHERE MONTH(A.TANGGAL) = :bulan 
-    //     AND YEAR(A.TANGGAL) = :tahun
-    //     and A.IsOtorisasi1 = 1
-    //     AND ISNULL(AA.pKonsi, 0) = 1
-    // GROUP BY 
-    //     A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-    //     A.NOBUKTI, A.NOURUT, A.TANGGAL, A.note, 
-    //     A.IDUSER, A.NoPenyerahan,
-    //     A.KODECUSTSUPP, F.NamaCustSupp,
-    //     A.KODESLS, G.Nama,
-    //     AA.RefPR
-    // ORDER BY A.NOBUKTI", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
+    $loadAll = $this->fetchHeaderList($date1, $date2);
 
     return view('gudang.terimatransferbarang', [
         "menul0" => $menul0,
         "periode" => $periode,
-        "tempOutstanding" => $tempOutstanding,
-        "tempPenerimaan" => $tempPenerimaan,
-        // "tempPenerimaan2" => $tempPenerimaan2,
+        "date1" => $date1,
+        "date2" => $date2,
+        "listBelumTerima" => $loadAll['listBelumTerima'],
+        "listSdhTerima" => $loadAll['listSdhTerima'],
         "akses" => $akses
     ]);
-}
+  }
+
+  private function fetchHeaderList($date1, $date2) {
+    $query = "
+      SELECT
+          B.NOBUKTI,
+          X.TANGGAL,
+          X.NOTE,
+          MIN(D.Nama + ' (' + B.GdgAsal + ')') AS NamagdgAsal,
+          MIN(E.Nama + ' (' + B.GdgTujuan + ')') AS NamagdgTujuan,
+          ISNULL(X.pTERIMA, 0) AS IsTerima,
+          COUNT(*) AS JmlItem
+      FROM dbTransferDet B
+      LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
+      LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
+      LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
+      LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
+      LEFT JOIN (
+          SELECT NoTransfer, UrutTransfer, SUM(QNT) Qnt, SUM(QNT2) Qnt2
+          FROM DBTRANSFERDET
+          GROUP BY NoTransfer, UrutTransfer
+      ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
+      WHERE
+          B.QNT - ISNULL(F.Qnt, 0) > 0
+          AND ISNULL(B.isbatal, 0) = 0
+          AND CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
+      GROUP BY B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA
+    ";
+
+    $listBelumTerima = DB::connection("SML")->select($query . " HAVING ISNULL(X.pTERIMA, 0) = 0
+      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
+      ", ["date1" => $date1, "date2" => $date2]);
+
+    $listSdhTerima = DB::connection("SML")->select($query . " HAVING ISNULL(X.pTERIMA, 0) = 1
+      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
+      ", ["date1" => $date1, "date2" => $date2]);
+
+    return [
+        "listBelumTerima" => $listBelumTerima,
+        "listSdhTerima" => $listSdhTerima
+    ];
+  }
 
   public function loadAll(Request $request)
-{
-    $periode = NewPeriode::where('user_id', \Auth::user()->username)->first();
+  {
+    $date1 = $request->date1;
+    $date2 = $request->date2;
 
-    $tempOutstanding = DB::connection("SML")->select("
-    SELECT 	
-        B.NOBUKTI,
-        X.TANGGAL,
-        B.URUT,
-        B.KODEBRG,
-        C.NAMABRG,
-        '' AS Jns_Kertas,
-        '' AS Ukr_Kertas,
-        B.QNT,
-        B.QNT2,
-        B.SAT_1,
-        B.SAT_2,
-        B.ISI,
-        B.GdgAsal,
-        B.GdgTujuan,
-        D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
-        E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
-        0.00 AS GSM,
-        CASE 
-            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0) 
-            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0) 
-        END AS Qntx,
-        CASE 
-            WHEN B.nosat = 1 THEN C.sat1 
-            WHEN B.nosat = 2 THEN C.sat2 
-        END AS Satx,
-        X.NOTE
-    FROM dbTransferDet B    
-    LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
-    LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
-    LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
-    LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
-    LEFT JOIN (
-        SELECT NoTransfer, UrutTransfer, SUM(QNT) Qnt, SUM(QNT2) Qnt2 
-        FROM DBTRANSFERDET 
-        GROUP BY NoTransfer, UrutTransfer
-    ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
-    WHERE	
-        B.QNT - ISNULL(F.Qnt, 0) > 0 
-        AND ISNULL(B.isbatal, 0) = 0
-        AND ISNULL(X.pTERIMA, 0) = 0
-    ORDER BY B.Urut
-");
+    if (!$date1 || !$date2) {
+      $periode = NewPeriode::where('user_id', \Auth::user()->username)->first();
+      $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+      $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    }
 
-    $tempPenerimaan = DB::connection("SML")->select("
-    SELECT 	
-        X.TANGGAL,
-        B.NOBUKTI,
-        B.URUT,
-        B.KODEBRG,
-        C.NAMABRG,
-        '' AS Jns_Kertas,
-        '' AS Ukr_Kertas,
-        B.QNT,
-        B.QNT2,
-        B.SAT_1,
-        B.SAT_2,
-        B.ISI,
-        B.GdgAsal,
-        B.GdgTujuan,
-        D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
-        E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
-        0.00 AS GSM,
-        CASE 
-            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0) 
-            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0) 
-        END AS Qntx,
-        CASE 
-            WHEN B.nosat = 1 THEN C.sat1 
-            WHEN B.nosat = 2 THEN C.sat2 
-        END AS Satx,
-        X.NOTE
-    FROM dbTransferDet B    
-    LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
-    LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
-    LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
-    LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
-    LEFT JOIN (
-        SELECT NoTransfer, UrutTransfer, SUM(QNT) AS Qnt, SUM(QNT2) AS Qnt2 
-        FROM DBTRANSFERDET 
-        GROUP BY NoTransfer, UrutTransfer
-    ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
-    WHERE	
-        B.QNT - ISNULL(F.Qnt, 0) > 0 
-        AND ISNULL(B.isbatal, 0) = 0
-        AND ISNULL(X.pTERIMA, 0) = 1
-        AND MONTH(X.TANGGAL) = :bulan 
-        AND YEAR(X.TANGGAL) = :tahun
-    ORDER BY B.Urut
-", [
-    "tahun" => $periode->tahun, 
-    "bulan" => $periode->bulan
-]);
-
-    // $tempPenerimaan2 = DB::connection("SML")->select("
-    // SELECT 
-    //     A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-    //     A.NOBUKTI, A.NOURUT, A.TANGGAL, A.note AS Keterangan, 
-    //     A.IDUSER, A.NoPenyerahan,
-    //     A.KODECUSTSUPP, F.NamaCustSupp,
-    //     A.KODESLS, G.Nama AS NAMASLS,
-    //     AA.RefPR,
-    //     COUNT(B.URUT) AS JumlahItem,
-    //     SUM(CASE WHEN B.NOSAT = 1 THEN ISNULL(B.QNT, 0) ELSE ISNULL(B.QNT2, 0) END) AS TotalQntSample,
-    //     SUM(ISNULL(BB.QNTOUTSTANDING, 0)) AS TotalQntOutstanding
-    // FROM DBserahSAMPLE A
-    // LEFT JOIN DBserahSAMPLEDET B ON B.NoBukti = A.NoBukti
-    // LEFT JOIN DbCustSupp F ON F.KodeCustSupp = A.KODECUSTSUPP
-    // LEFT JOIN dbKaryawan G ON A.KODESLS = G.KeyNIK
-    // LEFT JOIN DBPRSAMPLE AA ON B.NOPRSAMPLE = AA.NOBUKTI
-    // LEFT JOIN (
-    //     SELECT 
-    //         A.NOBUKTI, A.URUT,
-    //         CASE 
-    //             WHEN A.NOSAT = 1 THEN ISNULL(A.QNT, 0) - ISNULL(B.Qnt1, 0) 
-    //             ELSE ISNULL(A.QNT2, 0) - ISNULL(B.Qnt2, 0) 
-    //         END AS QNTOUTSTANDING
-    //     FROM DBPRSAMPLEDET A 
-    //     LEFT JOIN (
-    //         SELECT NOPRSAMPLE, URUTPRSAMPLE, SUM(QNT) AS Qnt1, SUM(QNT2) AS Qnt2
-    //         FROM DBSERAHSAMPLEDET
-    //         GROUP BY NOPRSAMPLE, URUTPRSAMPLE
-    //     ) B ON A.NoBukti = B.NOPRSAMPLE AND A.Urut = B.URUTPRSAMPLE
-    // ) BB ON BB.NOBUKTI = B.NOPRSAMPLE AND BB.URUT = B.URUTPRSAMPLE
-    // WHERE MONTH(A.TANGGAL) = :bulan 
-    //     AND YEAR(A.TANGGAL) = :tahun
-    //     and A.IsOtorisasi1 = 1
-    //     AND ISNULL(AA.pKonsi, 0) = 1
-    // GROUP BY 
-    //     A.IsOtorisasi1, A.OtoUser1, A.TglOto1,
-    //     A.NOBUKTI, A.NOURUT, A.TANGGAL, A.note, 
-    //     A.IDUSER, A.NoPenyerahan,
-    //     A.KODECUSTSUPP, F.NamaCustSupp,
-    //     A.KODESLS, G.Nama,
-    //     AA.RefPR
-    // ORDER BY A.NOBUKTI", ["tahun" => $periode->tahun, "bulan" => $periode->bulan]);
-
-    return response()->json([
-        "tempOutstanding" => $tempOutstanding,
-        "tempPenerimaan" => $tempPenerimaan
-        // "tempPenerimaan2" => $tempPenerimaan2
-    ]);
-}
+    return response()->json($this->fetchHeaderList($date1, $date2));
+  }
 
   public function getDetail (Request $req ) {
     DB::connection('SML')->statement('exec sp_TempOutTerimatransferWeb ?,?,?,?,?,?,?', [\Auth::User()->username, $req->nobukti, (int)date('Y'), (int)date('m'),'','','']);
