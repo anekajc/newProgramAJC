@@ -19,7 +19,9 @@
     margin-left: auto;
   }
 
-  #tabelitem_header th {
+  #tabelitem_header th,
+  #detailKoreksiTable_header th,
+  #detailTransferBarangTable_header th {
     background: #f8f9fb !important;
     color: #6b7280 !important;
     font-size: 12px;
@@ -31,19 +33,29 @@
   }
 
   #tabelitem.table-bordered th,
-  #tabelitem.table-bordered td {
+  #tabelitem.table-bordered td,
+  #detailKoreksiTable.table-bordered th,
+  #detailKoreksiTable.table-bordered td,
+  #detailTransferBarangTable.table-bordered th,
+  #detailTransferBarangTable.table-bordered td {
     border-color: #e7e9ee !important;
   }
 
-  #tabelitem tbody tr:nth-of-type(odd) {
+  #tabelitem tbody tr:nth-of-type(odd),
+  #detailKoreksiTable tbody tr:nth-of-type(odd),
+  #detailTransferBarangTable tbody tr:nth-of-type(odd) {
     background-color: #fbfbfc;
   }
 
-  #tabelitem tbody tr:hover {
+  #tabelitem tbody tr:hover,
+  #detailKoreksiTable tbody tr:hover,
+  #detailTransferBarangTable tbody tr:hover {
     background-color: #f5f3ff;
   }
 
-  #tabelitem tbody td {
+  #tabelitem tbody td,
+  #detailKoreksiTable tbody td,
+  #detailTransferBarangTable tbody td {
     font-size: 12px;
     padding: 6px 12px;
     vertical-align: middle;
@@ -704,7 +716,7 @@
   </div>
 {{-- End Modal List gudang tujuan --}}
 
-<div id="page4" style="display: none; margin-top: -80px" class="mainpage container-fluid" >
+<div id="page4" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
       <h2>Detail Terima Transfer Barang</h2>
@@ -766,8 +778,8 @@
         </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-              <table id="detailKoreksiTable" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
+              <table id="detailKoreksiTable" class="table table-bordered table-hover table-responsive-lg"  >
+                <thead id="detailKoreksiTable_header" class="text-center">
                 <tr>
                   <th colspan="4">Deskripsi Barang</th>
                   <th colspan="2">Satuan</th>
@@ -791,7 +803,7 @@
   </div>
 </div>
 
-<div id="page5" style="display: none; margin-top: -80px" class="mainpage container-fluid" >
+<div id="page5" style="display: none" class="mainpage container-fluid" >
   <div class="row">
     <div class="col-8 text-left">
       <h2>Detail Transfer Barang</h2>
@@ -840,8 +852,8 @@
         </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-              <table id="detailTransferBarangTable" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
+              <table id="detailTransferBarangTable" class="table table-bordered table-hover table-responsive-lg"  >
+                <thead id="detailTransferBarangTable_header" class="text-center">
                 <tr>
                   <th scope="col">Kode Barang</th>
                   <th scope="col">Nama Barang</th>
