@@ -183,6 +183,69 @@
   </style>
 
   <style>
+  #mainTable th.rt-fixed-th,
+  #mainTable td:first-child {
+    min-width: 112px;
+  }
+
+  #mainTable td:first-child {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #mainTable td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #mainTable td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #mainTable tbody td:first-child .btn {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  #mainTable tbody tr:hover td:first-child .btn {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  #mainTable td:first-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #mainTable td:first-child .btn-warning {
+    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+  }
+
+  #mainTable td:first-child .btn-primary {
+    color: #2563eb; border-color: #cfdcff; background: #e8edff;
+  }
+
+  #mainTable td:first-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  #mainTable td:first-child .btn-info {
+    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
+  }
+  </style>
+
+  <style>
   .rodokNdukurTitik{
     margin-top:-12px;
   }
@@ -2245,26 +2308,24 @@ function filterByOtorisasi(rows, filterVal) {
 function aksiButtonsHtml(r) {
   const nobukti = r.nobukti;
   const detailBtn =
-    '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
-    nobukti + '\')"><i class="bi bi-info-circle"></i></button>';
+    '<button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+    nobukti + '\')"><i class="bi bi-info"></i></button>';
 
   if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
     // Sudah otorisasi (Detail + Batal Otorisasi + Print)
-    return '<div class="action-buttons">' + detailBtn +
-      '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-      nobukti + '\')"><i class="bi bi-key"></i></button>' +
-      '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-      nobukti + '\')"><i class="bi bi-printer"></i></button>' +
-      '</div>';
+    return detailBtn +
+      '<button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+      nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
+      '<button type="button" class="btn btn-info btn-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+      nobukti + '\')"><i class="bi bi-printer"></i></button>';
   }
 
-  // Belum otorisasi (Detail + Edit + Otorisasi)
-  return '<div class="action-buttons">' + detailBtn +
-    '<button type="button" class="btn-action-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
-    nobukti + '\')"><i class="bi bi-pencil"></i></button>' +
-    '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+  // Belum otorisasi (Detail + Otorisasi + Edit)
+  return detailBtn +
+    '<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
     nobukti + '\')"><i class="bi bi-key"></i></button>' +
-    '</div>';
+    '<button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
+    nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
 }
 
 function renderTabel() {
