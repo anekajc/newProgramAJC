@@ -22,196 +22,90 @@ class TransferBarangController extends Controller
   public function index(Request $req) {
     $kodemenu = '04101';
     $akses = app('App\Http\Controllers\GlobalController')->getAkses1($kodemenu , $req->path());
-    // $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
+    
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
     }
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    // $users = DB::connection("SML")->select('select * from new_users');
-    // $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    // $listData = DB::connection('SML')->select('SELECT * FROM DBMERK');
-
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
-    // $outstanding = VwPPL::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('IsJasa', 0)->where('pAgen', 1)->groupBy('NoBukti');
-    $tempOutstanding = DB::connection("SML")->select("Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-      A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-      A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                end As Bit) NeedOtorisasi,
-                B.GDGASAL
-    from dbPRTransfer a
-    Left Outer Join (SELECT A.NOBUKTI, A.GDGASAL
-            FROM DBPRtransferDET A
-            LEFT OUTER JOIN (select NOPRTRANSFER,URUTPRTRANSFER ,sum(QNT)Qnt1,SUM(QNT2) Qnt2
-                      from DBTRANSFERDET  group by NOPRTRANSFER,URUTPRTRANSFER
-                    ) B on A.NoBukti=B.NOPRTRANSFER AND A.Urut=B.URUTPRTRANSFER
-            WHERE ISNULL(A.QNT,0)-ISNULL(B.Qnt1,0) >0
-            GROUP BY A.NoBukti, A.GDGASAL
-            )B ON A.NoBukti=B.NoBukti
-    left outer join DBGUDANG C on C.KODEGDG = B.GDGASAL
-    where 
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                end As Bit)=0
-    AND B.NoBukti IS not NULL
-    and C.pSampit = 0");
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
 
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-      select @Tahun= :tahun, @Bulan= :bulan
-
-      Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
-              A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-              Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                        else 1
-                  end As Bit) NeedOtorisasi
-      from dbTransfer a
-      where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-      and isnull(pterima,0)=0
-      order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-  $tempOutstanding3 = DB::connection("SML")->select("select A.NOBUKTI,A.KODEBRG,A.QNT,A.QNT2,
-  A.NOPRTRANSFER,B.KODEBRG,B.QNT1 QntTerima,B.QNT2 Qnt2Terima,C.NAMABRG,A1.tanggal TglTransfer,C.Sat1 Sat ,
-  A1.NOTE
-  from DBTRANSFERDET A
-  LEFT OUTER JOIN (SELECT KODEBRG,NoTransfer,UrutTransfer,SUM(QNT) QNT1,SUM(QNT2) QNT2 
-            FROM DBTRANSFERDET
-          GROUP BY KODEBRG,NoTransfer,UrutTransfer
-            ) B ON A.NOBUKTI=B.NoTransfer AND A.URUT=B.UrutTransfer 
-  LEFT OUTER JOIN DBBARANG C ON A.KODEBRG=C.KODEBRG
-  LEFT OUTER JOIN DBTRANSFER A1 ON A.NOBUKTI=A1.NOBUKTI
-  WHERE ISNULL(NOPRTRANSFER,'')<>'' AND A.QNT - ISNULL(B.QNT1,0)<>0");
+    $listTransfer = $this->fetchHeaderList($date1, $date2);
 
     return view('gudang.transferbarang' , [
       "menul0" => $menul0,
       "periode" => $periode,
-      // "users"=> $users,
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
-
+      "date1" => $date1,
+      "date2" => $date2,
+      "listTransfer" => $listTransfer,
       "listBarangAll" => [] ,
       "akses" => $akses
     ]);
+  }
 
-}
+  // Query header gabungan: Non-Otorisasi + Otorisasi + Belum/Sudah Diterima.
+  // Otorisasi difilter lewat kolom NeedOtorisasi (0 = sudah, 1 = belum),
+  // status terima difilter lewat kolom IsTerima (dari pTERIMA), sama seperti pola
+  // di ubahkemasanbarang (filter Otorisasi) dan terimatransferbarang (filter Status Terima).
+  private function fetchHeaderList($date1, $date2) {
+    $query = "
+      SELECT
+          B.NOBUKTI,
+          X.TANGGAL,
+          X.NOTE,
+          MIN(D.Nama + ' (' + B.GdgAsal + ')') AS NamagdgAsal,
+          MIN(E.Nama + ' (' + B.GdgTujuan + ')') AS NamagdgTujuan,
+          ISNULL(X.pTERIMA, 0) AS IsTerima,
+          ISNULL(X.IsOtorisasi1, 0) AS IsOtorisasi1,
+          X.OtoUser1,
+          X.TglOto1,
+          CAST(
+            CASE WHEN
+                (CASE WHEN X.IsOtorisasi1 = 1 THEN 1 ELSE 0 END +
+                 CASE WHEN X.IsOtorisasi2 = 1 THEN 1 ELSE 0 END +
+                 CASE WHEN X.IsOtorisasi3 = 1 THEN 1 ELSE 0 END +
+                 CASE WHEN X.IsOtorisasi4 = 1 THEN 1 ELSE 0 END +
+                 CASE WHEN X.IsOtorisasi5 = 1 THEN 1 ELSE 0 END) = X.MaxOL
+              THEN 0 ELSE 1
+            END AS BIT
+          ) AS NeedOtorisasi,
+          COUNT(*) AS JmlItem
+      FROM dbTransferDet B
+      LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
+      LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
+      LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
+      LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
+      WHERE
+          ISNULL(B.isbatal, 0) = 0
+          AND CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
+      GROUP BY
+          B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA,
+          X.IsOtorisasi1, X.OtoUser1, X.TglOto1,
+          X.IsOtorisasi2, X.IsOtorisasi3, X.IsOtorisasi4, X.IsOtorisasi5, X.MaxOL
+      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
+    ";
 
-  public function loadAll () {
+    return DB::connection("SML")->select($query, ["date1" => $date1, "date2" => $date2]);
+  }
 
-    $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
-    //
-    $tempOutstanding = DB::connection("SML")->select("Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
-            A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-      A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-      A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                end As Bit) NeedOtorisasi,
-                B.GDGASAL
-    from dbPRTransfer a
-    Left Outer Join (SELECT A.NOBUKTI, A.GDGASAL
-            FROM DBPRtransferDET A
-            LEFT OUTER JOIN (select NOPRTRANSFER,URUTPRTRANSFER ,sum(QNT)Qnt1,SUM(QNT2) Qnt2
-                      from DBTRANSFERDET  group by NOPRTRANSFER,URUTPRTRANSFER
-                    ) B on A.NoBukti=B.NOPRTRANSFER AND A.Urut=B.URUTPRTRANSFER
-            WHERE ISNULL(A.QNT,0)-ISNULL(B.Qnt1,0) >0
-            GROUP BY A.NoBukti, A.GDGASAL
-            )B ON A.NoBukti=B.NoBukti
-    left outer join DBGUDANG C on C.KODEGDG = B.GDGASAL
-    where 
-    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                      else 1
-                end As Bit)=0
-    AND B.NoBukti IS not NULL
-    and C.pSampit = 0");
+  public function loadAll (Request $request) {
+    $date1 = $request->date1;
+    $date2 = $request->date2;
 
-    $tempOutstanding2 = DB::connection("SML")->select("declare @Tahun int, @Bulan int
+    if (!$date1 || !$date2) {
+      $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+      $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+      $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    }
 
-      select @Tahun= :tahun, @Bulan= :bulan
-
-      Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
-              A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-              Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                        else 1
-                  end As Bit) NeedOtorisasi
-      from dbTransfer a
-      where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-      and isnull(pterima,0)=0 and IsOtorisasi1 = 0
-      order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-  $tempOutstanding3 = DB::connection("SML")->select("select A.NOBUKTI,A.KODEBRG,A.QNT,A.QNT2,
-  A.NOPRTRANSFER,B.KODEBRG,B.QNT1 QntTerima,B.QNT2 Qnt2Terima,C.NAMABRG,A1.tanggal TglTransfer,C.Sat1 Sat ,
-  A1.NOTE
-  from DBTRANSFERDET A
-  LEFT OUTER JOIN (SELECT KODEBRG,NoTransfer,UrutTransfer,SUM(QNT) QNT1,SUM(QNT2) QNT2 
-            FROM DBTRANSFERDET
-          GROUP BY KODEBRG,NoTransfer,UrutTransfer
-            ) B ON A.NOBUKTI=B.NoTransfer AND A.URUT=B.UrutTransfer 
-  LEFT OUTER JOIN DBBARANG C ON A.KODEBRG=C.KODEBRG
-  LEFT OUTER JOIN DBTRANSFER A1 ON A.NOBUKTI=A1.NOBUKTI
-  WHERE ISNULL(NOPRTRANSFER,'')<>'' AND A.QNT - ISNULL(B.QNT1,0)<>0");
-
-  $tempOutstanding4 = DB::connection("SML")->select("
-      DECLARE @Tahun int, @Bulan int
-
-      select @Tahun= :tahun, @Bulan= :bulan
-
-      Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
-              A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-        A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-        A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
-              Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                            Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                        else 1
-                  end As Bit) NeedOtorisasi
-      from dbTransfer a
-      where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-      and isnull(pterima,0)=0 and IsOtorisasi1 = 1
-      order by A.NoBukti" , ["bulan" => $periode->bulan , "tahun" =>$periode->tahun]);
-
-    return [
-      "tempOutstanding" => $tempOutstanding,
-      "tempOutstanding2" => $tempOutstanding2,
-      "tempOutstanding3" => $tempOutstanding3,
-      "tempOutstanding4" => $tempOutstanding4
-    ];
-}
+    return response()->json([
+      "listTransfer" => $this->fetchHeaderList($date1, $date2)
+    ]);
+  }
 
   public function cekOtorisasi (Request $req) {
     $res = DB::connection('SML')->select("select isOtorisasi1 from dbpo where nobukti = :nobukti", ["nobukti" => $req->nobukti ]);
@@ -843,4 +737,4 @@ $listHeader = DB::connection('SML')->select("declare @Tahun int, @Bulan int
 
   
 
-}
+} 
