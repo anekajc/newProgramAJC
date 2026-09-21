@@ -1365,9 +1365,6 @@
       </div>
 
 
-
-
-
     <div class="container-fluid" style="overflow-x: auto;">
 
           <table id="detailTable" class="data-table">
@@ -1399,7 +1396,7 @@
     <div id="" class="container-fluid ">
       <div class="row">
         <div class="col-12 text-right">
-          <button type="button" id="buttonSubmitOto" class="btn btn-primary btn-lg" style="
+          <button type="button" id="buttonSubmitOto" class="btn btn-chip-biru btn-lg" style="
           height: 30px;
           padding: 4px 12px;
           border-radius: 20px;
@@ -1934,40 +1931,47 @@ function buttonBatalOto (nobukti) {
     return
   }
 
-  alertify.confirm('Batal Otorisasi', 'Batal Otorisasi RSPB ' + nobukti + ' ?',
-      function() {
-        let _token = $("#_token").val();
+  alertify.prompt("Batal Otorisasi","Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  function(evt, value) {
+    let xpket = value;
 
+    if (xpket==''){
+      alertify.warning('Keterangan harus diisi.');
+      return
+    }
+    let _token = $("#_token").val();
 
+    $.ajax({
+      url: "{!! url('retursuratjalanspbataloto') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token,
+        nobukti,
+        pket: value
 
-        $.ajax({
-          url: "{!! url('retursuratjalanspbataloto') !!}",
-          type: "post",
-          async: false,
-          data: {
-            _token,
-            nobukti
+      },
+      success: function(res) {
+        console.log('!', res)
+        loadAll()
 
-          },
-          success: function(res) {
-            console.log('!', res)
-            loadAll()
+        // lockFormAdd()
 
-            // lockFormAdd()
+        alertify.success('Berhasil Batal Otorisasi RSPB')
 
-            alertify.success('Berhasil Batal Otorisasi RSPB')
-
-          },
-          error: function (err) {
-            console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
-          }
-
-        })
+      },
+      error: function (err) {
+        console.log(err)
+        loadAll()
+        alertify.error('Batal otorisasi kemungkinan sudah tersimpan, namun terjadi kesalahan pada proses lanjutan. Data telah dimuat ulang -- silahkan periksa status terbaru pada tabel.')
       }
-    ,function(){
-      console.log('no')
-    });
+
+    })
+  }
+  ,function(){
+    console.log('no')
+    alertify.error("Action cancelled");
+  });
 }
 
 function submitOto () {
