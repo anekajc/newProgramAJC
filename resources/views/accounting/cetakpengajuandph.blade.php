@@ -42,11 +42,12 @@
     <link rel="stylesheet" href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
 
-{{-- .dph-table-outer/.dph-table-wrap/.dph-tb — skin for tables inside the page2/page3
+    {{-- .dph-table-outer/.dph-table-wrap/.dph-tb — skin for tables inside the page2/page3
      forms (outside .tb-report, so report-table.css's .tb classes don't apply here per
      new-design-gudang-style-guide.md §3). Shared with accounting/pengajuandph.blade.php's
      own analogous page2 table — reused rather than duplicated, per that file's own note. --}}
-<link rel="stylesheet" href="{!! URL::asset('css/pengajuandphtunai.css') !!}?v={{ @filemtime(base_path('public/css/pengajuandphtunai.css')) ?: '1' }}">
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/pengajuandphtunai.css') !!}?v={{ @filemtime(base_path('public/css/pengajuandphtunai.css')) ?: '1' }}">
 
     {{-- #page3 pill-button SHAPE only -----------------------------------------------
      The colour/hover half of this page's pill buttons is fixed centrally now — see the
@@ -151,7 +152,7 @@
         #tabel_add_list_customer_filter {
             display: flex;
             align-items: flex-end;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         #tabel_add_list_customer_filter label input {
@@ -165,7 +166,7 @@
         #tabel_add_list_noinvoice_filter {
             display: flex;
             align-items: flex-end;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         #tabel_add_list_noinvoice_filter label input {
@@ -179,7 +180,7 @@
         #tabel_add_list_barang_filter {
             display: flex;
             align-items: flex-end;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         #tabel_add_list_barang_filter label input {
@@ -193,7 +194,7 @@
         #tabel_add_list_nobeli_filter {
             display: flex;
             align-items: flex-end;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         #tabel_add_list_nobeli_filter label input {
@@ -209,7 +210,7 @@
             align-items: flex-end;
             margin-top: 8px;
             margin-right: 10px;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
 
@@ -237,7 +238,7 @@
             align-items: flex-end;
             margin-top: 8px;
             margin-right: 10px;
-            margin-bottom: -10px;
+            margin-bottom: 0px;
         }
 
         #tabel2_filter label input {
@@ -487,7 +488,7 @@
         </div>
 
         <div id= "formAdd" class="">
-            <div id="" class="">
+            <div id="formBsGrid" class="">
                 <div class="">
                     <!-- <h1>Tes Modal</h1> -->
                     <div class="container-fluid">
@@ -536,30 +537,27 @@
                         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
                             <div class="dph-table-outer">
-                              <div class="dph-table-wrap">
-                                <table id="addTable" class="dph-tb">
-                                  <thead id="addTableHead">
-                                    <tr>
-                                      <th scope="col">No. Invoice</th>
-                                      <th scope="col">Supplier</th>
-                                      <th scope="col">Valas</th>
-                                      <th scope="col" class="num">Dibayar</th>
-                                      <th scope="col" class="num">KL</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody id="addTableData" class="text-left">
-                                    <tr>
-                                      <td colspan="5" class="text-center">Belum ada data</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
+                                <div class="dph-table-wrap">
+                                    <table id="addTable" class="dph-tb">
+                                        <thead id="addTableHead">
+                                            <tr>
+                                                <th scope="col">No. Invoice</th>
+                                                <th scope="col">Supplier</th>
+                                                <th scope="col">Valas</th>
+                                                <th scope="col" class="num">Dibayar</th>
+                                                <th scope="col" class="num">KL</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="addTableData" class="text-left">
+                                            <tr>
+                                                <td colspan="5" class="text-center">Belum ada data</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         <div id="formAddAdd" class="container-fluid showhideitem">
-                            <!-- <div class="line"></div> -->
-                            <!-- <div class="row"> -->
-
                             <div class="col-12">
                                 <hr />
                                 <div class="row">
@@ -568,47 +566,32 @@
                                     </div>
                                 </div>
 
-
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="row">
-
-
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Faktur</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddFaktur" type="text" class="form-control"
                                                         disabled>
-
-
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
-
                                 </div>
 
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row" style="margin-top: 0px">
                                     <div class="col-md-3">
                                         <div class="row">
-
-
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Dibayar</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddDibayar" type="number"
@@ -624,9 +607,6 @@
                                                     <label>Lebih Bayar</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddLebihBayar" type="number"
@@ -636,7 +616,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row" style="margin-top: 0px">
                                     <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
@@ -644,43 +624,30 @@
                                                     <label>Kurang Bayar</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKurangBayar" type="number"
                                                         class="form-control text-right" disabled>
-
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row" style="margin-top: 0px">
                                     <div class="col-md-3">
                                         <div class="row">
-
-
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Perkiraan</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodePerkiraan" type="text" class="form-control"
                                                         disabled>
                                                     <input type="text" class="form-control" id="AddAddNamaPerkiraan"
                                                         disabled>
-
-                                                    <!-- <button id="buttonAddListPerkiraan" type="button" onclick="" class="btn btn-primary" >+</button> -->
-
                                                 </div>
                                             </div>
                                         </div>
@@ -702,17 +669,6 @@
             </div>
         </div>
     </div>
-    <!-- </div> -->
-
-    <!-- <h2 class="page3showhide detailshowhide"> Detail Pengajuan DPH</h2>
-      <h2 class="page3showhide otorisasishowhide"> Otorisasi Pengajuan DPH</h2> -->
-
-
-
-    <!-- <div class="col-6 text-right">
-          <button type="button" class="page3showhide otorisasishowhide btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="submitOtorisasi()"  >Otorisasi</button>
-        </div> -->
-
 
     <div id="page3" style="display: none" class="mainpage container-fluid">
 
@@ -728,12 +684,9 @@
         </div>
 
         <div id= "" class="">
-            <div id="" class="">
+            <div id="formBsGrid" class="">
                 <div class="">
-                    <!-- <h1>Tes Modal</h1> -->
-
                     <div class="container-fluid">
-
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="row">
@@ -751,7 +704,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                             <div class="col-md-3">
                                 <div class="row">
@@ -767,14 +719,12 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row" style="margin-top: 0px">
                                     <div class="col-md-6">
                                         <div class="row">
                                             <div class="col-md-4">
@@ -782,42 +732,26 @@
                                                     <label>BKM/BBM</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                          </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="input_detail_nobkmbbm" type="text" class="form-control"
                                                         disabled>
-
-
                                                 </div>
                                             </div>
-
                                         </div>
-                                        <div class="row" style="margin-top: -10px">
-
-
-
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Valas</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                          </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="input_detail_valas" type="text" class="form-control"
                                                         disabled>
-
-                                                    <!-- <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary" disabled >+</button> -->
-
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
 
                                     <div class="col-md-6">
@@ -827,50 +761,30 @@
                                                     <label>Customer</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                              </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="input_detail_kodecust" type="text" class="form-control"
                                                         disabled>
-
-
                                                 </div>
                                             </div>
-
                                         </div>
 
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-                        </div> -->
                                             <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="input_detail_namacust" type="text" class="form-control"
                                                         disabled>
-
-
                                                 </div>
                                             </div>
-
                                         </div>
-
-
-
                                     </div>
-
-
                                 </div>
-
                             </div>
-
-
                         </div>
 
-                        <div class="row" style="margin-top: -10px">
+                        <div class="row" style="margin-top: 0px">
                             <div class="col-md-3">
                                 <div class="row">
                                     <div class="col-md-4">
@@ -878,18 +792,12 @@
                                             <label>Jumlah</label>
                                         </div>
                                     </div>
-                                    <!-- <div class="col-4 text-right">
-
-                          </div> -->
                                     <div class="col-md-8">
                                         <div class="input-group form-group">
                                             <input id="input_detail_jumlah" type="number"
                                                 class="form-control text-right" disabled>
-
-
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 
@@ -900,9 +808,6 @@
                                             <label>Dibayar</label>
                                         </div>
                                     </div>
-                                    <!-- <div class="col-4 text-right">
-
-                        </div> -->
                                     <div class="col-md-8">
                                         <div class="input-group form-group">
                                             <input id="input_detail_dibayar" type="number"
@@ -918,54 +823,46 @@
                                             <label>Sisa</label>
                                         </div>
                                     </div>
-                                    <!-- <div class="col-4 text-right">
-
-                      </div> -->
                                     <div class="col-md-8">
                                         <div class="input-group form-group">
                                             <input id="input_detail_sisa" type="number" class="form-control text-right"
                                                 disabled>
-
-
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                         <div class="container-fluid">
                             <hr />
-
                         </div>
                         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
                             <div class="dph-table-outer">
-                              <div class="dph-table-wrap">
-                                <table id="detailTable" class="dph-tb">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Nama Kas Bank</th>
-                                            <th scope="col">No. Invoice</th>
-                                            <th scope="col" class="text-right">Dibayar</th>
-                                            <th scope="col" class="text-right">LB</th>
-                                            <th scope="col" class="text-right">KL</th>
-                                            <th scope="col">Perkiraan</th>
-                                            <th scope="col">Kode</th>
-                                            <th scope="col">Supp. / Cust.</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="detailTableData" class="">
-                                        <tr>
-                                            <td colspan="8" class="text-center">Belum ada data</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                              </div>
+                                <div class="dph-table-wrap">
+                                    <table id="detailTable" class="dph-tb">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Nama Kas Bank</th>
+                                                <th scope="col">No. Invoice</th>
+                                                <th scope="col" class="text-right">Dibayar</th>
+                                                <th scope="col" class="text-right">LB</th>
+                                                <th scope="col" class="text-right">KL</th>
+                                                <th scope="col">Perkiraan</th>
+                                                <th scope="col">Kode</th>
+                                                <th scope="col">Supp. / Cust.</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailTableData" class="">
+                                            <tr>
+                                                <td colspan="8" class="text-center">Belum ada data</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
                         <div class="container-fluid">
                             <div class="row">
-
                                 <div class="col-12 text-right">
                                     <button type="button"
                                         class="page3showhide otorisasishowhide btn btn-primary btn-action-primary btn-pill-primary"
@@ -975,51 +872,26 @@
                         </div>
                     </div>
                 </div>
-                <!-- <div class="line"></div> -->
-                <!-- <hr/> -->
             </div>
         </div>
-        <!-- </div> -->
-
-
-        <!-- ADD EDIT -->
-
-
-        <!-- </div> -->
-
-
-
     </div>
-
-
-
-
-
-
-    <!--  -->
 
     <!-- start modal add -->
     <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="min-width: 1400px">
             <div id="" class="modal-content ">
-
                 <div id= "" class="">
                     <div class="modal-header">
-
-
                         <h5 class="modal-title" id="">Proses Terima DPP</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-
-                    <div id="" class="">
+                    <div id="formBsGrid" class="">
                         <div class="modal-body">
-
                             <div class="container-fluid">
-
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="row">
@@ -1035,7 +907,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Dibayar</label>
@@ -1048,7 +920,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Sisa</label>
@@ -1061,9 +933,7 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
-
 
                                     <div class="col-md-4">
                                         <div class="row">
@@ -1081,7 +951,7 @@
                                         </div>
 
 
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Nama Cust</label>
@@ -1093,22 +963,11 @@
                                                         placeholder="" disabled>
                                                 </div>
                                             </div>
-
                                         </div>
-
                                     </div>
-
                                 </div>
-
-
-
-
-                                <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                                 <div class="row">
                                     <div class="col-12" style="overflow:auto;  max-height: 400px">
-                                        <!-- <div class="container-fluid"> -->
-
-
                                         <table id="tabel_add_list_modal" class="table table-bordered table-striped"
                                             style="overflow:auto; ">
                                             <thead class="text-center bg-primary text-white"
@@ -1128,7 +987,6 @@
                                                 </tr>
                                             </thead>
 
-
                                             <tbody id="tabel_data_add_list_modal" class="text-left">
 
                                                 <tr>
@@ -1141,31 +999,14 @@
                                                     <td>-</td>
                                                     <td>-</td>
                                                     <td>-</td>
-
-
-
                                                 </tr>
                                             </tbody>
-
-
                                         </table>
-                                        <!-- </div> -->
-                                        <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                     </div>
                                 </div>
                             </div>
-
-
-
-
                         </div>
-
-
-
-
-
                     </div>
-
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-pill-secondary"
@@ -1174,92 +1015,27 @@
                             onclick="submitAdd()">Submit</button>
                     </div>
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
-
-
-
-
-
-
-
         </div>
     </div>
 
     <!-- End modal add-->
 
-
-
-
-
     <div class="modal fade" id="formX" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="min-width: 1400px">
             <div id="" class="modal-content ">
-
                 <div id= "" class="">
                     <div class="modal-header">
-
-
                         <h5 class="modal-title" id="">Change Invoice</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-
-                    <div id="" class="">
+                    <div id="formBsGrid" class="">
                         <div class="modal-body">
-
                             <div class="container-fluid">
-
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="row">
@@ -1274,15 +1050,11 @@
                                                         id="input_modalx_nilainotadibayar" disabled>
                                                 </div>
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="col-md-4">
                                         <div class="row">
-
-
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Sisa Nota</label>
@@ -1294,13 +1066,11 @@
                                                         id="input_modalx_sisanotadibayar" disabled>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
 
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row" style="margin-top: 0px">
                                     <div class="col-md-4">
                                         <div class="row">
                                             <div class="col-md-4">
@@ -1315,7 +1085,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Lebih Bayar</label>
@@ -1329,7 +1099,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row" style="margin-top: 0px">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Perk LB</label>
@@ -1358,79 +1128,39 @@
                                             class="btn btn-success btn-action-success btn-pill-primary">Save</button>
                                         <button type="button" id="buttonAddKL" class="btn btn-chip-biru"
                                             onclick="buttonAddKL()">+ KL</button>
-
-
-
-
-
-                                        <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
                                     </div>
-
                                 </div>
-
-
-
                             </div>
                             <div id="formAddKL" class="container-fluid showhideitemKL">
-                                <!-- <div class="line"></div> -->
-                                <!-- <div class="row"> -->
-
                                 <div class="col-12">
-
-
                                     <hr />
                                     <div class="row">
                                         <div class="col-md-12">
                                             <h4 id="">Add KL</h4>
                                         </div>
                                     </div>
-
-
                                     <div class="row">
                                         <div class="col-md-6">
-
-
                                             <div class="row">
-
-
-
-
-
-
                                                 <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Jumlah</label>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="col-4 text-right">
-
-                        </div> -->
                                                 <div class="col-md-4">
                                                     <div class="input-group form-group">
                                                         <input id="input_modalx_kurangbayar" type="number"
                                                             value="0.00" class="text-right form-control">
-
                                                     </div>
                                                 </div>
-
-
-
                                             </div>
                                         </div>
 
                                     </div>
 
-                                    <div class="row" style="margin-top: -10px">
+                                    <div class="row" style="margin-top: 0px">
                                         <div class="col-md-6">
-
-
                                             <div class="row">
-
-
-
-
-
-
                                                 <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Perk KL</label>
@@ -1445,62 +1175,24 @@
                                                         <button id="buttonAddListPerkiraanKurangBayar" type="button"
                                                             onclick="buttonAddListPerkiraanLebihBayar('kurangbayar')"
                                                             class="btn btn-chip-biru">+</button>
-
                                                     </div>
                                                 </div>
-
-
-
-
-
                                             </div>
                                         </div>
-
                                     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                 </div>
-
-
-
                                 <div class="row mt-2" style="margin-top: 0">
                                     <div class="col-md-12 text-right mt-4">
                                         <button type="button" class="btn btn-secondary btn-pill-secondary"
                                             onclick="buttonAddBatalKL()">Batal</button>
-
                                         <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()"
                                             class="btn btn-primary btn-action-primary btn-pill-primary">Submit Add</button>
-
-
-
-
-                                        <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
                                     </div>
-
                                 </div>
-
                             </div>
-
-
 
                             <div class="row" style="margin-top:20px">
                                 <div class="col-12" style="overflow:auto;  max-height: 400px">
-                                    <!-- <div class="container-fluid"> -->
-
-
                                     <table id="tabel_add_list_modalx" class="table table-bordered table-striped"
                                         style="overflow:auto; ">
                                         <thead class="text-center bg-primary text-white"
@@ -1517,98 +1209,49 @@
 
 
                                         <tbody id="tabel_data_add_list_modalx" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-
                                             </tr>
                                         </tbody>
-
-
                                     </table>
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
-
-
-
-
-
-
-
-
-                            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
-
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-pill-secondary"
                         data-dismiss="modal">Batal</button>
-                    <!-- <button type="button" class="btn btn-primary" onclick="submitAddModalX()">Submit</button> -->
                 </div>
             </div>
-
         </div>
-
     </div>
-
-
-
 
     <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="min-width: 1400px">
             <div id="" class="modal-content ">
-
                 <div id= "" class="">
                     <div class="modal-header">
-
-
                         <h5 class="modal-title" id="">Perkiraan</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-
                     <div id="" class="">
                         <div class="modal-body">
-
                             <div class="container-fluid">
                                 <div class="row">
                                     <div class="col-12">
                                         <h3>Perkiraan</h3>
                                     </div>
-
-
                                 </div>
-
-
-
-                                <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                                 <div class="row">
                                     <div class="col-12" style="overflow:auto;  max-height: 400px">
-                                        <!-- <div class="container-fluid"> -->
-
-
                                         <table id="tabel_add_list_perkiraan" class="table table-bordered table-striped"
                                             style="overflow:auto; ">
                                             <thead class="text-center bg-primary text-white"
@@ -1622,7 +1265,6 @@
 
                                                 </tr>
                                             </thead>
-
 
                                             <tbody id="tabel_data_add_list_perkiraan" class="text-left">
 
@@ -1642,19 +1284,12 @@
                                                     </tr>
                                                 @endfor
                                             </tbody>
-
-
                                         </table>
-                                        <!-- </div> -->
-                                        <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
-
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-pill-secondary"
@@ -1663,24 +1298,9 @@
                             onclick="submitAdd()">Submit</button>
                     </div>
                 </div>
-
-
-
-
             </div>
-
-
-
-
-
-
-
         </div>
     </div>
-
-
-
-
 
     </div>
 @endsection
@@ -1987,7 +1607,9 @@
         // elemennya memang tidak ada, tanpa mengubah field yang masih live.
         function setValIfExists(id, val) {
             const el = document.getElementById(id);
-            if (el) { el.value = val; }
+            if (el) {
+                el.value = val;
+            }
         }
 
         function fmtYMD(v) {
@@ -2128,14 +1750,15 @@
                 nobukti + '\', \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-pencil-fill"></i></button>';
 
             if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-                return '<div class="action-buttons">' + detailBtn  +
+                return '<div class="action-buttons">' + detailBtn +
                     '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>'  + koreksiBtn + '</div>';
+                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' + koreksiBtn + '</div>';
             }
 
-            return '<div class="action-buttons">' + detailBtn  +
+            return '<div class="action-buttons">' + detailBtn +
                 '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonDetail(\'' +
-                nobukti + '\', 1, \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-key"></i></button>' + koreksiBtn + '</div>';
+                nobukti + '\', 1, \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-key"></i></button>' + koreksiBtn +
+                '</div>';
         }
 
         function filterByOtorisasiPenerimaan(rows, filterVal) {
@@ -4103,7 +3726,8 @@
                     let jumlahx = res.header[0].Debet ? parseFloat(res.header[0].Debet).toFixed(2) : '0.00'
                     console.log(dibayarx, jumlahx)
                     setValIfExists("input_add_dibayar", parseFloat(xxx).toFixed(2))
-                    setValIfExists("input_add_jumlah", res.header[0].Debet ? parseFloat(res.header[0].Debet).toFixed(2) : '0.00')
+                    setValIfExists("input_add_jumlah", res.header[0].Debet ? parseFloat(res.header[0].Debet)
+                        .toFixed(2) : '0.00')
                     setValIfExists("input_add_sisa", parseFloat(Number(jumlahx) - Number(xxx)).toFixed(2))
                     let totaldibayarx = 0
                     let totallbx = 0
@@ -4126,7 +3750,7 @@
             <td>${item.NamaCustSuppD ? item.NamaCustSuppD : ''}</td>
             <td class="text-center">
               <div class="action-buttons">
-                <button class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pencil-fill"></i></button>
+                <button class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen-fill"></i></button>
                 <button class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
               </div>
             </td>
@@ -4319,7 +3943,8 @@
                     let jumlahx = res.header[0].Debet ? parseFloat(res.header[0].Debet).toFixed(2) : '0.00'
                     console.log(dibayarx, jumlahx)
                     setValIfExists("input_add_dibayar", parseFloat(xxx).toFixed(2))
-                    setValIfExists("input_add_jumlah", res.header[0].Debet ? parseFloat(res.header[0].Debet).toFixed(2) : '0.00')
+                    setValIfExists("input_add_jumlah", res.header[0].Debet ? parseFloat(res.header[0].Debet)
+                        .toFixed(2) : '0.00')
                     setValIfExists("input_add_sisa", parseFloat(Number(jumlahx) - Number(xxx)).toFixed(2))
                     let totaldibayarx = 0
                     let totallbx = 0
@@ -4341,7 +3966,7 @@
               <td>${item.NamaCustSuppD ? item.NamaCustSuppD : ''}</td>
               <td class="text-center">
                 <div class="action-buttons">
-                  <button class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pencil-fill"></i></button>
+                  <button class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen"></i></button>
                   <button class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
                 </div>
               </td>
