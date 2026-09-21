@@ -304,7 +304,7 @@
 
   <div class="container-fluid">
     {{-- <input type="hidden" name="noUrut" id="input_koreksi_nourut" value="" /> --}}
-    <div class="row">
+    <div class="row" id="formBsGrid">
         <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
         <!-- Kiri -->
         <div class="col-md-4">
@@ -359,7 +359,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditPerkiraan" type="text" class="form-control text-left" placeholder="Perkiraan" onkeypress="onKeyPressPicker(event,'perkiraan')">
-              <button type="button" onclick="openPicker('perkiraan')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
+              <button type="button" onclick="openPicker('perkiraan')" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
               <input type="hidden" id="KoreksiEditNamaPerkiraan">
             </div>
           </div>
@@ -370,7 +370,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditCosting" type="text" class="form-control text-left" placeholder="Costing" onkeypress="onKeyPressPicker(event,'costing')">
-              <button type="button" onclick="openPicker('costing')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
+              <button type="button" onclick="openPicker('costing')" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
               <input type="hidden" id="input_costing">
             </div>
           </div>
@@ -381,7 +381,7 @@
           <div class="col">
             <div class="input-group">
               <input id="KoreksiEditSubCosting" type="text" class="form-control text-left" placeholder="Sub Costing" onkeypress="onKeyPressPicker(event,'subcosting')">
-              <button type="button" onclick="openPicker('subcosting')" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
+              <button type="button" onclick="openPicker('subcosting')" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
               <input type="hidden" id="input_sub_costing">
             </div>
           </div>
@@ -491,7 +491,7 @@
     </div>
   </div>
 
-  <div class="container-fluid">
+  <div class="container-fluid" id="formBsGrid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
         <!-- Kiri -->
@@ -1295,7 +1295,7 @@ function refreshDataTableKoreksi (nobukti) {
           <td>${item.KodePerkiraan ?? ''}</td>
           <td>${item.namaPerkiraan ?? ''}</td>
           <td class="text-center">
-            <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pencil-fill"></i></button>
+            <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
           </td>
         </tr>`;
       });
@@ -1536,7 +1536,7 @@ function buttonKoreksi (nobukti) {
           <td>${item.KodePerkiraan ?? ''}</td>
           <td>${item.namaPerkiraan ?? ''}</td>
           <td class="text-center">
-            <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pencil-fill"></i></button>
+            <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
           </td>
         </tr>`;
       });

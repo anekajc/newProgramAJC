@@ -533,8 +533,6 @@
 
                                 <tbody id="detailTableData" class="text-right">
                                     <tr>
-
-
                                         <td>-</td>
                                         <td>-</td>
                                         <td>-</td>
@@ -551,8 +549,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-pill-secondary" data-dismiss="modal">Batal</button>
+                <div class="modal-footer" id="contentContainer">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary" data-dismiss="modal">Batal</button>
                 </div>
             </div>
         </div>
@@ -1766,7 +1764,7 @@
     <td class="text-center">
       <div class="action-buttons">
         <button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item[0].NOBUKTI}')"><i class="bi bi-info"></i></button>
-        <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg"></i></button>
+        <button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Add" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus"></i></button>
       </div>
     </td>
     <td>${item[0].NOBUKTI}</td>
@@ -2690,7 +2688,7 @@
     <td class="text-center">${item.Satuan}</td>
     <td class="text-center">
     <div class="action-buttons">
-    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil-fill"></i></button>
+    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pen"></i></button>
     <button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" onclick="buttonKoreksiDelete(${i})"><i class="bi bi-trash"></i></button>
     </div></td>
     </td>
@@ -2897,7 +2895,7 @@
     <td class="text-center">${item.Satuan}</td>
     <td class="text-center">
     <div class="action-buttons">
-    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pencil-fill"></i></button>
+    <button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksiEdit(${i})"><i class="bi bi-pen"></i></button>
     <button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Hapus" onclick="buttonKoreksiDelete(${i})"><i class="bi bi-trash"></i></button>
     </div></td>
     </td>

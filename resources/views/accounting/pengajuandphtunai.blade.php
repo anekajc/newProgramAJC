@@ -207,7 +207,7 @@
             </div>
 
             <div id= "formAdd" class="">
-                <div id="" class="">
+                <div id="formBsGrid" class="">
                     <div class="">
                         <!-- <h1>Tes Modal</h1> -->
                         <div class="container-fluid">
@@ -642,7 +642,7 @@
             </div>
 
             <div id= "" class="">
-                <div id="" class="">
+                <div id="formBsGrid" class="">
                     <div class="">
                         <!-- <h1>Tes Modal</h1> -->
 
@@ -770,7 +770,8 @@
          invoice table below can use a real scroll height instead of a modal's max-height:400px box -->
     <div id="page4" style="display: none" class="mainpage container-fluid">
 
-        <div class="row "  id="contentContainer">
+        <div id="formBsGrid">
+            <div class="row "  id="contentContainer">
             <div class="col-8 text-left">
                 {{-- <h2>Tambah DPH</h2> --}}
             </div>
@@ -783,8 +784,6 @@
         <div class="row showhidelistpengajuandph">
             <div class="col-md-4">
                 <div class="row">
-
-
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>No Bukti</label>
@@ -799,12 +798,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-4">
                 <div class="row">
-
-
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Tanggal</label>
@@ -905,6 +901,7 @@
                 <button type="button" class="btn btn-action-primary btn-primary btn-pill-primary"
                     onclick="submitAdd()">Submit</button>
             </div>
+        </div>
         </div>
 
     </div>

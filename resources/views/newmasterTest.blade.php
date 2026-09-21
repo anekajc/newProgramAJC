@@ -228,28 +228,41 @@
             opacity: 1;
         }
 
+        /* newmaster.css (loaded above) still has the CSS-hover accordion this project
+           deliberately abandoned — .nav-group:hover>.nav-item .nav-chevron and
+           .nav-group:hover .nav-children (moving the cursor down the expanded rail
+           flashes every folder open in turn). Its hover selectors have HIGHER
+           specificity than a plain override (:hover counts as a class), so
+           !important is required here, not just later-in-source-wins. Direct-child
+           selectors so nesting can't leak .open state. Same pattern as
+           gudang/newmasterx.blade.php. */
+        .nav-group>.nav-item .nav-chevron {
+            transform: none !important;
+        }
+
         .nav-group.open>.nav-item .nav-chevron {
-            transform: rotate(90deg);
+            transform: rotate(90deg) !important;
             color: rgba(255, 255, 255, 0.6);
         }
 
         /* Children */
         .nav-children {
-            max-height: 0;
             overflow: hidden;
             transition: max-height 0.25s ease;
             background: rgba(0, 0, 0, 0.15);
         }
 
-        /* Show children only when the group has been CLICKED open — no :hover trigger.
-           Direct child (>) so a group can never open another group's children. */
-        .nav-group.open>.nav-children {
-            max-height: 600px;
+        /* Blanket-suppress first (kills newmaster.css's .nav-group:hover .nav-children
+           600px rule via !important, regardless of source order), then re-open only
+           for a genuinely .open group with the sidebar actually expanded — higher
+           specificity (4 simple selectors) than the blanket rule (1) so it wins over
+           it despite both being !important. */
+        .nav-children {
+            max-height: 0 !important;
         }
 
-        /* But only show text when sidebar is expanded */
-        .sidebar:not(:hover) .nav-children {
-            max-height: 0 !important;
+        .sidebar:hover .nav-group.open>.nav-children {
+            max-height: 600px !important;
         }
 
         .nav-child {
@@ -830,12 +843,12 @@
           opacity: 1 !important;
         }
 
-        #sidebar.flyout-pinned .nav-group.flyout-owner .nav-children {
+        #sidebar.flyout-pinned .nav-group.flyout-owner > .nav-children {
           max-height: 600px !important;
         }
 
         #sidebar.flyout-pinned .nav-group.flyout-owner > .nav-item .nav-chevron {
-          transform: rotate(90deg);
+          transform: rotate(90deg) !important;
           color: rgba(255, 255, 255, 0.6);
         }
 
@@ -1214,6 +1227,12 @@
   let modules = [];
   let activeModuleKey = null;
 
+  // Current page, for highlighting the matching sidebar row/module on load —
+  // same client-side approach as gudang/newmasterx.blade.php's $activePath, but
+  // resolved from the AJAX /getmenu/1 tree instead of a server-side $menul0,
+  // since most controllers on this shared layout don't pass one.
+  const currentHref = @json(trim(request()->path(), '/'));
+
   const moduleIcons = {
     'berkas':          'archive',
     'master data':     'users',
@@ -1359,6 +1378,31 @@
     }
   }
 
+  // Matches a menu node's href against the current page's path — trim both sides
+  // like PHP's trim($href, '/'), compare case-insensitively, same as newmasterx's
+  // $isCurrent check.
+  function nodeMatchesCurrent(node) {
+    const h = (node.href || '').replace(/^\/+|\/+$/g, '');
+    return h !== '' && h.toLowerCase() === currentHref.toLowerCase();
+  }
+
+  function subtreeHasCurrent(node) {
+    return nodeMatchesCurrent(node) || (node.children || []).some(subtreeHasCurrent);
+  }
+
+  // Re-derives which module group should start expanded/highlighted, by walking
+  // the client-side menu tree for the node matching currentHref. Ported from
+  // gudang/newmasterx.blade.php's applyActiveState(), adapted since this layout
+  // has no server-side $activePath available.
+  function applyActiveState() {
+    document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('active', 'open'));
+    if (!currentHref) return;
+    const mod = modules.find(subtreeHasCurrent);
+    if (!mod) return;
+    const ng = document.getElementById('ng-' + mod.key);
+    if (ng) ng.classList.add('active', 'open');
+  }
+
   function renderNav() {
     const nav = document.getElementById('nav');
     nav.innerHTML = modules.map(m => `
@@ -1371,8 +1415,9 @@
         <div class="nav-children">
           ${m.children.map(c => {
             const hasSub = c.children && c.children.length > 0;
+            const isCurrent = !hasSub && nodeMatchesCurrent(c);
             return `
-            <div class="nav-child ${hasSub ? 'has-sub' : ''}"
+            <div class="nav-child ${hasSub ? 'has-sub' : ''} ${isCurrent ? 'active-child' : ''}"
                  data-flyout-id="${hasSub ? 'flyout-' + c.key : ''}"
                  data-access="${c.access ?? ''}"
                  onclick="event.stopPropagation(); ${hasSub ? '' : `goTo('${encodeURIComponent(c.href || '')}')`}">
@@ -1403,6 +1448,7 @@
     ).join('');
 
     attachFlyoutHoverHandlers();
+    applyActiveState();
   }
 
   // ── Position + show/hide flyouts on hover using real coordinates ─────
@@ -1652,6 +1698,7 @@ function closeReportPage() {
 
   document.getElementById('breadcrumb').innerHTML =
     `<span>Beranda</span>`;
+  applyActiveState();
 }
 
 function openReport(encodedHref) {
@@ -1662,7 +1709,6 @@ function goHome() {
   closeReportPage();
 
   activeModuleKey = null;
-  document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('active'));
 
   const dyn = document.getElementById('content-dynamic');
   if (dyn) {
