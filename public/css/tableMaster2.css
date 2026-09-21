@@ -671,3 +671,9 @@
        public/css/report-table.css — cari blok .ajs-app-buttons di sana. Alasannya
        report-table.css dimuat 46 view (termasuk semua halaman report yang punya
        dialog "Reset Kolom"), sedangkan tableMaster2.css cuma dimuat 2 view. */
+
+       .bi-plus {
+        font-size: 1.5rem;
+        line-height: 0;
+        vertical-align: middle;
+        }

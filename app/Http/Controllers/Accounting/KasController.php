@@ -796,12 +796,7 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
     WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp , "username" =>  \Auth::user()->username]);
 
       return $listData;
-
-
-
   }
-
-
 
   public function spOtorisasi (Request $req) {
     $tanggal = date('Y-m-d H:i:s');
@@ -813,9 +808,6 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
     $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
     return $res;
   }
-
-
-
 
   public function spAddAktiva (Request $req) {
 
@@ -969,16 +961,9 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
     ]);
 
   return 1;
-
-
-
-
-
   }
 
   public function spAdd (Request $req) {
-
-
       $username = \Auth::user()->username;
 
       $jmlrecord = $req->jmlrecord;
@@ -1069,7 +1054,6 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
   }
 
 
-
     public function spAddNewAktiva (Request $req) {
 
 
@@ -1117,81 +1101,6 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
 
     }
 
-
-    // public function spAddAktiva (Request $req) {
-    //
-    //
-    //     $username = \Auth::user()->username;
-    //
-    //     $jmlrecord = $req->jmlrecord;
-    //     if ($jmlrecord == 0 ) {
-    //       $check = DB::connection('SML')->select('select * from DBTRANS where Nobukti = :nobukti',["nobukti" => $req->nobukti]);
-    //         if ($check) {
-    //           return 2;
-    //       }
-    //     }
-    //
-    //
-    //       DB::connection('SML')->statement('exec sp_TransaksiKasBankDPH ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', [
-    //         $req->choice,
-    //         $req->nobukti,
-    //         $req->nourut,
-    //         $req->tanggal,
-    //         $req->note ? $req->note : '',
-    //         $req->lampiran ? $req->lampiran : '',
-    //         $req->kodedevisi,
-    //         $req->perkiraanx,
-    //         $req->lawanx,
-    //         $req->keterangan ? $req->keterangan : '', // 10
-    //         $req->keterangan2 ? $req->keterangan2 : '',
-    //         $req->jumlah,
-    //         $req->kredit,
-    //         $req->valas,
-    //         $req->kurs,
-    //         $req->jumlahrp,
-    //         $req->kreditrp,
-    //         $req->transaksi,
-    //         $req->tphc,
-    //         $req->custsuppP ? $req->custsuppP : '' , // 20
-    //         $req->custsuppL ? $req->custsuppL : '' ,
-    //         $req->urut,
-    //         $req->noaktivaP ? $req->noaktivaP : '' ,
-    //         $req->noaktivaL ? $req->noaktivaL : '' ,
-    //         $req->statusaktivaP ? $req->statusaktivaP : '',
-    //         $req->statusaktivaL ? $req->statusaktivaL : '',
-    //         $req->nobon ? $req->nobon : '',
-    //         $req->kodedepartemen,
-    //         $req->kodeP ? $req->kodeP : '',
-    //         $req->kodeL ? $req->kodeL : '', // 30
-    //         $req->statusgiro ? $req->statusgiro : '',
-    //         $req->simbol,
-    //         $req->kodeperkiraan,
-    //         $req->flagsimbol ? $req->flagsimbol : '',
-    //         $req->kodecost ? $req->kodecost : '',
-    //         $req->kodesubcost ? $req->kodesubcost : '',
-    //         $req->nodph ?   $req->nodph : '',
-    //         $req->urutdph,
-    //         $req->dppdph ? $req->dppdph : '', // 40
-    //         $username,
-    //         $req->tp ? $req->tp : '',
-    //         $req->ppklx ? $req->ppklx : '',
-    //         $req->nofaktur ? $req->nofaktur : '',
-    //         $req->plok,
-    //         $req->nobons ? $req->nobons : '',
-    //         $req->jmlrecord,
-    //         $req->notitipan ? $req->notitipan : '',
-    //         $req->uruttitipan,
-    //         $req->keterangandetail ? $req->keterangandetail : '', // 50
-    //         $req->pSKB,
-    //
-    //       ]);
-    //
-    //     return 1;
-    //
-    // }
-
-
-
     public function listCosting (Request $req) {
 
       // $listData = DB::connection('SML')->select("select Perkiraan, Keterangan , Simbol from DBPERKIRAAN where Perkiraan like '1111%' and Tipe = 1");
@@ -1216,8 +1125,6 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
 
 
   public function spAddDPPDPH (Request $req) {
-
-
       $username = \Auth::user()->username;
 
       $jmlrecord = $req->jmlrecord;
@@ -1357,14 +1264,6 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
     WHERE KODESUPP= :custsupp and IDuser= :username order by nobukti , noretur", ["custsupp" => $req->kodesupp ,"username1" =>  \Auth::user()->username ,"username" =>  \Auth::user()->username]);
 
     return $listData;
-
-
-
-
-
-
-
-
   }
 
   public function spDeleteTempRUMJUAL (Request $req) {
@@ -1403,19 +1302,5 @@ $data['urutDPH'] ? $data['urutDPH'] : ''
     WHERE KODESUPP= :custsupp and IDuser= :username order by nobukti , noretur", ["custsupp" => $req->kodesupp ,"username1" =>  \Auth::user()->username ,"username" =>  \Auth::user()->username]);
 
     return $listData;
-
-
   }
-
-
-
-
-
-
-
-
-
-
-
-
 }

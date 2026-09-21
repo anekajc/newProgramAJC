@@ -261,8 +261,8 @@
 
     <!-- start pageForm (Add/Edit, full page) -->
     <div id="pageForm" class="container-fluid" style="display:none">
-
-        {{-- .tb-report cuma dipakai buat header supaya dapat gaya .toolbar/.page-title —
+        <div id="formBsGrid">
+            {{-- .tb-report cuma dipakai buat header supaya dapat gaya .toolbar/.page-title —
              DIBATASI ke sini saja, TIDAK membungkus seluruh halaman, karena
              `.tb-report *{margin:0;padding:0}` di report-table.css akan menghapus
              gutter grid Bootstrap dan padding form-control di bawahnya. --}}
@@ -441,11 +441,11 @@
                     <br />
                     <div class="row">
                         <div class="col-12">
-                            <h4>Edit Item</h4>
+                            {{-- <h4>Edit Item</h4> --}}
                         </div>
                     </div>
 
-                    <div class="container-fluid">
+                    <div class="container-fluid" id="formBsGrid">
                         <!-- Baris 1 -->
                         <div class="row">
                             <!-- Kode Barang -->
@@ -490,8 +490,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
 
                         <!-- Baris 2 -->
@@ -509,19 +507,19 @@
                     </div>
 
                     <div class="row mt-2">
-                        <div class="col-md-12 text-right">
-                            <button type="button" class="btn btn-outline-danger"
+                        <div class="col-md-12 text-right" id="contentContainer">
+                            <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                                 onclick="buttonBatalAdd()">Batal</button>
 
-                            <button type="button" onclick="submitAddEdit()" class="btn btn-pill-primary">Simpan</button>
+                            <button type="button" onclick="submitAddEdit()" class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                         </div>
 
                     </div>
-                    <!-- <div class="line"></div> -->
                     <hr />
                 </div>
                 <!-- end -->
             </div>
+        </div>
         </div>
     </div>
     <!-- End pageForm -->
@@ -549,7 +547,6 @@
                         </thead>
 
                         <tbody>
-
                         </tbody>
 
                     </table>
@@ -564,7 +561,8 @@
     <!-- start pageDetail (Detail, full page) -->
     <div id="pageDetail" class="container-fluid" style="display:none">
 
-        {{-- .tb-report cuma dipakai buat header — lihat catatan di pageForm di atas
+        <div id="formBsGrid">
+            {{-- .tb-report cuma dipakai buat header — lihat catatan di pageForm di atas
              soal kenapa TIDAK membungkus seluruh halaman. --}}
         <div class="tb-report" id="contentContainer">
             <div class="content">
@@ -631,6 +629,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
     <!-- End pageDetail -->
