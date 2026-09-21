@@ -4059,7 +4059,13 @@ function buttonBatalOtorisasi (nobukti) {
           },
           error: function (err) {
             console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
+            // Update status batal-otorisasi-nya sendiri jalan duluan sebelum proses
+            // posting hutang-piutang/jurnal susulan -- kalau proses susulan itu yang
+            // gagal, statusnya sudah kepakai duluan di database walau request ini
+            // balik sebagai error. loadAll() supaya tabel langsung menampilkan status
+            // yang sebenarnya tanpa user harus refresh manual.
+            loadAll()
+            alertify.error('Batal otorisasi kemungkinan sudah tersimpan, namun proses lanjutan (posting hutang-piutang/jurnal) gagal. Data telah dimuat ulang -- silahkan periksa status terbaru pada tabel, dan hubungi admin jika perlu diproses ulang.')
           }
 
         })
@@ -4097,7 +4103,13 @@ function submitOtorisasi () {
     },
     error: function (err) {
       console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      // Sama seperti buttonBatalOtorisasi() -- update status otorisasi-nya sendiri
+      // bisa saja sudah kepakai duluan di database sebelum proses posting susulan
+      // gagal, jadi refresh otomatis + pesan yang lebih jelas daripada cuma bilang
+      // "terjadi kesalahan" tanpa konteks.
+      loadAll()
+      buttonCloseForm()
+      alertify.error('Otorisasi kemungkinan sudah tersimpan, namun proses lanjutan (posting hutang-piutang/jurnal) gagal. Data telah dimuat ulang -- silahkan periksa status terbaru pada tabel, dan hubungi admin jika perlu diproses ulang.')
     }
 
   })
