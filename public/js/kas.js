@@ -771,11 +771,9 @@ function buttonAddListXBiaya (id) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBiayaX('${id}','${item.Perkiraan}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBiayaX('${id}','${item.Perkiraan}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -825,11 +823,9 @@ function buttonAddListXAkumulasi () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBiayaX('input_aktivax_akumulasi' ,'${item.Perkiraan}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBiayaX('input_aktivax_akumulasi' ,'${item.Perkiraan}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -892,11 +888,9 @@ function buttonAddListCosting () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCosting(${i},'${item.KodeCost}' , '${item.NamaCost}' )">
         <td>${item.KodeCost}</td>
         <td>${item.NamaCost}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCosting(${i},'${item.KodeCost}' , '${item.NamaCost}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -953,11 +947,9 @@ function buttonAddListSubCosting () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickSubCosting(${i},'${item.KodeSubCost}' , '${item.NamaSubCost}' )">
         <td>${item.KodeSubCost}</td>
         <td>${item.NamaSubCost}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSubCosting(${i},'${item.KodeSubCost}' , '${item.NamaSubCost}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2298,7 +2290,10 @@ function buttonAddDelete (index) {
 
 
 
-    alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus Item ?',
+    // Kelas 'ajs-app-buttons' + 'is-danger' ditempel ke root dialog supaya CSS tombol
+    // OK/Cancel di public/css/report-table.css (blok "gaya bersama") ikut jalan;
+    // 'is-danger' bikin tombol OK merah karena hapus item aksi merusak.
+    var dlgHapusItem = alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus Item ?',
         function() {
 
           let choice = "D"
@@ -2527,7 +2522,7 @@ function buttonAddDelete (index) {
       ,function(){
         console.log('no')
       });
-
+  dlgHapusItem.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 
 
 
@@ -2675,12 +2670,10 @@ function buttonAddListLawan () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickLawan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}', '${item.Kode}', '${item.iscost}' , '${item.IsLokalOrExim}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Simbol}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLawan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}', '${item.Kode}', '${item.iscost}' , '${item.IsLokalOrExim}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2758,15 +2751,13 @@ function modalDPP (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPP(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPP(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2824,11 +2815,9 @@ function modalDPHUHTBKM (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustDPHUHTBKM( '${item.KODESUPP}', '${item.NAMACUSTSUPP}','${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.KODESUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustDPHUHTBKM( '${item.KODESUPP}', '${item.NAMACUSTSUPP}','${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-arrow-right"></i></button></td>
-
         </tr>`
       });
 
@@ -2897,7 +2886,7 @@ function modalDPHUHT (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.NOUM}</td>
         <td>${item.KODECUSTSUPP}</td>
@@ -2905,8 +2894,6 @@ function modalDPHUHT (dataLawan) {
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3089,13 +3076,10 @@ function modalAktiva (dataLawan) {
         let rowTable = ``
         res.forEach((item, i) => {
           rowTable += `
-          <tr>
+          <tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
           <td>${item.Perkiraan}</td>
           <td>${item.Keterangan}</td>
           <td>${formatDate(item.Tanggal)}</td>
-
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
           </tr>`
         });
 
@@ -3119,7 +3103,7 @@ function modalAktiva (dataLawan) {
           // alertify.warning("Aktiva tidak ditemukkan")
           document.getElementById("tabel_data_add_list_aktiva").innerHTML = `
             <tr>
-              <td colspan=4>Belum ada data</td>
+              <td colspan=3>Belum ada data</td>
             </tr>
           `
 
@@ -3153,13 +3137,10 @@ function modalAktiva (dataLawan) {
         let rowTable = ``
         res.forEach((item, i) => {
           rowTable += `
-          <tr>
+          <tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
           <td>${item.Perkiraan}</td>
           <td>${item.Keterangan}</td>
           <td>${formatDate(item.Tanggal)}</td>
-
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
           </tr>`
         });
 
@@ -3224,15 +3205,13 @@ function modalDPH (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3771,11 +3750,9 @@ function buttonAddListDepartemen () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDepartemen(${i},'${item.KDDEP}' , '${item.NMDEP}'  )">
         <td>${item.KDDEP}</td>
         <td>${item.NMDEP}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDepartemen(${i},'${item.KDDEP}' , '${item.NMDEP}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3832,12 +3809,10 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' , '${item.KURS}' )">
         <td>${item.KODEVLS}</td>
         <td>${item.NAMAVLS}</td>
         <td class="text-right">${parseFloat(item.KURS).toFixed(2)}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' , '${item.KURS}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3849,15 +3824,18 @@ function buttonAddListValas () {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
-      document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
+      // Bug fix: sebelumnya menulis ke tabel_data_add_list_perkiraan / #modalAddListPerkiraan
+      // (copy-paste dari picker Perkiraan) — baris Valas jadi tidak pernah muncul di modal
+      // Valas-nya sendiri. Diperbaiki ke id Valas yang benar.
+      document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
 
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListPerkiraan').show();
+        $('#modalAddListValas').show();
         $("#form").modal('toggle')
       } else {
-        alertify.warning("Perkiraan tidak ditemukkan")
+        alertify.warning("Valas tidak ditemukkan")
       }
 
 
@@ -3896,11 +3874,9 @@ function buttonAddListDevisi () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDevisi(${i},'${item.Devisi}' , '${item.NamaDevisi}' )">
         <td>${item.Devisi}</td>
         <td>${item.NamaDevisi}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDevisi(${i},'${item.Devisi}' , '${item.NamaDevisi}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4205,19 +4181,12 @@ function onChangeAddAddJumlah () {
             res.forEach((item, i) => {
 
               rowTable += `
-              <tr >
+              <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
 
                 <td>${item.KODECUSTSUPP}</td>
                 <td>${item.NAMACUSTSUPP}</td>
                 <td>${item.ALAMAT}</td>
                 <td>${item.NAMAKOTA}</td>
-
-
-
-                  <td class="text-center">
-
-                    <button class="btn btn-primary btn-sm" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
               `
             });
@@ -4270,14 +4239,15 @@ function buttonAddListPerkiraan () {
       console.log(res)
       listPerkiraan = res
       let rowTable = ``
+      // Klik baris langsung, bukan tombol "+" — lihat docs/new-cust-supp-modal-guide.md.
+      // buttonAddPickPerkiraan() dipanggil persis sama seperti sebelumnya (argumen tak
+      // berubah), cuma pemicunya pindah dari onclick tombol ke onclick <tr>.
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}' , '${item.Kode}' ,'${item.iscost}', '${item.IsLokalOrExim}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Simbol}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}' , '${item.Kode}' ,'${item.iscost}', '${item.IsLokalOrExim}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4299,19 +4269,13 @@ function buttonAddListPerkiraan () {
       } else {
         alertify.warning("Perkiraan tidak ditemukkan")
       }
-
-
     },
     error: function (err) {
       console.log(err)
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
-
   })
-
-
 }
-
 
 
 function buttonAddListBon () {
@@ -4324,7 +4288,7 @@ function buttonAddListBon () {
   let kodeperkiraan = $("#input_add_kodeperkiraan").val()
 
   if(!kodeperkiraan) {
-      alertify.warning("Pilih Kas terlebih dahulu")
+      alertify.warning("Pilih Perkiraan terlebih dahulu")
       return
   }
 
@@ -4340,16 +4304,17 @@ function buttonAddListBon () {
       console.log(res)
       listBon = res
       let rowTable = ``
+      // Klik baris langsung, bukan tombol "+" — lihat docs/new-cust-supp-modal-guide.md.
+      // buttonAddPickBon() dipanggil persis sama seperti sebelumnya (argumen tak berubah),
+      // cuma pemicunya pindah dari onclick tombol ke onclick <tr>.
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBon(${i},'${item.NoBukti}' , '${item.Debet}'  )">
         <td>${item.NoBukti}</td>
         <td>${item.Penerima}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Perkiraan}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBon(${i},'${item.NoBukti}' , '${item.Debet}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4630,12 +4595,10 @@ function buttonAddListCustsupp () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustsupp('${item.kodecustsupp}' , '${item.namacustsupp}' , '${item.alamat1}')">
         <td>${item.kodecustsupp}</td>
         <td>${item.namacustsupp}</td>
         <td>${item.alamat1}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustsupp('${item.kodecustsupp}' , '${item.namacustsupp}' , '${item.alamat1}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -5722,12 +5685,12 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-        
+
         // console.log(res[0][0].IsOtorisasi1)
 
       }
     })
-    
+
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=8) {
       let tempArray = dataPrint.slice(i,i+8)
@@ -6179,7 +6142,7 @@ function submitPrint (nobukti) {
                   </tr>
                 </thead> `;
 
-	
+
     let z = 0
     let maxRow = 8;
     let tempPrintStr = ``
@@ -6232,11 +6195,11 @@ function submitPrint (nobukti) {
          <td class="text-align: left"
                style="width: 10%;">${itemSub.costSKB}</td>
          <td style="width: 10%; text-align: right;">
-            ${itemSub.JumlahRp 
+            ${itemSub.JumlahRp
               ? Number(itemSub.JumlahRp).toLocaleString('id-ID', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }) 
+                })
               : ''}
           </td>
          </tr>`;
@@ -6279,7 +6242,7 @@ function submitPrint (nobukti) {
          tempPrintStr += `</tbody>`;
 
          tempPrintStr += `</table>
-         
+
 
          <div class="footer-sign font-family: sans-serif;
            font-size: 10px ">
@@ -6288,7 +6251,7 @@ function submitPrint (nobukti) {
          font-size: 12px ">
          <span style="float: left; display: block; clear: left;">
          </span>
-	
+
 
          <div style="width:100%; display:flex; font-weight:bold; margin-top:5px;">
 
@@ -6330,7 +6293,7 @@ function submitPrint (nobukti) {
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 
@@ -6363,7 +6326,10 @@ function buttonBatalOtorisasi (nobukti) {
   }
 
 
-  alertify.confirm('Batal Otorisasi', 'Batal Otorisasi Kas ' + nobukti + ' ?',
+  // Kelas 'ajs-app-buttons' + 'is-danger' ditempel ke root dialog supaya CSS tombol
+  // OK/Cancel di public/css/report-table.css (blok "gaya bersama") ikut jalan;
+  // 'is-danger' bikin tombol OK merah karena batal otorisasi aksi merusak.
+  var dlgBatalOtorisasi = alertify.confirm('Batal Otorisasi', 'Batal Otorisasi Kas ' + nobukti + ' ?',
       function() {
         let _token = $("#_token").val();
 
@@ -6380,8 +6346,6 @@ function buttonBatalOtorisasi (nobukti) {
             alertify.success('Berhasil batal otorisasi')
             loadAll()
 
-
-
           },
           error: function (err) {
             console.log(err)
@@ -6393,6 +6357,7 @@ function buttonBatalOtorisasi (nobukti) {
     ,function(){
       console.log('no')
     });
+  dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 
 }
 

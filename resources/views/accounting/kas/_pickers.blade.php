@@ -1,62 +1,52 @@
 <!--  -->
 
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialo g-centered" role="document">
+{{-- rt-picker-v2 — see docs/new-cust-supp-modal-guide.md. #form is shared by all 19
+     entity-picker sections below (one <div class="showhidemodalbodyadd"> each), so this
+     class restyles the modal shell (header, table head, sticky columns) for all of them.
+     Every single-pick list here (Valas, Costing, SubCosting, Custsupp, DPP, Akumulasi/
+     Biaya, Aktiva, DPH, DPHUHT, the DPHUHTBKM custsupp sub-picker, Devisi, Perkiraan, Bon,
+     Departemen, Lawan, Customer) now uses whole-row click (.pick-row) instead of a "+"
+     button — see each buttonAddListXxx()/modalXxx() in kas.js. Two tables were left as-is
+     on purpose because they aren't "pick one row" lists: Invoice (checkbox + editable
+     Kurs/Qty per row, explicit Submit button) and DPHUHTBKM's main bukti table (editable
+     Qty input + a per-row add/remove toggle, not a single pick). bank.blade.php's identical
+     picker set was intentionally left untouched. --}}
+<div class="modal fade rt-picker-v2" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div id="" class="modal-content ">
 
             <div id= "modalAddListValas" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Valas</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
                                     <h3>Valas</h3>
                                 </div>
                             </div>
-                            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
                                 <div class="col-12" style="overflow:auto; margin-top:-60px; ">
                                     <!-- <div class="container-fluid"> -->
-
-
                                     <table id="tabel_add_list_valas" class="dph-tb">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Kurs</th>
-                                                <th scope="col">Actions</th>
-
+                                                <th scope="col" class="num">Kurs</th>
                                             </tr>
                                         </thead>
-
-
                                         <tbody id="tabel_data_add_list_valas" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -67,41 +57,29 @@
                         </div>
                     </div>
                 </div>
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
             <div id= "modalAddListAktivaDetail" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Aktiva</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
-                        <div class="container-fluid p-0">
-                            <!-- <div class="row">
-            <div class="col-12">
-              <h3>Aktiva</h3>
-            </div>
-          </div> -->
-                            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+                        <div class="container-fluid p-2">
                             <div class="row">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Group</label>
@@ -120,20 +98,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
-
-                                        <!-- <div class="col-md-4">
-                <div class="row">
-
-              <div class="col-md-12">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_aktiva_namaaktiva" placeholder="" disabled>
-                </div>
-              </div>
-            </div>
-
-              </div> -->
 
                                         <div class="col-md-4">
                                             <div class="row">
@@ -156,9 +121,7 @@
                                 </div>
 
                             </div>
-                            <div class="row" style="margin-top: -10px">
-
-
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
@@ -203,33 +166,11 @@
                                             </div>
 
                                         </div>
-
-                                        <!-- <div class="col-md-4">
-              <div class="row">
-
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_aktiva_namaaktiva" placeholder="" disabled>
-              </div>
-            </div>
-          </div>
-
-            </div> -->
-
-
-
                                     </div>
-
-
-
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
-
-
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
 
 
                                 <div class="col-md-12" style=" ">
@@ -299,7 +240,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
@@ -388,7 +329,7 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
@@ -419,7 +360,7 @@
 
 
                                             </div>
-                                            <div class="row" style="margin-top: -10px">
+                                            <div class="row kas-row-tight">
 
 
                                                 <div class="col-md-3">
@@ -445,7 +386,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row" style="margin-top: -10px">
+                                            <div class="row kas-row-tight">
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 3</label>
@@ -479,43 +420,32 @@
                         </div>
                     </div>
                 </div>
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="submitAddAktiva()">Submit</button>
+                    <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary" onclick="submitAddAktiva()">Submit</button>
                 </div>
             </div>
 
 
             <div id= "modalAddListAktivaDetailX" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Aktiva</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
 
                         <div class="container-fluid p-0">
-                            <!-- <div class="row">
-            <div class="col-12">
-              <h3>Aktiva</h3>
-            </div>
-          </div> -->
-                            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Group</label>
@@ -535,21 +465,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
-
-                                        <!-- <div class="col-md-4">
-                <div class="row">
-
-              <div class="col-md-12">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_aktivax_namaaktiva" placeholder="" disabled>
-                </div>
-              </div>
-            </div>
-
-              </div> -->
-
                                         <div class="col-md-4">
                                             <div class="row">
                                                 <div class="col-md-4">
@@ -566,21 +482,12 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
-
                                     </div>
-
-
-
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
 
                             </div>
-                            <div class="row" style="margin-top: -10px">
-
-
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
@@ -651,7 +558,7 @@
 
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
 
 
                                 <div class="col-md-12" style=" ">
@@ -747,7 +654,7 @@
 
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
 
 
                                 <div class="col-md-12" style=" ">
@@ -833,19 +740,19 @@
                                             <div class="row">
 
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Akumulasi Penyusutan</label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-10">
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control"
                                                             id="input_aktivax_akumulasi" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXAkumulasi"
                                                             onclick="buttonAddListXAkumulasi()"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -854,7 +761,7 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
 
 
                                 <div class="col-md-12" style=" ">
@@ -864,28 +771,28 @@
                                             <div class="row">
 
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 1</label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-6">
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya1" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya1"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya1')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0">
+                                                <div class="col-md-2" style="padding:0 ; margin:0">
                                                     <div class="form-group ">
                                                         <input type="number" class="form-control text-right"
                                                             id="input_aktivax_persen1" placeholder="">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0; padding-left: 5px">
+                                                <div class="col-md-2" style="padding:0 ; margin:0; padding-left: 5px">
                                                     <div class="form-group text-left">
                                                         %
                                                     </div>
@@ -893,32 +800,32 @@
 
 
                                             </div>
-                                            <div class="row" style="margin-top: -10px">
+                                            <div class="row kas-row-tight">
 
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 2</label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-6">
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya2" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya2"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya2')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0">
+                                                <div class="col-md-2" style="padding:0 ; margin:0">
                                                     <div class="form-group ">
                                                         <input type="number" class="form-control text-right"
                                                             id="input_aktivax_persen2" placeholder="">
 
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0; padding-left: 5px">
+                                                <div class="col-md-2" style="padding:0 ; margin:0; padding-left: 5px">
                                                     <div class="form-group text-left">
                                                         %
                                                     </div>
@@ -926,31 +833,31 @@
 
 
                                             </div>
-                                            <div class="row" style="margin-top: -10px">
+                                            <div class="row kas-row-tight">
 
 
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 3</label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-6">
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya3" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya3"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya3')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0">
+                                                <div class="col-md-2" style="padding:0 ; margin:0">
                                                     <div class="form-group ">
                                                         <input type="number" class="form-control text-right"
                                                             id="input_aktivax_persen3" placeholder="">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-1" style="padding:0 ; margin:0; padding-left: 5px">
+                                                <div class="col-md-2" style="padding:0 ; margin:0; padding-left: 5px">
                                                     <div class="form-group text-left">
                                                         %
                                                     </div>
@@ -979,39 +886,23 @@
 
 
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="submitAddAktivaX()">Submit</button>
+                    <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary" onclick="submitAddAktivaX()">Submit</button>
                 </div>
             </div>
 
-
-
-
             <div id= "modalAddListCosting" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Costing</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
 
                 <div id="" class="">
                     <div class="modal-body">
@@ -1033,50 +924,28 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListCosting() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_costing" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
@@ -1112,50 +981,29 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListSubCosting() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_subcosting" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
 
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
@@ -1192,66 +1040,40 @@
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Kota</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListCustsupp() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_custsupp" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
             <div id= "modalAddListDPP" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">DPP</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
 
                 <div id="" class="">
                     <div class="modal-body">
@@ -1274,57 +1096,35 @@
                                                 <th scope="col">No DPP</th>
                                                 <th scope="col">Kode Supp</th>
                                                 <th scope="col">Nama Supp</th>
-                                                <th scope="col">Nominal</th>
-                                                <th scope="col">K. Bayar</th>
-                                                <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
-
+                                                <th scope="col" class="num">Nominal</th>
+                                                <th scope="col" class="num">K. Bayar</th>
+                                                <th scope="col" class="num">L. Bayar</th>
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by modalDPP() in kas.js — whole row is clickable
+                                             (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_dpp" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
@@ -1360,69 +1160,42 @@
                                             <tr>
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Keterangan</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListXBiaya()/buttonAddListXAkumulasi()
+                                             in kas.js — whole row is clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_akumulasibiaya" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
             <div id= "modalAddListAktiva" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Aktiva</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
@@ -1441,63 +1214,37 @@
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Keterangan</th>
                                                 <th scope="col">Tanggal</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by modalAktiva() in kas.js — whole row is clickable
+                                             (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_aktiva" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
+                <div id="contentContainer" class="modal-footer ">
                     <button id="buttonAddNewAktiva" type="button" class="btn btn-chip-biru"
                         onclick="buttonAddNewAktiva()">+ Aktiva baru</button>
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
-
             <div id= "modalAddListDPH" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">DPH</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -1526,72 +1273,46 @@
                                                 <th scope="col">No DPH</th>
                                                 <th scope="col">Kode Supp</th>
                                                 <th scope="col">Nama Supp</th>
-                                                <th scope="col">Nominal</th>
-                                                <th scope="col">K. Bayar</th>
-                                                <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
-
+                                                <th scope="col" class="num">Nominal</th>
+                                                <th scope="col" class="num">K. Bayar</th>
+                                                <th scope="col" class="num">L. Bayar</th>
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by modalDPH() in kas.js — whole row is clickable
+                                             (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_dph" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
             <div id= "modalAddListDPHUHT" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">DPH</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
 
                 <div id="" class="">
                     <div class="modal-body">
@@ -1615,17 +1336,15 @@
                                                 <th scope="col">No Faktur</th>
                                                 <th scope="col">Kode Supp</th>
                                                 <th scope="col">Nama Supp</th>
-                                                <th scope="col">Nominal</th>
-                                                <th scope="col">K. Bayar</th>
-                                                <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
-
+                                                <th scope="col" class="num">Nominal</th>
+                                                <th scope="col" class="num">K. Bayar</th>
+                                                <th scope="col" class="num">L. Bayar</th>
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by modalDPHUHT() in kas.js — whole row is clickable
+                                             (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_dphuht" class="text-left">
-
                                             <tr>
                                                 <td>-</td>
                                                 <td>-</td>
@@ -1634,55 +1353,30 @@
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
-
-
             <div id= "modalAddListDPHUHTBKM" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Proses - Retur Uang Muka</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
 
                 <div id="" class="">
                     <div class="modal-body">
@@ -1700,27 +1394,17 @@
                                             <tr>
                                                 <th scope="col">KODE</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by modalDPHUHTBKM() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_dphuhtbkm_custsupp" class="text-left">
-
                                             <tr>
                                                 <td>-</td>
                                                 <td>-</td>
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
@@ -1803,26 +1487,14 @@
 
 
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
-
-
 
             <div id= "modalAddListDevisi" class="showhidemodalbodyadd">
                 <div class="modal-header">
@@ -1849,62 +1521,38 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
+                                        {{-- rows rendered by buttonAddListDevisi() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_devisi" class="text-left">
                                             <tr>
                                                 <td>-</td>
                                                 <td>-</td>
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
-
-
             <div id= "modalAddListPerkiraan" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Perkiraan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
-
                 <div id="" class="">
                     <div class="modal-body">
 
@@ -1918,68 +1566,43 @@
                             <div class="row">
                                 <div class="col-12" style="overflow:auto; margin-top:-60px; ">
                                     <!-- <div class="container-fluid"> -->
-
-
                                     <table id="tabel_add_list_perkiraan" class="dph-tb">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Simbol</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListPerkiraan() in kas.js via pickerRowHtml() —
+                                             whole row is clickable (.pick-row), no Actions column. See
+                                             docs/new-cust-supp-modal-guide.md. --}}
                                         <tbody id="tabel_data_add_list_perkiraan" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
             <div id= "modalAddListBon" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
-                    <h5 class="modal-title" id="">Perkiraan</h5>
+                    <h5 class="modal-title" id="">Bon</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -2008,65 +1631,40 @@
                                                 <th scope="col">Penerima</th>
                                                 <th scope="col">Keterangan</th>
                                                 <th scope="col">Perkiraan</th>
-                                                <th scope="col">Jumlah</th>
-                                                <th scope="col">Actions</th>
-
+                                                <th scope="col" class="num">Jumlah</th>
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListBon() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. See
+                                             docs/new-cust-supp-modal-guide.md. --}}
                                         <tbody id="tabel_data_add_list_bon" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
 
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
 
-
-
             <div id= "modalAddListDepartemen" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Departemen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -2094,50 +1692,29 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListDepartemen() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_departemen" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
 
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
@@ -2174,51 +1751,29 @@
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Simbol</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by buttonAddListLawan() in kas.js — whole row is
+                                             clickable (.pick-row), no Actions column. --}}
                                         <tbody id="tabel_data_add_list_lawan" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
@@ -2257,60 +1812,38 @@
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Alamat</th>
                                                 <th scope="col">Kota</th>
-                                                <th scope="col">Actions</th>
-
                                             </tr>
                                         </thead>
 
-
+                                        {{-- rows rendered by this @for loop (listCustSuppX, always empty from the
+                                             controller — real rows come from buttonAddPickCustSuppX()'s own AJAX
+                                             success handler in kas.js) — whole row is clickable (.pick-row), no
+                                             Actions column. --}}
                                         <tbody id="tabel_data_add_list_customer" class="text-left">
                                             @for ($i = 0; $i < count($listCustSuppX); $i++)
-                                                <tr>
-
+                                                <tr class="pick-row"
+                                                    onclick="buttonAddPickCustSuppX('{{ $listCustSuppX[$i]->KODECUSTSUPP }}', '{{ $listCustSuppX[$i]->Agent }}')">
                                                     <td>{{ $listCustSuppX[$i]->KODECUSTSUPP }}</td>
                                                     <td>{{ $listCustSuppX[$i]->NAMACUSTSUPP }}</td>
                                                     <td>{{ $listCustSuppX[$i]->ALAMAT }}</td>
                                                     <td>{{ $listCustSuppX[$i]->NAMAKOTA }}</td>
-
-
-
-                                                    <td class="text-center">
-                                                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                        <button class="btn btn-primary btn-sm"
-                                                            onclick="buttonAddPickCustSuppX('{{ $listCustSuppX[$i]->KODECUSTSUPP }}', '{{ $listCustSuppX[$i]->Agent }}')"
-                                                            type="button"><i class="bi bi-plus"></i></button>
-                                                    </td>
                                                 </tr>
                                             @endfor
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
                 </div>
             </div>
-
-
 
             <div id= "modalAddListInvoice" class="showhidemodalbodyadd">
                 <div class="modal-header">
@@ -2373,55 +1906,24 @@
                                                 <td>-</td>
                                                 <td>-</td>
 
-
-
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
-
-
-
-
-
                 </div>
 
-
-                <div id="" class="modal-footer ">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div id="contentContainer" class="modal-footer ">
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListBatal()">Batal</button>
-                    <button type="button" class="btn btn-primary"
+                    <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
                         onclick="buttonAddPickInvoice()">Submit</button>
                 </div>
             </div>
-
-
-
-
-
-
-
-
-
-
         </div>
-
-
-
-
-
-
-
     </div>
 </div>

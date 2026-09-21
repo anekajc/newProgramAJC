@@ -536,7 +536,7 @@
         <div class="row" style="margin-top: 0" id="contentContainer">
             <div class="col-8 text-left">
                 {{-- <h2 class="page3showhide detailshowhide"> Detail Pengajuan DPH</h2> --}}
-                <h2 class="page3showhide otorisasishowhide"> Otorisasi Pengajuan DPH</h2>
+                {{-- <h2 class="page3showhide otorisasishowhide"> Otorisasi Pengajuan DPH</h2> --}}
             </div>
             <div class="col-4 text-right">
                 <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
@@ -5398,11 +5398,11 @@
          <td class="text-align: left"
                style="width: 20%;">${itemSub.Noinv ?? ''}</td>
          <td style="width: 25%; text-align: right;">
-            ${itemSub.DIBAYAR 
+            ${itemSub.DIBAYAR
               ? Number(itemSub.DIBAYAR).toLocaleString('id-ID', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }) 
+                })
               : ''}
           </td>
           <td style="text-align:center; font-weight:bold; font-size:14px;">
@@ -5454,7 +5454,7 @@
                 tempPrintStr += `</tbody>`;
 
                 tempPrintStr += `</table>
-         
+
 
          <div class="footer-sign font-family: sans-serif;
            font-size: 10px ">
@@ -5463,7 +5463,7 @@
          font-size: 12px ">
          <span style="float: left; display: block; clear: left;">
          </span>
-          
+
 
          <div style="width:100%; display:flex; font-weight:bold; margin-top:5px;">
 
@@ -5518,7 +5518,7 @@
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 

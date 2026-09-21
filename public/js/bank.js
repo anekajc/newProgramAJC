@@ -4886,8 +4886,8 @@ function refreshDataTable (nobukti) {
                   <td>${item.NamaCost ? item.NamaCost : '' }</td>
                   <td>${item.NamaSubCost ? item.NamaSubCost : ''}</td>
                   <td class="text-center">
-                    <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete(${i}  )"><i class="bi bi-trash"></i></button>
+                    <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                    <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDelete(${i}  )"><i class="bi bi-trash"></i></button>
                   </td>
                 </tr>
 
@@ -5455,12 +5455,12 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-        
+
         // console.log(res[0][0].IsOtorisasi1)
 
       }
     })
-    
+
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=10) {
       let tempArray = dataPrint.slice(i,i+10)
@@ -5963,11 +5963,11 @@ function submitPrint (nobukti) {
          <td class="text-align: left"
                style="width: 10%;">${itemSub.costSKB}</td>
          <td style="width: 10%; text-align: right;">
-            ${itemSub.JumlahRp 
+            ${itemSub.JumlahRp
               ? Number(itemSub.JumlahRp).toLocaleString('id-ID', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }) 
+                })
               : ''}
           </td>
          </tr>`;
@@ -5975,7 +5975,7 @@ function submitPrint (nobukti) {
            z++;
 
         });
-	
+
 	// TAMBAHAN
         let sisaRow = maxRow - item.length;
 
@@ -6010,7 +6010,7 @@ function submitPrint (nobukti) {
          tempPrintStr += `</tbody>`;
 
          tempPrintStr += `</table>
-         
+
 
          <div class="footer-sign font-family: sans-serif;
            font-size: 10px ">
@@ -6019,7 +6019,7 @@ function submitPrint (nobukti) {
          font-size: 12px ">
          <span style="float: left; display: block; clear: left;">
          </span>
-          
+
          <div style="width:100%; display:flex; font-weight:bold; margin-top:5px;">
 
           </div>
@@ -6048,7 +6048,7 @@ function submitPrint (nobukti) {
               <td style="border: 1px solid;"></td>
               <td style="border: 1px solid;"></td>
             </tr>
-            
+
           </table>
          </div>
 
@@ -6061,7 +6061,7 @@ function submitPrint (nobukti) {
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 

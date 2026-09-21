@@ -26,15 +26,18 @@
      .btn-pill-* survives untouched (scoped #contentContainer .btn.btn-pill-*, higher
      specificity) — hence the pill shape looking right while the color didn't.
 
-     Fixed page-locally, in the "Pill-button rest/hover states" <style> block below, by
-     raising specificity — NOT with !important in tableMaster2.css: !important on the
-     .btn-action-* backgrounds also outranks canvas/bootstrap.css's .btn-primary:hover, which
-     is what supplies the solid color these pill buttons animate towards, so it wins the rest
-     state at the cost of killing the hover transition entirely. See the longer note on that
-     block, and the matching one above the .btn-action-* rules in tableMaster2.css. The same
-     collision exists on purchasing/newmasterx.blade.php, report/newmasterxreport.blade.php
-     and accounting/pengajuandph.blade.php — untouched here, they need the same page-local
-     treatment if/when it matters on them. --}}
+     Fixed centrally in tableMaster2.css — see its "Pill-button rest + hover, pinned" block,
+     which raises the tint to .btn.btn-pill-*.btn-action-* (0,3,0 at rest, 0,4,0 on hover) so
+     it outranks both the layout's colors and bootstrap's :hover. NOT fixed with !important:
+     !important on the .btn-action-* tints also outranks canvas/bootstrap.css's
+     .btn-primary:hover, which is what SUPPLIES the solid color these pill buttons animate
+     towards, so it wins the rest state at the cost of killing the hover transition entirely.
+
+     Because the fix lives in tableMaster2.css, every page loading that file is covered in one
+     place — including the same collision on purchasing/newmasterx.blade.php,
+     report/newmasterxreport.blade.php and accounting/newmaster.blade.php, and their pages
+     (accounting/kas.blade.php, accounting/bank.blade.php, accounting/pengajuandph.blade.php,
+     etc.). Nothing page-local is required here for colors. --}}
     <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
@@ -45,45 +48,27 @@
      own analogous page2 table — reused rather than duplicated, per that file's own note. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/pengajuandphtunai.css') !!}?v={{ @filemtime(base_path('public/css/pengajuandphtunai.css')) ?: '1' }}">
 
-    {{-- Pill-button rest/hover states, pinned page-locally ------------------------------
-     Reference behaviour: gudang/pemakaianbarang.blade.php lines ~859-862 — pale tint at
-     rest, solid colour on hover, animated by the pill rule's
-     `transition: background-color .3s`. It works there only by luck of load order:
-     gudang/newmasterx.blade.php defines no unscoped .btn-primary/.btn-danger of its own, so
-     tableMaster2.css's .btn-action-* tint (0,1,0) survives at rest and canvas/bootstrap.css's
-     .btn-primary:hover (0,2,0) supplies the solid hover colour.
+    {{-- #page3 pill-button SHAPE only -----------------------------------------------
+     The colour/hover half of this page's pill buttons is fixed centrally now — see the
+     "Pill-button rest + hover, pinned" block in tableMaster2.css, which this page already
+     loads above. Nothing page-local is needed for that any more.
 
-     On THIS layout it did not. newmasterTest.blade.php puts its own unscoped
-     .btn/.btn-primary/.btn-danger in a <style> at line ~505, i.e. AFTER @yield('css') (line
-     35) — so at equal specificity (0,1,0) it beat .btn-action-primary and forced Simpan to
-     solid var(--blue) #1a73e8 at rest. Bootstrap's :hover then took it to #0069d9: the
-     transition WAS running, but between two near-identical blues, so it read as "no
-     transition at all". Batal looked fine only because the layout's .btn-danger happens to
-     be pale (#fef2f2), so its hover to bootstrap's #c82333 stayed dramatic.
+     What is still page-local is a structural gap: #page1 and #page2 wrap their content in
+     `id="contentContainer"` (lines ~235 and ~417) but #page3 (line ~655) does not, so
+     tableMaster2.css's `#contentContainer .btn.btn-pill-*` / `.modal .btn.btn-pill-*` never
+     reached #page3's CLOSE and Otorisasi buttons — they rendered as plain rectangles with the
+     layout's .btn padding instead of pills. Re-declared here on .mainpage (the class on all
+     three #page wrappers) so the shape reaches them.
 
-     Fixed by raising specificity instead of reaching for !important — !important on the
-     .btn-action-* backgrounds would win the rest state but also block bootstrap's :hover,
-     killing the transition outright (that is why it was removed from tableMaster2.css).
-     .mainpage/.modal .btn.btn-action-* is 0,3,0 at rest (beats the layout's 0,1,0) and
-     0,4,0 on hover (beats bootstrap's 0,2,0), so the pair no longer depends on which
-     layout overrides which colour. Requiring .btn in the selector deliberately excludes the
-     .btn-action-sm icon buttons in the Aksi columns — they carry .btn-action-* without .btn
-     and keep their own filter/translateY hover from tableMaster2.css.
-
-     Hover colours are bootstrap's own .btn-*:hover values, copied verbatim so these buttons
-     land on exactly the same colour pemakaianbarang's do rather than drifting to
-     var(--sp-blue).
-
-     Only primary/danger/success appear on pill buttons on this page; .btn-action-warning is
-     used solely on .btn-action-sm, so it needs no entry here. --}}
+     Values are copied from tableMaster2.css's .btn-pill-* rule verbatim. NOT added to
+     tableMaster2.css itself: `.mainpage .btn.btn-pill-*` is 0,3,0, which loses to
+     `#contentContainer .btn` (1,1,0) anyway, so globally it would only ever affect pill
+     buttons orphaned outside BOTH #contentContainer and .modal — i.e. this page's #page3 and
+     any other page with the same missing wrapper. Changing button shapes on unaudited pages
+     is not worth it; the alternative permanent fix is to give #page3 its own
+     `id="contentContainer"` wrapper like the other two pages have, after which this block
+     can be deleted outright. --}}
     <style>
-        /* #page3 has no #contentContainer wrapper (pages 1 and 2 do, lines ~235 and ~417),
-           so tableMaster2.css's `#contentContainer .btn.btn-pill-*` / `.modal .btn.btn-pill-*`
-           never reached its CLOSE and Otorisasi buttons — they rendered as plain rectangles
-           with the layout's .btn padding. Re-declared here on .mainpage (the class on all
-           three #page wrappers) so every pill button on the page gets the shape. Kept
-           page-local rather than added to tableMaster2.css: .mainpage is used by other
-           modules' pages too and this file is the one that needs it. */
         .mainpage .btn.btn-pill-primary,
         .mainpage .btn.btn-pill-secondary {
             display: inline-flex;
@@ -97,66 +82,6 @@
             text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Rest: pale tint, same tokens as tableMaster2.css's .btn-action-* */
-        .mainpage .btn.btn-action-primary,
-        .modal .btn.btn-action-primary {
-            color: var(--sp-blue);
-            background: var(--sp-blue-bg);
-            border: 1px solid #cfdcff;
-        }
-
-        .mainpage .btn.btn-action-danger,
-        .modal .btn.btn-action-danger {
-            color: var(--sp-red);
-            background: var(--sp-red-bg);
-            border: 1px solid #f7cfcf;
-        }
-
-        .mainpage .btn.btn-action-success,
-        .modal .btn.btn-action-success {
-            color: var(--sp-green);
-            background: var(--sp-green-bg);
-            border: 1px solid #cdebd7;
-        }
-
-        /* Hover: solid, bootstrap's .btn-*:hover values (canvas/bootstrap.css ~2594/2668/2779) */
-        .mainpage .btn.btn-action-primary:hover,
-        .mainpage .btn.btn-action-primary:focus,
-        .modal .btn.btn-action-primary:hover,
-        .modal .btn.btn-action-primary:focus {
-            color: #fff;
-            background: #0069d9;
-            border-color: #0062cc;
-        }
-
-        .mainpage .btn.btn-action-danger:hover,
-        .mainpage .btn.btn-action-danger:focus,
-        .modal .btn.btn-action-danger:hover,
-        .modal .btn.btn-action-danger:focus {
-            color: #fff;
-            background: #c82333;
-            border-color: #bd2130;
-        }
-
-        .mainpage .btn.btn-action-success:hover,
-        .mainpage .btn.btn-action-success:focus,
-        .modal .btn.btn-action-success:hover,
-        .modal .btn.btn-action-success:focus {
-            color: #fff;
-            background: #218838;
-            border-color: #1e7e34;
-        }
-
-        /* The layout's `.btn:hover { opacity: .85 }` (line ~525) is not in the pill rule's
-           transition list, so it snaps instead of fading and muddies the colour change
-           above. Cancelled on these buttons only. */
-        .mainpage .btn.btn-pill-primary:hover,
-        .mainpage .btn.btn-pill-secondary:hover,
-        .modal .btn.btn-pill-primary:hover,
-        .modal .btn.btn-pill-secondary:hover {
-            opacity: 1;
         }
     </style>
 
@@ -1705,7 +1630,6 @@
                                                     <tr>
                                                         <td>{{ $tempListPerkiraan[$i]->Perkiraan }}</td>
                                                         <td>{{ $tempListPerkiraan[$i]->Keterangan }}</td>
-
 
                                                         <td class="text-center">
                                                             <div class="action-buttons">
@@ -4496,10 +4420,10 @@
                         rowTable += `
       <tr>
         <td>${item.noinvoice }</td>
-       
+
         <td>${item.namacustsupp }</td>
 
-        
+
         <td>${item.valas }</td>
         <td >${formatAngka(parseFloat(item.dibayar).toFixed(2))}</td>
         <td >${formatAngka(parseFloat(item.kl).toFixed(2))}</td>
@@ -5173,11 +5097,11 @@
          <td class="text-align: left"
                style="width: 20%;  ">${itemSub.NamaCustSupp ?? ''}</td>
          <td style="width: 20%; text-align: right;">
-            ${itemSub.NILAINOTA 
+            ${itemSub.NILAINOTA
               ? Number(itemSub.NILAINOTA).toLocaleString('id-ID', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }) 
+                })
               : ''}
           </td>
           <td class="text-align: left"
@@ -5229,7 +5153,7 @@
                 tempPrintStr += `</tbody>`;
 
                 tempPrintStr += `</table>
-         
+
 
          <div class="footer-sign font-family: sans-serif;
            font-size: 10px ">
@@ -5238,7 +5162,7 @@
          font-size: 12px ">
          <span style="float: left; display: block; clear: left;">
          </span>
-          
+
 
          <div style="width:100%; display:flex; font-weight:bold; margin-top:5px;">
 
@@ -5310,7 +5234,7 @@
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 

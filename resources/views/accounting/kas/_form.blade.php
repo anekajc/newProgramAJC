@@ -11,15 +11,19 @@
     </div>
 
     <div id= "formAdd" class="">
-
-        <div id="" class="">
+        {{-- id="formBsGrid", not "form" — #form is already the entity-picker modal's id
+             in _pickers.blade.php; duplicating it here made $("#form").modal(...) resolve
+             to this plain div instead (it comes first in the DOM), so every "+"/search
+             picker button silently stopped opening its modal. See newmaster.css's matching
+             #formBsGrid rules for the .bs-form grid CSS this div was added for. --}}
+        <div id="formBsGrid" class="">
             <div class="">
                 <!-- <h1>Tes Modal</h1> -->
 
                 <div class="container-fluid">
                     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-12 col-lg-3">
                             <div class="row">
                                 <div class="col-md-5">
                                     <div class="form-group">
@@ -35,11 +39,11 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
 
                                 <div class="col-md-5">
                                     <div class="form-group">
-                                        <label>Kas</label>
+                                        <label>Perkiraan</label>
                                     </div>
                                 </div>
                                 <div class="col-md-7">
@@ -55,13 +59,13 @@
 
                                 <div class="col-md-12" style="margin-top:-10px">
                                     <div class="form-group">
-                                        <textarea style="width: 100%; resize: none" rows=1 class="form-control" id="input_add_keteranganperkiraan" disabled></textarea>
+                                        <textarea style="width: 100%; resize: none;" rows=1 class="form-control" id="input_add_keteranganperkiraan" disabled></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-lg-6">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row">
@@ -104,7 +108,7 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-top: -10px">
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12">
                                     <div class="row">
                                         <div class="col-md-2">
@@ -123,7 +127,7 @@
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-top: -10px" class="">
+                            <div class="row kas-row-tight">
                                 <div class="col-md-12">
                                     <div class="row">
                                         <div class="col-md-2">
@@ -159,7 +163,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-12 col-lg-2">
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="row">
@@ -230,7 +234,7 @@
 
                 <div class="col-md-12 mt-2 text-right">
                     <button id="buttonAddAddItem" type="button" class="btn btn-chip-biru"
-                        onclick="buttonAddAddItem()">+ Tambah</button>
+                        onclick="buttonAddAddItem()">Tambah</button>
                 </div>
 
                 <div id="formAddAdd" class="container-fluid showhideitem">
@@ -246,20 +250,17 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-12 col-lg-4">
                                 <div class="row">
 
                                     <div class="col-md-12">
                                         <div class="row">
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Devisi</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeDevisi" type="text" class="form-control"
                                                         value="01" disabled>
@@ -271,7 +272,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-5">
+                                            <div class="col-md-4">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaDevisi" type="text" class="form-control"
                                                         value="Accounting" disabled>
@@ -279,18 +280,15 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row kas-row-tight">
                                             <div class="col-md-12">
                                                 <div class="row">
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-2">
                                                         <div class="form-group">
                                                             <label>Valas</label>
                                                         </div>
                                                     </div>
-                                                    <!-- <div class="col-4 text-right">
-
-                  </div> -->
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-5">
                                                         <div class="input-group form-group">
                                                             <input id="AddAddValas" type="text"
                                                                 class="form-control" value="IDR" disabled>
@@ -317,20 +315,17 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" style="margin-top: -10px">
+                                        <div class="row kas-row-tight">
                                             <div class="col-md-12">
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <div class="row">
-                                                            <div class="col-md-3">
+                                                            <div class="col-md-2">
                                                                 <div class="form-group">
                                                                     <label>Lawan</label>
                                                                 </div>
                                                             </div>
-                                                            <!-- <div class="col-4 text-right">
-
-                  </div> -->
-                                                            <div class="col-md-4">
+                                                            <div class="col-md-10">
                                                                 <div class="input-group form-group">
                                                                     <input id="AddAddLawan" type="text"
                                                                         class="form-control" disabled>
@@ -342,8 +337,9 @@
 
                                                                 </div>
                                                             </div>
-
-                                                            <div class="col-md-5">
+                                                        </div>
+                                                        <div class="row kas-row-tight">
+                                                            <div class="col-md-12">
                                                                 <div class="input-group form-group">
                                                                     <input id="AddAddKeteranganLawan" type="text"
                                                                         class="form-control" disabled>
@@ -354,16 +350,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" id="rowCustsupp" style="margin-top: -10px">
-                                            <div class="col-md-3">
+                                        <div class="row kas-row-tight" id="rowCustsupp">
+                                            <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Custsupp</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-          </div> -->
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeCustsupp" type="text"
                                                         class="form-control" disabled>
@@ -373,7 +366,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-5">
+                                            <div class="col-md-4">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaCustsupp" type="text"
                                                         class="form-control" disabled>
@@ -383,7 +376,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-12 col-lg-3">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="row">
@@ -404,7 +397,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row kas-row-tight">
                                     <div class="col-md-12">
                                         <div class="row">
                                             <div class="col-md-4">
@@ -424,7 +417,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row" style="margin-top: -10px">
+                                <div class="row kas-row-tight">
                                     <div class="col-md-12">
                                         <div class="row">
                                             <div class="col-md-4">
@@ -451,44 +444,40 @@
                             <!-- <div class="row">
       </div>
       </div> -->
-                            <div class="col-md-3">
+                            <div class="col-12 col-lg-3">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="row">
-                                            <div class="col-md-3">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Departemen</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-4">
+                                            <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeDepartemen" type="text"
                                                         class="form-control" disabled>
                                                     <button id="buttonAddListDepartemen" type="button"
                                                         onclick="buttonAddListDepartemen()"
-                                                        class="btn btn-primary">+</button>
+                                                        class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
                                                 </div>
                                             </div>
-                                            <div class="col-md-5">
+                                        </div>
+                                        <div class="row kas-row-tight">
+                                            <div class="col-md-12">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaDepartemen" type="text"
                                                         class="form-control" disabled>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" id="rowCosting" style="margin-top: -10px">
-                                            <div class="col-md-3">
+                                        <div class="row kas-row-tight" id="rowCosting">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Costing</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeCosting" type="text" class="form-control"
                                                         disabled>
@@ -497,23 +486,20 @@
                                                         class="btn btn-primary">+</button>
                                                 </div>
                                             </div>
-                                            <div class="col-md-5">
+                                            <div class="col-md-3">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaCosting" type="text" class="form-control"
                                                         disabled>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row" id="rowSubCosting" style="margin-top: -10px">
-                                            <div class="col-md-3">
+                                        <div class="row kas-row-tight" id="rowSubCosting">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>SubCosting</label>
                                                 </div>
                                             </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeSubCosting" type="text"
                                                         class="form-control" disabled>
@@ -522,7 +508,7 @@
                                                         class="btn btn-primary">+</button>
                                                 </div>
                                             </div>
-                                            <div class="col-md-5">
+                                            <div class="col-md-3">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaSubCosting" type="text"
                                                         class="form-control" disabled>
@@ -532,7 +518,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2" style="padding:0; margin: 0">
+                            <div class="col-12 col-lg-2" style="padding:0; margin: 0">
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="row">
@@ -554,20 +540,20 @@
                             </div>
                             <!-- </div> -->
                         </div>
-                        <div class="row" style="margin-top: -10px">
+                        <div class="row kas-row-tight">
                         </div>
                     </div>
 
                     <div class="row mt-2" style="margin-top: 0" id="contentContainer">
                         <div class="col-md-12 text-right mt-4">
-                            <button type="button" class="btn btn-secondary btn-pill-secondary"
+                            <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                                 onclick="buttonAddBatal()">Batal</button>
 
                             <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()"
-                                class="btn btn-primary btn-action-primary btn-pill-primary">Submit Add</button>
+                                class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
 
                             <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                class="btn btn-primary btn-action-primary btn-pill-primary">Submit Edit</button>
+                                class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                             <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
                         </div>
                     </div>

@@ -165,6 +165,89 @@
        #tabel2 .btn-info di purchasing/purchaseOrder.blade.php. */
     .btn-action-info   { color: var(--sp-cyan); border-color: #a5f3fc; background: var(--sp-cyan-bg); }
 
+    /* ---- Pill-button rest + hover, pinned ------------------------------------------
+       The tint rules above are single-class (0,1,0), so on the four layouts that define
+       their own unscoped .btn-primary/.btn-danger after @yield('css') — newmasterTest,
+       purchasing/newmasterx, report/newmasterxreport, accounting/newmaster — the layout won
+       the REST state and forced these buttons solid. canvas/bootstrap.css's .btn-*:hover
+       (0,2,0) still won the HOVER state, so the button animated from solid #1a73e8 to solid
+       #0069d9: the `transition: background-color .3s` in the .btn-pill-* rule below was
+       running the whole time, just between two near-identical colours, which reads as no
+       transition at all. (Batal escaped notice only because newmasterTest's .btn-danger
+       happens to be pale, so its hover to #c82333 stayed dramatic.)
+
+       Pinned here by specificity rather than !important: !important on the tints above would
+       win the rest state but also outrank bootstrap's :hover, which is what SUPPLIES the
+       solid colour these buttons animate towards — so it trades a wrong colour for no hover
+       at all. That is why it was removed; don't re-add it. These are 0,3,0 at rest (beats any
+       layout's 0,1,0) and 0,4,0 on :hover/:focus (beats bootstrap's 0,2,0).
+
+       .btn-pill-primary is part of the selector ON PURPOSE, not decoration. Repo-wide, 58
+       buttons use the full pill convention (btn + btn-primary + btn-action-primary +
+       btn-pill-primary) — those are these. But 64 others are plain `btn btn-action-primary`
+       with no bootstrap colour class and no pill: they have no hover rule today, and a
+       selector of merely `.btn.btn-action-primary` would hand all 64 a solid hover they never
+       had. Requiring the pill class excludes them, as it excludes the 238 .btn-action-sm and
+       67 .btn-action-md icon buttons (those carry no .btn class and keep their own
+       filter/translateY hover).
+
+       Hover/focus colours are bootstrap's own .btn-*:hover values, copied verbatim, so the
+       four broken layouts land on exactly the colour the four already-correct ones
+       (gudang/newmasterx, gudang/newmaster, master/newmaster, report/newmaster2x) show
+       today — on those, this whole block is a no-op that just makes the result explicit.
+
+       Deliberately no `border` shorthand and no #contentContainer variant: `#contentContainer
+       .btn { border: 1px solid transparent }` above is 1,1,0 and outranks these, so pill
+       buttons inside #contentContainer have always had transparent borders while those in
+       .modal show the tint border. Left exactly as-is — fighting it would change the look of
+       every already-correct page. */
+    .btn.btn-pill-primary.btn-action-primary {
+      color: var(--sp-blue);
+      background: var(--sp-blue-bg);
+      border-color: #cfdcff;
+    }
+
+    .btn.btn-pill-primary.btn-action-danger {
+      color: var(--sp-red);
+      background: var(--sp-red-bg);
+      border-color: #f7cfcf;
+    }
+
+    .btn.btn-pill-primary.btn-action-success {
+      color: var(--sp-green);
+      background: var(--sp-green-bg);
+      border-color: #cdebd7;
+    }
+
+    .btn.btn-pill-primary.btn-action-primary:hover,
+    .btn.btn-pill-primary.btn-action-primary:focus {
+      color: #fff;
+      background: #0069d9;
+      border-color: #0062cc;
+    }
+
+    .btn.btn-pill-primary.btn-action-danger:hover,
+    .btn.btn-pill-primary.btn-action-danger:focus {
+      color: #fff;
+      background: #c82333;
+      border-color: #bd2130;
+    }
+
+    .btn.btn-pill-primary.btn-action-success:hover,
+    .btn.btn-pill-primary.btn-action-success:focus {
+      color: #fff;
+      background: #218838;
+      border-color: #1e7e34;
+    }
+
+    /* The same four layouts also set `.btn:hover { opacity: .85 }`. opacity is not in the
+       .btn-pill-* transition list below, so it snaps instead of fading and muddies the colour
+       change above. Cancelled on pill buttons only; a no-op on the layouts that never had it. */
+    .btn.btn-pill-primary:hover,
+    .btn.btn-pill-secondary:hover {
+      opacity: 1;
+    }
+
     .action-buttons-wrap {
         display: flex;
         flex-wrap: nowrap;
