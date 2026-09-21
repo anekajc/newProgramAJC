@@ -15,119 +15,112 @@ use App\Http\Controllers\Accounting\PengajuanDPHTunaiController;
 use App\Http\Controllers\Accounting\PengajuanDPPController;
 
 Route::middleware('auth')->group(function () {
-// Route::get('/kas', [KasController::class, 'index']);
-// Route::get('/kaslistkasheader', [KasController::class, 'listKasHeader']);
-// Route::post('/kaslistlawan', [KasController::class, 'listLawan']);
-// Route::post('/kaslistbon', [KasController::class, 'listBon']);
-// Route::post('/kaslistsubcosting', [KasController::class, 'listSubCosting']);
-// Route::post('/kaslistcosting', [KasController::class, 'listCosting']);
-// Route::post('/kaschangekembaliuang', [KasController::class, 'changeKembaliUang']);
+Route::get('/kas', [KasController::class, 'index']);
+Route::get('/kaslistkasheader', [KasController::class, 'listKasHeader']);
+Route::post('/kaslistlawan', [KasController::class, 'listLawan']);
+Route::post('/kaslistbon', [KasController::class, 'listBon']);
+Route::post('/kaslistsubcosting', [KasController::class, 'listSubCosting']);
+Route::post('/kaslistcosting', [KasController::class, 'listCosting']);
+Route::post('/kaschangekembaliuang', [KasController::class, 'changeKembaliUang']);
 
-// Route::post('/kaslistakumulasi', [KasController::class, 'listAkumulasi']);
+Route::post('/kaslistakumulasi', [KasController::class, 'listAkumulasi']);
 
-// Route::get('/kaslistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
-// Route::get('/kaslistbiayainput', [KasController::class, 'listBiayaInput']);
+Route::get('/kaslistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
+Route::get('/kaslistbiayainput', [KasController::class, 'listBiayaInput']);
 
-// Route::post('/kasgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
-// Route::post('/kasspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
+Route::post('/kasgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
+Route::post('/kasspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
 
-// Route::post('/kaslistaktiva', [KasController::class, 'listAktiva']);
-// Route::post('/kaslistdetailaktiva', [KasController::class, 'listDetailAktiva']);
-// Route::post('/kasupdatedbaktivadet', [KasController::class, 'updateDBAktivaDet']);
-// Route::post('/kasspaddaktiva', [KasController::class, 'spAddAktiva']);
+Route::post('/kaslistaktiva', [KasController::class, 'listAktiva']);
+Route::post('/kaslistdetailaktiva', [KasController::class, 'listDetailAktiva']);
+Route::post('/kasupdatedbaktivadet', [KasController::class, 'updateDBAktivaDet']);
+Route::post('/kasspaddaktiva', [KasController::class, 'spAddAktiva']);
 
-// Route::get('/kaslistdepartemen', [KasController::class, 'listDepartemen']);
-// Route::get('/kaslistdevisi', [KasController::class, 'listDevisi']);
-// Route::get('/kaslistvalas', [KasController::class, 'listValas']);
-// Route::post('/kasspadd', [KasController::class, 'spAdd']);
-// Route::post('/kasspdetail', [KasController::class, 'getDetail']);
-// Route::get('/kasloadall', [KasController::class, 'loadAll']);
-// Route::get('/kaslistdph', [KasController::class, 'listDPH']);
-// Route::get('/kaslistdphuht', [KasController::class, 'listDPHUHT']);
-// Route::get('/kaslistdpp', [KasController::class, 'listDPP']);
-// Route::get('/kaslistcustsupp', [KasController::class, 'listCustsupp']);
-// Route::get('/kaslistcustsuppx', [KasController::class, 'listCustSuppX']);
-// Route::post('/kaslisttunai', [KasController::class, 'listTunai']);
-// Route::get('/kaslisttunaix', [KasController::class, 'listTunaiX']);
-// Route::post('/kaslistcustsupptunai', [KasController::class, 'listCustSuppTunai']);
+Route::get('/kaslistdepartemen', [KasController::class, 'listDepartemen']);
+Route::get('/kaslistdevisi', [KasController::class, 'listDevisi']);
+Route::get('/kaslistvalas', [KasController::class, 'listValas']);
+Route::post('/kasspadd', [KasController::class, 'spAdd']);
+Route::post('/kasspdetail', [KasController::class, 'getDetail']);
+Route::get('/kasloadall', [KasController::class, 'loadAll']);
+Route::get('/kaslistdph', [KasController::class, 'listDPH']);
+Route::get('/kaslistdphuht', [KasController::class, 'listDPHUHT']);
+Route::get('/kaslistdpp', [KasController::class, 'listDPP']);
+Route::get('/kaslistcustsupp', [KasController::class, 'listCustsupp']);
+Route::get('/kaslistcustsuppx', [KasController::class, 'listCustSuppX']);
+Route::post('/kaslisttunai', [KasController::class, 'listTunai']);
+Route::get('/kaslisttunaix', [KasController::class, 'listTunaiX']);
+Route::post('/kaslistcustsupptunai', [KasController::class, 'listCustSuppTunai']);
 
 
-// Route::post('/kassptemphutpiut', [KasController::class, 'spTempHutPiut']);
+Route::post('/kassptemphutpiut', [KasController::class, 'spTempHutPiut']);
 
-// Route::get('/kaslistcustsuppumb', [KasController::class, 'listCustsuppUMB']);
-// Route::post('/kasprosesumb', [KasController::class, 'prosesUMB']);
-// Route::post('/kaslistumb', [KasController::class, 'listUMB']);
-// Route::post('/kasspadddppdph', [KasController::class, 'spAddDPPDPH']);
-// Route::post('/kasspaddtemprumjual', [KasController::class, 'spAddTempRUMJUAL']);
-// Route::post('/kasspdeletetemprumjual', [KasController::class, 'spDeleteTempRUMJUAL']);
-// Route::post('/kasspupdatetemprumjual', [KasController::class, 'spUpdateTempRUMJUAL']);
-// Route::post('/kasspotorisasi', [KasController::class, 'spOtorisasi']);
-// Route::post('/kasspbatalotorisasi', [KasController::class, 'spBatalOtorisasi']);
-// Route::post('/kasdetailCetak', [KasController::class, 'getDetailCetak']);
+Route::get('/kaslistcustsuppumb', [KasController::class, 'listCustsuppUMB']);
+Route::post('/kasprosesumb', [KasController::class, 'prosesUMB']);
+Route::post('/kaslistumb', [KasController::class, 'listUMB']);
+Route::post('/kasspadddppdph', [KasController::class, 'spAddDPPDPH']);
+Route::post('/kasspaddtemprumjual', [KasController::class, 'spAddTempRUMJUAL']);
+Route::post('/kasspdeletetemprumjual', [KasController::class, 'spDeleteTempRUMJUAL']);
+Route::post('/kasspupdatetemprumjual', [KasController::class, 'spUpdateTempRUMJUAL']);
+Route::post('/kasspotorisasi', [KasController::class, 'spOtorisasi']);
+Route::post('/kasspbatalotorisasi', [KasController::class, 'spBatalOtorisasi']);
+Route::post('/kasdetailCetak', [KasController::class, 'getDetailCetak']);
 
 
 
 // // Bank
-// Route::get('/bank', [BankController::class, 'index']);
-// Route::get('/banklistkasheader', [BankController::class, 'listKasHeader']);
-// Route::post('/banklistlawan', [BankController::class, 'listLawan']);
-// Route::post('/banklistsubcosting', [BankController::class, 'listSubCosting']);
-// Route::post('/banklistcosting', [BankController::class, 'listCosting']);
+Route::get('/bank', [BankController::class, 'index']);
+Route::get('/banklistkasheader', [BankController::class, 'listKasHeader']);
+Route::post('/banklistlawan', [BankController::class, 'listLawan']);
+Route::post('/banklistsubcosting', [BankController::class, 'listSubCosting']);
+Route::post('/banklistcosting', [BankController::class, 'listCosting']);
 
-// Route::post('/banklistakumulasi', [BankController::class, 'listAkumulasi']);
+Route::post('/banklistakumulasi', [BankController::class, 'listAkumulasi']);
 
-// Route::get('/banklistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
-// Route::get('/banklistbiayainput', [KasController::class, 'listBiayaInput']);
+Route::get('/banklistakumulasiinput', [KasController::class, 'listAkumulasiInput']);
+Route::get('/banklistbiayainput', [KasController::class, 'listBiayaInput']);
 
-// Route::post('/bankgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
-// Route::post('/bankspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
-
-
-// Route::post('/banklistaktiva', [BankController::class, 'listAktiva']);
-// Route::post('/banklistdetailaktiva', [BankController::class, 'listDetailAktiva']);
-// Route::post('/bankupdatedbaktivadet', [BankController::class, 'updateDBAktivaDet']);
-// Route::post('/bankspaddaktiva', [BankController::class, 'spAddAktiva']);
+Route::post('/bankgetnourutaktiva' , [KasController::class, 'getNoUrutAktiva']);
+Route::post('/bankspaddnewaktiva' , [KasController::class, 'spAddNewAktiva']);
 
 
-
-// Route::post('/bankspnobukti', [BankController::class, 'getNoBukti']);
-// Route::get('/banklistdepartemen', [BankController::class, 'listDepartemen']);
-// Route::get('/banklistdevisi', [BankController::class, 'listDevisi']);
-// Route::get('/banklistvalas', [BankController::class, 'listValas']);
-// Route::post('/bankspadd', [BankController::class, 'spAdd']);
-// Route::post('/bankspdetail', [BankController::class, 'getDetail']);
-// Route::get('/bankloadall', [BankController::class, 'loadAll']);
-// Route::get('/banklistdph', [BankController::class, 'listDPH']);
-// Route::get('/banklistdphuht', [BankController::class, 'listDPHUHT']);
-// Route::get('/banklistdpp', [BankController::class, 'listDPP']);
-// Route::get('/banklistcustsupp', [BankController::class, 'listCustsupp']);
-
-
-// Route::get('/banklistcustsuppx', [BankController::class, 'listCustSuppX']);
-// Route::post('/banklisttunai', [BankController::class, 'listTunai']);
-// Route::get('/banklisttunaix', [BankController::class, 'listTunaiX']);
-// Route::post('/banklistcustsupptunai', [BankController::class, 'listCustSuppTunai']);
-
-
-// Route::post('/banksptemphutpiut', [BankController::class, 'spTempHutPiut']);
+Route::post('/banklistaktiva', [BankController::class, 'listAktiva']);
+Route::post('/banklistdetailaktiva', [BankController::class, 'listDetailAktiva']);
+Route::post('/bankupdatedbaktivadet', [BankController::class, 'updateDBAktivaDet']);
+Route::post('/bankspaddaktiva', [BankController::class, 'spAddAktiva']);
 
 
 
-// Route::get('/banklistcustsuppumb', [BankController::class, 'listCustsuppUMB']);
+Route::post('/bankspnobukti', [BankController::class, 'getNoBukti']);
+Route::get('/banklistdepartemen', [BankController::class, 'listDepartemen']);
+Route::get('/banklistdevisi', [BankController::class, 'listDevisi']);
+Route::get('/banklistvalas', [BankController::class, 'listValas']);
+Route::post('/bankspadd', [BankController::class, 'spAdd']);
+Route::post('/bankspdetail', [BankController::class, 'getDetail']);
+Route::get('/bankloadall', [BankController::class, 'loadAll']);
+Route::get('/banklistdph', [BankController::class, 'listDPH']);
+Route::get('/banklistdphuht', [BankController::class, 'listDPHUHT']);
+Route::get('/banklistdpp', [BankController::class, 'listDPP']);
+Route::get('/banklistcustsupp', [BankController::class, 'listCustsupp']);
 
 
+Route::get('/banklistcustsuppx', [BankController::class, 'listCustSuppX']);
+Route::post('/banklisttunai', [BankController::class, 'listTunai']);
+Route::get('/banklisttunaix', [BankController::class, 'listTunaiX']);
+Route::post('/banklistcustsupptunai', [BankController::class, 'listCustSuppTunai']);
 
+Route::post('/banksptemphutpiut', [BankController::class, 'spTempHutPiut']);
 
+Route::get('/banklistcustsuppumb', [BankController::class, 'listCustsuppUMB']);
 
-// Route::post('/bankprosesumb', [BankController::class, 'prosesUMB']);
-// Route::post('/banklistumb', [BankController::class, 'listUMB']);
-// Route::post('/bankspadddppdph', [BankController::class, 'spAddDPPDPH']);
-// Route::post('/bankspaddtemprumjual', [BankController::class, 'spAddTempRUMJUAL']);
-// Route::post('/bankspdeletetemprumjual', [BankController::class, 'spDeleteTempRUMJUAL']);
-// Route::post('/bankspupdatetemprumjual', [BankController::class, 'spUpdateTempRUMJUAL']);
-// Route::post('/bankspotorisasi', [BankController::class, 'spOtorisasi']);
-// Route::post('/bankspbatalotorisasi', [BankController::class, 'spBatalOtorisasi']);
-// Route::post('/bankdetailCetak', [BankController::class, 'getDetailCetak']);
+Route::post('/bankprosesumb', [BankController::class, 'prosesUMB']);
+Route::post('/banklistumb', [BankController::class, 'listUMB']);
+Route::post('/bankspadddppdph', [BankController::class, 'spAddDPPDPH']);
+Route::post('/bankspaddtemprumjual', [BankController::class, 'spAddTempRUMJUAL']);
+Route::post('/bankspdeletetemprumjual', [BankController::class, 'spDeleteTempRUMJUAL']);
+Route::post('/bankspupdatetemprumjual', [BankController::class, 'spUpdateTempRUMJUAL']);
+Route::post('/bankspotorisasi', [BankController::class, 'spOtorisasi']);
+Route::post('/bankspbatalotorisasi', [BankController::class, 'spBatalOtorisasi']);
+Route::post('/bankdetailCetak', [BankController::class, 'getDetailCetak']);
 
 // // CETAK PENGAJUAN DPH
 Route::post('/cetakpengajuandphspnobukti', [BankController::class, 'getNoBukti']);

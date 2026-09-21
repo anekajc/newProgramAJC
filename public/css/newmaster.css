@@ -275,3 +275,86 @@
     border-color: #a8bdff !important;
     color: #1d4ed8 !important;
   }
+
+  /* #formBsGrid — NOT #form: #form is already the id of the entity-picker modal in
+     accounting/kas/_pickers.blade.php (same convention as bank/pengajuandph/
+     bonsementara.blade.php's own #form .bs-form, which is that page's *modal*).
+     A second element sharing id="form" would make $("#form") resolve to whichever one
+     comes first in the DOM, silently breaking every $("#form").modal(...) call used to
+     open the picker (this happened once already on kas — see _form.blade.php's own note
+     on the div this targets). Keep this id unique per use. */
+  #formBsGrid .bs-form {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 68px minmax(0, 1fr);
+  gap: 14px 12px;
+  align-items: center;
+}
+
+/* Label tema Canvas punya margin-bottom: 10px global - dinetralkan di sini supaya
+   jarak antarbaris diatur gap grid, bukan hack margin-top negatif seperti dulu. */
+#formBsGrid .bs-form label {
+  margin-bottom: 0;
+  text-align: left;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--rt-ink-soft);
+  white-space: nowrap;
+  cursor: default;
+}
+
+/* Input yang membentang dari kolom input pertama sampai tepi kanan. */
+#formBsGrid .bs-form .bs-full { grid-column: 2 / -1; }
+
+#formBsGrid .form-control {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--rt-border);
+  font-size: 13.5px;
+  color: var(--rt-ink);
+  box-shadow: none;
+}
+
+#formBsGrid .form-control:focus {
+  border-color: var(--rt-indigo);
+  box-shadow: 0 0 0 3px var(--rt-indigo-soft);
+}
+
+/* Field terkunci - abu-abu supaya jelas tidak bisa diisi di mode tersebut.
+   Hanya tampilan; yang mengunci tetap atribut disabled & lockFormAdd(). */
+#formBsGrid .form-control:disabled,
+#formBsGrid .form-control[disabled] {
+  background-color: #f1f3f5;
+  border-color: #e3e6ea;
+  color: #8A8F9C;
+  cursor: not-allowed;
+}
+
+/* Layar sempit: label pindah ke atas input, semua jadi satu kolom. */
+@media (max-width: 575.98px) {
+  #formBsGrid .bs-form { grid-template-columns: 1fr; gap: 4px 0; }
+  #formBsGrid .bs-form label { text-align: left; margin-top: 8px; }
+  #formBsGrid .bs-form .bs-full { grid-column: 1 / -1; }
+}
+
+/* accounting/kas/_form.blade.php's field rows use style="margin-top: -10px" (not this
+   .bs-form grid) to pull rows closer together, sized for the fixed col-md-3/6/2 layout
+   those rows sit in. That layout now switches to col-12 below lg (992px) so the section
+   stacks full-width instead of squeezing into a 3-way split on a narrower laptop window —
+   but a fixed -10px pull still assumes the row above is exactly one line tall, and once
+   Bootstrap's own col-md-4/8 label+input pairs stack (below md, 768px) a row can grow to
+   two lines and get clipped by the row below pulling up into it. Same -10px rows were
+   inlined throughout the "Tambah" item panel for the same reason, so centralizing the
+   value here as .kas-row-tight lets both breakpoints below reset it in one place instead
+   of hunting down every inline style="margin-top: -10px". Not scoped to #formAdd: this
+   class is also reused on kas/_detail.blade.php and bank/_form.blade.php, whose wrapper
+   divs don't (and, for _detail's #formAdd, must not — kas.js's $('#formAdd').show() would
+   break if a second element on the same page shared that id) carry that id. */
+.kas-row-tight {
+  margin-top: -10px;
+}
+
+@media (max-width: 991.98px) {
+  .kas-row-tight {
+    margin-top: 0;
+  }
+}
