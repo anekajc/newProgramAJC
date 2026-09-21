@@ -249,7 +249,8 @@ Case when a.TPHC='C' then '[C]ash'
      when a.TPHC='H' then '[H]utang Giro'
      when a.TPHC='P' then '[P]iutang Giro'
      else ''
-end MyTPHC,e.NamaBag,f.nourut,g.NAMACUSTSUPP NamaCustSuppP,h.NAMACUSTSUPP NamaCustSuppL
+end MyTPHC,e.NamaBag,f.nourut,g.NAMACUSTSUPP NamaCustSuppP,h.NAMACUSTSUPP NamaCustSuppL,
+i.Kode KodePerkiraan
 from dbtransaksi a
      left outer join dbperkiraan b on a.perkiraan=b.perkiraan
      left outer join dbdevisi c on c.Devisi=a.Devisi
@@ -258,6 +259,11 @@ from dbtransaksi a
      left outer join dbTrans f on f.nobukti=a.nobukti
      left outer join dbCustSupp g on g.KODECUSTSUPP=a.CustSuppP
      left outer join dbCustSupp h on h.KODECUSTSUPP=a.CustSuppL
+     -- Kode perkiraan sisi Debet dari dbPostHutPiut, dipakai blade untuk mengenali perkiraan
+     -- Titipan Customer ('PTS') tanpa mematok nomor perkiraannya. Di-group dulu supaya satu
+     -- perkiraan tidak menggandakan baris kalau punya lebih dari satu entri.
+     left outer join (select Perkiraan, min(Kode) Kode from dbPostHutPiut group by Perkiraan) i
+          on i.Perkiraan=a.Perkiraan
 where a.nobukti= :nobukti
 Order by a.Nobukti,a.Urut
         " , ["nobukti" => $req->nobukti]);
@@ -446,6 +452,37 @@ Order by a.Nobukti,a.Urut
         "kuncibukti2"   => $kunciBukti,
       ]);
 
+      // MODE EDIT: muat kembali rincian yang SUDAH tersimpan untuk item ini, ditandai
+      // StatusUID='U'. Tanda itu yang membuat sp_TransaksiMemorial choice 'U' menghapus baris
+      // DBHUTPIUT lama lalu menulisnya ulang - jadi baris yang user pertahankan tetap utuh,
+      // yang dihapus (jadi 'D') hilang, dan yang baru ditambah ('I') masuk. Tanpa ini, rincian
+      // lama akan tertinggal di DBHUTPIUT dan baris baru menumpuk di atasnya.
+      //
+      // Baris ini sengaja TIDAK ikut tersaring filter outstanding di atas: seed outstanding
+      // justru mengecualikan bukti+nomsk item ini, sehingga saldo faktur terbaca seolah item ini
+      // belum ada - lalu rincian item ini ditambahkan di sini sebagai baris yang bisa diedit.
+      if ($req->edit) {
+        DB::connection('SML')->update("
+          insert into dbTempHutPiut (NoFaktur, NoRetur, TipeTrans, KodeCustSupp, NoBukti, NoMsk, Urut,
+          Tanggal, JatuhTempo, Debet, Kredit, Valas, Kurs, DebetD, KreditD, KodeSales, Tipe, Perkiraan,
+          Catatan, IDUser, TipeDK, StatusUID, NoInvoice, Valas_, Kurs_, KursBayar)
+
+          select NoFaktur, NoRetur, TipeTrans, KodeCustSupp, NoBukti, NoMsk, Urut,
+          Tanggal, JatuhTempo, Debet, Kredit, Valas, Kurs, DebetD, KreditD, KodeSales, Tipe, Perkiraan,
+          Catatan, :username, :tipedk, 'U', NOINVOICE, KodeVls_, Kurs_, KursBayar
+          from dbHutPiut
+          where NoBukti = :nobukti and NoMsk = :nomsk
+            and Perkiraan = :perkiraan and KodeCustSupp = :kodecustsupp
+        ", [
+          "username"     => $username,
+          "tipedk"       => $tipedk,
+          "nobukti"      => $req->nobukti,
+          "nomsk"        => $nomsk,
+          "perkiraan"    => $req->perkiraan,
+          "kodecustsupp" => $req->kodecustsupp,
+        ]);
+      }
+
       return [
         "nomsk" => $nomsk,
         "data"  => $this->queryKartuPT($username, $req->perkiraan, $tipedk),
@@ -572,9 +609,13 @@ Order by a.Nobukti,a.Urut
       $username = \Auth::user()->username;
       $nomsk = $this->nomskItem($req->nobukti, $req->urut);
 
+      // Disaring lewat StatusUID, bukan NoInvoice. Baris hasil seed bisa saja ber-NoInvoice
+      // 'TBH'/'LNS' juga kalau faktur itu dulu pernah ditambah/dilunasi lewat memorial LAIN -
+      // baris seperti itu milik transaksi lain dan NoBukti/NoMsk-nya tidak boleh ditimpa.
+      // Hanya baris kerja sesi ini ('I' baru, 'U' hasil muat ulang) yang ikut disamakan.
       DB::connection('SML')->update("
         update dbTempHutPiut set NoBukti = :nobukti, NoMsk = :nomsk
-        where IDUser = :username and isnull(NoInvoice,'') in ('TBH','LNS')
+        where IDUser = :username and isnull(StatusUID,'') in ('I','U')
       ", [
         "nobukti"  => $req->nobukti,
         "nomsk"    => $nomsk,
@@ -609,7 +650,8 @@ Order by a.Nobukti,a.Urut
                           FROM dbTransaksi
                           WHERE (NoBukti <> :nobuktiedit OR Urut <> :urutedit)
                           GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
-         where A.NoBukti = :notitipan AND A.Urut = :uruttitipan AND A.Lawan='113400'
+         where A.NoBukti = :notitipan AND A.Urut = :uruttitipan
+         AND A.Lawan in (select Perkiraan from dbPostHutPiut where Kode='PTS')
       ", [
         "nobuktiedit" => $req->nobukti,
         "urutedit" => $req->urut,
@@ -626,7 +668,8 @@ Order by a.Nobukti,a.Urut
       return $listData;
     }
 
-    // Browse No Titipan untuk Debet = 113400 (Titipan Customer). Query sesuai yang dipakai
+    // Browse No Titipan untuk Debet = perkiraan Titipan Customer. Perkiraannya diturunkan dari
+    // dbPostHutPiut (Kode='PTS'), tidak lagi dipatok '113400'. Query sesuai yang dipakai
     // PelunasanPiutangDPPController::queryOutstanding, tanpa filter tanggal akhir.
     public function listTitipan (Request $req) {
 
@@ -641,7 +684,8 @@ Order by a.Nobukti,a.Urut
                           from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
          LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
                           FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
-         where A.Lawan='113400' AND A.CustSuppL<>''  and A.TANGGAL>'03/28/2016'
+         where A.Lawan in (select Perkiraan from dbPostHutPiut where Kode='PTS')
+         AND A.CustSuppL<>''  and A.TANGGAL>'03/28/2016'
          and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0
          order by A.TANGGAL desc, A.NOBUKTI desc
       ");
