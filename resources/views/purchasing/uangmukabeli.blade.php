@@ -428,8 +428,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <label>No PO</label>
           <div class="input-group">
             <input id="input_add_nopo" type="text" class="form-control" disabled>
-            <button id="buttonAddListPO" type="button" onclick="buttonAddListPO()" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" disabled>
-              <i class="bi bi-plus"></i>
+            <button id="buttonAddListPO" type="button" onclick="buttonAddListPO()" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" disabled>
+              <i class="bi bi-search"></i>
             </button>
           </div>
         </div>
@@ -454,12 +454,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
         <div class="form-field">
           <label>Valas</label>
-          <div class="input-group">
-            <input id="input_add_valas" type="text" class="form-control" disabled>
-            <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary btn-sm rounded-end shadow-sm" style="height:32px;" disabled>
-              <i class="bi bi-plus"></i>
-            </button>
-          </div>
+          <select id="input_add_valas" class="form-control" disabled></select>
         </div>
         <div class="form-field">
           <label>Kurs</label>
@@ -1109,8 +1104,64 @@ jQuery(function($) {
 
 $(document).ready(function(){
   umbInitReportTableSekali()
+  muatDropdownValas()
   loadAll()
 });
+
+// Valas dipilih lewat dropdown (pola sama dengan halaman Purchase Order), bukan tombol
+// browse. Nilainya tetap mengikuti PO yang dipilih, jadi select-nya tetap disabled.
+let listValas = []
+
+function muatDropdownValas () {
+
+  $.ajax({
+    url: "{!! url('polistvalas') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      listValas = res
+
+      let selectEl = document.getElementById("input_add_valas")
+      let kodeTerpilih = selectEl.value
+
+      selectEl.innerHTML = ''
+      listValas.forEach((item) => {
+        let opt = document.createElement('option')
+        opt.value = item.kodevls
+        opt.textContent = `${item.kodevls} - ${item.namavls}`
+        selectEl.appendChild(opt)
+      })
+
+      if (kodeTerpilih) {
+        setValasValue(kodeTerpilih)
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+
+  })
+
+}
+
+// Kode valas dari PO belum tentu ada di daftar (misal data lama), jadi optionnya
+// ditambahkan dulu supaya nilainya tetap kelihatan.
+function setValasValue (kode) {
+  let selectEl = document.getElementById("input_add_valas")
+  kode = kode ? String(kode).trim() : ''
+
+  if (kode && !Array.from(selectEl.options).some(opt => opt.value === kode)) {
+    let opt = document.createElement('option')
+    opt.value = kode
+    opt.textContent = kode
+    selectEl.appendChild(opt)
+  }
+
+  selectEl.value = kode
+}
 
 function openPrintModal(nobukti) {
   selectedNoBukti = nobukti
@@ -1450,7 +1501,7 @@ function cleanForm () {
   document.getElementById("input_add_kodesupplier").value =  ''
   document.getElementById("input_add_namasupplier").value =  ''
   document.getElementById("input_add_tipeppn").value =  0
-  document.getElementById("input_add_valas").value =  'IDR'
+  setValasValue('IDR')
   document.getElementById("input_add_kurs").value =  '1.00'
   document.getElementById("input_add_bayar").value =  0
   document.getElementById("input_add_dpp").value =  '0.00'
@@ -1472,7 +1523,8 @@ function lockForm (value = true) {
   document.getElementById("input_add_tanggal").disabled = value
   // document.getElementById("input_add_tipeppn").disabled = value
   document.getElementById("buttonAddListPO").disabled = value
-  document.getElementById("buttonAddListValas").disabled = true
+  // Valas kini dropdown (diisi muatDropdownValas), tidak ada lagi tombol browse
+  // document.getElementById("buttonAddListValas").disabled = true
   document.getElementById("input_add_kurs").disabled = value
   //document.getElementById("input_add_totalsubtotal").disabled = value
   // document.getElementById("input_add_tanggalest").disabled = value
@@ -1484,7 +1536,8 @@ function lockFormAdd (value = true) {
 //document.getElementById("input_add_tanggal").disabled = value
 document.getElementById("input_add_tipeppn").disabled = value
 //document.getElementById("buttonAddListPO").disabled = value
-document.getElementById("buttonAddListValas").disabled = true
+// Valas kini dropdown (diisi muatDropdownValas), tidak ada lagi tombol browse
+// document.getElementById("buttonAddListValas").disabled = true
 //document.getElementById("input_add_kurs").disabled = value
 //document.getElementById("input_add_totalsubtotal").disabled = value
 // document.getElementById("input_add_tanggalest").disabled = value
@@ -1538,7 +1591,7 @@ function buttonAddPickPO (index) {
   document.getElementById("input_add_dpp").value = formatAngkaX(dataPO.DPP)
   document.getElementById("input_add_ppn").value = formatAngkaX(dataPO.PPN)
   document.getElementById("input_add_total").value = formatAngkaX(dataPO.Nnet)
-  document.getElementById("input_add_valas").value = dataPO.Valas
+  setValasValue(dataPO.Valas)
   document.getElementById("input_add_kurs").value = formatAngkaX(dataPO.Kurs)
   document.getElementById("input_add_tipeppn").value = dataPO.pPPN
   document.getElementById("input_add_bayar").value = dataPO.tipebayar
@@ -1632,7 +1685,7 @@ function refreshDataTable (nobukti) {
       document.getElementById("input_add_kodesupplier").value =  listData[0].KodeSupp
       document.getElementById("input_add_namasupplier").value =  listData[0].NamaCustSupp
       document.getElementById("input_add_tipeppn").value = listData[0].TipePPN
-      document.getElementById("input_add_valas").value =  listData[0].VALAS
+      setValasValue(listData[0].VALAS)
       document.getElementById("input_add_kurs").value =  listData[0].KURS
       document.getElementById("input_add_bayar").value =  listData[0].Bayar
       document.getElementById("input_add_dpp").value =  formatAngkaX(listData[0].DPPSO)
