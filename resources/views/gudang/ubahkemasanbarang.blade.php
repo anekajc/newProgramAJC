@@ -781,6 +781,7 @@
 
   const g_modalNone = "";
   var   gmodemodal = g_modalNone;
+  var   g_modeModal = g_modalNone;
 
   var dataItem = [];
   var dataBrowse = {};
@@ -919,11 +920,28 @@
     };
   }
 
+  if (typeof cekNotDuplicate !== 'function') {
+    window.cekNotDuplicate = function(list, key, value) {
+      let v = String(nullToEmpty(value)).trim().toLowerCase();
+      return !(list || []).some(function(row) {
+        let k = Object.keys(row).find(function(x) { return x.toLowerCase() === String(key).toLowerCase(); });
+        return k !== undefined && String(nullToEmpty(row[k])).trim().toLowerCase() === v;
+      });
+    };
+  }
+
+  if (typeof messageDuplicate !== 'function') {
+    window.messageDuplicate = function(label) {
+      return label + ' sudah ada';
+    };
+  }
+
   if (typeof setEmptyNumberToZero !== 'function') {
     window.setEmptyNumberToZero = function(inputId) {
       if ($('#' + inputId).val() === '') {
         $('#' + inputId).val(0);
       }
+      return $('#' + inputId).val();
     };
   }
 
@@ -2670,6 +2688,81 @@ function submitPrint (nobukti) {
 
   function submitItem() {
     doSubmitItem("item", "kmbjspadd", "KMBJ");
+  }
+
+  // Kirim item ke controller spAdd: I = tambah, U = ubah, D = hapus (sesuai gtipeformitem).
+  // Respon controller: "T" = sukses
+  let g_submittingItem = false;
+
+  function doSubmitItem(_type, _urlName, _kode, _isRetry = false) {
+    if (g_submittingItem) return;
+
+    let choice;
+    if (gtipeformitem === g_tipeformitemAdd)         choice = "I";
+    else if (gtipeformitem === g_tipeformitemEdit)   choice = "U";
+    else if (gtipeformitem === g_tipeformitemDelete) choice = "D";
+    else return alertify.warning("Mode item tidak dikenali, silakan refresh browser");
+
+    if (choice !== "D") {
+      if (!cekNotEmpty("input_tanggal")) return alertify.warning(messageRequired("Tanggal"));
+      if (!cekNotEmpty("input_gudang"))  return alertify.warning(messageRequired("Gudang"));
+    }
+    if (!cekNotEmpty("input_nobukti")) {
+      return alertify.warning("No Bukti belum terbentuk, silakan tutup form lalu klik Tambah lagi");
+    }
+
+    let cart = cekValidate(choice);
+    if (typeof cart !== "object" || cart === null) {
+      return alertify.warning(cart ? String(cart) : "Data tidak valid");
+    }
+
+    let _nobukti = cart["nobukti"];
+    let _token   = $("#_token").val();
+
+    const release = () => {
+      g_submittingItem = false;
+      $("#buttonSubmitItem").prop("disabled", false);
+    };
+
+    g_submittingItem = true;
+    $("#buttonSubmitItem").prop("disabled", true);
+
+    $.ajax({
+      url: "{!! url('') !!}/" + _urlName,
+      type: "post",
+      data: {
+        _token,
+        data: cart,
+        urut: cart["urut"]   
+      },
+      success: function(res) {
+        release();
+
+        if (res === "T") {
+          if (choice === "I")      successAdd(_nobukti);
+          else if (choice === "U") successEdit(_nobukti);
+          else                     successDelete(_nobukti);
+          return;
+        }
+
+        if (res === "D;;trans" && !_isRetry) {
+          // No Bukti bentrok dengan transaksi lain -> ambil nomor baru, coba sekali lagi
+          let nb = doGenerateNoBukti(_kode);
+          $("#input_nobukti").val(nb.Nobukti);
+          $("#input_nourut").val(nb.Nourut);
+          return doSubmitItem(_type, _urlName, _kode, true);
+        }
+
+        console.log(res);
+        alertify.warning("Gagal menyimpan item, silakan coba lagi");
+      },
+      error: function(err) {
+        release();
+        console.log(err);
+        console.log(err.status, err.statusText);
+        alertify.warning("Terjadi kesalahan, silahkan refresh browser");
+      }
+    });
   }
 
   function successAdd(_nobukti) {
