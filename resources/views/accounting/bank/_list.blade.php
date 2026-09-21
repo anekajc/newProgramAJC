@@ -46,7 +46,7 @@
         {{-- margin-left:auto pada .action-group (report-table.css) mendorongnya ke ujung kanan
              toolbar, terpisah dari Filter di sebelah kiri. --}}
         <div class="action-group">
-          <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">+ Bank</button>
+          <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah Bank</button>
         </div>
       </div>
 
