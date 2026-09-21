@@ -452,13 +452,13 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card mb-3 tab-card">
+  {{-- <div class="card mb-3 tab-card">
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Giro</a>
       </div>
     </div>
-  </div>
+  </div> --}}
   <div class="card">
 <div class="card-body" style="padding:0;">
 <div class="tab-content" id="myTabContent">
@@ -479,7 +479,7 @@
                   <select id="giroLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                 </div>
                 <div class="po-toolbar-act">
-                  <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
+                  <button id="AddVisibility" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                 </div>
               </div>
               <div id="rtBarTabel"></div>
@@ -506,12 +506,12 @@
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -30px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Giro Dibuka</h2>
+      {{-- <h2>Giro Dibuka</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
@@ -798,7 +798,7 @@
             <div class="input-group form-group">
               <input id="AddAddKodeDevisi" type="text" class="form-control" disabled>
 
-              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -839,7 +839,7 @@
           <div class="col-md-6">
             <div class="input-group form-group">
               <input id="AddAddNoDPH" type="text" class="form-control" value="" disabled>
-              <button id="buttonAddListDPH" type="button" onclick="buttonAddListDPH()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListDPH" type="button" onclick="buttonAddListDPH()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -961,7 +961,7 @@
             <div class="input-group form-group">
               <input id="AddAddLawan" type="text" class="form-control" disabled>
               <input id="AddAddKodeLawan" type="hidden" class="form-control" disabled>
-              <button id="buttonAddListLawan" type="button" onclick="buttonAddListLawan()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListLawan" type="button" onclick="buttonAddListLawan()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -1083,8 +1083,8 @@
 
       <div class="col-md-2">
         <div class="input-group form-group text-left">
-          <button id="buttonFormGiro" type="button" onclick="buttonFormGiro()" class="btn btn-primary" >+ Giro</button>
-          <button id="buttonFormGiroBGT" type="button" onclick="buttonFormGiroBGT()" class="btn btn-primary" >+ Giro</button>
+          <button id="buttonFormGiro" type="button" onclick="buttonFormGiro()" class="btn btn-chip-biru" >+ Giro</button>
+          <button id="buttonFormGiroBGT" type="button" onclick="buttonFormGiroBGT()" class="btn btn-chip-biru" >+ Giro</button>
 
 
         </div>
@@ -1180,7 +1180,7 @@
   <div class="col-md-3">
     <div class="input-group form-group">
       <input id="AddAddKodeDepartemen" type="text" class="form-control" disabled>
-      <button id="buttonAddListDepartemen" type="button" onclick="buttonAddListDepartemen()" class="btn btn-primary" >+</button>
+      <button id="buttonAddListDepartemen" type="button" onclick="buttonAddListDepartemen()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
     </div>
   </div>
@@ -1254,23 +1254,23 @@
 
   <div class="row mt-2" style="margin-top: 0">
     <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
+      <button type="button" class="btn btn-danger" onclick="buttonAddBatal()" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;">Batal</button>
 
-      <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-primary" style="height: 30px;
+      <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()" class="btn btn-chip-biru" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;">Submit Add</button>
+      text-transform: uppercase;">Simpan</button>
 
-      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" style="height: 30px;
+      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-chip-biru" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;">Submit Edit</button>
+      text-transform: uppercase;">Simpan</button>
 
 
       <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
