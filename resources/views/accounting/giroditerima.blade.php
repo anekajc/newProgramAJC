@@ -501,7 +501,7 @@
                   <select id="giroLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                 </div>
                 <div class="po-toolbar-act">
-                  <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
+                  <button id="AddVisibility" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                 </div>
               </div>
               <div id="rtBarTabel"></div>
