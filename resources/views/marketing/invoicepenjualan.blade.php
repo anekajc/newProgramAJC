@@ -3769,7 +3769,12 @@ function buttonBatalOtorisasi (nobukti) {
           },
           error: function (err) {
             console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
+            // Sama seperti submitOtorisasi() -- update status batal-otorisasi-nya
+            // sendiri bisa saja sudah kepakai duluan di database sebelum proses
+            // posting susulan gagal, jadi refresh otomatis + pesan yang lebih
+            // jelas daripada cuma bilang "terjadi kesalahan" tanpa konteks.
+            loadAll()
+            alertify.error('Batal otorisasi kemungkinan sudah tersimpan, namun proses lanjutan (posting hutang-piutang/jurnal) gagal. Data telah dimuat ulang -- silahkan periksa status terbaru pada tabel, dan hubungi admin jika perlu diproses ulang.')
           }
 
         })
@@ -3815,7 +3820,14 @@ function submitOtorisasi (nobukti) {
     },
     error: function (err) {
       console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      // Update status otorisasi-nya sendiri jalan duluan sebelum proses posting
+      // hutang-piutang/jurnal di belakangnya -- kalau salah satu proses susulan
+      // itu yang gagal, otorisasinya sendiri sudah kepakai duluan di database
+      // walau request ini balik sebagai error. loadAll() supaya tabel langsung
+      // menampilkan status yang sebenarnya tanpa user harus refresh manual.
+      loadAll()
+      buttonCloseForm()
+      alertify.error('Otorisasi kemungkinan sudah tersimpan, namun proses lanjutan (posting hutang-piutang/jurnal) gagal. Data telah dimuat ulang -- silahkan periksa status terbaru pada tabel, dan hubungi admin jika perlu diproses ulang.')
 	}
     });
 
@@ -4490,6 +4502,7 @@ function buttonDetail (nobukti) {
 
       $('#input_detail_pembayaran').val(header.TIPEBAYAR)
       $('#input_detail_hari').val(header.HARI)
+      $('#input_detail_tipeppn').val(header.PPN)
 
       $('#input_detail_tanggal').val(formatDate(header.Tanggal, '-'))
 

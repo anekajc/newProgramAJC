@@ -359,6 +359,7 @@ if ($header) {
 
   public function spBatalOtorisasi ( Request $req) {
     $res = DB::connection('SML')->update("update dbrSPB set IsOtorisasi1 = 0, OtoUser1 = '' , TglOto1 = NULL , maxol = -1 where NoBukti = :nobukti ", [ "nobukti" => $req->nobukti ]);
+    app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'RSJ', $req->nobukti, $req->pket, 0, 'dbrSPB');
     return 1;
   }
 

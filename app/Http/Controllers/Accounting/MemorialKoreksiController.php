@@ -249,13 +249,21 @@ Case when a.TPHC='C' then '[C]ash'
      when a.TPHC='H' then '[H]utang Giro'
      when a.TPHC='P' then '[P]iutang Giro'
      else ''
-end MyTPHC,e.NamaBag,f.nourut
+end MyTPHC,e.NamaBag,f.nourut,g.NAMACUSTSUPP NamaCustSuppP,h.NAMACUSTSUPP NamaCustSuppL,
+i.Kode KodePerkiraan
 from dbtransaksi a
      left outer join dbperkiraan b on a.perkiraan=b.perkiraan
      left outer join dbdevisi c on c.Devisi=a.Devisi
      left outer join dbPerkiraan d on d.Perkiraan=a.Lawan
      left outer join dbBagian e on e.kodebag=a.kodebag
      left outer join dbTrans f on f.nobukti=a.nobukti
+     left outer join dbCustSupp g on g.KODECUSTSUPP=a.CustSuppP
+     left outer join dbCustSupp h on h.KODECUSTSUPP=a.CustSuppL
+     -- Kode perkiraan sisi Debet dari dbPostHutPiut, dipakai blade untuk mengenali perkiraan
+     -- Titipan Customer ('PTS') tanpa mematok nomor perkiraannya. Di-group dulu supaya satu
+     -- perkiraan tidak menggandakan baris kalau punya lebih dari satu entri.
+     left outer join (select Perkiraan, min(Kode) Kode from dbPostHutPiut group by Perkiraan) i
+          on i.Perkiraan=a.Perkiraan
 where a.nobukti= :nobukti
 Order by a.Nobukti,a.Urut
         " , ["nobukti" => $req->nobukti]);
@@ -263,35 +271,417 @@ Order by a.Nobukti,a.Urut
   }
 
 
+    // Daftar perkiraan SAMA untuk semua jenis transaksi (BMM & BJK). Perkiraan piutang usaha
+    // (Kode 'PT'), titipan customer ('PTS'), dan hutang usaha ('HT') ikut tampil di keduanya.
+    //
+    // Yang membedakan BMM & BJK BUKAN daftarnya, melainkan apa yang terjadi SETELAH dipilih:
+    //   BMM - memicu rantai browse Customer/Supplier -> modal Kartu (lihat loadKartuPT()).
+    //   BJK - tidak ada rantai itu; perkiraannya dipakai sebagai perkiraan biasa saja.
+    // Pembatasan itu dikerjakan di blade lewat mkAlurKartuAktif(), BUKAN dengan menyembunyikan
+    // perkiraannya di sini. $req->transaksi sengaja tidak dipakai lagi di method ini.
     public function listPerkiraan (Request $req) {
 
-          $username = \Auth::user()->username;
-          $listData = [];
+      $username = \Auth::user()->username;
 
-          if ($req->transaksi == 'BMM') {
-            $listData = DB::connection('SML')->select("
-            select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, C.IsLokalOrExim from dbPerkiraan a
-                        left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-                         Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-                        where a.Tipe=1 and b.UserID = :username
-                        and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
+      return DB::connection('SML')->select("
+        select a.Perkiraan, a.Keterangan, a.Simbol, C.Kode, C.IsLokalOrExim from dbPerkiraan a
+              left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
+               Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim) C on A.Perkiraan=C.Perkiraan
+              where a.Tipe=1 and b.UserID = :username
+              order by a.Perkiraan
+      ", [ "username" => $username ]);
+    }
 
-                        order by a.Perkiraan" , [ "username" => $username ]);
+    /* ==================================================================================
+       PENAMBAHAN PIUTANG USAHA (Debet = perkiraan ber-Kode 'PT' di dbPOSTHUTPIUT) DAN
+       PELUNASAN/PENAMBAHAN HUTANG USAHA (perkiraan ber-Kode 'HT') - dua alur kembar yang
+       memakai modal, endpoint, dan tabel kerja yang SAMA, dibedakan lewat $req->jenis
+       ('PT'/'HT', lihat jenisHP()).
+       ----------------------------------------------------------------------------------
+       Alur: browse Perkiraan -> pilih perkiraan PT/HT -> browse Customer/Supplier -> modal
+       Kartu. Di modal Kartu, faktur outstanding ditampilkan sebagai informasi (read-only)
+       dan user bisa menambah baris baru sebesar nilai memorial.
 
-          } else {
-            $listData = DB::connection('SML')->select("
-            select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, C.IsLokalOrExim from dbPerkiraan a
-                  left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-                   Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-                  where a.Tipe=1 and b.UserID = :username
-                  and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' and Perkiraan not in ('116100','21203') )
+       Piutang (PT): Debet = MENAMBAH piutang, Kredit = PELUNASAN piutang.
+       Hutang  (HT): Debet = PELUNASAN hutang, Kredit = MENAMBAH hutang - PERSIS KEBALIKANNYA.
+       Outstanding piutang = sisa Debet (sum(Debet-Kredit)>0), outstanding hutang = sisa
+       Kredit (sum(Kredit-Debet)>0) - lihat loadKartuPT(). Kedua fakta ini dikonfirmasi
+       langsung dari data lama program desktop, bukan tebakan.
 
-                  order by a.Perkiraan" , [ "username" => $username ]);
+       Cara datanya tersimpan (dibaca langsung dari definisi SP di SQL Server):
 
+       - Baris kerja ditampung di dbTempHutPiut, dipisah per user lewat kolom IDUser (jadi
+         satu user hanya bisa punya SATU kartu terbuka - piutang atau hutang - dalam satu
+         waktu; lihat validasi "satu sisi" di blade).
+       - Baris outstanding di-seed dengan INSERT biasa sehingga StatusUID-nya NULL.
+       - Baris yang DITAMBAH user lewat sp_TempHutPiut choice 'I' otomatis ber-StatusUID 'I',
+         choice 'D' menandai StatusUID 'D' (soft delete).
+       - sp_TransaksiMemorial (dipanggil di spAdd()) yang MEMINDAHKAN baris temp ke DBHUTPIUT
+         permanen, dengan filter: NoBukti=@Nobukti and NoMsk=@Urut and StatusUID in ('I','U').
+         Jadi hanya baris tambahan user yang ikut diposting - baris outstanding yang StatusUID
+         NULL tidak pernah dobel-posting. Tidak ada pemanggilan SP posting terpisah di sini.
+         SP ini generik - @Tipe disalin apa adanya dari dbTempHutPiut, jadi HT jalan tanpa
+         perubahan apa pun di SQL Server.
 
-          }
+       Konvensi nilai di bawah ini mengikuti data memorial lama yang memakai fitur yang sama
+       (mis. NoBukti SMX/BMM/00003/0622 untuk PT, SMX/BMM/00004/0316 untuk HT): TipeTrans='L'
+       (SAMA untuk PT & HT), Tipe='PT'/'HT', Valas IDR/Kurs 1, KursBayar 1, DebetD/KreditD 0.
+       NoInvoice='TBH' menandai baris TAMBAHAN (Debet untuk PT, Kredit untuk HT), 'LNS'
+       menandai baris PELUNASAN (Kredit untuk PT, Debet untuk HT) - lihat penandaBaris().
+       NoInvoice sekaligus jadi penanda baris buatan user, supaya tombol Hapus hanya muncul
+       di baris itu.
 
+       PT, PTS (titipan customer), dan HT sengaja HANYA berlaku di transaksi BMM - lihat
+       filter Kode in ('HT','PT','PTS') di cabang BJK pada listPerkiraan().
+       ================================================================================== */
 
+    // Browse Customer/Supplier untuk perkiraan piutang/hutang usaha. vwBrowsCustSupp.Perkiraan
+    // sudah berisi perkiraan piutang/hutang milik masing-masing customer/supplier, jadi tinggal
+    // disaring dengan perkiraan yang dipilih user - jangan dipatok '113100'/'21201', kode
+    // perkiraan tidak pernah dihardcode di project ini.
+    public function listCustomerPT (Request $req) {
+
+      $listData = DB::connection('SML')->select("
+        select A.KODECUSTSUPP, A.NAMACUSTSUPP, A.ALAMAT, A.NAMAKOTA, A.ALAMATKOTA, A.PPN, A.Hari
+        from vwBrowsCustSupp A
+        where A.Perkiraan = :perkiraan
+        order by A.KodeCustSupp
+      ", [ "perkiraan" => $req->perkiraan ]);
+
+      return $listData;
+    }
+
+    /**
+     * NoMsk yang dipakai baris dbTempHutPiut supaya nanti terangkut oleh sp_TransaksiMemorial.
+     *
+     * sp_TransaksiMemorial memindahkan baris temp ke DBHUTPIUT dengan syarat NoMsk = Urut baris
+     * dbTransaksi milik item memorial ini. Pada choice 'I' SP menghitung sendiri urutnya
+     * (MAX(Urut)+1 untuk NoBukti tsb) dan MENGABAIKAN urut yang dikirim client - karena itu
+     * untuk item BARU nilainya harus ditebak dengan rumus yang sama persis. Untuk item yang
+     * sedang diedit, urutnya sudah pasti dan dikirim apa adanya oleh blade.
+     */
+    private function nomskItem ($nobukti, $urut) {
+      if ((int) $urut > 0) { return (int) $urut; }
+
+      $row = DB::connection('SML')->select("
+        select isnull(max(Urut),0) + 1 as NoMsk from dbTransaksi where NoBukti = :nobukti
+      ", [ "nobukti" => $nobukti ]);
+
+      return $row ? (int) $row[0]->NoMsk : 1;
+    }
+
+    // Isi tabel kartu: baris temp milik user untuk perkiraan & tipe D. Query sama persis dengan
+    // yang dipakai form Penambahan Piutang di aplikasi desktop, termasuk kolom MyKey sebagai
+    // identitas baris dan urutan berdasarkan tanggal faktur terawal.
+    private function queryKartuPT ($username, $perkiraan, $tipedk) {
+      return DB::connection('SML')->select("
+        declare @IDUser varchar(30), @Perkiraan varchar(30), @TipeDK varchar(1)
+
+        select @IDUser = :username, @Perkiraan = :perkiraan, @TipeDK = :tipedk
+
+        select A.NoFaktur+convert(varchar(8),A.Tanggal,102)+right('00000000'+cast(A.Urut as varchar(8)),8)+A.NoRetur MyKey,
+               A.NoFaktur, A.NoRetur, A.TipeTrans, A.KodeCustSupp, A.NoBukti, A.NoMsk, A.Urut,
+               A.Tanggal, A.JatuhTempo, A.Debet, A.Kredit, A.Saldo, A.Valas, A.Kurs,
+               A.DebetD, A.KreditD, A.SaldoD, A.KodeSales, A.Tipe, A.Perkiraan, A.Catatan,
+               A.IDUser, A.StatusUID, A.TipeDK, A.NoInvoice, A.Valas_, A.Kurs_, A.KursBayar
+        from dbTempHutPiut A
+        left outer join
+                (select NoFaktur, KodeCustSupp, min(Tanggal) Tanggal from dbTempHutPiut
+                where IDUser=@IDUser and Perkiraan=@Perkiraan and TipeDK=@TipeDK
+                group by NoFaktur, KodeCustSupp
+                ) B on B.NoFaktur=A.NoFaktur and B.KodeCustSupp=A.KodeCustSupp
+        where A.IDUser=@IDUser and A.Perkiraan=@Perkiraan and A.TipeDK=@TipeDK and isnull(A.StatusUID,'')<>'D'
+        order by B.Tanggal, A.NoFaktur, A.Urut
+      ", [ "username" => $username, "perkiraan" => $perkiraan, "tipedk" => $tipedk ]);
+    }
+
+    // 'D' (menambah piutang, dari sisi Debet) atau 'K' (pelunasan, dari sisi Kredit). Dipakai
+    // untuk memisahkan baris kerja kedua alur di dbTempHutPiut. Nilai apa pun selain 'K'
+    // dianggap 'D' supaya request lama/tanpa parameter tetap berperilaku seperti semula.
+    private function tipeDK (Request $req) {
+      return $req->tipedk === 'K' ? 'K' : 'D';
+    }
+
+    // Penanda baris buatan user di kolom NoInvoice: 'TBH' (Tambah) untuk alur yang MENAMBAH,
+    // 'LNS' (Lunas) untuk alur PELUNASAN. Konvensi ini diambil dari data memorial lama yang
+    // memakai fitur yang sama - lihat catatan besar di atas.
+    //
+    // Piutang (PT): Debet=menambah ('TBH'), Kredit=pelunasan ('LNS').
+    // Hutang  (HT): Debet=pelunasan ('LNS'), Kredit=menambah ('TBH') - PERSIS KEBALIKANNYA,
+    // dikonfirmasi dari data lama ber-NoBukti SMX/BMM/00004/0316 (Debet+NoInvoice='LNS',
+    // Kredit+NoInvoice='TBH' untuk Tipe='HT').
+    private function penandaBaris ($tipedk, $jenis = 'PT') {
+      if ($jenis === 'HT') {
+        return $tipedk === 'K' ? 'TBH' : 'LNS';
+      }
+      return $tipedk === 'K' ? 'LNS' : 'TBH';
+    }
+
+    // 'PT' (piutang usaha) atau 'HT' (hutang usaha). Nilai lain diabaikan dan dianggap 'PT'
+    // supaya request lama/tanpa parameter tetap berperilaku seperti semula.
+    private function jenisHP (Request $req) {
+      return $req->jenis === 'HT' ? 'HT' : 'PT';
+    }
+
+    // Dipanggil sekali saat modal Kartu dibuka: bersihkan baris temp milik user, lalu seed
+    // faktur outstanding customer tsb. Faktur yang berasal dari item memorial ini sendiri
+    // dikecualikan supaya tidak ikut terhitung sebagai outstanding.
+    public function loadKartuPT (Request $req) {
+
+      $username = \Auth::user()->username;
+      $nomsk = $this->nomskItem($req->nobukti, $req->urut);
+      $tipedk = $this->tipeDK($req);
+      $jenis = $this->jenisHP($req);
+
+      // Kunci baris milik item memorial ini: NoBukti + NoMsk yang dipad 4 digit, sama dengan
+      // bentuk yang dipakai di query aslinya.
+      $kunciBukti = $req->nobukti . str_pad($nomsk, 4, '0', STR_PAD_LEFT);
+
+      // Outstanding piutang = sisa Debet (belum dibayar). Outstanding hutang = sisa Kredit
+      // (belum dilunasi) - kebalikannya, dikonfirmasi lewat query langsung ke vwHutPiut.
+      $havingOutstanding = $jenis === 'HT' ? 'sum(Kredit-Debet)>0' : 'sum(Debet-Kredit)>0';
+
+      DB::connection('SML')->update("delete dbTempHutPiut where IDUser = :username", [ "username" => $username ]);
+
+      DB::connection('SML')->update("
+        insert into dbTempHutPiut (NoFaktur, NoRetur, TipeTrans, KodeCustSupp, NoBukti, NoMsk, Urut, Tanggal, JatuhTempo,
+        Debet, Kredit, Valas, Kurs, DebetD, KreditD, KodeSales, Tipe, Perkiraan, Catatan, IDUser, TipeDK,
+        NoInvoice, Valas_, Kurs_)
+
+        select Y.NoFaktur, Y.NoRetur, Y.TipeTrans, Y.KodeCustSupp, Y.NoBukti, Y.NoMsk, Y.Urut, Y.Tanggal, Y.JatuhTempo,
+        Y.Debet, Y.Kredit, Y.Valas, Y.Kurs, Y.DebetD, Y.KreditD, Y.KodeSales, Y.Tipe, Y.Perkiraan, Y.Catatan, :username IDUser, :tipedk,
+        Y.NoInvoice, Y.KodeVls_, Y.Kurs_
+        from
+        (select NoFaktur, KodeCustSupp, Perkiraan
+        from vwHutPiut
+        where KodeCustSupp = :kodecustsupp and Perkiraan = :perkiraan
+        and NoBukti+right('0000'+cast(NoMsk as varchar(4)),4) <> :kuncibukti
+            group by NoFaktur, KodeCustSupp, Perkiraan
+            having {$havingOutstanding}  ) X
+            left outer join vwHutPiut Y on Y.NoFaktur=X.NoFaktur and Y.KodeCustSupp=X.KodeCustSupp and Y.Perkiraan=X.Perkiraan
+            where Y.KodeCustSupp = :kodecustsupp2
+            and Y.Perkiraan = :perkiraan2
+            and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4) <> :kuncibukti2
+      ", [
+        "username"      => $username,
+        "tipedk"        => $tipedk,
+        "kodecustsupp"  => $req->kodecustsupp,
+        "perkiraan"     => $req->perkiraan,
+        "kuncibukti"    => $kunciBukti,
+        "kodecustsupp2" => $req->kodecustsupp,
+        "perkiraan2"    => $req->perkiraan,
+        "kuncibukti2"   => $kunciBukti,
+      ]);
+
+      // MODE EDIT: muat kembali rincian yang SUDAH tersimpan untuk item ini, ditandai
+      // StatusUID='U'. Tanda itu yang membuat sp_TransaksiMemorial choice 'U' menghapus baris
+      // DBHUTPIUT lama lalu menulisnya ulang - jadi baris yang user pertahankan tetap utuh,
+      // yang dihapus (jadi 'D') hilang, dan yang baru ditambah ('I') masuk. Tanpa ini, rincian
+      // lama akan tertinggal di DBHUTPIUT dan baris baru menumpuk di atasnya.
+      //
+      // Baris ini sengaja TIDAK ikut tersaring filter outstanding di atas: seed outstanding
+      // justru mengecualikan bukti+nomsk item ini, sehingga saldo faktur terbaca seolah item ini
+      // belum ada - lalu rincian item ini ditambahkan di sini sebagai baris yang bisa diedit.
+      if ($req->edit) {
+        DB::connection('SML')->update("
+          insert into dbTempHutPiut (NoFaktur, NoRetur, TipeTrans, KodeCustSupp, NoBukti, NoMsk, Urut,
+          Tanggal, JatuhTempo, Debet, Kredit, Valas, Kurs, DebetD, KreditD, KodeSales, Tipe, Perkiraan,
+          Catatan, IDUser, TipeDK, StatusUID, NoInvoice, Valas_, Kurs_, KursBayar)
+
+          select NoFaktur, NoRetur, TipeTrans, KodeCustSupp, NoBukti, NoMsk, Urut,
+          Tanggal, JatuhTempo, Debet, Kredit, Valas, Kurs, DebetD, KreditD, KodeSales, Tipe, Perkiraan,
+          Catatan, :username, :tipedk, 'U', NOINVOICE, KodeVls_, Kurs_, KursBayar
+          from dbHutPiut
+          where NoBukti = :nobukti and NoMsk = :nomsk
+            and Perkiraan = :perkiraan and KodeCustSupp = :kodecustsupp
+        ", [
+          "username"     => $username,
+          "tipedk"       => $tipedk,
+          "nobukti"      => $req->nobukti,
+          "nomsk"        => $nomsk,
+          "perkiraan"    => $req->perkiraan,
+          "kodecustsupp" => $req->kodecustsupp,
+        ]);
+      }
+
+      return [
+        "nomsk" => $nomsk,
+        "data"  => $this->queryKartuPT($username, $req->perkiraan, $tipedk),
+      ];
+    }
+
+    // Refresh isi tabel kartu tanpa seed ulang - dipakai setelah tambah/hapus baris.
+    public function getKartuPT (Request $req) {
+      return $this->queryKartuPT(\Auth::user()->username, $req->perkiraan, $this->tipeDK($req));
+    }
+
+    // Tambah satu baris faktur ke dbTempHutPiut lewat sp_TempHutPiut choice 'I'.
+    // Catatan penting soal parameter SP:
+    //  - @Urut diabaikan saat 'I'; SP mengisinya sendiri (MAX+1 per KodeCustSupp+NoFaktur).
+    //  - SP menyimpan Debet = @Debet * @Kurs, jadi @Debet dikirim dalam nilai valas.
+    public function addKartuPT (Request $req) {
+
+      $username = \Auth::user()->username;
+      $nomsk = $this->nomskItem($req->nobukti, $req->urut);
+      $tipedk = $this->tipeDK($req);
+      $jenis = $this->jenisHP($req);
+
+      // Alur Debet menaruh nilainya di kolom Debet, alur Kredit di kolom Kredit - ini TIDAK
+      // berubah antara piutang & hutang, hanya MAKNANYA yang dibalik (lihat penandaBaris()).
+      $debet  = $tipedk === 'K' ? 0 : $req->jumlah;
+      $kredit = $tipedk === 'K' ? $req->jumlah : 0;
+
+      $values = [
+        'I',                                    // @Choice
+        $req->nofaktur,                         // @NoFaktur
+        '',                                     // @NoRetur
+        'L',                                    // @TipeTrans - dikonfirmasi sama untuk PT & HT
+        $req->kodecustsupp,                     // @KodeCustSupp
+        $req->nobukti,                          // @NoBukti  - bukti memorial ini
+        $nomsk,                                 // @NoMsk    - Urut item memorial ini
+        0,                                       // @Urut     - diisi sendiri oleh SP
+        $req->tanggal,                          // @Tanggal
+        $req->jatuhtempo,                       // @JatuhTempo
+        $debet,                                 // @Debet
+        $kredit,                                // @Kredit
+        $req->valas,                            // @Valas
+        $req->kurs,                             // @Kurs
+        '',                                     // @KodeSales
+        $jenis,                                 // @Tipe - 'PT' atau 'HT'
+        $req->perkiraan,                        // @Perkiraan
+        $req->catatan ?? '',                    // @Catatan
+        $username,                              // @IDUser
+        $tipedk,                                // @TipeDK
+        $this->penandaBaris($tipedk, $jenis),   // @NoInvoice - 'TBH' (tambah) / 'LNS' (pelunasan)
+        '',                              // @Valas_
+        0,                               // @Kurs_
+        1,                               // @KursBayar
+        0,                               // @DebetD
+        0,                               // @KreditD
+        '',                              // @FlagSimbol
+        '',                              // @NODPh
+        0,                               // @UrutDPH
+      ];
+
+      DB::connection('SML')->statement('exec sp_TempHutPiut ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+
+      return $this->queryKartuPT($username, $req->perkiraan, $tipedk);
+    }
+
+    // Hapus baris tambahan (soft delete StatusUID='D'). Kunci pencocokan di SP memakai
+    // NoFaktur+NoRetur+TipeTrans+KodeCustSupp+NoBukti+Perkiraan+IDUser+NoMsk+Urut, jadi semuanya
+    // dikirim apa adanya dari baris yang dipilih di tabel.
+    public function deleteKartuPT (Request $req) {
+
+      $username = \Auth::user()->username;
+      $tipedk = $this->tipeDK($req);
+      $jenis = $this->jenisHP($req);
+
+      $values = [
+        'D',                                    // @Choice
+        $req->nofaktur,                         // @NoFaktur
+        $req->noretur ?? '',                    // @NoRetur
+        $req->tipetrans,                        // @TipeTrans
+        $req->kodecustsupp,                     // @KodeCustSupp
+        $req->nobukti,                          // @NoBukti
+        $req->nomsk,                            // @NoMsk
+        $req->urut,                             // @Urut - urut baris di dbTempHutPiut
+        $req->tanggal,                          // @Tanggal
+        $req->jatuhtempo,                       // @JatuhTempo
+        0,                                       // @Debet
+        0,                                       // @Kredit
+        $req->valas,                            // @Valas
+        $req->kurs,                             // @Kurs
+        '',                                     // @KodeSales
+        $jenis,                                 // @Tipe - 'PT' atau 'HT'
+        $req->perkiraan,                        // @Perkiraan
+        '',                                     // @Catatan
+        $username,                              // @IDUser
+        $tipedk,                                // @TipeDK
+        $this->penandaBaris($tipedk, $jenis),   // @NoInvoice
+        '',                              // @Valas_
+        0,                               // @Kurs_
+        1,                               // @KursBayar
+        0,                               // @DebetD
+        0,                               // @KreditD
+        '',                              // @FlagSimbol
+        '',                              // @NODPh
+        0,                               // @UrutDPH
+      ];
+
+      DB::connection('SML')->statement('exec sp_TempHutPiut ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
+
+      return $this->queryKartuPT($username, $req->perkiraan, $tipedk);
+    }
+
+    /**
+     * Samakan NoBukti/NoMsk baris tambahan dengan bukti & urut yang BENAR-BENAR dipakai saat
+     * simpan, dipanggil blade sesaat sebelum submit item.
+     *
+     * No Bukti memorial bisa berubah setelah kartu disusun: user mengganti jenis transaksi
+     * (BMM/BJK) sehingga blade meminta bukti baru, atau spAdd() mengembalikan 2 karena buktinya
+     * sudah terpakai dan blade me-refresh buktinya lalu meminta user submit ulang. Kalau baris
+     * kerja masih memakai bukti lama, sp_TransaksiMemorial tidak menemukannya
+     * (NoBukti=@Nobukti and NoMsk=@Urut) dan rincian piutangnya hilang tanpa pesan error -
+     * jurnalnya tersimpan tapi kartu piutangnya kosong.
+     *
+     * Hanya baris tambahan user (NoInvoice='TBH') yang disamakan. Baris outstanding hasil seed
+     * harus tetap memakai NoBukti/NoMsk transaksi asalnya.
+     */
+    public function retagKartuPT (Request $req) {
+
+      $username = \Auth::user()->username;
+      $nomsk = $this->nomskItem($req->nobukti, $req->urut);
+
+      // Disaring lewat StatusUID, bukan NoInvoice. Baris hasil seed bisa saja ber-NoInvoice
+      // 'TBH'/'LNS' juga kalau faktur itu dulu pernah ditambah/dilunasi lewat memorial LAIN -
+      // baris seperti itu milik transaksi lain dan NoBukti/NoMsk-nya tidak boleh ditimpa.
+      // Hanya baris kerja sesi ini ('I' baru, 'U' hasil muat ulang) yang ikut disamakan.
+      DB::connection('SML')->update("
+        update dbTempHutPiut set NoBukti = :nobukti, NoMsk = :nomsk
+        where IDUser = :username and isnull(StatusUID,'') in ('I','U')
+      ", [
+        "nobukti"  => $req->nobukti,
+        "nomsk"    => $nomsk,
+        "username" => $username,
+      ]);
+
+      return [ "nomsk" => $nomsk ];
+    }
+
+    // Bersihkan baris kerja milik user. Dipanggil saat user membatalkan alur piutang atau
+    // setelah item memorial tersimpan, supaya temp tidak terbawa ke pemakaian berikutnya.
+    public function clearKartuPT (Request $req) {
+      return DB::connection('SML')->update("delete dbTempHutPiut where IDUser = :username", [ "username" => \Auth::user()->username ]);
+    }
+
+    // Sisa efektif SATU titipan saat mode edit item: rumus sama persis dengan listTitipan(),
+    // hanya subquery E (total Debet ber-NOTITIPAN) mengecualikan baris yang sedang diedit
+    // sendiri, supaya baris itu tidak dobel-mengurangi sisanya sendiri. Dipakai blade lewat
+    // mkAmbilSisaTitipan() supaya validasi Jumlah <= Sisa tetap berlaku waktu edit.
+    public function sisaTitipan (Request $req) {
+
+      $listData = DB::connection('SML')->select("
+        select 	A.NOBUKTI,  A.TANGGAL,A.Valas ,C.namaCustSupp,
+          (A.Debet+A.Kredit)*A.Kurs JumlahRp ,A.Keterangan  ,
+         A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa,A.URUT,A.Debet,C.KOdeCustSupp
+         from dbTransaksi A
+         LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
+         LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
+         LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB
+                          from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
+         LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
+                          FROM dbTransaksi
+                          WHERE (NoBukti <> :nobuktiedit OR Urut <> :urutedit)
+                          GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
+         where A.NoBukti = :notitipan AND A.Urut = :uruttitipan
+         AND A.Lawan in (select Perkiraan from dbPostHutPiut where Kode='PTS')
+      ", [
+        "nobuktiedit" => $req->nobukti,
+        "urutedit" => $req->urut,
+        "notitipan" => $req->notitipan,
+        "uruttitipan" => $req->uruttitipan,
+      ]);
 
       return $listData;
     }
@@ -299,6 +689,31 @@ Order by a.Nobukti,a.Urut
     public function listValas (Request $req) {
 
       $listData = DB::connection('SML')->select("select * from DBVALAS");
+      return $listData;
+    }
+
+    // Browse No Titipan untuk Debet = perkiraan Titipan Customer. Perkiraannya diturunkan dari
+    // dbPostHutPiut (Kode='PTS'), tidak lagi dipatok '113400'. Query sesuai yang dipakai
+    // PelunasanPiutangDPPController::queryOutstanding, tanpa filter tanggal akhir.
+    public function listTitipan (Request $req) {
+
+      $listData = DB::connection('SML')->select("
+        select 	A.NOBUKTI,  A.TANGGAL,A.Valas ,C.namaCustSupp,
+          (A.Debet+A.Kredit)*A.Kurs JumlahRp ,A.Keterangan  ,
+         A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa,A.URUT,A.Debet,C.KOdeCustSupp
+         from dbTransaksi A
+         LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
+         LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
+         LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB
+                          from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
+         LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
+                          FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
+         where A.Lawan in (select Perkiraan from dbPostHutPiut where Kode='PTS')
+         AND A.CustSuppL<>''  and A.TANGGAL>'03/28/2016'
+         and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0
+         order by A.TANGGAL desc, A.NOBUKTI desc
+      ");
+
       return $listData;
     }
 
@@ -412,7 +827,14 @@ Order by a.Nobukti,a.Urut
 
         // $jmlrecord = 1;
 
-
+        // Baris kerja piutang/hutang sudah dipindahkan ke DBHUTPIUT oleh sp_TransaksiMemorial
+        // di atas (filter StatusUID 'I'/'U'), jadi sisa isi dbTempHutPiut tinggal dibuang supaya
+        // tidak terbawa ke item atau transaksi berikutnya. Termasuk untuk choice 'D', karena SP
+        // juga menghapus baris DBHUTPIUT milik item yang dibatalkan.
+        // KodeP/KodeL berisi 'PT' atau 'HT' tergantung sisinya - lihat catatan besar di atas.
+        if (in_array($req->kodeP ?? '', ['PT', 'HT']) || in_array($req->kodeL ?? '', ['PT', 'HT'])) {
+          DB::connection('SML')->update("delete dbTempHutPiut where IDUser = :username", [ "username" => $username ]);
+        }
 
       // }
 

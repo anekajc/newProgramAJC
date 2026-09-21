@@ -143,11 +143,14 @@
 /* {{-- Kolom Aksi -- pastel round-button treatment, copied verbatim (rescoped to this
      page's own #tabel/#addTable/#detailTable/#giroModalTable/#giroBGTModalTable/
      #tabel_add_list_dphuhtbbm/#tabel_add_list_pencairangiroedit) from so.blade.php's
-     own @section('css'). #tabel's Actions column is LAST (not first like so.blade.php's
-     #tabel2), so this is scoped with td:last-child throughout, matching addTable's own
+     own @section('css'). Unlike girodibuka.blade.php (where this block originated),
+     #tabel's Actions column here is actually FIRST (tabelActionsCell() is prepended
+     before the data cells in renderTabelRows()), so #tabel is additionally scoped
+     with td:first-child; the other ids keep td:last-child, matching addTable's own
      existing convention in invoicejasa.blade.php/so.blade.php. The extra ids are the
      other data-entry grids in this file that also have a real (non-picker) Actions
      column -- add/koreksi line items, giro correction entries. --}} */
+#tabel td:first-child,
 #tabel td:last-child,
 #addTable td:last-child,
 #detailTable td:last-child,
@@ -161,6 +164,7 @@
   align-items: center;
 }
 
+#tabel td:first-child .btn,
 #tabel td:last-child .btn,
 #addTable td:last-child .btn,
 #detailTable td:last-child .btn,
@@ -181,6 +185,7 @@
   transition: all .12s ease;
 }
 
+#tabel td:first-child .btn:hover,
 #tabel td:last-child .btn:hover,
 #addTable td:last-child .btn:hover,
 #detailTable td:last-child .btn:hover,
@@ -192,6 +197,7 @@
   transform: translateY(-1px);
 }
 
+#tabel td:first-child .btn-success,
 #tabel td:last-child .btn-success,
 #addTable td:last-child .btn-success,
 #detailTable td:last-child .btn-success,
@@ -202,6 +208,7 @@
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
+#tabel td:first-child .btn-warning,
 #tabel td:last-child .btn-warning,
 #addTable td:last-child .btn-warning,
 #detailTable td:last-child .btn-warning,
@@ -212,6 +219,7 @@
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
+#tabel td:first-child .btn-primary,
 #tabel td:last-child .btn-primary,
 #addTable td:last-child .btn-primary,
 #detailTable td:last-child .btn-primary,
@@ -222,6 +230,7 @@
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
+#tabel td:first-child .btn-danger,
 #tabel td:last-child .btn-danger,
 #addTable td:last-child .btn-danger,
 #detailTable td:last-child .btn-danger,
@@ -232,6 +241,7 @@
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
+#tabel td:first-child .btn-info,
 #tabel td:last-child .btn-info,
 #addTable td:last-child .btn-info,
 #detailTable td:last-child .btn-info,
@@ -491,7 +501,7 @@
                   <select id="giroLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                 </div>
                 <div class="po-toolbar-act">
-                  <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
+                  <button id="AddVisibility" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
                 </div>
               </div>
               <div id="rtBarTabel"></div>
@@ -795,7 +805,7 @@
             <div class="input-group form-group">
               <input id="AddAddKodeDevisi" type="text" class="form-control" disabled>
 
-              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListDevisi" type="button" onclick="buttonAddListDevisi()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -837,7 +847,7 @@
           <div class="col-md-3">
             <div class="input-group form-group">
               <input id="AddAddKodeCustomer" type="text" class="form-control" value="" disabled>
-              <button id="buttonAddListCustomer" type="button" onclick="buttonAddListCustSupp()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListCustomer" type="button" onclick="buttonAddListCustSupp()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -880,7 +890,7 @@
           <div class="col-md-3">
             <div class="input-group form-group">
               <input id="AddAddValas" type="text" class="form-control" value="IDR" disabled>
-              <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -929,7 +939,7 @@
             <div class="input-group form-group">
               <input id="AddAddLawan" type="text" class="form-control" disabled>
               <input id="AddAddKodeLawan" type="hidden" class="form-control" disabled>
-              <button id="buttonAddListLawan" type="button" onclick="buttonAddListLawan()" class="btn btn-primary" >+</button>
+              <button id="buttonAddListLawan" type="button" onclick="buttonAddListLawan()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
             </div>
           </div>
@@ -1051,10 +1061,8 @@
 
       <div class="col-md-2">
         <div class="input-group form-group text-left">
-          <button id="buttonFormGiro" type="button" onclick="buttonFormGiro()" class="btn btn-primary" >+ Giro</button>
-          <button id="buttonFormGiroBGT" type="button" onclick="buttonFormGiroBGT()" class="btn btn-primary" >+ Giro</button>
-
-
+          <button id="buttonFormGiro" type="button" onclick="buttonFormGiro()" class="btn btn-chip-biru" >+ Giro</button>
+          <button id="buttonFormGiroBGT" type="button" onclick="buttonFormGiroBGT()" class="btn btn-chip-biru" >+ Giro</button>
         </div>
 
       </div>
@@ -1070,11 +1078,6 @@
 
 
     <div class="row">
-
-
-
-
-
 
       <div class="col-md-2">
         <div class="form-group">
@@ -1148,7 +1151,7 @@
   <div class="col-md-3">
     <div class="input-group form-group">
       <input id="AddAddKodeDepartemen" type="text" class="form-control" disabled>
-      <button id="buttonAddListDepartemen" type="button" onclick="buttonAddListDepartemen()" class="btn btn-primary" >+</button>
+      <button id="buttonAddListDepartemen" type="button" onclick="buttonAddListDepartemen()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
     </div>
   </div>
@@ -1222,7 +1225,7 @@
 
   <div class="row mt-2" style="margin-top: 0">
     <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
+      <button type="button" class="btn btn-danger" onclick="buttonAddBatal()" style="height: 30px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -1674,7 +1677,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1748,7 +1751,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1828,7 +1831,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1909,7 +1912,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1990,7 +1993,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2132,7 +2135,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2205,7 +2208,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2281,7 +2284,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2352,7 +2355,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2425,7 +2428,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2501,7 +2504,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2594,7 +2597,7 @@
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn btn-danger" onclick="buttonAddListBatal()" >Batal</button>
         <button type="button" class="btn btn-primary" onclick="buttonAddPickInvoice()" >Submit</button>
       </div>
       </div>
@@ -2929,7 +2932,7 @@
 
               <div class="row mt-2" style="margin-top: 0">
                 <div class="col-md-12 text-right mt-4">
-                  <button type="button" class="btn btn-secondary" onclick="buttonGiroBatal()" style="height: 30px;
+                  <button type="button" class="btn btn-danger" onclick="buttonGiroBatal()" style="height: 30px;
                   border-radius: 20px;
                   font-size: 0.75rem;
                   font-weight: 600;
@@ -3263,7 +3266,7 @@
 
                 <div class="row mt-2" style="margin-top: 0">
                   <div class="col-md-12 text-right mt-4">
-                    <button type="button" class="btn btn-secondary" onclick="buttonGiroBatalBGTt()" style="height: 30px;
+                    <button type="button" class="btn btn-danger" onclick="buttonGiroBatalBGTt()" style="height: 30px;
                     border-radius: 20px;
                     font-size: 0.75rem;
                     font-weight: 600;
@@ -3481,7 +3484,7 @@
 
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
             <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
           </div>
           </div>
@@ -3574,7 +3577,7 @@
 
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
               <button type="button" class="btn btn-primary" onclick="submitAddBGC()">Submit</button>
             </div>
             </div>
@@ -3666,7 +3669,7 @@
 
 
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
                 <button type="button" class="btn btn-primary" onclick="submitAddBGC()">Submit</button>
               </div>
               </div>

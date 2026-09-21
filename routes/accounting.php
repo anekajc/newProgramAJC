@@ -135,7 +135,6 @@ Route::post('/cetakpengajuandphspproses' , [CetakPengajuanDphController::class, 
 Route::get('/cetakpengajuandphloadall' , [CetakPengajuanDphController::class, 'loadAll'] );
 Route::post('/cetakpengajuandphdetailCetak', [CetakPengajuanDphController::class, 'getDetailCetak']);
 
-
 // Giro Diterima
 Route::get('/giroditerima', [GiroDiterimaController::class, 'index']);
 Route::get('/giroditerimalistperkiraanheader', [GiroDiterimaController::class, 'listPerkiraanHeader']);
@@ -152,8 +151,6 @@ Route::post('/giroditerimaspaddgirobgt', [GiroDiterimaController::class, 'spGiro
 // Route::post('/giroditerimaspdeletegirobgt', [GiroDiterimaController::class, 'spDeleteGiroBGT']);
 
 
-
-
 Route::get('/giroditerimalistdepartemen', [GiroDiterimaController::class, 'listDepartemen']);
 Route::get('/giroditerimalistdevisi', [GiroDiterimaController::class, 'listDevisi']);
 Route::get('/giroditerimalistvalas', [GiroDiterimaController::class, 'listValas']);
@@ -162,10 +159,6 @@ Route::post('/giroditerimaspaddbgc', [GiroDiterimaController::class, 'spAddBGC']
 Route::post('/giroditerimaspaddgirokoreksi', [GiroDiterimaController::class, 'spAddGiroKoreksi']);
 Route::post('/giroditerimaspdeletegirokoreksi', [GiroDiterimaController::class, 'spDeleteGiroKoreksi']);
 Route::post('/giroditerimaspdelete', [GiroDiterimaController::class, 'spDelete']);
-
-
-
-
 
 Route::post('/giroditerimaspdetail', [GiroDiterimaController::class, 'getDetail']);
 Route::get('/giroditerimaloadall', [GiroDiterimaController::class, 'loadAll']);
@@ -183,8 +176,6 @@ Route::post('/giroditerimaspupdatetemprumjual', [GiroDiterimaController::class, 
 Route::post('/giroditerimaspotorisasi', [GiroDiterimaController::class, 'spOtorisasi']);
 Route::post('/giroditerimaspbatalotorisasi', [GiroDiterimaController::class, 'spBatalOtorisasi']);
 Route::post('/giroditerimadetailCetak', [GiroDiterimaController::class, 'getDetailCetak']);
-
-
 
 
 // Giro Dibuka
@@ -327,11 +318,22 @@ Route::get('/memorialkoreksiloadall', [MemorialKoreksiController::class, 'loadAl
 Route::post('/memorialkoreksiresetheader', [MemorialKoreksiController::class, 'resetHeader']);
 Route::post('/memorialkoreksispdetail', [MemorialKoreksiController::class, 'getDetail']);
 Route::post('/memorialkoreksilistperkiraan', [MemorialKoreksiController::class, 'listPerkiraan']);
+Route::post('/memorialkoreksilisttitipan', [MemorialKoreksiController::class, 'listTitipan']);
+Route::post('/memorialkoreksisisatitipan', [MemorialKoreksiController::class, 'sisaTitipan']);
 Route::get('/memorialkoreksilistvalas', [MemorialKoreksiController::class, 'listValas']);
 Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']);
 Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
 Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
 Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
+// Piutang usaha (Kode 'PT') & hutang usaha (Kode 'HT') - endpoint yang sama dipakai kedua
+// jenis, dibedakan lewat parameter POST 'jenis' (lihat MemorialKoreksiController::jenisHP()).
+Route::post('/memorialkoreksilistcustomerpt', [MemorialKoreksiController::class, 'listCustomerPT']);
+Route::post('/memorialkoreksiloadkartupt', [MemorialKoreksiController::class, 'loadKartuPT']);
+Route::post('/memorialkoreksigetkartupt', [MemorialKoreksiController::class, 'getKartuPT']);
+Route::post('/memorialkoreksiaddkartupt', [MemorialKoreksiController::class, 'addKartuPT']);
+Route::post('/memorialkoreksideletekartupt', [MemorialKoreksiController::class, 'deleteKartuPT']);
+Route::post('/memorialkoreksiretagkartupt', [MemorialKoreksiController::class, 'retagKartuPT']);
+Route::post('/memorialkoreksiclearkartupt', [MemorialKoreksiController::class, 'clearKartuPT']);
 
 
 // BON SEMENTARA

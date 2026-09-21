@@ -281,7 +281,6 @@ input[type=number] {
 
 @section('content')
 
-
 <div id="page1" class="container-fluid mainpage">
   <!--mulai--><div class="modal fade" id="formAldok" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
@@ -422,6 +421,12 @@ input[type=number] {
             <div class="col-md-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalawal_ctt2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalakhir_ctt2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="ctSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
                     <label for="ctLen2">Tampilkan</label>
@@ -2441,10 +2446,34 @@ function reinitTabel () {
   }
 }
 
+function ctFilterTabel2ByPeriode (rows) {
+  let awal = document.getElementById('input_tanggalawal_ctt2') ? document.getElementById('input_tanggalawal_ctt2').value : ''
+  let akhir = document.getElementById('input_tanggalakhir_ctt2') ? document.getElementById('input_tanggalakhir_ctt2').value : ''
+  if (!awal && !akhir) { return rows }
+  return (rows || []).filter(function (row) {
+    let tgl = ctPickCI(row[0], 'tglcetak')
+    if (!tgl) { return false }
+    let tglStr = formatDate(tgl)
+    if (awal && tglStr < awal) { return false }
+    if (akhir && tglStr > akhir) { return false }
+    return true
+  })
+}
+
+function onChangePeriodeTabel2 () {
+  let awal = $('#input_tanggalawal_ctt2').val()
+  let akhir = $('#input_tanggalakhir_ctt2').val()
+  if (awal && akhir && awal > akhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return
+  }
+  reinitTabel2()
+}
+
 function reinitTabel2 () {
   try {
     if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
-    renderTabel2Rows(lastTabel2Rows);
+    renderTabel2Rows(ctFilterTabel2ByPeriode(lastTabel2Rows));
     $('#tabel2').DataTable({
       dom: CT_DOM_STRING,
       lengthChange: false,

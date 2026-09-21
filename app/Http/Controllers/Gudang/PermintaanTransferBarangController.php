@@ -231,7 +231,7 @@ class PermintaanTransferBarangController extends Controller
 
   public function listGudangAsal (Request $req) {
 
-    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, IsRusak from dbGudang order by KodeGdg ");
+    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, Alamat, IsRusak from dbGudang order by KodeGdg ");
     // TEMP DEBUG: filter exclude dimatikan dulu untuk memastikan tabel/koneksi mengembalikan data.
     // Kalau ini sudah muncul isinya, filter != :kodeGudangTujuan akan dipasang kembali.
     return $listData;
@@ -239,7 +239,7 @@ class PermintaanTransferBarangController extends Controller
 
     public function listGudangTujuan (Request $req) {
 
-    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, IsRusak from dbGudang order by KodeGdg ");
+    $listData = DB::connection('SML')->select(" select KodeGdg, Nama NamaGdg, Alamat, IsRusak from dbGudang order by KodeGdg ");
     // TEMP DEBUG: filter exclude dimatikan dulu untuk memastikan tabel/koneksi mengembalikan data.
     return $listData;
   }
@@ -538,8 +538,8 @@ select 	@NoBukti= :nobukti
 select A.NOBUKTI, A.NOURUT, A.TANGGAL, A.note Keterangan,
         B.URUT, B.KODEBRG, C.NamaBrg, '' Jns_Kertas, '' Ukr_Kertas,
         B.QNT, B.QNT2, B.SAT_1, B.SAT_2, B.NoSat, B.ISI, 
-        B.gdgAsal, D.NAMA+' ('+B.gdgAsal+')' NamaGgdAsal, 0.00 GSM,
-        B.gdgTujuan, E.NAMA+' ('+B.gdgTujuan+')' NamaGgdTujuan,
+        B.gdgAsal, D.NAMA+' ('+B.gdgAsal+')' NamaGgdAsal, D.Alamat AlamatGdgAsal, 0.00 GSM,
+        B.gdgTujuan, E.NAMA+' ('+B.gdgTujuan+')' NamaGgdTujuan, E.Alamat AlamatGdgTujuan,
         A.NoPenyerahan
 From DBPRTransfer A
 Left Outer Join DBPRTransferDET B on B.NoBukti=A.NoBukti

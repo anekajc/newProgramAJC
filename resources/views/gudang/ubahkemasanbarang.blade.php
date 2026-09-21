@@ -644,7 +644,7 @@
 @include('gudang.modalbrowsemaster')
 
 <style>
-  /* #modalPickBarang: styling untuk modal pencarian Barang (Gudang sudah jadi dropdown, tidak pakai modal lagi) */
+  
   #modalPickBarang tbody tr.pick-row {
     cursor: pointer;
     transition: background-color .12s;
@@ -679,6 +679,7 @@
     border-bottom: 1px solid #f1f3f5 !important;
     font-size: 13px;
     vertical-align: middle;
+    padding: 10px 12px !important;
   }
 
   #modalPickBarang .dataTables_wrapper > .row:first-child > div {
@@ -727,7 +728,7 @@
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="modalPickBarangLabel">Pilih Barang</h4>
+        <h4 class="modal-title" id="modalPickBarangLabel">Barang</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -745,9 +746,9 @@
               <table id="tabelPickBarang" class="table table-bordered table-hover table-striped table-responsive-lg">
                 <thead class="text-center">
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama</th>
-                    <th style="padding: 4px 12px;" scope="col">Satuan</th>
+                    <th style="padding: 10px 12px;" scope="col">Kode</th>
+                    <th style="padding: 10px 12px;" scope="col">Nama</th>
+                    <th style="padding: 10px 12px;" scope="col">Satuan</th>
                   </tr>
                 </thead>
                 <tbody id="tabelPickBarang_data" class="text-left"></tbody>
@@ -2491,9 +2492,9 @@ function submitPrint (nobukti) {
     let rowTable = '';
     list.forEach((item, i) => {
       rowTable += `<tr class="pick-row" onclick="buttonPickBarang(${i})">
-        <td>${item.KodeBrg}</td>
-        <td>${item.NamaBrg}</td>
-        <td>${nullToEmpty(item.Sat1)}</td>
+        <td style="padding:10px 12px;">${item.KodeBrg}</td>
+        <td style="padding:10px 12px;">${item.NamaBrg}</td>
+        <td style="padding:10px 12px;">${nullToEmpty(item.Sat1)}</td>
       </tr>`;
     });
     $('#tabelPickBarang_data').html(rowTable);

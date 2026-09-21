@@ -509,7 +509,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 #addTable td .btn-danger  { color:#dc2626; border-color:#f7cfcf; background:#fdeaea; }
 
 /* ---------- Modal lookup DPP (#form) - baris diklik langsung ---------- */
-#tabel_add_list_modal thead th {
+#tabel_add_list_modal thead th,
+#tabel_add_list_perkiraan thead th,
+#tabel_add_list_titipan thead th {
   background: #f8f9fb !important;
   color: #6b7280 !important;
   font-size: 12px;
@@ -520,19 +522,58 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   border-top: none !important;
 }
 
-#tabel_add_list_modal tbody td {
+#tabel_add_list_modal tbody td,
+#tabel_add_list_perkiraan tbody td,
+#tabel_add_list_titipan tbody td {
   border-top: none !important;
   border-bottom: 1px solid #f1f3f5 !important;
   font-size: 13px;
   vertical-align: middle;
 }
 
-#tabel_add_list_modal tbody tr.pick-row {
+#tabel_add_list_modal tbody tr.pick-row,
+#tabel_add_list_perkiraan tbody tr.pick-row,
+#tabel_add_list_titipan tbody tr.pick-row {
   cursor: pointer;
   transition: background-color .12s;
 }
-#tabel_add_list_modal tbody tr.pick-row:hover td { background-color: #eef2ff; }
-#tabel_add_list_modal tbody tr.pick-row.row-terpilih td { background-color: #e8edff; }
+#tabel_add_list_modal tbody tr.pick-row:hover td,
+#tabel_add_list_perkiraan tbody tr.pick-row:hover td,
+#tabel_add_list_titipan tbody tr.pick-row:hover td { background-color: #eef2ff; }
+#tabel_add_list_modal tbody tr.pick-row.row-terpilih td,
+#tabel_add_list_perkiraan tbody tr.pick-row.row-terpilih td,
+#tabel_add_list_titipan tbody tr.pick-row.row-terpilih td { background-color: #e8edff; }
+
+/* Modal browse Perkiraan (#form) dipakai bareng pane Valas yang modal-dialog-nya
+   modal-xl - saat pane Perkiraan yang tampil, sempitkan ke ukuran modal-lg supaya
+   sama seperti modal Perkiraan di pelunasanpiutangdpp. Kelas ditambah/dilepas lewat
+   JS (lihat buttonAddListPerkiraan() / buttonAddListBatal()). */
+#form .modal-dialog.mk-dialog-perkiraan { max-width: 800px; }
+
+/* Blok No Titipan berada di col-md-6 kedua, jadi mulainya di titik 50% padahal isi blok
+   Debet sudah habis di 33,3%. Ditarik 2 kolom grid ke kiri supaya rapat dengan Debet.
+   Hanya di layar >= md; di bawah itu kolomnya menumpuk dan tidak boleh digeser. */
+@media (min-width: 768px) {
+  #rowNoTitipan { margin-left: -16.666667%; }
+}
+
+/* Kotak cari di modal Perkiraan - meniru .cari-modal-pdpp di pelunasanpiutangdpp. */
+.cari-modal-mk {
+  width: 260px;
+  max-width: 100%;
+  font-size: 13px;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.cari-modal-mk:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #e8edff;
+}
 
 /* Kolom "v" (pilih baris): header dan kotak centang sama-sama rata tengah.
    .form-check bawaan Bootstrap 5 memberi padding-left pada wadah dan float:left
@@ -638,6 +679,143 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 #page2 .input-group .btn-browsing {
   height: 38px;
 }
+
+/* ---------- Tumpukan modal: hanya modal teratas yang terlihat ----------
+   Pola sama dengan penerimaandpp/pelunasanpiutangdpp - tidak ada main z-index,
+   modal induk disembunyikan lewat class supaya isian & handler-nya tidak terpicu. */
+.modal.mk-modal-tertimbun { display: none !important; }
+.modal-backdrop.mk-backdrop-tertimbun { display: none !important; }
+
+/* ---------- Modal Kartu Piutang ---------- */
+#formMkKartuPT .mk-kartu-cust {
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+#formMkKartuPT .mk-kartu-cust .kode {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #212529;
+}
+#formMkKartuPT .mk-kartu-cust .nama {
+  color: #6c757d;
+}
+
+/* Tombol tambah baris faktur: plus biru soft, ukuran besar. */
+.btn-mk-tambah {
+  background-color: #eaf1ff;
+  border: 1px solid #c7dbff;
+  color: #1d4ed8;
+  border-radius: 8px !important;
+  padding: 6px 14px;
+  font-size: 1.25rem;
+  line-height: 1;
+  box-shadow: none;
+}
+.btn-mk-tambah:hover {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+.btn-mk-tambah:disabled {
+  opacity: .5;
+}
+
+/* Ringkasan Total / Dibayar / Sisa di kaki tabel kartu. */
+#formMkKartuPT .mk-ringkas {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+#formMkKartuPT .mk-ringkas label {
+  margin-bottom: 0;
+  color: #6c757d;
+  font-size: .85rem;
+}
+#formMkKartuPT .mk-ringkas .nilai {
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Panel form tambah faktur di dalam modal kartu. */
+#mkKartuFormTambah {
+  border-top: 1px solid #dee2e6;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+#formMkKartuPT .mk-baris-total td {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+/* Kolom Action di paling kiri - dibuat sempit supaya tidak memakan ruang kolom data. */
+#tabel_mk_kartupt th:first-child,
+#tabel_mk_kartupt td.kolom-mk-action {
+  width: 52px;
+  white-space: nowrap;
+}
+
+/* Header bergrup (Rupiah / Valas): judulnya di tengah kolom yang dinaunginya. Sengaja TANPA
+   garis pemisah dan TANPA warna sendiri - warnanya ikut header lain (.data-table thead th),
+   supaya tidak terlihat seperti kotak terbingkai. text-align dipaksa karena
+   .data-table thead th menetapkan rata kiri untuk semua header. */
+#tabel_mk_kartupt thead th.mk-grup {
+  text-align: center;
+}
+
+/* Kolom angka jangan terpotong/terbungkus - tabelnya memang lebar dan boleh digeser. */
+#tabel_mk_kartupt th,
+#tabel_mk_kartupt td {
+  white-space: nowrap;
+}
+
+/* Baris Total ikut menempel di kaki area scroll supaya tetap terlihat. */
+#tabel_mk_kartupt tfoot tr.mk-baris-total td {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Tombol hapus di kolom Action sengaja lebih kecil dari btn-sm bawaan. */
+.btn-mk-hapus {
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+}
+
+/* Tombol + per baris di alur Kredit (pelunasan). Warna biru soft yang sama dengan tombol
+   Tambah di alur Debet, tapi ukurannya disamakan dengan tombol hapus di kolom yang sama. */
+.btn-mk-lunas {
+  background-color: #eaf1ff;
+  border: 1px solid #c7dbff;
+  color: #1d4ed8;
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+  box-shadow: none;
+}
+.btn-mk-lunas:hover {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+.btn-mk-lunas:disabled {
+  opacity: .4;
+}
+
+/* Baris hasil pelunasan dibedakan merah, seperti tampilan form lama. */
+#tabel_mk_kartupt tr.mk-baris-lunas td {
+  color: #dc3545;
+  background-color: #fffbea;
+}
+
+/* Baris outstanding bisa didobel-klik untuk pelunasan otomatis, baris pelunasan untuk
+   menghapusnya - beri petunjuk kursor supaya kelihatan bisa diklik. */
+#tabel_mk_kartupt tr.mk-bisa-dobel { cursor: pointer; }
 </style>
 @endsection
 
@@ -1012,7 +1190,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div> -->
       <div class="col-md-3">
         <div class="input-group form-group">
-          <input id="AddAddJumlah" type="text" value="0.00" class="text-right form-control" onblur="formatAngkaInput(this)" onfocus="unformatAngkaInput(this)">
+          <input id="AddAddJumlah" type="text" value="0.00" class="text-right form-control" onblur="formatAngkaInput(this); mkAturTombolBrowse()" oninput="formatAngkaKetik(this); mkAturTombolBrowse()">
 
         </div>
       </div>
@@ -1110,6 +1288,65 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
       </div>
 
+    </div>
+  </div>
+
+  {{-- No Titipan: hanya muncul kalau perkiraan Debet ber-Kode 'PTS' (Titipan Customer)
+       menurut dbPostHutPiut. Disembunyikan &
+       direset lewat mkResetTitipan() - lihat buttonAddPickPerkiraan()/cleanFormAddAdd(). --}}
+  <div class="col-md-6" id="rowNoTitipan" style="display:none">
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+        <label>No Titipan</label>
+      </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group form-group">
+          <input id="AddAddNoTitipan" type="text" class="form-control" disabled>
+          <input id="AddAddUrutTitipan" type="hidden" disabled>
+          <input id="AddAddCustsuppTitipan" type="hidden" disabled>
+          <input id="AddAddSisaTitipan" type="hidden" disabled>
+          {{-- Terisi 'PTS' kalau perkiraan Debet adalah Titipan Customer menurut dbPostHutPiut.
+               Dipakai mkAmbilTitipan() sebagai pengganti pematokan nomor perkiraan. --}}
+          <input id="AddAddKodePTS" type="hidden" disabled>
+          <button id="buttonAddListTitipan" type="button" onclick="buttonAddListTitipan()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- Customer/Supplier piutang-hutang: hanya muncul kalau Debet/Kredit = perkiraan ber-Kode
+       'PT' (piutang) atau 'HT' (hutang). Dipakai bersama untuk kedua jenis - lihat mkJenisHP.
+       Disembunyikan & direset lewat mkResetPT() - lihat buttonAddPickPerkiraan()/
+       cleanFormAddAdd(). Tombol kaca pembesar membuka lagi rantai Customer/Supplier -> Kartu. --}}
+  {{-- Kolom ini DINONAKTIFKAN atas permintaan: tidak ditampilkan di form Add Item, baik untuk
+       alur Debet maupun Kredit. Blok ini sengaja TIDAK dihapus - field di dalamnya tetap
+       menyimpan customer/supplier terpilih (dipakai untuk CustSuppP/CustSuppL dan endpoint
+       kartu), dan tombol browse-nya masih dirujuk lockFormAddAdd(). Untuk menampilkannya lagi,
+       aktifkan kembali pemanggilan $('#rowCustomerPT').show() di mkKartuBuka() dan
+       buttonEditItem(). --}}
+  <div class="col-md-6" id="rowCustomerPT" style="display:none">
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+        <label>Customer</label>
+      </div>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group form-group">
+          <input id="AddAddCustsuppPT" type="text" class="form-control" disabled>
+          <input id="AddAddKodePT" type="hidden" disabled>
+          <input id="AddAddNamaCustPT" type="hidden" disabled>
+          <input id="AddAddNoMskPT" type="hidden" disabled>
+          <button id="buttonAddListCustomerPT" type="button" onclick="buttonAddListCustomerPT()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="input-group form-group">
+          <input id="AddAddNamaCustPTView" type="text" class="form-control" disabled>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1325,7 +1562,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <!-- start modal add -->
 <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialo g-centered"  role="document">
+  <div class="modal-dialog modal-xl modal-dialog-centered"  role="document">
     <div id="" class="modal-content ">
 
       <div id= "modalAddListValas" class="showhidemodalbodyadd">
@@ -1410,46 +1647,96 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Perkiraan</h3>
+          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+
+          {{-- Kotak pencarian tabel modal - diikat lewat mkIkatSearchPerkiraan(). --}}
+          <div class="row mb-2">
+            <div class="col-12 d-flex justify-content-end">
+              <input id="input_search_perkiraan" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
             </div>
           </div>
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+            <div class="col-12" style="overflow:auto; max-height: 400px">
             <!-- <div class="container-fluid"> -->
 
-
-            <table id="tabel_add_list_perkiraan" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white">
+            {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih
+                 (lihat buttonAddPickPerkiraan()). --}}
+            <table id="tabel_add_list_perkiraan" class="data-table" style="overflow:auto; " >
+              <thead class="text-center" style="position: sticky;
+            top: 0;
+            z-index: 1;">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-
                 </tr>
               </thead>
 
-
+              {{-- Sengaja dikosongkan - lihat catatan di modal DPP soal _DT_CellIndex. --}}
               <tbody id="tabel_data_add_list_perkiraan" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-                  <td>-</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
-              </tr>
               </tbody>
 
             </table>
           <!-- </div> -->
             <!-- <button onclick="buttonSubKategori()">tes</button> -->
+          </div>
+            </div>
+            </div>
+
+        </div>
+
+      </div>
+
+      <div id="" class="modal-footer ">
+        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+      </div>
+      </div>
+
+      <div id= "modalAddListTitipan" class="showhidemodalbodyadd">
+      <div class="modal-header">
+
+          <h5 class="modal-title" id="">No Titipan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div id="" class="">
+      <div class="modal-body">
+
+        <div class="container-fluid mt-4" >
+
+          {{-- Kotak pencarian tabel modal - diikat lewat mkIkatSearchTitipan(). --}}
+          <div class="row mb-2">
+            <div class="col-12 d-flex justify-content-end">
+              <input id="input_search_titipan" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12" style="overflow:auto; max-height: 400px">
+
+            {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih
+                 (lihat buttonAddPickTitipan()). --}}
+            <table id="tabel_add_list_titipan" class="data-table" style="overflow:auto; " >
+              <thead class="text-center" style="position: sticky;
+            top: 0;
+            z-index: 1;">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                  <th style="padding: 4px 12px;" scope="col">Customer</th>
+                  <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+                  <th style="padding: 4px 12px;" scope="col">Jumlah Rp</th>
+                  <th style="padding: 4px 12px;" scope="col">Sisa</th>
+                </tr>
+              </thead>
+
+              {{-- Sengaja dikosongkan - lihat catatan di modal DPP soal _DT_CellIndex. --}}
+              <tbody id="tabel_data_add_list_titipan" class="text-left" >
+              </tbody>
+
+            </table>
           </div>
             </div>
             </div>
@@ -1471,6 +1758,272 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 <!-- End modal add-->
 
 
+{{-- ============================================================================
+     Modal 2: browse Customer (piutang usaha, Kode 'PT') atau Supplier (hutang usaha,
+     Kode 'HT') - dipakai bersama untuk kedua jenis, judul mengikuti mkIstilah().pihak.
+     Dibuka dari buttonAddPickPerkiraan() saat modal #form (pane Perkiraan) masih
+     terbuka - jadi ia menjadi modal bertumpuk di atasnya.
+     ============================================================================ --}}
+<div class="modal fade" id="formMkCustomerPT" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mkCustomerJudul">Customer</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-12 d-flex justify-content-end">
+              <input id="input_search_customerpt" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12" style="overflow:auto; max-height: 400px">
+              {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih. --}}
+              <table id="tabel_mk_customerpt" class="data-table" style="overflow:auto;">
+                <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama</th>
+                    <th style="padding: 4px 12px;" scope="col">Alamat</th>
+                    <th style="padding: 4px 12px;" scope="col">Kota</th>
+                  </tr>
+                </thead>
+                {{-- Sengaja dikosongkan - lihat catatan soal _DT_CellIndex. --}}
+                <tbody id="tabel_data_mk_customerpt" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- ============================================================================
+     Modal 3: Kartu Piutang/Hutang - faktur outstanding customer/supplier (informasi,
+     tanpa aksi) plus baris faktur yang ditambahkan user. Dipakai bersama untuk PT & HT.
+     Panel form tambah ada di dalam modal ini sendiri (bukan modal ke-4), muncul saat
+     tombol + ditekan.
+     ============================================================================ --}}
+<div class="modal fade" id="formMkKartuPT" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        {{-- Judul ikut mkModeLunas(): "Penambahan Piutang"/"Pelunasan Piutang" (PT) atau
+             "Pelunasan Hutang"/"Penambahan Hutang" (HT) - lihat mkMulaiAlurPT()/mkBukaKartuEditPT() --}}
+        <h5 class="modal-title"><span id="mkKartuJudul">Penambahan Piutang</span> <span id="mkKartuJudulPerkiraan"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+
+          {{-- Identitas customer terpilih --}}
+          <div class="row">
+            <div class="col-12 mk-kartu-cust">
+              <div class="kode" id="mkKartuKodeCust"></div>
+              <div class="nama" id="mkKartuNamaCust"></div>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-6">
+              {{-- Alur Debet: tombol tambah faktur di atas tabel. Alur Kredit tidak memakai ini -
+                   tombol + nya ada di tiap baris, lihat mkKartuRender(). --}}
+              <button type="button" id="mkKartuButtonTambah" class="btn btn-mk-tambah" onclick="mkKartuBukaFormTambah()" title="Tambah faktur">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+              <input id="input_search_kartupt" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12" style="overflow:auto; max-height: 320px">
+              {{-- Kolom Aksi hanya berisi tombol Hapus, dan hanya untuk baris tambahan user
+                   (ditandai NoInvoice='TBH'). Baris outstanding bawaan tidak bisa dihapus. --}}
+              {{-- Susunan kolom mengikuti form lama: nilai Rupiah dan nilai Valas dipisah jadi
+                   dua grup, dengan kolom Valas & Kurs di antaranya. Nilai valas diambil dari
+                   DebetD/KreditD (untuk transaksi IDR isinya 0). --}}
+              <table id="tabel_mk_kartupt" class="data-table" style="overflow:auto;">
+                <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">Action</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">No. Faktur</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">No. Retur</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">Tanggal</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">Jatuh Tempo</th>
+                    <th style="padding: 4px 12px;" scope="col" colspan="3" class="mk-grup">Rupiah</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">Valas</th>
+                    <th style="padding: 4px 12px;" scope="col" rowspan="2">Kurs</th>
+                    <th style="padding: 4px 12px;" scope="col" colspan="3" class="mk-grup">Valas</th>
+                  </tr>
+                  <tr>
+                    <th style="padding: 4px 12px;" scope="col">Debet</th>
+                    <th style="padding: 4px 12px;" scope="col">Kredit</th>
+                    <th style="padding: 4px 12px;" scope="col">Saldo</th>
+                    <th style="padding: 4px 12px;" scope="col">Debet</th>
+                    <th style="padding: 4px 12px;" scope="col">Kredit</th>
+                    <th style="padding: 4px 12px;" scope="col">Saldo</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_mk_kartupt" class="text-left"></tbody>
+                {{-- Baris Total ditaruh di dalam tabel yang sama supaya selalu lurus dengan
+                     kolomnya, tidak bisa meleset seperti kalau dibuat tabel terpisah. --}}
+                <tfoot>
+                  <tr class="mk-baris-total">
+                    <td colspan="5">Total</td>
+                    <td class="text-right" id="mkKartuTotalDebet">0.00</td>
+                    <td class="text-right" id="mkKartuTotalKredit">0.00</td>
+                    <td class="text-right" id="mkKartuTotalSaldo">0.00</td>
+                    <td colspan="2"></td>
+                    <td class="text-right" id="mkKartuTotalDebetD">0.00</td>
+                    <td class="text-right" id="mkKartuTotalKreditD">0.00</td>
+                    <td class="text-right" id="mkKartuTotalSaldoD">0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          {{-- DINONAKTIFKAN: baris total versi tabel terpisah. Sejak kolomnya bertambah jadi 13,
+               tabel terpisah tidak mungkin lurus dengan kolom di atasnya - totalnya dipindah ke
+               <tfoot> tabel kartu itu sendiri. Tidak dihapus supaya jejaknya jelas.
+
+          <div class="row mt-1">
+            <div class="col-12" style="overflow:auto;">
+              <table class="data-table" style="width:100%">
+                <tbody>
+                  <tr class="mk-baris-total">
+                    <td style="width:40%">Total</td>
+                    <td class="text-right" id="mkKartuTotalDebet">0,00</td>
+                    <td class="text-right" id="mkKartuTotalKredit">0,00</td>
+                    <td class="text-right" id="mkKartuTotalSaldo">0,00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          --}}
+
+          {{-- Total = Jumlah item memorial, Dibayar = akumulasi baris tambahan, Sisa = selisih.
+               Sesuai permintaan: hanya informasi, tidak ada validasi apa pun. --}}
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="row mk-ringkas">
+                <div class="col-md-4">
+                  <div class="row">
+                    <div class="col-5"><label>Total</label></div>
+                    <div class="col-7 nilai" id="mkKartuRingkasTotal">0,00</div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="row">
+                    <div class="col-5"><label>Dibayar</label></div>
+                    <div class="col-7 nilai" id="mkKartuRingkasDibayar">0,00</div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="row">
+                    <div class="col-5"><label>Sisa</label></div>
+                    <div class="col-7 nilai" id="mkKartuRingkasSisa">0,00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- Panel tambah faktur (gambar 2) - di dalam modal kartu, bukan modal terpisah. --}}
+          <div id="mkKartuFormTambah" style="display:none">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row" style="margin-top:-6px">
+                  <div class="col-md-4"><div class="form-group"><label>No. Faktur</label></div></div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input id="mkKartuNoFaktur" type="text" class="form-control">
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:-10px">
+                  <div class="col-md-4"><div class="form-group"><label>Tanggal Bukti</label></div></div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input id="mkKartuTanggal" type="date" class="form-control">
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:-10px">
+                  <div class="col-md-4"><div class="form-group"><label>Tanggal Jatuh Tempo</label></div></div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input id="mkKartuJatuhTempo" type="date" class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="row" style="margin-top:-6px">
+                  <div class="col-md-4"><div class="form-group"><label>Valas</label></div></div>
+                  <div class="col-md-3">
+                    {{-- Valas & Kurs ikut item memorial, dikunci seperti alur lama. --}}
+                    <div class="input-group form-group">
+                      <input id="mkKartuValas" type="text" class="form-control" disabled>
+                    </div>
+                  </div>
+                  <div class="col-md-2"><div class="form-group"><label>Kurs</label></div></div>
+                  <div class="col-md-3">
+                    <div class="input-group form-group">
+                      <input id="mkKartuKurs" type="text" class="form-control text-right" disabled>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:-10px">
+                  <div class="col-md-4"><div class="form-group"><label>Jumlah</label></div></div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      {{-- Format ribuan sama seperti #AddAddJumlah supaya angkanya konsisten. --}}
+                      <input id="mkKartuJumlah" type="text" class="form-control text-right" value="0.00" onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-top:-10px">
+                  <div class="col-md-4"><div class="form-group"><label>Catatan</label></div></div>
+                  <div class="col-md-8">
+                    <div class="input-group form-group">
+                      <input id="mkKartuCatatan" type="text" class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12 text-right">
+                <button type="button" class="btn btn-secondary" onclick="mkKartuTutupFormTambah()">Tutup</button>
+                <button type="button" class="btn btn-chip-biru" onclick="mkKartuSimpanTambah()">Simpan</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -1489,6 +2042,16 @@ let listPerkiraan = []
 let listValas = []
 let tipeform = ''
 
+// true selama item sedang diedit (lockFormAddAdd(true) dari buttonEditItem()). Dulu dipakai juga
+// untuk mematikan tombol browse Debet/Kredit; sekarang tidak lagi - browse sudah dibuka di mode
+// edit atas permintaan, lihat mkAturTombolBrowse().
+let mkItemTerkunci = false
+
+// true saat form item sedang dipakai untuk MENGEDIT item yang sudah tersimpan, false saat
+// menambah item baru. Dipisahkan dari mkItemTerkunci karena penguncian tombol bisa berubah,
+// sedangkan penentuan Urut item (mkUrutItemPT()) harus tetap mengikuti mode add/edit.
+let mkModeEditItem = false
+
 $(document).ready(function(){
 
     // Tabel #tabel dibangun renderTabelMk() lewat report-table.js (geser & sembunyikan
@@ -1506,6 +2069,8 @@ $(document).ready(function(){
          // {  "className": "text-center", "targets": [4] },
        ]
       });
+
+        mkIkatSearchPerkiraan()
 
         $("#tabel_add_list_custsupp").DataTable({
           "lengthChange": false,
@@ -2779,6 +3344,32 @@ function submitEdit () {
 
   }
 
+  let titipan = mkAmbilTitipan(perkiraan, jumlah)
+  if (!titipan) { return }
+  notitipan = titipan.notitipan
+  uruttitipan = titipan.uruttitipan
+  custsuppP = titipan.custsuppP
+
+  // Pasangan CustSupp/Kode piutang/hutang diambil dari KEADAAN FORM SAAT INI, sama seperti
+  // submitAdd - bukan disalin mentah dari itemEdit. Sejak browse Debet/Kredit dibuka di mode
+  // edit, perkiraannya bisa berubah: kalau masih piutang/hutang, buttonEditItem() sudah mengisi
+  // ulang customer/supplier & mode-nya; kalau diganti ke perkiraan lain, mkResetPTSisi() sudah
+  // mengosongkannya sehingga keterkaitannya ikut dilepas. Menyalin dari itemEdit akan menyimpan
+  // KodeP/KodeL 'PT'/'HT' pada baris yang perkiraannya sudah bukan itu lagi.
+  let piutang = mkAmbilPiutang()
+  if (!piutang) { return }
+  if (piutang.kodeP === 'PT' || piutang.kodeP === 'HT') {
+    if (mkModePT === 'K') {
+      custsuppL = piutang.custsuppP
+      kodeL = piutang.kodeP
+    } else {
+      custsuppP = piutang.custsuppP
+      kodeP = piutang.kodeP
+    }
+
+    if (!mkSamakanBuktiPiutang(nobukti)) { return }
+  }
+
   console.log({
     choice,
     nobukti,
@@ -2817,7 +3408,6 @@ function submitEdit () {
     keterangandetail
 
   })
-
 
 
 
@@ -2968,6 +3558,39 @@ function submitAdd () {
     alertify.warning("Data tidak lengkap")
     return
 
+  }
+
+  if (perkiraan.trim() === lawan.trim()) {
+    alertify.warning("Debet dan Kredit tidak boleh perkiraan yang sama")
+    return
+  }
+
+  let titipan = mkAmbilTitipan(perkiraan, jumlah)
+  if (!titipan) { return }
+  notitipan = titipan.notitipan
+  uruttitipan = titipan.uruttitipan
+  custsuppP = titipan.custsuppP
+
+  // Perkiraan piutang/hutang usaha: customer/supplier terpilih disimpan ke dbTransaksi bersama
+  // kode 'PT'/'HT'. Sisi Debet memakai CustSuppP/KodeP, sisi Kredit memakai CustSuppL/KodeL -
+  // mengikuti kolom mana yang memegang perkiraannya (INI TIDAK TERGANTUNG jenisnya, hanya
+  // sisinya). Kode itu juga yang dipakai spAdd() sebagai penanda untuk membersihkan
+  // dbTempHutPiut setelah sp_TransaksiMemorial memindahkan barisnya ke DBHUTPIUT.
+  let piutang = mkAmbilPiutang()
+  if (!piutang) { return }
+  if (piutang.kodeP === 'PT' || piutang.kodeP === 'HT') {
+    if (mkModePT === 'K') {
+      custsuppL = piutang.custsuppP
+      kodeL = piutang.kodeP
+    } else {
+      custsuppP = piutang.custsuppP
+      kodeP = piutang.kodeP
+    }
+
+    // Samakan dulu NoBukti/NoMsk baris kerja dengan bukti yang dipakai submit ini - buktinya
+    // bisa berganti setelah kartu disusun (ganti jenis transaksi, atau bukti di-refresh karena
+    // sudah terpakai). Tanpa ini baris piutang/hutangnya tidak terangkut dan hilang diam-diam.
+    if (!mkSamakanBuktiPiutang(nobukti)) { return }
   }
 
   console.log({
@@ -3137,7 +3760,7 @@ function buttonAddListValas () {
 
         $('.showhidemodalbodyadd').hide();
         $('#modalAddListValas').show();
-        $("#form").modal('toggle')
+        $("#form").modal('show')
       } else {
         alertify.warning("Perkiraan tidak ditemukkan")
       }
@@ -3203,8 +3826,11 @@ function onChangeValasAdd () {
 function buttonAddListBatal () {
   $('.showhidemodalbodyadd').hide();
   // $('#modalBodyAddMain').show();
+  $('#form .modal-dialog').removeClass('mk-dialog-perkiraan');
 
-  $("#form").modal('toggle')
+  // Dulu 'toggle'. Sejak ada tumpukan modal (mkTumpukanModal) perintahnya harus eksplisit -
+  // 'toggle' pada modal yang sedang tampil memicu hide dan mem-pop tumpukan secara keliru.
+  $("#form").modal('hide')
 }
 
 function buttonCloseForm () {
@@ -3238,13 +3864,994 @@ function cleanFormAddAdd () {
   document.getElementById("AddAddKeteranganDebet").value = ''
   document.getElementById("AddAddKredit").value = ''
   document.getElementById("AddAddKeteranganKredit").value = ''
+  mkResetTitipan()
+  mkResetPT()
+  mkAturTombolBrowse()
+}
+
+// ---------- Tumpukan modal ----------
+// Hanya satu modal yang terlihat pada satu waktu. Saat modal anak dibuka, modal
+// induk disembunyikan lewat class (bukan .modal('hide'), supaya isian form dan
+// handler hidden.bs.modal milik induk tidak ikut terpicu). Saat anak ditutup -
+// lewat Batal, tombol x, Esc, maupun klik backdrop - induk muncul lagi.
+// Pola sama persis dengan penerimaandpp.blade.php / pelunasanpiutangdpp.blade.php.
+var mkTumpukanModal = []
+
+function mkSisakanSatuBackdrop () {
+  var backdrop = $('.modal-backdrop')
+  backdrop.addClass('mk-backdrop-tertimbun')
+  backdrop.last().removeClass('mk-backdrop-tertimbun')
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+  var induk = $('.modal.show').not(this).not('.mk-modal-tertimbun').last()
+  if (induk.length) {
+    mkTumpukanModal.push(induk)
+    induk.addClass('mk-modal-tertimbun')
+  }
+})
+
+$(document).on('shown.bs.modal', '.modal', function () {
+  mkSisakanSatuBackdrop()
+})
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+  var induk = mkTumpukanModal.pop()
+  if (induk) induk.removeClass('mk-modal-tertimbun')
+  // BS4 melepas .modal-open dari <body> begitu satu modal tertutup, padahal masih
+  // ada modal lain yang terbuka - pasang lagi supaya scroll body tetap terkunci.
+  if ($('.modal.show').length) $('body').addClass('modal-open')
+  mkSisakanSatuBackdrop()
+})
+
+
+/* ==========================================================================================
+   PIUTANG USAHA (Kode 'PT' di dbPOSTHUTPIUT) & HUTANG USAHA (Kode 'HT') - dua alur kembar
+   yang memakai modal, state, dan fungsi yang SAMA, dibedakan lewat mkJenisHP ('PT'/'HT').
+   ------------------------------------------------------------------------------------------
+   Rantai modal: #form (pane Perkiraan) -> #formMkCustomerPT -> #formMkKartuPT.
+   Baris faktur yang ditambahkan user ditulis langsung ke dbTempHutPiut (sp_TempHutPiut 'I'),
+   dan nanti dipindahkan ke DBHUTPIUT oleh sp_TransaksiMemorial saat item memorial disimpan.
+
+   Piutang: Debet = MENAMBAH, Kredit = PELUNASAN. Hutang: Debet = PELUNASAN, Kredit = MENAMBAH -
+   PERSIS KEBALIKANNYA. Satu-satunya titik pembalikan maknanya ada di mkModeLunas().
+   ========================================================================================== */
+
+let listCustomerPT = []   // hasil browse customer/supplier
+let listKartuPT = []      // baris MENTAH dbTempHutPiut yang sedang tampil
+let mkTampilKartu = []    // baris TAMPILAN hasil mkSusunBarisTampil() - indeks tombol merujuk ini
+
+// Jenis kartu yang sedang berjalan: 'PT' (piutang usaha) atau 'HT' (hutang usaha). Kedua alur
+// memakai modal, fungsi, dan endpoint yang SAMA - hanya dibedakan lewat variabel ini plus
+// mkModePT di bawah. Lihat mkModeLunas() untuk satu-satunya titik pembalikan maknanya.
+let mkJenisHP = 'PT'
+
+// SISI perkiraan di item memorial yang sedang berjalan - TIDAK berubah antara piutang & hutang,
+// selalu menentukan kolom yang diisi (D->Debet, K->Kredit):
+//   'D' = Debet
+//   'K' = Kredit
+// Piutang (PT): Debet=menambah (NoInvoice 'TBH'), Kredit=pelunasan (NoInvoice 'LNS').
+// Hutang  (HT): Debet=pelunasan (NoInvoice 'LNS'), Kredit=menambah (NoInvoice 'TBH') - KEBALIKAN
+// piutang, dikonfirmasi dari data lama (NoBukti SMX/BMM/00004/0316, Tipe='HT').
+let mkModePT = 'D'
+
+// Indeks baris faktur yang sedang dilunasi lewat form (alur pelunasan). -1 = tidak ada.
+let mkBarisLunas = -1
+
+// true kalau isi kartu sudah dimuat untuk item yang sedang dikerjakan. Dipakai mode edit supaya
+// membuka kartu untuk kedua kalinya tidak memuat ulang dari DBHUTPIUT dan membuang perubahan
+// yang belum disimpan. Direset mkResetPT().
+let mkKartuSudahDimuat = false
+
+// true kalau mode saat ini adalah PELUNASAN (piutang di Kredit, hutang di Debet) - inilah
+// satu-satunya tempat arti mode D/K dibalik antara piutang dan hutang. Semua logika kartu yang
+// bicara soal "pelunasan vs tambah" harus lewat fungsi ini, BUKAN membandingkan mkModePT
+// langsung, supaya pembalikannya konsisten di satu tempat.
+function mkModeLunas () {
+  return mkJenisHP === 'HT' ? mkModePT === 'D' : mkModePT === 'K'
+}
+
+// Istilah tampilan (judul modal, label pesan) yang mengikuti jenis kartu.
+function mkIstilah () {
+  return mkJenisHP === 'HT'
+    ? { entitas: 'Hutang', pihak: 'Supplier' }
+    : { entitas: 'Piutang', pihak: 'Customer' }
+}
+
+// Rantai browse Customer/Supplier -> Kartu, dan browse No Titipan, HANYA berlaku di transaksi
+// BMM. Di BJK ketiga jenis perkiraan itu (PT/HT/PTS) TETAP muncul di daftar dan tetap boleh
+// dipilih - tapi murni sebagai perkiraan biasa, tanpa modal Customer/Kartu/Titipan. Lihat
+// MemorialKoreksiController::listPerkiraan() - daftarnya sengaja sudah sama untuk semua transaksi.
+function mkAlurKartuAktif () {
+  return ($("#input_add_transaksi").val() || '').trim() === 'BMM'
+}
+
+// Perkiraan PT/HT yang sedang dipakai - dipakai semua endpoint kartu. Alur Debet memakai
+// perkiraan di sisi Debet, alur Kredit memakai yang di sisi Kredit (di dbTransaksi jadi kolom
+// Lawan). Ini berbasis SISI, sama untuk piutang maupun hutang.
+function mkPerkiraanPT () {
+  return mkModePT === 'K'
+    ? ($("#AddAddKredit").val() || '').trim()
+    : ($("#AddAddDebet").val() || '').trim()
+}
+
+// Urut item memorial yang dikirim ke server, penentu NoMsk baris kerja piutang.
+//
+// Mode tambah item -> 0, server menghitung NoMsk lewat MAX(Urut)+1, rumus yang sama dengan yang
+// dipakai sp_TransaksiMemorial saat choice 'I'. Mode edit item -> Urut item itu sendiri, karena
+// choice 'U' memakai Urut yang dikirim apa adanya.
+//
+// Sengaja memakai mkModeEditItem, BUKAN mkItemTerkunci: penguncian tombol sudah tidak lagi
+// menandai mode edit sejak browse Debet/Kredit dibuka di form edit.
+function mkUrutItemPT () {
+  return (mkModeEditItem && itemEdit && itemEdit.Urut) ? Number(itemEdit.Urut) : 0
+}
+
+function buttonAddListCustomerPT () {
+  listCustomerPT = []
+  let _token = $("#_token").val()
+  let perkiraan = mkPerkiraanPT()
+  let pihak = mkIstilah().pihak
+
+  if (!perkiraan) { alertify.warning("Perkiraan " + (mkModePT === 'K' ? 'Kredit' : 'Debet') + " belum dipilih"); return }
+
+  $.ajax({
+    url: "{!! url('memorialkoreksilistcustomerpt') !!}",
+    type: "post",
+    async: false,
+    data: { _token, perkiraan },
+    success: function (res) {
+      listCustomerPT = res
+
+      let rowTable = ``
+      res.forEach((item, i) => {
+        rowTable += `
+        <tr class="pick-row" onclick="mkPickCustomerPT(${i})">
+        <td>${item.KODECUSTSUPP}</td>
+        <td>${item.NAMACUSTSUPP}</td>
+        <td>${item.ALAMAT || ''}</td>
+        <td>${item.NAMAKOTA || ''}</td>
+        </tr>`
+      })
+
+      document.getElementById("tabel_data_mk_customerpt").innerHTML = rowTable
+      document.getElementById("mkCustomerJudul").innerHTML = pihak
+
+      let inputCari = document.getElementById('input_search_customerpt')
+      if (inputCari) { inputCari.value = '' }
+
+      if (res.length) {
+        $('#formMkCustomerPT').modal('show')
+      } else {
+        alertify.warning(pihak + " untuk perkiraan ini tidak ditemukkan")
+      }
+
+      mkIkatSearchCustomerPT()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function mkIkatSearchCustomerPT () {
+  let input = document.getElementById('input_search_customerpt')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_mk_customerpt tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
+
+function mkPickCustomerPT (index) {
+  let item = listCustomerPT[index]
+  if (!item) { return }
+
+  // Customer yang sama dipilih lagi: JANGAN seed ulang, karena seed menghapus seluruh baris
+  // kerja - termasuk faktur yang sudah ditambahkan user. Cukup buka lagi kartunya apa adanya.
+  let custLama = ($("#AddAddCustsuppPT").val() || '').trim()
+  let custBaru = (item.KODECUSTSUPP || '').trim()
+
+  if (custLama !== '' && custLama === custBaru) {
+    mkKartuBukaLagi()
+    return
+  }
+
+  // Modal Customer dibiarkan terbuka sebagai induk: modal Kartu ditumpuk di atasnya,
+  // supaya Batal di Kartu mengembalikan user ke daftar customer.
+  mkKartuBuka(item)
+}
+
+// Buka kembali modal Kartu tanpa seed ulang - dipakai kalau customer yang dipilih sama dengan
+// yang sedang aktif, supaya baris faktur yang sudah ditambahkan tidak ikut terhapus.
+function mkKartuBukaLagi () {
+  document.getElementById("mkKartuJudulPerkiraan").innerHTML = mkPerkiraanPT()
+  document.getElementById("mkKartuKodeCust").innerHTML = $("#AddAddCustsuppPT").val()
+  document.getElementById("mkKartuNamaCust").innerHTML = '[ ' + ($("#AddAddNamaCustPT").val() || '') + ' ]'
+
+  mkKartuRefresh()
+  mkKartuTutupFormTambah()
+  $('#formMkKartuPT').modal('show')
+  mkIkatSearchKartuPT()
+}
+
+// Buka modal Kartu Piutang: seed faktur outstanding customer ini ke dbTempHutPiut lalu
+// tampilkan. Hanya dipanggil sekali per pemilihan customer - refresh berikutnya memakai
+// mkKartuRefresh() supaya baris tambahan user tidak ikut terhapus.
+function mkKartuBuka (item, edit = false) {
+  let _token = $("#_token").val()
+  let perkiraan = mkPerkiraanPT()
+  let kodecustsupp = (item.KODECUSTSUPP || '').trim()
+  let nobukti = $("#input_add_nobukti").val()
+  let urut = mkUrutItemPT()
+
+  $.ajax({
+    url: "{!! url('memorialkoreksiloadkartupt') !!}",
+    type: "post",
+    async: false,
+    data: { _token, perkiraan, kodecustsupp, nobukti, urut, tipedk: mkModePT, jenis: mkJenisHP, edit: edit ? 1 : 0 },
+    success: function (res) {
+      // Pilihan customer baru dicatat SETELAH seed berhasil. Kalau dicatat lebih awal dan
+      // seed-nya gagal, pemilihan customer yang sama berikutnya akan dianggap "customer sama"
+      // lalu masuk jalur tanpa seed - kartunya jadi tampil kosong terus.
+      document.getElementById("AddAddCustsuppPT").value = item.KODECUSTSUPP
+      document.getElementById("AddAddNamaCustPT").value = item.NAMACUSTSUPP
+      document.getElementById("AddAddNamaCustPTView").value = item.NAMACUSTSUPP
+      document.getElementById("AddAddKodePT").value = mkJenisHP
+      // Kolom Customer di form Add Item dinonaktifkan atas permintaan - tidak perlu tampil,
+      // baik di alur Debet maupun Kredit. Field-nya tetap ada dan tetap terisi karena nilainya
+      // dipakai untuk CustSuppP/CustSuppL dan seluruh endpoint kartu.
+      // $('#rowCustomerPT').show()
+
+      // NoMsk yang dipakai baris temp - disimpan supaya tambah/hapus memakai nilai yang sama.
+      document.getElementById("AddAddNoMskPT").value = res.nomsk
+
+      document.getElementById("mkKartuJudulPerkiraan").innerHTML = perkiraan
+      document.getElementById("mkKartuKodeCust").innerHTML = kodecustsupp
+      document.getElementById("mkKartuNamaCust").innerHTML = '[ ' + (item.NAMACUSTSUPP || '') + ' ]'
+
+      mkKartuSudahDimuat = true
+
+      mkKartuRender(res.data)
+      mkKartuTutupFormTambah()
+      $('#formMkKartuPT').modal('show')
+      mkIkatSearchKartuPT()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+// Ambil ulang isi kartu tanpa seed ulang.
+function mkKartuRefresh () {
+  let _token = $("#_token").val()
+  let perkiraan = mkPerkiraanPT()
+
+  $.ajax({
+    url: "{!! url('memorialkoreksigetkartupt') !!}",
+    type: "post",
+    async: false,
+    data: { _token, perkiraan, tipedk: mkModePT },
+    success: function (res) { mkKartuRender(res) },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+/**
+ * Gambar isi tabel kartu. Kolom Action berbeda per alur - ditentukan mkModeLunas(), BUKAN
+ * mkModePT langsung, supaya piutang (Kredit=lunas) dan hutang (Debet=lunas) sama-sama benar:
+ *
+ *   Tambah    - baris buatan sesi ini dapat tombol Hapus; baris outstanding tanpa tombol.
+ *   Pelunasan - baris outstanding dapat tombol + (pelunasan, mati kalau Sisa atau saldo faktur
+ *               sudah habis) dan bisa didobel-klik untuk melunasi otomatis; baris pelunasan
+ *               buatan sesi ini ditandai merah, dapat tombol Hapus, dan dobel-klik = hapus.
+ *
+ * Baris mana yang "buatan sesi ini" ditentukan mkBarisBuatanSesiIni(), bukan dari NoInvoice.
+ */
+function mkKartuRender (res) {
+  listKartuPT = res || []
+  mkTampilKartu = mkSusunBarisTampil()
+
+  let sisa = mkKartuSisa()
+  let modeLunas = mkModeLunas()
+
+  // Kolom Saldo adalah saldo BERJALAN (akumulatif dari baris paling atas), bukan selisih per
+  // baris - sama seperti tampilan form lama. Rupiah dan Valas punya saldo berjalannya sendiri.
+  // Piutang: saldo = Debet-Kredit (outstanding = belum dibayar, sisi Debet).
+  // Hutang : saldo = Kredit-Debet (outstanding = belum dilunasi, sisi Kredit) - KEBALIKANNYA,
+  // dikonfirmasi langsung dari data (footer kartu hutang: Kredit=Saldo, Debet=0).
+  let saldoBerjalan = 0
+  let saldoBerjalanD = 0
+
+  let rowTable = ``
+  mkTampilKartu.forEach((baris, i) => {
+    let debet = baris.Debet
+    let kredit = baris.Kredit
+    let debetD = baris.DebetD
+    let kreditD = baris.KreditD
+    saldoBerjalan += mkJenisHP === 'HT' ? (kredit - debet) : (debet - kredit)
+    saldoBerjalanD += mkJenisHP === 'HT' ? (kreditD - debetD) : (debetD - kreditD)
+
+    let aksi = ``
+    let kelas = ``
+
+    if (baris.jenis === 'sesi') {
+      // Baris buatan sesi ini: bisa dihapus (tombol, dan dobel-klik di alur pelunasan).
+      aksi = `<button class="btn btn-danger btn-mk-hapus" type="button" onclick="mkKartuHapus(${i})" title="Hapus"><i class="bi bi-trash"></i></button>`
+      if (modeLunas) { kelas = ' class="mk-baris-lunas mk-bisa-dobel" ondblclick="mkKartuHapus(' + i + ')"' }
+    } else if (modeLunas) {
+      // Baris ringkas faktur di alur pelunasan: tombol + untuk melunasi. Mati kalau Sisa sudah
+      // habis atau saldo faktur itu sendiri sudah nol.
+      let bisaLunas = sisa > 0 && mkSaldoFaktur(baris.NoFaktur) > 0
+      aksi = `<button class="btn btn-mk-lunas" type="button" onclick="mkKartuBukaFormLunas(${i})" title="Pelunasan"${bisaLunas ? '' : ' disabled'}><i class="bi bi-plus-lg"></i></button>`
+      if (bisaLunas) { kelas = ' class="mk-bisa-dobel" ondblclick="mkKartuLunasCepat(' + i + ')"' }
+    }
+
+    rowTable += `
+    <tr${kelas}>
+    <td class="text-center kolom-mk-action">${aksi}</td>
+    <td>${baris.NoFaktur}</td>
+    <td>${baris.NoRetur || ''}</td>
+    <td>${formatDate(baris.Tanggal)}</td>
+    <td>${formatDate(baris.JatuhTempo)}</td>
+    <td class="text-right">${formatAngka(debet.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(kredit.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(saldoBerjalan.toFixed(2))}</td>
+    <td>${baris.Valas}</td>
+    <td class="text-right">${formatAngka(parseFloat(baris.Kurs || 0).toFixed(2))}</td>
+    <td class="text-right">${formatAngka(debetD.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(kreditD.toFixed(2))}</td>
+    <td class="text-right">${formatAngka(saldoBerjalanD.toFixed(2))}</td>
+    </tr>`
+  })
+
+  // Tabel ini digambar manual (bukan DataTables), jadi baris placeholder ber-colspan aman.
+  if (!mkTampilKartu.length) {
+    rowTable = `<tr><td class="text-center" colspan=13>Belum ada data</td></tr>`
+  }
+
+  document.getElementById("tabel_data_mk_kartupt").innerHTML = rowTable
+
+  mkKartuHitung()
+}
+
+/**
+ * Susun baris TAMPILAN dari baris mentah dbTempHutPiut.
+ *
+ * Satu faktur = satu baris. Seluruh riwayat lama faktur itu (baris hasil seed dari vwHutPiut:
+ * faktur aslinya plus pelunasan-pelunasan dari transaksi lain) dijumlahkan jadi SATU baris
+ * ringkas bersaldo bersih, supaya nomor faktur tidak tampil berulang dan tidak terbaca sebagai
+ * data dobel.
+ *
+ * Baris yang dibuat user di sesi ini (StatusUID='I') sengaja TIDAK ikut diringkas - masing-masing
+ * tetap jadi baris sendiri di bawah baris ringkas fakturnya, supaya bisa ditandai merah dan
+ * dihapus satu per satu. Kalau ikut dilebur, pelunasan yang baru dibuat tidak bisa dibatalkan.
+ *
+ * Peringkasan ini MURNI tampilan. Isi dbTempHutPiut tidak disentuh, karena baris mentah itulah
+ * yang dibaca sp_TransaksiMemorial saat item memorial disimpan.
+ */
+function mkSusunBarisTampil () {
+  return listKartuPT.map(function (item) {
+    return {
+      jenis: mkBarisBuatanSesiIni(item) ? 'sesi' : 'seed',
+      item: item,
+      NoFaktur: item.NoFaktur,
+      NoRetur: item.NoRetur,
+      Tanggal: item.Tanggal,
+      JatuhTempo: item.JatuhTempo,
+      Valas: item.Valas,
+      Kurs: item.Kurs,
+      Debet: parseFloat(item.Debet) || 0,
+      Kredit: parseFloat(item.Kredit) || 0,
+      // Nilai dalam valas aslinya. Untuk transaksi IDR isinya 0, sama seperti di form lama.
+      DebetD: parseFloat(item.DebetD) || 0,
+      KreditD: parseFloat(item.KreditD) || 0
+    }
+  })
+}
+
+/* ------------------------------------------------------------------------------------------
+   DINONAKTIFKAN: peringkasan satu baris per faktur.
+   ------------------------------------------------------------------------------------------
+   Versi di bawah ini menggabungkan seluruh riwayat lama sebuah faktur jadi SATU baris bersaldo
+   bersih, supaya nomor fakturnya tidak tampil berulang. Dimatikan atas permintaan: riwayat per
+   baris justru dibutuhkan untuk melacak TANGGAL tiap mutasi.
+
+   Kesan "dobel" yang memicu peringkasan ini ternyata berasal dari data, bukan tampilan - di
+   produksi ada baris pelunasan yang Tanggal-nya tertimpa sama dengan tanggal fakturnya (lihat
+   SML0915/INV/118 dan SML0915/INV/121), sehingga dua baris terlihat kembar persis. Kalau
+   tanggalnya benar, dua baris itu memang beda dan informatif.
+
+   Tidak dihapus supaya gampang dihidupkan lagi kalau suatu saat dibutuhkan.
+
+function mkSusunBarisTampilRingkas () {
+  let urutanFaktur = []
+  let ringkas = {}
+  let barisSesi = {}
+
+  listKartuPT.forEach(function (item) {
+    let nf = item.NoFaktur
+
+    if (!(nf in ringkas)) {
+      urutanFaktur.push(nf)
+      barisSesi[nf] = []
+      ringkas[nf] = {
+        jenis: 'ringkas',
+        NoFaktur: nf,
+        NoRetur: item.NoRetur,
+        Tanggal: item.Tanggal,
+        JatuhTempo: item.JatuhTempo,
+        Valas: item.Valas,
+        Kurs: item.Kurs,
+        Debet: 0,
+        Kredit: 0,
+        adaSeed: false
+      }
+    }
+
+    if (mkBarisBuatanSesiIni(item)) {
+      barisSesi[nf].push({
+        jenis: 'sesi',
+        item: item,
+        NoFaktur: item.NoFaktur,
+        NoRetur: item.NoRetur,
+        Tanggal: item.Tanggal,
+        JatuhTempo: item.JatuhTempo,
+        Valas: item.Valas,
+        Kurs: item.Kurs,
+        Debet: parseFloat(item.Debet) || 0,
+        Kredit: parseFloat(item.Kredit) || 0
+      })
+      return
+    }
+
+    ringkas[nf].Debet += parseFloat(item.Debet) || 0
+    ringkas[nf].Kredit += parseFloat(item.Kredit) || 0
+    ringkas[nf].adaSeed = true
+  })
+
+  let hasil = []
+  urutanFaktur.forEach(function (nf) {
+    if (ringkas[nf].adaSeed) { hasil.push(ringkas[nf]) }
+    barisSesi[nf].forEach(function (b) { hasil.push(b) })
+  })
+
+  return hasil
+}
+------------------------------------------------------------------------------------------ */
+
+/**
+ * Apakah baris ini dibuat user di sesi kerja ini (bukan bawaan hasil seed)?
+ *
+ * Pembedanya StatusUID, BUKAN NoInvoice. sp_TempHutPiut mengisi StatusUID 'I' untuk baris yang
+ * baru ditambahkan, sedangkan baris hasil seed dari vwHutPiut StatusUID-nya kosong. Ini juga
+ * kondisi yang dipakai sp_TransaksiMemorial untuk memilih baris yang diposting
+ * (StatusUID in ('I','U')), jadi tampilan dan yang benar-benar tersimpan selalu sejalan.
+ *
+ * Memakai NoInvoice ('TBH'/'LNS') saja tidak cukup: faktur yang dulu pernah ditambah atau
+ * dilunasi lewat memorial LAIN ikut ter-seed dengan penanda yang sama, dan akan salah dihitung
+ * sebagai "Dibayar" di sesi ini maupun salah diberi tombol hapus.
+ */
+function mkBarisBuatanSesiIni (item) {
+  // 'I' = baru ditambahkan di sesi ini. 'U' = rincian yang SUDAH tersimpan lalu dimuat ulang
+  // untuk diedit (mode edit item, lihat loadKartuPT()). Sama persis dengan filter yang dipakai
+  // sp_TransaksiMemorial untuk memilih baris yang ditulis ke DBHUTPIUT: StatusUID in ('I','U').
+  return ['I', 'U'].indexOf((item.StatusUID || '').trim()) !== -1
+}
+
+// Sisa yang belum dialokasikan = Jumlah item memorial (dalam Rupiah) - yang sudah dipakai.
+function mkKartuSisa () {
+  let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+  let terpakai = 0
+
+  listKartuPT.forEach(function (item) {
+    if (!mkBarisBuatanSesiIni(item)) { return }
+    terpakai += (mkModePT === 'K' ? (parseFloat(item.Kredit) || 0) : (parseFloat(item.Debet) || 0))
+  })
+
+  return total - terpakai
+}
+
+// Saldo satu faktur di dalam kartu ini, termasuk baris pelunasan yang baru dibuat user. Dipakai
+// untuk mematikan tombol + dan membatasi nilai pelunasan supaya saldo faktur tidak pernah minus.
+// Piutang: Debet-Kredit. Hutang: Kredit-Debet (KEBALIKANNYA, sama seperti saldo berjalan kartu).
+function mkSaldoFaktur (nofaktur) {
+  let saldo = 0
+  listKartuPT.forEach(function (item) {
+    if (item.NoFaktur !== nofaktur) { return }
+    let debet = parseFloat(item.Debet) || 0
+    let kredit = parseFloat(item.Kredit) || 0
+    saldo += mkJenisHP === 'HT' ? (kredit - debet) : (debet - kredit)
+  })
+  return saldo
+}
+
+// Total kolom + ringkasan Total/Dibayar/Sisa.
+// Total  = Jumlah di form item memorial
+// Dibayar= akumulasi baris tambahan user (NoInvoice='TBH') saja
+// Sisa   = Total - Dibayar. Murni informasi, tidak ada validasi apa pun.
+function mkKartuHitung () {
+  let totalDebet = 0
+  let totalKredit = 0
+  let totalDebetD = 0
+  let totalKreditD = 0
+
+  listKartuPT.forEach(function (item) {
+    totalDebet += parseFloat(item.Debet) || 0
+    totalKredit += parseFloat(item.Kredit) || 0
+    totalDebetD += parseFloat(item.DebetD) || 0
+    totalKreditD += parseFloat(item.KreditD) || 0
+  })
+
+  // Kolom Saldo total mengikuti arah yang sama dengan saldo berjalan per baris & mkSaldoFaktur():
+  // piutang Debet-Kredit, hutang Kredit-Debet.
+  let totalSaldo = mkJenisHP === 'HT' ? (totalKredit - totalDebet) : (totalDebet - totalKredit)
+  let totalSaldoD = mkJenisHP === 'HT' ? (totalKreditD - totalDebetD) : (totalDebetD - totalKreditD)
+
+  document.getElementById("mkKartuTotalDebet").innerHTML = formatAngka(totalDebet.toFixed(2))
+  document.getElementById("mkKartuTotalKredit").innerHTML = formatAngka(totalKredit.toFixed(2))
+  document.getElementById("mkKartuTotalSaldo").innerHTML = formatAngka(totalSaldo.toFixed(2))
+  document.getElementById("mkKartuTotalDebetD").innerHTML = formatAngka(totalDebetD.toFixed(2))
+  document.getElementById("mkKartuTotalKreditD").innerHTML = formatAngka(totalKreditD.toFixed(2))
+  document.getElementById("mkKartuTotalSaldoD").innerHTML = formatAngka(totalSaldoD.toFixed(2))
+
+  let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+  let sisa = mkKartuSisa()
+
+  document.getElementById("mkKartuRingkasTotal").innerHTML = formatAngka(total.toFixed(2))
+  document.getElementById("mkKartuRingkasDibayar").innerHTML = formatAngka((total - sisa).toFixed(2))
+  document.getElementById("mkKartuRingkasSisa").innerHTML = formatAngka(sisa.toFixed(2))
+
+  // Alur tambah: tombol Tambah di atas tabel. Alur pelunasan: tombolnya per baris, dan yang di
+  // atas disembunyikan. Ditentukan mkModeLunas(), bukan mkModePT langsung (lihat catatan di atas).
+  let tombolTambah = document.getElementById("mkKartuButtonTambah")
+  if (mkModeLunas()) {
+    $('#mkKartuButtonTambah').hide()
+  } else {
+    $('#mkKartuButtonTambah').show()
+    tombolTambah.disabled = false
+  }
+}
+
+function mkIkatSearchKartuPT () {
+  let input = document.getElementById('input_search_kartupt')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_mk_kartupt tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
+
+// Panel tambah faktur (alur DEBET). Jumlah-nya mengikuti Jumlah di form item memorial, sesuai
+// permintaan - bukan mengikuti Sisa. Valas & Kurs ikut item dan dikunci.
+function mkKartuBukaFormTambah () {
+  mkBarisLunas = -1
+
+  document.getElementById("mkKartuNoFaktur").value = ''
+  document.getElementById("mkKartuNoFaktur").disabled = false
+  document.getElementById("mkKartuTanggal").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuTanggal").disabled = false
+  document.getElementById("mkKartuJatuhTempo").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuJatuhTempo").disabled = false
+  document.getElementById("mkKartuValas").value = $("#AddAddValas").val()
+  document.getElementById("mkKartuKurs").value = $("#AddAddKurs").val()
+  document.getElementById("mkKartuJumlah").value = $("#AddAddJumlah").val()
+  document.getElementById("mkKartuCatatan").value = ''
+
+  $('#mkKartuFormTambah').show()
+}
+
+// Panel pelunasan (alur KREDIT) untuk satu baris faktur. Semua kolom terkunci kecuali Jumlah
+// dan Catatan: No. Faktur & Jatuh Tempo ikut faktur yang dipilih, Tanggal Bukti ikut tanggal
+// memorial - persis seperti form lama.
+function mkKartuBukaFormLunas (index) {
+  let baris = mkTampilKartu[index]
+  if (!baris) { return }
+
+  let maks = mkMaksPelunasan(baris.NoFaktur)
+  if (maks <= 0) {
+    alertify.warning("Sisa sudah habis atau faktur ini sudah lunas")
+    return
+  }
+
+  mkBarisLunas = index
+
+  document.getElementById("mkKartuNoFaktur").value = baris.NoFaktur
+  document.getElementById("mkKartuNoFaktur").disabled = true
+  document.getElementById("mkKartuTanggal").value = $("#input_add_tanggal").val()
+  document.getElementById("mkKartuTanggal").disabled = true
+  document.getElementById("mkKartuJatuhTempo").value = formatDate(baris.JatuhTempo)
+  document.getElementById("mkKartuJatuhTempo").disabled = true
+  document.getElementById("mkKartuValas").value = baris.Valas
+  document.getElementById("mkKartuKurs").value = formatAngka(parseFloat(baris.Kurs).toFixed(2))
+  document.getElementById("mkKartuJumlah").value = formatAngka(maks.toFixed(2))
+  document.getElementById("mkKartuCatatan").value = ''
+
+  $('#mkKartuFormTambah').show()
+}
+
+// Nilai pelunasan terbesar yang boleh untuk satu faktur: tidak melebihi Sisa yang belum
+// dialokasikan, dan tidak melebihi saldo faktur itu sendiri (supaya saldonya tidak minus).
+function mkMaksPelunasan (nofaktur) {
+  return Math.min(mkKartuSisa(), mkSaldoFaktur(nofaktur))
+}
+
+// Dobel-klik di baris ringkas faktur: langsung lunasi sebesar mkMaksPelunasan() tanpa membuka
+// form. Kalau saldo fakturnya lebih kecil dari Sisa, Sisa masih tersisa untuk faktur lain;
+// kalau lebih besar, Sisa langsung habis jadi 0.
+function mkKartuLunasCepat (index) {
+  let baris = mkTampilKartu[index]
+  if (!baris) { return }
+
+  let jumlah = mkMaksPelunasan(baris.NoFaktur)
+  if (jumlah <= 0) {
+    alertify.warning("Sisa sudah habis atau faktur ini sudah lunas")
+    return
+  }
+
+  mkKirimBarisKartu({
+    nofaktur: baris.NoFaktur,
+    tanggal: $("#input_add_tanggal").val(),
+    jatuhtempo: formatDate(baris.JatuhTempo),
+    jumlah: jumlah,
+    valas: baris.Valas,
+    kurs: unformatAngka(baris.Kurs),
+    catatan: ''
+  }, "Pelunasan ditambahkan")
+}
+
+function mkKartuTutupFormTambah () {
+  $('#mkKartuFormTambah').hide()
+}
+
+function mkKartuSimpanTambah () {
+  let nofaktur = ($("#mkKartuNoFaktur").val() || '').trim()
+  let tanggal = $("#mkKartuTanggal").val()
+  let jatuhtempo = $("#mkKartuJatuhTempo").val()
+  let jumlah = unformatAngka($("#mkKartuJumlah").val())
+
+  if (!nofaktur) { alertify.warning("No. Faktur belum diisi"); return }
+  if (!tanggal || !jatuhtempo) { alertify.warning("Tanggal belum lengkap"); return }
+  if (Number(jumlah) <= 0) { alertify.warning("Jumlah <= 0"); return }
+
+  let valas = $("#AddAddValas").val()
+  let kurs = unformatAngka($("#AddAddKurs").val())
+  let pesan = "Faktur ditambahkan"
+
+  // Alur pelunasan: Jumlah boleh diubah user, tapi tidak boleh melebihi Sisa yang belum
+  // dialokasikan maupun saldo faktur yang sedang dilunasi.
+  if (mkModeLunas()) {
+    let baris = mkTampilKartu[mkBarisLunas]
+    if (!baris) { alertify.warning("Baris faktur tidak ditemukkan"); return }
+
+    let sisa = mkKartuSisa()
+    if (Number(jumlah) > sisa) {
+      alertify.warning("Jumlah melebihi Sisa (" + formatAngka(sisa.toFixed(2)) + ")")
+      return
+    }
+
+    let saldoFaktur = mkSaldoFaktur(baris.NoFaktur)
+    if (Number(jumlah) > saldoFaktur) {
+      alertify.warning("Jumlah melebihi saldo faktur (" + formatAngka(saldoFaktur.toFixed(2)) + ")")
+      return
+    }
+
+    valas = baris.Valas
+    kurs = unformatAngka(baris.Kurs)
+    pesan = "Pelunasan ditambahkan"
+  }
+
+  mkKirimBarisKartu({
+    nofaktur,
+    tanggal,
+    jatuhtempo,
+    jumlah,
+    valas,
+    kurs,
+    catatan: $("#mkKartuCatatan").val()
+  }, pesan)
+}
+
+// Satu pintu untuk menambah baris kartu - dipakai form Tambah (Debet), form Pelunasan (Kredit),
+// dan dobel-klik pelunasan cepat.
+function mkKirimBarisKartu (baris, pesanSukses) {
+  $.ajax({
+    url: "{!! url('memorialkoreksiaddkartupt') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token: $("#_token").val(),
+      nofaktur: baris.nofaktur,
+      tanggal: baris.tanggal,
+      jatuhtempo: baris.jatuhtempo,
+      jumlah: baris.jumlah,
+      valas: baris.valas,
+      kurs: baris.kurs,
+      catatan: baris.catatan || '',
+      perkiraan: mkPerkiraanPT(),
+      kodecustsupp: $("#AddAddCustsuppPT").val(),
+      nobukti: $("#input_add_nobukti").val(),
+      urut: mkUrutItemPT(),
+      tipedk: mkModePT,
+      jenis: mkJenisHP
+    },
+    success: function (res) {
+      mkKartuRender(res)
+      mkKartuTutupFormTambah()
+      alertify.success(pesanSukses)
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function mkKartuHapus (index) {
+  let baris = mkTampilKartu[index]
+  // Hanya baris buatan sesi ini yang punya acuan ke baris mentahnya - itu yang dibutuhkan
+  // sp_TempHutPiut untuk mencocokkan baris mana yang dihapus.
+  if (!baris || baris.jenis !== 'sesi') { return }
+  let item = baris.item
+
+  alertify.confirm('Hapus Faktur', `Apakah yakin ingin menghapus faktur ${item.NoFaktur} ?`,
+    function () {
+      let _token = $("#_token").val()
+
+      $.ajax({
+        url: "{!! url('memorialkoreksideletekartupt') !!}",
+        type: "post",
+        async: false,
+        data: {
+          _token,
+          nofaktur: item.NoFaktur,
+          noretur: item.NoRetur || '',
+          tipetrans: item.TipeTrans,
+          kodecustsupp: item.KodeCustSupp,
+          nobukti: item.NoBukti,
+          nomsk: item.NoMsk,
+          urut: item.Urut,
+          tanggal: item.Tanggal,
+          jatuhtempo: item.JatuhTempo,
+          valas: item.Valas,
+          kurs: item.Kurs,
+          perkiraan: item.Perkiraan,
+          tipedk: mkModePT,
+          jenis: mkJenisHP
+        },
+        success: function (res) {
+          mkKartuRender(res)
+          alertify.success("Faktur dihapus")
+        },
+        error: function (err) {
+          console.log(err)
+          alertify.warning('Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    }
+    , function () {
+      console.log('no')
+    })
+}
+
+// Bersihkan pilihan customer + baris kerja di dbTempHutPiut. Dipanggil kalau Debet berubah
+// jadi bukan perkiraan PT, dan dari cleanFormAddAdd().
+function mkResetPT (bersihkanTemp = true) {
+  document.getElementById("AddAddCustsuppPT").value = ''
+  document.getElementById("AddAddNamaCustPT").value = ''
+  document.getElementById("AddAddNamaCustPTView").value = ''
+  document.getElementById("AddAddKodePT").value = ''
+  document.getElementById("AddAddNoMskPT").value = ''
+  $('#rowCustomerPT').hide()
+
+  listKartuPT = []
+  mkTampilKartu = []
+  mkKartuSudahDimuat = false
+  mkBarisLunas = -1
+  mkModePT = 'D'
+  mkJenisHP = 'PT'
+
+  if (bersihkanTemp) {
+    $.ajax({
+      url: "{!! url('memorialkoreksiclearkartupt') !!}",
+      type: "post",
+      async: false,
+      data: { _token: $("#_token").val() },
+      error: function (err) { console.log(err) }
+    })
+  }
+}
+
+// No Titipan hanya berlaku kalau perkiraan Debet ber-Kode 'PTS' (Titipan Customer). Dari
+// cleanFormAddAdd(), buttonAddPickPerkiraan(), dan buttonEditItem() saat Debet-nya
+// cleanFormAddAdd(), buttonAddPickPerkiraan(), dan buttonEditItem() saat Debet-nya bukan/tidak
+// lagi titipan, supaya notitipan/uruttitipan/custsuppP tidak ikut tersimpan.
+function mkResetTitipan () {
+  document.getElementById("AddAddNoTitipan").value = ''
+  document.getElementById("AddAddUrutTitipan").value = ''
+  document.getElementById("AddAddCustsuppTitipan").value = ''
+  document.getElementById("AddAddSisaTitipan").value = ''
+  document.getElementById("AddAddKodePTS").value = ''
+  $('#rowNoTitipan').hide();
+}
+
+// Dipanggil dari submitAdd()/submitEdit() sesaat sebelum kirim data. Kalau Debet bukan
+// titipan, notitipan/uruttitipan/custsuppP dikirim kosong seperti semula. Kalau titipan,
+// wajib sudah pilih titipan lewat browse, dan Jumlah tidak boleh melebihi Sisa titipan
+// -- kecuali Sisa kosong (fallback: gagal mengambil sisa efektif, lihat mkAmbilSisaTitipan()).
+function mkAmbilTitipan (perkiraan, jumlah) {
+  if (($("#AddAddKodePTS").val() || '').trim() !== 'PTS') {
+    return { notitipan: '', uruttitipan: 0, custsuppP: '' }
+  }
+  let notitipan = $("#AddAddNoTitipan").val()
+  let uruttitipan = Number($("#AddAddUrutTitipan").val() || 0)
+  let custsuppP = $("#AddAddCustsuppTitipan").val()
+  let sisa = $("#AddAddSisaTitipan").val()
+  if (!notitipan) {
+    alertify.warning("Pilih No Titipan")
+    return null
+  }
+  if (sisa !== '' && Number(jumlah) > Number(sisa)) {
+    alertify.warning("Jumlah melebihi sisa titipan (" + formatAngka(parseFloat(sisa).toFixed(2)) + ")")
+    return null
+  }
+  return { notitipan, uruttitipan, custsuppP }
+}
+
+// Dipanggil dari submitAdd()/submitEdit() sesaat sebelum kirim data. Kalau item ini tidak
+// sedang punya kartu piutang/hutang, kodeP/custsuppP dikirim kosong seperti semula. Kalau
+// sedang punya (KodeP = 'PT' atau 'HT'), customer/supplier wajib sudah dipilih lewat rantai
+// browse Customer/Supplier -> Kartu, karena tanpa CustSuppP baris piutang/hutangnya tidak
+// punya pemilik. Nama field yang dikembalikan ('kodeP'/'custsuppP') dipertahankan apa adanya
+// dari versi piutang - pemetaan ke kolom kodeP/kodeL yang sebenarnya (sisi Debet/Kredit)
+// tetap dikerjakan submitAdd()/submitEdit() berdasarkan mkModePT, sama seperti semula.
+function mkAmbilPiutang () {
+  let kode = ($("#AddAddKodePT").val() || '').trim()
+
+  if (kode !== 'PT' && kode !== 'HT') {
+    return { kodeP: '', custsuppP: '' }
+  }
+
+  let custsuppP = ($("#AddAddCustsuppPT").val() || '').trim()
+  if (!custsuppP) {
+    alertify.warning("Pilih " + mkIstilah().pihak + " untuk perkiraan " + mkIstilah().entitas.toLowerCase())
+    return null
+  }
+
+  return { kodeP: kode, custsuppP }
+}
+
+// Menyamakan NoBukti/NoMsk baris tambahan di dbTempHutPiut dengan bukti yang benar-benar
+// dipakai saat submit - lihat MemorialKoreksiController::retagKartuPT(). Mengembalikan false
+// kalau gagal, supaya submit dibatalkan daripada menyimpan jurnal tanpa rincian piutangnya.
+function mkSamakanBuktiPiutang (nobukti) {
+  if (!nobukti) {
+    alertify.warning("No Bukti belum terbentuk, silahkan refresh browser")
+    return false
+  }
+
+  let berhasil = false
+
+  $.ajax({
+    url: "{!! url('memorialkoreksiretagkartupt') !!}",
+    type: "post",
+    async: false,
+    data: { _token: $("#_token").val(), nobukti, urut: mkUrutItemPT(), tipedk: mkModePT },
+    success: function (res) {
+      document.getElementById("AddAddNoMskPT").value = res.nomsk
+      berhasil = true
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+
+  return berhasil
+}
+
+// Dipanggil dari buttonEditItem() saat perkiraan item yang dibuka ber-Kode 'PTS'. Mengambil sisa
+// EFEKTIF titipan (endpoint memorialkoreksisisatitipan / MemorialKoreksiController::sisaTitipan)
+// -- yaitu sisa titipan seandainya baris yang sedang diedit ini sendiri dikecualikan dari
+// perhitungan -- supaya mkAmbilTitipan() tetap bisa menolak Jumlah baru yang melebihi sisa.
+// Kalau gagal diambil (jaringan/endpoint error) atau notitipan kosong, AddAddSisaTitipan
+// dikosongkan supaya validasi dilewati (fallback) daripada memblokir user mengedit item.
+function mkAmbilSisaTitipan (item) {
+  let notitipan = item.NOTITIPAN
+  let uruttitipan = item.URUTTITIPAN
+  document.getElementById("AddAddSisaTitipan").value = ''
+
+  if (!notitipan) { return }
+
+  let _token = $("#_token").val();
+  $.ajax({
+    url: "{!! url('memorialkoreksisisatitipan') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      notitipan,
+      uruttitipan,
+      nobukti: item.NoBukti,
+      urut: item.Urut
+    },
+    success: function (res) {
+      if (res && res.length) {
+        document.getElementById("AddAddSisaTitipan").value = res[0].Sisa
+      }
+    },
+    error: function (err) {
+      console.log(err)
+    }
+  })
 }
 
 function lockFormAddAdd (value = true) {
   document.getElementById("AddAddKodeDevisi").disabled = value
   document.getElementById("AddAddValas").disabled = value
-  document.getElementById("buttonAddListDebet").disabled = value
-  document.getElementById("buttonAddListKredit").disabled = value
+  document.getElementById("buttonAddListTitipan").disabled = value
+  // Browse Customer piutang ikut dikunci saat edit item, sejalan dengan browse Titipan dan
+  // browse Debet/Kredit - rincian piutang hanya boleh disusun waktu item dibuat.
+  document.getElementById("buttonAddListCustomerPT").disabled = value
+
+  mkItemTerkunci = value
+  mkAturTombolBrowse()
+}
+
+// Tombol browse Debet & Kredit aktif selama kolom Jumlah sudah diisi (> 0) - dipanggil ulang
+// setiap kali Jumlah berubah, supaya urutan pengisiannya wajib Jumlah dulu baru pilih perkiraan.
+//
+// Sebelumnya tombol ini ikut dimatikan selama mode edit item (mkItemTerkunci). Sekarang DIBUKA
+// juga di mode edit atas permintaan, supaya perkiraan yang salah pilih masih bisa dibetulkan
+// tanpa menghapus itemnya.
+function mkAturTombolBrowse () {
+  let jumlah = Number(unformatAngka($("#AddAddJumlah").val()) || 0)
+  let belumAdaJumlah = !(jumlah > 0)
+
+  let tombolDebet = document.getElementById("buttonAddListDebet")
+  let tombolKredit = document.getElementById("buttonAddListKredit")
+
+  if (mkModeEditItem) {
+    // MODE EDIT: perkiraan TIDAK boleh diganti. Browse hanya dibuka di sisi yang perkiraannya
+    // piutang/hutang usaha, dan di sana fungsinya bukan memilih perkiraan melainkan membuka
+    // Kartu untuk mengedit rinciannya (lihat buttonAddListPerkiraan()). Sisi lain dimatikan.
+    // Kalau buktinya BJK, rantai Kartu ditutup total (mkAlurKartuAktif()) - biar item lama itu
+    // sudah punya KodeP/KodeL 'PT'/'HT', tombolnya tetap mati supaya rinciannya tidak diutak-atik
+    // lewat halaman ini. KodeP/KodeL & CustSuppP/CustSuppL milik item lama tidak ikut dikosongkan
+    // - hanya AKSES ke Kartu-nya yang ditutup.
+    let sisi = mkAlurKartuAktif() ? mkSisiPiutangItem() : ''
+    let labelUbah = sisi ? ('Ubah rincian ' + mkIstilah().entitas.toLowerCase()) : ''
+
+    tombolDebet.disabled  = belumAdaJumlah || sisi !== 'Debet'
+    tombolKredit.disabled = belumAdaJumlah || sisi !== 'Kredit'
+
+    tombolDebet.title  = (sisi === 'Debet')  ? labelUbah : 'Perkiraan tidak bisa diubah saat edit item'
+    tombolKredit.title = (sisi === 'Kredit') ? labelUbah : 'Perkiraan tidak bisa diubah saat edit item'
+    return
+  }
+
+  tombolDebet.disabled = belumAdaJumlah
+  tombolKredit.disabled = belumAdaJumlah
+
+  let title = belumAdaJumlah ? 'Isi Jumlah dulu sebelum memilih perkiraan' : ''
+  tombolDebet.title = title
+  tombolKredit.title = title
 }
 
 
@@ -3271,6 +4878,20 @@ function buttonAddListPerkiraan (idTujuan) {
 
   console.log('buttonAddListPerkiraan')
 
+  // MODE EDIT, sisi yang perkiraannya sudah piutang/hutang usaha: browse TIDAK membuka daftar
+  // perkiraan, tapi langsung membuka Kartu supaya rincian yang sudah tersimpan bisa diedit.
+  // Perkiraan & customer/supplier-nya sengaja tidak diubah - untuk menggantinya, item harus
+  // dihapus lalu dibuat baru. Lapis pengaman kedua: kalau buktinya BJK, tombolnya sudah mati di
+  // mkAturTombolBrowse(), jadi baris ini seharusnya tidak pernah tercapai - tapi tetap dipagari
+  // mkAlurKartuAktif() supaya tidak pernah membuka Kartu untuk item ber-bukti BJK.
+  if (mkModeEditItem && mkAlurKartuAktif()) {
+    let sisiPiutang = mkSisiPiutangItem()
+    if (sisiPiutang && sisiPiutang === idTujuan) {
+      mkBukaKartuEditPT(idTujuan === 'Kredit' ? 'K' : 'D')
+      return
+    }
+  }
+
 
   let _token = $("#_token").val();
   // let perkiraan = $("#input_add_kodeperkiraan").val();
@@ -3283,19 +4904,29 @@ function buttonAddListPerkiraan (idTujuan) {
     async: false,
     data: {
       _token,
-      transaksi
+      transaksi,
+      // Sisi browse menentukan boleh/tidaknya perkiraan piutang usaha (Kode 'PT') muncul -
+      // hanya Debet yang dibuka, lihat MemorialKoreksiController::listPerkiraan().
+      sisi: idTujuan
     },
     success: function(res) {
       console.log(res)
       listLawan  = res
+
+      // Perkiraan yang sudah dipakai di sisi lawan tidak boleh dipilih lagi (Debet dan
+      // Kredit tidak boleh sama) - baris itu langsung disembunyikan dari daftar.
+      let idLawan = idTujuan === 'Debet' ? 'AddAddKredit' : 'AddAddDebet'
+      let perkiraanLawan = ($("#" + idLawan).val() || '').trim()
+
       let rowTable = ``
+      let jumlahBaris = 0
       res.forEach((item, i) => {
+        if (perkiraanLawan && item.Perkiraan === perkiraanLawan) { return }
+        jumlahBaris++
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${idTujuan}', '${item.Kode || ''}')">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${idTujuan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3309,15 +4940,20 @@ function buttonAddListPerkiraan (idTujuan) {
       // }
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
 
-      if (res.length) {
+      let inputCariPerkiraan = document.getElementById('input_search_perkiraan')
+      if (inputCariPerkiraan) { inputCariPerkiraan.value = '' }
+
+      if (jumlahBaris) {
 
         $('.showhidemodalbodyadd').hide();
         $('#modalAddListPerkiraan').show();
-        $("#form").modal('toggle')
+        $('#form .modal-dialog').addClass('mk-dialog-perkiraan');
+        $("#form").modal('show')
       } else {
         alertify.warning("Perkiraan tidak ditemukkan")
       }
 
+      mkIkatSearchPerkiraan()
 
     },
     error: function (err) {
@@ -3330,14 +4966,284 @@ function buttonAddListPerkiraan (idTujuan) {
 
 }
 
+// Kotak cari di modal browse Perkiraan - barisnya digambar langsung (bukan DataTable),
+// jadi penyaringannya menyembunyikan baris secara langsung, sama seperti
+// pldIkatCariPerkiraanModal() di pelunasanpiutangdpp.blade.php.
+function mkIkatSearchPerkiraan () {
+  let input = document.getElementById('input_search_perkiraan')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
 
-function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan) {
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_add_list_perkiraan tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
 
-  console.log(index, perkiraan, keterangan , idTujuan)
+
+function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan, kode) {
+
+  console.log(index, perkiraan, keterangan , idTujuan, kode)
+
+  // Penjaga lapis kedua - seharusnya baris ini sudah disembunyikan oleh
+  // buttonAddListPerkiraan(), tapi tetap ditolak kalau entah bagaimana masih terklik.
+  let idLawan = idTujuan === 'Debet' ? 'AddAddKredit' : 'AddAddDebet'
+  let perkiraanLawan = ($("#" + idLawan).val() || '').trim()
+  if (perkiraanLawan && perkiraan.trim() === perkiraanLawan) {
+    alertify.warning("Debet dan Kredit tidak boleh perkiraan yang sama")
+    return
+  }
+
   document.getElementById(`AddAdd${idTujuan}`).value = perkiraan
   document.getElementById(`AddAddKeterangan${idTujuan}`).value = keterangan
+
+  if (idTujuan === 'Debet') {
+    // Kalau sebelumnya sudah ada titipan terpilih, Jumlah kemungkinan masih berisi Sisa
+    // titipan lama itu - reset supaya tidak salah kebawa ke perkiraan yang baru dipilih.
+    let adaTitipanLama = !!$("#AddAddNoTitipan").val()
+    if (adaTitipanLama) {
+      document.getElementById("AddAddJumlah").value = '0.00'
+      mkAturTombolBrowse()
+    }
+
+    // Titipan Customer dikenali dari dbPostHutPiut.Kode = 'PTS' (dikirim listPerkiraan()),
+    // bukan lagi dari nomor perkiraan '113400'. Hanya berlaku di sisi DEBET - sisi Kredit tidak
+    // memakai alur titipan sama sekali. Rantai browse-nya HANYA jalan di transaksi BMM
+    // (mkAlurKartuAktif()) - di BJK perkiraannya tetap terisi, tapi diperlakukan sebagai
+    // perkiraan biasa (jatuh ke cabang else, lalu buttonAddListBatal() di bawah).
+    if ((kode || '').trim() === 'PTS' && mkAlurKartuAktif()) {
+      mkResetTitipan()
+      mkResetPTSisi('D')
+      document.getElementById("AddAddKodePTS").value = 'PTS'
+      $('#rowNoTitipan').show();
+      buttonAddListTitipan(true)
+      return
+    } else {
+      mkResetTitipan()
+    }
+
+    // Perkiraan piutang usaha (PT) atau hutang usaha (HT): lanjut ke browse Customer/Supplier,
+    // lalu Kartu. Modal #form (pane Perkiraan) sengaja DIBIARKAN terbuka supaya jadi induk di
+    // tumpukan modal - jangan panggil buttonAddListBatal() di cabang ini.
+    // Debet: PT=menambah piutang, HT=pelunasan hutang (KEBALIKAN, lihat mkModeLunas()).
+    // Rantai ini juga HANYA jalan di transaksi BMM - lihat mkAlurKartuAktif().
+    if (((kode || '').trim() === 'PT' || (kode || '').trim() === 'HT') && mkAlurKartuAktif()) {
+      if (!mkMulaiAlurPT('D', (kode || '').trim())) { return }
+      return
+    } else {
+      mkResetPTSisi('D')
+    }
+  }
+
+  // Sisi KREDIT dengan perkiraan piutang/hutang usaha. Rantai modalnya sama, hanya isinya yang
+  // berbeda (lihat mkKartuRender / mkKartuBukaFormLunas). Kredit: PT=pelunasan piutang,
+  // HT=menambah hutang (KEBALIKAN). Rantai ini juga HANYA jalan di transaksi BMM.
+  if (idTujuan === 'Kredit') {
+    if (((kode || '').trim() === 'PT' || (kode || '').trim() === 'HT') && mkAlurKartuAktif()) {
+      if (!mkMulaiAlurPT('K', (kode || '').trim())) { return }
+      return
+    } else {
+      mkResetPTSisi('K')
+    }
+  }
+
   buttonAddListBatal()
 
+}
+
+// Reset state piutang HANYA kalau yang sedang aktif memang milik sisi itu. Satu item memorial
+// cuma punya satu alur piutang (Debet ATAU Kredit), jadi mengganti perkiraan di sisi yang tidak
+// memegang alur itu tidak boleh ikut menghapus customer & baris kerja milik sisi sebelah.
+function mkResetPTSisi (sisi) {
+  if (!$("#AddAddKodePT").val()) { return }
+  if (mkModePT !== sisi) { return }
+  mkResetPT()
+}
+
+// Sisi mana dari item yang sedang diedit yang perkiraannya piutang ('PT') ATAU hutang ('HT')
+// usaha: 'Debet', 'Kredit', atau '' kalau item ini tidak sedang punya kartu di sisi mana pun.
+function mkSisiPiutangItem () {
+  let kodeP = (itemEdit.KodeP || '').trim()
+  let kodeL = (itemEdit.KodeL || '').trim()
+  if (kodeP === 'PT' || kodeP === 'HT') { return 'Debet' }
+  if (kodeL === 'PT' || kodeL === 'HT') { return 'Kredit' }
+  return ''
+}
+
+// Jenis kartu ('PT'/'HT') dari item yang sedang diedit, atau '' kalau item ini tidak sedang
+// punya kartu di sisi mana pun. Dipakai bersama mkSisiPiutangItem() untuk masuk ke mode edit.
+function mkJenisPiutangItem () {
+  let kodeP = (itemEdit.KodeP || '').trim()
+  let kodeL = (itemEdit.KodeL || '').trim()
+  if (kodeP === 'PT' || kodeP === 'HT') { return kodeP }
+  if (kodeL === 'PT' || kodeL === 'HT') { return kodeL }
+  return ''
+}
+
+// Buka Kartu langsung untuk item yang rinciannya sudah tersimpan, tanpa lewat modal Perkiraan
+// dan Customer/Supplier. Customer/supplier diambil dari item itu sendiri, dan loadKartuPT
+// dipanggil dengan penanda edit supaya rincian lama ikut dimuat (StatusUID 'U') dan bisa
+// ditambah/dihapus.
+function mkBukaKartuEditPT (mode) {
+  mkModePT = mode
+  mkJenisHP = mkJenisPiutangItem() || 'PT'
+
+  let istilah = mkIstilah()
+  document.getElementById("mkKartuJudul").innerHTML = (mkModeLunas() ? 'Pelunasan ' : 'Penambahan ') + istilah.entitas
+
+  let sisiKredit = mode === 'K'
+  let kodeCust = (sisiKredit ? itemEdit.CustSuppL : itemEdit.CustSuppP) || ''
+  let namaCust = (sisiKredit ? itemEdit.NamaCustSuppL : itemEdit.NamaCustSuppP) || ''
+
+  if (!kodeCust) {
+    alertify.warning(istilah.pihak + " item ini tidak ditemukkan")
+    return
+  }
+
+  document.getElementById("AddAddKodePT").value = mkJenisHP
+  document.getElementById("AddAddCustsuppPT").value = kodeCust
+  document.getElementById("AddAddNamaCustPT").value = namaCust
+  document.getElementById("AddAddNamaCustPTView").value = namaCust
+
+  // Kartu sudah pernah dibuka di sesi edit ini: buka lagi apa adanya, JANGAN muat ulang dari
+  // DBHUTPIUT - kalau dimuat ulang, baris yang sudah user tambah/hapus tapi belum disimpan
+  // akan hilang diam-diam.
+  if (mkKartuSudahDimuat) {
+    mkKartuBukaLagi()
+    return
+  }
+
+  mkKartuBuka({ KODECUSTSUPP: kodeCust, NAMACUSTSUPP: namaCust }, true)
+}
+
+// Mulai rantai Customer/Supplier -> Kartu untuk perkiraan piutang ('PT') atau hutang ('HT')
+// usaha. mode 'D' = sisi Debet, 'K' = sisi Kredit (artinya tambah/pelunasan dibalik antara PT
+// & HT, lihat mkModeLunas()). Mengembalikan false kalau tidak bisa dimulai.
+function mkMulaiAlurPT (mode, jenis = 'PT') {
+  // Tanpa No Bukti, baris kerja piutang/hutang tidak punya kunci ke item memorialnya dan tidak
+  // akan pernah terangkut sp_TransaksiMemorial - hentikan di sini daripada lanjut diam-diam.
+  if (!$("#input_add_nobukti").val()) {
+    alertify.warning("No Bukti belum terbentuk, silahkan refresh browser")
+    return false
+  }
+
+  // Satu item hanya boleh punya SATU kartu piutang/hutang, di SATU sisi. Kalau sisi lain sudah
+  // aktif - baik baru dipilih di sesi penyusunan item ini (mode tambah item), maupun sudah
+  // tersimpan dan dimuat ulang oleh buttonEditItem() (mode edit item) - tolak daripada diam-diam
+  // menimpanya. #AddAddKodePT + mkModePT sudah mencerminkan kedua kasus itu (buttonEditItem()
+  // mengisinya dari itemEdit sebelum browse dibuka), jadi cukup satu pengecekan runtime di sini.
+  //
+  // Di mode edit item, ini juga jadi jaring pengaman kedua: sp_TransaksiMemorial choice 'U'
+  // hanya menghapus baris DBHUTPIUT yang punya pasangan di temp ber-StatusUID 'D'/'U', sedangkan
+  // baris kerja yang baru dibuat ber-StatusUID 'I' - kalau rincian yang SUDAH tersimpan disusun
+  // ulang dari sini, baris lama tetap tinggal dan baris baru ikut ditambahkan, rinciannya jadi
+  // dobel tanpa pesan error.
+  let kodeAktif = ($("#AddAddKodePT").val() || '').trim()
+  let sisiAktif = mkModePT === 'K' ? 'Kredit' : 'Debet'
+  let sisiDiminta = mode === 'K' ? 'Kredit' : 'Debet'
+  if (kodeAktif && sisiAktif !== sisiDiminta) {
+    alertify.warning("Item ini sudah punya kartu hutang/piutang di sisi " + sisiAktif + ". Satu item hanya boleh punya kartu hutang/piutang di satu sisi.")
+    return false
+  }
+
+  mkResetPT()
+  mkModePT = mode
+  mkJenisHP = jenis
+  document.getElementById("AddAddKodePT").value = jenis
+  document.getElementById("mkKartuJudul").innerHTML = (mkModeLunas() ? 'Pelunasan ' : 'Penambahan ') + mkIstilah().entitas
+  buttonAddListCustomerPT()
+  return true
+}
+
+// Browse No Titipan (dbTransaksi.NOTITIPAN/URUTTITIPAN) - hanya saat Debet ber-Kode 'PTS'.
+// Query & endpoint: MemorialKoreksiController::listTitipan() / memorialkoreksilisttitipan.
+//
+// lanjutDariPerkiraan = true dipanggil dari buttonAddPickPerkiraan() saat modal #form MASIH
+// TERBUKA (pane Perkiraan) - jadi hanya menukar pane, tidak toggle modal lagi. Dipanggil tanpa
+// argumen dari tombol browse manual #buttonAddListTitipan, modalnya belum terbuka.
+let listTitipan = []
+function buttonAddListTitipan (lanjutDariPerkiraan = false) {
+  listTitipan = []
+  let _token = $("#_token").val();
+
+  $.ajax({
+    url: "{!! url('memorialkoreksilisttitipan') !!}",
+    type: "post",
+    async: false,
+    data: { _token },
+    success: function (res) {
+      listTitipan = res
+      let rowTable = ``
+      res.forEach((item, i) => {
+        rowTable += `
+        <tr class="pick-row" onclick="buttonAddPickTitipan(${i})">
+        <td>${item.NOBUKTI}</td>
+        <td>${formatDate(item.TANGGAL)}</td>
+        <td>${item.namaCustSupp}</td>
+        <td>${item.Keterangan}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.JumlahRp).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Sisa).toFixed(2))}</td>
+        </tr>`
+      });
+
+      document.getElementById("tabel_data_add_list_titipan").innerHTML = rowTable
+
+      let inputCariTitipan = document.getElementById('input_search_titipan')
+      if (inputCariTitipan) { inputCariTitipan.value = '' }
+
+      if (res.length) {
+        $('.showhidemodalbodyadd').hide();
+        $('#modalAddListTitipan').show();
+        $('#form .modal-dialog').removeClass('mk-dialog-perkiraan');
+        if (!lanjutDariPerkiraan) { $("#form").modal('show') }
+      } else {
+        alertify.warning("Titipan tidak ditemukkan")
+        if (lanjutDariPerkiraan) { buttonAddListBatal() }
+      }
+
+      mkIkatSearchTitipan()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function mkIkatSearchTitipan () {
+  let input = document.getElementById('input_search_titipan')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_add_list_titipan tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
+
+function buttonAddPickTitipan (index) {
+  let item = listTitipan[index]
+  console.log(item)
+
+  document.getElementById("AddAddNoTitipan").value = item.NOBUKTI
+  document.getElementById("AddAddUrutTitipan").value = item.URUT
+  document.getElementById("AddAddCustsuppTitipan").value = item.KOdeCustSupp
+  document.getElementById("AddAddSisaTitipan").value = item.Sisa
+
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(item.Sisa).toFixed(2))
+  mkAturTombolBrowse()
+
+  if (item.Valas && $("#AddAddValas").val() && item.Valas !== $("#AddAddValas").val()) {
+    alertify.warning("Valas titipan (" + item.Valas + ") berbeda dengan Valas yang dipilih")
+  }
+
+  buttonAddListBatal()
 }
 
 
@@ -3484,6 +5390,7 @@ function buttonDeleteItem (i) {
 function buttonEditItem (i) {
   console.log(listData[i])
   itemEdit = listData[i]
+  mkModeEditItem = true
   document.getElementById("AddAddKodeDevisi").value = itemEdit.Devisi
   document.getElementById("AddAddValas").value = itemEdit.Valas
   document.getElementById("AddAddKurs").value = formatAngka(parseFloat(itemEdit.Kurs).toFixed(2))
@@ -3495,7 +5402,43 @@ function buttonEditItem (i) {
   document.getElementById("AddAddKredit").value = itemEdit.Lawan
   document.getElementById("AddAddKeteranganKredit").value = itemEdit.NamaLawan
 
+  // No Titipan: kolomnya NOTITIPAN/URUTTITIPAN (huruf besar, hasil select a.* dari dbTransaksi).
+  // AddAddSisaTitipan diisi lewat mkAmbilSisaTitipan() (sisa efektif yang mengecualikan baris
+  // ini sendiri), supaya Jumlah tetap dibatasi <= sisa titipan sewaktu diedit.
+  if ((itemEdit.KodePerkiraan || '').trim() === 'PTS') {
+    document.getElementById("AddAddKodePTS").value = 'PTS'
+    document.getElementById("AddAddNoTitipan").value = itemEdit.NOTITIPAN || ''
+    document.getElementById("AddAddUrutTitipan").value = itemEdit.URUTTITIPAN || ''
+    document.getElementById("AddAddCustsuppTitipan").value = itemEdit.CustSuppP || ''
+    mkAmbilSisaTitipan(itemEdit)
+    $('#rowNoTitipan').show();
+  } else {
+    mkResetTitipan()
+  }
 
+  // Item dengan Debet/Kredit = perkiraan piutang ('PT') atau hutang ('HT') usaha: customer/
+  // supplier-nya ditampilkan sebagai informasi. dbTempHutPiut sengaja DIBERSIHKAN saat masuk
+  // mode edit. Rinciannya tidak disusun ulang di sini, dan sp_TransaksiMemorial choice 'U'
+  // menghapus lalu menulis ulang baris DBHUTPIUT berdasarkan isi temp - kalau ada baris sisa
+  // dari alur yang ditinggalkan sebelumnya, baris itu bisa ikut tertulis ke item ini. Dengan
+  // temp kosong, 'U' tidak menyentuh piutang/hutang sama sekali.
+  mkResetPT()
+
+  let jenisItem = mkJenisPiutangItem()
+  if (jenisItem) {
+    let sisiKredit = (itemEdit.KodeL || '').trim() === jenisItem
+    let kodeCust = (sisiKredit ? itemEdit.CustSuppL : itemEdit.CustSuppP) || ''
+    let namaCust = (sisiKredit ? itemEdit.NamaCustSuppL : itemEdit.NamaCustSuppP) || ''
+
+    mkModePT = sisiKredit ? 'K' : 'D'
+    mkJenisHP = jenisItem
+    document.getElementById("AddAddKodePT").value = jenisItem
+    document.getElementById("AddAddCustsuppPT").value = kodeCust
+    document.getElementById("AddAddNamaCustPT").value = namaCust
+    document.getElementById("AddAddNamaCustPTView").value = namaCust
+    // Kolom Customer sengaja tidak ditampilkan - lihat catatan di mkKartuBuka().
+    // $('#rowCustomerPT').show();
+  }
 
   lockFormAddAdd(true)
   $('.showhideitem').hide();
@@ -3506,6 +5449,7 @@ function buttonEditItem (i) {
 }
 
 function buttonAddItem () {
+  mkModeEditItem = false
   lockFormAddAdd(false)
   cleanFormAddAdd()
   $('.showhideitem').hide();
@@ -3757,6 +5701,14 @@ function buttonAdd () {
 }
 
 function onChangeTransaksi () {
+  // Pindah ke BJK padahal alur kartu/titipan sudah terlanjur disusun di BMM: buang state-nya
+  // (termasuk baris kerja dbTempHutPiut) supaya tidak ikut terbawa ke bukti BJK. Transaksi masih
+  // bisa diganti bebas sebelum item pertama tersimpan (baru dikunci lockFormAdd()), jadi ini
+  // perlu dijaga di sini.
+  if (!mkAlurKartuAktif()) {
+    mkResetTitipan()
+    mkResetPT()
+  }
   setNewNoBukti()
 }
 
@@ -3809,6 +5761,36 @@ function formatAngkaInput (el) {
 
 function unformatAngkaInput (el) {
   el.value = unformatAngka(el.value).toFixed(2)
+}
+
+// Dipasang di oninput #AddAddJumlah supaya separator ribuan langsung muncul sambil mengetik,
+// tidak menunggu pindah fokus (onblur formatAngkaInput() tetap jalan untuk menormalkan ke 2
+// desimal). Tidak memakai formatAngka() biasa karena nilai yang sedang diketik boleh belum
+// punya titik desimal atau baru diketik sebagian - formatAngka() mengasumsikan keduanya sudah
+// lengkap. Posisi kursor dihitung ulang dari jarak ke kanan supaya tidak melompat ke ujung
+// setiap kali jumlah koma bertambah.
+function formatAngkaKetik (el) {
+  let posDariKanan = el.value.length - el.selectionStart
+  let minus = el.value.trim().startsWith('-') ? '-' : ''
+  let raw = el.value.replace(/[^0-9.]/g, '')
+
+  let titikIndex = raw.indexOf('.')
+  let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+  let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+  bulat = bulat.replace(/^0+(?=\d)/, '')
+  if (bulat === '') { bulat = '0' }
+
+  let bulatFormatted = ''
+  for (let i = 0; i < bulat.length; i++) {
+    if (i != 0 && (bulat.length - i) % 3 == 0) { bulatFormatted += ',' }
+    bulatFormatted += bulat[i]
+  }
+
+  el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+  let posBaru = Math.max(0, el.value.length - posDariKanan)
+  el.setSelectionRange(posBaru, posBaru)
 }
 
 function formatAngkaX (angka) {
