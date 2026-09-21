@@ -332,7 +332,8 @@ Route::post('/memorialkoreksispadd', [MemorialKoreksiController::class, 'spAdd']
 Route::post('/memorialkoreksispotorisasi', [MemorialKoreksiController::class, 'spOtorisasi']);
 Route::post('/memorialkoreksispbatalotorisasi', [MemorialKoreksiController::class, 'spBatalOtorisasi']);
 Route::post('/memorialkoreksidetailCetak', [MemorialKoreksiController::class, 'getDetailCetak']);
-// Penambahan piutang usaha saat Debet = perkiraan ber-Kode 'PT'
+// Piutang usaha (Kode 'PT') & hutang usaha (Kode 'HT') - endpoint yang sama dipakai kedua
+// jenis, dibedakan lewat parameter POST 'jenis' (lihat MemorialKoreksiController::jenisHP()).
 Route::post('/memorialkoreksilistcustomerpt', [MemorialKoreksiController::class, 'listCustomerPT']);
 Route::post('/memorialkoreksiloadkartupt', [MemorialKoreksiController::class, 'loadKartuPT']);
 Route::post('/memorialkoreksigetkartupt', [MemorialKoreksiController::class, 'getKartuPT']);
