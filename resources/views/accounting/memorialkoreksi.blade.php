@@ -3904,6 +3904,24 @@ $(document).on('hidden.bs.modal', '.modal', function () {
   mkSisakanSatuBackdrop()
 })
 
+// Tutup SELURUH rantai modal kartu sekaligus (#formMkKartuPT -> #formMkCustomerPT -> #form),
+// bukan mundur satu tingkat seperti perilaku Batal / tombol x / Esc / klik backdrop.
+// Dipakai saat user menekan Simpan di kartu: pekerjaannya sudah selesai, jadi user langsung
+// dikembalikan ke form item memorial. Berlaku untuk perkiraan Debet maupun Kredit, dan untuk
+// piutang usaha (PT) maupun hutang usaha (HT) - ketiganya memakai rantai modal yang sama.
+function mkTutupRantaiKartu () {
+  // Tumpukan dikosongkan dulu supaya handler hidden.bs.modal di atas tidak memunculkan
+  // kembali modal induk yang barusan kita tutup. Dikosongkan lewat .length (bukan = [])
+  // karena gaya kode di file ini tanpa titik koma - baris berikutnya yang diawali $( akan
+  // menempel ke statement sebelumnya kalau statement ini berakhir dengan [] atau ).
+  mkTumpukanModal.length = 0
+  var rantai = $('#formMkKartuPT, #formMkCustomerPT, #form')
+  rantai.removeClass('mk-modal-tertimbun')
+  rantai.modal('hide')
+  var backdrop = $('.modal-backdrop')
+  backdrop.removeClass('mk-backdrop-tertimbun')
+}
+
 
 /* ==========================================================================================
    PIUTANG USAHA (Kode 'PT' di dbPOSTHUTPIUT) & HUTANG USAHA (Kode 'HT') - dua alur kembar
@@ -4565,12 +4583,15 @@ function mkKartuSimpanTambah () {
     valas,
     kurs,
     catatan: $("#mkKartuCatatan").val()
-  }, pesan)
+  }, pesan, true)
 }
 
 // Satu pintu untuk menambah baris kartu - dipakai form Tambah (Debet), form Pelunasan (Kredit),
 // dan dobel-klik pelunasan cepat.
-function mkKirimBarisKartu (baris, pesanSukses) {
+// tutupSemua = true hanya dikirim dari tombol Simpan di kartu: begitu barisnya tersimpan,
+// SELURUH rantai modal ditutup (tidak mundur ke modal Customer / Perkiraan). Dobel-klik
+// pelunasan cepat tidak memakainya, supaya kartu tetap terbuka untuk melunasi faktur lain.
+function mkKirimBarisKartu (baris, pesanSukses, tutupSemua) {
   $.ajax({
     url: "{!! url('memorialkoreksiaddkartupt') !!}",
     type: "post",
@@ -4595,6 +4616,7 @@ function mkKirimBarisKartu (baris, pesanSukses) {
       mkKartuRender(res)
       mkKartuTutupFormTambah()
       alertify.success(pesanSukses)
+      if (tutupSemua) { mkTutupRantaiKartu() }
     },
     error: function (err) {
       console.log(err)
