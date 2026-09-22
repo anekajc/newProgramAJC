@@ -567,12 +567,21 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 }
 #modalAddFormAktiva .mk-aktiva-nama { background-color: #f8f9fa; }
 
-/* Blok No Titipan berada di col-md-6 kedua, jadi mulainya di titik 50% padahal isi blok
-   Debet sudah habis di 33,3%. Ditarik 2 kolom grid ke kiri supaya rapat dengan Debet.
-   Hanya di layar >= md; di bawah itu kolomnya menumpuk dan tidak boleh digeser. */
+/* DINONAKTIFKAN: dulu blok No Titipan berada di col-md-6 kedua di sebelah Debet, jadi
+   mulainya di titik 50% padahal isi blok Debet sudah habis di 33,3% - makanya ditarik
+   2 kolom grid ke kiri. Sekarang form Add/Edit Item dibagi dua kolom dan No Titipan
+   sudah jadi baris tersendiri di kolom kanan, jadi geseran ini justru membuatnya
+   keluar jalur. Sengaja tidak dihapus.
 @media (min-width: 768px) {
   #rowNoTitipan { margin-left: -16.666667%; }
 }
+*/
+
+/* Kotak Kurs di form item. Setelah kolom kiri dipersempit dari col-md-6 ke col-md-5, tidak ada
+   kelipatan grid yang pas dengan lebar aslinya (col-md-2 dari col-md-6): col-md-2 kekecilan dan
+   col-md-3 kelebaran. Dipakai col-md-3 lalu kotaknya dipatok di sini supaya ukurannya kembali
+   sama seperti sebelum form dibagi dua kolom. */
+#AddAddKurs { max-width: 115px; }
 
 /* Kotak cari di modal Perkiraan - meniru .cari-modal-pdpp di pelunasanpiutangdpp. */
 .cari-modal-mk {
@@ -1101,11 +1110,17 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
     </div>
 
+    {{-- Form Add/Edit Item dibagi dua kolom: KIRI = Devisi, Valas + Kurs, Jumlah;
+         KANAN = Keterangan, Ket. Det, Debet, Kredit, No Titipan. Sebelumnya semua field
+         bertumpuk di satu kolom kiri sehingga separuh layar kanan kosong. --}}
     <div class="row">
-      <div class="col-md-6">
+
+      {{-- ==================== KOLOM KIRI ==================== --}}
+      <div class="col-md-5">
+
         <div class="row">
 
-          <div class="col-md-2">
+          <div class="col-md-3">
             <div class="form-group">
             <label>Devisi</label>
           </div>
@@ -1113,8 +1128,10 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <!-- <div class="col-4 text-right">
 
             </div> -->
-            <div class="col-md-4">
-              <select id="AddAddKodeDevisi" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onChange="">
+            <div class="col-md-5">
+              {{-- onChangeDevisiAdd() mencatat pilihan user ke mkDevisiTerakhir supaya item
+                   berikutnya langsung terisi devisi yang sama - lihat mkSetDevisiDefault(). --}}
+              <select id="AddAddKodeDevisi" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onChange="onChangeDevisiAdd()">
                 <option value='' selected>Pilih Devisi</option>
                   @for ($i = 0; $i < count($devisi); $i++)
                 <option value='{{ $devisi[$i]->devisi }}' >{{ $devisi[$i]->namadevisi  }}</option>
@@ -1140,19 +1157,9 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
         </div>
 
+        <div class="row" style="margin-top: -10px">
 
-
-      </div>
-
-    </div>
-
-    <div class="row" style="margin-top: -10px">
-      <div class="col-md-6">
-
-
-        <div class="row">
-
-          <div class="col-md-2">
+          <div class="col-md-3">
             <div class="form-group">
             <label>Valas</label>
           </div>
@@ -1160,7 +1167,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <!-- <div class="col-4 text-right">
 
             </div> -->
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="input-group form-group">
               {{-- Valas jadi dropdown (bukan lagi picker + tombol +), disamakan dengan
                    purchaseOrder.blade.php. Modal pencarian lama (#modalAddListValas) dan
@@ -1178,7 +1185,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-3">
             <div class="input-group form-group">
               <input id="AddAddKurs" type="text"  value="1.00" class="text-right form-control" disabled>
 
@@ -1186,235 +1193,189 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
 
         </div>
+
+        <div class="row" style="margin-top: -10px">
+
+          <div class="col-md-3">
+            <div class="form-group">
+            <label>Jumlah</label>
+          </div>
+          </div>
+          <!-- <div class="col-4 text-right">
+
+            </div> -->
+          <div class="col-md-4">
+            <div class="input-group form-group">
+              <input id="AddAddJumlah" type="text" value="0.00" class="text-right form-control" onblur="formatAngkaInput(this); mkAturTombolBrowse()" oninput="formatAngkaKetik(this); mkAturTombolBrowse()">
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      {{-- ==================== KOLOM KANAN ====================
+           Pembagiannya 5 : 7, bukan 6 : 6. Dengan 6 : 6 blok kanan mulai tepat di 50% padahal
+           isi kolom kiri sudah habis jauh sebelum itu, jadi kelihatan terlalu ke kanan dan
+           menyisakan jurang kosong di tengah. Kolom kiri dipersempit ke col-md-5 (lebar grid
+           di dalamnya dinaikkan sekelas supaya ukuran field-nya tetap mirip) dan kolom kanan
+           jadi col-md-7 sehingga mulai di 41,7%. --}}
+      <div class="col-md-7">
+
+        <div class="row">
+
+          <div class="col-md-2">
+            <div class="form-group">
+            <label>Keterangan</label>
+          </div>
+          </div>
+          <div class="col-md-8">
+            <div class="input-group form-group">
+              <input id="AddAddKeterangan" type="text" value="" class="form-control" >
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row" style="margin-top: -10px">
+
+          <div class="col-md-2">
+            <div class="form-group">
+            <label>Ket. Det</label>
+          </div>
+          </div>
+          <div class="col-md-8">
+            <div class="input-group form-group">
+              <input id="AddAddKeteranganDetail" type="text" value="" class="form-control" >
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row" style="margin-top: -10px">
+
+          <div class="col-md-2">
+            <div class="form-group">
+            <label>Debet</label>
+          </div>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group form-group">
+              <input id="AddAddDebet" type="text" class="form-control" disabled>
+              <input id="AddAddKodeDebet" type="hidden" class="form-control" disabled>
+              <button id="buttonAddListDebet" type="button" onclick="buttonAddListPerkiraan('Debet')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="input-group form-group">
+              <input id="AddAddKeteranganDebet" type="text" class="form-control" disabled>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row" style="margin-top: -10px">
+
+          <div class="col-md-2">
+            <div class="form-group">
+            <label>Kredit</label>
+          </div>
+          </div>
+          <!-- <div class="col-4 text-right">
+
+            </div> -->
+          <div class="col-md-4">
+            <div class="input-group form-group">
+              <input id="AddAddKredit" type="text" class="form-control" disabled>
+              <input id="AddAddKodeKredit" type="hidden" class="form-control" disabled>
+              <button id="buttonAddListKredit" type="button" onclick="buttonAddListPerkiraan('Kredit')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <div class="input-group form-group">
+              <input id="AddAddKeteranganKredit" type="text" class="form-control" disabled>
+
+            </div>
+          </div>
+
+        </div>
+
+        {{-- No Titipan: hanya muncul kalau perkiraan Debet ber-Kode 'PTS' (Titipan Customer)
+             menurut dbPostHutPiut. Disembunyikan &
+             direset lewat mkResetTitipan() - lihat buttonAddPickPerkiraan()/cleanFormAddAdd().
+             Pembungkusnya col-md-12 (bukan .row) supaya $('#rowNoTitipan').show() yang memasang
+             display:block tidak mematikan flex-nya .row. --}}
+        <div class="row" style="margin-top: -10px">
+          <div class="col-md-12" id="rowNoTitipan" style="display:none">
+            <div class="row">
+              <div class="col-md-2">
+                <div class="form-group">
+                <label>No Titipan</label>
+              </div>
+              </div>
+              <div class="col-md-8">
+                <div class="input-group form-group">
+                  <input id="AddAddNoTitipan" type="text" class="form-control" disabled>
+                  <input id="AddAddUrutTitipan" type="hidden" disabled>
+                  <input id="AddAddCustsuppTitipan" type="hidden" disabled>
+                  <input id="AddAddSisaTitipan" type="hidden" disabled>
+                  {{-- Terisi 'PTS' kalau perkiraan Debet adalah Titipan Customer menurut dbPostHutPiut.
+                       Dipakai mkAmbilTitipan() sebagai pengganti pematokan nomor perkiraan. --}}
+                  <input id="AddAddKodePTS" type="hidden" disabled>
+                  <button id="buttonAddListTitipan" type="button" onclick="buttonAddListTitipan()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Customer/Supplier piutang-hutang: hanya muncul kalau Debet/Kredit = perkiraan ber-Kode
+             'PT' (piutang) atau 'HT' (hutang). Dipakai bersama untuk kedua jenis - lihat mkJenisHP.
+             Disembunyikan & direset lewat mkResetPT() - lihat buttonAddPickPerkiraan()/
+             cleanFormAddAdd(). Tombol kaca pembesar membuka lagi rantai Customer/Supplier -> Kartu. --}}
+        {{-- Kolom ini DINONAKTIFKAN atas permintaan: tidak ditampilkan di form Add Item, baik untuk
+             alur Debet maupun Kredit. Blok ini sengaja TIDAK dihapus - field di dalamnya tetap
+             menyimpan customer/supplier terpilih (dipakai untuk CustSuppP/CustSuppL dan endpoint
+             kartu), dan tombol browse-nya masih dirujuk lockFormAddAdd(). Untuk menampilkannya lagi,
+             aktifkan kembali pemanggilan $('#rowCustomerPT').show() di mkKartuBuka() dan
+             buttonEditItem(). --}}
+        <div class="row" style="margin-top: -10px">
+          <div class="col-md-12" id="rowCustomerPT" style="display:none">
+            <div class="row">
+              <div class="col-md-2">
+                <div class="form-group">
+                <label>Customer</label>
+              </div>
+              </div>
+              <div class="col-md-4">
+                <div class="input-group form-group">
+                  <input id="AddAddCustsuppPT" type="text" class="form-control" disabled>
+                  <input id="AddAddKodePT" type="hidden" disabled>
+                  <input id="AddAddNamaCustPT" type="hidden" disabled>
+                  <input id="AddAddNoMskPT" type="hidden" disabled>
+                  <button id="buttonAddListCustomerPT" type="button" onclick="buttonAddListCustomerPT()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="input-group form-group">
+                  <input id="AddAddNamaCustPTView" type="text" class="form-control" disabled>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
-
-
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-6">
-
-
-    <div class="row">
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Jumlah</label>
-      </div>
-      </div>
-      <!-- <div class="col-4 text-right">
-
-        </div> -->
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddJumlah" type="text" value="0.00" class="text-right form-control" onblur="formatAngkaInput(this); mkAturTombolBrowse()" oninput="formatAngkaKetik(this); mkAturTombolBrowse()">
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-6">
-
-
-    <div class="row">
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Keterangan</label>
-      </div>
-      </div>
-      <!-- <div class="col-4 text-right">
-
-        </div> -->
-      <div class="col-md-6">
-        <div class="input-group form-group">
-          <input id="AddAddKeterangan" type="text" value="" class="form-control" >
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<div class="row" style="margin-top: -10px">
-  <div class="col-md-6">
-
-
-    <div class="row">
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Ket. Det</label>
-      </div>
-      </div>
-      <!-- <div class="col-4 text-right">
-
-        </div> -->
-      <div class="col-md-6">
-        <div class="input-group form-group">
-          <input id="AddAddKeteranganDetail" type="text" value="" class="form-control" >
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<div class="row" style="margin-top: -10px">
-
-  <div class="col-md-12">
-
-  <div class="row">
-
-  <div class="col-md-6">
-
-
-    <div class="row">
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Debet</label>
-      </div>
-      </div>
-      <!-- <div class="col-4 text-right">
-
-        </div> -->
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddDebet" type="text" class="form-control" disabled>
-          <input id="AddAddKodeDebet" type="hidden" class="form-control" disabled>
-          <button id="buttonAddListDebet" type="button" onclick="buttonAddListPerkiraan('Debet')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
-
-        </div>
-      </div>
-
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddKeteranganDebet" type="text" class="form-control" disabled>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  {{-- No Titipan: hanya muncul kalau perkiraan Debet ber-Kode 'PTS' (Titipan Customer)
-       menurut dbPostHutPiut. Disembunyikan &
-       direset lewat mkResetTitipan() - lihat buttonAddPickPerkiraan()/cleanFormAddAdd(). --}}
-  <div class="col-md-6" id="rowNoTitipan" style="display:none">
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>No Titipan</label>
-      </div>
-      </div>
-      <div class="col-md-6">
-        <div class="input-group form-group">
-          <input id="AddAddNoTitipan" type="text" class="form-control" disabled>
-          <input id="AddAddUrutTitipan" type="hidden" disabled>
-          <input id="AddAddCustsuppTitipan" type="hidden" disabled>
-          <input id="AddAddSisaTitipan" type="hidden" disabled>
-          {{-- Terisi 'PTS' kalau perkiraan Debet adalah Titipan Customer menurut dbPostHutPiut.
-               Dipakai mkAmbilTitipan() sebagai pengganti pematokan nomor perkiraan. --}}
-          <input id="AddAddKodePTS" type="hidden" disabled>
-          <button id="buttonAddListTitipan" type="button" onclick="buttonAddListTitipan()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {{-- Customer/Supplier piutang-hutang: hanya muncul kalau Debet/Kredit = perkiraan ber-Kode
-       'PT' (piutang) atau 'HT' (hutang). Dipakai bersama untuk kedua jenis - lihat mkJenisHP.
-       Disembunyikan & direset lewat mkResetPT() - lihat buttonAddPickPerkiraan()/
-       cleanFormAddAdd(). Tombol kaca pembesar membuka lagi rantai Customer/Supplier -> Kartu. --}}
-  {{-- Kolom ini DINONAKTIFKAN atas permintaan: tidak ditampilkan di form Add Item, baik untuk
-       alur Debet maupun Kredit. Blok ini sengaja TIDAK dihapus - field di dalamnya tetap
-       menyimpan customer/supplier terpilih (dipakai untuk CustSuppP/CustSuppL dan endpoint
-       kartu), dan tombol browse-nya masih dirujuk lockFormAddAdd(). Untuk menampilkannya lagi,
-       aktifkan kembali pemanggilan $('#rowCustomerPT').show() di mkKartuBuka() dan
-       buttonEditItem(). --}}
-  <div class="col-md-6" id="rowCustomerPT" style="display:none">
-    <div class="row">
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Customer</label>
-      </div>
-      </div>
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddCustsuppPT" type="text" class="form-control" disabled>
-          <input id="AddAddKodePT" type="hidden" disabled>
-          <input id="AddAddNamaCustPT" type="hidden" disabled>
-          <input id="AddAddNoMskPT" type="hidden" disabled>
-          <button id="buttonAddListCustomerPT" type="button" onclick="buttonAddListCustomerPT()" class="btn btn-browsing"><i class="bi bi-search"></i></button>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddNamaCustPTView" type="text" class="form-control" disabled>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-</div>
-
-
-<div class="row" style="margin-top: -10px">
-
-  <div class="col-md-12">
-
-  <div class="row">
-
-  <div class="col-md-6">
-
-
-    <div class="row">
-
-      <div class="col-md-2">
-        <div class="form-group">
-        <label>Kredit</label>
-      </div>
-      </div>
-      <!-- <div class="col-4 text-right">
-
-        </div> -->
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddKredit" type="text" class="form-control" disabled>
-          <input id="AddAddKodeKredit" type="hidden" class="form-control" disabled>
-          <button id="buttonAddListKredit" type="button" onclick="buttonAddListPerkiraan('Kredit')" class="btn btn-browsing"><i class="bi bi-search"></i></button>
-
-        </div>
-      </div>
-
-      <div class="col-md-3">
-        <div class="input-group form-group">
-          <input id="AddAddKeteranganKredit" type="text" class="form-control" disabled>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-</div>
-
-</div>
 
 </div>
 
@@ -2286,6 +2247,12 @@ let mkItemTerkunci = false
 // menambah item baru. Dipisahkan dari mkItemTerkunci karena penguncian tombol bisa berubah,
 // sedangkan penentuan Urut item (mkUrutItemPT()) harus tetap mengikuti mode add/edit.
 let mkModeEditItem = false
+
+// Devisi yang terakhir dipakai user di form item. Dipakai cleanFormAddAdd() supaya saat
+// menambah item berikutnya dropdown Devisi langsung terisi pilihan sebelumnya - user tidak
+// perlu memilih ulang untuk tiap item. Diisi onChangeDevisiAdd() (user memilih sendiri) dan
+// submitAdd()/submitEdit() (nilai yang benar-benar tersimpan).
+let mkDevisiTerakhir = ''
 
 $(document).ready(function(){
 
@@ -3534,6 +3501,8 @@ function submitEdit () {
   let choice = "U"
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
+  // Ingat devisi yang dipakai item ini supaya item berikutnya sudah terisi sendiri.
+  if (kodedevisi) { mkDevisiTerakhir = kodedevisi }
   let valas  = $("#AddAddValas").val()
   let kurs  = unformatAngka($("#AddAddKurs").val())
   let lawan  = $("#AddAddKredit").val()
@@ -3770,6 +3739,8 @@ function submitAdd () {
   let choice = "I"
 
   let kodedevisi  = $("#AddAddKodeDevisi").val()
+  // Ingat devisi yang dipakai item ini supaya item berikutnya sudah terisi sendiri.
+  if (kodedevisi) { mkDevisiTerakhir = kodedevisi }
   let valas  = $("#AddAddValas").val()
   let kurs  = unformatAngka($("#AddAddKurs").val())
   let lawan  = $("#AddAddKredit").val()
@@ -4128,8 +4099,40 @@ function cleanFormAdd () {
 
 }
 
+// Dropdown Devisi diisi otomatis supaya user tidak memilih berulang-ulang:
+//  - kalau devisi yang tersedia cuma satu, langsung dipilihkan yang satu itu;
+//  - kalau lebih dari satu, dipakai devisi yang terakhir dipilih user (mkDevisiTerakhir),
+//    jadi item kedua dan seterusnya sudah terisi sesuai item sebelumnya;
+//  - kalau belum ada pilihan sebelumnya, biarkan kosong ("Pilih Devisi") supaya user memilih.
+function mkDevisiOpsi () {
+  let sel = document.getElementById("AddAddKodeDevisi")
+  if (!sel) { return [] }
+  // Opsi ber-value kosong adalah placeholder "Pilih Devisi", bukan devisi sungguhan.
+  return Array.prototype.slice.call(sel.options).filter(function (o) { return o.value !== '' })
+}
+
+function mkSetDevisiDefault () {
+  let sel = document.getElementById("AddAddKodeDevisi")
+  if (!sel) { return }
+
+  let opsi = mkDevisiOpsi()
+
+  if (opsi.length === 1) {
+    sel.value = opsi[0].value
+    mkDevisiTerakhir = sel.value
+    return
+  }
+
+  let adaTerakhir = opsi.some(function (o) { return o.value === mkDevisiTerakhir })
+  sel.value = adaTerakhir ? mkDevisiTerakhir : ''
+}
+
+function onChangeDevisiAdd () {
+  mkDevisiTerakhir = document.getElementById("AddAddKodeDevisi").value
+}
+
 function cleanFormAddAdd () {
-  document.getElementById("AddAddKodeDevisi").value = ''
+  mkSetDevisiDefault()
   document.getElementById("AddAddValas").value = 'IDR'
   document.getElementById("AddAddKurs").value = '1.00'
   document.getElementById("AddAddJumlah").value = '0.00'
