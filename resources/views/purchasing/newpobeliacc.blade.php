@@ -631,7 +631,7 @@
             <div class="row">
               <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
               <div class="col-md-8"><div class="form-group">
-                <input type="number" class="form-control text-left" id="editPembelianNuangmuka" disabled>
+                <input type="text" class="form-control text-right" id="editPembelianNuangmuka" disabled>
               </div></div>
             </div>
           </div>
@@ -991,7 +991,7 @@
             <div class="row">
               <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
               <div class="col-md-8"><div class="form-group">
-                <input type="number" class="form-control text-left" id="detailNuangmuka" disabled>
+                <input type="text" class="form-control text-right" id="detailNuangmuka" disabled>
               </div></div>
             </div>
           </div>
@@ -1222,7 +1222,7 @@
             <div class="row">
               <div class="col-md-4" style="margin-top:5px;"><label>Uang Muka</label></div>
               <div class="col-md-8"><div class="form-group">
-                <input type="number" class="form-control text-left" id="IdetailNuangmuka" disabled>
+                <input type="text" class="form-control text-right" id="IdetailNuangmuka" disabled>
               </div></div>
             </div>
           </div>
@@ -1896,7 +1896,7 @@ function detailPembelian1(index) {
         console.log(table_pembelian_row_detail[0].NOUMK)
         document.getElementById("IdetailNoUangMuka").value = table_pembelian_row_detail[0].NOUMK
 
-        document.getElementById("IdetailNuangmuka").value = parseFloat(table_pembelian_row_detail[0].NuangMuka || 0).toFixed(2)
+        document.getElementById("IdetailNuangmuka").value = formatAngkaX(table_pembelian_row_detail[0].NuangMuka)
       
         
         document.getElementById("IdetailPembelianJthTempo").value = formatDate(table_pembelian_row_detail[0].JthTempo)
@@ -2089,7 +2089,7 @@ function detailPembelian1(index) {
         document.getElementById("IdetailSoCustomer").value = table_pembelian_row_detail[0].NOSO
         document.getElementById("IdetailNoUangMuka").value = table_pembelian_row_detail[0].NOUMK
 
-        document.getElementById("IdetailNuangmuka").value = parseFloat(table_pembelian_row_detail[0].NuangMuka || 0).toFixed(2)
+        document.getElementById("IdetailNuangmuka").value = formatAngkaX(table_pembelian_row_detail[0].NuangMuka)
       
 
         document.getElementById("Idetailgudang").value = table_pembelian_row_detail[0].NAMAGUDANG
@@ -3219,7 +3219,7 @@ function refreshUpdateHeader () {
             document.getElementById("editPembelianSoCustomer").value = edit_pembelian_row_data[0].NOSO
             document.getElementById("editPembelianNoUangMuka").value = edit_pembelian_row_data[0].NOUMK
 
-            document.getElementById("editPembelianNuangmuka").value = parseFloat(edit_pembelian_row_data[0].NuangMuka || 0).toFixed(2)
+            document.getElementById("editPembelianNuangmuka").value = formatAngkaX(edit_pembelian_row_data[0].NuangMuka)
 
 
             document.getElementById("editPembeliangudang").value = edit_pembelian_row_data[0].NAMAGUDANG
@@ -3581,7 +3581,7 @@ if (pcekglobal) {
             document.getElementById("editPembelianSoCustomer").value = edit_pembelian_row_data[0].NOSO
             document.getElementById("editPembelianNoUangMuka").value = edit_pembelian_row_data[0].NOUMK
 
-            document.getElementById("editPembelianNuangmuka").value = parseFloat(edit_pembelian_row_data[0].NuangMuka || 0).toFixed(2)
+            document.getElementById("editPembelianNuangmuka").value = formatAngkaX(edit_pembelian_row_data[0].NuangMuka)
 
 
             document.getElementById("editPembeliangudang").value = edit_pembelian_row_data[0].NAMAGUDANG
@@ -3704,7 +3704,7 @@ if (pcekglobal) {
         document.getElementById("detailSoCustomer").value = detail_row_data[0].NOSO
         document.getElementById("detailNoUangMuka").value = detail_row_data[0].NOUMK
 
-        document.getElementById("detailNuangmuka").value = parseFloat(detail_row_data[0].NuangMuka || 0).toFixed(2)
+        document.getElementById("detailNuangmuka").value = formatAngkaX(detail_row_data[0].NuangMuka)
       
         document.getElementById("detailgudang").value = detail_row_data[0].NAMAGUDANG
       
@@ -3934,7 +3934,7 @@ if (pcekglobal) {
         console.log(detail_row_data[0].NOUMK)
         document.getElementById("detailNoUangMuka").value = detail_row_data[0].NOUMK
 
-        document.getElementById("detailNuangmuka").value = parseFloat(detail_row_data[0].NuangMuka || 0).toFixed(2)
+        document.getElementById("detailNuangmuka").value = formatAngkaX(detail_row_data[0].NuangMuka)
 
         document.getElementById("detailPembelianJthTempo").value = formatDate(detail_row_data[0].JthTempo)
         console.log(formatDate(detail_row_data[0].JthTempo) + ' TANGGAL JATUH TEMPO BUAT DIMASUKNO DATA')

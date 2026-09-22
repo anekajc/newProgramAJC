@@ -398,7 +398,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               <i class="bi bi-funnel"></i> Filter
             </button>
             <div class="po-toolbar-act">
-              <button type="button" class="btn btn-dpp-utama" onclick="buttonAdd()">+ Tambah Bon</button>
+              <!-- <button type="button" class="btn btn-dpp-utama" onclick="buttonAdd()">+ Tambah Bon</button> -->
             </div>
           </div>
 
