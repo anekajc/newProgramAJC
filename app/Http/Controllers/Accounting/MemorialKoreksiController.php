@@ -293,6 +293,182 @@ Order by a.Nobukti,a.Urut
     }
 
     /* ==================================================================================
+       AKTIVA TETAP ('AKV') DAN AKUMULASI PENYUSUTAN ('AKM') - dbPOSTHUTPIUT.Kode
+       ----------------------------------------------------------------------------------
+       'P' = kolom Perkiraan dbTransaksi = sisi Debet, 'L' = kolom Lawan = sisi Kredit -
+       lihat pola yang sama di public/js/kas.js. Tidak ada dbTransaksiDet di database ini;
+       nomor aktivanya menempel langsung di baris dbTransaksi.
+
+       AKV (aktiva tetap):
+         Sisi DEBET  : user MENAMBAH aktiva baru ke master dbAktiva (daftar yang tampil cuma
+                       informasi, barisnya tidak bisa diklik), lalu aktiva baru itu langsung
+                       dipakai sebagai NoAktivaP dengan StatusAktivaP = 'AKV+'.
+         Sisi KREDIT : user MEMILIH aktiva yang sudah ada -> NoAktivaL + 'AKV-'.
+         Dalam SATU No. Bukti hanya boleh ada satu aktiva AKV.
+
+       AKM (akumulasi penyusutan):
+         Kedua sisi sama: user MEMILIH aktiva yang sudah ada, tidak ada penambahan master.
+         Debet -> NoAktivaP + 'AKM+', Kredit -> NoAktivaL + 'AKM-'.
+         TIDAK ada batasan satu per bukti, dan Debet + Kredit boleh sama-sama AKM asal
+         perkiraannya berbeda - itu sudah dijamin aturan "Debet dan Kredit tidak boleh
+         perkiraan yang sama" yang lebih dulu jalan di blade.
+       ================================================================================== */
+
+    // Isi modal browse aktiva untuk satu perkiraan AKV (mis. '121102' Bangunan) atau AKM
+    // (mis. '121202' Akum. Penyusutan Bangunan).
+    //
+    // Setting default form aktiva baru (Akumulasi, % susut, metode, biaya penyusutan) diambil
+    // dari dbPostHutPiut - nomor perkiraannya TIDAK pernah di-hardcode di kode, sama seperti
+    // yang sudah dilakukan untuk 'PT'/'HT'/'PTS' di listPerkiraan().
+    public function listAktiva (Request $req) {
+
+      $setting = DB::connection('SML')->select("
+        select a.Perkiraan, a.Kode, a.Akumulasi, a.Persen, a.Tipe,
+               a.Biaya1, a.PersenBiaya1, a.Biaya2, a.PersenBiaya2,
+               b.Keterangan NamaAkumulasi
+        from dbPostHutPiut a
+        left outer join dbPerkiraan b on b.Perkiraan = a.Akumulasi and b.Tipe = 1
+        where a.Perkiraan = :perkiraan and a.Kode in ('AKV', 'AKM')
+      ", [ "perkiraan" => $req->perkiraan ]);
+
+      // Bukan perkiraan aktiva (atau set postingnya belum diisi di master) - blade akan
+      // memperlakukannya sebagai perkiraan biasa.
+      if (!$setting) {
+        return [ "setting" => null, "rows" => [] ];
+      }
+
+      // Daftar aktiva dikenali lewat perkiraan AKUMULASI PENYUSUTAN-nya. Untuk perkiraan AKV
+      // akumulasi itu diambil dari set postingnya (121102 -> 121202); untuk perkiraan AKM,
+      // perkiraan itu SENDIRI yang jadi akumulasinya (121202 -> 121202). Query di bawah sama
+      // persis untuk keduanya, hanya nilai parameternya yang berbeda.
+      $kode = strtoupper(trim((string)$setting[0]->Kode));
+      $akumulasi = $kode === 'AKM' ? $setting[0]->Perkiraan : $setting[0]->Akumulasi;
+
+      // Sengaja TIDAK disaring per Devisi - semua divisi ikut tampil.
+      $rows = DB::connection('SML')->select("
+        Select A.Devisi,b.NamaBag,A.Perkiraan, A.Keterangan,A.Tanggal,
+         Case when A.Tipe='L' then '[L]urus'
+           when A.Tipe='M' then '[M]enurun'
+           when A.Tipe='P' then '[P]ajak'
+           else ''
+         end Metode,A.Persen,A.Quantity,A.Kodebag,
+         A.Akumulasi, D.Keterangan NamaAkumulasi,
+         A.Nomuka,C.Keterangan NamaGroupAktiva,A.noBelakang,A.NoBelakang2, A.Biaya,a.biaya2,a.persenbiaya1,a.persenbiaya2,
+         E.NamaDevisi,a.TipeAktiva,a.Kelompok
+         From DBAktiva A
+         left outer join dbBagian b on b.kodebag=a.kodebag
+         left outer join dbperkiraan c on c.perkiraan=a.Nomuka and c.tipe=1
+         left outer join dbperkiraan d on d.perkiraan=a.Akumulasi and d.Tipe=1
+         left outer join dbDevisi e on e.Devisi=a.Devisi
+         Where A.NoMuka='' or A.Akumulasi = :akumulasi
+         order by A.Perkiraan
+      ", [ "akumulasi" => $akumulasi ]);
+
+      return [ "setting" => $setting[0], "rows" => $rows ];
+    }
+
+    // No. urut berikutnya untuk satu group aktiva -> jadi NoBelakang ('00003') dan bagian
+    // belakang No. Aktiva ('121102.00003'). Query identik dengan KasController::getNoUrutAktiva().
+    public function getNoUrutAktiva (Request $req) {
+
+      return DB::connection('SML')->select("
+        SELECT RIGHT('00000' + (CAST(ISNULL(MAX(CONVERT(int, NoBelakang)), 0) + 1 AS VARCHAR(10))), 5) AS NoUrut
+        FROM dbAktiva where nomuka = :nomuka
+      ", [ "nomuka" => $req->nomuka ]);
+    }
+
+    // Simpan aktiva baru ke master lewat SP_AktivaTetap (SP yang sudah ada, tidak diubah).
+    // Return 2 = No. Aktiva sudah dipakai (user lain keburu memakai no. urut itu), blade
+    // tinggal mengambil ulang no. urutnya. Return 1 = berhasil.
+    public function spAddNewAktiva (Request $req) {
+
+      $check = DB::connection('SML')->select('select * from dbaktiva where Perkiraan = :noaktiva', [ "noaktiva" => $req->noaktiva ]);
+      if ($check) {
+        return 2;
+      }
+
+      DB::connection('SML')->statement('exec SP_AktivaTetap ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', [
+        $req->choice,                              // @Choice
+        $req->devisi,                              // @Devisi
+        $req->noaktiva,                            // @Perkiraan
+        $req->keterangan,                          // @Keterangan
+        $req->kuantum,                             // @Quantity
+        $req->persen,                              // @Persen
+        $req->tglpemakaian,                        // @Tanggal
+        $req->metodepenyusutan,                    // @Tipe
+        $req->akumulasi,                           // @Akumulasi
+        $req->biaya1 ? $req->biaya1 : '',          // @Biaya
+        $req->groupaktiva,                         // @NoMuka
+        $req->nobelakang,                          // @NoBelakang
+        $req->biaya2 ? $req->biaya2 : '',          // @biaya2
+        $req->persen1 ? $req->persen1 : '0.00',    // @persen1
+        $req->persen2 ? $req->persen2 : '0.00',    // @persen2
+        $req->biaya3 ? $req->biaya3 : '',          // @biaya3
+        $req->persen3 ? $req->persen3 : '0.00',    // @persenbiaya3
+        '',                                        // @biaya4
+        0,                                         // @persenbiaya4
+        $req->tipeaktiva,                          // @TipeAktiva
+        '',                                        // @Bagian
+        '',                                        // @NoBelakang2
+        0,                                         // @IsHeader
+        '',                                        // @NoAktivaHd
+        $req->tglperolehan,                        // @TglPeroleh
+      ]);
+
+      return 1;
+    }
+
+    // Nama kolom mutasi dbAktivaDet untuk satu status aktiva + sisi. Mengembalikan '' kalau
+    // statusnya bukan aktiva, sehingga baris itu tidak dibukukan sama sekali.
+    //
+    //   AKV (nilai perolehan)      -> MD (Debet) / MK (Kredit)
+    //   AKM (akumulasi penyusutan) -> SD (Debet) / SK (Kredit)
+    //
+    // Pemetaan AKM -> SK terbaca dari data yang sudah ada: 6.434 baris ber-StatusAktivaL
+    // 'AKM-' nilainya persis sama dengan dbAktivaDet.SK pada bulan/tahun transaksinya,
+    // sementara MD hanya dipakai baris 'AKV+'.
+    private function kolomAktivaDet ($status, $sisi) {
+      $jenis = strtoupper(substr(trim((string)$status), 0, 3));
+      if ($jenis !== 'AKV' && $jenis !== 'AKM') { return ''; }
+      return ($jenis === 'AKV' ? 'M' : 'S') . ($sisi === 'P' ? 'D' : 'K');
+    }
+
+    // Mutasi satu baris dbAktivaDet (per No. Aktiva + Bulan + Tahun). $kolom hanya boleh
+    // salah satu dari MD/MK/SD/SK - di-whitelist, bukan dari request mentah, karena ia
+    // disisipkan ke SQL sebagai nama kolom.
+    //
+    // Baris yang sudah ada DIAKUMULASIKAN (bukan sekadar insert kalau belum ada seperti
+    // KasController), supaya edit/hapus item bisa membalik nilainya dengan benar.
+    // DMD/DMK/Valas/Kurs dibiarkan 0/kosong - mengikuti bentuk baris yang sudah ada di tabel.
+    private function mutasiAktivaDet ($noaktiva, $kolom, $nilai, $devisi, $bulan, $tahun) {
+
+      if (!$noaktiva || !in_array($kolom, ['MD', 'MK', 'SD', 'SK']) || !(float)$nilai) { return; }
+
+      $check = DB::connection('SML')->select("
+        select Perkiraan from dbAktivaDet where Perkiraan = :perkiraan and Bulan = :bulan and Tahun = :tahun
+      ", [ "perkiraan" => $noaktiva, "bulan" => $bulan, "tahun" => $tahun ]);
+
+      if ($check) {
+        DB::connection('SML')->update("
+          update dbAktivaDet set $kolom = $kolom + :nilai
+          where Perkiraan = :perkiraan and Bulan = :bulan and Tahun = :tahun
+        ", [ "nilai" => $nilai, "perkiraan" => $noaktiva, "bulan" => $bulan, "tahun" => $tahun ]);
+        return;
+      }
+
+      DB::connection('SML')->statement("
+        insert into DBAKTIVADET (Perkiraan, Bulan, Tahun, Devisi, Valas, Kurs, Awal, AwalSusut, MD, DMD, MK, DMK, SD, DSD, SK, DSK)
+        values (:perkiraan, :bulan, :tahun, :devisi, '', 0, 0, 0, :md, 0, :mk, 0, :sd, 0, :sk, 0)
+      ", [
+        "perkiraan" => $noaktiva, "bulan" => $bulan, "tahun" => $tahun, "devisi" => $devisi,
+        "md" => $kolom === 'MD' ? $nilai : 0,
+        "mk" => $kolom === 'MK' ? $nilai : 0,
+        "sd" => $kolom === 'SD' ? $nilai : 0,
+        "sk" => $kolom === 'SK' ? $nilai : 0,
+      ]);
+    }
+
+    /* ==================================================================================
        PENAMBAHAN PIUTANG USAHA (Debet = perkiraan ber-Kode 'PT' di dbPOSTHUTPIUT) DAN
        PELUNASAN/PENAMBAHAN HUTANG USAHA (perkiraan ber-Kode 'HT') - dua alur kembar yang
        memakai modal, endpoint, dan tabel kerja yang SAMA, dibedakan lewat $req->jenis
@@ -826,6 +1002,49 @@ Order by a.Nobukti,a.Urut
         ]);
 
         // $jmlrecord = 1;
+
+        // Mutasi aktiva ke dbAktivaDet. sp_TransaksiMemorial HANYA menyimpan NoAktivaP/L +
+        // StatusAktivaP/L di baris dbTransaksi, ia tidak menyentuh dbAktivaDet sama sekali -
+        // jadi pembukuan mutasinya dikerjakan di sini (pola yang sama dipakai KasController).
+        //
+        // Sisi Debet (kolom Perkiraan)  -> MD, sisi Kredit (kolom Lawan) -> MK.
+        // Nilainya selalu diambil dari $req->debet, karena di memorial satu item hanya punya
+        // satu angka Jumlah yang selalu masuk ke kolom Debet (Kredit selalu 0) - lihat
+        // submitAdd() di blade.
+        //
+        // choice 'I' tambah, 'D' balikkan, 'U' balikkan nilai lama lalu terapkan nilai baru.
+        //
+        // Kolom tujuannya ditentukan kolomAktivaDet() dari StatusAktiva - status selain
+        // AKV/AKM menghasilkan '' dan baris itu dilewati begitu saja.
+        $kolP     = $this->kolomAktivaDet($req->statusaktivaP ?? '', 'P');
+        $kolL     = $this->kolomAktivaDet($req->statusaktivaL ?? '', 'L');
+        $kolPLama = $this->kolomAktivaDet($req->statusaktivaPLama ?? '', 'P');
+        $kolLLama = $this->kolomAktivaDet($req->statusaktivaLLama ?? '', 'L');
+
+        $barangP     = $kolP     ? trim((string)($req->noaktivaP ?? ''))     : '';
+        $barangL     = $kolL     ? trim((string)($req->noaktivaL ?? ''))     : '';
+        $barangPLama = $kolPLama ? trim((string)($req->noaktivaPLama ?? '')) : '';
+        $barangLLama = $kolLLama ? trim((string)($req->noaktivaLLama ?? '')) : '';
+
+        if ($barangP || $barangL || $barangPLama || $barangLLama) {
+          $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+          $bulan   = $periode->bulan;
+          $tahun   = $periode->tahun;
+          $devisi  = $req->kodedevisi;
+
+          $nilai     = (float)$req->debet;
+          $nilaiLama = (float)($req->debetLama ?? 0);
+
+          if ($req->choice === 'U' || $req->choice === 'D') {
+            $this->mutasiAktivaDet($barangPLama, $kolPLama, -$nilaiLama, $devisi, $bulan, $tahun);
+            $this->mutasiAktivaDet($barangLLama, $kolLLama, -$nilaiLama, $devisi, $bulan, $tahun);
+          }
+
+          if ($req->choice === 'I' || $req->choice === 'U') {
+            $this->mutasiAktivaDet($barangP, $kolP, $nilai, $devisi, $bulan, $tahun);
+            $this->mutasiAktivaDet($barangL, $kolL, $nilai, $devisi, $bulan, $tahun);
+          }
+        }
 
         // Baris kerja piutang/hutang sudah dipindahkan ke DBHUTPIUT oleh sp_TransaksiMemorial
         // di atas (filter StatusUID 'I'/'U'), jadi sisa isi dbTempHutPiut tinggal dibuang supaya

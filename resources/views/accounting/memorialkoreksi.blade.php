@@ -550,6 +550,23 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
    JS (lihat buttonAddListPerkiraan() / buttonAddListBatal()). */
 #form .modal-dialog.mk-dialog-perkiraan { max-width: 800px; }
 
+/* Pane Aktiva (list & form aktiva baru) - lihat mkAktivaBukaList() / mkAktivaBukaForm(). */
+#form .modal-dialog.mk-dialog-aktiva { max-width: 1000px; }
+
+/* Form aktiva baru: rapatkan jarak antar baris supaya muat satu layar seperti form lama.
+   Label di-override dari gaya global canvas/style.css (13px, bold, uppercase,
+   letter-spacing 1px) - dengan itu label sepanjang "Biaya Penyusutan 1" pecah jadi dua
+   baris dan merusak kesejajaran kolom. Di sini dikecilkan dan dipaksa satu baris. */
+#modalAddFormAktiva .form-group { margin-bottom: .5rem; }
+#modalAddFormAktiva label {
+  margin-bottom: 0;
+  line-height: 38px;
+  font-size: 11.5px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+#modalAddFormAktiva .mk-aktiva-nama { background-color: #f8f9fa; }
+
 /* Blok No Titipan berada di col-md-6 kedua, jadi mulainya di titik 50% padahal isi blok
    Debet sudah habis di 33,3%. Ditarik 2 kolom grid ke kiri supaya rapat dengan Debet.
    Hanya di layar >= md; di bawah itu kolomnya menumpuk dan tidak boleh digeser. */
@@ -701,15 +718,15 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   color: #6c757d;
 }
 
-/* Tombol tambah baris faktur: plus biru soft, ukuran besar. */
+/* Tombol "Tambah" biru soft - dipakai di modal Kartu Piutang/Hutang dan di modal Aktiva. */
 .btn-mk-tambah {
   background-color: #eaf1ff;
   border: 1px solid #c7dbff;
   color: #1d4ed8;
   border-radius: 8px !important;
-  padding: 6px 14px;
-  font-size: 1.25rem;
-  line-height: 1;
+  padding: 6px 16px;
+  font-size: .875rem;
+  line-height: 1.5;
   box-shadow: none;
 }
 .btn-mk-tambah:hover {
@@ -1692,6 +1709,226 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
       </div>
 
+      {{-- ===== AKTIVA 'AKV' & AKUMULASI PENYUSUTAN 'AKM' (dbPostHutPiut.Kode) =====
+           Dua pane: daftar aktiva milik satu perkiraan, dan form aktiva baru.
+           Hanya AKV sisi DEBET yang memakai mode "tambah": barisnya tidak bisa diklik
+           (informasi saja) dan lanjutnya lewat tombol Tambah -> form aktiva baru.
+           Selebihnya - AKV sisi Kredit, dan AKM di kedua sisi - barisnya diklik untuk
+           memilih, tombol Tambah disembunyikan. Lihat mkAktivaBukaList() di bawah. --}}
+      <div id= "modalAddListAktiva" class="showhidemodalbodyadd">
+      <div class="modal-header">
+          {{-- Judul ikut jenis perkiraannya: "Aktiva" untuk AKV, "Akumulasi Penyusutan"
+               untuk AKM - diisi mkAktivaBukaList(). --}}
+          <h5 class="modal-title" id=""><span id="mkAktivaJudulPane">Aktiva</span> <span id="mkAktivaJudulGroup" class="text-muted" style="font-size:.9rem"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid mt-4">
+
+          {{-- Tombol Tambah (hanya AKV sisi Debet, lihat mkAktivaBukaList()) di kiri, kotak
+               pencarian di kanan - keduanya di ATAS tabel aktiva. --}}
+          <div class="row mb-2 align-items-center">
+            <div class="col-6">
+              <button type="button" id="mkAktivaButtonTambah" class="btn btn-mk-tambah" onclick="mkAktivaBukaForm()">Tambah</button>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+              <input id="input_search_aktiva" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12" style="overflow:auto; max-height: 400px">
+            <table id="tabel_add_list_aktiva" class="data-table" style="overflow:auto;">
+              <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Kode Aktiva</th>
+                  <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                </tr>
+              </thead>
+              <tbody id="tabel_data_add_list_aktiva" class="text-left"></tbody>
+            </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="" class="modal-footer ">
+        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+      </div>
+      </div>
+
+      {{-- Form aktiva baru. Bagian atas (Group s/d Kuantum) SENGAJA terkunci: nilainya
+           diturunkan dari perkiraan aktiva yang dipilih, Divisi form item, dan no. urut
+           berikutnya di dbAktiva. Yang bisa diubah user: Keterangan, kedua tanggal,
+           % Susut, Metode, dan Akumulasi Penyusutan ke bawah. --}}
+      <div id= "modalAddFormAktiva" class="showhidemodalbodyadd">
+      <div class="modal-header">
+          <h5 class="modal-title" id="">Input Data Aktiva</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        {{-- Grid 12 kolom rata: SEMUA label memakai col-md-3 sehingga setiap kolom input
+             mulai di titik x yang sama (25%). Label sengaja dipendekkan ("Tgl ...",
+             "Akum. Penyusutan", "Metode") supaya muat satu baris - lihat juga CSS
+             #modalAddFormAktiva label di atas. --}}
+        <div class="container-fluid">
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Group Aktiva</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaGroupKode" type="text" class="form-control" disabled></div>
+            </div>
+            <div class="col-md-3" style="padding-left:0">
+              <div class="form-group"><input id="mkAktivaGroupNama" type="text" class="form-control mk-aktiva-nama" disabled></div>
+            </div>
+            <div class="col-md-2 text-md-right"><div class="form-group"><label>Tgl Perolehan</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group"><input id="mkAktivaTglPerolehan" type="date" class="form-control text-center"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Divisi</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaDevisiKode" type="text" class="form-control" disabled></div>
+            </div>
+            <div class="col-md-3" style="padding-left:0">
+              <div class="form-group"><input id="mkAktivaDevisiNama" type="text" class="form-control mk-aktiva-nama" disabled></div>
+            </div>
+            <div class="col-md-2 text-md-right"><div class="form-group"><label>Tgl Pemakaian</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group"><input id="mkAktivaTglPemakaian" type="date" class="form-control text-center"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>No. Urut</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group"><input id="mkAktivaNoUrut" type="text" class="form-control" disabled></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>No. Aktiva</label></div></div>
+            <div class="col-md-5">
+              <div class="form-group"><input id="mkAktivaNoAktiva" type="text" class="form-control" disabled></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Tipe Aktiva</label></div></div>
+            <div class="col-md-5">
+              <div class="form-group">
+                <select id="mkAktivaTipeAktiva" class="form-control" disabled>
+                  <option value="0">Aktiva Tetap</option>
+                  <option value="1">Aktiva yang dibiayakan</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Keterangan</label></div></div>
+            <div class="col-md-9">
+              {{-- 50 karakter: SP_AktivaTetap menerima @Keterangan varchar(50), lebih dari itu
+                   akan terpotong diam-diam di server. --}}
+              <div class="form-group"><input id="mkAktivaKeterangan" type="text" class="form-control" maxlength="50"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Kuantum</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group"><input id="mkAktivaKuantum" type="text" class="form-control text-right" value="1" disabled></div>
+            </div>
+            <div class="col-md-2 text-md-right"><div class="form-group"><label>% Susut</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <input id="mkAktivaPersen" type="text" class="form-control text-right" value="0.00"
+                       onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
+              </div>
+            </div>
+            <div class="col-md-1 text-md-right"><div class="form-group"><label>Metode</label></div></div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <select id="mkAktivaMetode" class="form-control">
+                  <option value="L">[L]urus</option>
+                  <option value="M">[M]enurun</option>
+                  <option value="P">[P]ajak</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Akum. Penyusutan</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaAkumulasi" type="text" class="form-control"></div>
+            </div>
+            <div class="col-md-4" style="padding-left:0">
+              <div class="form-group"><input id="mkAktivaAkumulasiNama" type="text" class="form-control mk-aktiva-nama" disabled></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Biaya Penyusutan 1</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaBiaya1" type="text" class="form-control"></div>
+            </div>
+            <div class="col-md-2" style="padding-left:0">
+              <div class="form-group">
+                <input id="mkAktivaPersen1" type="text" class="form-control text-right" value="0.00"
+                       onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
+              </div>
+            </div>
+            <div class="col-md-1"><div class="form-group"><label>%</label></div></div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Biaya Penyusutan 2</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaBiaya2" type="text" class="form-control"></div>
+            </div>
+            <div class="col-md-2" style="padding-left:0">
+              <div class="form-group">
+                <input id="mkAktivaPersen2" type="text" class="form-control text-right" value="0.00"
+                       onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
+              </div>
+            </div>
+            <div class="col-md-1"><div class="form-group"><label>%</label></div></div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3"><div class="form-group"><label>Biaya Penyusutan 3</label></div></div>
+            <div class="col-md-2" style="padding-right:0">
+              <div class="form-group"><input id="mkAktivaBiaya3" type="text" class="form-control"></div>
+            </div>
+            <div class="col-md-2" style="padding-left:0">
+              <div class="form-group">
+                <input id="mkAktivaPersen3" type="text" class="form-control text-right" value="0.00"
+                       onblur="formatAngkaInput(this)" oninput="formatAngkaKetik(this)">
+              </div>
+            </div>
+            <div class="col-md-1"><div class="form-group"><label>%</label></div></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="" class="modal-footer ">
+        <button type="button" class="btn btn-secondary" onclick="mkAktivaKembaliKeList()">Batal</button>
+        <button type="button" id="mkAktivaButtonSimpan" class="btn btn-chip-biru" onclick="mkAktivaSimpan()">Simpan</button>
+      </div>
+      </div>
+
       <div id= "modalAddListTitipan" class="showhidemodalbodyadd">
       <div class="modal-header">
 
@@ -1838,9 +2075,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             <div class="col-6">
               {{-- Alur Debet: tombol tambah faktur di atas tabel. Alur Kredit tidak memakai ini -
                    tombol + nya ada di tiap baris, lihat mkKartuRender(). --}}
-              <button type="button" id="mkKartuButtonTambah" class="btn btn-mk-tambah" onclick="mkKartuBukaFormTambah()" title="Tambah faktur">
-                <i class="bi bi-plus-lg"></i>
-              </button>
+              <button type="button" id="mkKartuButtonTambah" class="btn btn-mk-tambah" onclick="mkKartuBukaFormTambah()" title="Tambah faktur">Tambah</button>
             </div>
             <div class="col-6 d-flex justify-content-end">
               <input id="input_search_kartupt" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
@@ -3338,6 +3573,21 @@ function submitEdit () {
   let notitipan = ''
   let uruttitipan = 0
 
+  // Aktiva tetap - lihat mkAktivaPayload(). Field *Lama dipakai spAdd() untuk membalik
+  // mutasi dbAktivaDet milik nilai sebelum diedit.
+  let aktiva = mkAktivaPayload()
+  noaktivaP = aktiva.noaktivaP
+  noaktivaL = aktiva.noaktivaL
+  statusaktivaP = aktiva.statusaktivaP
+  statusaktivaL = aktiva.statusaktivaL
+  if (aktiva.kodeAktivaP) { kodeP = aktiva.kodeAktivaP }
+  if (aktiva.kodeAktivaL) { kodeL = aktiva.kodeAktivaL }
+  let noaktivaPLama = aktiva.noaktivaPLama
+  let noaktivaLLama = aktiva.noaktivaLLama
+  let statusaktivaPLama = aktiva.statusaktivaPLama
+  let statusaktivaLLama = aktiva.statusaktivaLLama
+  let debetLama = aktiva.debetLama
+
   if (!perkiraan || !lawan || !kodedevisi || !note) {
     alertify.warning("Data tidak lengkap")
     return
@@ -3443,6 +3693,11 @@ function submitEdit () {
         noaktivaL,
         statusaktivaP,
         statusaktivaL,
+        noaktivaPLama,
+        noaktivaLLama,
+        statusaktivaPLama,
+        statusaktivaLLama,
+        debetLama,
         nobon,
         kodebag,
         kodeP,
@@ -3553,6 +3808,21 @@ function submitAdd () {
   let jmlrecord = tipeform == 'add' ? 0 : 1
   let notitipan = ''
   let uruttitipan = 0
+
+  // Aktiva tetap - lihat mkAktivaPayload(). Item baru tidak punya nilai lama, jadi field
+  // *Lama-nya kosong dan spAdd() tidak membalik apa pun.
+  let aktiva = mkAktivaPayload()
+  noaktivaP = aktiva.noaktivaP
+  noaktivaL = aktiva.noaktivaL
+  statusaktivaP = aktiva.statusaktivaP
+  statusaktivaL = aktiva.statusaktivaL
+  if (aktiva.kodeAktivaP) { kodeP = aktiva.kodeAktivaP }
+  if (aktiva.kodeAktivaL) { kodeL = aktiva.kodeAktivaL }
+  let noaktivaPLama = ''
+  let noaktivaLLama = ''
+  let statusaktivaPLama = ''
+  let statusaktivaLLama = ''
+  let debetLama = 0
 
   if (!perkiraan || !lawan || !kodedevisi || !note) {
     alertify.warning("Data tidak lengkap")
@@ -3667,6 +3937,11 @@ function submitAdd () {
         noaktivaL,
         statusaktivaP,
         statusaktivaL,
+        noaktivaPLama,
+        noaktivaLLama,
+        statusaktivaPLama,
+        statusaktivaLLama,
+        debetLama,
         nobon,
         kodebag,
         kodeP,
@@ -3826,7 +4101,7 @@ function onChangeValasAdd () {
 function buttonAddListBatal () {
   $('.showhidemodalbodyadd').hide();
   // $('#modalBodyAddMain').show();
-  $('#form .modal-dialog').removeClass('mk-dialog-perkiraan');
+  $('#form .modal-dialog').removeClass('mk-dialog-perkiraan').removeClass('mk-dialog-aktiva');
 
   // Dulu 'toggle'. Sejak ada tumpukan modal (mkTumpukanModal) perintahnya harus eksplisit -
   // 'toggle' pada modal yang sedang tampil memicu hide dan mem-pop tumpukan secara keliru.
@@ -3864,8 +4139,11 @@ function cleanFormAddAdd () {
   document.getElementById("AddAddKeteranganDebet").value = ''
   document.getElementById("AddAddKredit").value = ''
   document.getElementById("AddAddKeteranganKredit").value = ''
+  document.getElementById("AddAddKodeDebet").value = ''
+  document.getElementById("AddAddKodeKredit").value = ''
   mkResetTitipan()
   mkResetPT()
+  mkAktivaReset()
   mkAturTombolBrowse()
 }
 
@@ -4860,11 +5138,18 @@ function mkAturTombolBrowse () {
     let sisi = mkAlurKartuAktif() ? mkSisiPiutangItem() : ''
     let labelUbah = sisi ? ('Ubah rincian ' + mkIstilah().entitas.toLowerCase()) : ''
 
-    tombolDebet.disabled  = belumAdaJumlah || sisi !== 'Debet'
-    tombolKredit.disabled = belumAdaJumlah || sisi !== 'Kredit'
+    // Sisi yang memegang aktiva ikut dibuka - di sana browse membuka daftar aktiva, bukan
+    // daftar perkiraan, jadi perkiraannya tetap tidak bisa diganti. AKV hanya di sisi Kredit,
+    // AKM di kedua sisi - lihat mkAktivaBolehBrowseEdit().
+    let aktivaDebet  = mkAktivaBolehBrowseEdit('Debet')
+    let aktivaKredit = mkAktivaBolehBrowseEdit('Kredit')
+    let labelKunci = 'Perkiraan tidak bisa diubah saat edit item'
 
-    tombolDebet.title  = (sisi === 'Debet')  ? labelUbah : 'Perkiraan tidak bisa diubah saat edit item'
-    tombolKredit.title = (sisi === 'Kredit') ? labelUbah : 'Perkiraan tidak bisa diubah saat edit item'
+    tombolDebet.disabled  = belumAdaJumlah || (sisi !== 'Debet' && !aktivaDebet)
+    tombolKredit.disabled = belumAdaJumlah || (sisi !== 'Kredit' && !aktivaKredit)
+
+    tombolDebet.title  = (sisi === 'Debet')  ? labelUbah : aktivaDebet  ? 'Ubah aktiva yang dipilih' : labelKunci
+    tombolKredit.title = (sisi === 'Kredit') ? labelUbah : aktivaKredit ? 'Ubah aktiva yang dipilih' : labelKunci
     return
   }
 
@@ -4912,6 +5197,20 @@ function buttonAddListPerkiraan (idTujuan) {
       mkBukaKartuEditPT(idTujuan === 'Kredit' ? 'K' : 'D')
       return
     }
+  }
+
+  // MODE EDIT, sisi yang memegang aktiva: browse TIDAK membuka daftar perkiraan, melainkan
+  // langsung DAFTAR AKTIVA milik perkiraan itu. Perkiraannya sendiri tetap tidak bisa diganti -
+  // yang boleh diubah hanya aktiva mana yang dipilih. Sisi mana saja yang boleh: lihat
+  // mkAktivaBolehBrowseEdit() (AKV hanya Kredit, AKM kedua sisi).
+  if (mkModeEditItem && mkAktivaBolehBrowseEdit(idTujuan)) {
+    mkAktivaBukaList(
+      idTujuan,
+      ($("#AddAdd" + idTujuan).val() || '').trim(),
+      $("#AddAddKeterangan" + idTujuan).val() || '',
+      true
+    )
+    return
   }
 
 
@@ -5006,6 +5305,371 @@ function mkIkatSearchPerkiraan () {
 }
 
 
+/* ========== AKTIVA TETAP ('AKV') & AKUMULASI PENYUSUTAN ('AKM') ==========
+   Keduanya dikenali dari dbPostHutPiut.Kode yang ikut dikirim listPerkiraan(), BUKAN dari
+   nomor perkiraan - pola yang sama dipakai 'PT'/'HT'/'PTS' di halaman ini.
+
+   AKV (aktiva tetap)
+     Debet  : daftar aktiva cuma informasi (baris tidak bisa diklik), lanjutnya lewat tombol
+              Tambah -> form aktiva baru -> aktiva itu jadi NoAktivaP + 'AKV+'.
+     Kredit : pilih aktiva yang sudah ada -> NoAktivaL + 'AKV-'.
+     Dalam SATU No. Bukti hanya boleh ada satu aktiva AKV (mkAktivaBolehDipakai()).
+
+   AKM (akumulasi penyusutan)
+     Kedua sisi sama: pilih aktiva yang sudah ada, tidak ada penambahan master.
+     Debet -> NoAktivaP + 'AKM+', Kredit -> NoAktivaL + 'AKM-'.
+     TIDAK ada batasan satu per bukti, dan Debet + Kredit boleh sama-sama AKM asal
+     perkiraannya berbeda. Larangan "persis sama" sudah dijamin aturan "Debet dan Kredit tidak
+     boleh perkiraan yang sama" yang jalan lebih dulu di buttonAddListPerkiraan() - perkiraan
+     sisi lawan malah disembunyikan dari daftar. Karena tiap perkiraan akumulasi punya daftar
+     aktivanya sendiri, No. Aktiva yang sama pun tidak bisa muncul di kedua sisi.
+   ======================================================================== */
+
+// Aktiva yang menempel di tiap sisi item: { no, status, kode } atau null. Dipisah per sisi
+// karena AKM boleh mengisi Debet DAN Kredit sekaligus.
+let mkAktivaItem = { Debet: null, Kredit: null }
+// Keadaan sebelum diedit - dipakai spAdd() untuk membalik mutasi dbAktivaDet yang lama.
+// Diisi buttonEditItem() dari NoAktivaP/L + StatusAktivaP/L milik baris dbTransaksi APA
+// ADANYA, supaya item buatan modul lain tidak berubah jenis saat disimpan ulang dari sini.
+let mkAktivaItemLama = { Debet: null, Kredit: null }
+let mkAktivaDebetLama = 0
+// Konteks browse yang sedang terbuka.
+let mkAktivaSisiBrowse = ''
+let mkAktivaSetting = null
+let mkAktivaGroup = null
+let mkAktivaRows = []
+
+function mkAktivaReset () {
+  mkAktivaItem = { Debet: null, Kredit: null }
+  mkAktivaItemLama = { Debet: null, Kredit: null }
+  mkAktivaDebetLama = 0
+  mkAktivaSisiBrowse = ''
+  mkAktivaSetting = null
+  mkAktivaGroup = null
+  mkAktivaRows = []
+}
+
+// 'AKV' | 'AKM' | '' dari sebuah StatusAktiva ('AKV+', 'AKM-', ...).
+function mkAktivaJenisStatus (status) {
+  let s = (status || '').trim().toUpperCase()
+  if (s.indexOf('AKV') === 0) { return 'AKV' }
+  if (s.indexOf('AKM') === 0) { return 'AKM' }
+  return ''
+}
+
+// dd/mm/yyyy untuk kolom Tanggal di daftar aktiva (formatDate() menghasilkan yyyy-mm-dd,
+// itu format untuk input[type=date], bukan untuk ditampilkan di tabel).
+function mkAktivaTgl (tanggal) {
+  if (!tanggal) { return '' }
+  let d = new Date(tanggal)
+  if (isNaN(d.getTime())) { return '' }
+  let hari = ('0' + d.getDate()).slice(-2)
+  let bulan = ('0' + (d.getMonth() + 1)).slice(-2)
+  return hari + '/' + bulan + '/' + d.getFullYear()
+}
+
+// Satu bukti hanya boleh memegang satu aktiva AKV. AKM tidak dibatasi sama sekali, dan baris
+// AKM juga TIDAK ikut dihitung saat memeriksa AKV - aturan keduanya terpisah.
+function mkAktivaBolehDipakai (idTujuan, kode) {
+  if (kode !== 'AKV') { return true }
+
+  let pesan = "Dalam 1 bukti hanya boleh ada 1 aktiva"
+
+  let lawan = mkAktivaItem[idTujuan === 'Debet' ? 'Kredit' : 'Debet']
+  if (lawan && lawan.kode === 'AKV') {
+    alertify.warning(pesan)
+    return false
+  }
+
+  // listData bisa tertinggal dari bukti yang dibuka sebelumnya, jadi NoBukti-nya ikut
+  // dicocokkan. Baris yang sedang diedit dikecualikan.
+  let nobukti = ($("#input_add_nobukti").val() || '').trim()
+  let urutIni = mkModeEditItem && itemEdit ? Number(itemEdit.Urut) : -1
+  let bentrok = (listData || []).some(function (item) {
+    if ((item.NoBukti || '').trim() !== nobukti) { return false }
+    if (Number(item.Urut) === urutIni) { return false }
+    return mkAktivaJenisStatus(item.StatusAktivaP) === 'AKV'
+        || mkAktivaJenisStatus(item.StatusAktivaL) === 'AKV'
+  })
+  if (bentrok) {
+    alertify.warning(pesan)
+    return false
+  }
+
+  return true
+}
+
+// Sisi yang aktivanya boleh di-browse ulang saat EDIT item. Perkiraannya sendiri tetap tidak
+// bisa diganti - yang terbuka adalah daftar aktiva, bukan daftar perkiraan.
+//   AKV : hanya Kredit. Di Debet browse berarti MEMBUAT aktiva baru di master, dan itu tidak
+//         boleh dilakukan lewat edit item.
+//   AKM : kedua sisi, karena dua-duanya memang cuma memilih.
+function mkAktivaBolehBrowseEdit (idTujuan) {
+  let item = mkAktivaItem[idTujuan]
+  if (!item || !item.no) { return false }
+  if (item.kode === 'AKM') { return true }
+  return item.kode === 'AKV' && idTujuan === 'Kredit'
+}
+
+// Buka daftar aktiva milik satu perkiraan AKV/AKM. Dari buttonAddPickPerkiraan() modal #form
+// sudah terbuka sehingga cukup bertukar pane; dari alur edit (buttonAddListPerkiraan())
+// modalnya belum terbuka, jadi bukaModal = true.
+function mkAktivaBukaList (idTujuan, perkiraan, keterangan, bukaModal = false) {
+  let _token = $("#_token").val()
+
+  $.ajax({
+    url: "{!! url('memorialkoreksilistaktiva') !!}",
+    type: "post",
+    async: false,
+    data: { _token, perkiraan },
+    success: function (res) {
+      let setting = res ? res.setting : null
+
+      // Set postingnya belum diisi di master - perlakukan sebagai perkiraan biasa.
+      if (!setting) {
+        mkAktivaTerapkanPerkiraan(idTujuan, perkiraan, keterangan, '')
+        mkAktivaItem[idTujuan] = null
+        buttonAddListBatal()
+        return
+      }
+
+      mkAktivaSetting = setting
+      mkAktivaGroup = { Perkiraan: perkiraan, Keterangan: keterangan }
+      mkAktivaSisiBrowse = idTujuan
+      mkAktivaRows = res.rows || []
+
+      // Hanya AKV di sisi Debet yang berarti MENAMBAH aktiva baru; selebihnya memilih.
+      let kodeSet = (setting.Kode || '').trim().toUpperCase()
+      let modeTambah = kodeSet === 'AKV' && idTujuan === 'Debet'
+      let bisaPilih = !modeTambah
+
+      let rowTable = ``
+      mkAktivaRows.forEach(function (item, i) {
+        let klik = bisaPilih ? ' class="pick-row" onclick="mkAktivaPick(' + i + ')"' : ''
+        rowTable += '<tr' + klik + '>'
+          + '<td>' + item.Perkiraan + '</td>'
+          + '<td>' + (item.Keterangan || '') + '</td>'
+          + '<td>' + mkAktivaTgl(item.Tanggal) + '</td>'
+          + '</tr>'
+      })
+      if (!mkAktivaRows.length) {
+        rowTable = `<tr><td class="text-center" colspan=3>Belum ada data</td></tr>`
+      }
+
+      document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
+      document.getElementById("mkAktivaJudulPane").innerText = kodeSet === 'AKM' ? 'Akumulasi Penyusutan' : 'Aktiva'
+      document.getElementById("mkAktivaJudulGroup").innerText = perkiraan + ' - ' + keterangan
+
+      let inputCari = document.getElementById('input_search_aktiva')
+      if (inputCari) { inputCari.value = '' }
+
+      if (modeTambah) { $('#mkAktivaButtonTambah').show() } else { $('#mkAktivaButtonTambah').hide() }
+
+      $('.showhidemodalbodyadd').hide()
+      $('#modalAddListAktiva').show()
+      $('#form .modal-dialog').removeClass('mk-dialog-perkiraan').addClass('mk-dialog-aktiva')
+      if (bukaModal) { $("#form").modal('show') }
+
+      mkIkatSearchAktiva()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function mkIkatSearchAktiva () {
+  let input = document.getElementById('input_search_aktiva')
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  input.addEventListener('input', function () {
+    let cari = input.value.toLowerCase()
+    let baris = document.querySelectorAll('#tabel_data_add_list_aktiva tr')
+    baris.forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    })
+  })
+}
+
+// Isi perkiraan (dan kode 'AKV'/'AKM') ke sisi yang dipilih, sekalian melepas state titipan /
+// piutang milik sisi itu - persis seperti yang dilakukan buttonAddPickPerkiraan() untuk
+// perkiraan biasa.
+function mkAktivaTerapkanPerkiraan (idTujuan, perkiraan, keterangan, kode) {
+  document.getElementById('AddAdd' + idTujuan).value = perkiraan
+  document.getElementById('AddAddKeterangan' + idTujuan).value = keterangan
+  document.getElementById('AddAddKode' + idTujuan).value = kode
+
+  if (idTujuan === 'Debet') { mkResetTitipan() }
+  mkResetPTSisi(idTujuan === 'Debet' ? 'D' : 'K')
+}
+
+// Memilih aktiva yang sudah ada. Dipakai AKM di kedua sisi, dan AKV di sisi Kredit.
+function mkAktivaPick (index) {
+  let item = mkAktivaRows[index]
+  if (!item || !mkAktivaGroup || !mkAktivaSetting) { return }
+
+  let sisi = mkAktivaSisiBrowse
+  let kode = (mkAktivaSetting.Kode || '').trim().toUpperCase()
+
+  mkAktivaTerapkanPerkiraan(sisi, mkAktivaGroup.Perkiraan, mkAktivaGroup.Keterangan, kode)
+  mkAktivaItem[sisi] = {
+    no: item.Perkiraan,
+    status: kode + (sisi === 'Debet' ? '+' : '-'),
+    kode: kode
+  }
+
+  buttonAddListBatal()
+}
+
+// AKV sisi DEBET: buka form aktiva baru. No. urut diambil dari dbAktiva (max NoBelakang + 1),
+// sisanya diturunkan dari set posting (dbPostHutPiut) dan Divisi di form item.
+function mkAktivaBukaForm () {
+  if (!mkAktivaGroup || !mkAktivaSetting) { return }
+
+  let selDevisi = document.getElementById("AddAddKodeDevisi")
+  let kodeDevisi = selDevisi ? selDevisi.value : ''
+  let namaDevisi = selDevisi && selDevisi.selectedIndex >= 0 ? selDevisi.options[selDevisi.selectedIndex].text : ''
+
+  if (!kodeDevisi) { alertify.warning("Divisi belum dipilih"); return }
+
+  document.getElementById("mkAktivaGroupKode").value = mkAktivaGroup.Perkiraan
+  document.getElementById("mkAktivaGroupNama").value = mkAktivaGroup.Keterangan
+  document.getElementById("mkAktivaDevisiKode").value = kodeDevisi
+  document.getElementById("mkAktivaDevisiNama").value = namaDevisi
+  document.getElementById("mkAktivaTipeAktiva").value = '0'
+  document.getElementById("mkAktivaKuantum").value = '1'
+  document.getElementById("mkAktivaKeterangan").value = ''
+  document.getElementById("mkAktivaTglPerolehan").value = formatDate(new Date())
+  document.getElementById("mkAktivaTglPemakaian").value = formatDate(new Date())
+  document.getElementById("mkAktivaPersen").value = formatAngka(parseFloat(mkAktivaSetting.Persen || 0).toFixed(2))
+  document.getElementById("mkAktivaMetode").value = (mkAktivaSetting.Tipe || 'L').trim() || 'L'
+  document.getElementById("mkAktivaAkumulasi").value = (mkAktivaSetting.Akumulasi || '').trim()
+  document.getElementById("mkAktivaAkumulasiNama").value = mkAktivaSetting.NamaAkumulasi || ''
+  document.getElementById("mkAktivaBiaya1").value = (mkAktivaSetting.Biaya1 || '').trim()
+  document.getElementById("mkAktivaPersen1").value = formatAngka(parseFloat(mkAktivaSetting.PersenBiaya1 || 0).toFixed(2))
+  document.getElementById("mkAktivaBiaya2").value = (mkAktivaSetting.Biaya2 || '').trim()
+  document.getElementById("mkAktivaPersen2").value = formatAngka(parseFloat(mkAktivaSetting.PersenBiaya2 || 0).toFixed(2))
+  document.getElementById("mkAktivaBiaya3").value = ''
+  document.getElementById("mkAktivaPersen3").value = '0.00'
+
+  mkAktivaAmbilNoUrut()
+
+  $('.showhidemodalbodyadd').hide()
+  $('#modalAddFormAktiva').show()
+}
+
+// No. Urut + No. Aktiva ('121102' + '.' + '00003'). Dipanggil lagi kalau ternyata no. urutnya
+// sudah keburu dipakai user lain (spAddNewAktiva mengembalikan 2).
+function mkAktivaAmbilNoUrut () {
+  let _token = $("#_token").val()
+  $.ajax({
+    url: "{!! url('memorialkoreksigetnourutaktiva') !!}",
+    type: "post",
+    async: false,
+    data: { _token, nomuka: mkAktivaGroup.Perkiraan },
+    success: function (res) {
+      let nourut = res && res.length ? res[0].NoUrut : ''
+      document.getElementById("mkAktivaNoUrut").value = nourut
+      document.getElementById("mkAktivaNoAktiva").value = mkAktivaGroup.Perkiraan + '.' + nourut
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+function mkAktivaKembaliKeList () {
+  $('.showhidemodalbodyadd').hide()
+  $('#modalAddListAktiva').show()
+}
+
+function mkAktivaSimpan () {
+  let noaktiva = ($("#mkAktivaNoAktiva").val() || '').trim()
+  let keterangan = ($("#mkAktivaKeterangan").val() || '').trim()
+
+  if (!noaktiva) { alertify.warning("No. Aktiva belum terbentuk"); return }
+  if (!keterangan) { alertify.warning("Keterangan belum diisi"); return }
+  if (!($("#mkAktivaTglPerolehan").val())) { alertify.warning("Tanggal Perolehan belum diisi"); return }
+  if (!($("#mkAktivaTglPemakaian").val())) { alertify.warning("Tanggal Pemakaian belum diisi"); return }
+
+  let _token = $("#_token").val()
+
+  $.ajax({
+    url: "{!! url('memorialkoreksispaddnewaktiva') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      choice: 'I',
+      noaktiva,
+      keterangan,
+      devisi: $("#mkAktivaDevisiKode").val(),
+      groupaktiva: mkAktivaGroup.Perkiraan,
+      nobelakang: $("#mkAktivaNoUrut").val(),
+      kuantum: unformatAngka($("#mkAktivaKuantum").val()),
+      persen: unformatAngka($("#mkAktivaPersen").val()),
+      metodepenyusutan: $("#mkAktivaMetode").val(),
+      tipeaktiva: $("#mkAktivaTipeAktiva").val(),
+      tglperolehan: $("#mkAktivaTglPerolehan").val(),
+      tglpemakaian: $("#mkAktivaTglPemakaian").val(),
+      akumulasi: ($("#mkAktivaAkumulasi").val() || '').trim(),
+      biaya1: ($("#mkAktivaBiaya1").val() || '').trim(),
+      persen1: unformatAngka($("#mkAktivaPersen1").val()),
+      biaya2: ($("#mkAktivaBiaya2").val() || '').trim(),
+      persen2: unformatAngka($("#mkAktivaPersen2").val()),
+      biaya3: ($("#mkAktivaBiaya3").val() || '').trim(),
+      persen3: unformatAngka($("#mkAktivaPersen3").val())
+    },
+    success: function (res) {
+      // No. urutnya keburu dipakai user lain - ambil ulang, form dibiarkan terbuka supaya
+      // user tinggal menekan Simpan lagi.
+      if (res == 2) {
+        mkAktivaAmbilNoUrut()
+        alertify.warning("No. Aktiva sudah dipakai, no. urut telah direfresh - silahkan simpan ulang")
+        return
+      }
+
+      if (res == 1) {
+        mkAktivaTerapkanPerkiraan('Debet', mkAktivaGroup.Perkiraan, mkAktivaGroup.Keterangan, 'AKV')
+        mkAktivaItem.Debet = { no: noaktiva, status: 'AKV+', kode: 'AKV' }
+        alertify.success('Aktiva ' + noaktiva + ' telah ditambahkan')
+        buttonAddListBatal()
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+}
+
+// Isi slot aktiva pada payload sp_TransaksiMemorial. 'P' = kolom Perkiraan dbTransaksi
+// (sisi Debet), 'L' = kolom Lawan (sisi Kredit) - status '+' di Debet, '-' di Kredit.
+// Field *Lama dipakai spAdd() untuk membalik mutasi dbAktivaDet sebelum menerapkan yang baru.
+function mkAktivaPayload () {
+  let d = mkAktivaItem.Debet
+  let k = mkAktivaItem.Kredit
+  let dLama = mkAktivaItemLama.Debet
+  let kLama = mkAktivaItemLama.Kredit
+
+  return {
+    noaktivaP: d ? d.no : '',
+    noaktivaL: k ? k.no : '',
+    statusaktivaP: d ? d.status : '',
+    statusaktivaL: k ? k.status : '',
+    kodeAktivaP: d ? d.kode : '',
+    kodeAktivaL: k ? k.kode : '',
+    noaktivaPLama: dLama ? dLama.no : '',
+    noaktivaLLama: kLama ? kLama.no : '',
+    statusaktivaPLama: dLama ? dLama.status : '',
+    statusaktivaLLama: kLama ? kLama.status : '',
+    debetLama: mkAktivaDebetLama || 0
+  }
+}
+
 function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan, kode) {
 
   console.log(index, perkiraan, keterangan , idTujuan, kode)
@@ -5019,8 +5683,22 @@ function buttonAddPickPerkiraan (index, perkiraan, keterangan , idTujuan, kode) 
     return
   }
 
+  // Perkiraan aktiva ('AKV') atau akumulasi penyusutan ('AKM'). Perkiraannya SENGAJA belum
+  // diisi di sini: baru terisi setelah aktivanya dipilih (mkAktivaPick()), atau - khusus AKV
+  // sisi Debet - setelah aktiva barunya tersimpan (mkAktivaSimpan()).
+  let kodeAktiva = (kode || '').trim().toUpperCase()
+  if (kodeAktiva === 'AKV' || kodeAktiva === 'AKM') {
+    if (!mkAktivaBolehDipakai(idTujuan, kodeAktiva)) { return }
+    mkAktivaBukaList(idTujuan, perkiraan, keterangan)
+    return
+  }
+
+  // Bukan aktiva: kalau sisi ini sebelumnya memegang aktiva, tautannya dilepas.
+  mkAktivaItem[idTujuan] = null
+
   document.getElementById(`AddAdd${idTujuan}`).value = perkiraan
   document.getElementById(`AddAddKeterangan${idTujuan}`).value = keterangan
+  document.getElementById(`AddAddKode${idTujuan}`).value = ''
 
   if (idTujuan === 'Debet') {
     // Kalau sebelumnya sudah ada titipan terpilih, Jumlah kemungkinan masih berisi Sisa
@@ -5325,6 +6003,18 @@ function buttonDeleteItem (i) {
         let notitipan = ''
         let uruttitipan = 0
 
+        // Aktiva tetap: nilainya diambil dari baris yang dihapus (bukan dari form item, yang
+        // isinya belum tentu milik baris ini) supaya spAdd() bisa membalik mutasi dbAktivaDet.
+        noaktivaP = (itemDelete.NoAktivaP || '').trim()
+        noaktivaL = (itemDelete.NoAktivaL || '').trim()
+        statusaktivaP = (itemDelete.StatusAktivaP || '').trim()
+        statusaktivaL = (itemDelete.StatusAktivaL || '').trim()
+        let noaktivaPLama = noaktivaP
+        let noaktivaLLama = noaktivaL
+        let statusaktivaPLama = statusaktivaP
+        let statusaktivaLLama = statusaktivaL
+        let debetLama = Number(itemDelete.Debet) || 0
+
 
 
 
@@ -5360,6 +6050,11 @@ function buttonDeleteItem (i) {
               noaktivaL,
               statusaktivaP,
               statusaktivaL,
+              noaktivaPLama,
+              noaktivaLLama,
+              statusaktivaPLama,
+              statusaktivaLLama,
+              debetLama,
               nobon,
               kodebag,
               kodeP,
@@ -5423,6 +6118,30 @@ function buttonEditItem (i) {
   document.getElementById("AddAddKeteranganDebet").value = itemEdit.namaPerkiraan
   document.getElementById("AddAddKredit").value = itemEdit.Lawan
   document.getElementById("AddAddKeteranganKredit").value = itemEdit.NamaLawan
+
+  // Aktiva: pulihkan tautan milik item ini. Kolom NoAktivaP/NoAktivaL + StatusAktivaP/L ikut
+  // terbawa getDetail() (select a.* dari dbTransaksi). Kedua sisi dipulihkan terpisah karena
+  // satu item AKM boleh memegang aktiva di Debet DAN Kredit sekaligus. StatusAktiva disalin
+  // apa adanya supaya item buatan modul lain tidak berubah jenis saat disimpan ulang, dan
+  // salinannya di mkAktivaItemLama dipakai spAdd() choice 'U'/'D' untuk membalik mutasi
+  // dbAktivaDet yang lama.
+  mkAktivaReset()
+  document.getElementById("AddAddKodeDebet").value = ''
+  document.getElementById("AddAddKodeKredit").value = ''
+
+  let aktivaSisi = { Debet: ['NoAktivaP', 'StatusAktivaP'], Kredit: ['NoAktivaL', 'StatusAktivaL'] }
+  Object.keys(aktivaSisi).forEach(function (sisi) {
+    let no = (itemEdit[aktivaSisi[sisi][0]] || '').trim()
+    if (!no) { return }
+
+    let status = (itemEdit[aktivaSisi[sisi][1]] || '').trim()
+    let kode = mkAktivaJenisStatus(status)
+
+    mkAktivaItem[sisi] = { no: no, status: status, kode: kode }
+    mkAktivaItemLama[sisi] = { no: no, status: status, kode: kode }
+    if (kode) { document.getElementById("AddAddKode" + sisi).value = kode }
+  })
+  mkAktivaDebetLama = Number(itemEdit.Debet) || 0
 
   // No Titipan: kolomnya NOTITIPAN/URUTTITIPAN (huruf besar, hasil select a.* dari dbTransaksi).
   // AddAddSisaTitipan diisi lewat mkAmbilSisaTitipan() (sisa efektif yang mengecualikan baris

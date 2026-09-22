@@ -334,6 +334,11 @@ Route::post('/memorialkoreksiaddkartupt', [MemorialKoreksiController::class, 'ad
 Route::post('/memorialkoreksideletekartupt', [MemorialKoreksiController::class, 'deleteKartuPT']);
 Route::post('/memorialkoreksiretagkartupt', [MemorialKoreksiController::class, 'retagKartuPT']);
 Route::post('/memorialkoreksiclearkartupt', [MemorialKoreksiController::class, 'clearKartuPT']);
+// Aktiva tetap (Kode 'AKV'). Debet = menambah aktiva baru ke master, Kredit = memilih aktiva
+// yang sudah ada. Kode 'AKM' (akumulasi penyusutan) belum ditangani.
+Route::post('/memorialkoreksilistaktiva', [MemorialKoreksiController::class, 'listAktiva']);
+Route::post('/memorialkoreksigetnourutaktiva', [MemorialKoreksiController::class, 'getNoUrutAktiva']);
+Route::post('/memorialkoreksispaddnewaktiva', [MemorialKoreksiController::class, 'spAddNewAktiva']);
 
 
 // BON SEMENTARA
