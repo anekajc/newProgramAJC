@@ -432,7 +432,12 @@ class PermintaanTransferBarangController extends Controller
 
 
     if ($req->Choice =='D'){
-      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingDataTrans($req->Choice,'PRT',$req->Nobukti,'',$xurut,'DBPRTRANSFERDET');
+ 
+      try {
+        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingDataTrans($req->Choice,'PRT',$req->Nobukti,'',$xurut,'DBPRTRANSFERDET');
+      } catch (\Throwable $e) {
+        \Log::error('LoggingDataTrans gagal (PRT Delete), dilewati: '.$e->getMessage());
+      }
       }
 
 
@@ -459,7 +464,12 @@ class PermintaanTransferBarangController extends Controller
       DB::connection('SML')->statement('exec sp_PRTRANSFER ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', $values);
 
     if ($req->Choice!='D'){
-      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingDataTrans($req->Choice,'PRT',$req->Nobukti,'',$xurut,'DBPRTRANSFERDET');
+   
+      try {
+        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingDataTrans($req->Choice,'PRT',$req->Nobukti,'',$xurut,'DBPRTRANSFERDET');
+      } catch (\Throwable $e) {
+        \Log::error('LoggingDataTrans gagal (PRT Add/Update), dilewati: '.$e->getMessage());
+      }
       }
 
 
