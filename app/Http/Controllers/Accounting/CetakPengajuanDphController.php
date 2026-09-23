@@ -41,10 +41,6 @@ class CetakPengajuanDphController extends Controller
     ",[ "username" => $username ]);
 
 
-
-
-
-
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
 
 
@@ -212,20 +208,20 @@ class CetakPengajuanDphController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
      $res = DB::connection('SML')->update("     Delete dbTempTTDPH
-     Insert Into dbTempTTDPH 
-     Select 1,A.NoBukti,b.KODECUSTSUPP,C.nAMACUSTSUPP,A.VALAS,B.DIBAYAR,B.KL from dbDPH A 
-     LEFT OUTER JOIN (SELECT NOBUKTI,KODECUSTSUPP,SUM(DIBAYAR) DIBAYAR,SUM(KL) kl 
-						FROM DBDPHDET GROUP BY NoBukti,KODECUSTSUPP) B ON A.NoBukti=B.NoBukti 
-     LEFT OUTER JOIN DBCUSTSUPP C ON B.KODECUSTSUPP =C.KODECUSTSUPP 
-     where 
-      A.Nobukti Not in(select NoInvoice from DBNOMORDPH) and A.Tipe='DPH'", 
+     Insert Into dbTempTTDPH
+     Select 1,A.NoBukti,b.KODECUSTSUPP,C.nAMACUSTSUPP,A.VALAS,B.DIBAYAR,B.KL from dbDPH A
+     LEFT OUTER JOIN (SELECT NOBUKTI,KODECUSTSUPP,SUM(DIBAYAR) DIBAYAR,SUM(KL) kl
+						FROM DBDPHDET GROUP BY NoBukti,KODECUSTSUPP) B ON A.NoBukti=B.NoBukti
+     LEFT OUTER JOIN DBCUSTSUPP C ON B.KODECUSTSUPP =C.KODECUSTSUPP
+     where
+      A.Nobukti Not in(select NoInvoice from DBNOMORDPH) and A.Tipe='DPH'",
      []);
 
 
 
     $tempOutstanding = DB::connection("SML")->select("
-    Select pilih,noinvoice,kodecustsupp,namacustsupp,valas,dibayar,kl from dbTempTTDPH  
-   
+    Select pilih,noinvoice,kodecustsupp,namacustsupp,valas,dibayar,kl from dbTempTTDPH
+
     " , []);
 
   return $tempOutstanding;

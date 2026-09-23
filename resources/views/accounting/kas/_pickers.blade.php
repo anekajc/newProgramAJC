@@ -28,11 +28,11 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Valas</h3>
+                                    {{-- <h3>Valas</h3> --}}
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
                                     <table id="tabel_add_list_valas" class="dph-tb">
                                         <thead>
@@ -910,12 +910,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Costing</h3>
+                                    {{-- <h3>Costing</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -967,12 +967,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>SubCosting</h3>
+                                    {{-- <h3>SubCosting</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1025,12 +1025,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>CustSupp</h3>
+                                    {{-- <h3>CustSupp</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1081,12 +1081,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPP</h3>
+                                    {{-- <h3>DPP</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1146,12 +1146,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Akumulasi / Biaya</h3>
+                                    {{-- <h3>Akumulasi / Biaya</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1199,12 +1199,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Aktiva</h3>
+                                    {{-- <h3>Aktiva</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1258,12 +1258,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPH</h3>
+                                    {{-- <h3>DPH</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1320,12 +1320,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPH</h3>
+                                    {{-- <h3>DPH</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1385,7 +1385,7 @@
 
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto;  max-height: 300px">
+                                <div class="col-12" style="overflow:auto;">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1509,12 +1509,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Devisi</h3>
+                                    {{-- <h3>Devisi</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
                                     <table id="tabel_add_list_devisi" class="dph-tb">
                                         <thead>
@@ -1559,12 +1559,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Perkiraan</h3>
+                                    {{-- <h3>Perkiraan</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
                                     <table id="tabel_add_list_perkiraan" class="dph-tb">
                                         <thead>
@@ -1678,12 +1678,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Departemen</h3>
+                                    {{-- <h3>Departemen</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1794,12 +1794,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Customer</h3>
+                                    {{-- <h3>Customer</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 

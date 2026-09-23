@@ -810,55 +810,28 @@
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaCustsupp" type="text" class="form-control"
                                                         disabled>
-
                                                 </div>
                                             </div>
-
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
                             <div class="row mt-2" style="margin-top: 0">
-                                <div class="col-md-12 text-right mt-4">
+                                <div class="col-md-12 text-right mt-4" id="contentContainer">
                                     <button type="button" class="btn btn-secondary btn-pill-secondary"
                                         onclick="buttonAddBatal()">Batal</button>
 
                                     <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()"
-                                        class="btn btn-primary btn-pill-primary">Submit Add</button>
+                                        class="btn btn-primary btn-pill-primary">Simpan</button>
 
                                     <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                        class="btn btn-primary btn-pill-primary">Submit Edit</button>
+                                        class="btn btn-primary btn-pill-primary">Simpan</button>
                                 </div>
-
                             </div>
-
                         </div>
-
-
-
-
-
-
-
-
-                        <!-- <div class="line"></div> -->
-                        <!-- <hr/> -->
                     </div>
                 </div>
-                <!-- </div> -->
-
-
-                <!-- ADD EDIT -->
-
-
-                <!-- </div> -->
             </div>
-
-            <!-- <div class="row "> -->
-
-            <!-- </div> -->
         </div>
         <div id="page3" style="display: none" class="mainpage container-fluid">
 
@@ -1362,23 +1335,23 @@
                             <div class="container-fluid">
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Nilai Nota</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
+                                                    <input type="text" class="form-control text-right"
                                                         id="input_modalxedit_nilainotadibayar" disabled>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -1396,22 +1369,23 @@
                                 </div>
 
                                 <div class="row" style="margin-top: -10px">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Dibayar</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
-                                                        id="input_modalxedit_dibayar">
+                                                    <input type="text" class="form-control text-right"
+                                                        id="input_modalxedit_dibayar" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this)">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -1464,8 +1438,9 @@
                               </div> -->
                                                 <div class="col-md-4">
                                                     <div class="input-group form-group">
-                                                        <input id="input_modalxedit_kurangbayar" type="number"
-                                                            value="0.00" class="text-right form-control">
+                                                        <input id="input_modalxedit_kurangbayar" type="text"
+                                                            value="0.00" class="text-right form-control"
+                                                            oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
 
                                                     </div>
                                                 </div>
@@ -1498,8 +1473,8 @@
                                     </div>
                                 </div>
                                 <div class="row mt-2" style="margin-top: 0">
-                                    <div class="col-md-12 text-right mt-4">
-                                        <button type="button" class="btn btn-secondary btn-pill-secondary"
+                                    <div class="col-md-12 text-right mt-4" id="contentContainer">
+                                        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                             onclick="buttonAddBatalKLEdit()">Batal</button>
 
                                         <button id="buttonSubmitAddKLEdit" type="button" onclick="submitAddKLEdit()"
@@ -1543,8 +1518,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary" data-dismiss="modal">Batal</button>
+                <div class="modal-footer" id="contentContainer">
+                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary" data-dismiss="modal">Batal</button>
                     <!-- <button type="button" class="btn btn-primary" onclick="submitAddModalX()">Submit</button> -->
                 </div>
             </div>
@@ -2247,7 +2222,7 @@
 
             let xdibayar = $("#input_modalx_dibayar").val().toString().replace(/,/g, '')
 
-            let dibayar = $("#input_modalxedit_dibayar").val()
+            let dibayar = unformatAngka($("#input_modalxedit_dibayar").val())
             let noinvoice = $("#input_modalxedit_noinvoice").val()
             let tanggalinvoice = $("#input_modalxedit_tanggalinvoice").val()
             let nofaktur = barangEdit.NoFaktur
@@ -2479,7 +2454,7 @@
             let nofaktur = barangEdit.NoFaktur
             let nobukti = barangEdit.NoBukti
             let kodecustsupp = barangEdit.KodeCustSupp
-            let inputKL = $('#input_modalxedit_kurangbayar').val()
+            let inputKL = unformatAngka($('#input_modalxedit_kurangbayar').val())
             let perkiraan = $('#input_modalx_perkiraankurangbayaredit').val()
             let _token = $("#_token").val()
 
@@ -2495,8 +2470,8 @@
                 xlist = []
             }
             let xtotalKL = 0
-            let xnilainotadibayar = $("#input_modalxedit_nilainotadibayar").val()
-            let xdibayar = $("#input_modalxedit_dibayar").val()
+            let xnilainotadibayar = unformatAngka($("#input_modalxedit_nilainotadibayar").val())
+            let xdibayar = unformatAngka($("#input_modalxedit_dibayar").val())
 
 
             xlist.forEach((item, i) => {
@@ -3690,9 +3665,10 @@
                 return
 
             }
-            document.getElementById("input_modalxedit_nilainotadibayar").value = parseFloat(Number(barangEdit.NilaiNota))
-                .toFixed(2)
-            document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
+            document.getElementById("input_modalxedit_nilainotadibayar").value = formatAngka(parseFloat(Number(barangEdit
+                .NilaiNota)).toFixed(2))
+            document.getElementById("input_modalxedit_dibayar").value = formatAngka(parseFloat(Number(barangEdit.dibayar))
+                .toFixed(2))
 
             // document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
 
@@ -6007,6 +5983,46 @@
             }
             temp1 += '.' + tempAngka[1]
             return temp1
+        }
+
+        function unformatAngka(angka) {
+            if (!angka) return 0
+            return parseFloat(String(angka).replace(/,/g, '')) || 0
+        }
+
+        function formatAngkaInput(el) {
+            el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+        }
+
+        // Dipasang di oninput supaya separator ribuan langsung muncul sambil mengetik, tidak
+        // menunggu pindah fokus (onblur formatAngkaInput() tetap jalan untuk menormalkan ke 2
+        // desimal). Sama seperti formatAngkaKetik() di accounting/memorialkoreksi.blade.php.
+        function formatAngkaKetik(el) {
+            let posDariKanan = el.value.length - el.selectionStart
+            let minus = el.value.trim().startsWith('-') ? '-' : ''
+            let raw = el.value.replace(/[^0-9.]/g, '')
+
+            let titikIndex = raw.indexOf('.')
+            let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+            let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+            bulat = bulat.replace(/^0+(?=\d)/, '')
+            if (bulat === '') {
+                bulat = '0'
+            }
+
+            let bulatFormatted = ''
+            for (let i = 0; i < bulat.length; i++) {
+                if (i != 0 && (bulat.length - i) % 3 == 0) {
+                    bulatFormatted += ','
+                }
+                bulatFormatted += bulat[i]
+            }
+
+            el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+            let posBaru = Math.max(0, el.value.length - posDariKanan)
+            el.setSelectionRange(posBaru, posBaru)
         }
     </script>
 @endsection

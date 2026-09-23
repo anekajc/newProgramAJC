@@ -722,10 +722,10 @@
                                     onclick="buttonAddBatal()">Batal</button>
 
                                 <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()"
-                                    class="btn btn-primary btn-pill-primary">Submit Add</button>
+                                    class="btn btn-primary btn-pill-primary">Simpan</button>
 
                                 <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                    class="btn btn-primary btn-pill-primary">Submit Edit</button>
+                                    class="btn btn-primary btn-pill-primary">Edit</button>
                             </div>
                         </div>
                     </div>
@@ -1013,9 +1013,7 @@
                                                         id="input_modalx_nilainotadibayar" disabled>
                                                 </div>
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="col-md-3">
@@ -1045,7 +1043,7 @@
                                                     <label>Dibayar</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <input type="text" class="form-control text-right"
                                                         id="input_modalx_dibayar">
@@ -1203,14 +1201,14 @@
                             <div class="container-fluid">
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Nilai Nota</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <input type="text" class="form-control text-right"
                                                         id="input_modalxedit_nilainotadibayar" disabled>
@@ -1219,10 +1217,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
-
-
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>No Invoice</label>
@@ -1234,29 +1230,28 @@
                                                         id="input_modalxedit_noinvoice">
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
 
                                 <div class="row" style="margin-top: -10px">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Dibayar</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <input type="text" class="form-control text-right"
-                                                        id="input_modalxedit_dibayar">
+                                                        id="input_modalxedit_dibayar" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this)">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -1267,11 +1262,9 @@
                                                 <div class="form-group">
                                                     <input type="date" class="form-control text-center"
                                                         id="input_modalxedit_tanggalinvoice">
-
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                                 <div class="row mt-2" style="margin-top: 0">
@@ -1307,8 +1300,9 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="input-group form-group">
-                                                        <input id="input_modalxedit_kurangbayar" type="number"
-                                                            value="0.00" class="text-right form-control">
+                                                        <input id="input_modalxedit_kurangbayar" type="text"
+                                                            value="0.00" class="text-right form-control"
+                                                            oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
 
                                                     </div>
                                                 </div>
@@ -1349,7 +1343,7 @@
                                             onclick="buttonAddBatalKLEdit()">Batal</button>
 
                                         <button id="buttonSubmitAddKLEdit" type="button" onclick="submitAddKLEdit()"
-                                            class="btn btn-primary btn-action-primary btn-pill-primary">Submit Add</button>
+                                            class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                                     </div>
                                 </div>
                             </div>
@@ -1423,8 +1417,8 @@
                             </div>
 
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        <div class="modal-footer" id="contentContainer">
+                            <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                 data-dismiss="modal">Batal</button>
                         </div>
                     </div>
@@ -2091,7 +2085,7 @@
             let nofaktur = barangEdit.NoFaktur
             let nobukti = barangEdit.NoBukti
             let kodecustsupp = barangEdit.KodeCustSupp
-            let inputKL = $('#input_modalxedit_kurangbayar').val()
+            let inputKL = unformatAngka($('#input_modalxedit_kurangbayar').val())
             let perkiraan = $('#input_modalx_perkiraankurangbayaredit').val()
             let _token = $("#_token").val()
 
@@ -4806,7 +4800,7 @@
 
 
             });
-            if (Number(xnilainotadibayar) < Number(xdibayar) + Number(xtotalKL)) {
+            if (Number(xnilainota) < Number(xdibayar) + Number(xtotalKL)) {
                 alertify.warning('KL + dibayar melebihi nilai nota ')
 
                 return
@@ -5884,6 +5878,46 @@
             }
             temp1 += '.' + tempAngka[1]
             return temp1
+        }
+
+        function unformatAngka(angka) {
+            if (!angka) return 0
+            return parseFloat(String(angka).replace(/,/g, '')) || 0
+        }
+
+        function formatAngkaInput(el) {
+            el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+        }
+
+        // Dipasang di oninput supaya separator ribuan langsung muncul sambil mengetik, tidak
+        // menunggu pindah fokus (onblur formatAngkaInput() tetap jalan untuk menormalkan ke 2
+        // desimal). Sama seperti formatAngkaKetik() di accounting/memorialkoreksi.blade.php.
+        function formatAngkaKetik(el) {
+            let posDariKanan = el.value.length - el.selectionStart
+            let minus = el.value.trim().startsWith('-') ? '-' : ''
+            let raw = el.value.replace(/[^0-9.]/g, '')
+
+            let titikIndex = raw.indexOf('.')
+            let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+            let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+            bulat = bulat.replace(/^0+(?=\d)/, '')
+            if (bulat === '') {
+                bulat = '0'
+            }
+
+            let bulatFormatted = ''
+            for (let i = 0; i < bulat.length; i++) {
+                if (i != 0 && (bulat.length - i) % 3 == 0) {
+                    bulatFormatted += ','
+                }
+                bulatFormatted += bulat[i]
+            }
+
+            el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+            let posBaru = Math.max(0, el.value.length - posDariKanan)
+            el.setSelectionRange(posBaru, posBaru)
         }
     </script>
 @endsection

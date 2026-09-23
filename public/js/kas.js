@@ -218,6 +218,34 @@ function aksiButtonsHtml(r) {
     return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
 }
 
+/* Paginasi tabel picker (10 baris/halaman). Dipanggil SETELAH <tbody> diisi dan
+   SEBELUM modal-nya di-show(). Placeholder ber-colspan dibuang dulu supaya
+   DataTables tidak menganggapnya baris data (jumlah kolomnya tidak cocok);
+   pesan kosongnya diserahkan ke language.emptyTable.
+
+   Dua tabel sengaja TIDAK memakai ini — tabel_add_list_invoice dan
+   tabel_add_list_dphuhtbkm — karena barisnya berisi input yang dibaca lewat
+   getElementById() untuk SEMUA baris, sedangkan DataTables melepas baris di luar
+   halaman aktif dari DOM. */
+function kasInitPicker(idTabel, opsi) {
+    var sel = '#' + idTabel;
+    if ($.fn.DataTable.isDataTable(sel)) {
+        $(sel).DataTable().destroy();
+    }
+    if ($(sel + ' tbody td[colspan]').length) {
+        $(sel + ' tbody').empty();
+    }
+    $(sel).DataTable($.extend({
+        lengthChange: false,
+        paging: true,
+        pageLength: 10,
+        language: {
+            emptyTable: 'Tidak ada data',
+            zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+        }
+    }, opsi || {}));
+}
+
 /* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel
    dengan #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti rtPindahBar()
    di bonsementara.blade.php. */
@@ -511,68 +539,9 @@ $(document).ready(function(){
       kasInitReportTableSekali();
       renderTabel();
 
-        $("#tabel_add_list_akumulasibiaya").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-
-
-
-
-        $("#tabel_add_list_lawan").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0
-        }
-    ]
-        //    "columnDefs": [
-        // { "type": "date", "targets": [1] },
-        // {  "className": "text-center", "targets": [3] },
-      // ]
-    });
-
-//     $("#tabel_add_list_tunai").DataTable({
-//     "lengthChange": false,
-//       "paging": false ,
-//       "columnDefs": [
-//     {
-//         type: 'string',
-//         targets: 0
-//     }
-// ]
-//     //    "columnDefs": [
-//     // { "type": "date", "targets": [1] },
-//     // {  "className": "text-center", "targets": [3] },
-//   // ]
-// });
-
-
-        // $('.showhidemodalbodyadd').hide();
-        // $('#modalAddListAktivaDetail').show();
-
-        // $("#formTunai").modal('toggle')
-
-        $("#tabel_add_list_bon").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-
-      $("#tabel_add_list_customer").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
-
-        $("#tabel_add_list_custsupp").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-
-      // buttonAddNewAktiva()
-      // $("#form").modal('toggle')
-
+      // Picker tabel_add_list_* tidak lagi di-init di sini terhadap baris statis "-"
+      // bawaan blade — kasInitPicker() menginisialisasi ulang tiap tabel picker saat
+      // dibuka (lihat masing-masing buttonAddListXxx()).
 });
 
 function buttonAddPickCustSuppX (kodecustsupp, agent) {
@@ -863,7 +832,6 @@ function buttonAddPickBiayaX (id , perkiraan) {
 function buttonAddListXBiaya (id) {
 
   // let _token = $("#_token").val();
-  $('#tabel_add_list_akumulasibiaya').DataTable().destroy();
   $.ajax({
     url: KAS_ROUTES.kaslistbiayainput,
     type: "get",
@@ -883,16 +851,9 @@ function buttonAddListXBiaya (id) {
 
 
       document.getElementById("tabel_data_add_list_akumulasibiaya").innerHTML = rowTable
-      $("#tabel_add_list_akumulasibiaya").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0 // Applies this definition to the first column (index 0)
-        }
-    ]
-    });
+      kasInitPicker('tabel_add_list_akumulasibiaya', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
 
       if (res.length) {
 
@@ -915,7 +876,6 @@ function buttonAddListXBiaya (id) {
 function buttonAddListXAkumulasi () {
 
   // let _token = $("#_token").val();
-  $('#tabel_add_list_akumulasibiaya').DataTable().destroy();
   $.ajax({
     url: KAS_ROUTES.kaslistakumulasiinput,
     type: "get",
@@ -935,16 +895,9 @@ function buttonAddListXAkumulasi () {
 
 
       document.getElementById("tabel_data_add_list_akumulasibiaya").innerHTML = rowTable
-      $("#tabel_add_list_akumulasibiaya").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0 // Applies this definition to the first column (index 0)
-        }
-    ]
-    });
+      kasInitPicker('tabel_add_list_akumulasibiaya', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
 
       if (res.length) {
 
@@ -1000,6 +953,7 @@ function buttonAddListCosting () {
 
 
       document.getElementById("tabel_data_add_list_costing").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_costing');
 
       if (res.length) {
 
@@ -1059,6 +1013,7 @@ function buttonAddListSubCosting () {
 
 
       document.getElementById("tabel_data_add_list_subcosting").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_subcosting');
 
       if (res.length) {
 
@@ -2211,7 +2166,7 @@ function submitAddEdit () {
   let perkiraanx = transaksi == 'BKK' ? lawan : kodeperkiraan
   let lawanx = transaksi == 'BKK' ? kodeperkiraan : lawan
 
-  let nilai = formatAngkaVal($("#input_add_nilaibon").val())
+  let nilaibon = formatAngkaVal($("#input_add_nilaibon").val())
 
 
 
@@ -2799,24 +2754,11 @@ function buttonAddListLawan () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
 
-      $('#tabel_add_list_lawan').DataTable().destroy();
-
       document.getElementById("tabel_data_add_list_lawan").innerHTML = rowTable
 
-      $("#tabel_add_list_lawan").DataTable({
-      "lengthChange": false,
-        "paging": false ,
-        "columnDefs": [
-      {
-          type: 'string',
-          targets: 0
-      }
-  ]
-      //    "columnDefs": [
-      // { "type": "date", "targets": [1] },
-      // {  "className": "text-center", "targets": [3] },
-    // ]
-  });
+      kasInitPicker('tabel_add_list_lawan', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
 
       if (res.length) {
 
@@ -2883,6 +2825,7 @@ function modalDPP (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dpp").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_dpp');
 
       if (res.length) {
 
@@ -2943,6 +2886,7 @@ function modalDPHUHTBKM (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dphuhtbkm_custsupp").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_dphuhtbkm_custsupp');
       document.getElementById("input_dphuhtbkm_namacustsupp").value = ''
       document.getElementById("input_dphuhtbkm_kodecustsupp").value = ''
 
@@ -3019,6 +2963,7 @@ function modalDPHUHT (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dphuht").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_dphuht');
 
       if (res.length) {
 
@@ -3222,6 +3167,7 @@ function modalAktiva (dataLawan) {
 
 
         }
+        kasInitPicker('tabel_add_list_aktiva');
 
         $('.showhidemodalbodyadd').hide();
         $('#modalAddListAktiva').show();
@@ -3267,6 +3213,7 @@ function modalAktiva (dataLawan) {
         // }
 
         document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
+        kasInitPicker('tabel_add_list_aktiva');
 
 
         if (res.length) {
@@ -3337,6 +3284,7 @@ function modalDPH (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dph").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_dph');
 
       if (res.length) {
 
@@ -3878,6 +3826,7 @@ function buttonAddListDepartemen () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_departemen").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_departemen');
 
       if (res.length) {
 
@@ -3941,6 +3890,7 @@ function buttonAddListValas () {
       // (copy-paste dari picker Perkiraan) — baris Valas jadi tidak pernah muncul di modal
       // Valas-nya sendiri. Diperbaiki ke id Valas yang benar.
       document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_valas');
 
       if (res.length) {
 
@@ -4002,6 +3952,7 @@ function buttonAddListDevisi () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_devisi").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_devisi');
 
       if (res.length) {
 
@@ -4306,13 +4257,8 @@ function onChangeAddAddJumlah () {
 
 
 
-            $('#tabel_add_list_customer').DataTable().destroy();
-
             document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
-            $("#tabel_add_list_customer").DataTable({
-              "lengthChange": false,
-                "paging": false ,
-          });
+            kasInitPicker('tabel_add_list_customer');
 
                     $('#modalAddListCustomer').show();
                     $("#form").modal('toggle')
@@ -4373,6 +4319,7 @@ function buttonAddListPerkiraan () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_perkiraan');
 
       if (res.length) {
 
@@ -4439,12 +4386,8 @@ function buttonAddListBon () {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
-      $('#tabel_add_list_bon').DataTable().destroy();
       document.getElementById("tabel_data_add_list_bon").innerHTML = rowTable
-      $("#tabel_add_list_bon").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      kasInitPicker('tabel_add_list_bon');
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
@@ -4695,7 +4638,6 @@ function buttonAddListNoInvoice () {
 
 function buttonAddListCustsupp () {
   console.log('buttonAddListCustsupp')
-  $('#tabel_add_list_custsupp').DataTable().destroy();
   $.ajax({
     url: KAS_ROUTES.kaslistcustsupp,
     type: "get",
@@ -4722,10 +4664,7 @@ function buttonAddListCustsupp () {
         rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_custsupp").innerHTML = rowTable
-      $("#tabel_add_list_custsupp").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      kasInitPicker('tabel_add_list_custsupp');
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListCustsupp').show();
       $("#form").modal('toggle')
