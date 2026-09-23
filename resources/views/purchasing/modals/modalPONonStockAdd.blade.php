@@ -424,8 +424,8 @@
                 <th scope="col">Part Number</th>
                 <th scope="col">Merk</th>
                 <th scope="col">Sat</th>
-                <th scope="col">Qnt PR</th>
-                <th scope="col">Qnt PO</th>
+                <th scope="col">Qty PR</th>
+                <th scope="col">Qty PO</th>
                 <th scope="col">Sisa PR</th>
                 <th scope="col">No. PR</th>
                 <th scope="col">No. SO Cust</th>

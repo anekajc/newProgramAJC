@@ -1307,7 +1307,7 @@
           <thead class="text-center">
             <tr>
               <th scope="col">Tanggal</th>
-              <th scope="col">Qnt</th>
+              <th scope="col">Qty</th>
               <th scope="col">Satuan</th>
               <th scope="col">Valas</th>
               <th scope="col">Kurs</th>
@@ -3339,7 +3339,7 @@ function buttonAddAddListPWO () {
           <td>${item.supplier}</td>
           <td>${item.kode}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.qty}</td>
+          <td>${formatAngka(item.qty)}</td>
           <td>${item.satuan}</td>
           <td>${item.harga}</td>
           <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPWO('${item.no_bukti}' , '${item.tanggal}')" type="button" ><i class="bi bi-plus"></i></button></td>
@@ -3402,8 +3402,8 @@ function buttonAddAddListBarang () {
             <td style="white-space:nowrap;">${item.PartNumber}</td>
             <td style="white-space:nowrap;">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
             <td style="white-space:nowrap;">${item.Sat}</td>
-            <td style="white-space:nowrap;">${item.Qnt}</td>
-            <td style="white-space:nowrap;">${item.QntPO}</td>
+            <td style="white-space:nowrap;">${formatAngka(item.Qnt)}</td>
+            <td style="white-space:nowrap;">${formatAngka(item.QntPO)}</td>
             <td style="white-space:nowrap;">${item.SisaPPL}</td>
             <td style="white-space:nowrap;">${item.NoBukti}</td>
             <td style="white-space:nowrap;">${item.NosoCust}</td>
@@ -3458,8 +3458,8 @@ function buttonAddAddListBarang () {
             <td style="white-space:nowrap;">${item.PartNumber}</td>
             <td style="white-space:nowrap;">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
             <td style="white-space:nowrap;">${item.Sat}</td>
-            <td style="white-space:nowrap;">${item.Qnt}</td>
-            <td style="white-space:nowrap;">${item.QntPO}</td>
+            <td style="white-space:nowrap;">${formatAngka(item.Qnt)}</td>
+            <td style="white-space:nowrap;">${formatAngka(item.QntPO)}</td>
             <td style="white-space:nowrap;">${item.SisaPPL}</td>
             <td style="white-space:nowrap;">${item.NoBukti}</td>
             <td style="white-space:nowrap;">${item.NosoCust}</td>
@@ -3557,8 +3557,8 @@ function buttonAddAddListBarang () {
             <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddPickBarangNonFOCPlus(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
             <td>${item.KodeBrg}</td>
             <td style="white-space:nowrap;">${item.NamaBrg}</td>
-            <td>${item.Qnt}</td>
-            <td>${item.Qnt2}</td>
+            <td>${formatAngka(item.Qnt)}</td>
+            <td>${formatAngka(item.Qnt2)}</td>
             <td>${item.Sat}</td>
             <td>${item.SisaPPL}</td>
             <td>${item.Sisa2PPL}</td>
@@ -4874,7 +4874,7 @@ function cekQntStock () {
   console.log(currentQntPO + ' current qnt PO')
 
   if (currentQntPO > cekQntSisa) {
-    alertify.warning('Qnt PO Tidak boleh melebihi Qnt Sisa')
+    alertify.warning('Qty PO Tidak boleh melebihi Qty Sisa')
     document.getElementById("input_add_add_qty").value = '0.00'
   }
   
@@ -4931,7 +4931,7 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
         <tr>
           <td>${item.NamaCustSupp}</td>
           <td>${date1}</td>
-          <td>${item.QNT}</td>
+          <td>${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           <td>${item.KODEVLS}</td>
           <td>${item.KURS}</td>
@@ -5034,7 +5034,7 @@ function buttonAddAddPickBarangNonFOCPlus (index , pEdit = 0) {
         <tr>
           <td>${item.NamaCustSupp}</td>
           <td>${date1}</td>
-          <td>${item.QNT}</td>
+          <td>${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           <td>${item.KODEVLS}</td>
           <td>${item.KURS}</td>
@@ -5602,7 +5602,7 @@ function refreshDataTableAdd (NOBUKTI) {
             `<tr>
               <td>${item.KODEBRG}</td>
               <td>${item.NamaBrg}</td>
-              <td class="text-right">${item.QNT ? parseFloat(item.QNT).toFixed(2) : '0.00'}</td>
+              <td class="text-right">${item.QNT ? formatAngka(item.QNT) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td>${item.NORJual}</td>
               <td>${item.nopbl}</td>
@@ -6751,7 +6751,7 @@ function submitPrint (nobukti) {
                 <thead>
                   <tr>
                     <td class="text-center" style="width: 30%">BARANG</td>
-                    <td class="text-center" style="width: 5%">QNT</td>
+                    <td class="text-center" style="width: 5%">QTY</td>
                     <td class="text-center" style="width: 5%">SUPPLIER</td>
                     <td class="text-center" style="width: 5%">PO BELI</td>
                     <td class="text-center" style="width: 5%">NOTA BELI</td>
@@ -6790,7 +6790,7 @@ item.forEach((itemSub, j) => {
   tempPrintStr += `
     <tr>
       <td style='' class="no-border" style="width: 20%;">${z+1} ${itemSub.NAMABRG}</td>
-      <td style='' class="no-border" style="width: 5%;">${itemSub.QNT}  ${itemSub.SATUAN}</td>
+      <td style='' class="no-border" style="width: 5%;">${formatAngka(itemSub.QNT)}  ${itemSub.SATUAN}</td>
       <td style='' class="no-border" style="width: 35%;">${itemSub.namaCustSupp}</td>
       <td style='' class="no-border" style="width: 20%;">${itemSub.POBELI}</td>
       <td style='' class="no-border" style="width: 20%;">${itemSub.NOBELI}</td>

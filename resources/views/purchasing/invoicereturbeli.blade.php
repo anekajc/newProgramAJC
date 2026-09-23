@@ -568,7 +568,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             <tr>
               <th scope="col">Kode Barang</th>
               <th scope="col">Nama Barang</th>
-              <th scope="col">Qnt</th>
+              <th scope="col">Qty</th>
               <th scope="col">Sat</th>
               <th scope="col">Harga</th>
               <th scope="col">Diskon</th>
@@ -1278,7 +1278,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               <tr>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
-                <th scope="col">Qnt</th>
+                <th scope="col">Qty</th>
                 <th scope="col">Sat</th>
                 <th scope="col">Harga</th>
                 <th scope="col">Diskon</th>
@@ -1661,7 +1661,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
 
-                  <th style="padding: 4px 12px;" scope="col">Qnt Sisa</th>
+                  <th style="padding: 4px 12px;" scope="col">Qty Sisa</th>
 
                   <th style="padding: 4px 12px;" scope="col">Satuan</th>
                   <th style="padding: 4px 12px;" scope="col">Actions</th>
@@ -2431,7 +2431,7 @@ function submitAddAdd () {
   }
 
   if (Number(qnt) * Number(isi) > Number(barang.QntSisa) * Number(barang.Isi) ) {
-    alertify.warning("Melebihi qnt sisa")
+    alertify.warning("Melebihi qty sisa")
     return
   }
   console.log('y')
@@ -2577,7 +2577,7 @@ function buttonAddListBarang () {
         <tr>
         <td>${item.KodeBrg}</td>
         <td>${item.NamaBrg ? item.NamaBrg : item.NamaBrgx }</td>
-        <td>${item.QntSisa}</td>
+        <td>${formatAngka(item.QntSisa)}</td>
         <td class="text-center">${item.Satuan}</td>
         <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBarang(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
 
@@ -4252,7 +4252,7 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 2%;">${z+1}</td>
       <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NamaBrg}</td>
       <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 5%;">${itemSub.PartNumber}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.Qnt ? formatAngka(itemSub.Qnt) : ''}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${formatAngka(parseFloat(itemSub.Harga).toFixed(2))}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${formatAngka(parseFloat(itemSub.Total).toFixed(2))}</td>
     </tr>`;

@@ -915,12 +915,12 @@ td input[type="checkbox"] {
                         <th style="padding: 4px 12px; " scope="col">Kode Barang</th>
                         <th style="padding: 4px 12px; " scope="col">Nama Barang</th>
                         <th style="padding: 4px 12px; " scope="col">Sat</th>
-                        <th style="padding: 4px 12px; " scope="col">Qnt</th>
-                        <th style="padding: 4px 12px; " scope="col">Qnt PO</th>
+                        <th style="padding: 4px 12px; " scope="col">Qty</th>
+                        <th style="padding: 4px 12px; " scope="col">Qty PO</th>
                         <th style="padding: 4px 12px; " scope="col">Sisa PR</th>
                         <th style="padding: 4px 12px; " scope="col">Keterangan</th>
                         <th style="padding: 4px 12px; " scope="col">Out. SO</th>
-                        <th style="padding: 4px 12px; " scope="col">Qnt Stock</th>
+                        <th style="padding: 4px 12px; " scope="col">Qty Stock</th>
 
                       </tr>
                     </thead>
@@ -1996,7 +1996,7 @@ td input[type="checkbox"] {
                           <tr>
                             <th style="padding: 4px 12px;" scope="col">Supplier</th>
                             <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                            <th style="padding: 4px 12px;" scope="col">Qnt</th>
+                            <th style="padding: 4px 12px;" scope="col">Qty</th>
                             <th style="padding: 4px 12px;" scope="col">Satuan</th>
                             <th style="padding: 4px 12px;" scope="col">Valas</th>
                             <th style="padding: 4px 12px;" scope="col">Kurs</th>
@@ -2265,7 +2265,7 @@ td input[type="checkbox"] {
           <thead class="text-center">
             <tr>
               <th scope="col">Tanggal</th>
-              <th scope="col">Qnt</th>
+              <th scope="col">Qty</th>
               <th scope="col">Satuan</th>
               <th scope="col">Valas</th>
               <th scope="col">Kurs</th>
@@ -3390,7 +3390,7 @@ td input[type="checkbox"] {
               <tr>
                 <th>Kode Barang</th>
                 <th>Nama Barang</th>
-                <th class="num">Qnt</th>
+                <th class="num">Qty</th>
                 <th class="num">Harga</th>
                 <th class="num">Diskon</th>
                 <th class="num">Sub Total</th>
@@ -4064,7 +4064,7 @@ function buttonOtorisasi (nobukti , isoto1) {
         rows += `<tr>
           <td>${item.KodeBrg}</td>
           <td>${item.NamaBrg}</td>
-          <td class="text-right">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
+          <td class="text-right">${item.Qnt ? formatAngka(item.Qnt) : '0.00'}</td>
           <td class="text-right">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
           <td class="text-right">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
           <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
@@ -5985,7 +5985,7 @@ function buttonAddEditItem (i) {
         <tr>
           <td>${item.NamaCustSupp}</td>
           <td>${date1}</td>
-          <td>${item.QNT}</td>
+          <td>${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           <td>${item.KODEVLS}</td>
           <td>${item.KURS}</td>
@@ -6148,7 +6148,7 @@ function buttonAddAddListPWO () {
           <td>${item.supplier}</td>
           <td>${item.kode}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.qty}</td>
+          <td>${formatAngka(item.qty)}</td>
           <td>${item.satuan}</td>
           <td>${item.harga}</td>
         </tr>`
@@ -6319,9 +6319,9 @@ function buttonAddAddListBarang (opsi = {}) {
             <td style="">${item.PartNumber}</td>
             <td style="">${item.NAMAMERK ? item.NAMAMERK : ''}</td>
             <td style="">${item.Sat}</td>
-            <td style="">${item.Qnt}</td>
-            <td style="">${item.QntPO}</td>
-            <td style="">${qntBatal}</td>
+            <td style="">${formatAngka(item.Qnt)}</td>
+            <td style="">${formatAngka(item.QntPO)}</td>
+            <td style="">${formatAngka(qntBatal)}</td>
             <td style="">${item.SisaPPL}</td>
             <td style="">${item.NoBukti}</td>
             <td style="">${item.NosoCust ? item.NosoCust : ''}</td>
@@ -6426,8 +6426,8 @@ function buttonAddAddListBarang (opsi = {}) {
           <tr class="pick-row" onclick="buttonAddAddPickBarangNonFOCPlus(${i})">
             <td>${item.KodeBrg}</td>
             <td style="">${item.NamaBrg}</td>
-            <td>${item.Qnt}</td>
-            <td>${item.Qnt2}</td>
+            <td>${formatAngka(item.Qnt)}</td>
+            <td>${formatAngka(item.Qnt2)}</td>
             <td>${item.Sat}</td>
             <td>${item.SisaPPL}</td>
             <td>${item.Sisa2PPL}</td>
@@ -6656,7 +6656,7 @@ function buttonTambahSOAll () {
           <td>${item.NoPesanan}</td>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td class="text-right">${parseFloat(item.QNT).toFixed(2)}</td>
+          <td class="text-right">${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           </tr>`
       });
@@ -8832,13 +8832,15 @@ function cekQntStock () {
   cekQntPO = tempStockAdd.QntPO
   cekQntSisa = tempStockAdd.SisaPPL
 
-  currentQntPO = document.getElementById("input_add_add_qty").value || 0
+  // Nilai input qty sudah berpemisah ribuan (autoNumeric), jadi koma harus dibuang
+  // sebelum dibandingkan - sama seperti purchaseOrderNonStock.blade.php.
+  currentQntPO = (document.getElementById("input_add_add_qty").value || '0').replace(/,/g, '')
 
   console.log(currentQntPO + ' current qnt PO')
   console.log(currentQntPO,'=============================PO')
   console.log(cekQntSisa,'=============================sisa')
   if (Number(currentQntPO) > Number(cekQntSisa)) {
-    alertify.warning('Qnt PO Tidak boleh melebihi Qnt Sisa')
+    alertify.warning('Qty PO Tidak boleh melebihi Qty Sisa')
     document.getElementById("input_add_add_qty").value = '0.00'
   }
 
@@ -8856,7 +8858,7 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
   document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
-  document.getElementById("input_add_add_qty").value = tempAddAdd.SisaPPL
+  document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.SisaPPL).toFixed(2))
 
   // Nomor + urut PR-nya disimpan di dua field tersembunyi ini; itulah yang dikirim
   // sebagai NoPPL/UrutPPL ke sp_PO dan berakhir di kolom noppl/urutppl dbpodet.
@@ -8913,7 +8915,7 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
         <tr>
           <td>${item.NamaCustSupp}</td>
           <td>${date1}</td>
-          <td>${item.QNT}</td>
+          <td>${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           <td>${item.KODEVLS}</td>
           <td>${item.KURS}</td>
@@ -8962,7 +8964,7 @@ function buttonAddAddPickBarangNonFOCPlus (index , pEdit = 0) {
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
   document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
-  document.getElementById("input_add_add_qty").value = tempAddAdd.Qnt
+  document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.Qnt).toFixed(2))
 
   // Sama seperti alur PR: nomor + urut SO-nya yang berakhir di kolom noppl/urutppl.
   document.getElementById("input_add_add_noPPL").value = tempAddAdd.NoBukti
@@ -8995,10 +8997,10 @@ function buttonAddAddPickBarangNonFOCPlus (index , pEdit = 0) {
   document.getElementById("input_add_add_nosat").value = tempAddAdd.NoSat
   console.log(tempAddAdd.Nosat)
   if (tempAddAdd.NoSat == 1) {
-    document.getElementById("input_add_add_qty").value = tempAddAdd.SisaPPL
+    document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.SisaPPL).toFixed(2))
 
   } else {
-    document.getElementById("input_add_add_qty").value = tempAddAdd.Sisa2PPL
+    document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.Sisa2PPL).toFixed(2))
 
   }
 
@@ -9025,7 +9027,7 @@ function buttonAddAddPickBarangNonFOCPlus (index , pEdit = 0) {
         <tr>
           <td>${item.NamaCustSupp}</td>
           <td>${date1}</td>
-          <td>${item.QNT}</td>
+          <td>${formatAngka(item.QNT)}</td>
           <td>${item.SATUAN}</td>
           <td>${item.KODEVLS}</td>
           <td>${item.KURS}</td>
@@ -9715,7 +9717,7 @@ function refreshDataTableAdd (NOBUKTI) {
             `<tr>
               <td>${item.KodeBrg}</td>
               <td>${item.NamaBrg}</td>
-              <td class="text-center">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
+              <td class="text-center">${item.Qnt ? formatAngka(item.Qnt) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td class="text-center">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
               <td class="text-center">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
@@ -9844,7 +9846,7 @@ function refreshDataTableEdit (NOBUKTI) {
             `<tr>
               <td>${item.KodeBrg}</td>
               <td>${item.NamaBrg}</td>
-              <td class="text-center">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
+              <td class="text-center">${item.Qnt ? formatAngka(item.Qnt) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td class="text-center">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
               <td class="text-center">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
@@ -9966,7 +9968,7 @@ function refreshDataTableDetail (NOBUKTI) {
               <td>${item.KodeBrg}</td>
               <td>${item.NamaBrg}</td>
               <td>${item.KeteranganBarang || ''}</td>
-              <td class="text-center">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
+              <td class="text-center">${item.Qnt ? formatAngka(item.Qnt) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td class="text-center">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
               <td class="text-center">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
@@ -10588,7 +10590,7 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 35%;">${itemSub.NAMABRG}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 15%; text-align: center;">${itemSub.PartNumber}</td>
       <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 10%;">${itemSub.NAMAMERK ?? ''}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 8%; text-align: right;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 8%; text-align: right;">${itemSub.QNT ? formatAngka(itemSub.QNT) : ''}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 5%; text-align: center;">${itemSub.SATUAN}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 10%; text-align: right;">${formatAngka(parseFloat(itemSub.harga).toFixed(2))}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 15%; text-align: right;">${formatAngka(parseFloat(itemSub.SUBTOTALRp).toFixed(2))}</td>
@@ -11327,7 +11329,7 @@ tempPrintStr += `
   <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 35%;">${itemSub.NAMABRG}</td>
   <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 15%; text-align: center;">${itemSub.PartNumber}</td>
   <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 10%;">${itemSub.NAMAMERK ?? ''}</td>
-  <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 8%; text-align: right;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
+  <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 8%; text-align: right;">${itemSub.QNT ? formatAngka(itemSub.QNT) : ''}</td>
   <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 5%; text-align: center;">${itemSub.SATUAN}</td>
   <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 10%; text-align: right;">${formatAngka(parseFloat(itemSub.harga).toFixed(2))}</td>
   <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; width: 15%; text-align: right;">${formatAngka(parseFloat(itemSub.SUBTOTALRp).toFixed(2))}</td>

@@ -179,8 +179,8 @@
                 <th scope="col">Part Number</th>
                 <th scope="col">Merk</th>
                 <th scope="col">Sat</th>
-                <th scope="col">Qnt PR</th>
-                <th scope="col">Qnt PO</th>
+                <th scope="col">Qty PR</th>
+                <th scope="col">Qty PO</th>
                 <th scope="col">Sisa PR</th>
                 <th scope="col">No. PR</th>
                 <th scope="col">No. SO Cust</th>
@@ -224,8 +224,8 @@
                   <th style="white-space:nowrap;" scope="col">Actions</th>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
-                  <th style="white-space:nowrap;" scope="col">QNT Sat 1</th>
-                  <th style="white-space:nowrap;" scope="col">QNT Sat 2</th>
+                  <th style="white-space:nowrap;" scope="col">QTY Sat 1</th>
+                  <th style="white-space:nowrap;" scope="col">QTY Sat 2</th>
                   <th style="white-space:nowrap;" scope="col">Sat</th>
                   <th style="white-space:nowrap;" scope="col">Sisa</th>
                   <th style="white-space:nowrap;" scope="col">Sisa 2</th>
