@@ -525,7 +525,36 @@
   }
   .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
   .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
-  </style>
+  
+/* ---------- Perataan kotak centang untuk semua tabel di halaman ini ----------
+   Dikumpulkan di satu tempat supaya tabel utama maupun tabel di dalam modal
+   berperilaku sama. Dua hal yang dibereskan:
+   1. .form-check bawaan Bootstrap memberi padding-left pada wadahnya dan
+      float:left pada inputnya, jadi text-center saja tidak membuat kotaknya
+      benar-benar di tengah kolom.
+   2. vertical-align:middle mengacu ke titik tengah x-height teks, sedangkan isi
+      kolom sebelahnya huruf kapital/angka. Tanpa koreksi -2px kotak centangnya
+      terlihat turun sedikit dibanding teks di sebelahnya. */
+td .form-check {
+  padding-left: 0;
+  margin: 0;
+  min-height: 0;
+}
+td input[type="checkbox"] {
+  float: none;
+  margin: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+  /* Ukuran diseragamkan lewat scale, bukan width/height, supaya bentuk kotaknya
+     tetap bawaan browser. width/height dikembalikan ke auto supaya ukuran khusus
+     dari class lain (mis. .pba-chk-lg di invoicepembelian) tidak membuat sebagian
+     kotak jadi lebih besar dari yang lain. */
+  width: auto;
+  height: auto;
+  transform: scale(1.5);
+}
+</style>
 {{-- tab bar baru--}}
 
 {{-- tampilan search bar 1 --}}
