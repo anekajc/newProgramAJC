@@ -31,16 +31,16 @@ class LaporanAccountingHutangOutstandingNotaController extends Controller {
 
   public function doReport(Request $req) {
 
-    $tanggal = $req->get('date1');
-    $awal = $req->get('inputSuppAwal');
-    $akhir= $req->get('inputSuppAkhir');
+    $tanggal = $req->query('date1');
+    $awal = $req->query('inputSuppAwal');
+    $akhir= $req->query('inputSuppAkhir');
     $devisi = '01';
-    $tipe = $req->get('inputOrd');
-    $Perkiraan = $req->get('inputPerkiraan');
-    $KodeVls = $req->get('valas_value');
+    $tipe = $req->query('inputOrd');
+    $Perkiraan = $req->query('inputPerkiraan');
+    $KodeVls = $req->query('valas_value');
 
     $values  = [$tanggal, $awal, $akhir, $devisi, $tipe, $Perkiraan, $KodeVls];
-    
+
     $res = DB::connection('SML')->select('exec sp_ReportSisaHutangJTH ?,?,?,?,?,?,?',
       $values);
 
@@ -48,7 +48,7 @@ class LaporanAccountingHutangOutstandingNotaController extends Controller {
   }
 
   // public function doFilter(Request $req) {
-  //   $kolom = ($req->get('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
+  //   $kolom = ($req->query('inputOrd') == "N") ? 'nobukti, Tanggal' : 'KODEBRG, NAMABRG';
   //   $listData = DB::connection('MGL')->select('select ' . $kolom . ' from VwREPORTHISPO where tanggal between :tgl1 and :tgl2 group by ' . $kolom , ['tgl1' => $req->date1, 'tgl2' => $req->date2]);
   //   return $listData;
   // }
@@ -59,12 +59,12 @@ class LaporanAccountingHutangOutstandingNotaController extends Controller {
 
   //   for ($i=0; $i < count($req->listdata); $i++) {
   //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
+
   //     for ($j=0; $j < count($row); $j++) {
   //       $res = array_add($res, $i+$j, $row[$j]);
   //     }
   //   }
-    
+
   //   return $res;
   // }
 
@@ -77,13 +77,13 @@ class LaporanAccountingHutangOutstandingNotaController extends Controller {
       // $userid = $request->input('userid');
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
                 SELECT Perkiraan
-                FROM DBAKSESPERKIRAANR 
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -106,13 +106,13 @@ public function loadValas()
       $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
-          select a.KodeCustsupp, 
-                a.NamaCustSupp as NamaCust, 
-                a.Alamat, 
-                a.Telpon 
+          select a.KodeCustsupp,
+                a.NamaCustSupp as NamaCust,
+                a.Alamat,
+                a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
       ", [$perkiraan]);
 

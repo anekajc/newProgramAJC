@@ -1555,7 +1555,7 @@
          * List "Nota belum cetak" (#tabelOut, tbody #tabel_data) dan "Nota sudah cetak"
          * (#tabelPenerimaan, tbody #tabel2_data) — draggable/hideable columns + DataTables
          * pagination, byte-for-byte sama dengan accounting/memorialkoreksi.blade.php /
-         * accounting/bonsementara.blade.php per tab (lihat @section('css') di atas). Dua
+         * accounting/bonsementara.blade.php per tab (lihat section('css') di atas). Dua
          * tab = dua dataset yang benar-benar berbeda, jadi dua instance ReportTable dan
          * dua instance DataTables terpisah — lihat ctkInitReportTableSekali()/
          * ctkHeadHtml()/ctkAturTinggiTabel() di bawah, diparameterkan lewat tableId/barId

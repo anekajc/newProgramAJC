@@ -28,17 +28,17 @@ class LaporanAccountingHutangLPHTOController extends Controller {
 
   public function doReport(Request $req) {
 
-    $Perkiraan = $req->get('inputPerkiraan');
-    $Tanggal1 = $req->get('date1');
-    $Tanggal2 = $req->get('date2');
-    $Awal = $req->get('inputSuppAwal');
-    $Akhir = $req->get('inputSuppAkhir');
+    $Perkiraan = $req->query('inputPerkiraan');
+    $Tanggal1 = $req->query('date1');
+    $Tanggal2 = $req->query('date2');
+    $Awal = $req->query('inputSuppAwal');
+    $Akhir = $req->query('inputSuppAkhir');
     $Devisi = '01';
     $Tipe = 0;
-    $KodeVls = $req->get('valas_value');
+    $KodeVls = $req->query('valas_value');
 
     $values  = [$Perkiraan, $Tanggal1, $Tanggal2, $Awal, $Akhir, $Devisi, $Tipe, $KodeVls];
-    
+
     $res = DB::connection('SML')->select('exec sp_ReportSaldoHutangTO ?,?,?,?,?,?,?,?',
       $values);
 
@@ -57,12 +57,12 @@ class LaporanAccountingHutangLPHTOController extends Controller {
 
   //   for ($i=0; $i < count($req->listdata); $i++) {
   //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
+
   //     for ($j=0; $j < count($row); $j++) {
   //       $res = array_add($res, $i+$j, $row[$j]);
   //     }
   //   }
-    
+
   //   return $res;
   // }
 
@@ -75,13 +75,13 @@ class LaporanAccountingHutangLPHTOController extends Controller {
       // $userid = $request->input('userid');
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
                 SELECT Perkiraan
-                FROM DBAKSESPERKIRAANR 
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -104,13 +104,13 @@ public function loadValas()
       $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
-          select a.KodeCustsupp, 
-                a.NamaCustSupp as NamaCust, 
-                a.Alamat, 
-                a.Telpon 
+          select a.KodeCustsupp,
+                a.NamaCustSupp as NamaCust,
+                a.Alamat,
+                a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
       ", [$perkiraan]);
 

@@ -218,6 +218,34 @@ function aksiButtonsHtml(r) {
     return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
 }
 
+/* Paginasi tabel picker (10 baris/halaman). Dipanggil SETELAH <tbody> diisi dan
+   SEBELUM modal-nya di-show(). Placeholder ber-colspan dibuang dulu supaya
+   DataTables tidak menganggapnya baris data (jumlah kolomnya tidak cocok);
+   pesan kosongnya diserahkan ke language.emptyTable.
+
+   Dua tabel sengaja TIDAK memakai ini — tabel_add_list_invoice dan
+   tabel_add_list_dphuhtbbm — karena barisnya berisi input yang dibaca lewat
+   getElementById() untuk SEMUA baris, sedangkan DataTables melepas baris di luar
+   halaman aktif dari DOM. */
+function bankInitPicker(idTabel, opsi) {
+    var sel = '#' + idTabel;
+    if ($.fn.DataTable.isDataTable(sel)) {
+        $(sel).DataTable().destroy();
+    }
+    if ($(sel + ' tbody td[colspan]').length) {
+        $(sel + ' tbody').empty();
+    }
+    $(sel).DataTable($.extend({
+        lengthChange: false,
+        paging: true,
+        pageLength: 10,
+        language: {
+            emptyTable: 'Tidak ada data',
+            zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+        }
+    }, opsi || {}));
+}
+
 /* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel
    dengan #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti rtPindahBar()
    di bonsementara.blade.php. */
@@ -504,51 +532,9 @@ $(document).ready(function(){
       bankInitReportTableSekali();
       renderTabel();
 
-        $("#tabel_add_list_akumulasibiaya").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-
-        $("#tabel_add_list_lawan").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0
-        }
-    ]
-        //    "columnDefs": [
-        // { "type": "date", "targets": [1] },
-        // {  "className": "text-center", "targets": [3] },
-      // ]
-    });
-
-
-        $("#tabel_add_list_bon").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-        $("#tabel_add_list_custsupp").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
-        // const urlString = window.location.href
-        // console.log(urlString)
-        // const url = new URL(urlString);
-        // console.log(url)
-        // const searchParams = new URLSearchParams(url.search);
-        // console.log(searchParams)
-        //
-        // const query = searchParams.get('nobukti');
-        // console.log(query)
-
-
-        // var xyz = jQuery.url.param("nobukti");
-        // console.log(xyz)
-
-
-  //   formAddListItem
+      // Picker tabel_add_list_* tidak lagi di-init di sini terhadap baris statis "-"
+      // bawaan blade — bankInitPicker() menginisialisasi ulang tiap tabel picker saat
+      // dibuka (lihat masing-masing buttonAddListXxx()).
 });
 
 
@@ -843,7 +829,6 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
 function buttonAddListXBiaya (id) {
 
   // let _token = $("#_token").val();
-  $('#tabel_add_list_akumulasibiaya').DataTable().destroy();
   $.ajax({
     url: BANK_ROUTES.banklistbiayainput,
     type: "get",
@@ -863,16 +848,9 @@ function buttonAddListXBiaya (id) {
 
 
       document.getElementById("tabel_data_add_list_akumulasibiaya").innerHTML = rowTable
-      $("#tabel_add_list_akumulasibiaya").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0 // Applies this definition to the first column (index 0)
-        }
-    ]
-    });
+      bankInitPicker('tabel_add_list_akumulasibiaya', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
 
       if (res.length) {
 
@@ -895,7 +873,6 @@ function buttonAddListXBiaya (id) {
 function buttonAddListXAkumulasi () {
 
   // let _token = $("#_token").val();
-  $('#tabel_add_list_akumulasibiaya').DataTable().destroy();
   $.ajax({
     url: BANK_ROUTES.banklistakumulasiinput,
     type: "get",
@@ -915,16 +892,9 @@ function buttonAddListXAkumulasi () {
 
 
       document.getElementById("tabel_data_add_list_akumulasibiaya").innerHTML = rowTable
-      $("#tabel_add_list_akumulasibiaya").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        {
-            type: 'string',
-            targets: 0 // Applies this definition to the first column (index 0)
-        }
-    ]
-    });
+      bankInitPicker('tabel_add_list_akumulasibiaya', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
 
       if (res.length) {
 
@@ -1091,12 +1061,8 @@ function buttonAddListBon () {
         </tr>`
       });
 
-      $('#tabel_add_list_bon').DataTable().destroy();
       document.getElementById("tabel_data_add_list_bon").innerHTML = rowTable
-      $("#tabel_add_list_bon").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      bankInitPicker('tabel_add_list_bon');
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
@@ -2648,6 +2614,7 @@ function buttonAddListCosting () {
 
 
       document.getElementById("tabel_data_add_list_costing").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_costing');
 
       if (res.length) {
 
@@ -2707,6 +2674,7 @@ function buttonAddListSubCosting () {
 
 
       document.getElementById("tabel_data_add_list_subcosting").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_subcosting');
 
       if (res.length) {
 
@@ -2773,23 +2741,10 @@ function buttonAddListLawan () {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
-      $('#tabel_add_list_lawan').DataTable().destroy();
-
       document.getElementById("tabel_data_add_list_lawan").innerHTML = rowTable
-      $("#tabel_add_list_lawan").DataTable({
-      "lengthChange": false,
-        "paging": false ,
-        "columnDefs": [
-      {
-          type: 'string',
-          targets: 0
-      }
-  ]
-      //    "columnDefs": [
-      // { "type": "date", "targets": [1] },
-      // {  "className": "text-center", "targets": [3] },
-    // ]
-  });
+      bankInitPicker('tabel_add_list_lawan', {
+        columnDefs: [{ type: 'string', targets: 0 }]
+      });
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
@@ -2855,6 +2810,7 @@ function modalDPP (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dpp").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_dpp');
 
       if (res.length) {
 
@@ -2915,6 +2871,7 @@ function modalDPHUHTBBM (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dphuhtbbm_custsupp").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_dphuhtbbm_custsupp');
       document.getElementById("input_dphuhtbbm_namacustsupp").value = ''
       document.getElementById("input_dphuhtbbm_kodecustsupp").value = ''
 
@@ -2991,6 +2948,7 @@ function modalDPHUHT (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dphuht").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_dphuht');
 
       if (res.length) {
 
@@ -3058,6 +3016,7 @@ function modalDPH (dataLawan) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_dph").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_dph');
 
       if (res.length) {
 
@@ -3599,6 +3558,7 @@ function buttonAddListDepartemen () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_departemen").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_departemen');
 
       if (res.length) {
 
@@ -3735,13 +3695,8 @@ function onChangeAddAddJumlah () {
 
 
 
-            $('#tabel_add_list_customer').DataTable().destroy();
-
             document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
-            $("#tabel_add_list_customer").DataTable({
-              "lengthChange": false,
-                "paging": false ,
-          });
+            bankInitPicker('tabel_add_list_customer');
 
                     $('#modalAddListCustomer').show();
                     $("#form").modal('toggle')
@@ -3808,6 +3763,7 @@ function buttonAddListValas () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_valas');
 
       if (res.length) {
 
@@ -3869,6 +3825,7 @@ function buttonAddListDevisi () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_devisi").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_devisi');
 
       if (res.length) {
 
@@ -3929,6 +3886,7 @@ function buttonAddListPerkiraan () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
+      bankInitPicker('tabel_add_list_perkiraan');
 
       if (res.length) {
 
@@ -4180,7 +4138,6 @@ function buttonAddListNoInvoice () {
 
 function buttonAddListCustsupp () {
   console.log('buttonAddListCustsupp')
-  $('#tabel_add_list_custsupp').DataTable().destroy();
   $.ajax({
     url: BANK_ROUTES.banklistcustsupp,
     type: "get",
@@ -4207,10 +4164,7 @@ function buttonAddListCustsupp () {
         rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_custsupp").innerHTML = rowTable
-      $("#tabel_add_list_custsupp").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      bankInitPicker('tabel_add_list_custsupp');
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListCustsupp').show();
       $("#form").modal('toggle')
@@ -4488,6 +4442,7 @@ function modalAktiva (dataLawan) {
             </tr>
           `
         }
+        bankInitPicker('tabel_add_list_aktiva');
 
         $('.showhidemodalbodyadd').hide();
         $('#modalAddListAktiva').show();
@@ -4533,6 +4488,7 @@ function modalAktiva (dataLawan) {
         // }
 
         document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
+        bankInitPicker('tabel_add_list_aktiva');
 
 
         if (res.length) {

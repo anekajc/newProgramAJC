@@ -30,16 +30,16 @@ class LaporanAccountingHutangUmurController extends Controller {
 
   public function doReport(Request $req) {
 
-    $Tanggal = $req->get('date1');
-    $Tipe = $req->get('inputOrd');
-    $Awal = $req->get('inputSuppAwal');
-    $Akhir= $req->get('inputSuppAkhir');
+    $Tanggal = $req->query('date1');
+    $Tipe = $req->query('inputOrd');
+    $Awal = $req->query('inputSuppAwal');
+    $Akhir= $req->query('inputSuppAkhir');
     $Devisi = '01';
-    $Perkiraan = $req->get('inputPerkiraan');
-    $KodeVls = $req->get('valas_value');
+    $Perkiraan = $req->query('inputPerkiraan');
+    $KodeVls = $req->query('valas_value');
 
     $values  = [$Tanggal, $Tipe, $Awal, $Akhir, $Devisi, $Perkiraan, $KodeVls];
-    
+
     $res = DB::connection('SML')->select('exec sp_ReportUmurHutang ?,?,?,?,?,?,?',
       $values);
 
@@ -50,14 +50,14 @@ class LaporanAccountingHutangUmurController extends Controller {
   // SP sama dengan report Hutang Kartu; kodesupp awal = akhir = supplier yang diklik.
   // Rentang penuh sampai tanggal 'Per Tanggal' umur (date1 = jauh ke belakang, date2 = umur).
   public function doKartu(Request $req) {
-    $awal      = $req->get('date1');            // jauh ke belakang (mis. 2000-01-01)
-    $akhir     = $req->get('date2');            // tanggal 'Per Tanggal' umur
-    $kode      = $req->get('kode');             // kode supplier yang diklik
+    $awal      = $req->query('date1');            // jauh ke belakang (mis. 2000-01-01)
+    $akhir     = $req->query('date2');            // tanggal 'Per Tanggal' umur
+    $kode      = $req->query('kode');             // kode supplier yang diklik
     $devisi    = '01';
     $Urut      = '0';                           // urut tanggal
-    $Perkiraan = $req->get('inputPerkiraan');
+    $Perkiraan = $req->query('inputPerkiraan');
     $rekap     = '0';
-    $KodeVls   = $req->get('valas_value');
+    $KodeVls   = $req->query('valas_value');
 
     $values = [$awal, $akhir, $kode, $kode, $devisi, $Urut, $Perkiraan, $rekap, $KodeVls];
 
@@ -79,12 +79,12 @@ class LaporanAccountingHutangUmurController extends Controller {
 
   //   for ($i=0; $i < count($req->listdata); $i++) {
   //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
+
   //     for ($j=0; $j < count($row); $j++) {
   //       $res = array_add($res, $i+$j, $row[$j]);
   //     }
   //   }
-    
+
   //   return $res;
   // }
 
@@ -97,13 +97,13 @@ class LaporanAccountingHutangUmurController extends Controller {
       // $userid = $request->input('userid');
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
                 SELECT Perkiraan
-                FROM DBAKSESPERKIRAANR 
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -126,13 +126,13 @@ public function loadValas()
       $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
-          select a.KodeCustsupp, 
-                a.NamaCustSupp as NamaCust, 
-                a.Alamat, 
-                a.Telpon 
+          select a.KodeCustsupp,
+                a.NamaCustSupp as NamaCust,
+                a.Alamat,
+                a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
       ", [$perkiraan]);
 

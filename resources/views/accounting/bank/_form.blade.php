@@ -309,14 +309,13 @@
                                         </div>
 
                                         <div class="row kas-row-tight" id="rowCustsupp">
-
-                                            <div class="col-md-2">
+                                            <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Custsupp</label>
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6">
+                                            <div class="col-md-5">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeCustsupp" type="text"
                                                         class="form-control" disabled>
@@ -506,7 +505,7 @@
                                     onclick="buttonAddBatal()">Batal</button>
 
                                 <button id="buttonSubmitAddAdd" type="button" onclick="submitAddAdd()"
-                                    class="btn btn-primary btn-action-primary btn-pill-primary">Submit Add</button>
+                                    class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
 
                                 <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
                                     class="btn btn-primary btn-action-primary btn-pill-primary">Submit Edit</button>

@@ -1,5 +1,16 @@
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{{-- rt-picker-v2 — matches accounting/kas/_pickers.blade.php (see
+     docs/new-cust-supp-modal-guide.md). #form is shared by all entity-picker sections
+     below (one <div class="showhidemodalbodyadd"> each), so this class restyles the
+     modal shell (header, table head, sticky columns, and the DataTables pager below)
+     for all of them. 16 of the pick-one-row lists here now paginate 10 rows/page via
+     bankInitPicker() in public/js/bank.js. Two tables are intentionally left unpaged
+     because they aren't "pick one row" lists — their rows carry editable inputs read
+     back by index for every row (getElementById), which DataTables would break by
+     detaching off-page rows from the DOM: Invoice (checkbox + editable Kurs/Qty per
+     row, explicit Submit button) and DPHUHTBBM's main bukti table (editable Qty input
+     + per-row add/remove toggle). --}}
+<div class="modal fade rt-picker-v2" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div id="" class="modal-content ">
 
@@ -18,12 +29,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Akumulasi / Biaya</h3>
+                                    {{-- <h3>Akumulasi / Biaya</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -75,9 +86,8 @@
                 </div>
 
 
-                <div id="" class="">
+                <div id="formBsGrid" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid p-0">
                             <div class="row">
                                 <div class="col-md-12" style=" ">
@@ -85,8 +95,6 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Group</label>
@@ -138,8 +146,6 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Divisi</label>
@@ -158,7 +164,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
 
                                         <div class="col-md-4">
@@ -175,7 +180,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -189,8 +193,6 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Tipe</label>
@@ -208,7 +210,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
 
                                         <div class="col-md-4">
@@ -232,8 +233,6 @@
                             </div>
 
                             <div class="row" style="margin-top: 0px">
-
-
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
@@ -264,8 +263,6 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="row">
-
-
                                                 <div class="col-md-2">
                                                     <div class="form-group">
                                                         <label>Kuantum</label>
@@ -290,7 +287,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
 
                                         <div class="col-md-6">
@@ -299,7 +295,6 @@
                                                     <div class="form-group">
                                                         <label>Metode Penyusutan</label>
                                                     </div>
-
                                                 </div>
                                                 <div class="col-md-7">
                                                     <div class="form-group ">
@@ -314,34 +309,18 @@
                                                         <!-- <input type="text" class="form-control" id="input_aktivax_metodepenyusutan" placeholder="" disabled> -->
                                                     </div>
                                                 </div>
-
                                             </div>
-
                                         </div>
-
-
-
-
                                     </div>
-
-
                                 </div>
-
-
-
-
                             </div>
 
                             <div class="row" style="margin-top: 0px">
-
-
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Akumulasi Penyusutan</label>
@@ -351,42 +330,24 @@
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control"
                                                             id="input_aktivax_akumulasi" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru"
                                                             id="buttonAddListXAkumulasi"
                                                             onclick="buttonAddListXAkumulasi()"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
-
-
                                             </div>
-
                                         </div>
-
-
-
-
-
                                     </div>
-
-
                                 </div>
-
-
-
-
                             </div>
 
                             <div class="row" style="margin-top: -10px">
-
-
                                 <div class="col-md-12" style=" ">
                                     <!-- <div class="container-fluid"> -->
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="row">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 1</label>
@@ -396,10 +357,10 @@
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya1" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya1"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya1')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-1" style="padding:0 ; margin:0">
@@ -413,12 +374,8 @@
                                                         %
                                                     </div>
                                                 </div>
-
-
                                             </div>
                                             <div class="row" style="margin-top: -10px">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 2</label>
@@ -428,10 +385,10 @@
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya2" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya2"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya2')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-1" style="padding:0 ; margin:0">
@@ -446,12 +403,8 @@
                                                         %
                                                     </div>
                                                 </div>
-
-
                                             </div>
                                             <div class="row" style="margin-top: -10px">
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Biaya Penyusutan 3</label>
@@ -461,10 +414,10 @@
                                                     <div class="form-group input-group">
                                                         <input type="text" class="form-control text-left"
                                                             id="input_aktivax_biaya3" placeholder="" disabled>
-                                                        <button class="btn btn-primary btn-sm text-right"
+                                                        <button class="btn btn-chip-biru text-right"
                                                             id="buttonAddListXBiaya3"
                                                             onclick="buttonAddListXBiaya('input_aktivax_biaya3')"><i
-                                                                class="bi bi-plus"></i></button>
+                                                                class="bi bi-search"></i></button>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-1" style="padding:0 ; margin:0">
@@ -511,12 +464,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Valas</h3>
+                                    {{-- <h3>Valas</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
                                     <table id="tabel_add_list_valas" class="dph-tb">
@@ -557,27 +510,23 @@
 
             <div id= "modalAddListCustsupp" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">CustSupp</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>CustSupp</h3>
+                                    {{-- <h3>CustSupp</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -587,24 +536,16 @@
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Kota</th>
-
                                             </tr>
                                         </thead>
 
-
                                         <tbody id="tabel_data_add_list_custsupp" class="text-left">
-
                                             <tr>
-
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
                                             </tr>
                                         </tbody>
-
-
                                     </table>
                                     <!-- </div> -->
                                     <!-- <button onclick="buttonSubKategori()">tes</button> -->
@@ -613,7 +554,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <div id="contentContainer" class="modal-footer ">
                     <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
@@ -637,12 +577,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Aktiva</h3>
+                                    {{-- <h3>Aktiva</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1118,12 +1058,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPP</h3>
+                                    {{-- <h3>DPP</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1189,12 +1129,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPH</h3>
+                                    {{-- <h3>DPH</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1262,12 +1202,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>DPH</h3>
+                                    {{-- <h3>DPH</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1336,7 +1276,7 @@
 
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto;  max-height: 300px">
+                                <div class="col-12" style="overflow:auto;">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1460,12 +1400,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Devisi</h3>
+                                    {{-- <h3>Devisi</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1525,12 +1465,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Bon</h3>
+                                    {{-- <h3>Bon</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1592,12 +1532,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Perkiraan</h3>
+                                    {{-- <h3>Perkiraan</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1656,12 +1596,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Departemen</h3>
+                                    {{-- <h3>Departemen</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1784,9 +1724,7 @@
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
-                                    <!-- <div class="container-fluid"> -->
-
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
 
                                     <table id="tabel_add_list_costing" class="dph-tb">
                                         <thead>
@@ -1843,12 +1781,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>SubCosting</h3>
+                                    {{-- <h3>SubCosting</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1908,12 +1846,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Customer</h3>
+                                    {{-- <h3>Customer</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 

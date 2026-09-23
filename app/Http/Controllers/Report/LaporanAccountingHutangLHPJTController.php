@@ -31,14 +31,14 @@ class LaporanAccountingHutangLHPJTController extends Controller {
 
   public function doReport(Request $req) {
 
-    $tanggal = $req->get('date1');
-    $tanggal2 = $req->get('date2');
-    $awal = $req->get('inputSuppAwal');
-    $akhir = $req->get('inputSuppAkhir');
-    $Perkiraan = $req->get('inputPerkiraan');
+    $tanggal = $req->query('date1');
+    $tanggal2 = $req->query('date2');
+    $awal = $req->query('inputSuppAwal');
+    $akhir = $req->query('inputSuppAkhir');
+    $Perkiraan = $req->query('inputPerkiraan');
 
     $values  = [$tanggal, $tanggal2, $awal, $akhir, $Perkiraan];
-    
+
     $res = DB::connection('SML')->select('exec sp_ReportSisaHtempo ?,?,?,?,?',
       $values);
 
@@ -57,12 +57,12 @@ class LaporanAccountingHutangLHPJTController extends Controller {
 
   //   for ($i=0; $i < count($req->listdata); $i++) {
   //     $row = DB::connection('MGL')->select('select * from VwREPORTHISPO where ' . $kolom . ' = :list' , ['list' => $req->listdata[$i]]);
-      
+
   //     for ($j=0; $j < count($row); $j++) {
   //       $res = array_add($res, $i+$j, $row[$j]);
   //     }
   //   }
-    
+
   //   return $res;
   // }
 
@@ -75,13 +75,13 @@ class LaporanAccountingHutangLHPJTController extends Controller {
       // $userid = $request->input('userid');
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
                 SELECT Perkiraan
-                FROM DBAKSESPERKIRAANR 
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -104,13 +104,13 @@ public function loadValas()
       $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
-          select a.KodeCustsupp, 
-                a.NamaCustSupp as NamaCust, 
-                a.Alamat, 
-                a.Telpon 
+          select a.KodeCustsupp,
+                a.NamaCustSupp as NamaCust,
+                a.Alamat,
+                a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
       ", [$perkiraan]);
 
