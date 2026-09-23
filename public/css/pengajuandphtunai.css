@@ -215,6 +215,18 @@
     vertical-align: middle;
 }
 
+/* newmaster.css also carries `table.dataTable tbody td { padding: 0 10px !important }` in the
+   same rule group — that selector's extra class (.dataTable, which DataTables' own JS adds to
+   any table it's initialized on) outranks the plain `.dph-tb tbody td` above (1 class + 3 types
+   beats 1 class + 2 types), so any .dph-tb picker table that also gets $(...).DataTable() called
+   on it (e.g. accounting/bank's Lawan/Bon/Custsupp/Akumulasi Biaya/Customer pickers) silently
+   lost its vertical padding back to 0. Match the extra class here too so this rule wins again. */
+.dph-tb.dataTable tbody td {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
 .dph-tb tbody tr:hover {
     background: #F8F9FF;
 }
@@ -279,7 +291,7 @@
 }
 
 .bi-plus {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     line-height: 0;
     vertical-align: middle;
   }

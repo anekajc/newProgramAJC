@@ -44,7 +44,7 @@ class LaporanAccountingHutangOutstandingJTController extends Controller {
     $KodeVls = $req->query('valas_value');
 
     $values  = [$tanggal, $awal, $akhir, $devisi, $tipe, $Perkiraan, $KodeVls];
-    
+
     $res = DB::connection('SML')->select('exec sp_ReportSisaHutang ?,?,?,?,?,?,?',
       $values);
 
@@ -60,13 +60,13 @@ class LaporanAccountingHutangOutstandingJTController extends Controller {
       $userid = $user->username;
 
       $listData = DB::connection('SML')->select("
-          SELECT a.Perkiraan, b.Keterangan 
+          SELECT a.Perkiraan, b.Keterangan
           FROM dbposthutpiut a
           LEFT OUTER JOIN dbperkiraan b ON b.Perkiraan = a.Perkiraan
-          WHERE a.Kode = ? 
+          WHERE a.Kode = ?
             AND a.Perkiraan IN (
                 SELECT Perkiraan
-                FROM DBAKSESPERKIRAANR 
+                FROM DBAKSESPERKIRAANR
                 WHERE UserID = ?
             )
           ORDER BY a.Perkiraan
@@ -89,13 +89,13 @@ public function loadValas()
       $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
-          select a.KodeCustsupp, 
-                a.NamaCustSupp as NamaCust, 
-                a.Alamat, 
-                a.Telpon 
+          select a.KodeCustsupp,
+                a.NamaCustSupp as NamaCust,
+                a.Alamat,
+                a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
       ", [$perkiraan]);
 

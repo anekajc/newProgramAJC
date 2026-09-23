@@ -15,7 +15,6 @@
         <div id="formBsGrid" class="">
             <div class="">
                 <!-- <h1>Tes Modal</h1> -->
-
                 <div class="container-fluid">
                     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
                     <div class="row">
@@ -27,7 +26,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-7">
+                                <div class="col-md-6">
                                     <select id="input_add_transaksi" class="form-control form-select-lg mb-3"
                                         aria-label=".form-select-lg example" onChange="onChangeTransaksi()">
                                         <option value='BBK' selected>BBK</option>
@@ -41,14 +40,10 @@
 
                                 <div class="col-md-5">
                                     <div class="form-group">
-                                        <label>Bank</label>
+                                        <label>Perkiraan</label>
                                     </div>
                                 </div>
-                                <!-- <div class="col-3 text-right">
-            <div class="form-group">
-          </div>
-        </div> -->
-                                <div class="col-md-7">
+                                <div class="col-md-6">
                                     <div class="form-group input-group">
                                         <input type="hidden" class="form-control" id="input_add_simbol" placeholder=""
                                             disabled>
@@ -59,10 +54,14 @@
                                     </div>
                                 </div>
 
+                                <div class="col-md-5">
 
-                                <div class="col-md-12" style="margin-top:-10px">
+                                </div>
+
+
+                                <div class="col-md-6" style="margin-top:-10px">
                                     <div class="form-group">
-                                        <textarea style="width: 100%; resize: none" rows=1 class="form-control" id="input_add_keteranganperkiraan" disabled></textarea>
+                                        <input type="text" style="width: 100%; resize: none" rows=1 class="form-control" id="input_add_keteranganperkiraan" disabled/>
                                     </div>
                                 </div>
 
@@ -189,35 +188,36 @@
                 </div>
                 <div class="col-md-12">
                     <div class="row">
-                        <div class="col-md-12  text-right">
+                        <div class="col-md-12  text-right" style="padding: 1rem 0 ;">
                             <button id="buttonAddAddItem" type="button" class="btn btn-chip-biru"
-                                onclick="buttonAddAddItem()">+ Tambah</button>
+                                onclick="buttonAddAddItem()">Tambah</button>
                         </div>
                     </div>
                 </div>
 
                 <div id="formAddAdd" class="container-fluid showhideitem">
                     <div class="col-12">
-                        <hr />
+                        {{-- <hr /> --}}
                         <div class="row">
                             <div class="col-md-12">
-                                <h4 id="labelAddAddItem">Add Item</h4>
-                                <h4 id="labelAddEditItem">Edit Item</h4>
+                                {{-- <h4 id="labelAddAddItem">Add Item</h4>
+                                <h4 id="labelAddEditItem">Edit Item</h4> --}}
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-12 col-lg-4">
                                 <div class="row">
-
                                     <div class="col-md-12">
+
                                         <div class="row">
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <label>Devisi</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+
+                                            <div class="col-md-5">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddKodeDevisi" type="text" class="form-control"
                                                         value="01" disabled>
@@ -228,7 +228,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddNamaDevisi" value="Accounting" type="text"
                                                         class="form-control" disabled>
@@ -240,11 +240,13 @@
                                         <div class="row kas-row-tight">
                                             <div class="col-md-12">
                                                 <div class="row">
+
                                                     <div class="col-md-2">
                                                         <div class="form-group">
                                                             <label>Valas</label>
                                                         </div>
                                                     </div>
+
                                                     <div class="col-md-5">
                                                         <div class="input-group form-group">
                                                             <input id="AddAddValas" type="text"
@@ -276,33 +278,30 @@
                                         <div class="row kas-row-tight">
                                             <div class="col-md-12">
                                                 <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="row">
-                                                            <div class="col-md-2">
-                                                                <div class="form-group">
-                                                                    <label>Lawan</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-10">
-                                                                <div class="input-group form-group">
-                                                                    <input id="AddAddLawan" type="text"
-                                                                        class="form-control" disabled>
-                                                                    <input id="AddAddKodeLawan" type="hidden"
-                                                                        class="form-control" disabled>
-                                                                    <button id="buttonAddListLawan" type="button"
-                                                                        onclick="buttonAddListLawan()"
-                                                                        class="btn btn-chip-biru"><i
-                                                                            class="bi bi-search"></i></button>
-                                                                </div>
-                                                            </div>
+
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Lawan</label>
                                                         </div>
-                                                        <div class="row kas-row-tight">
-                                                            <div class="col-md-12">
-                                                                <div class="input-group form-group">
-                                                                    <input id="AddAddKeteranganLawan" type="text"
-                                                                        class="form-control" disabled>
-                                                                </div>
-                                                            </div>
+                                                    </div>
+
+                                                    <div class="col-md-5">
+                                                        <div class="input-group form-group">
+                                                            <input id="AddAddLawan" type="text"
+                                                                class="form-control" disabled>
+                                                            <input id="AddAddKodeLawan" type="hidden"
+                                                                class="form-control" disabled>
+                                                            <button id="buttonAddListLawan" type="button"
+                                                                onclick="buttonAddListLawan()"
+                                                                class="btn btn-chip-biru"><i
+                                                                    class="bi bi-search"></i></button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5">
+                                                        <div class="input-group form-group">
+                                                            <input id="AddAddKeteranganLawan" type="text"
+                                                                class="form-control" disabled>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -311,31 +310,26 @@
 
                                         <div class="row kas-row-tight" id="rowCustsupp">
 
-                                            <div class="col-md-12">
-                                                <div class="row">
-                                                    <div class="col-md-2">
-                                                        <div class="form-group">
-                                                            <label>Custsupp</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="input-group form-group">
-                                                            <input id="AddAddKodeCustsupp" type="text"
-                                                                class="form-control" disabled>
-                                                            <button id="buttonAddListCustsupp" type="button"
-                                                                onclick="buttonAddListCustsupp()"
-                                                                class="btn btn-chip-biru"><i
-                                                                    class="bi bi-search"></i></button>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Custsupp</label>
+                                                </div>
+                                            </div>
 
-                                                        </div>
-                                                    </div>
+                                            <div class="col-md-6">
+                                                <div class="input-group form-group">
+                                                    <input id="AddAddKodeCustsupp" type="text"
+                                                        class="form-control" disabled>
+                                                    <button id="buttonAddListCustsupp" type="button"
+                                                        onclick="buttonAddListCustsupp()" class="btn btn-chip-biru"><i
+                                                            class="bi bi-search"></i></button>
+                                                </div>
+                                            </div>
 
-                                                    <div class="col-md-4">
-                                                        <div class="input-group form-group">
-                                                            <input id="AddAddNamaCustsupp" type="text"
-                                                                class="form-control" disabled>
-                                                        </div>
-                                                    </div>
+                                            <div class="col-md-4">
+                                                <div class="input-group form-group">
+                                                    <input id="AddAddNamaCustsupp" type="text"
+                                                        class="form-control" disabled>
                                                 </div>
                                             </div>
                                         </div>
@@ -353,9 +347,10 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="input-group form-group">
-                                                    <input id="AddAddJumlah" type="number" value="0.00"
+                                                    <input id="AddAddJumlah" type="text" value="0.00"
                                                         class="text-right form-control"
-                                                        onblur='onChangeAddAddJumlah()'>
+                                                        oninput='formatAngkaKetik(this)'
+                                                        onblur='formatAngkaInput(this); onChangeAddAddJumlah()'>
                                                     <input id="AddAddJumlahTunai" type="hidden" value="0.00"
                                                         class="text-right form-control" onblur=''>
                                                 </div>
@@ -386,8 +381,6 @@
 
                                 <div class="row kas-row-tight">
                                     <div class="col-md-12">
-
-
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -406,108 +399,34 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-3">
+                            <div class="col-12 col-lg-5">
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Departemen</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKodeDepartemen" type="text"
-                                                        class="form-control" disabled>
-                                                    <button id="buttonAddListDepartemen" type="button"
-                                                        onclick="buttonAddListDepartemen()"
-                                                        class="btn btn-chip-biru"><i
-                                                            class="bi bi-search"></i></button>
-
-                                                </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Departemen</label>
                                             </div>
                                         </div>
-
-                                        <div class="row kas-row-tight">
-                                            <div class="col-md-12">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddNamaDepartemen" type="text"
-                                                        class="form-control" disabled>
-
-                                                </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddKodeDepartemen" type="text" class="form-control"
+                                                    disabled>
+                                                <button id="buttonAddListDepartemen" type="button"
+                                                    onclick="buttonAddListDepartemen()" class="btn btn-chip-biru"><i
+                                                        class="bi bi-search"></i></button>
                                             </div>
                                         </div>
+                                        <div class="col-md-4">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddNamaDepartemen" type="text" class="form-control"
+                                                    disabled>
 
-                                        <div class="row kas-row-tight" id="rowCosting">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Costing</label>
-                                                </div>
                                             </div>
-                                            <div class="col-md-5">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKodeCosting" type="text" class="form-control"
-                                                        disabled>
-                                                    <button id="buttonAddListCosting" type="button"
-                                                        onclick="buttonAddListCosting()"
-                                                        class="btn btn-primary">+</button>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-3">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddNamaCosting" type="text" class="form-control"
-                                                        disabled>
-
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="row kas-row-tight" id="rowSubCosting">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>SubCosting</label>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-4 text-right">
-
-                </div> -->
-                                            <div class="col-md-5">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKodeSubCosting" type="text"
-                                                        class="form-control" disabled>
-                                                    <button id="buttonAddListSubCosting" type="button"
-                                                        onclick="buttonAddListSubCosting()"
-                                                        class="btn btn-primary">+</button>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-3">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddNamaSubCosting" type="text"
-                                                        class="form-control" disabled>
-
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
-                                </div>
 
-                            </div>
-
-                            <div class="col-12 col-lg-2" style="padding:0; margin: 0">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="row">
-
-                                        </div>
-                                    </div>
-                                    <div class="col-md-10 text-left">
-                                        <div class="row text-left">
+                                    <div class="row kas-row-tight">
+                                        <div class="col-md-12">
                                             <div class="form-check form-group text-left">
                                                 <input class="form-check-input" type="checkbox" value=""
                                                     id="checkBoxSKB" onclick="onclickPSKB()">
@@ -516,12 +435,68 @@
                                                 </label>
                                             </div>
                                         </div>
+                                    </div>
 
+                                    <div class="row kas-row-tight" id="rowCosting">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Costing</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddKodeCosting" type="text" class="form-control"
+                                                    disabled>
+                                                <button id="buttonAddListCosting" type="button"
+                                                    onclick="buttonAddListCosting()"
+                                                    class="btn btn-primary">+</button>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddNamaCosting" type="text" class="form-control"
+                                                    disabled>
+
+                                            </div>
+                                        </div>
 
                                     </div>
 
+                                    <div class="row kas-row-tight" id="rowSubCosting">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>SubCosting</label>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="col-4 text-right">
+
+                </div> -->
+                                        <div class="col-md-5">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddKodeSubCosting" type="text" class="form-control"
+                                                    disabled>
+                                                <button id="buttonAddListSubCosting" type="button"
+                                                    onclick="buttonAddListSubCosting()"
+                                                    class="btn btn-primary">+</button>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="input-group form-group">
+                                                <input id="AddAddNamaSubCosting" type="text" class="form-control"
+                                                    disabled>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
+
                             </div>
+
                             <div class="row kas-row-tight">
                             </div>
                         </div>

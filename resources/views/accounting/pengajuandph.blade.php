@@ -1,6 +1,6 @@
 @extends('newmasterTest')
 {{-- @extends('accounting.newmaster') --}}
-@section('page-title', 'Pengajuan DPH')
+@section('page-title', 'Pengajuan DPH UM')
 @section('buttons')
 @endsection
 
@@ -10,7 +10,17 @@
      load report-table.css/tableMaster2.css/newmaster.css itself — added here, page-local, so no
      other page on this shared layout is affected. Only the list view was ported; the Add/
      Otorisasi forms and the entity-picker modals are untouched on purpose — see the guide's §13
-     ask-first note on existing picker patterns. --}}
+     ask-first note on existing picker patterns.
+
+     #page1 (toolbar + table markup, CSS and table id) was made byte-for-byte identical to
+     accounting/memorialkoreksi.blade.php / accounting/bonsementara.blade.php on request — same
+     `po-*` class family, same `<table id="tabel">` (already registered in po-table-header.css's
+     selector lists, shared with #tabel/#tabel2/#tabel3/#tabel7/#tabelso etc. on other pages), same
+     action-button/DataTable markup. report-table.css/tableMaster2.css/newmaster.css/
+     pengajuandphtunai.css stay loaded regardless (unlike the reference pages) because page2+ (the
+     Add/Detail/Otorisasi forms) and the #formPerkiraan entity-picker modal (.rt-picker-v2, no po-*
+     equivalent) still depend on them — #page1 just neutralizes the few rules from those files that
+     would otherwise leak onto #tabel (see the CSS block below). --}}
 
 @section('css')
     <div id="imagecontainer" class="d-none" style="">
@@ -18,111 +28,328 @@
     </div>
 
     <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+    {{-- Header tabel interaktif (geser kolom + roda gigi + bar kolom tersembunyi + kotak
+     scroll bertajuk sticky) dalam skema po-* — lihat po-table-header.css untuk daftar id
+     terdaftar (#tabel, dipakai halaman ini, sudah terdaftar di sana untuk halaman-halaman
+     lain). Dimuat SETELAH report-table.css supaya .po-*/.rt-colmenu-nya menang saat
+     spesifisitas seri. --}}
+    <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
 
     {{-- Shared with accounting/pengajuandphtunai.blade.php — every rule this page needs
-     (.len-wrap Tampilkan dropdown, .tb-report .pg.disabled, the .dph-* table/form classes for
-     formX/formXedit/#page4, and the pre-existing #tabel_xxx_filter search-box styles) is
-     byte-identical between the two sibling pages, so this file is deliberately reused here
-     instead of duplicating it. Filename still says "tunai" only because that page had it
-     first — treat it as shared, and check both pages before editing a rule in it. --}}
+     (.tb-report .pg.disabled, the .dph-* table/form classes for formX/formXedit/#page4, and
+     the pre-existing #tabel_xxx_filter search-box styles) is byte-identical between the two
+     sibling pages, so this file is deliberately reused here instead of duplicating it.
+     Filename still says "tunai" only because that page had it first — treat it as shared, and
+     check both pages before editing a rule in it. (.len-wrap/.len-inp here are now dead code
+     for #page1 — the Tampilkan dropdown uses .po-len-wrap/.po-len-inp below — but the rule
+     stays in the shared file in case another consumer still needs it; verify before deleting.) --}}
     <link rel="stylesheet"
         href="{!! URL::asset('css/pengajuandphtunai.css') !!}?v={{ @filemtime(base_path('public/css/pengajuandphtunai.css')) ?: '1' }}">
+
+    <style>
+        /* Jarak kartu ke bar atas — sama seperti pengajuandpp/bonsementara. */
+        #content { padding-top: 12px; }
+
+        /* po-table-header.css tidak menulis .po-len-wrap/.po-len-inp — disalin apa adanya dari
+           accounting/pengajuandpp.blade.php, halaman lain di folder ini yang sudah memakai
+           skema po-* dan menulis dropdown Tampilkan ini page-local juga. */
+        .po-len-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--rt-card, #fff);
+            border: 1.5px solid var(--rt-border, #E7E8F0);
+            border-radius: 8px;
+            padding: 5px 12px;
+        }
+        .po-len-wrap label {
+            margin: 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--rt-ink-soft, #6B7180);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
+        .po-len-inp {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--rt-ink, #1D2130);
+            outline: none;
+            cursor: pointer;
+            padding: 2px 20px 2px 0;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right center;
+        }
+
+        /* ==========================================================================
+           Dari sini ke bawah: disalin verbatim dari accounting/memorialkoreksi.blade.php
+           (dan bonsementara.blade.php) supaya #page1 (list DPH) memakai class & tampilan
+           yang persis sama — lihat permintaan "samakan dengan bonsementara/memorialkoreksi".
+           ========================================================================== */
+
+        /* Rule .card global di sebagian layout (flex + align-items:center + efek melayang
+           saat hover) diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
+        #page1 .card {
+          display: block !important;
+          align-items: stretch !important;
+          padding: 0 !important;
+          text-align: left !important;
+          cursor: default !important;
+        }
+
+        #page1 .card:hover {
+          transform: none !important;
+          box-shadow: none !important;
+          border-color: var(--border, #e5e7eb) !important;
+        }
+
+        /* ---------- Gaya dasar tabel daftar ---------- */
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 14px;
+        }
+
+        .data-table thead th {
+          background: #f9fafb;
+          padding: 11px 16px;
+          text-align: left;
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--text-muted, #6b7280);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          border-bottom: 1px solid var(--border, #e5e7eb);
+        }
+
+        .data-table tbody td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #f3f4f6;
+          color: var(--text-main, #1f2937);
+        }
+
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover td { background: #f9fafb; }
+
+        /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
+           inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
+           Dipakai min-width, BUKAN width. */
+        #tabel { min-width: 100%; }
+
+        /* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
+        #tabel td:first-child:not([colspan]) { vertical-align: middle; }
+
+        #tabel td:first-child .po-aksi-wrap {
+          display: flex;
+          gap: 4px;
+          justify-content: center;
+          align-items: center;
+        }
+
+        #tabel td:first-child .btn {
+          width: 30px;
+          height: 30px;
+          padding: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 7px;
+          font-size: 13px;
+          border: 1px solid transparent;
+          box-shadow: none;
+          transition: all .12s ease;
+        }
+
+        #tabel td:first-child .btn:hover {
+          filter: brightness(0.97);
+          transform: translateY(-1px);
+        }
+
+        #tabel td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+        #tabel td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+        #tabel td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+        #tabel td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+        #tabel td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+        /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
+        table.data-table.po-aksi-hover tbody td:first-child .btn {
+          visibility: hidden;
+          opacity: 0;
+          transition: opacity .12s ease;
+        }
+        table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        /* ==========================================================================
+           Penetral kebocoran gaya - halaman ini (beda dengan memorialkoreksi) masih
+           memuat report-table.css/tableMaster2.css/newmaster.css karena page2+ (form
+           tambah/detail/otorisasi) dan modal #formPerkiraan masih memakainya. Aturan di
+           bawah ini HANYA menimpa balik nilai file-file itu supaya #page1 tetap identik
+           dengan referensi, tanpa melepas file-nya (yang akan merusak halaman lain).
+           ========================================================================== */
+
+        /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
+        #page1 #tabel tbody td { padding: 12px 16px !important; }
+
+        /* tableMaster2.css: skin khusus id #tabel (dipakai juga oleh halaman lain yang
+           memuat file itu) - dikembalikan ke nilai .data-table di atas. */
+        #page1 #tabel thead th {
+          background: #f9fafb !important;
+          color: var(--text-muted, #6b7280) !important;
+          font-size: 12px !important;
+          text-transform: uppercase;
+          letter-spacing: .04em;
+          font-weight: 600;
+          border-bottom: 1px solid var(--border, #e5e7eb) !important;
+          border-top: none;
+          white-space: normal;
+        }
+        /* font-size/color SENGAJA TANPA !important (beda dengan padding di atas) - tableMaster2.css
+           tidak menandai keduanya !important pada #tabel tbody td, jadi spesifisitas ekstra dari ID
+           #page1 di sini sudah cukup menang tanpa !important. Kalau dipaksa !important, itu akan
+           mengalahkan Bootstrap .text-success/.text-danger (yang !important) pada sel Oto - itulah
+           yang membuat ikon centang/silang di kolom Oto tampak hitam alih-alih hijau/merah. */
+        #page1 #tabel tbody td {
+          font-size: 14px;
+          color: var(--text-main, #1f2937);
+          border-color: #f3f4f6 !important;
+          border-left: none;
+          border-right: none;
+        }
+        #page1 #tabel tbody tr:hover { background-color: transparent !important; }
+        #page1 #tabel td:last-child { font-weight: inherit !important; }
+
+        /* tableMaster2.css: chrome DataTables (panjang halaman/info/pagination) diwarnai
+           ungu (--sp-primary) dan diberi padding tambahan - dikembalikan ke nilai bawaan
+           jquery.dataTables.css 1.13.2 (dari public/css/jquery.dataTables.min.css, versi
+           yang sama dimuat layout lewat CDN) supaya sama persis dengan memorialkoreksi,
+           yang tidak memuat tableMaster2.css sama sekali. */
+        #page1 .dataTables_wrapper { padding: 0; }
+        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button {
+          border-radius: 2px !important;
+          margin-left: 2px;
+          border: 1px solid transparent !important;
+          color: #333 !important;
+        }
+        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+          background: #fff !important;
+          border-color: #979797 !important;
+          color: #333 !important;
+        }
+        #page1 .dataTables_wrapper .dataTables_info {
+          color: inherit;
+          font-size: inherit;
+          padding-top: 0.755em !important;
+        }
+    </style>
 @endsection
 
 
 @section('content')
     <div id="page1" class="container-fluid mainpage">
-        <div class="container-fluid">
+
+        <div id="printContainer" style="display:none">
 
 
-            <div id="printContainer" style="display:none">
+        </div>
+        <div id="contentContainer" class="container-fluid">
+            <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
+            <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
+            <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
+            <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS !!}" />
+            <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
+            <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+            <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+            <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
-            </div>
-            <div id="contentContainer" class="container-fluid">
-                <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-                <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+            <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-                <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
-                <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS !!}" />
-                <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
-                <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
-                <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
-                <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
+            {{-- .tb-report/.content dilepas (pindah ke skema po-*, lihat catatan di
+             @section('css')) — #modalFilter di luar tetap aman karena selalu sudah berada
+             di luar .tb-report (lihat catatannya sendiri di bawah). Kartu + toolbar + tabel
+             disalin dari accounting/memorialkoreksi.blade.php supaya sama persis. --}}
+            <div class="card">
+                <div class="card-body" style="padding:0;">
 
-                <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-
-                <div class="tb-report">
-                    <div class="content">
-
-                        <div class="toolbar">
-                            <div class="filter-wrap">
-                                <label>Periode</label>
-                                <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
-                                    onchange="loadAll()">
-                                <span class="filter-sep">s/d</span>
-                                <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
-                                    onchange="loadAll()">
-                            </div>
-
-                            <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
-                                oninput="renderTabel()" style="width:200px">
-
-                            {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — lihat
-             renderTabel()/onLenChange2() di bagian JS halaman ini. --}}
-                            <div class="len-wrap">
-                                <label for="tabelLen2">Tampilkan</label>
-                                <select id="tabelLen2" class="len-inp" onchange="onLenChange2()">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                    <option value="-1">Semua</option>
-                                </select>
-                            </div>
-
-                            <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-                                <i class="bi bi-funnel"></i> Filter
-                            </button>
-
-                            {{-- margin-left:auto pada .action-group (report-table.css) mendorongnya ke ujung kanan
-             toolbar, terpisah dari Filter di sebelah kiri. --}}
-                            <div class="action-group">
-                                <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah DPH</button>
-                            </div>
+                    <div class="po-toolbar">
+                        <div class="po-filter-wrap">
+                            <label>Periode</label>
+                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+                            <span class="po-filter-sep">s/d</span>
+                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
                         </div>
 
-                        <div id="rtBar"></div>
+                        <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
 
-                        <div class="table-outer">
-                            <div class="table-wrap">
-                                <table id="mainTable" class="tb aksi-hover">
-                                    <thead>
-                                        <tr>
-                                            <th class="rt-fixed-th">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabel_data" class="text-left"></tbody>
-                                </table>
-                            </div>
-                            <div class="table-footer">
-                                <span id="footerLabel1">Belum ada data</span>
-                                <div class="pager-btns" id="pagerBtns1"></div>
-                            </div>
+                        {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — diikat
+                 ke DataTables lewat ikatPanjangHalaman() di renderTabel(), bukan onchange inline
+                 (pola sama seperti outIkatPanjangHalaman() di bonsementara.blade.php). --}}
+                        <div class="po-len-wrap">
+                            <label for="tabelLen2">Tampilkan</label>
+                            <select id="tabelLen2" class="po-len-inp">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="-1">Semua</option>
+                            </select>
                         </div>
 
-                        <div class="rt-hint">
-                            <i class="bi bi-info-circle"></i>
-                            Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-                            sembunyikan kolom.
-                        </div>
+                        <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
 
+                        <div class="po-toolbar-act">
+                            <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
+                        </div>
                     </div>
-                </div>
 
+                    {{-- #rtBar diisi lewat JS oleh ReportTable.init() - lihat dphInitReportTableSekali(). --}}
+                    <div id="rtBar"></div>
+
+                    <table id="tabel" class="data-table po-aksi-hover">
+                        <thead id="tabel_header" class="text-center">
+                            <tr>
+                                <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                                <th style="padding: 4px 12px;" scope="col">Supplier</th>
+                                <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                                <th style="padding: 4px 12px;" scope="col">Valas</th>
+                                <th style="padding: 4px 12px;" scope="col">Nilai</th>
+                                <th style="padding: 4px 12px;" scope="col">K/L</th>
+                                <th style="padding: 4px 12px;" scope="col">Oto</th>
+                                <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                                <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel_data" class="text-left">
+                            {{-- Baris digambar renderTabel() lewat JS, supaya susunan kolom hasil
+                                 geser/sembunyi selalu konsisten dengan hasil render ulang. --}}
+                        </tbody>
+                    </table>
+
+                    <div class="po-rt-hint">
+                        <i class="bi bi-info-circle"></i>
+                        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                        untuk menyembunyikan kolom.
+                    </div>
+
+                </div>
             </div>
+
         </div>
     </div>
     <!-- closes #page1 (container-fluid mainpage) — see docs/new-design-gudang-style-guide.md /
@@ -280,7 +507,7 @@
                     </div>
                     <div class="col-md-12 mt-2 text-right">
                         <button id="buttonAddItem" type="button" class="btn btn-chip-biru"
-                            onclick="buttonAddItem()">+ Tambah</button>
+                            onclick="buttonAddItem()">Tambah</button>
                     </div>
                     <div id="formAddAdd" class="container-fluid showhideitem">
                         <div class="col-12">
@@ -612,9 +839,9 @@
                     </div>
                     <div class="container-fluid">
                         <div class="row" style="margin-top: 12px">
-                            <div class="col-12 text-right">
+                            <div class="col-12 text-right" id="contentContainer">
                                 <button type="button"
-                                    class="page3showhide otorisasishowhide btn btn-primary btn-pill-primary"
+                                    class="page3showhide otorisasishowhide btn btn-action-primary btn-primary btn-pill-primary"
                                     onclick="submitOtorisasi()">Otorisasi</button>
                             </div>
                         </div>
@@ -748,9 +975,9 @@
         </div>
 
         <div class="row" style="margin-top: 12px">
-            <div class="col-12 text-right">
+            <div class="col-12 text-right" id="contentContainer">
                 <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
-                    onclick="submitAdd()">Submit</button>
+                    onclick="submitAdd()">Simpan</button>
             </div>
         </div>
         </div>
@@ -771,20 +998,18 @@
                     </div>
                     <div id="" class="">
                         <div class="modal-body">
-
                             <div class="container-fluid">
-
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label>Nilai Nota</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
+                                                    <input type="text" class="form-control text-right"
                                                         id="input_modalx_nilainotadibayar" disabled>
                                                 </div>
                                             </div>
@@ -793,7 +1018,7 @@
 
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -813,7 +1038,7 @@
                                 </div>
 
                                 <div class="row" style="margin-top: -10px">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -822,13 +1047,13 @@
                                             </div>
                                             <div class="col-md-8">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
+                                                    <input type="text" class="form-control text-right"
                                                         id="input_modalx_dibayar">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -843,18 +1068,14 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
-
-
                                 </div>
-
 
                                 <div class="row mt-2" style="margin-top: 0">
                                     <div class="col-md-12 text-right mt-4">
 
                                         <button id="buttonSaveLB" type="button" onclick="buttonSaveLB()"
-                                            class="btn btn-success btn-action-success btn-pill-primary">Save</button>
+                                            class="btn btn-success btn-action-success btn-pill-primary">Simpan</button>
                                         <button type="button" id="buttonAddKL"
                                             class="btn btn-primary btn-action-primary btn-pill-primary"
                                             onclick="buttonAddKL()">+ KL</button>
@@ -863,9 +1084,6 @@
                                 </div>
                             </div>
                             <div id="formAddKL" class="container-fluid showhideitemKL">
-                                <!-- <div class="line"></div> -->
-                                <!-- <div class="row"> -->
-
                                 <div class="col-12">
                                     <hr />
                                     <div class="row">
@@ -916,12 +1134,12 @@
                                     </div>
                                 </div>
                                 <div class="row mt-2" style="margin-top: 0">
-                                    <div class="col-md-12 text-right mt-4">
-                                        <button type="button" class="btn btn-secondary btn-pill-secondary"
+                                    <div class="col-md-12 text-right mt-4" id="contentContainer">
+                                        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                             onclick="buttonAddBatalKL()">Batal</button>
 
                                         <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()"
-                                            class="btn btn-primary btn-action-primary btn-pill-primary">Submit Add</button>
+                                            class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                                     </div>
                                 </div>
                             </div>
@@ -954,8 +1172,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                <div class="modal-footer" id="contentContainer">
+                    <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                         data-dismiss="modal">Batal</button>
                     <!-- <button type="button" class="btn btn-primary" onclick="submitAddModalX()">Submit</button> -->
                 </div>
@@ -973,8 +1191,6 @@
 
                 <div id= "" class="">
                     <div class="modal-header">
-
-
                         <h5 class="modal-title" id="">Change Invoice</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -984,7 +1200,6 @@
 
                     <div id="" class="">
                         <div class="modal-body">
-
                             <div class="container-fluid">
 
                                 <div class="row">
@@ -997,13 +1212,11 @@
                                             </div>
                                             <div class="col-md-8">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
+                                                    <input type="text" class="form-control text-right"
                                                         id="input_modalxedit_nilainotadibayar" disabled>
                                                 </div>
                                             </div>
-
                                         </div>
-
                                     </div>
 
                                     <div class="col-md-4">
@@ -1037,7 +1250,7 @@
                                             </div>
                                             <div class="col-md-8">
                                                 <div class="form-group">
-                                                    <input type="number" class="form-control text-right"
+                                                    <input type="text" class="form-control text-right"
                                                         id="input_modalxedit_dibayar">
                                                 </div>
                                             </div>
@@ -1065,7 +1278,7 @@
                                     <div class="col-md-12 text-right mt-4">
 
                                         <button id="buttonSaveLBEdit" type="button" onclick="buttonSaveLBEdit()"
-                                            class="btn btn-success btn-action-success btn-pill-primary">Save</button>
+                                            class="btn btn-success btn-action-success btn-pill-primary">Simpan</button>
                                         <button type="button" id="buttonAddKLEdit"
                                             class="btn btn-primary btn-action-primary btn-pill-primary"
                                             onclick="buttonAddKLEdit()">+ KL</button>
@@ -1092,9 +1305,6 @@
                                                         <label>Jumlah</label>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="col-4 text-right">
-
-                              </div> -->
                                                 <div class="col-md-4">
                                                     <div class="input-group form-group">
                                                         <input id="input_modalxedit_kurangbayar" type="number"
@@ -1127,7 +1337,6 @@
                                                             onclick="openPickerPerkiraanLB('kurangbayaredit')"
                                                             class="btn btn-chip-biru"><i
                                                                 class="bi bi-search"></i></button>
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -1135,8 +1344,8 @@
                                     </div>
                                 </div>
                                 <div class="row mt-2" style="margin-top: 0">
-                                    <div class="col-md-12 text-right mt-4">
-                                        <button type="button" class="btn btn-secondary btn-pill-secondary"
+                                    <div class="col-md-12 text-right mt-4" id="contentContainer">
+                                        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                             onclick="buttonAddBatalKLEdit()">Batal</button>
 
                                         <button id="buttonSubmitAddKLEdit" type="button" onclick="submitAddKLEdit()"
@@ -1272,8 +1481,7 @@
         0]); // tempOutstanding dikelompokkan per NoBukti di controller — ambil baris pertama tiap grup
         let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
 
-        let tabelLen2 = 10;
-        let tabelPage2 = 1;
+        let tabelLen2 = 10; // dipakai sebagai pageLength DataTables di renderTabel()
 
         var g_href = 'pengajuandph';
         var g_modeReport = '1';
@@ -1282,6 +1490,10 @@
         var gsum_isgrandtotal = 0;
         var gct_desimal_max = 4;
 
+        // IsOtorisasi1/OtoUser1/TglOto1 SENGAJA tidak ada di sini — seperti
+        // memorialkoreksi.blade.php, ketiganya bukan kolom yang bisa digeser/disembunyikan,
+        // melainkan tiga kolom tetap (Oto/User Oto/Tgl Oto) yang selalu ditambahkan di ujung
+        // kanan tabel oleh renderTabel(), lihat catatan di sana.
         function setDefaultHeader() {
             // [ field, label, visible, type, total, decimals ]
             gcart_header = [
@@ -1291,10 +1503,6 @@
                 ['Valas', 'Valas', 1, 'varchar', 0, 0],
                 ['DIBAYAR', 'Nilai', 1, 'float', 0, 2],
                 ['KL', 'K/L', 1, 'float', 0, 2],
-                // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum.
-                ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
-                ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
-                ['TglOto1', 'Tgl Oto', 1, 'date', 0, 0],
                 ['Userbatal', 'User Btl', 0, 'varchar', 0, 0],
                 ['TglBatal', 'Tgl Btl', 0, 'date', 0, 0],
             ];
@@ -1433,19 +1641,6 @@
             return (v === null || v === undefined) ? '' : v;
         }
 
-        function fmtYMD(v) {
-            if (!v) {
-                return '';
-            }
-            let date = new Date(v);
-            if (isNaN(date)) {
-                return '';
-            }
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            return date.getFullYear() + "/" + month + "/" + day;
-        }
-
         // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum — client-side saja.
         function filterByOtorisasi(rows, filterVal) {
             if (filterVal === '1') {
@@ -1459,141 +1654,242 @@
 
         // Satu-satunya tempat yang menentukan tombol Aksi — dipakai renderTabel() untuk paint pertama
         // MAUPUN tiap refresh loadAll(), jadi tidak bisa lagi berbeda seperti sebelumnya.
+        // Markup + pemetaan warna/ikon disalin persis dari renderTabelMk() di
+        // memorialkoreksi.blade.php (.po-aksi-wrap, cuma title, tanpa tooltip Bootstrap).
         function aksiButtonsHtml(r) {
             const nobukti = r.NoBukti;
-            const detailBtn =
-                '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+            let tombolAksi = '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' +
                 nobukti + '\')"><i class="bi bi-info"></i></button>';
 
             if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-                // Sudah otorisasi — Batal Otorisasi + Print
-                return '<div class="action-buttons">' + detailBtn +
-                    '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
-                    '<button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-                    nobukti + '\')"><i class="bi bi-printer"></i></button>' +
-                    '</div>';
+                // Sudah otorisasi — Batal Otorisasi + Cetak
+                tombolAksi += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
+                    '<button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint(\'' +
+                    nobukti + '\')"><i class="bi bi-printer"></i></button>';
+            } else {
+                // Belum otorisasi — Koreksi + Otorisasi
+                tombolAksi += '<button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi(\'' +
+                    nobukti + '\')"><i class="bi bi-pen"></i></button>' +
+                    '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>';
             }
 
-            // Belum otorisasi — Edit + Otorisasi
-            return '<div class="action-buttons">' + detailBtn +
-                '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
-                nobukti + '\')"><i class="bi bi-key"></i></button>' +
-                '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
-                nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>' +
-                '</div>';
+            return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
         }
 
-        function renderTabel(resetPage) {
-            if (resetPage !== false) {
-                tabelPage2 = 1;
+        /* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus
+           tabel dengan #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti
+           rtPindahBar() di bonsementara.blade.php. */
+        function rtPindahBar(idBar, idTabel) {
+            let bar = document.getElementById(idBar);
+            let tabel = document.getElementById(idTabel);
+            if (!bar || !tabel) { return; }
+
+            let acuan = tabel;
+            if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+                acuan = document.getElementById(idTabel + '_wrapper') || tabel;
             }
 
-            const cols = gcart_header.filter(c => c[2] === 1);
-            const thead = document.querySelector('#mainTable thead');
-            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Actions</th>');
-
-            const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-            let rows = lastRows;
-            if (search) {
-                rows = rows.filter(function(r) {
-                    return cols.some(function(c) {
-                        const v = pickCI(r, c[0]);
-                        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-                    });
-                });
+            if (acuan.previousElementSibling !== bar) {
+                acuan.parentNode.insertBefore(bar, acuan);
             }
-            rows = filterByOtorisasi(rows, globalOtorisasi);
+        }
 
-            const tbody = document.getElementById('tabel_data');
-            $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+        function ikatSearch() {
+            let input = document.getElementById('searchBox2');
+            if (!input || input.dataset.rtBound) { return; }
+            input.dataset.rtBound = '1';
 
-            if (!rows.length) {
-                tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-                document.getElementById('footerLabel1').textContent = 'Tidak ada data';
-                renderPager2(0, 0);
-                return;
+            input.addEventListener('input', function() {
+                $('#tabel').DataTable().search(input.value).draw();
+            });
+        }
+
+        function ikatPanjangHalaman() {
+            let sel = document.getElementById('tabelLen2');
+            if (!sel || sel.dataset.rtBound) { return; }
+            sel.dataset.rtBound = '1';
+            sel.value = String(tabelLen2);
+
+            sel.addEventListener('change', function() {
+                let n = Number(sel.value);
+                tabelLen2 = (n === -1 || n > 0) ? n : 10;
+                $('#tabel').DataTable().page.len(tabelLen2).draw();
+            });
+        }
+
+        // Diikat lewat JS (bukan onchange="loadAll()" inline lagi) supaya rentang yang belum
+        // lengkap tidak memicu request, dan urutan tanggal terbalik ditolak dengan peringatan —
+        // sama seperti outIkatPeriode() di bonsementara.blade.php.
+        function ikatPeriode() {
+            let awal = document.getElementById('inputDate1');
+            let akhir = document.getElementById('inputDate2');
+            if (!awal || !akhir || awal.dataset.rtBound) { return; }
+            awal.dataset.rtBound = '1';
+
+            let onUbah = function() {
+                if (!awal.value || !akhir.value) { return; }
+                if (awal.value > akhir.value) {
+                    alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
+                    return;
+                }
+                loadAll();
+            };
+            awal.addEventListener('change', onUbah);
+            akhir.addEventListener('change', onUbah);
+        }
+
+        // ReportTable.headHtml() dengan fallback bila report-table.js belum termuat — sama
+        // seperti mkHeadHtml() di memorialkoreksi.blade.php.
+        function dphHeadHtml(cols) {
+            if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+                return ReportTable.headHtml(cols);
+            }
+            console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.');
+            let html = '<tr>';
+            cols.forEach((c) => {
+                html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`;
+            });
+            return html + '</tr>';
+        }
+
+        let dphRtSudahInit = false;
+
+        function dphInitReportTableSekali() {
+            if (dphRtSudahInit || typeof ReportTable === 'undefined') { return; }
+            dphRtSudahInit = true;
+
+            ReportTable.init({
+                table: '#tabel',
+                bar: '#rtBar',
+                onChange: renderTabel
+            });
+
+            // Sebagian layout memasang penangan klik sendiri di <thead>; teruskan klik pada
+            // roda gigi / pegangan geser ke penangan milik ReportTable — sama seperti
+            // mkInitReportTableSekali() di memorialkoreksi.blade.php.
+            let dphGuardUlangKlik = false;
+            let thead = document.getElementById('tabel_header');
+            if (thead) {
+                thead.addEventListener('click', function(e) {
+                    if (dphGuardUlangKlik) { return; }
+                    let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip');
+                    if (!interaktif) { return; }
+
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    dphGuardUlangKlik = true;
+                    let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window });
+                    Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true });
+                    thead.dispatchEvent(ulang);
+                    dphGuardUlangKlik = false;
+                }, true);
+            }
+        }
+
+        // Tinggi tabel mengikuti sisa ruang layar - sama seperti mkAturTinggiTabel() di
+        // memorialkoreksi.blade.php. Beda dengan referensi, halaman ini punya page2/3/4 yang
+        // memakai .mainpage yang sama, jadi ditambah jaga-jaga: berhenti diam-diam kalau
+        // #page1 sedang disembunyikan (loadAll() masih bisa terpanggil saat page2/3/4 aktif).
+        function dphAturTinggiTabel() {
+            let page = document.getElementById('page1');
+            if (!page || page.offsetParent === null) { return; }
+
+            let area = document.getElementById('content');
+            let wrap = document.querySelector('#page1 .po-table-wrap');
+            if (!area || !wrap) { return; }
+
+            wrap.style.maxHeight = 'none';
+
+            let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+            let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+            let kotak = wrap.getBoundingClientRect();
+            let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+            let sisa = batasBawah - kotak.top - bawah - 4;
+            wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
+        }
+
+        // IsOtorisasi1/OtoUser1/TglOto1 dikeluarkan dari cols meski masih tersimpan di
+        // susunan kolom lama (sebelum perubahan ini) — ketiganya sekarang kolom tetap
+        // (Oto/User Oto/Tgl Oto) yang ditambahkan sendiri di bawah, bukan kolom geser/sembunyi.
+        function renderTabel() {
+            const cols = gcart_header.filter(c => c[2] === 1 &&
+                c[0] !== 'IsOtorisasi1' && c[0] !== 'OtoUser1' && c[0] !== 'TglOto1');
+
+            if ($.fn.DataTable.isDataTable('#tabel')) {
+                $('#tabel').DataTable().destroy();
             }
 
-            const totalRows = rows.length;
-            const totalPages = tabelLen2 === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLen2));
-            if (tabelPage2 > totalPages) {
-                tabelPage2 = totalPages;
+            let thead = document.getElementById('tabel_header');
+            thead.innerHTML = dphHeadHtml(cols);
+            let baris = thead.querySelector('tr');
+            if (baris) {
+                baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>');
+                baris.insertAdjacentHTML('beforeend', `
+                    <th style="padding: 4px 12px;" scope="col">Oto</th>
+                    <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                    <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+                `);
             }
-            const pageRows = tabelLen2 === -1 ? rows : rows.slice((tabelPage2 - 1) * tabelLen2, tabelPage2 * tabelLen2);
 
-            let html = '';
-            pageRows.forEach(function(r) {
-                html += '<tr class="data-row">';
-                html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
-                html += cols.map(function(c) {
+            const rows = filterByOtorisasi(lastRows, globalOtorisasi);
+
+            let rowTable = '';
+            rows.forEach(function(r) {
+                let isOtorisasi = Number(pickCI(r, 'IsOtorisasi1')) || 0;
+                let otoUser = pickCI(r, 'OtoUser1');
+                let tglOto = pickCI(r, 'TglOto1');
+
+                rowTable += '<tr><td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+                rowTable += cols.map(function(c) {
                     const v = pickCI(r, c[0]);
-                    if (c[0] === 'IsOtorisasi1') {
-                        return (Number(v) === 1) ?
-                            '<td><span class="sp-badge is-active">Sudah</span></td>' :
-                            '<td><span class="sp-badge is-inactive">Belum</span></td>';
-                    }
                     if (c[3] === 'date') {
-                        return '<td>' + fmtYMD(v) + '</td>';
+                        return '<td>' + (v ? formatDate(v) : '') + '</td>';
                     }
                     if (c[3] === 'float') {
-                        return '<td class="text-right">' + formatAngka(parseFloat(v || 0).toFixed(2)) +
-                            '</td>';
+                        return '<td style="text-align: right;">' +
+                            formatAngka(parseFloat(v || 0).toFixed(Number(c[5]) || 0)) + '</td>';
                     }
                     return '<td>' + nullToEmpty(v) + '</td>';
                 }).join('');
-                html += '</tr>';
+                rowTable += `
+                    ${isOtorisasi ?
+                        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+                      :
+                        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+                    }
+                    <td>${otoUser || ''}</td>
+                    <td>${tglOto ? formatDate(tglOto) : ''}</td>
+                </tr>`;
             });
 
-            tbody.innerHTML = html;
-            document.getElementById('footerLabel1').textContent = tabelLen2 === -1 ?
-                'Menampilkan ' + totalRows + ' baris' :
-                'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
-            renderPager2(tabelPage2, totalPages);
-            $('[data-toggle="tooltip"]').tooltip({
-                container: 'body',
-                boundary: 'window'
+            document.getElementById('tabel_data').innerHTML = rowTable;
+
+            $('#tabel').DataTable({
+                lengthChange: false,
+                pageLength: tabelLen2,
+                order: [],
+                columnDefs: [{ targets: [0], orderable: false }],
+                dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    emptyTable: 'Tidak ada data',
+                    zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+                }
             });
-        }
 
-        function onLenChange2() {
-            const v = Number(document.getElementById('tabelLen2').value);
-            tabelLen2 = (v === -1 || v > 0) ? v : 10;
-            renderTabel();
-        }
+            rtPindahBar('rtBar', 'tabel');
+            ikatSearch();
+            ikatPanjangHalaman();
+            ikatPeriode();
 
-        function gotoPage2(p) {
-            tabelPage2 = p;
-            renderTabel(false);
-        }
-
-        function renderPager2(page, totalPages) {
-            const el = document.getElementById('pagerBtns1');
-            if (!el) {
-                return;
+            let inputSearch = document.getElementById('searchBox2');
+            if (inputSearch && inputSearch.value) {
+                $('#tabel').DataTable().search(inputSearch.value).draw();
             }
-            if (!totalPages || totalPages <= 1) {
-                el.innerHTML = '';
-                return;
-            }
-
-            function pgBtn(label, targetPage, active, disabled) {
-                const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
-                const click = disabled ? '' : ' onclick="gotoPage2(' + targetPage + ')"';
-                return '<div class="' + cls + '"' + click + '>' + label + '</div>';
-            }
-
-            let start = Math.max(1, page - 2);
-            let end = Math.min(totalPages, start + 4);
-            start = Math.max(1, end - 4);
-
-            let html = pgBtn('&laquo;', page - 1, false, page <= 1);
-            for (let p = start; p <= end; p++) {
-                html += pgBtn(String(p), p, p === page, false);
-            }
-            html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
-
-            el.innerHTML = html;
+            dphAturTinggiTabel();
         }
 
         /* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum) -- */
@@ -1622,11 +1918,7 @@
 
         $(document).ready(function() {
             doSetHeader(g_modeReport);
-            ReportTable.init({
-                table: '#mainTable',
-                bar: '#rtBar',
-                onChange: renderTabel
-            });
+            dphInitReportTableSekali();
             renderTabel();
 
             //   $("#tabel_add_list_modal").DataTable({
@@ -1638,12 +1930,6 @@
             //    // {  "className": "text-center", "targets": [4] },
             //  ]
             // });
-
-
-
-
-
-
 
             $("#tabel_add_list_custsupp").DataTable({
                 "lengthChange": false,
@@ -1714,7 +2000,7 @@
             // listPengajuan[saveHeaderIndex]
             saveHeaderInvoice = listPengajuan[index]
             saveHeaderIndex = index
-            let xdibayar = $(`#list_proses_dibayar${index}`).val();
+            let xdibayar = $(`#list_proses_dibayar${index}`).val().toString().replace(/,/g, '');
             // let xLB = $(`#list_proses_LB${index}`).val();
             // let sisa = $(`#input_modal_sisa`).val();
             console.log(saveHeaderInvoice.NoBukti)
@@ -1724,11 +2010,11 @@
             console.log(formatAngka(parseFloat(x.TOTFAKTUR).toFixed(2)))
             console.log('==')
             // console.log(xdibayar, xLB , sisa)
-            document.getElementById("input_modalx_nilainotadibayar").value = parseFloat(Number(x.Kredit) - Number(x
-                .JmlDibayar)).toFixed(2)
-            document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+            document.getElementById("input_modalx_nilainotadibayar").value = formatAngka(parseFloat(Number(x.Kredit) - Number(x
+                .JmlDibayar)).toFixed(2))
+            document.getElementById("input_modalx_dibayar").value = formatAngka(parseFloat(xdibayar).toFixed(2))
 
-            document.getElementById("input_modalx_dibayar").value = parseFloat(xdibayar).toFixed(2)
+            document.getElementById("input_modalx_dibayar").value = formatAngka(parseFloat(xdibayar).toFixed(2))
 
             document.getElementById("input_modalx_noinvoice").value = x.noinvoice ? x.noinvoice : ''
             document.getElementById("input_modalx_tanggalinvoice").value = x.tanggalinvoice
@@ -1778,9 +2064,9 @@
                 return
 
             }
-            document.getElementById("input_modalxedit_nilainotadibayar").value = parseFloat(Number(barangEdit.NilaiNota))
-                .toFixed(2)
-            document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
+            document.getElementById("input_modalxedit_nilainotadibayar").value = formatAngka(parseFloat(Number(barangEdit.NilaiNota))
+                .toFixed(2))
+            document.getElementById("input_modalxedit_dibayar").value = formatAngka(parseFloat(Number(barangEdit.dibayar)).toFixed(2))
 
             // document.getElementById("input_modalxedit_dibayar").value = parseFloat(Number(barangEdit.dibayar)).toFixed(2)
 
@@ -1821,8 +2107,8 @@
                 xlist = []
             }
             let xtotalKL = 0
-            let xnilainotadibayar = $("#input_modalxedit_nilainotadibayar").val()
-            let xdibayar = $("#input_modalxedit_dibayar").val()
+            let xnilainotadibayar = $("#input_modalxedit_nilainotadibayar").val().toString().replace(/,/g, '')
+            let xdibayar = $("#input_modalxedit_dibayar").val().toString().replace(/,/g, '')
 
 
             xlist.forEach((item, i) => {
@@ -1882,8 +2168,8 @@
                 alertify.warning("Data tidak lengkap")
                 return
             }
-            let xnilainotadibayar = $("#input_modalx_nilainotadibayar").val()
-            let xdibayar = $("#input_modalx_dibayar").val()
+            let xnilainotadibayar = $("#input_modalx_nilainotadibayar").val().toString().replace(/,/g, '')
+            let xdibayar = $("#input_modalx_dibayar").val().toString().replace(/,/g, '')
             // if (Number(xnilainotadibayar) + Number(xdibayar) < Number(kl)) {
             //   alertify.warning('KL melebihi nilai nota + dibayar')
             //
@@ -2040,7 +2326,7 @@
                 });
 
                 document.getElementById("tabel_data_add_list_modalxedit").innerHTML = rowTablex
-                document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = parseFloat(xTempTotalKL).toFixed(2)
+                document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = formatAngka(parseFloat(xTempTotalKL).toFixed(2))
 
 
             }
@@ -2211,7 +2497,6 @@
                 tanggal
             })
             console.log('awuu')
-
             // listCheckListPengajuan
 
             $.ajax({
@@ -2239,6 +2524,7 @@
 
                         // $('.showhideitem').hide();
                         loadAll()
+                        buttonCloseForm()
                         // buttonCloseForm()
                         tipeform = 'edit'
                         // document.getElementById("buttonAddListCustomer").disabled = true
@@ -3040,11 +3326,11 @@
             let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
             let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur);
             console.log(check)
-            let xnilainota = $("#input_modalx_nilainotadibayar").val()
+            let xnilainota = $("#input_modalx_nilainotadibayar").val().toString().replace(/,/g, '')
             let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
             let xnoinvoice = $("#input_modalx_noinvoice").val()
 
-            let xdibayar = $("#input_modalx_dibayar").val()
+            let xdibayar = $("#input_modalx_dibayar").val().toString().replace(/,/g, '')
             // if (xnilainota < xdibayar ) {
             //   alertify.warning("Melebihi nilai nota")
             //   return
@@ -3078,7 +3364,7 @@
             listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
             listCheckListPengajuan[check].noinvoice = xnoinvoice
 
-            document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
+            document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = formatAngka(parseFloat(xdibayar).toFixed(2))
             alertify.success("Berhasil update dibayar")
 
 
@@ -3216,7 +3502,7 @@
             // return
 
 
-            alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus faktur ' + barangDelete.NoFaktur + ' ?',
+            var dlgHapusItem = alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus faktur ' + barangDelete.NoFaktur + ' ?',
                 function() {
                     let _token = $("#_token").val()
                     let choice = "D"
@@ -3297,13 +3583,7 @@
                 function() {
                     console.log('no')
                 });
-
-
-
-
-
-
-
+                dlgHapusItem.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
 
@@ -4247,8 +4527,8 @@
                 // kalo tidak ada data di adddataarray langsung add , kalo ada data cek namacustsupp
 
                 if (!listCheckListPengajuan.length) {
-                    document.getElementById(`list_proses_dibayar${index}`).value = parseFloat(Number(data.Kredit) - Number(
-                        data.JmlDibayar)).toFixed(2)
+                    document.getElementById(`list_proses_dibayar${index}`).value = formatAngka(parseFloat(Number(data.Kredit) - Number(
+                        data.JmlDibayar)).toFixed(2))
                     listPengajuan[index].diBayar = Number(data.Kredit) - Number(data.JmlDibayar)
                     listPengajuan[index].noinvoice = data.NOInvoice
                     listPengajuan[index].tanggalinvoice = formatDate(data.TglInvoice)
@@ -4265,8 +4545,8 @@
                     console.log(listCheckListPengajuan)
                     return
                 }
-                document.getElementById(`list_proses_dibayar${index}`).value = parseFloat(Number(data.Kredit) - Number(data
-                    .JmlDibayar)).toFixed(2)
+                document.getElementById(`list_proses_dibayar${index}`).value = formatAngka(parseFloat(Number(data.Kredit) - Number(data
+                    .JmlDibayar)).toFixed(2))
                 listPengajuan[index].diBayar = Number(data.Kredit) - Number(data.JmlDibayar)
                 listPengajuan[index].noinvoice = data.NOInvoice
                 listPengajuan[index].tanggalinvoice = formatDate(data.TglInvoice)
@@ -4355,14 +4635,14 @@
       <td class="text-right">${formatAngka(parseFloat(item.JmlDibayar).toFixed(2))}</td>
       <td class="text-center">
       <div class="input-group form-group dph-dibayar-group">
-        <input class="dph-inp-sm form-control text-right" id="list_proses_dibayar${i}" type="number" value='0.00' disabled>
+        <input class="dph-inp-sm form-control text-right" id="list_proses_dibayar${i}" type="text" value='0.00' disabled>
 
-        <button id="buttonChangeDibayar${i}" class="btn btn-chip-biru" type="button" onclick="buttonChangeDibayar(${i})">+</button>
+        <button id="buttonChangeDibayar${i}" class="btn btn-chip-biru" type="button" onclick="buttonChangeDibayar(${i})"><i class="bi bi-plus"></i></button>
 
       </div></td>
 
       <td class="text-center">
-      <input class="dph-inp-kl form-control text-right" id="list_proses_KL${i}" type="number" value='0.00' disabled>
+      <input class="dph-inp-kl form-control text-right" id="list_proses_KL${i}" type="text" value='0.00' disabled>
       </td>
       <td>${ item.NOInvoice ? item.NOInvoice: ''}</td>
       <td>${ item.TglInvoice ? formatDate(item.TglInvoice) : ''}</td>
@@ -4402,11 +4682,11 @@
             let xlist = listTambahKL[saveHeaderInvoice.NoFaktur]
             let check = listCheckListPengajuan.findIndex(el => el.NoFaktur === saveHeaderInvoice.NoFaktur);
             console.log(check)
-            let xnilainota = $("#input_modalx_nilainotadibayar").val()
+            let xnilainota = $("#input_modalx_nilainotadibayar").val().toString().replace(/,/g, '')
             let xtanggalinvoice = $("#input_modalx_tanggalinvoice").val()
             let xnoinvoice = $("#input_modalx_noinvoice").val()
 
-            let xdibayar = $("#input_modalx_dibayar").val()
+            let xdibayar = $("#input_modalx_dibayar").val().toString().replace(/,/g, '')
             // if (xnilainota < xdibayar ) {
             //   alertify.warning("Melebihi nilai nota")
             //   return
@@ -4440,7 +4720,7 @@
             listCheckListPengajuan[check].tanggalinvoice = xtanggalinvoice
             listCheckListPengajuan[check].noinvoice = xnoinvoice
 
-            document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = parseFloat(xdibayar).toFixed(2)
+            document.getElementById(`list_proses_dibayar${saveHeaderIndex}`).value = formatAngka(parseFloat(xdibayar).toFixed(2))
             alertify.success("Berhasil update dibayar")
 
         }
@@ -4486,7 +4766,7 @@
                 });
 
                 document.getElementById("tabel_data_add_list_modalx").innerHTML = rowTablex
-                document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = parseFloat(xTempTotalKL).toFixed(2)
+                document.getElementById(`list_proses_KL${saveHeaderIndex}`).value = formatAngka(parseFloat(xTempTotalKL).toFixed(2))
 
 
             }
@@ -4504,9 +4784,9 @@
             let xtanggalinvoice = $("#input_modalxinvoice_tanggalinvoice").val()
             let xnoinvoice = $("#input_modalxinvoice_noinvoice").val()
 
-            let xdibayar = $("#input_modalx_dibayar").val()
+            let xdibayar = $("#input_modalx_dibayar").val().toString().replace(/,/g, '')
 
-            let dibayar = $("#input_modalxedit_dibayar").val()
+            let dibayar = $("#input_modalxedit_dibayar").val().toString().replace(/,/g, '')
             let noinvoice = $("#input_modalxedit_noinvoice").val()
             let tanggalinvoice = $("#input_modalxedit_tanggalinvoice").val()
             let nofaktur = barangEdit.NoFaktur
@@ -4787,6 +5067,10 @@
             $('.mainpage').hide();
             // $('#page2').hide();
             $('#page1').show();
+            // #page1 bisa saja sudah dirender saat masih disembunyikan (loadAll() dipanggil
+            // dari page2/3/4) - dphAturTinggiTabel() melewati perhitungan tinggi saat itu,
+            // jadi dihitung ulang sekarang setelah #page1 benar-benar terlihat lagi.
+            dphAturTinggiTabel();
 
         }
 
@@ -4795,15 +5079,20 @@
         function buttonClosePage4() {
             $('.mainpage').hide();
             $('#' + formPageOrigin).show();
+            // no-op kalau yang ditampilkan kembali bukan #page1 - lihat dphAturTinggiTabel().
+            dphAturTinggiTabel();
         }
 
         function loadAll() {
+            document.getElementById('tabel_data').innerHTML =
+                '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>';
+
             let date1 = $('#inputDate1').val();
             let date2 = $('#inputDate2').val();
             $.ajax({
                 url: "{!! url('pengajuandphloadall') !!}",
                 type: "get",
-                async: false,
+                async: true,
                 data: {
                     date1,
                     date2
@@ -4811,6 +5100,10 @@
                 success: function(res) {
                     lastRows = (res.tempOutstanding || []).map(g => g[0]);
                     renderTabel();
+                },
+                error: function(err) {
+                    console.error("Load failed:", err);
+                    alertify.warning('Terjadi kesalahan silahkan refresh browser');
                 }
             })
 
@@ -5511,7 +5804,7 @@
 
 
 
-            alertify.confirm('Batal Otorisasi', 'Batal Otorisasi DPH ' + nobukti + ' ?',
+            var dlgBatalOtorisasi = alertify.confirm('Batal Otorisasi', 'Batal Otorisasi DPH ' + nobukti + ' ?',
                 function() {
                     let _token = $("#_token").val();
 
@@ -5541,7 +5834,7 @@
                 function() {
                     console.log('no')
                 });
-
+                dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
 

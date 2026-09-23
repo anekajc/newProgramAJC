@@ -32,7 +32,6 @@
                                             <tr>
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Keterangan</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -46,11 +45,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -504,7 +498,6 @@
             </div>
             <div id= "modalAddListValas" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
                     <h5 class="modal-title" id="">Valas</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -526,14 +519,12 @@
                                 <div class="col-12" style="overflow:auto; margin-top:-60px; ">
                                     <!-- <div class="container-fluid"> -->
 
-
                                     <table id="tabel_add_list_valas" class="dph-tb">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Kurs</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -545,13 +536,6 @@
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -603,7 +587,6 @@
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Kota</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -618,11 +601,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -674,7 +652,6 @@
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Keterangan</th>
                                                 <th scope="col">Tanggal</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -689,11 +666,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1164,7 +1136,6 @@
                                                 <th scope="col">Nominal</th>
                                                 <th scope="col">K. Bayar</th>
                                                 <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1182,11 +1153,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1241,7 +1207,6 @@
                                                 <th scope="col">Nominal</th>
                                                 <th scope="col">K. Bayar</th>
                                                 <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1259,11 +1224,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1321,7 +1281,6 @@
                                                 <th scope="col">Nominal</th>
                                                 <th scope="col">K. Bayar</th>
                                                 <th scope="col">L. Bayar</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1339,11 +1298,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1391,7 +1345,6 @@
                                             <tr>
                                                 <th scope="col">KODE</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1403,11 +1356,6 @@
                                                 <td>-</td>
                                                 <td>-</td>
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1501,18 +1449,14 @@
 
             <div id= "modalAddListDevisi" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Devisi</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
@@ -1530,7 +1474,6 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1544,11 +1487,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1604,7 +1542,6 @@
                                                 <th scope="col">Keterangan</th>
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Jumlah</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1622,11 +1559,6 @@
 
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1649,18 +1581,14 @@
 
             <div id= "modalAddListPerkiraan" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Perkiraan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
@@ -1679,7 +1607,6 @@
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Simbol</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1692,13 +1619,6 @@
                                                 <td>-</td>
                                                 <td>-</td>
                                                 <td>-</td>
-
-
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1750,7 +1670,6 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1764,11 +1683,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1791,41 +1705,33 @@
 
             <div id= "modalAddListLawan" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Lawan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
-
                 <div id="" class="">
                     <div class="modal-body">
-
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Lawan</h3>
+                                    {{-- <h3>Lawan</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
-
-
                                     <table id="tabel_add_list_lawan" class="dph-tb">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Perkiraan</th>
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Simbol</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
-
 
                                         <tbody id="tabel_data_add_list_lawan" class="text-left">
 
@@ -1836,11 +1742,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1892,7 +1793,6 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1906,11 +1806,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -1962,7 +1857,6 @@
                                             <tr>
                                                 <th scope="col">Kode</th>
                                                 <th scope="col">Nama</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -1976,11 +1870,6 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
                                         </tbody>
 
@@ -2035,7 +1924,6 @@
                                                 <th scope="col">Nama</th>
                                                 <th scope="col">Alamat</th>
                                                 <th scope="col">Kota</th>
-                                                <th scope="col">Actions</th>
 
                                             </tr>
                                         </thead>
@@ -2051,89 +1939,7 @@
                                                 <td>-</td>
 
 
-                                                <td class="text-center">
-                                                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                    <button class="btn btn-primary btn-sm" type="button"><i
-                                                            class="bi bi-plus"></i></button>
-                                                </td>
                                             </tr>
-                                        </tbody>
-
-
-                                    </table>
-                                    <!-- </div> -->
-                                    <!-- <button onclick="buttonSubKategori()">tes</button> -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListBatal()">Batal</button>
-                </div>
-            </div>
-
-            <div id= "modalAddListCustomer" class="showhidemodalbodyadd">
-                <div class="modal-header">
-
-
-                    <h5 class="modal-title" id="">Customer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-
-                <div id="" class="">
-                    <div class="modal-body">
-
-                        <div class="container-fluid mt-4">
-                            <div class="row">
-                                <div class="col-12">
-                                    <h3>Customer</h3>
-                                </div>
-                            </div>
-                            <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-                            <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
-                                    <!-- <div class="container-fluid"> -->
-
-
-                                    <table id="tabel_add_list_customer" class="dph-tb">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Kode</th>
-                                                <th scope="col">Nama</th>
-                                                <th scope="col">Alamat</th>
-                                                <th scope="col">Kota</th>
-                                                <th scope="col">Actions</th>
-
-                                            </tr>
-                                        </thead>
-
-
-                                        <tbody id="tabel_data_add_list_customer" class="text-left">
-                                            @for ($i = 0; $i < count($listCustSuppX); $i++)
-                                                <tr>
-
-                                                    <td>{{ $listCustSuppX[$i]->KODECUSTSUPP }}</td>
-                                                    <td>{{ $listCustSuppX[$i]->NAMACUSTSUPP }}</td>
-                                                    <td>{{ $listCustSuppX[$i]->ALAMAT }}</td>
-                                                    <td>{{ $listCustSuppX[$i]->NAMAKOTA }}</td>
-
-
-
-                                                    <td class="text-center">
-                                                        <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                                                        <button class="btn btn-primary btn-sm"
-                                                            onclick="buttonAddPickCustSuppX('{{ $listCustSuppX[$i]->KODECUSTSUPP }}', '{{ $listCustSuppX[$i]->Agent }}')"
-                                                            type="button"><i class="bi bi-plus"></i></button>
-                                                    </td>
-                                                </tr>
-                                            @endfor
                                         </tbody>
 
 

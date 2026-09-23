@@ -1,5 +1,4 @@
 <div id="page1" class="container-fluid mainpage">
-<div class="container-fluid">
 
 <div id="printContainer" style="display:none">
 
@@ -20,17 +19,27 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  <div class="tb-report">
-    <div class="content">
+  {{-- .tb-report/.content dilepas (pindah ke skema po-*, lihat catatan di bank.blade.php
+   @section('css')) — #modalFilter di luar tetap aman karena selalu sudah berada di luar
+   .tb-report (lihat catatannya sendiri di bawah). Kartu + toolbar + tabel disalin dari
+   accounting/memorialkoreksi.blade.php supaya sama persis. --}}
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-      <div class="toolbar">
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..." oninput="renderTabel()" style="width:200px">
+      <div class="po-toolbar">
+        <div class="po-filter-wrap">
+          <label>Periode</label>
+          <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+          <span class="po-filter-sep">s/d</span>
+          <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
+        </div>
 
-        {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — lihat
-             renderTabel()/onLenChange2() di bagian JS halaman ini. --}}
-        <div class="len-wrap">
+        <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
+
+        {{-- Jumlah baris per halaman - lihat bankIkatPanjangHalaman() di public/js/bank.js. --}}
+        <div class="po-len-wrap">
           <label for="tabelLen2">Tampilkan</label>
-          <select id="tabelLen2" class="len-inp" onchange="onLenChange2()">
+          <select id="tabelLen2" class="po-len-inp">
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -39,45 +48,48 @@
           </select>
         </div>
 
-        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
+        <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
           <i class="bi bi-funnel"></i> Filter
         </button>
 
-        {{-- margin-left:auto pada .action-group (report-table.css) mendorongnya ke ujung kanan
-             toolbar, terpisah dari Filter di sebelah kiri. --}}
-        <div class="action-group">
-          <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah Bank</button>
+        <div class="po-toolbar-act">
+          <button type="button" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
         </div>
       </div>
 
+      {{-- #rtBar diisi lewat JS oleh ReportTable.init() - lihat bankInitReportTableSekali(). --}}
       <div id="rtBar"></div>
 
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table id="mainTable" class="tb aksi-hover">
-            <thead>
-              <tr>
-                <th class="rt-fixed-th">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="tabel_data" class="text-left"></tbody>
-          </table>
-        </div>
-        <div class="table-footer">
-          <span id="footerLabel1">Belum ada data</span>
-          <div class="pager-btns" id="pagerBtns1"></div>
-        </div>
-      </div>
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+            <th style="padding: 4px 12px;" scope="col">Trans</th>
+            <th style="padding: 4px 12px;" scope="col">Perk.</th>
+            <th style="padding: 4px 12px;" scope="col">Ket.</th>
+            <th style="padding: 4px 12px;" scope="col">Jumlah Rp</th>
+            <th style="padding: 4px 12px;" scope="col">Oto</th>
+            <th style="padding: 4px 12px;" scope="col">User Oto</th>
+            <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+          {{-- Baris digambar renderTabel() lewat JS, supaya susunan kolom hasil
+               geser/sembunyi selalu konsisten dengan hasil render ulang. --}}
+        </tbody>
+      </table>
 
-      <div class="rt-hint">
+      <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
-        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk sembunyikan kolom.
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+        untuk menyembunyikan kolom.
       </div>
 
     </div>
   </div>
 
-</div>
 </div>
 </div>
 
@@ -108,6 +120,14 @@
                 <option value="2">Semua</option>
                 <option value="1">Sudah Otorisasi</option>
                 <option value="0">Belum Otorisasi</option>
+              </select>
+            </div>
+            <div>
+              <label class="rt-field-label" for="modalTipeTrans">Tipe Transaksi</label>
+              <select class="rt-native" id="modalTipeTrans">
+                <option value="">Semua</option>
+                <option value="BBK">BBK</option>
+                <option value="BBM">BBM</option>
               </select>
             </div>
           </div>

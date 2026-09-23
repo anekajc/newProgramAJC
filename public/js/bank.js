@@ -4,12 +4,20 @@
  * docs/new-design-gudang-style-guide.md. Menggantikan DataTable() polos + render gabungan
  * for-loop Blade lama plus loadAll() lama; satu fungsi renderTabel() dipakai untuk paint
  * pertama maupun tiap refresh loadAll() supaya keduanya tidak lagi bisa beda.
+ *
+ * renderTabel()/pagination di bawah diganti total memakai jQuery DataTables (persis pola
+ * accounting/memorialkoreksi.blade.php / accounting/pengajuandph.blade.php), menggantikan
+ * pager manual lama (renderPager2/gotoPage2/pgBtn/#footerLabel1/#pagerBtns1) — lihat
+ * permintaan "samakan dengan bonsementara/memorialkoreksi" yang sudah diterapkan lebih dulu
+ * di accounting/pengajuandph.blade.php dan accounting/pengajuandphtunai.blade.php. Halaman
+ * ini tidak punya filter Periode (rentang tanggal) — sengaja tidak ditambahkan, bukan bagian
+ * dari fitur halaman ini.
  * ========================================================================= */
 let lastRows = (BANK_INITIAL_ROWS); // dbTrans/dbTransaksi sudah di-GROUP BY per NoBukti di controller
 let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
+let globalTipeTrans = ""; // filter modal: "" = Semua, "BBK", "BBM"
 
-let tabelLen2 = 10;
-let tabelPage2 = 1;
+let tabelLen2 = 10; // dipakai sebagai pageLength DataTables di renderTabel()
 
 var g_href = 'bank';
 var g_modeReport = '1';
@@ -18,6 +26,10 @@ var gsum_issubtotal = 0;
 var gsum_isgrandtotal = 0;
 var gct_desimal_max = 4;
 
+// IsOtorisasi1/OtoUser1/TglOto1 SENGAJA tidak ada di sini — seperti
+// memorialkoreksi.blade.php, ketiganya bukan kolom yang bisa digeser/disembunyikan,
+// melainkan tiga kolom tetap (Oto/User Oto/Tgl Oto) yang selalu ditambahkan di ujung
+// kanan tabel oleh renderTabel(), lihat catatan di sana.
 function setDefaultHeader() {
     // [ field, label, visible, type, total, decimals ]
     gcart_header = [
@@ -27,10 +39,6 @@ function setDefaultHeader() {
         ['Perkiraan', 'Perk.', 1, 'varchar', 0, 0],
         ['Note', 'Ket.', 1, 'varchar', 0, 0],
         ['TotalRp', 'Jumlah Rp', 1, 'float', 0, 2],
-        // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum.
-        ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
-        ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
-        ['TglOto1', 'Tgl Oto', 1, 'date', 0, 0],
     ];
 }
 
@@ -167,19 +175,6 @@ function nullToEmpty(v) {
     return (v === null || v === undefined) ? '' : v;
 }
 
-function fmtYMD(v) {
-    if (!v) {
-        return '';
-    }
-    let date = new Date(v);
-    if (isNaN(date)) {
-        return '';
-    }
-    let day = ("0" + date.getDate()).slice(-2);
-    let month = ("0" + (date.getMonth() + 1)).slice(-2);
-    return date.getFullYear() + "/" + month + "/" + day;
-}
-
 // #modalOtorisasi: 2=Semua, 1=Sudah, 0=Belum — client-side saja.
 function filterByOtorisasi(rows, filterVal) {
     if (filterVal === '1') {
@@ -191,158 +186,269 @@ function filterByOtorisasi(rows, filterVal) {
     return rows;
 }
 
+// #modalTipeTrans: "" = Semua, "BBK"/"BBM" — client-side saja.
+function filterByTipeTrans(rows, filterVal) {
+    if (!filterVal) return rows;
+    return rows.filter(r => String(pickCI(r, 'TipeTransHd') || '').trim().toUpperCase() === filterVal);
+}
+
 // Satu-satunya tempat yang menentukan tombol Aksi — dipakai renderTabel() untuk paint pertama
-// MAUPUN tiap refresh loadAll(), jadi tidak bisa lagi berbeda seperti sebelumnya.
+// MAUPUN tiap refresh loadAll(), jadi tidak bisa lagi berbeda seperti sebelumnya. Markup +
+// pemetaan warna/ikon disalin persis dari renderTabelMk() di memorialkoreksi.blade.php
+// (.po-aksi-wrap, cuma title, tanpa tooltip Bootstrap).
 function aksiButtonsHtml(r) {
     const nobukti = r.NoBukti;
-    const detailBtn =
-        '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+    let tombolAksi = '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' +
         nobukti + '\', \'detail\')"><i class="bi bi-info"></i></button>';
 
     if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-        // Sudah otorisasi — Batal Otorisasi + Print
-        return '<div class="action-buttons">' + detailBtn +
-            '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-            nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
-            '<button type="button" class="btn-action-sm btn-action-info" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-            nobukti + '\')"><i class="bi bi-printer"></i></button>' +
-            '</div>';
+        // Sudah otorisasi — Batal Otorisasi + Cetak
+        tombolAksi += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+            nobukti + '\')"><i class="bi bi-key"></i></button>' +
+            '<button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint(\'' +
+            nobukti + '\')"><i class="bi bi-printer"></i></button>';
+    } else {
+        // Belum otorisasi — Koreksi + Otorisasi
+        tombolAksi += '<button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi(\'' +
+            nobukti + '\')"><i class="bi bi-pen"></i></button>' +
+            '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonDetail(\'' +
+            nobukti + '\', \'otorisasi\')"><i class="bi bi-key"></i></button>';
     }
 
-    // Belum otorisasi — Koreksi + Otorisasi
-    return '<div class="action-buttons">' + detailBtn +
-        '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonDetail(\'' +
-        nobukti + '\', \'otorisasi\')"><i class="bi bi-key"></i></button>' +
-        '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Edit" onclick="buttonKoreksi(\'' +
-        nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>' +
-        '</div>';
+    return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
 }
 
-function renderTabel(resetPage) {
-    if (resetPage !== false) {
-        tabelPage2 = 1;
+/* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel
+   dengan #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti rtPindahBar()
+   di bonsementara.blade.php. */
+function rtPindahBar(idBar, idTabel) {
+    let bar = document.getElementById(idBar);
+    let tabel = document.getElementById(idTabel);
+    if (!bar || !tabel) { return; }
+
+    let acuan = tabel;
+    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+        acuan = document.getElementById(idTabel + '_wrapper') || tabel;
     }
 
-    const cols = gcart_header.filter(c => c[2] === 1);
-    const thead = document.querySelector('#mainTable thead');
-    thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Actions</th>');
-
-    const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-    let rows = lastRows;
-    if (search) {
-        rows = rows.filter(function(r) {
-            return cols.some(function(c) {
-                const v = pickCI(r, c[0]);
-                return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-            });
-        });
+    if (acuan.previousElementSibling !== bar) {
+        acuan.parentNode.insertBefore(bar, acuan);
     }
-    rows = filterByOtorisasi(rows, globalOtorisasi);
+}
 
-    const tbody = document.getElementById('tabel_data');
-    $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
+function ikatSearch() {
+    let input = document.getElementById('searchBox2');
+    if (!input || input.dataset.rtBound) { return; }
+    input.dataset.rtBound = '1';
 
-    if (!rows.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-        document.getElementById('footerLabel1').textContent = 'Tidak ada data';
-        renderPager2(0, 0);
-        return;
+    input.addEventListener('input', function() {
+        $('#tabel').DataTable().search(input.value).draw();
+    });
+}
+
+function ikatPanjangHalaman() {
+    let sel = document.getElementById('tabelLen2');
+    if (!sel || sel.dataset.rtBound) { return; }
+    sel.dataset.rtBound = '1';
+    sel.value = String(tabelLen2);
+
+    sel.addEventListener('change', function() {
+        let n = Number(sel.value);
+        tabelLen2 = (n === -1 || n > 0) ? n : 10;
+        $('#tabel').DataTable().page.len(tabelLen2).draw();
+    });
+}
+
+// ReportTable.headHtml() dengan fallback bila report-table.js belum termuat — sama seperti
+// mkHeadHtml() di memorialkoreksi.blade.php.
+function bankHeadHtml(cols) {
+    if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+        return ReportTable.headHtml(cols);
+    }
+    console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.');
+    let html = '<tr>';
+    cols.forEach((c) => {
+        html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`;
+    });
+    return html + '</tr>';
+}
+
+let bankRtSudahInit = false;
+
+function bankInitReportTableSekali() {
+    if (bankRtSudahInit || typeof ReportTable === 'undefined') { return; }
+    bankRtSudahInit = true;
+
+    ReportTable.init({
+        table: '#tabel',
+        bar: '#rtBar',
+        onChange: renderTabel
+    });
+
+    // Sebagian layout memasang penangan klik sendiri di <thead>; teruskan klik pada roda
+    // gigi / pegangan geser ke penangan milik ReportTable — sama seperti
+    // mkInitReportTableSekali() di memorialkoreksi.blade.php.
+    let bankGuardUlangKlik = false;
+    let thead = document.getElementById('tabel_header');
+    if (thead) {
+        thead.addEventListener('click', function(e) {
+            if (bankGuardUlangKlik) { return; }
+            let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip');
+            if (!interaktif) { return; }
+
+            e.stopPropagation();
+            e.preventDefault();
+
+            bankGuardUlangKlik = true;
+            let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window });
+            Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true });
+            thead.dispatchEvent(ulang);
+            bankGuardUlangKlik = false;
+        }, true);
+    }
+}
+
+// Tinggi tabel mengikuti sisa ruang layar - sama seperti mkAturTinggiTabel() di
+// memorialkoreksi.blade.php.
+function bankAturTinggiTabel() {
+    let page = document.getElementById('page1');
+    if (!page || page.offsetParent === null) { return; }
+
+    let area = document.getElementById('content');
+    let wrap = document.querySelector('#page1 .po-table-wrap');
+    if (!area || !wrap) { return; }
+
+    wrap.style.maxHeight = 'none';
+
+    let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+    let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+    let kotak = wrap.getBoundingClientRect();
+    let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+    let sisa = batasBawah - kotak.top - bawah - 4;
+    wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
+}
+
+// IsOtorisasi1/OtoUser1/TglOto1 dikeluarkan dari cols meski masih tersimpan di susunan
+// kolom lama (sebelum perubahan ini) — ketiganya sekarang kolom tetap (Oto/User Oto/Tgl
+// Oto) yang ditambahkan sendiri di bawah, bukan kolom geser/sembunyi.
+function renderTabel() {
+    const cols = gcart_header.filter(c => c[2] === 1 &&
+        c[0] !== 'IsOtorisasi1' && c[0] !== 'OtoUser1' && c[0] !== 'TglOto1');
+
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+        $('#tabel').DataTable().destroy();
     }
 
-    const totalRows = rows.length;
-    const totalPages = tabelLen2 === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLen2));
-    if (tabelPage2 > totalPages) {
-        tabelPage2 = totalPages;
+    let thead = document.getElementById('tabel_header');
+    thead.innerHTML = bankHeadHtml(cols);
+    let baris = thead.querySelector('tr');
+    if (baris) {
+        baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>');
+        baris.insertAdjacentHTML('beforeend', `
+            <th style="padding: 4px 12px;" scope="col">Oto</th>
+            <th style="padding: 4px 12px;" scope="col">User Oto</th>
+            <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+        `);
     }
-    const pageRows = tabelLen2 === -1 ? rows : rows.slice((tabelPage2 - 1) * tabelLen2, tabelPage2 * tabelLen2);
 
-    let html = '';
-    pageRows.forEach(function(r) {
-        html += '<tr class="data-row">';
-        html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
-        html += cols.map(function(c) {
+    const rows = filterByTipeTrans(
+        filterByOtorisasi(lastRows, globalOtorisasi),
+        globalTipeTrans
+    );
+
+    let rowTable = '';
+    rows.forEach(function(r) {
+        let isOtorisasi = Number(pickCI(r, 'IsOtorisasi1')) || 0;
+        let otoUser = pickCI(r, 'OtoUser1');
+        let tglOto = pickCI(r, 'TglOto1');
+
+        rowTable += '<tr><td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+        rowTable += cols.map(function(c) {
             const v = pickCI(r, c[0]);
-            if (c[0] === 'IsOtorisasi1') {
-                return (Number(v) === 1) ?
-                    '<td><span class="sp-badge is-active">Sudah</span></td>' :
-                    '<td><span class="sp-badge is-inactive">Belum</span></td>';
-            }
             if (c[3] === 'date') {
-                return '<td>' + fmtYMD(v) + '</td>';
+                return '<td>' + (v ? formatDate(v) : '') + '</td>';
             }
             if (c[3] === 'float') {
-                return '<td class="text-right">' + formatAngka(parseFloat(v || 0).toFixed(2)) +
-                    '</td>';
+                return '<td style="text-align: right;">' +
+                    formatAngka(parseFloat(v || 0).toFixed(Number(c[5]) || 0)) + '</td>';
             }
             return '<td>' + nullToEmpty(v) + '</td>';
         }).join('');
-        html += '</tr>';
+        rowTable += `
+            ${isOtorisasi ?
+                '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+              :
+                '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+            }
+            <td>${otoUser || ''}</td>
+            <td>${tglOto ? formatDate(tglOto) : ''}</td>
+        </tr>`;
     });
 
-    tbody.innerHTML = html;
-    document.getElementById('footerLabel1').textContent = tabelLen2 === -1 ?
-        'Menampilkan ' + totalRows + ' baris' :
-        'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
-    renderPager2(tabelPage2, totalPages);
-    $('[data-toggle="tooltip"]').tooltip({
-        container: 'body',
-        boundary: 'window'
+    document.getElementById('tabel_data').innerHTML = rowTable;
+
+    $('#tabel').DataTable({
+        lengthChange: false,
+        pageLength: tabelLen2,
+        order: [],
+        columnDefs: [{ targets: [0], orderable: false }],
+        dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        language: {
+            emptyTable: 'Tidak ada data',
+            zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+        }
     });
+
+    rtPindahBar('rtBar', 'tabel');
+    ikatSearch();
+    ikatPanjangHalaman();
+    ikatPeriode();
+
+    let inputSearch = document.getElementById('searchBox2');
+    if (inputSearch && inputSearch.value) {
+        $('#tabel').DataTable().search(inputSearch.value).draw();
+    }
+    bankAturTinggiTabel();
 }
 
-function onLenChange2() {
-    const v = Number(document.getElementById('tabelLen2').value);
-    tabelLen2 = (v === -1 || v > 0) ? v : 10;
-    renderTabel();
+// Diikat lewat JS (bukan onchange="loadAll()" inline lagi) supaya rentang yang belum lengkap
+// tidak memicu request, dan urutan tanggal terbalik ditolak dengan peringatan — sama seperti
+// ikatPeriode() di accounting/pengajuandph.blade.php.
+function ikatPeriode() {
+    let awal = document.getElementById('inputDate1');
+    let akhir = document.getElementById('inputDate2');
+    if (!awal || !akhir || awal.dataset.rtBound) { return; }
+    awal.dataset.rtBound = '1';
+
+    let onUbah = function() {
+        if (!awal.value || !akhir.value) { return; }
+        if (awal.value > akhir.value) {
+            alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
+            return;
+        }
+        loadAll();
+    };
+    awal.addEventListener('change', onUbah);
+    akhir.addEventListener('change', onUbah);
 }
 
-function gotoPage2(p) {
-    tabelPage2 = p;
-    renderTabel(false);
-}
-
-function renderPager2(page, totalPages) {
-    const el = document.getElementById('pagerBtns1');
-    if (!el) {
-        return;
-    }
-    if (!totalPages || totalPages <= 1) {
-        el.innerHTML = '';
-        return;
-    }
-
-    function pgBtn(label, targetPage, active, disabled) {
-        const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
-        const click = disabled ? '' : ' onclick="gotoPage2(' + targetPage + ')"';
-        return '<div class="' + cls + '"' + click + '>' + label + '</div>';
-    }
-
-    let start = Math.max(1, page - 2);
-    let end = Math.min(totalPages, start + 4);
-    start = Math.max(1, end - 4);
-
-    let html = pgBtn('&laquo;', page - 1, false, page <= 1);
-    for (let p = start; p <= end; p++) {
-        html += pgBtn(String(p), p, p === page, false);
-    }
-    html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
-
-    el.innerHTML = html;
-}
-
-/* -- FILTER MODAL (Otorisasi: Semua/Sudah Otorisasi/Belum) -- */
+/* -- FILTER MODAL (Otorisasi + Tipe Transaksi) -- */
 function updateFilterBadge() {
     let count = ($('#modalOtorisasi').val() !== '2') ? 1 : 0;
+    count += ($('#modalTipeTrans').val() !== '') ? 1 : 0;
     $('#filterBadge').text(count + ' aktif');
 }
 
 function resetAllFilters() {
     $('#modalOtorisasi').val('2');
+    $('#modalTipeTrans').val('');
     updateFilterBadge();
 }
 
 $(document).on('show.bs.modal', '#modalFilter', function() {
     $('#modalOtorisasi').val(globalOtorisasi);
+    $('#modalTipeTrans').val(globalTipeTrans);
     updateFilterBadge();
 });
 
@@ -350,6 +456,7 @@ $(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
 
 function applyModalFilter() {
     globalOtorisasi = $('#modalOtorisasi').val();
+    globalTipeTrans = $('#modalTipeTrans').val();
     renderTabel();
     $('#modalFilter').modal('hide');
 }
@@ -394,11 +501,7 @@ let tipeform = ''
 
 $(document).ready(function(){
       doSetHeader(g_modeReport);
-      ReportTable.init({
-        table: '#mainTable',
-        bar: '#rtBar',
-        onChange: renderTabel
-      });
+      bankInitReportTableSekali();
       renderTabel();
 
         $("#tabel_add_list_akumulasibiaya").DataTable({
@@ -536,7 +639,7 @@ function refreshDataTableTunai () {
 
 
 
-      document.getElementById("AddAddJumlah").value = parseFloat(xdebet).toFixed(2)
+      document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
 
       document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
 
@@ -752,11 +855,9 @@ function buttonAddListXBiaya (id) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBiayaX('${id}','${item.Perkiraan}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBiayaX('${id}','${item.Perkiraan}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -806,11 +907,9 @@ function buttonAddListXAkumulasi () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBiayaX('input_aktivax_akumulasi' ,'${item.Perkiraan}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBiayaX('input_aktivax_akumulasi' ,'${item.Perkiraan}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -983,14 +1082,12 @@ function buttonAddListBon () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBon(${i},'${item.NoBukti}' , '${item.Debet}'  )">
         <td>${item.NoBukti}</td>
         <td>${item.Penerima}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Perkiraan}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBon(${i},'${item.NoBukti}' , '${item.Debet}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -1184,7 +1281,7 @@ function submitAddAdd () {
   let kurs  = $("#AddAddKurs").val()
   let lawan  = $("#AddAddLawan").val()
   // let kodelawan  = $("#AddAddKodeLawan").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = unformatAngka($("#AddAddJumlah").val())
   let keterangan  = $("#AddAddKeterangan").val()
   let keterangandetail  = $("#AddAddKeteranganDetail").val()
   let kodedepartemen  = $("#AddAddKodeDepartemen").val()
@@ -1918,7 +2015,7 @@ function submitAddEdit () {
   let valas  = $("#AddAddValas").val()
   let kurs  = $("#AddAddKurs").val()
   let lawan  = $("#AddAddLawan").val()
-  let jumlah  = $("#AddAddJumlah").val()
+  let jumlah  = unformatAngka($("#AddAddJumlah").val())
   let keterangan  = $("#AddAddKeterangan").val()
   let keterangandetail  = $("#AddAddKeteranganDetail").val()
   let kodedepartemen  = $("#AddAddKodeDepartemen").val()
@@ -2186,7 +2283,7 @@ function buttonAddDelete (index) {
           let valas  = $("#AddAddValas").val()
           let kurs  = $("#AddAddKurs").val()
           let lawan  = $("#AddAddLawan").val()
-          let jumlah  = $("#AddAddJumlah").val()
+          let jumlah  = unformatAngka($("#AddAddJumlah").val())
           let keterangan  = $("#AddAddKeterangan").val()
           let keterangandetail  = $("#AddAddKeteranganDetail").val()
           let kodedepartemen  = $("#AddAddKodeDepartemen").val()
@@ -2543,11 +2640,9 @@ function buttonAddListCosting () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCosting(${i},'${item.KodeCost}' , '${item.NamaCost}' )">
         <td>${item.KodeCost}</td>
         <td>${item.NamaCost}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCosting(${i},'${item.KodeCost}' , '${item.NamaCost}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2604,11 +2699,9 @@ function buttonAddListSubCosting () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickSubCosting(${i},'${item.KodeSubCost}' , '${item.NamaSubCost}' )">
         <td>${item.KodeSubCost}</td>
         <td>${item.NamaSubCost}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickSubCosting(${i},'${item.KodeSubCost}' , '${item.NamaSubCost}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2665,12 +2758,10 @@ function buttonAddListLawan () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickLawan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}', '${item.Kode}', '${item.iscost}', '${item.IsLokalOrExim}'  )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Simbol}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickLawan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}', '${item.Kode}', '${item.iscost}', '${item.IsLokalOrExim}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2745,15 +2836,13 @@ function modalDPP (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPP(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPP(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2811,11 +2900,9 @@ function modalDPHUHTBBM (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustDPHUHTBBM( '${item.KODESUPP}', '${item.NAMACUSTSUPP}','${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.KODESUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustDPHUHTBBM( '${item.KODESUPP}', '${item.NAMACUSTSUPP}','${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-arrow-right"></i></button></td>
-
         </tr>`
       });
 
@@ -2884,7 +2971,7 @@ function modalDPHUHT (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.NOUM}</td>
         <td>${item.KODECUSTSUPP}</td>
@@ -2892,8 +2979,6 @@ function modalDPHUHT (dataLawan) {
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2954,15 +3039,13 @@ function modalDPH (dataLawan) {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
         <td>${item.Nobukti}</td>
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td class="text-right">${item.DIBAYAR ? formatAngka(parseFloat(item.DIBAYAR).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.KL ? formatAngka(parseFloat(item.KL).toFixed(2)) : '0.00'}</td>
         <td class="text-right">${item.LB ? formatAngka(parseFloat(item.LB).toFixed(2)) : '0.00'}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDPH(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3079,7 +3162,7 @@ function buttonMinusUMB (index) {
       document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = rowTable
 
       if (res.length) {
-        document.getElementById("AddAddJumlah").value = res[0].totalqntx
+        document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(res[0].totalqntx).toFixed(2))
       } else {
         document.getElementById("AddAddJumlah").value = '0.00'
         document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = `
@@ -3184,7 +3267,7 @@ function buttonPlusUMB (index) {
       document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = rowTable
 
       if (res.length) {
-        document.getElementById("AddAddJumlah").value = res[0].totalqntx
+        document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(res[0].totalqntx).toFixed(2))
       } else {
         document.getElementById("AddAddJumlah").value = '0.00'
         document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = `
@@ -3311,7 +3394,7 @@ function onChangeDPPUMB (index) {
       document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = rowTable
 
       if (res.length) {
-        document.getElementById("AddAddJumlah").value = res[0].totalqntx
+        document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(res[0].totalqntx).toFixed(2))
       } else {
         document.getElementById("AddAddJumlah").value = '0.00'
         document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = `
@@ -3421,7 +3504,7 @@ function buttonAddPickCustDPHUHTBBM (kode, nama,perkiraanlawan, kodelawan , kete
 
       if (res.length) {
 
-        document.getElementById("AddAddJumlah").value = res[0].totalqntx
+        document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(res[0].totalqntx).toFixed(2))
       } else {
         document.getElementById("AddAddJumlah").value = '0.00'
         document.getElementById("tabel_data_add_list_dphuhtbbm").innerHTML = `
@@ -3454,7 +3537,7 @@ function buttonAddPickDPH (indexDPH , perkiraanlawan, kodelawan , keteranganlawa
   document.getElementById("AddAddLawan").value = perkiraanlawan
   document.getElementById("AddAddKodeLawan").value = kodelawan
   document.getElementById("AddAddKeteranganLawan").value = keteranganlawan
-  document.getElementById("AddAddJumlah").value = parseFloat(tempDPPDPH.DIBAYAR).toFixed(2)
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(tempDPPDPH.DIBAYAR).toFixed(2))
   console.log(tempDPPDPH)
 
   // $('.showhideitem').hide();
@@ -3471,7 +3554,7 @@ function buttonAddPickDPP (indexDPP , perkiraanlawan, kodelawan , keteranganlawa
   document.getElementById("AddAddLawan").value = perkiraanlawan
   document.getElementById("AddAddKodeLawan").value = kodelawan
   document.getElementById("AddAddKeteranganLawan").value = keteranganlawan
-  document.getElementById("AddAddJumlah").value = parseFloat(tempDPPDPH.DIBAYAR).toFixed(2)
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(tempDPPDPH.DIBAYAR).toFixed(2))
   console.log(tempDPPDPH)
 
   // $('.showhideitem').hide();
@@ -3501,11 +3584,9 @@ function buttonAddListDepartemen () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDepartemen(${i},'${item.KDDEP}' , '${item.NMDEP}'  )">
         <td>${item.KDDEP}</td>
         <td>${item.NMDEP}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDepartemen(${i},'${item.KDDEP}' , '${item.NMDEP}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3616,7 +3697,7 @@ function onChangeAddAddJumlah () {
     let trans =  $("#input_add_transaksi").val();
     if (trans == 'BBK' && xislocalorexim == 1 && tipeformdet == 'add') {
       let _token = $("#_token").val()
-      let xnum =  $("#AddAddJumlah").val();
+      let xnum =  unformatAngka($("#AddAddJumlah").val()).toFixed(2);
       document.getElementById("AddAddJumlahTunai").value= xnum
       let lawan = $("#AddAddLawan").val();
       if (flagtunai == 0) {
@@ -3642,19 +3723,12 @@ function onChangeAddAddJumlah () {
             res.forEach((item, i) => {
 
               rowTable += `
-              <tr >
+              <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
 
                 <td>${item.KODECUSTSUPP}</td>
                 <td>${item.NAMACUSTSUPP}</td>
                 <td>${item.ALAMAT}</td>
                 <td>${item.NAMAKOTA}</td>
-
-
-
-                  <td class="text-center">
-
-                    <button class="btn btn-primary btn-sm" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
               `
             });
@@ -3718,12 +3792,10 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' , '${item.KURS}' )">
         <td>${item.KODEVLS}</td>
         <td>${item.NAMAVLS}</td>
         <td class="text-right">${parseFloat(item.KURS).toFixed(2)}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' , '${item.KURS}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3735,15 +3807,15 @@ function buttonAddListValas () {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
-      document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
+      document.getElementById("tabel_data_add_list_valas").innerHTML = rowTable
 
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListPerkiraan').show();
+        $('#modalAddListValas').show();
         $("#form").modal('toggle')
       } else {
-        alertify.warning("Perkiraan tidak ditemukkan")
+        alertify.warning("Valas tidak ditemukkan")
       }
 
 
@@ -3782,11 +3854,9 @@ function buttonAddListDevisi () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickDevisi(${i},'${item.Devisi}' , '${item.NamaDevisi}' )">
         <td>${item.Devisi}</td>
         <td>${item.NamaDevisi}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickDevisi(${i},'${item.Devisi}' , '${item.NamaDevisi}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -3843,12 +3913,10 @@ function buttonAddListPerkiraan () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}' )">
         <td>${item.Perkiraan}</td>
         <td>${item.Keterangan}</td>
         <td>${item.Simbol}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickPerkiraan(${i},'${item.Perkiraan}' , '${item.Keterangan}' , '${item.Simbol}' )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4125,12 +4193,10 @@ function buttonAddListCustsupp () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustsupp('${item.kodecustsupp}' , '${item.namacustsupp}' , '${item.alamat1}')">
         <td>${item.kodecustsupp}</td>
         <td>${item.namacustsupp}</td>
         <td>${item.alamat1}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustsupp('${item.kodecustsupp}' , '${item.namacustsupp}' , '${item.alamat1}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -4138,7 +4204,7 @@ function buttonAddListCustsupp () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_custsupp").innerHTML = rowTable
       $("#tabel_add_list_custsupp").DataTable({
@@ -4392,13 +4458,10 @@ function modalAktiva (dataLawan) {
         let rowTable = ``
         res.forEach((item, i) => {
           rowTable += `
-          <tr>
+          <tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
           <td>${item.Perkiraan}</td>
           <td>${item.Keterangan}</td>
           <td>${formatDate(item.Tanggal)}</td>
-
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
           </tr>`
         });
 
@@ -4421,7 +4484,7 @@ function modalAktiva (dataLawan) {
         } else {
           document.getElementById("tabel_data_add_list_aktiva").innerHTML = `
             <tr>
-              <td colspan=4>Belum ada data</td>
+              <td colspan=3>Belum ada data</td>
             </tr>
           `
         }
@@ -4453,13 +4516,10 @@ function modalAktiva (dataLawan) {
         let rowTable = ``
         res.forEach((item, i) => {
           rowTable += `
-          <tr>
+          <tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
           <td>${item.Perkiraan}</td>
           <td>${item.Keterangan}</td>
           <td>${formatDate(item.Tanggal)}</td>
-
-          <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
           </tr>`
         });
 
@@ -5351,7 +5411,7 @@ function buttonAddEditItem (i) {
   document.getElementById("AddAddKeteranganLawan").value = tempBarangAddEdit.TipeTrans == 'BBK' ? tempBarangAddEdit.NamaPerkiraan : tempBarangAddEdit.NamaLawan
 
   console.log(tempBarangAddEdit.Debet)
-  document.getElementById("AddAddJumlah").value = parseFloat(tempBarangAddEdit.Debet).toFixed(2)
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(tempBarangAddEdit.Debet).toFixed(2))
   document.getElementById("AddAddKeterangan").value = tempBarangAddEdit.Keterangan
   document.getElementById("AddAddKeteranganDetail").value = tempBarangAddEdit.KetDetail
 
@@ -5411,21 +5471,30 @@ function buttonCloseForm () {
   $('.mainpage').hide();
   // $('#page2').hide();
   $('#page1').show();
+  // #page1 bisa saja sudah dirender saat masih disembunyikan (loadAll() dipanggil dari
+  // page2/3/4) - bankAturTinggiTabel() melewati perhitungan tinggi saat itu, jadi dihitung
+  // ulang sekarang setelah #page1 benar-benar terlihat lagi.
+  bankAturTinggiTabel();
 
 }
 
 function loadAll () {
 
-  console.log('loadall')
+  document.getElementById('tabel_data').innerHTML =
+    '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>';
+
+  let date1 = $('#inputDate1').val();
+  let date2 = $('#inputDate2').val();
 
   $.ajax({
     url: BANK_ROUTES.bankloadall,
     type: "get",
-    async: false,
+    async: true,
     data: {
+      date1,
+      date2
     },
     success: function(res) {
-      console.log(res)
       lastRows = res.tempOutstanding || [];
       renderTabel();
     },
@@ -6159,6 +6228,45 @@ function formatAngka (angkaString) {
   }
   temp1 += '.' + tempAngka[1]
   return temp1
+}
+
+function unformatAngka (angka) {
+  if (!angka) return 0
+  return parseFloat(String(angka).replace(/,/g, '')) || 0
+}
+
+function formatAngkaInput (el) {
+  el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+}
+
+// Dipasang di oninput #AddAddJumlah supaya separator ribuan langsung muncul sambil mengetik,
+// tidak menunggu pindah fokus (onblur formatAngkaInput() tetap jalan untuk menormalkan ke 2
+// desimal). Tidak memakai formatAngka() biasa karena nilai yang sedang diketik boleh belum
+// punya titik desimal atau baru diketik sebagian - formatAngka() mengasumsikan keduanya sudah
+// lengkap. Posisi kursor dihitung ulang dari jarak ke kanan supaya tidak melompat ke ujung
+// setiap kali jumlah koma bertambah. Disalin dari accounting/memorialkoreksi.blade.php.
+function formatAngkaKetik (el) {
+  let posDariKanan = el.value.length - el.selectionStart
+  let minus = el.value.trim().startsWith('-') ? '-' : ''
+  let raw = el.value.replace(/[^0-9.]/g, '')
+
+  let titikIndex = raw.indexOf('.')
+  let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+  let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+  bulat = bulat.replace(/^0+(?=\d)/, '')
+  if (bulat === '') { bulat = '0' }
+
+  let bulatFormatted = ''
+  for (let i = 0; i < bulat.length; i++) {
+    if (i != 0 && (bulat.length - i) % 3 == 0) { bulatFormatted += ',' }
+    bulatFormatted += bulat[i]
+  }
+
+  el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+  let posBaru = Math.max(0, el.value.length - posDariKanan)
+  el.setSelectionRange(posBaru, posBaru)
 }
 
 

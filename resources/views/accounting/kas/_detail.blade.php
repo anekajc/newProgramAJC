@@ -138,7 +138,7 @@
                                           </div>
                                           <div class="col-md-4">
                                               <div class="form-group">
-                                                  <input type="number"
+                                                  <input type="text"
                                                       class="form-control text-right partBKK showhidePart"
                                                       id="input_detail_nilaibon" value="0.00" disabled>
                                               </div>

@@ -53,8 +53,8 @@
                     <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i
-                            class="fas fa-cog"></i> Customize Table</button>
+                    {{-- <button class="btn-load" onclick="doShowFormCustomizeTable()" title="Customize Table"><i
+                            class="fas fa-cog"></i> Customize Table</button> --}}
                     <button class="btn-load" onclick="makeTable('REPORT')" title="Tampilkan laporan"><i
                             class="fas fa-check"></i> Tampilkan</button>
                     <div class="export-wrap" id="exportWrap">
