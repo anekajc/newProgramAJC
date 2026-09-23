@@ -54,12 +54,20 @@
    purchaseOrder.blade.php, #tabel/#tabel2/#tabel3 di invoicepenjualan.blade.php,
    #tabel/#tabelRetur di returpembeliangudang.blade.php, #tabelPdpp di
    accounting/penerimaandpp.blade.php, #tabelDpp di
-   accounting/pengajuandpp.blade.php, dan halaman marketing sejenis. Semua id
-   itu didaftarkan di tiap aturan di bawah supaya tidak ada halaman yang
-   kehilangan styling saat salah satu id ditambah/diganti nama. */
+   accounting/pengajuandpp.blade.php, #tabelOut/#tabelPenerimaan di
+   accounting/cetakpengajuandph.blade.php (dua tabel, satu per tab), dan halaman
+   marketing sejenis. Semua id itu didaftarkan di tiap aturan di bawah supaya tidak
+   ada halaman yang kehilangan styling saat salah satu id ditambah/diganti nama.
+   #tabelDph masih terdaftar tapi sudah tidak dipakai halaman manapun -
+   accounting/pengajuandph.blade.php sendiri sudah dipindah ke id #tabel; dibiarkan
+   sebagai pendaftaran mati yang tidak berbahaya, bukan dihapus, supaya tidak perlu
+   audit ulang kalau suatu saat id itu dipakai lagi. */
 
 /* Padding pindah ke .th-inner supaya area drag mengisi penuh sel. */
 #tabelDpp thead th.rt-th,
+#tabelDph thead th.rt-th,
+#tabelOut thead th.rt-th,
+#tabelPenerimaan thead th.rt-th,
 #tabelPdpp thead th.rt-th,
 #tabel thead th.rt-th,
 #tabel2 thead th.rt-th,
@@ -73,6 +81,9 @@
 }
 
 #tabelDpp thead th.rt-th .th-inner,
+#tabelDph thead th.rt-th .th-inner,
+#tabelOut thead th.rt-th .th-inner,
+#tabelPenerimaan thead th.rt-th .th-inner,
 #tabelPdpp thead th.rt-th .th-inner,
 #tabel thead th.rt-th .th-inner,
 #tabel2 thead th.rt-th .th-inner,
@@ -89,6 +100,9 @@
 }
 
 #tabelDpp thead th.rt-th .th-inner.dragging,
+#tabelDph thead th.rt-th .th-inner.dragging,
+#tabelOut thead th.rt-th .th-inner.dragging,
+#tabelPenerimaan thead th.rt-th .th-inner.dragging,
 #tabelPdpp thead th.rt-th .th-inner.dragging,
 #tabel thead th.rt-th .th-inner.dragging,
 #tabel2 thead th.rt-th .th-inner.dragging,
@@ -99,6 +113,9 @@
 #tabelRetur thead th.rt-th .th-inner.dragging { opacity: .4; }
 
 #tabelDpp thead th.rt-th.drag-over .th-inner,
+#tabelDph thead th.rt-th.drag-over .th-inner,
+#tabelOut thead th.rt-th.drag-over .th-inner,
+#tabelPenerimaan thead th.rt-th.drag-over .th-inner,
 #tabelPdpp thead th.rt-th.drag-over .th-inner,
 #tabel thead th.rt-th.drag-over .th-inner,
 #tabel2 thead th.rt-th.drag-over .th-inner,
@@ -109,6 +126,9 @@
 #tabelRetur thead th.rt-th.drag-over .th-inner { box-shadow: inset 3px 0 0 var(--rt-indigo); }
 
 #tabelDpp thead th.rt-th .th-label,
+#tabelDph thead th.rt-th .th-label,
+#tabelOut thead th.rt-th .th-label,
+#tabelPenerimaan thead th.rt-th .th-label,
 #tabelPdpp thead th.rt-th .th-label,
 #tabel thead th.rt-th .th-label,
 #tabel2 thead th.rt-th .th-label,
@@ -124,6 +144,9 @@
 
 /* kolom numerik: judul rata kanan seperti angkanya */
 #tabelDpp thead th.rt-th.num .th-label,
+#tabelDph thead th.rt-th.num .th-label,
+#tabelOut thead th.rt-th.num .th-label,
+#tabelPenerimaan thead th.rt-th.num .th-label,
 #tabelPdpp thead th.rt-th.num .th-label,
 #tabel thead th.rt-th.num .th-label,
 #tabel2 thead th.rt-th.num .th-label,
@@ -135,6 +158,9 @@
 
 /* pegangan drag */
 #tabelDpp thead th.rt-th .th-grip,
+#tabelDph thead th.rt-th .th-grip,
+#tabelOut thead th.rt-th .th-grip,
+#tabelPenerimaan thead th.rt-th .th-grip,
 #tabelPdpp thead th.rt-th .th-grip,
 #tabel thead th.rt-th .th-grip,
 #tabel2 thead th.rt-th .th-grip,
@@ -152,6 +178,9 @@
 }
 
 #tabelDpp thead th.rt-th .th-grip i,
+#tabelDph thead th.rt-th .th-grip i,
+#tabelOut thead th.rt-th .th-grip i,
+#tabelPenerimaan thead th.rt-th .th-grip i,
 #tabelPdpp thead th.rt-th .th-grip i,
 #tabel thead th.rt-th .th-grip i,
 #tabel2 thead th.rt-th .th-grip i,
@@ -167,6 +196,9 @@
 }
 
 #tabelDpp thead th.rt-th:hover .th-grip,
+#tabelDph thead th.rt-th:hover .th-grip,
+#tabelOut thead th.rt-th:hover .th-grip,
+#tabelPenerimaan thead th.rt-th:hover .th-grip,
 #tabelPdpp thead th.rt-th:hover .th-grip,
 #tabel thead th.rt-th:hover .th-grip,
 #tabel2 thead th.rt-th:hover .th-grip,
@@ -178,6 +210,9 @@
 
 /* tombol roda gigi */
 #tabelDpp thead th.rt-th .th-gear,
+#tabelDph thead th.rt-th .th-gear,
+#tabelOut thead th.rt-th .th-gear,
+#tabelPenerimaan thead th.rt-th .th-gear,
 #tabelPdpp thead th.rt-th .th-gear,
 #tabel thead th.rt-th .th-gear,
 #tabel2 thead th.rt-th .th-gear,
@@ -205,6 +240,9 @@
 }
 
 #tabelDpp thead th.rt-th:hover .th-gear,
+#tabelDph thead th.rt-th:hover .th-gear,
+#tabelOut thead th.rt-th:hover .th-gear,
+#tabelPenerimaan thead th.rt-th:hover .th-gear,
 #tabelPdpp thead th.rt-th:hover .th-gear,
 #tabel thead th.rt-th:hover .th-gear,
 #tabel2 thead th.rt-th:hover .th-gear,
@@ -215,9 +253,15 @@
 #tabelRetur thead th.rt-th:hover .th-gear { opacity: 1; }
 
 #tabelDpp thead th.rt-th .th-gear:hover,
+#tabelDph thead th.rt-th .th-gear:hover,
+#tabelOut thead th.rt-th .th-gear:hover,
+#tabelPenerimaan thead th.rt-th .th-gear:hover,
 #tabelPdpp thead th.rt-th .th-gear:hover,
 #tabel thead th.rt-th .th-gear:hover,
 #tabelDpp thead th.rt-th .th-gear.active,
+#tabelDph thead th.rt-th .th-gear.active,
+#tabelOut thead th.rt-th .th-gear.active,
+#tabelPenerimaan thead th.rt-th .th-gear.active,
 #tabelPdpp thead th.rt-th .th-gear.active,
 #tabel thead th.rt-th .th-gear.active,
 #tabel2 thead th.rt-th .th-gear:hover,
@@ -241,6 +285,9 @@
    Dengan .th-inner yang mengisi penuh sel, ikon itu bertabrakan dengan roda
    gigi, jadi digeser sedikit ke kiri. */
 #tabelDpp thead th.rt-th,
+#tabelDph thead th.rt-th,
+#tabelOut thead th.rt-th,
+#tabelPenerimaan thead th.rt-th,
 #tabelPdpp thead th.rt-th,
 #tabel thead th.rt-th,
 #tabel2 thead th.rt-th,
@@ -750,6 +797,9 @@
 }
 
 #tabelDpp thead th,
+#tabelDph thead th,
+#tabelOut thead th,
+#tabelPenerimaan thead th,
 #tabelPdpp thead th,
 #tabel thead th,
 #tabel2 thead th,

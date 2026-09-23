@@ -1615,12 +1615,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Bon</h3>
+                                    {{-- <h3>Bon</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 
@@ -1721,8 +1721,6 @@
 
             <div id= "modalAddListLawan" class="showhidemodalbodyadd">
                 <div class="modal-header">
-
-
                     <h5 class="modal-title" id="">Lawan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -1736,12 +1734,12 @@
                         <div class="container-fluid mt-4">
                             <div class="row">
                                 <div class="col-12">
-                                    <h3>Lawan</h3>
+                                    {{-- <h3>Lawan</h3> --}}
                                 </div>
                             </div>
                             <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
                             <div class="row">
-                                <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+                                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                                     <!-- <div class="container-fluid"> -->
 
 

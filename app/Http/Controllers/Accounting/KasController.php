@@ -14,26 +14,13 @@ use Illuminate\Support\Facades\DB;
 class KasController extends Controller
 {
 
-  public function index(Request $req) {
-    $kodemenu = '02011';
-
-    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
-    // $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
-    if(!$akses || !$akses->HASACCESS) {
-       return redirect('/home');
-    }
-
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
-
-
-
-$tempOutstanding = DB::connection("SML")->select("
-declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan= :bulan
-
+  // Satu rentang tanggal dipakai baik oleh index() (first load) maupun loadAll() (AJAX reload
+  // dari date picker Periode di toolbar). A.Tanggal dipakai dengan rentang setengah-terbuka
+  // [date1, date2+1hari) supaya baris yang timestamp-nya persis di tanggal akhir tidak ikut
+  // terbuang, sama seperti PengajuanDPHController::fetchList() / BankController::fetchList().
+  private function fetchList(string $date1, string $date2)
+  {
+    return DB::connection("SML")->select("
 select  A.NoUrut, A.NoBukti, A.Tanggal, A.Note, '' Devisi, A.PerkiraanHd Perkiraan, A.TipeTransHd,
         sum(case when B.Valas='IDR' then 0.00 else B.Debet+B.Kredit end) TotalD,
         sum((B.Debet+B.Kredit)*B.Kurs) TotalRp,
@@ -42,7 +29,7 @@ select  A.NoUrut, A.NoBukti, A.Tanggal, A.Note, '' Devisi, A.PerkiraanHd Perkira
 	A.IsOtorisasi5, A.OtoUser5, A.TglOto5
 from dbTrans A
 left outer join dbTransaksi B on B.NoBukti=A.NoBukti
-where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
+where A.Tanggal >= :date1 and A.Tanggal < :date2
 and (a.NoBukti like '%BKK%' or a.NoBukti like '%BKM%' )
 
 
@@ -56,7 +43,29 @@ Order by A.Nobukti
 
 
 
-",[ "tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
+",[
+      "date1" => $date1,
+      "date2" => date('Y-m-d', strtotime($date2 . ' +1 day')),
+    ]);
+  }
+
+  public function index(Request $req) {
+    $kodemenu = '02011';
+
+    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
+    // $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
+    if(!$akses || !$akses->HASACCESS) {
+       return redirect('/home');
+    }
+
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+
+    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(5);
+
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-d');
+
+    $tempOutstanding = $this->fetchList($date1, $date2);
 
 
 // $listCustSuppX = DB::connection('SML')->select("select A.KODECUSTSUPP, A.NAMACUSTSUPP, A.ALAMAT, A.NAMAKOTA, A.ALAMATKOTA, A.PPN, A.Hari, ISNULL(a.agent, '') Agent
@@ -68,6 +77,8 @@ Order by A.Nobukti
     return view('accounting.kas' , [
       "menul0" => $menul0,
       "periode" => $periode,
+      "date1" => $date1,
+      "date2" => $date2,
       "listCustSuppX" =>[],
       "tempOutstanding" => $tempOutstanding,
       "akses" => $akses
@@ -139,36 +150,19 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
   }
 
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("
-    declare @Tahun int, @Bulan int
+    $date1 = $req->input('date1');
+    $date2 = $req->input('date2');
+    if (!$date1 || !$date2) {
+        $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+        $date2 = date('Y-m-d');
+    }
 
-    select @Tahun= :tahun , @Bulan= :bulan
-
-    select  A.NoUrut, A.NoBukti, A.Tanggal, A.Note, '' Devisi, A.PerkiraanHd Perkiraan, A.TipeTransHd,
-            sum(case when B.Valas='IDR' then 0.00 else B.Debet+B.Kredit end) TotalD,
-            sum((B.Debet+B.Kredit)*B.Kurs) TotalRp,
-    	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-    	A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-    	A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    from dbTrans A
-    left outer join dbTransaksi B on B.NoBukti=A.NoBukti
-    where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-    and (a.NoBukti like '%BKK%' or a.NoBukti like '%BKM%' )
-
-    group by A.NoUrut, A.NoBukti, A.Tanggal, A.Note, A.TipeTransHd, A.PerkiraanHd,
-    	A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
-    	A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
-    	A.IsOtorisasi5, A.OtoUser5, A.TglOto5
-    Order by A.Nobukti
-
-    ",[ "tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
-
-    return ["tempOutstanding" => $tempOutstanding];
+    return ["tempOutstanding" => $this->fetchList($date1, $date2)];
   }
 
   public function getDetailCetak(Request $req)

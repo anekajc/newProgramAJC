@@ -49,6 +49,239 @@
     <link rel="stylesheet"
         href="{!! URL::asset('css/pengajuandphtunai.css') !!}?v={{ @filemtime(base_path('public/css/pengajuandphtunai.css')) ?: '1' }}">
 
+    {{-- #page1's two tabs ("Nota belum cetak tanda terima" / "Nota sudah cetak tanda terima")
+     were made byte-for-byte identical to accounting/memorialkoreksi.blade.php /
+     accounting/bonsementara.blade.php on request — same `po-*` class family, same
+     DataTables-driven pagination — replacing each tab's own hand-rolled .tb-report/
+     #mainTableOut+#mainTablePenerimaan/.pg pager (see this page's @section('js') below —
+     ctkHeadHtml()/ctkInitReportTableSekali()/ctkAturTinggiTabel() for the conversion,
+     shared helpers parameterized by table/bar id since both tabs are two instances of the
+     same pattern on one page). Two SEPARATE
+     table ids are used (#tabelOut / #tabelPenerimaan, one per tab) rather than reusing
+     #tabel, each newly registered in po-table-header.css's ID-scoped drag/gear rules —
+     see the note there. report-table.css/tableMaster2.css/newmaster.css/
+     pengajuandphtunai.css stay loaded regardless (unlike the reference pages) because
+     page2/page3 (the Tambah/Detail/Otorisasi/Koreksi forms) and the tabel_add_list_*
+     entity-picker modals still depend on them — the CSS below just neutralizes the few
+     rules from those files that would otherwise leak onto #tabelOut/#tabelPenerimaan
+     (same technique as accounting/bank.blade.php / accounting/kas.blade.php). --}}
+    <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+
+    <style>
+    /* Jarak kartu ke bar atas - sama seperti pengajuandph/bank/kas. */
+    #content { padding-top: 12px; }
+
+    /* po-table-header.css tidak menulis .po-len-wrap/.po-len-inp - disalin apa adanya dari
+       accounting/bank.blade.php. */
+    .po-len-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--rt-card, #fff);
+        border: 1.5px solid var(--rt-border, #E7E8F0);
+        border-radius: 8px;
+        padding: 5px 12px;
+    }
+    .po-len-wrap label {
+        margin: 0;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--rt-ink-soft, #6B7180);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        white-space: nowrap;
+    }
+    .po-len-inp {
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--rt-ink, #1D2130);
+        outline: none;
+        cursor: pointer;
+        padding: 2px 20px 2px 0;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right center;
+    }
+
+    /* ==========================================================================
+       Dari sini ke bawah: disalin verbatim dari accounting/memorialkoreksi.blade.php
+       (dan bonsementara.blade.php) supaya kedua tab di #page1 memakai class & tampilan
+       yang persis sama, dengan selector didobelkan untuk #tabelOut DAN #tabelPenerimaan
+       (dua tabel di satu halaman, bukan satu seperti referensinya).
+       ========================================================================== */
+
+    /* Rule .card global di sebagian layout (flex + align-items:center + efek melayang
+       saat hover) diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
+    #page1 .card {
+      display: block !important;
+      align-items: stretch !important;
+      padding: 0 !important;
+      text-align: left !important;
+      cursor: default !important;
+    }
+
+    #page1 .card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+      border-color: var(--border, #e5e7eb) !important;
+    }
+
+    /* ---------- Gaya dasar tabel daftar ---------- */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .data-table thead th {
+      background: #f9fafb;
+      padding: 11px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-muted, #6b7280);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border, #e5e7eb);
+    }
+
+    .data-table tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      color: var(--text-main, #1f2937);
+    }
+
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: #f9fafb; }
+
+    /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
+       inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
+       Dipakai min-width, BUKAN width. */
+    #tabelOut, #tabelPenerimaan { min-width: 100%; }
+
+    /* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
+    #tabelOut td:first-child:not([colspan]),
+    #tabelPenerimaan td:first-child:not([colspan]) { vertical-align: middle; }
+
+    #tabelOut td:first-child .po-aksi-wrap,
+    #tabelPenerimaan td:first-child .po-aksi-wrap {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #tabelOut td:first-child .btn,
+    #tabelPenerimaan td:first-child .btn {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 7px;
+      font-size: 13px;
+      border: 1px solid transparent;
+      box-shadow: none;
+      transition: all .12s ease;
+    }
+
+    #tabelOut td:first-child .btn:hover,
+    #tabelPenerimaan td:first-child .btn:hover {
+      filter: brightness(0.97);
+      transform: translateY(-1px);
+    }
+
+    #tabelOut td:first-child .btn-success, #tabelPenerimaan td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+    #tabelOut td:first-child .btn-warning, #tabelPenerimaan td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+    #tabelOut td:first-child .btn-primary, #tabelPenerimaan td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+    #tabelOut td:first-child .btn-danger,  #tabelPenerimaan td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+    #tabelOut td:first-child .btn-info,    #tabelPenerimaan td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+    /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
+    table.data-table.po-aksi-hover tbody td:first-child .btn {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity .12s ease;
+    }
+    table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       Penetral kebocoran gaya - halaman ini (beda dengan memorialkoreksi) masih memuat
+       report-table.css/tableMaster2.css/newmaster.css karena page2/page3 (form tambah/
+       detail/otorisasi/koreksi) dan modal-modal tabel_add_list_* masih memakainya. Aturan
+       di bawah ini HANYA menimpa balik nilai file-file itu supaya #tabelOut/#tabelPenerimaan
+       tetap identik dengan referensi, tanpa melepas file-nya (yang akan merusak halaman
+       lain). Sama seperti accounting/bank.blade.php / accounting/kas.blade.php.
+
+       font-size/color/padding SENGAJA TANPA !important - tableMaster2.css tidak menandai
+       ketiganya !important pada #tabel tbody td (beda dengan border-color di bawah, yang
+       DIPAKSA !important lewat aturan terpisah), jadi spesifisitas ekstra dari ID #page1 di
+       sini sudah cukup menang tanpa !important. Kalau dipaksa !important, itu akan
+       mengalahkan Bootstrap .text-success/.text-danger (yang !important) pada sel Oto -
+       itulah yang membuat ikon centang/silang di kolom Oto tampak hitam alih-alih
+       hijau/merah (bug yang sama sempat terjadi di pengajuandph/pengajuandphtunai, sudah
+       diperbaiki di sana juga).
+       ========================================================================== */
+
+    /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
+    #page1 #tabelOut tbody td, #page1 #tabelPenerimaan tbody td { padding: 12px 16px !important; }
+
+    /* tableMaster2.css: skin khusus id #tabel (tidak match #tabelOut/#tabelPenerimaan
+       langsung, tapi thead th/tbody td-nya dituliskan generik lewat selector lain di file
+       itu) - dikembalikan ke nilai .data-table di atas supaya konsisten dengan referensi. */
+    #page1 #tabelOut thead th, #page1 #tabelPenerimaan thead th {
+      background: #f9fafb !important;
+      color: var(--text-muted, #6b7280) !important;
+      font-size: 12px !important;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border, #e5e7eb) !important;
+      border-top: none;
+      white-space: normal;
+    }
+    #page1 #tabelOut tbody td, #page1 #tabelPenerimaan tbody td {
+      font-size: 14px;
+      color: var(--text-main, #1f2937);
+      border-color: #f3f4f6 !important;
+      border-left: none;
+      border-right: none;
+    }
+    #page1 #tabelOut tbody tr:hover, #page1 #tabelPenerimaan tbody tr:hover { background-color: transparent !important; }
+    #page1 #tabelOut td:last-child, #page1 #tabelPenerimaan td:last-child { font-weight: inherit !important; }
+
+    /* tableMaster2.css: chrome DataTables (panjang halaman/info/pagination) diwarnai ungu
+       (--sp-primary) dan diberi padding tambahan - dikembalikan ke nilai bawaan
+       jquery.dataTables.css 1.13.2 supaya sama persis dengan memorialkoreksi. */
+    #page1 .dataTables_wrapper { padding: 0; }
+    #page1 .dataTables_wrapper .dataTables_paginate .paginate_button {
+      border-radius: 2px !important;
+      margin-left: 2px;
+      border: 1px solid transparent !important;
+      color: #333 !important;
+    }
+    #page1 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #fff !important;
+      border-color: #979797 !important;
+      color: #333 !important;
+    }
+    #page1 .dataTables_wrapper .dataTables_info {
+      color: inherit;
+      font-size: inherit;
+      padding-top: 0.755em !important;
+    }
+    </style>
+
     {{-- #page3 pill-button SHAPE only -----------------------------------------------
      The colour/hover half of this page's pill buttons is fixed centrally now — see the
      "Pill-button rest + hover, pinned" block in tableMaster2.css, which this page already
@@ -303,18 +536,20 @@
                     aria-controls="profile" aria-selected="false">Nota sudah cetak tanda terima</a>
             </div>
 
+            {{-- Kartu + toolbar + tabel disalin dari accounting/memorialkoreksi.blade.php per
+             tab, sama seperti accounting/bank.blade.php / accounting/kas.blade.php - lihat
+             catatan di @section('css') soal dua id tabel terpisah. --}}
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="nav-home-tab">
-                    <div class="tb-report">
-                        <div class="content">
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
 
-                            <div class="toolbar">
-                                <input class="search-inp" type="text" id="searchBoxOut" placeholder="Cari data..."
-                                    oninput="renderTabelOut()" style="width:200px">
+                            <div class="po-toolbar">
+                                <input class="po-search-inp" type="search" id="searchBoxOut" placeholder="Cari data">
 
-                                <div class="len-wrap">
+                                <div class="po-len-wrap">
                                     <label for="tabelLenOut">Tampilkan</label>
-                                    <select id="tabelLenOut" class="len-inp" onchange="onLenChangeOut()">
+                                    <select id="tabelLenOut" class="po-len-inp">
                                         <option value="10">10</option>
                                         <option value="25">25</option>
                                         <option value="50">50</option>
@@ -324,35 +559,31 @@
                                 </div>
                             </div>
 
+                            {{-- #rtBarOut diisi lewat JS oleh ReportTable.init() - lihat ctkInitReportTableSekali(). --}}
                             <div id="rtBarOut"></div>
 
-                            <div class="table-outer">
-                                <div class="table-wrap">
-                                    <table id="mainTableOut" class="tb aksi-hover">
-                                        <thead>
-                                            <tr>
-                                                <th class="rt-fixed-th">Aksi</th>
-                                                <th class="rt-fixed-th">No. Bukti</th>
-                                                <th class="rt-fixed-th">Supplier</th>
-                                                <th class="rt-fixed-th">Tanggal</th>
-                                                <th class="rt-fixed-th">Valas</th>
-                                                <th class="rt-fixed-th">Nilai</th>
-                                                <th class="rt-fixed-th">KL</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabel_data" class="text-left"></tbody>
-                                    </table>
-                                </div>
-                                <div class="table-footer">
-                                    <span id="footerLabelOut">Belum ada data</span>
-                                    <div class="pager-btns" id="pagerBtnsOut"></div>
-                                </div>
-                            </div>
+                            <table id="tabelOut" class="data-table po-aksi-hover">
+                                <thead id="tabelOut_header" class="text-center">
+                                    <tr>
+                                        <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                        <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
+                                        <th style="padding: 4px 12px;" scope="col">Supplier</th>
+                                        <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                                        <th style="padding: 4px 12px;" scope="col">Valas</th>
+                                        <th style="padding: 4px 12px;" scope="col">Nilai</th>
+                                        <th style="padding: 4px 12px;" scope="col">KL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel_data" class="text-left">
+                                    {{-- Baris digambar renderTabelOut() lewat JS, supaya susunan kolom hasil
+                                         geser/sembunyi selalu konsisten dengan hasil render ulang. --}}
+                                </tbody>
+                            </table>
 
-                            <div class="rt-hint">
+                            <div class="po-rt-hint">
                                 <i class="bi bi-info-circle"></i>
-                                Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-                                sembunyikan kolom.
+                                Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                                untuk menyembunyikan kolom.
                             </div>
 
                         </div>
@@ -360,16 +591,15 @@
                 </div>
 
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-                    <div class="tb-report">
-                        <div class="content">
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
 
-                            <div class="toolbar">
-                                <input class="search-inp" type="text" id="searchBoxPenerimaan"
-                                    placeholder="Cari data..." oninput="renderTabelPenerimaan()" style="width:200px">
+                            <div class="po-toolbar">
+                                <input class="po-search-inp" type="search" id="searchBoxPenerimaan" placeholder="Cari data">
 
-                                <div class="len-wrap">
+                                <div class="po-len-wrap">
                                     <label for="tabelLenPenerimaan">Tampilkan</label>
-                                    <select id="tabelLenPenerimaan" class="len-inp" onchange="onLenChangePenerimaan()">
+                                    <select id="tabelLenPenerimaan" class="po-len-inp">
                                         <option value="10">10</option>
                                         <option value="25">25</option>
                                         <option value="50">50</option>
@@ -378,44 +608,41 @@
                                     </select>
                                 </div>
 
-                                <button class="btn-load" type="button"
-                                    onclick="$('#modalFilterPenerimaan').modal('show')">
+                                <button class="po-btn-filter" type="button" onclick="$('#modalFilterPenerimaan').modal('show')">
                                     <i class="bi bi-funnel"></i> Filter
                                 </button>
                             </div>
 
+                            {{-- #rtBarPenerimaan diisi lewat JS oleh ReportTable.init() - lihat ctkInitReportTableSekali(). --}}
                             <div id="rtBarPenerimaan"></div>
 
-                            <div class="table-outer">
-                                <div class="table-wrap">
-                                    <table id="mainTablePenerimaan" class="tb aksi-hover">
-                                        <thead>
-                                            <tr>
-                                                <th class="rt-fixed-th">Aksi</th>
-                                                <th class="rt-fixed-th">No. Bukti</th>
-                                                <th class="rt-fixed-th">Kode Cust</th>
-                                                <th class="rt-fixed-th">Nama Cust</th>
-                                                <th class="rt-fixed-th">No DPP</th>
-                                                <th class="rt-fixed-th">Dibayar</th>
-                                                <th class="rt-fixed-th">LB</th>
-                                                <th class="rt-fixed-th">KL</th>
-                                                <th class="rt-fixed-th">Otorisasi</th>
-                                                <th class="rt-fixed-th">User OTO</th>
-                                                <th class="rt-fixed-th">TGL OTO</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabel2_data" class="text-left"></tbody>
-                                    </table>
-                                </div>
-                                <div class="table-footer">
-                                    <span id="footerLabelPenerimaan">Belum ada data</span>
-                                    <div class="pager-btns" id="pagerBtnsPenerimaan"></div>
-                                </div>
-                            </div>div
-                            <div class="rt-hint">
+                            <table id="tabelPenerimaan" class="data-table po-aksi-hover">
+                                <thead id="tabelPenerimaan_header" class="text-center">
+                                    <tr>
+                                        <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                        <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+                                        <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                                        <th style="padding: 4px 12px;" scope="col">Kode Cust</th>
+                                        <th style="padding: 4px 12px;" scope="col">Nama Cust</th>
+                                        <th style="padding: 4px 12px;" scope="col">No DPP</th>
+                                        <th style="padding: 4px 12px;" scope="col">Dibayar</th>
+                                        <th style="padding: 4px 12px;" scope="col">LB</th>
+                                        <th style="padding: 4px 12px;" scope="col">KL</th>
+                                        <th style="padding: 4px 12px;" scope="col">Oto</th>
+                                        <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                                        <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel2_data" class="text-left">
+                                    {{-- Baris digambar renderTabelPenerimaan() lewat JS, supaya susunan kolom hasil
+                                         geser/sembunyi selalu konsisten dengan hasil render ulang. --}}
+                                </tbody>
+                            </table>
+
+                            <div class="po-rt-hint">
                                 <i class="bi bi-info-circle"></i>
-                                Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-                                sembunyikan kolom.
+                                Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                                untuk menyembunyikan kolom.
                             </div>
 
                         </div>
@@ -1325,11 +1552,14 @@
         let dataEdit = {}
 
         /* =========================================================================
-         * List "Nota belum cetak" (tabel/mainTableOut) dan "Nota sudah cetak"
-         * (tabel2/mainTablePenerimaan) — draggable/hideable columns per
-         * docs/new-design-gudang-style-guide.md §5/§8. Dua tab = dua dataset yang
-         * benar-benar berbeda (guide §11), jadi dua instance ReportTable terpisah
-         * (ReportTable.use() dipanggil di awal masing-masing renderTabel*()).
+         * List "Nota belum cetak" (#tabelOut, tbody #tabel_data) dan "Nota sudah cetak"
+         * (#tabelPenerimaan, tbody #tabel2_data) — draggable/hideable columns + DataTables
+         * pagination, byte-for-byte sama dengan accounting/memorialkoreksi.blade.php /
+         * accounting/bonsementara.blade.php per tab (lihat @section('css') di atas). Dua
+         * tab = dua dataset yang benar-benar berbeda, jadi dua instance ReportTable dan
+         * dua instance DataTables terpisah — lihat ctkInitReportTableSekali()/
+         * ctkHeadHtml()/ctkAturTinggiTabel() di bawah, diparameterkan lewat tableId/barId
+         * supaya tidak perlu menduplikasi logikanya.
          * lastRowsOut/lastRowsPenerimaan diisi dari data Blade saat render pertama
          * DAN dari loadAll() saat refresh — satu-satunya fungsi render dipakai untuk
          * keduanya supaya tidak lagi bisa berbeda seperti sebelumnya.
@@ -1338,10 +1568,8 @@
         let lastRowsPenerimaan = (@json($tempPenerimaan)).map(g => g[0]);
         let globalOtorisasiPenerimaan = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
 
-        let tabelLenOut = 10,
-            tabelPageOut = 1;
-        let tabelLenPenerimaan = 10,
-            tabelPagePenerimaan = 1;
+        let tabelLenOut = 10;
+        let tabelLenPenerimaan = 10;
 
         // ---- Tab "Nota belum cetak" (Outstanding) ----
         var g_hrefOut = 'cetakpengajuandph_out';
@@ -1465,6 +1693,9 @@
             gsum_isgrandtotalPenerimaan = 0,
             gct_desimal_maxPenerimaan = 4;
 
+        // IsOtorisasi1/OtoUser1/TglOto1 sengaja TIDAK ada di sini lagi — sekarang kolom
+        // tetap (Oto/User Oto/Tgl Oto) yang ditambahkan sendiri di renderTabelPenerimaan(),
+        // bukan kolom geser/sembunyi, sama seperti accounting/bank.blade.php / kas.blade.php.
         function setDefaultHeaderPenerimaan() {
             gcart_headerPenerimaan = [
                 ['NoBukti', 'No Bukti', 1, 'varchar', 0, 0],
@@ -1475,10 +1706,6 @@
                 ['TotDIBAYAR', 'Dibayar', 1, 'float', 0, 2],
                 ['TotLB', 'LB', 1, 'float', 0, 2],
                 ['TotKL', 'KL', 1, 'float', 0, 2],
-                // 'varchar', bukan 'float' — nilainya dirender jadi badge Sudah/Belum.
-                ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
-                ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
-                ['TglOto1', 'Tgl Oto', 1, 'date', 0, 0],
             ];
         }
 
@@ -1612,129 +1839,165 @@
             }
         }
 
-        function fmtYMD(v) {
-            if (!v) {
-                return '';
+        // ---- Util bersama untuk kedua tabel (Out/Penerimaan) - sama seperti
+        // rtPindahBar()/ikatSearch()/ikatPanjangHalaman()/bankHeadHtml()/
+        // bankInitReportTableSekali()/bankAturTinggiTabel() di public/js/bank.js, hanya
+        // diparameterkan lewat tableId/barId karena satu halaman ini punya dua tabel. ----
+        function rtPindahBar(idBar, idTabel) {
+            let bar = document.getElementById(idBar);
+            let tabel = document.getElementById(idTabel);
+            if (!bar || !tabel) { return; }
+
+            let acuan = tabel;
+            if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+                acuan = document.getElementById(idTabel + '_wrapper') || tabel;
             }
-            let date = new Date(v);
-            if (isNaN(date)) {
-                return '';
+
+            if (acuan.previousElementSibling !== bar) {
+                acuan.parentNode.insertBefore(bar, acuan);
             }
-            let day = ("0" + date.getDate()).slice(-2);
-            let month = ("0" + (date.getMonth() + 1)).slice(-2);
-            return date.getFullYear() + "/" + month + "/" + day;
+        }
+
+        function ctkIkatSearch(tableId, inputId) {
+            let input = document.getElementById(inputId);
+            if (!input || input.dataset.rtBound) { return; }
+            input.dataset.rtBound = '1';
+
+            input.addEventListener('input', function() {
+                $('#' + tableId).DataTable().search(input.value).draw();
+            });
+        }
+
+        function ctkIkatPanjangHalaman(tableId, selectId, getLen, setLen) {
+            let sel = document.getElementById(selectId);
+            if (!sel || sel.dataset.rtBound) { return; }
+            sel.dataset.rtBound = '1';
+            sel.value = String(getLen());
+
+            sel.addEventListener('change', function() {
+                let n = Number(sel.value);
+                setLen((n === -1 || n > 0) ? n : 10);
+                $('#' + tableId).DataTable().page.len(getLen()).draw();
+            });
+        }
+
+        // ReportTable.headHtml() dengan fallback bila report-table.js belum termuat - sama
+        // seperti bankHeadHtml() di public/js/bank.js.
+        function ctkHeadHtml(cols) {
+            if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
+                return ReportTable.headHtml(cols);
+            }
+            console.warn('report-table.js tidak termuat - fitur geser & sembunyikan kolom dimatikan. Pastikan public/js/report-table.js ada di server.');
+            let html = '<tr>';
+            cols.forEach((c) => {
+                html += `<th style="padding: 4px 12px;" scope="col">${c[1]}</th>`;
+            });
+            return html + '</tr>';
+        }
+
+        let ctkRtSudahInit = {};
+
+        function ctkInitReportTableSekali(tableId, barId, theadId, onChange) {
+            if (ctkRtSudahInit[tableId] || typeof ReportTable === 'undefined') { return; }
+            ctkRtSudahInit[tableId] = true;
+
+            ReportTable.init({
+                table: '#' + tableId,
+                bar: '#' + barId,
+                onChange: onChange
+            });
+
+            // Sebagian layout memasang penangan klik sendiri di <thead>; teruskan klik pada
+            // roda gigi / pegangan geser ke penangan milik ReportTable - sama seperti
+            // bankInitReportTableSekali() di public/js/bank.js.
+            let guardUlangKlik = false;
+            let thead = document.getElementById(theadId);
+            if (thead) {
+                thead.addEventListener('click', function(e) {
+                    if (guardUlangKlik) { return; }
+                    let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip');
+                    if (!interaktif) { return; }
+
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    guardUlangKlik = true;
+                    let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window });
+                    Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true });
+                    thead.dispatchEvent(ulang);
+                    guardUlangKlik = false;
+                }, true);
+            }
+        }
+
+        // Tinggi tabel mengikuti sisa ruang layar - sama seperti bankAturTinggiTabel() di
+        // public/js/bank.js. Dilewatkan bila tab yang memuat tabelId ini sedang tidak aktif
+        // (wrap.offsetParent === null), dipanggil ulang lewat shown.bs.tab saat tab dibuka.
+        function ctkAturTinggiTabel(tableId) {
+            let page = document.getElementById('page1');
+            if (!page || page.offsetParent === null) { return; }
+
+            let table = document.getElementById(tableId);
+            let wrap = table ? table.closest('.po-table-wrap') : null;
+            let area = document.getElementById('content');
+            if (!area || !wrap || wrap.offsetParent === null) { return; }
+
+            wrap.style.maxHeight = 'none';
+
+            let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+            let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+            let kotak = wrap.getBoundingClientRect();
+            let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+            let sisa = batasBawah - kotak.top - bawah - 4;
+            wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
         }
 
         function aksiButtonsHtmlOut(r) {
             const nobukti = pickCI(r, 'nobukti');
-            return '<div class="action-buttons">' +
-                '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Tambah" onclick="buttonAdd(\'' +
-                nobukti + '\')"><i class="bi bi-plus"></i></button>' +
-                '</div>';
+            return '<div class="po-aksi-wrap"><button class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd(\'' +
+                nobukti + '\')"><i class="bi bi-plus"></i></button></div>';
         }
 
-        function renderTabelOut(resetPage) {
-            if (resetPage !== false) {
-                tabelPageOut = 1;
-            }
-            ReportTable.use('#mainTableOut');
-
+        function renderTabelOut() {
             const cols = gcart_headerOut.filter(c => c[2] === 1);
-            const thead = document.querySelector('#mainTableOut thead');
-            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+            if ($.fn.DataTable.isDataTable('#tabelOut')) { $('#tabelOut').DataTable().destroy(); }
+            let thead = document.getElementById('tabelOut_header');
+            thead.innerHTML = ctkHeadHtml(cols);
+            let baris = thead.querySelector('tr');
+            if (baris) {
+                baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>');
+            }
 
-            const search = ($('#searchBoxOut').val() || '').trim().toLowerCase();
-            let rows = lastRowsOut;
-            if (search) {
-                rows = rows.filter(r => cols.some(c => {
+            const rows = lastRowsOut;
+            let rowTable = '';
+            rows.forEach(function(r) {
+                rowTable += '<tr><td class="text-center">' + aksiButtonsHtmlOut(r) + '</td>';
+                rowTable += cols.map(function(c) {
                     const v = pickCI(r, c[0]);
-                    return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-                }));
-            }
-
-            const tbody = document.getElementById('tabel_data');
-            $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
-
-            if (!rows.length) {
-                tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-                document.getElementById('footerLabelOut').textContent = 'Tidak ada data';
-                renderPagerOut(0, 0);
-                return;
-            }
-
-            const totalRows = rows.length;
-            const totalPages = tabelLenOut === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLenOut));
-            if (tabelPageOut > totalPages) {
-                tabelPageOut = totalPages;
-            }
-            const pageRows = tabelLenOut === -1 ? rows : rows.slice((tabelPageOut - 1) * tabelLenOut, tabelPageOut *
-                tabelLenOut);
-
-            let html = '';
-            pageRows.forEach(r => {
-                html += '<tr class="data-row">';
-                html += '<td class="text-center">' + aksiButtonsHtmlOut(r) + '</td>';
-                html += cols.map(c => {
-                    const v = pickCI(r, c[0]);
-                    if (c[3] === 'date') {
-                        return '<td>' + fmtYMD(v) + '</td>';
-                    }
+                    if (c[3] === 'date') { return '<td>' + (v ? formatDate(v) : '') + '</td>'; }
                     if (c[3] === 'float') {
-                        return '<td class="text-right">' + formatAngka(parseFloat(v || 0).toFixed(2)) +
-                            '</td>';
+                        return '<td style="text-align: right;">' +
+                            formatAngka(parseFloat(v || 0).toFixed(Number(c[5]) || 0)) + '</td>';
                     }
                     return '<td>' + nullToEmpty(v) + '</td>';
                 }).join('');
-                html += '</tr>';
+                rowTable += '</tr>';
             });
+            document.getElementById('tabel_data').innerHTML = rowTable;
 
-            tbody.innerHTML = html;
-            document.getElementById('footerLabelOut').textContent = tabelLenOut === -1 ?
-                'Menampilkan ' + totalRows + ' baris' : 'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
-            renderPagerOut(tabelPageOut, totalPages);
-            $('[data-toggle="tooltip"]').tooltip({
-                container: 'body',
-                boundary: 'window'
+            $('#tabelOut').DataTable({
+                lengthChange: false, pageLength: tabelLenOut, order: [],
+                columnDefs: [{ targets: [0], orderable: false }],
+                dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: { emptyTable: 'Tidak ada data', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
             });
-        }
-
-        function onLenChangeOut() {
-            const v = Number(document.getElementById('tabelLenOut').value);
-            tabelLenOut = (v === -1 || v > 0) ? v : 10;
-            renderTabelOut();
-        }
-
-        function gotoPageOut(p) {
-            tabelPageOut = p;
-            renderTabelOut(false);
-        }
-
-        function renderPagerOut(page, totalPages) {
-            const el = document.getElementById('pagerBtnsOut');
-            if (!el) {
-                return;
-            }
-            if (!totalPages || totalPages <= 1) {
-                el.innerHTML = '';
-                return;
-            }
-
-            function pgBtn(label, targetPage, active, disabled) {
-                const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
-                const click = disabled ? '' : ' onclick="gotoPageOut(' + targetPage + ')"';
-                return '<div class="' + cls + '"' + click + '>' + label + '</div>';
-            }
-
-            let start = Math.max(1, page - 2);
-            let end = Math.min(totalPages, start + 4);
-            start = Math.max(1, end - 4);
-
-            let html = pgBtn('&laquo;', page - 1, false, page <= 1);
-            for (let p = start; p <= end; p++) {
-                html += pgBtn(String(p), p, p === page, false);
-            }
-            html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
-            el.innerHTML = html;
+            rtPindahBar('rtBarOut', 'tabelOut');
+            ctkIkatSearch('tabelOut', 'searchBoxOut');
+            ctkIkatPanjangHalaman('tabelOut', 'tabelLenOut', () => tabelLenOut, (v) => { tabelLenOut = v; });
+            let inputSearchOut = document.getElementById('searchBoxOut');
+            if (inputSearchOut && inputSearchOut.value) { $('#tabelOut').DataTable().search(inputSearchOut.value).draw(); }
+            ctkAturTinggiTabel('tabelOut');
         }
 
         // Satu-satunya tempat yang menentukan tombol Aksi tab "sudah cetak" — dipakai
@@ -1742,23 +2005,22 @@
         function aksiButtonsHtmlPenerimaan(r) {
             const nobukti = pickCI(r, 'NoBukti');
             const nodpp = pickCI(r, 'NoDPP');
-            const detailBtn =
-                '<button type="button" class="btn-action-sm btn-action-warning" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+            const detailBtn = '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' +
                 nobukti + '\', 0, \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-info"></i></button>';
-            const koreksiBtn =
-                '<button type="button" class="btn-action-sm btn-action-success" data-toggle="tooltip" title="Koreksi" onclick="buttonKoreksi(\'' +
-                nobukti + '\', \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-pencil-fill"></i></button>';
+            const koreksiBtn = '<button class="btn btn-success btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi(\'' +
+                nobukti + '\', \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-pen"></i></button>';
 
+            let tombolAksi = detailBtn;
             if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
-                return '<div class="action-buttons">' + detailBtn +
-                    '<button type="button" class="btn-action-sm btn-action-danger" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' + koreksiBtn + '</div>';
+                tombolAksi += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>';
+            } else {
+                tombolAksi += '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonDetail(\'' +
+                    nobukti + '\', 1, \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-key"></i></button>';
             }
+            tombolAksi += koreksiBtn;
 
-            return '<div class="action-buttons">' + detailBtn +
-                '<button type="button" class="btn-action-sm btn-action-primary" data-toggle="tooltip" title="Otorisasi" onclick="buttonDetail(\'' +
-                nobukti + '\', 1, \'' + nullToEmpty(nodpp) + '\')"><i class="bi bi-key"></i></button>' + koreksiBtn +
-                '</div>';
+            return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
         }
 
         function filterByOtorisasiPenerimaan(rows, filterVal) {
@@ -1771,114 +2033,63 @@
             return rows;
         }
 
-        function renderTabelPenerimaan(resetPage) {
-            if (resetPage !== false) {
-                tabelPagePenerimaan = 1;
-            }
-            ReportTable.use('#mainTablePenerimaan');
-
+        function renderTabelPenerimaan() {
             const cols = gcart_headerPenerimaan.filter(c => c[2] === 1);
-            const thead = document.querySelector('#mainTablePenerimaan thead');
-            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+            if ($.fn.DataTable.isDataTable('#tabelPenerimaan')) { $('#tabelPenerimaan').DataTable().destroy(); }
+            let thead = document.getElementById('tabelPenerimaan_header');
+            thead.innerHTML = ctkHeadHtml(cols);
+            let baris = thead.querySelector('tr');
+            if (baris) {
+                baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>');
+                baris.insertAdjacentHTML('beforeend', `
+                    <th style="padding: 4px 12px;" scope="col">Oto</th>
+                    <th style="padding: 4px 12px;" scope="col">User Oto</th>
+                    <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+                `);
+            }
 
-            const search = ($('#searchBoxPenerimaan').val() || '').trim().toLowerCase();
-            let rows = lastRowsPenerimaan;
-            if (search) {
-                rows = rows.filter(r => cols.some(c => {
+            const rows = filterByOtorisasiPenerimaan(lastRowsPenerimaan, globalOtorisasiPenerimaan);
+            let rowTable = '';
+            rows.forEach(function(r) {
+                let isOtorisasi = Number(pickCI(r, 'IsOtorisasi1')) || 0;
+                let otoUser = pickCI(r, 'OtoUser1');
+                let tglOto = pickCI(r, 'TglOto1');
+                rowTable += '<tr><td class="text-center">' + aksiButtonsHtmlPenerimaan(r) + '</td>';
+                rowTable += cols.map(function(c) {
                     const v = pickCI(r, c[0]);
-                    return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-                }));
-            }
-            rows = filterByOtorisasiPenerimaan(rows, globalOtorisasiPenerimaan);
-
-            const tbody = document.getElementById('tabel2_data');
-            $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
-
-            if (!rows.length) {
-                tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-                document.getElementById('footerLabelPenerimaan').textContent = 'Tidak ada data';
-                renderPagerPenerimaan(0, 0);
-                return;
-            }
-
-            const totalRows = rows.length;
-            const totalPages = tabelLenPenerimaan === -1 ? 1 : Math.max(1, Math.ceil(totalRows / tabelLenPenerimaan));
-            if (tabelPagePenerimaan > totalPages) {
-                tabelPagePenerimaan = totalPages;
-            }
-            const pageRows = tabelLenPenerimaan === -1 ? rows : rows.slice((tabelPagePenerimaan - 1) * tabelLenPenerimaan,
-                tabelPagePenerimaan * tabelLenPenerimaan);
-
-            let html = '';
-            pageRows.forEach(r => {
-                html += '<tr class="data-row">';
-                html += '<td class="text-center">' + aksiButtonsHtmlPenerimaan(r) + '</td>';
-                html += cols.map(c => {
-                    const v = pickCI(r, c[0]);
-                    if (c[0] === 'IsOtorisasi1') {
-                        return (Number(v) === 1) ?
-                            '<td><span class="sp-badge is-active">Sudah</span></td>' :
-                            '<td><span class="sp-badge is-inactive">Belum</span></td>';
-                    }
-                    if (c[3] === 'date') {
-                        return '<td>' + fmtYMD(v) + '</td>';
-                    }
+                    if (c[3] === 'date') { return '<td>' + (v ? formatDate(v) : '') + '</td>'; }
                     if (c[3] === 'float') {
-                        return '<td class="text-right">' + formatAngka(parseFloat(v || 0).toFixed(2)) +
-                            '</td>';
+                        return '<td style="text-align: right;">' +
+                            formatAngka(parseFloat(v || 0).toFixed(Number(c[5]) || 0)) + '</td>';
                     }
                     return '<td>' + nullToEmpty(v) + '</td>';
                 }).join('');
-                html += '</tr>';
+                rowTable += `
+                    ${isOtorisasi ?
+                        '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+                      :
+                        '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+                    }
+                    <td>${otoUser || ''}</td>
+                    <td>${tglOto ? formatDate(tglOto) : ''}</td>
+                </tr>`;
             });
+            document.getElementById('tabel2_data').innerHTML = rowTable;
 
-            tbody.innerHTML = html;
-            document.getElementById('footerLabelPenerimaan').textContent = tabelLenPenerimaan === -1 ?
-                'Menampilkan ' + totalRows + ' baris' : 'Menampilkan ' + pageRows.length + ' dari ' + totalRows + ' baris';
-            renderPagerPenerimaan(tabelPagePenerimaan, totalPages);
-            $('[data-toggle="tooltip"]').tooltip({
-                container: 'body',
-                boundary: 'window'
+            $('#tabelPenerimaan').DataTable({
+                lengthChange: false, pageLength: tabelLenPenerimaan, order: [],
+                columnDefs: [{ targets: [0], orderable: false }],
+                dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: { emptyTable: 'Tidak ada data', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
             });
-        }
-
-        function onLenChangePenerimaan() {
-            const v = Number(document.getElementById('tabelLenPenerimaan').value);
-            tabelLenPenerimaan = (v === -1 || v > 0) ? v : 10;
-            renderTabelPenerimaan();
-        }
-
-        function gotoPagePenerimaan(p) {
-            tabelPagePenerimaan = p;
-            renderTabelPenerimaan(false);
-        }
-
-        function renderPagerPenerimaan(page, totalPages) {
-            const el = document.getElementById('pagerBtnsPenerimaan');
-            if (!el) {
-                return;
+            rtPindahBar('rtBarPenerimaan', 'tabelPenerimaan');
+            ctkIkatSearch('tabelPenerimaan', 'searchBoxPenerimaan');
+            ctkIkatPanjangHalaman('tabelPenerimaan', 'tabelLenPenerimaan', () => tabelLenPenerimaan, (v) => { tabelLenPenerimaan = v; });
+            let inputSearchPenerimaan = document.getElementById('searchBoxPenerimaan');
+            if (inputSearchPenerimaan && inputSearchPenerimaan.value) {
+                $('#tabelPenerimaan').DataTable().search(inputSearchPenerimaan.value).draw();
             }
-            if (!totalPages || totalPages <= 1) {
-                el.innerHTML = '';
-                return;
-            }
-
-            function pgBtn(label, targetPage, active, disabled) {
-                const cls = 'pg' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
-                const click = disabled ? '' : ' onclick="gotoPagePenerimaan(' + targetPage + ')"';
-                return '<div class="' + cls + '"' + click + '>' + label + '</div>';
-            }
-
-            let start = Math.max(1, page - 2);
-            let end = Math.min(totalPages, start + 4);
-            start = Math.max(1, end - 4);
-
-            let html = pgBtn('&laquo;', page - 1, false, page <= 1);
-            for (let p = start; p <= end; p++) {
-                html += pgBtn(String(p), p, p === page, false);
-            }
-            html += pgBtn('&raquo;', page + 1, false, page >= totalPages);
-            el.innerHTML = html;
+            ctkAturTinggiTabel('tabelPenerimaan');
         }
 
         /* -- FILTER MODAL tab "sudah cetak" (Otorisasi: Semua/Sudah/Belum) -- */
@@ -1907,19 +2118,11 @@
 
         $(document).ready(function() {
             doSetHeaderOut(g_modeReportOut);
-            ReportTable.init({
-                table: '#mainTableOut',
-                bar: '#rtBarOut',
-                onChange: renderTabelOut
-            });
+            ctkInitReportTableSekali('tabelOut', 'rtBarOut', 'tabelOut_header', renderTabelOut);
             renderTabelOut();
 
             doSetHeaderPenerimaan(g_modeReportPenerimaan);
-            ReportTable.init({
-                table: '#mainTablePenerimaan',
-                bar: '#rtBarPenerimaan',
-                onChange: renderTabelPenerimaan
-            });
+            ctkInitReportTableSekali('tabelPenerimaan', 'rtBarPenerimaan', 'tabelPenerimaan_header', renderTabelPenerimaan);
             renderTabelPenerimaan();
 
             // Render pertama di atas memakai data awal dari Blade (@json($tempOutstanding)/
@@ -1928,6 +2131,14 @@
             // (dan berlaku juga sebagai refresh setelah aksi seperti Otorisasi/Koreksi/dst) —
             // kalau AJAX-nya gagal, tabel tetap menampilkan data awal ini, bukan kosong.
             loadAll();
+
+            // Tab "Nota sudah cetak" (Penerimaan) mulai tersembunyi (display:none dari
+            // .tab-pane tanpa .show/.active) - ctkAturTinggiTabel('tabelPenerimaan') di atas
+            // dilewatkan saat itu (wrap.offsetParent === null), jadi dihitung ulang begitu tab
+            // itu benar-benar ditampilkan. Tab "Nota belum cetak" (Out) dihitung ulang juga
+            // untuk jaga-jaga kalau ukurannya berubah selagi tab lain terbuka.
+            $('#nav-home-tab').on('shown.bs.tab', function() { ctkAturTinggiTabel('tabelOut'); });
+            $('#nav-profile-tab').on('shown.bs.tab', function() { ctkAturTinggiTabel('tabelPenerimaan'); });
 
             //   $("#tabel_add_list_modal").DataTable({
             //     "lengthChange": false,
@@ -4188,10 +4399,15 @@
 
             console.log('loadall')
 
+            document.getElementById('tabel_data').innerHTML =
+                '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>';
+            document.getElementById('tabel2_data').innerHTML =
+                '<tr><td colspan="20" class="text-center">' + loadingHtml('Memuat data...') + '</td></tr>';
+
             $.ajax({
                 url: "{!! url('cetakpengajuandphloadall') !!}",
                 type: "get",
-                async: false,
+                async: true,
                 data: {},
                 success: function(res) {
                     lastRowsOut = (res.tempOutstanding || []).map(g => g[0]);

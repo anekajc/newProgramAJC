@@ -92,9 +92,9 @@ public function loadValas()
                 a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            and a.PERKIRAAN = ?
+            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
-      ", [$perkiraan]);
+          ", [$perkiraan]);
 
       return $listData;
   }
