@@ -173,6 +173,7 @@
         #content {
             flex: 1;
             overflow-y: auto;
+            padding: 28px 32px;
         }
 
         /* -- Flyout panel for menu depth beyond the group/child tier -- rendered OUTSIDE
@@ -471,11 +472,11 @@
 
         <!-- Content
     ============================================= -->
-        <section id="content" class="mt-3 mb-6">
+        <section id="content">
             <div id="content-dynamic" class="nm-ui" style="display:none;"></div>
             <div id="content-report" class="nm-ui" style="display:none;"></div>
             <div class="content-wrap" id="content-blade">
-                <div class="container-fluid px-5 clearfix">
+                <div class="container-fluid clearfix">
                     <div class="row gutter-40 col-mb-80">
                         @yield('content')
                     </div>
