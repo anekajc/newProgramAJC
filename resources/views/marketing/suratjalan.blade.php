@@ -9,7 +9,7 @@
 @section('css')
 
 {{-- report-table.css/report-table.js + public/js/headerEngine.js power #tabel/#tabel2/
-     #tabel5/#tabel6's draggable-column/gear-menu headers and "Tampilkan"
+     #tabel6's draggable-column/gear-menu headers and "Tampilkan"
      (page-length) control, same pattern as so.blade.php's #tabel/#tabel7. Linked here
      page-locally (not in newmaster.blade.php) so only this page gets it. #tabel4 ("Out SO
      Booking") is left on the old static header -- its nav-tab link is already commented
@@ -22,7 +22,7 @@
      purchaseOrder.blade.php): same card-wrapped pill tab bar, shared toolbar
      (search + Tampilkan) in its own card, po-table-wrap sticky-header scroll box, and
      Reset-kolom bar -- copied verbatim, rescoped from SO's #tabel/#tabel7 to this
-     page's four live tables (#tabel/#tabel2/#tabel5/#tabel6). Data/business
+     page's three live tables (#tabel/#tabel2/#tabel6). Data/business
      logic (loadAll, HeaderEngine persistence, tabelXActionsCell) is untouched -- this
      only changes how the page is built and how it looks. --}}
 <link rel="stylesheet" href="{{ asset('css/sj-table-header.css') }}?v={{ filemtime(public_path('css/sj-table-header.css')) }}">
@@ -209,8 +209,8 @@
     border-color: #D64550;
     background: #FEF2F2;
   }
-  /* Pager server-side milik tabel/tabel2/tabel5 (SO Belum Siap Kirim/SO Siap
-     Kirim/Out SO Prioritas) -- ketiganya tidak lagi dipaginate DataTables di
+  /* Pager server-side milik tabel/tabel2 (SO Belum Siap Kirim/SO Siap
+     Kirim) -- keduanya tidak lagi dipaginate DataTables di
      browser (satu halaman per request lewat suratjalanpaginate), tapi tetap
      dibikin pakai markup+class .paginate_button/.dataTables_paginate yang
      sama dengan pager DataTables asli (lihat .tb-pagination-outside di atas)
@@ -367,36 +367,6 @@
 
 
 <style>
-#tabel5_filter {
-    display: flex;
-    align-items: flex-end;
-    margin-top: 8px;
-    margin-right: 10px;
-    margin-bottom: -10px;
-  }
-
-#tabel5_filter label input {
-    width: 150px;
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: none;
-    font-size: 0.65rem;
-  }
-
-#tabel5_filter label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #333;
-  }
-
-#tabel5_filter input:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-</style>
-
-<style>
   #tabel_add_list_pelanggan_filter{
     display: flex;
     align-items: flex-end;
@@ -504,6 +474,39 @@
   #tabel6 .action-buttons-wrap .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
   #tabel6 .action-buttons-wrap .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
   #tabel6 .action-buttons-wrap .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+
+  /* Same pastel round-button treatment for #tabel2's ("SO Siap Kirim") own "+"
+     action, copied 1:1 from returpenjualangudang.blade.php's #tabel/#tabel2/#tabel3
+     td:first-child .btn-primary pastel-blue pattern + its .btn .bi-plus rule
+     (bigger glyph, line-height:0 so it doesn't grow the button's height). */
+  #tabel2 .action-buttons-wrap .btn {
+    width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
+    justify-content: center; border-radius: 7px; font-size: 13px; border: 1px solid transparent;
+    box-shadow: none; transition: all .12s ease;
+  }
+  #tabel2 .action-buttons-wrap .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+  #tabel2 .action-buttons-wrap .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel2 .action-buttons-wrap .btn .bi-plus {
+    font-size: 1.5rem;
+    line-height: 0;
+    vertical-align: middle;
+  }
+
+  /* Modal pickers converted to click-anywhere-on-row (per marketing-full-menu-guide.md),
+     same convention as so.blade.php's own picker modals. */
+  .pick-row { cursor: pointer; }
+  .pick-row:hover { background-color: #f5f3ff !important; }
+
+  /* Pastel round-button treatment for #koreksiTable's own Edit/Delete actions
+     (last column, not wrapped in .action-buttons-wrap like the other tables). */
+  #koreksiTable td:last-child .btn {
+    width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center;
+    justify-content: center; border-radius: 7px; font-size: 13px; border: 1px solid transparent;
+    box-shadow: none; transition: all .12s ease;
+  }
+  #koreksiTable td:last-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+  #koreksiTable td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #koreksiTable td:last-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 </style>
 
 @endsection
@@ -538,10 +541,6 @@
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
 
-        <a class="nav-item nav-link" id="nav-profile3-tab" data-toggle="tab" href="#profile3" role="tab" aria-controls="nav-profile3" aria-selected="false">
-          Out SO Prioritas
-        </a>
-
         <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
           SO Siap Kirim
         </a>
@@ -565,7 +564,7 @@
   {{-- Setiap tab sekarang punya toolbar (search+Tampilkan) sendiri-sendiri, tidak lagi
        berbagi satu toolbar seperti sebelumnya (dulu satu #tabel_filter_visual/
        #tabel_length_visual menyaring KEEMPAT tabel sekaligus lewat page1Tables).
-       "SO Belum Siap Kirim"/"SO Siap Kirim"/"Out SO Prioritas" (tabel/tabel2/tabel5)
+       "SO Belum Siap Kirim"/"SO Siap Kirim" (tabel/tabel2)
        juga sekarang TIDAK dibatasi periode sama sekali (dulu ikut ke-filter rentang
        tanggal yang harusnya cuma milik "Surat Jalan Otorisasi") dan datanya diambil
        per-halaman dari server (server-side paging, lihat sjLoadPage() / endpoint
@@ -578,6 +577,50 @@
   <div class="tab-content" id="myTabContent">
 
   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      {{-- Filter modal: sama persis polanya dengan modalFilterSPB milik tabel6,
+           cuma isinya "Status Prioritas" (Urgent/Not Urgent) bukan status
+           otorisasi. --}}
+      <div class="modal fade rt-filter" id="modalFilterTabel1">
+        <div class="modal-dialog modal-md">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="bi bi-funnel"></i>
+                Filter Data
+                <span class="rt-active-badge" id="tabel1FilterBadge">0 aktif</span>
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterTabel1').modal('hide')">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="rt-section">
+                <div class="rt-group-label">Status</div>
+                <div>
+                  <label class="rt-field-label" for="input_filterprioritas1">Status Prioritas</label>
+                  <select class="rt-native" id="input_filterprioritas1">
+                    <option value="" selected>Semua</option>
+                    <option value="1">Urgent</option>
+                    <option value="0">Not Urgent</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="rt-reset-link" onclick="sjResetFilterFieldsTabel('tabel')">Reset semua</button>
+              <div class="rt-footer-buttons">
+                <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                  onclick="$('#modalFilterTabel1').modal('hide')">Batal</button>
+                <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterTabel('tabel'); $('#modalFilterTabel1').modal('hide');">Terapkan</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       <div class="po-toolbar">
         <input type="search" id="tabelSearch1" class="po-search-inp" placeholder="Cari data">
         <div class="po-len-wrap">
@@ -589,6 +632,9 @@
             <option value="100">100</option>
           </select>
         </div>
+        <button class="po-btn-filter" id="sjFilterBtn1" type="button" onclick="$('#modalFilterTabel1').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
       </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel')">
@@ -618,6 +664,47 @@
       </div>
   </div>
   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="modal fade rt-filter" id="modalFilterTabel2">
+        <div class="modal-dialog modal-md">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="bi bi-funnel"></i>
+                Filter Data
+                <span class="rt-active-badge" id="tabel2FilterBadge">0 aktif</span>
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterTabel2').modal('hide')">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="rt-section">
+                <div class="rt-group-label">Status</div>
+                <div>
+                  <label class="rt-field-label" for="input_filterprioritas2">Status Prioritas</label>
+                  <select class="rt-native" id="input_filterprioritas2">
+                    <option value="" selected>Semua</option>
+                    <option value="1">Urgent</option>
+                    <option value="0">Not Urgent</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="rt-reset-link" onclick="sjResetFilterFieldsTabel('tabel2')">Reset semua</button>
+              <div class="rt-footer-buttons">
+                <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal"
+                  onclick="$('#modalFilterTabel2').modal('hide')">Batal</button>
+                <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterTabel('tabel2'); $('#modalFilterTabel2').modal('hide');">Terapkan</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       <div class="po-toolbar">
         <input type="search" id="tabelSearch2" class="po-search-inp" placeholder="Cari data">
         <div class="po-len-wrap">
@@ -629,6 +716,9 @@
             <option value="100">100</option>
           </select>
         </div>
+        <button class="po-btn-filter" id="sjFilterBtn2" type="button" onclick="$('#modalFilterTabel2').modal('show')">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
       </div>
       <div class="rt-bar-row">
         <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel2')">
@@ -794,45 +884,6 @@
               </table>
     </div>
   </div>
-  <div class="tab-pane fade" id="profile3" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="po-toolbar">
-        <input type="search" id="tabelSearch5" class="po-search-inp" placeholder="Cari data">
-        <div class="po-len-wrap">
-          <label for="tabelLen5">Tampilkan</label>
-          <select id="tabelLen5" class="po-len-inp">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-      </div>
-      <div class="rt-bar-row">
-        <button class="rt-reset-btn" type="button" title="Reset kolom" onclick="buttonHeaderTable('tabel5')">
-          <i class="bi bi-arrow-clockwise"></i> Reset kolom
-        </button>
-        <div id="rtBarTabel5"></div>
-      </div>
-      <div class="po-table-wrap">
-        <table id="tabel5" class="tb data-table">
-          <thead style="white-space:nowrap;"></thead>
-          <tbody id="tabel5_data" class="text-left"></tbody>
-        </table>
-      </div>
-      <div class="tb-pagination-outside">
-        <div class="dataTables_info" id="tabelPagerInfo5"></div>
-        <div class="dataTables_paginate paging_simple_numbers">
-          <a class="paginate_button previous" id="tabelPagerPrev5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page - 1)">Previous</a>
-          <span id="tabelPagerNumbers5"></span>
-          <a class="paginate_button next" id="tabelPagerNext5" onclick="sjGotoPage('tabel5', sjPageState.tabel5.page + 1)">Next</a>
-        </div>
-      </div>
-      <div class="po-rt-hint">
-        <i class="bi bi-info-circle"></i>
-        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-        untuk menyembunyikan kolom atau mengatur jumlah desimal.
-      </div>
-  </div>
 </div>
 </div>
 </div>
@@ -844,12 +895,12 @@
 
 <div id="page2" class="container-fluid" style="display: none">
 
-  <div class="row" style="margin-top: -65px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Form Surat Jalan</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
     </div>
   </div>
     <div id="" class="">
@@ -1080,10 +1131,10 @@
       <div class="container-fluid" style="overflow-x: auto;">
         <hr/>
 
-            <table id="addTable" class="table table-bordered table-hover table-striped table-responsive-lg" >
-              <thead class="text-center bg-primary text-white">
+            <table id="addTable" class="data-table" >
+              <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Terima</th>
+                  <th style="padding: 4px 12px;" scope="col">Kirim</th>
                   <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
                   <th style="padding: 4px 12px;" scope="col">Satuan</th>
@@ -1127,7 +1178,7 @@
             <div class="row">
               <div id="" class="text-right col-12">
                 <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-                <button type="button" id="submitAddAdd" class="btn btn-primary btn-lg" style="
+                <button type="button" id="submitAddAdd" class="btn btn-chip-biru btn-lg" style="
                 height: 30px;
                 padding: 4px 12px;
                 border-radius: 20px;
@@ -1136,7 +1187,7 @@
                 text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                onclick="submitAdd()" class="btn btn-secondary">Submit Add</button>
+                onclick="submitAdd()">Simpan</button>
 
               </div>
 
@@ -1157,12 +1208,12 @@
 <!-- page 2 end -->
 
 <div id="page3" class="container-fluid" style="display: none">
-  <div class="row" style="margin-top: -65px">
+  <div class="row">
     <div class="col-6 text-left">
-      <h1 style="">Form Koreksi Surat Jalan</h1>
+      <h1 style=""></h1>
     </div>
     <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
     </div>
   </div>
 
@@ -1466,16 +1517,14 @@
       <hr/ style="margin-top: -20px">
     </div>
 
-        <table id="koreksiTable" class="table table-bordered table-hover table-striped table-responsive-lg" >
-          <thead class="text-center bg-primary text-white">
+        <table id="koreksiTable" class="data-table" >
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
               <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
               <th style="padding: 4px 12px;" scope="col">Nama Produk</th>
               <th style="padding: 4px 12px;" scope="col">Qty</th>
               <th style="padding: 4px 12px;" scope="col">Sat</th>
-              <th style="padding: 4px 12px;" scope="col">Qty2</th>
-              <th style="padding: 4px 12px;" scope="col">Sat2</th>
               <th style="padding: 4px 12px;" scope="col">Gudang</th>
               <th style="padding: 4px 12px;" scope="col">Actions</th>
 
@@ -1506,7 +1555,7 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-12  text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
+        <button type="button" class="btn btn-chip-biru btn-lg" style="
           height: 30px;
           padding: 4px 12px;
           border-radius: 20px;
@@ -1515,7 +1564,7 @@
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonKoreksiAdd()" class="btn btn-secondary"><b>+ Tambah Item</b></button>
+          onclick="buttonKoreksiAdd()" class="btn btn-secondary"><b>Tambah</b></button>
         <!-- <button type="button" onclick="buttonKoreksiAdd()" class="btn btn-primary">+ Tambah Item</button> -->
       </div>
 
@@ -1548,7 +1597,7 @@
             <div class="col-md-8">
               <div class="form-group input-group">
                 <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
-                <button type="button" onclick="buttonKoreksiListBarang()" class="btn btn-primary" >+</button>
+                <button type="button" onclick="buttonKoreksiListBarang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
 
               </div>
 
@@ -1592,7 +1641,7 @@
 
                 <input id="AddAddNamaGdg" type="text" class="form-control" disabled>
                 <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled>
-                <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
+                <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
@@ -1620,10 +1669,9 @@
       </div>
 
 
-
       <div class="row mt-2">
         <div class="col-md-12 text-right mt-4">
-          <button type="button" class="btn btn-secondary btn-lg" style="
+          <button type="button" class="btn btn-danger btn-lg" style="
           height: 30px;
           padding: 4px 12px;
           border-radius: 20px;
@@ -1632,9 +1680,9 @@
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonBatalAdd()" class="btn btn-secondary">Batal</button>
+          onclick="buttonBatalAdd()">Batal</button>
 
-          <button type="button" id="buttonSubmitAddAdd" class="btn btn-primary btn-lg" style="
+          <button type="button" id="buttonSubmitAddAdd" class="btn btn-chip-biru btn-lg" style="
           height: 30px;
           padding: 4px 12px;
           border-radius: 20px;
@@ -1643,7 +1691,7 @@
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="submitAddAdd()" class="btn btn-secondary">Submit Add</button>
+          onclick="submitAddAdd()">Simpan</button>
 
           <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
         </div>
@@ -1719,7 +1767,7 @@
 
               <input id="AddEditNamaGdg" type="text" class="form-control" disabled>
               <input id="AddEditKodeGdg" type="hidden" class="form-control" disabled>
-              <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
+              <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
             </div>
           </div>
 
@@ -1762,7 +1810,7 @@
         onclick="buttonBatalAdd()" class="btn btn-secondary">Batal</button>
 
 
-        <button type="button" id="buttomSubmitAddEdit" class="btn btn-primary btn-lg" style="
+        <button type="button" id="buttomSubmitAddEdit" class="btn btn-chip-biru btn-lg" style="
         height: 30px;
         padding: 4px 12px;
         border-radius: 20px;
@@ -1771,7 +1819,7 @@
         text-transform: uppercase;
         transition: background-color 0.3s, box-shadow 0.3s;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-        onclick="submitAddEdit()" class="btn btn-secondary">Edit</button>
+        onclick="submitAddEdit()">Simpan Edit</button>
         <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
       </div>
 
@@ -2164,22 +2212,16 @@
         <div class="modal-body" >
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12" style="margin-top:-40px;">
-              <h3>Gudang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
             <div class="col-12" style="overflow:auto;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_gudang" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_gudang" class="data-table">
+              <thead class="text-center">
                 <tr>
 
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
 
@@ -2193,12 +2235,6 @@
 
                   <td>-</td>
                   <td>-</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               </tbody>
 
@@ -2216,22 +2252,16 @@
       <div class="modal-body" >
 
       <div class="container-fluid mt-4" >
-        <div class="row">
-          <div class="col-12" style="margin-top:-40px;">
-            <h3>Ekspedisi</h3>
-          </div>
-        </div>
         <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
         <div class="row">
           <div class="col-12" style="overflow:auto;">
           <!-- <div class="container-fluid"> -->
 
 
-          <table id="tabel_add_list_ekspedisi" class="table table-bordered table-hover table-striped table-responsive-lg">
-            <thead class="text-center bg-primary text-white">
+          <table id="tabel_add_list_ekspedisi" class="data-table">
+            <thead class="text-center">
               <tr>
 
-                <th style="padding: 4px 12px;" scope="col">Actions</th>
                 <th style="padding: 4px 12px;" scope="col">Kode</th>
                 <th style="padding: 4px 12px;" scope="col">Nama</th>
 
@@ -2245,12 +2275,6 @@
 
                 <td>-</td>
                 <td>-</td>
-
-
-                  <td class="text-center">
-                    <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                    <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                  </td>
             </tr>
             </tbody>
 
@@ -2991,22 +3015,15 @@
         <div class="modal-body" >
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Barang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
             <div class="col-12" style="overflow:auto;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_koreksi_list_barang" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_koreksi_list_barang" class="data-table">
+              <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
 
@@ -3020,19 +3037,13 @@
 
               <tbody id="tabel_data_koreksi_list_barang" class="text-left" >
                 @for ($i = 0; $i < count($listBarang); $i++)
-                <tr >
+                <tr class="pick-row" onclick="buttonKoreksiPickBarang('{{ $listBarang[$i]->Kodebrg }}' , '{{ $listBarang[$i]->NamaBrg }}' , '{{ $listBarang[$i]->Sat1 }}' , '{{ $listBarang[$i]->ISI1 }}')">
 
                   <td>{{ $listBarang[$i]->Kodebrg }}</td>
                   <td>{{ $listBarang[$i]->NamaBrg }}</td>
 
                   <td>{{ $listBarang[$i]->SATUAN }}</td>
                   <td></td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" onclick="buttonKoreksiPickBarang('{{ $listBarang[$i]->Kodebrg }}' , '{{ $listBarang[$i]->NamaBrg }}' , '{{ $listBarang[$i]->Sat1 }}' , '{{ $listBarang[$i]->ISI1 }}')"><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               @endfor
               </tbody>
@@ -3051,23 +3062,17 @@
         <div class="modal-body" >
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Gudang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
             <div class="col-12" style="overflow:auto;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_koreksi_list_gudang" class="table table-bordered table-hover table-striped table-responsive-lg">
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_koreksi_list_gudang" class="data-table">
+              <thead class="text-center">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode</th>
                   <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
 
                 </tr>
               </thead>
@@ -3076,16 +3081,10 @@
               <tbody id="tabel_data_koreksi_list_gudang" class="text-left" >
                 @for ($i = 0; $i < count($listGudang); $i++)
 
-                <tr >
+                <tr class="pick-row" onclick="buttonKoreksiPickGudang('{{ $listGudang[$i]->KODEGDG }}' , '{{ $listGudang[$i]->NAMA }}')">
 
                   <td>{{ $listGudang[$i]->KODEGDG }}</td>
                   <td>{{ $listGudang[$i]->NAMA }}</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" onclick="buttonKoreksiPickGudang('{{ $listGudang[$i]->KODEGDG }}' , '{{ $listGudang[$i]->NAMA }}')"><i class="bi bi-plus"></i></button>
-                    </td>
               </tr>
               @endfor
               </tbody>
@@ -3314,18 +3313,16 @@ var g_modeReport = 1;
 var gcart_header = [];
 var gsum_issubtotal = 0, gsum_isgrandtotal = 0;
 
-var sjCart = { tabel: [], tabel2: [], tabel5: [], tabel6: [] };
+var sjCart = { tabel: [], tabel2: [], tabel6: [] };
 var sjActiveKey = null;
 var SJ_TABLE_INFO = {
   tabel:  { href: 'suratjalan_tabel',  setDefault: setDefaultHeaderTabel  },
   tabel2: { href: 'suratjalan_tabel2', setDefault: setDefaultHeaderTabel2 },
-  tabel5: { href: 'suratjalan_tabel5', setDefault: setDefaultHeaderTabel5 },
   tabel6: { href: 'suratjalan_tabel6', setDefault: setDefaultHeaderTabel6 }
 };
 
 var lastTabelRows = [];
 var lastTabel2Rows = [];
-var lastTabel5Rows = [];
 var lastTabel6Rows = [];
 
 // Dua sumber data di halaman ini kadang mengembalikan field logis yang sama
@@ -3435,6 +3432,7 @@ window.doButtonTotal = function (_index) {
 function setDefaultHeaderTabel() {
   gcart_header = [
     ['NOBUKTI',    'No. Bukti',       1, 'varchar', 0, 0],
+    ['URGENT',     'Prioritas',       1, 'varchar', 0, 0],
     ['Tanggal',    'Tanggal',         1, 'date',    0, 0],
     ['NamaBrg',    'Nama Barang',     1, 'varchar', 0, 0],
     ['KODEBRG',    'Kode Barang',     1, 'varchar', 0, 0],
@@ -3452,10 +3450,15 @@ function setDefaultHeaderTabel() {
 }
 
 // #tabel2 ("SO Siap Kirim") shares dbSuratJalan's same outstanding-SO query shape as
-// #tabel ("SO Belum Siap Kirim"), just pre-filtered to rows ready to ship.
+// #tabel ("SO Belum Siap Kirim"), just pre-filtered to rows ready to ship. Also absorbs
+// what used to be the separate "Out SO Prioritas" tab (#tabel5/queryOutstanding5SJ,
+// removed) -- that tab's query was just this same one filtered to B.PUrgent=1, so
+// instead of a separate tab the priority flag is now its own URGENT/NOTURGENT column
+// here and every row shows regardless of priority.
 function setDefaultHeaderTabel2() {
   gcart_header = [
     ['NOBUKTI',    'No. Bukti',       1, 'varchar', 0, 0],
+    ['URGENT',     'Prioritas',       1, 'varchar', 0, 0],
     ['Tanggal',    'Tanggal',         1, 'date',    0, 0],
     ['NamaBrg',    'Nama Barang',     1, 'varchar', 0, 0],
     ['KODEBRG',    'Kode Barang',     1, 'varchar', 0, 0],
@@ -3469,30 +3472,6 @@ function setDefaultHeaderTabel2() {
     ['PartNumber', 'Part Number',     1, 'varchar', 0, 0],
     ['NamaMerk',   'Nama Merk',       1, 'varchar', 0, 0],
     ['UserID',     'UserID',          1, 'varchar', 0, 0]
-  ];
-}
-
-// 'LokasiPenerima' has no matching field in dbSPB's result set (the original static
-// markup rendered an always-empty <td></td> for it too) -- kept as a column so hiding/
-// reordering still works, it just always renders blank via tabelValueCell's fallback.
-function setDefaultHeaderTabel5() {
-  gcart_header = [
-    ['NOBUKTI',      'Nobukti',    1, 'varchar', 0, 0],
-    ['Tanggal',      'Tanggal',    1, 'date',    0, 0],
-    ['NamaCustSupp', 'Nama Cust',  1, 'varchar', 0, 0],
-    ['NamaBrg',      'Nama Brg',   1, 'varchar', 0, 0],
-    ['RefPR',        'Ref PR',     1, 'varchar', 0, 0],
-    ['Nopesanan',    'NoPesanan',  1, 'varchar', 0, 0],
-    ['Qnt',          'Qnt',        1, 'float',   0, 2],
-    ['QntOut',       'Qty',        1, 'float',   0, 2],
-    ['SATUAN',       'Satuan',     1, 'varchar', 0, 0],
-    ['SaldoQnt',     'SaldoQnt',   1, 'float',   0, 2],
-    ['catatan',      'Catatan',    1, 'varchar', 0, 0],
-    ['DUEDATE',      'DueDate',    1, 'date',    0, 0],
-    ['namakebun',    'Nama Kebun', 1, 'varchar', 0, 0],
-    ['PartNumber',   'PartNumber', 1, 'varchar', 0, 0],
-    ['NamaMerk',     'Nama Merk',  1, 'varchar', 0, 0],
-    ['UserID',       'UserID',     1, 'varchar', 0, 0]
   ];
 }
 
@@ -3527,10 +3506,11 @@ function tabel6ActionsCell(row) {
   var isOto = Number(sjPickCI(row, 'IsOtorisasi1'));
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
   if (isOto) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button> ';
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
-    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonTerimaAcc(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglSpbInvc + '\')"><i class="bi bi-calendar4-range"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" title="Otorisasi" type="button" onclick="buttonBatalOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button> ';
+    html += '<button class="btn btn-primary btn-sm" title="Kirim Terima" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
+    html += '<button class="btn btn-success btn-sm" title="Terima Acc" type="button" onclick="buttonTerimaAcc(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglSpbInvc + '\')"><i class="bi bi-calendar4-range"></i></button>';
   } else {
+    html += '<button class="btn btn-success btn-sm" title="Edit" type="button" onclick="buttonKoreksiSPB(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button> ';
     html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
@@ -3552,6 +3532,14 @@ function suratjalanFormatTanggal(raw) {
 function tabelValueCell(row, col) {
   var raw = sjPickCI(row, col[0]);
   var type = col[3];
+
+  // Badge pakai .sp-badge yang sudah ada (report-table.css, sudah dimuat di
+  // halaman ini) -- is-inactive sudah merah, is-user sudah biru, tidak perlu
+  // CSS baru.
+  if (col[0] === 'URGENT') {
+    var kelas = raw === 'URGENT' ? 'is-inactive' : 'is-user';
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
+  }
 
   if (type === 'date') {
     return '<td>' + suratjalanFormatTanggal(raw) + '</td>';
@@ -3627,30 +3615,28 @@ function renderTabelRows(rows) {
   suratjalanReplaceThead('#tabel', cols);
 }
 
+// "SO Siap Kirim" row action -- buttonAdd(NOBUKTI) sudah lama ada (dipakai utk
+// mulai bikin Surat Jalan baru dari baris SO ini, isi input_add_noso) tapi
+// tidak pernah benar-benar dipanggil dari mana pun; sekarang dipasang lagi di
+// sini sebagai tombol "+".
+function tabel2ActionsCell(row) {
+  var nobukti = sjPickCI(row, 'NOBUKTI');
+  return '<td class="text-center"><div class="action-buttons-wrap">'
+    + '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>'
+    + '</div></td>';
+}
+
 function renderTabel2Rows(rows) {
   if (sjActiveKey !== 'tabel2') { sjAktifkanTabel('tabel2'); }
   var cols = gcart_header.filter(function (c) { return c[2] === 1; });
   var html = '';
   (rows || []).forEach(function (row) {
-    html += '<tr>';
+    html += '<tr>' + tabel2ActionsCell(row);
     cols.forEach(function (col) { html += tabelValueCell(row, col); });
     html += '</tr>';
   });
   document.getElementById('tabel2_data').innerHTML = html;
-  suratjalanReplaceThead('#tabel2', cols);
-}
-
-function renderTabel5Rows(rows) {
-  if (sjActiveKey !== 'tabel5') { sjAktifkanTabel('tabel5'); }
-  var cols = gcart_header.filter(function (c) { return c[2] === 1; });
-  var html = '';
-  (rows || []).forEach(function (row) {
-    html += '<tr>';
-    cols.forEach(function (col) { html += tabelValueCell(row, col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel5_data').innerHTML = html;
-  suratjalanReplaceThead('#tabel5', cols);
+  suratjalanReplaceThead('#tabel2', cols, '<th style="padding: 4px 12px;">Actions</th>');
 }
 
 function renderTabel6Rows(rows) {
@@ -3666,7 +3652,7 @@ function renderTabel6Rows(rows) {
   suratjalanReplaceThead('#tabel6', cols, '<th style="padding: 4px 12px;">Actions</th>');
 }
 
-// tabel/tabel2/tabel5 tidak lagi dipaginate DataTables di browser (server-side
+// tabel/tabel2 tidak lagi dipaginate DataTables di browser (server-side
 // paging sekarang, lihat sjGotoPage() di bawah) -- lastTabelRows/dst cuma berisi
 // SATU halaman, jadi DataTable() dipasang dengan paging/searching/info mati,
 // murni buat konsistensi visual saja.
@@ -3698,32 +3684,17 @@ function reinitTabel2() {
   }
 }
 
-function reinitTabel5() {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel5')) { $('#tabel5').DataTable().destroy(); }
-    renderTabel5Rows(lastTabel5Rows);
-    $('#tabel5').DataTable({ dom: SJ_DOM_STRING_NOPAGE, paging: false, searching: false, info: false, ordering: false, drawCallback: function () { setTimeout(sjAturTinggiTabel, 0); } });
-    ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
-    sjAturTinggiTabel();
-  } catch (e) {
-    console.error('reinitTabel5 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
-// ============ Pagination server-side utk tabel/tabel2/tabel5 ============
+// ============ Pagination server-side utk tabel/tabel2 ============
 // Masing-masing simpan state (halaman, panjang halaman, kata pencarian) sendiri --
 // mengubah salah satu TIDAK memengaruhi tabel lain, beda dari perilaku lama yang
 // menyaring keempat tabel sekaligus lewat satu kotak pencarian.
 var sjPageState = {
-  tabel:  { page: 1, length: 10, search: '', total: 0 },
-  tabel2: { page: 1, length: 10, search: '', total: 0 },
-  tabel5: { page: 1, length: 10, search: '', total: 0 }
+  tabel:  { page: 1, length: 10, search: '', prioritas: '', total: 0 },
+  tabel2: { page: 1, length: 10, search: '', prioritas: '', total: 0 }
 }
 var SJ_PAGE_INFO = {
-  tabel:  { rowsVar: 'lastTabelRows',  reinit: 'reinitTabel',  prevId: 'tabelPagerPrev1', numbersId: 'tabelPagerNumbers1', nextId: 'tabelPagerNext1', infoId: 'tabelPagerInfo1', searchInpId: 'tabelSearch1', lenSelId: 'tabelLen1' },
-  tabel2: { rowsVar: 'lastTabel2Rows', reinit: 'reinitTabel2', prevId: 'tabelPagerPrev2', numbersId: 'tabelPagerNumbers2', nextId: 'tabelPagerNext2', infoId: 'tabelPagerInfo2', searchInpId: 'tabelSearch2', lenSelId: 'tabelLen2' },
-  tabel5: { rowsVar: 'lastTabel5Rows', reinit: 'reinitTabel5', prevId: 'tabelPagerPrev5', numbersId: 'tabelPagerNumbers5', nextId: 'tabelPagerNext5', infoId: 'tabelPagerInfo5', searchInpId: 'tabelSearch5', lenSelId: 'tabelLen5' }
+  tabel:  { rowsVar: 'lastTabelRows',  reinit: 'reinitTabel',  prevId: 'tabelPagerPrev1', numbersId: 'tabelPagerNumbers1', nextId: 'tabelPagerNext1', infoId: 'tabelPagerInfo1', searchInpId: 'tabelSearch1', lenSelId: 'tabelLen1', filterInpId: 'input_filterprioritas1', filterBadgeId: 'tabel1FilterBadge' },
+  tabel2: { rowsVar: 'lastTabel2Rows', reinit: 'reinitTabel2', prevId: 'tabelPagerPrev2', numbersId: 'tabelPagerNumbers2', nextId: 'tabelPagerNext2', infoId: 'tabelPagerInfo2', searchInpId: 'tabelSearch2', lenSelId: 'tabelLen2', filterInpId: 'input_filterprioritas2', filterBadgeId: 'tabel2FilterBadge' }
 }
 
 // Bikin daftar tombol nomor halaman ala DataTables (1 ... 4 5 [6] 7 8 ... 20)
@@ -3770,7 +3741,7 @@ function sjFetchPage(key) {
     url: "{!! url('suratjalanpaginate') !!}",
     type: "get",
     async: false,
-    data: { table: key, page: st.page, length: st.length, search: st.search },
+    data: { table: key, page: st.page, length: st.length, search: st.search, prioritas: st.prioritas },
     success: function (res) {
       window[info.rowsVar] = res.rows
       st.total = res.total
@@ -3815,6 +3786,27 @@ function sjIkatToolbarTabel(key) {
   })
 }
 
+// Filter "Status Prioritas" (Urgent/Not Urgent) utk tabel/tabel2 -- pola modal +
+// tombol hijau po-btn-filter sama persis dengan modalFilterSPB milik tabel6,
+// bukan dropdown lepas di toolbar. "Reset semua" cuma mengosongkan field di
+// modal (belum diterapkan); baru dipakai betulan saat "Terapkan" diklik, sama
+// seperti sjResetFilterFieldsSPB()/buttonFilterSPB().
+function sjResetFilterFieldsTabel (key) {
+  $('#' + SJ_PAGE_INFO[key].filterInpId).val('')
+}
+
+function sjUpdateFilterBadgeTabel (key) {
+  var aktif = sjPageState[key].prioritas !== ''
+  $('#' + SJ_PAGE_INFO[key].filterBadgeId).text(aktif ? '1 aktif' : '0 aktif')
+}
+
+function buttonFilterTabel (key) {
+  sjPageState[key].prioritas = $('#' + SJ_PAGE_INFO[key].filterInpId).val()
+  sjPageState[key].page = 1
+  sjFetchPage(key)
+  sjUpdateFilterBadgeTabel(key)
+}
+
 function reinitTabel6() {
   try {
     if ($.fn.DataTable.isDataTable('#tabel6')) { $('#tabel6').DataTable().destroy(); }
@@ -3832,7 +3824,7 @@ function buttonHeaderTable(key) {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
     sjAktifkanTabel(key);
     sjDoSetHeader(key, true);
-    ({ tabel: reinitTabel, tabel2: reinitTabel2, tabel5: reinitTabel5, tabel6: reinitTabel6 })[key]();
+    ({ tabel: reinitTabel, tabel2: reinitTabel2, tabel6: reinitTabel6 })[key]();
     alertify.success('Kolom telah direset ke tampilan default');
   }, function () {});
 }
@@ -3858,14 +3850,6 @@ $(document).ready(function(){
       sjUpdatePagerUI('tabel2');
       sjIkatToolbarTabel('tabel2');
 
-      sjAktifkanTabel('tabel5');
-      sjDoSetHeader('tabel5', false);
-      lastTabel5Rows = @json($tempOutstanding5);
-      sjPageState.tabel5.total = {{ (int) $tempOutstanding5Total }};
-      reinitTabel5();
-      sjUpdatePagerUI('tabel5');
-      sjIkatToolbarTabel('tabel5');
-
       sjAktifkanTabel('tabel');
       sjDoSetHeader('tabel', false);
       lastTabelRows = @json($tempOutstanding);
@@ -3889,11 +3873,6 @@ $(document).ready(function(){
         ReportTable.init({ table: '#tabel2', bar: '#rtBarTabel2', onChange: reinitTabel2 });
         sjAturTinggiTabel();
       });
-      $('#nav-profile3-tab').on('shown.bs.tab', function () {
-        sjAktifkanTabel('tabel5');
-        ReportTable.init({ table: '#tabel5', bar: '#rtBarTabel5', onChange: reinitTabel5 });
-        sjAturTinggiTabel();
-      });
       $('#nav-profile4-tab').on('shown.bs.tab', function () {
         sjAktifkanTabel('tabel6');
         ReportTable.init({ table: '#tabel6', bar: '#rtBarTabel6', onChange: reinitTabel6 });
@@ -3904,7 +3883,7 @@ $(document).ready(function(){
       // (datanya sudah dibatasi periode dari server), jadi search/length-nya sendiri
       // masih lewat DataTable().search()/.page.len() seperti sebelumnya -- cuma
       // sekarang idnya sendiri (#tabelSearch6/#tabelLen6), tidak berbagi lagi dengan
-      // tabel/tabel2/tabel5.
+      // tabel/tabel2.
       var tabel6SearchTimeout;
       $('#tabelSearch6').on('keyup', function () {
         var value = this.value;
@@ -3993,10 +3972,7 @@ function buttonKoreksiListBarang () {
 
       listAddBarangKoreksi.forEach((item, i) => {
         rowListBarangKoreksi += `
-          <tr>
-          <td class="text-center">
-            <button class="btn btn-primary btn-sm" type="button" onclick="buttonKoreksiPickBarang(${i})"><i class="bi bi-plus"></i></button>
-          </td>
+          <tr class="pick-row" onclick="buttonKoreksiPickBarang(${i})">
             <td>${item.KodeBrg}</td>
             <td>${item.NamaBrg}</td>
 
@@ -4014,6 +3990,7 @@ function buttonKoreksiListBarang () {
 
       $('.showhidemodalkoreksi').hide();
       $('#modalKoreksiListBarang').show();
+      $('#formKoreksi .modal-title').text('Barang')
       $("#formKoreksi").modal('toggle')
     },
     error: function (err) {
@@ -4055,6 +4032,7 @@ dataKoreksiAdd = listAddBarangKoreksi[index]
   document.getElementById(`Add${tipeformitem}InputQty`).value = parseFloat(dataKoreksiAdd.QntOut).toFixed(2)
   $('.showhidemodalkoreksi').hide();
   $('#modalKoreksiMain').show();
+  $('#formKoreksi .modal-title').text('Koreksi SPB')
   // document.getElementById(`Add${tipeformitem}KodeBrg`).scrollIntoView();
   $("#formKoreksi").modal('toggle')
 
@@ -4066,6 +4044,7 @@ function buttonKoreksiPickGudang (kode , nama ) {
   document.getElementById(`Add${tipeformitem}NamaGdg`).value = nama
   $('.showhidemodalkoreksi').hide();
   $('#modalKoreksiMain').show();
+  $('#formKoreksi .modal-title').text('Koreksi SPB')
   document.getElementById(`Add${tipeformitem}NamaGdg`).scrollIntoView();
   $("#formKoreksi").modal('toggle')
 }
@@ -4073,6 +4052,7 @@ function buttonKoreksiPickGudang (kode , nama ) {
 function buttonKoreksiListGudang () {
   $('.showhidemodalkoreksi').hide();
   $('#modalKoreksiListGudang').show();
+  $('#formKoreksi .modal-title').text('Gudang')
   $("#formKoreksi").modal('toggle')
 }
 
@@ -4095,8 +4075,7 @@ function buttonAddListEkspedisi () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickEkspedisi('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickEkspedisi('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}'  )">
 
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
@@ -4108,7 +4087,7 @@ function buttonAddListEkspedisi () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_ekspedisi").innerHTML = rowTable
 
@@ -4117,6 +4096,7 @@ function buttonAddListEkspedisi () {
       // showhidemodalfooteradd
       $('.showhidemodalfooteradd').hide();
       $('#modalBodyFooterList').show();
+      $('#form .modal-title').text('Ekspedisi')
 
       $("#form").modal('toggle')
 
@@ -4446,8 +4426,7 @@ function buttonAddListGudang () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickGudang('${item.kodegdg}' , '${item.nama}'  )" type="button" ><i class="bi bi-plus"></i></button></td>
+        <tr class="pick-row" onclick="buttonAddPickGudang('${item.kodegdg}' , '${item.nama}'  )">
 
         <td>${item.kodegdg}</td>
         <td>${item.nama}</td>
@@ -4459,7 +4438,7 @@ function buttonAddListGudang () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable
 
@@ -4468,6 +4447,7 @@ function buttonAddListGudang () {
       // showhidemodalfooteradd
       $('.showhidemodalfooteradd').hide();
       $('#modalBodyFooterList').show();
+      $('#form .modal-title').text('Gudang')
       $("#form").modal('toggle')
 
     },
@@ -4522,21 +4502,21 @@ function loadAll () {
       tglawalspb, tglakhirspb, filterspb
     },
     success: function(res) {
-      dataRefreshOutstanding = res.tempOutstanding
-      dataRefreshOutstanding2 = res.tempOutstanding2
-
       dataRefreshOutstanding4 = res.tempOutstanding4
-      dataRefreshOutstanding5 = res.tempOutstanding5
       dataRefreshOutstanding6 = res.tempOutstanding6
 
 
     }})
 
-  lastTabelRows = dataRefreshOutstanding
-  reinitTabel()
-
-  lastTabel2Rows = dataRefreshOutstanding2
-  reinitTabel2()
+  // tabel/tabel2 ("SO Siap Kirim"/"SO Belum Siap Kirim") sudah dipaginate server-side
+  // sendiri (lihat sjFetchPage()) dan TIDAK lagi termasuk di response
+  // suratjalanloadall (cuma tempOutstanding4/tempOutstanding6) -- sebelumnya baris di
+  // bawah ini menimpa lastTabelRows/lastTabel2Rows dengan res.tempOutstanding/
+  // res.tempOutstanding2 yang sudah undefined, jadi setiap loadAll() dipanggil kedua
+  // tabel itu ikut kekosongan. Refresh lewat sjFetchPage() supaya tetap ambil
+  // halaman/pencarian/filter yang sedang aktif.
+  sjFetchPage('tabel')
+  sjFetchPage('tabel2')
 
   lastTabel6Rows = dataRefreshOutstanding6
   reinitTabel6()
@@ -4581,11 +4561,6 @@ function loadAll () {
               "paging": false ,
 
             });
-
-
-
-            lastTabel5Rows = dataRefreshOutstanding5
-            reinitTabel5()
 
 }
 
@@ -4684,8 +4659,6 @@ function refreshDataTableKoreksi (NOBUKTI) {
           <td>${item.namabrgx ? item.namabrgx : ''}</td>
           <td class="text-right">${parseFloat(item.QNT).toFixed(2)}</td>
           <td>${item.SAT_1}</td>
-          <td class="text-right">${parseFloat(item.QNT2).toFixed(2)}</td>
-          <td>${item.SAT_2}</td>
 
           <td>${item.NAMAGDG}</td>
           <td class='text-center'>
@@ -4697,6 +4670,8 @@ function refreshDataTableKoreksi (NOBUKTI) {
         </tr>
         `
 
+          // <td class="text-right">${parseFloat(item.QNT2).toFixed(2)}</td>
+          // <td>${item.SAT_2}</td>
       });
 
 
@@ -4979,8 +4954,6 @@ function buttonKoreksiSPB (NOBUKTI) {
             <td>${item.namabrgx ? item.namabrgx : ''}</td>
             <td class="text-right">${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-            <td class="text-right">${parseFloat(item.QNT2).toFixed(2)}</td>
-            <td>${item.SAT_2}</td>
 
             <td>${item.NAMAGDG}</td>
             <td class='text-center'>
@@ -4994,6 +4967,8 @@ function buttonKoreksiSPB (NOBUKTI) {
 
       });
 
+            // <td class="text-right">${parseFloat(item.QNT2).toFixed(2)}</td>
+            // <td>${item.SAT_2}</td>
 
       document.getElementById("koreksiTableData").innerHTML = rowTableKoreksi
 
@@ -5021,32 +4996,6 @@ function buttonKoreksiSPB (NOBUKTI) {
 
 
 }
-
-
-// function buttonAdd (NOBUKTI) {
-//   cleanFormAdd()
-//   let akses = $("#akses_istambah").val();
-//
-//   if (!Number(akses)) {
-//     alertify.warning('No access')
-//     return
-//   }
-//   refreshDataTableAdd(NOBUKTI)
-//   // $('.showhidemodalbodyadd').hide();
-//   // $('#modalBodyAddMain').show();
-//   // $('.showhidemodalfooteradd').hide();
-//   // $('#modalBodyFooterMain').show();
-//   document.getElementById("input_add_kodegdg").value = ''
-//   document.getElementById("input_add_kodeekspedisi").value = ''
-//   document.getElementById("input_add_noso").value = NOBUKTI
-//   setNewNoBukti()
-//
-//   // $("#form").modal('toggle')
-//   $('#page1').hide();
-//   $('#page2').show();
-//   return
-//   // lockFormAdd()
-// }
 
 
 function buttonAdd (NOBUKTI) {
