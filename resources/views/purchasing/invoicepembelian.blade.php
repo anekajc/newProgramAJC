@@ -2240,7 +2240,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
         table_pembelian_row_detail.forEach((detail_row, i) => {
     console.log(detail_row.KodeBrg)
-           table_row_detail_inf += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${detail_row.Qnt}</td><td class="text-right">${detail_row.QNTPO}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
+           table_row_detail_inf += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${formatAngka(detail_row.Qnt)}</td><td class="text-right">${formatAngka(detail_row.QNTPO)}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
 
         });
 
@@ -3071,7 +3071,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
           if (r.Satuan) {
             satuan = r.Satuan
           }
-          table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td class="text-right">${r.Qnt}</td><td class="text-right">${r.QNTPO}</td><td>${satuan}</td><td class="text-right">${r.QNTOUT}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
+          table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td class="text-right">${formatAngka(r.Qnt)}</td><td class="text-right">${formatAngka(r.QNTPO)}</td><td>${satuan}</td><td class="text-right">${formatAngka(r.QNTOUT)}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
           });
         document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  dataLPB.NoBukti;
         // document.getElementById("editPembelianNoPO").value = dataLPB.NoPO
@@ -3165,7 +3165,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
 
               printContent1 += `<div style="margin-top: -25px; text-align: center">`
-              printContent1 += `<h6>${date1} / ${item.QntTerima} ${item.Satuan}</h6>`
+              printContent1 += `<h6>${date1} / ${formatAngka(item.QntTerima)} ${item.Satuan}</h6>`
               printContent1 += `</div>`
               printContent1 += `</div>`
               z++
@@ -3234,7 +3234,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
           rowTable += `<tr><td>
           <div class="form-check text-center">
               <input id="printChecklist${i}" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-              </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.QntTerima}</td><td>${r.QNTPO}</td><td>${satuan}</td></tr>`
+              </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.QntTerima)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td></tr>`
           rowTableTemp += `
           <div id="tempqrcodeprint${i}" style="width: 10px; height: 10px"></div>
           <div id="tempqrcodeprintkodebrg${i}" style="width: 10px; height: 10px"></div>
@@ -3823,7 +3823,7 @@ if (pcekglobal) {
                detail_row_data.forEach((detail_row, i) => {
              console.log(detail_row.KodeBrg)
 
-          table_row_detail += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${detail_row.Qnt}</td><td class="text-right">${detail_row.QNTPO}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
+          table_row_detail += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${formatAngka(detail_row.Qnt)}</td><td class="text-right">${formatAngka(detail_row.QNTPO)}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
 
           });
 
@@ -3889,7 +3889,7 @@ if (pcekglobal) {
         if (r.Satuan) {
           satuan = r.Satuan
         }
-        table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.Qnt}</td><td>${r.QNTPO}</td><td>${satuan}</td><td>${Number(r.Qnt) ? r.Qnt : "0.00"}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
+        table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.Qnt)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td><td>${formatAngka(r.Qnt)}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
         });
       document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
 
@@ -3984,7 +3984,7 @@ console.log(nobukti,"sebelum url")
            detail_row_data.forEach((detail_row, i) => {
          console.log(detail_row.KodeBrg)
 
-      table_row_detail += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${detail_row.Qnt}</td><td class="text-right">${detail_row.QNTPO}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
+      table_row_detail += `<tr><td>${detail_row.KodeBrg}</td><td>${detail_row.namabrgx}</td><td class="text-right">${formatAngka(detail_row.Qnt)}</td><td class="text-right">${formatAngka(detail_row.QNTPO)}</td><td>${detail_row.Satuan}</td><td class="text-right">${Number(detail_row.Harga) ? detail_row.Harga : "0.00"}</td><td class="text-right">${detail_row.DiscRp1}</td><td class="text-right">${detail_row.NNET}</td></tr>`
 
       });
 
@@ -4069,7 +4069,7 @@ if (pcekglobal) {
       row_data = add_row_data
       let table_row_add = ""
       add_row_data.forEach((add_row, i) => {
-        table_row_add += `<tr><td class="text-center"><input id="add_checkbox${i}" class="pba-chk-lg" type="checkbox" ></td><td>${add_row.namaBrg}</td><td class="text-right">${parseFloat(add_row.QNT).toFixed(2)}</td><td class="text-right">${parseFloat(add_row.QntBeli).toFixed(2)}</td><td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td><td>${add_row.Satuan}</td><td><input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=0.00></td><td>-</td><td>-</td></tr>`
+        table_row_add += `<tr><td class="text-center"><input id="add_checkbox${i}" class="pba-chk-lg" type="checkbox" ></td><td>${add_row.namaBrg}</td><td class="text-right">${formatAngka(add_row.QNT)}</td><td class="text-right">${formatAngka(add_row.QntBeli)}</td><td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td><td>${add_row.Satuan}</td><td><input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=0.00></td><td>-</td><td>-</td></tr>`
       });
 
       document.getElementById("addTableData").innerHTML = table_row_add
@@ -4182,7 +4182,7 @@ if (pcekglobal) {
         }
       });
       if (flag) {
-        alertify.warning("QtyTerima lebih besar dari QNTOS ataupun negatif");
+        alertify.warning("Qty Terima lebih besar dari Qty OS ataupun negatif");
         return
       }
 

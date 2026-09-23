@@ -1405,6 +1405,40 @@ td input[type="checkbox"] {
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
+// format angka ribuan (separator koma, 2 desimal) - dipakai untuk tampilan Qty
+function formatAngka (angkaString) {
+  if (!Number(angkaString)) {
+    return '0.00';
+  }
+
+  angkaString = parseFloat(angkaString).toFixed(2);
+
+  let tempAngka = angkaString.split('.');
+
+  if (tempAngka[0][0] == '-') {
+    let temp2 = '';
+    let tempAngka1 = tempAngka[0].split('-');
+    for (let i = 0; i < tempAngka1[1].length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        temp2 = ',' + temp2;
+      }
+      temp2 = tempAngka1[1][tempAngka1[1].length - i - 1] + temp2;
+    }
+    temp2 += '.' + tempAngka[1];
+    return '-' + temp2;
+  }
+
+  let temp1 = '';
+  for (let i = 0; i < tempAngka[0].length; i++) {
+    if (i != 0 && i % 3 == 0) {
+      temp1 = ',' + temp1;
+    }
+    temp1 = tempAngka[0][tempAngka[0].length - i - 1] + temp1;
+  }
+  temp1 += '.' + tempAngka[1];
+  return temp1;
+}
+
 let dataRefreshOutstanding = []
 let dataRefreshPenerimaan = []
 let xkodesupp=''
@@ -1496,8 +1530,8 @@ function buttonAdd (NOBUKTI) {
     <td>${item.NOBUKTI}</td>
     <td>${item.Kodebrg}</td>
     <td>${item.namaBrg}</td>
-    <td class="text-right">${qnt}</td>
-    <td class="text-right">${qntos}</td>
+    <td class="text-right">${formatAngka(qnt)}</td>
+    <td class="text-right">${formatAngka(qntos)}</td>
     <td class="text-center" >${item.SATUAN}</td>
     <td class="text-center"><input onblur="cekQnt(${qntos}, ${i})" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=0.00></td>
     </tr>`
@@ -1522,7 +1556,7 @@ function cekQnt (qntos, urut){
   }
 
   if (stateQnt == 1 ){
-    alertify.warning('Qnt Kirim tidak boleh melebihi Qnt OS')
+    alertify.warning('Qty Kirim tidak boleh melebihi Qty OS')
     document.getElementById('input_add_qntTerima'+urut).value = '0.00'
   }
 
@@ -1540,7 +1574,7 @@ function cekQntEdit (){
   }
 
   if (stateQnt == 1 ){
-    alertify.warning('Qnt Kirim tidak boleh melebihi Qnt OS')
+    alertify.warning('Qty Kirim tidak boleh melebihi Qty OS')
     document.getElementById('koreksiEditInputQty').value = qntEditTemp
   }
 
@@ -1646,8 +1680,8 @@ function refreshKoreksi (NOBUKTI) {
     <td>${item.NOBUKTI}</td>
     <td>${item.KODEBRG}</td>
     <td>${item.NAMABRG}</td>
-    <td class="text-right">${qnt}</td>
-    <td class="text-right">${qntos}</td>
+    <td class="text-right">${formatAngka(qnt)}</td>
+    <td class="text-right">${formatAngka(qntos)}</td>
     <td class="text-center">${item.Satuan}</td>
     </tr>`
   });
@@ -1749,8 +1783,8 @@ function buttonKoreksi (NOBUKTI) {
     <td>${item.NOBUKTI}</td>
     <td>${item.KODEBRG}</td>
     <td>${item.NAMABRG}</td>
-    <td class="text-right">${qnt}</td>
-    <td class="text-right">${qntos}</td>
+    <td class="text-right">${formatAngka(qnt)}</td>
+    <td class="text-right">${formatAngka(qntos)}</td>
     <td class="text-center">${item.Satuan}</td> 
     </tr>`
   });
@@ -1850,8 +1884,8 @@ function buttonDetailKoreksi (NOBUKTI) {
         rowTable += `<tr class="text-left">
         <td>${item.KODEBRG}</td>
         <td>${item.NAMABRG}</td>
-        <td class="text-right">${qnt}</td>
-        <td class="text-right">${qntos}</td>
+        <td class="text-right">${formatAngka(qnt)}</td>
+        <td class="text-right">${formatAngka(qntos)}</td>
         <td class="text-center">${item.Satuan}</td>
 
         </tr>`
@@ -1929,8 +1963,8 @@ function buttonDetail (NOBUKTI) {
         <td>${item.NOBUKTI}</td>
         <td>${item.Kodebrg}</td>
         <td>${item.namaBrg}</td>
-        <td class="text-right">${qnt}</td>
-        <td class="text-right">${qntos}</td>
+        <td class="text-right">${formatAngka(qnt)}</td>
+        <td class="text-right">${formatAngka(qntos)}</td>
         <td class="text-center">${item.SATUAN}</td>
         </tr>`
       });
@@ -2304,7 +2338,7 @@ function submitEditKoreksi () {
   let qntTerimaTemp = document.getElementById('koreksiEditInputQty').value
 
   if (qntTerimaTemp == 0){
-    alertify.warning('QNT tidak boleh kosong')
+    alertify.warning('QTY tidak boleh kosong')
     return;
   }
 
@@ -3541,7 +3575,7 @@ function submitPrint (nobukti) {
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 2%;">${z+1}</td>
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NAMABRG  }</td>
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 5%;">${itemSub.KodeBrg}</td>
-        <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
+        <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.QNT ? formatAngka(itemSub.QNT) : ''}</td>
         <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.SATUAN}</td>
       </tr>`;
     z++;

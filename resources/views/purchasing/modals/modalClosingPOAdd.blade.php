@@ -187,8 +187,8 @@
                 <th scope="col">Part Number</th>
                 <th scope="col">Merk</th>
                 <th scope="col">Sat</th>
-                <th scope="col">Qnt PR</th>
-                <th scope="col">Qnt PO</th>
+                <th scope="col">Qty PR</th>
+                <th scope="col">Qty PO</th>
                 <th scope="col">Sisa PR</th>
                 <th scope="col">No. PR</th>
                 <th scope="col">No. SO Cust</th>
@@ -237,8 +237,8 @@
                 <tr>
                   <th style="white-space:nowrap;" scope="col">Kode Barang</th>
                   <th style="white-space:nowrap;" scope="col">Nama Barang</th>
-                  <th style="white-space:nowrap;" scope="col">QNT Sat 1</th>
-                  <th style="white-space:nowrap;" scope="col">QNT Sat 2</th>
+                  <th style="white-space:nowrap;" scope="col">QTY Sat 1</th>
+                  <th style="white-space:nowrap;" scope="col">QTY Sat 2</th>
                   <th style="white-space:nowrap;" scope="col">Sat</th>
                   <th style="white-space:nowrap;" scope="col">Sisa</th>
                   <th style="white-space:nowrap;" scope="col">Sisa 2</th>
@@ -755,7 +755,7 @@
               <textarea type="text" style="width: 100%; resize: none" rows="4" class="form-control" id="input_add_keteranganbatalbarang"></textarea>
             </div>
             <div class="col-12" style="overflow:auto; margin-top:20px;">
-              <h5>Qnt Close</h5>
+              <h5>Qty Close</h5>
               <input type="number" class="form-control text-right" id="input_add_qtyclosebarang" tabindex="5" readonly>
             </div>
           </div>

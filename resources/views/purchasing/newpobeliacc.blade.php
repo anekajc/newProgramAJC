@@ -842,7 +842,7 @@ td input[type="checkbox"] {
           <div class="col-md-2 col-4">
             <div class="form-group">
               <label>DiscRp</label>
-              <input type="number" class="form-control text-right" id="input_edit_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+              <input type="text" class="form-control text-right" id="input_edit_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
             </div>
           </div>
           <div class="col-md-2 col-4">
@@ -1069,7 +1069,7 @@ td input[type="checkbox"] {
           <div class="col-md-2 col-4">
             <div class="form-group">
               <label>DiscRp</label>
-              <input type="number" class="form-control text-right" id="input_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+              <input type="text" class="form-control text-right" id="input_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
             </div>
           </div>
           <div class="col-md-2 col-4">
@@ -1301,7 +1301,7 @@ td input[type="checkbox"] {
           <div class="col-md-2 col-4">
             <div class="form-group">
               <label>DiscRp</label>
-              <input type="number" class="form-control text-right" id="Iinput_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
+              <input type="text" class="form-control text-right" id="Iinput_det_discrp" onblur="onChangeInputAddDiscRp()" value="0.00" disabled>
             </div>
           </div>
           <div class="col-md-2 col-4">
@@ -1887,7 +1887,7 @@ function detailPembelian1(index) {
           <td>${detail_row.Satuan}</td>
           <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
           <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-          <td class="text-right">${detail_row.NDPP ? formatAngkaX(detail_row.NDPP) : '0.00' }</td></tr>` 
+          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>` 
 
         });
 
@@ -1936,7 +1936,7 @@ function detailPembelian1(index) {
         document.getElementById("IdetailNoSopir").value = table_pembelian_row_detail[0].SOPIR
 
         document.getElementById("Iinput_det_disc").value = formatAngkaX(table_pembelian_row_detail[0].disc)
-        document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].DISCRP)
+        document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].TotDiskon)
         document.getElementById("Iinput_det_dpp").value = formatAngkaX(table_pembelian_row_detail[0].TotDPP)
         document.getElementById("Iinput_det_ppn").value = formatAngkaX(table_pembelian_row_detail[0].TotPPN)
         document.getElementById("Iinput_det_grandtotal").value = formatAngkaX(table_pembelian_row_detail[0].TotNet)
@@ -2082,7 +2082,7 @@ function detailPembelian1(index) {
             <td>${detail_row.Satuan}</td>
             <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
           <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-          <td class="text-right">${detail_row.NDPP ? formatAngkaX(detail_row.NDPP) : '0.00' }</td></tr>` 
+          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>` 
 
           });
 
@@ -2127,7 +2127,7 @@ function detailPembelian1(index) {
         document.getElementById("IdetailNoSopir").value = table_pembelian_row_detail[0].SOPIR
 
         document.getElementById("Iinput_det_disc").value = formatAngkaX(table_pembelian_row_detail[0].disc)
-        document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].DISCRP)
+        document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].TotDiskon)
         document.getElementById("Iinput_det_dpp").value = formatAngkaX(table_pembelian_row_detail[0].TotDPP)
         document.getElementById("Iinput_det_ppn").value = formatAngkaX(table_pembelian_row_detail[0].TotPPN)
         document.getElementById("Iinput_det_grandtotal").value = formatAngkaX(table_pembelian_row_detail[0].TotNet ) 
@@ -2465,7 +2465,7 @@ function formatAngkaX (angka) {
 
             <td class="text-right">${r.Harga ? formatAngkaX(r.Harga) : "0.00"}</td>
             <td class="text-right">${r.DiscRp1 ? formatAngkaX(r.DiscRp1) : "0.00"}</td>
-            <td class="text-right">${r.NDPP ? formatAngkaX(r.NDPP) : "0.00"}</td>
+            <td class="text-right">${r.TotalIDR ? formatAngkaX(r.TotalIDR) : "0.00"}</td>
 
 
             <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
@@ -2571,7 +2571,7 @@ function formatAngkaX (angka) {
             rowTable += `<tr><td>
             <div class="form-check text-center">
                 <input id="printChecklist${i}" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.QntTerima}</td><td>${r.QNTPO}</td><td>${satuan}</td></tr>`
+                </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.QntTerima)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td></tr>`
             rowTableTemp += `
             <div id="tempqrcodeprint${i}" style="width: 10px; height: 10px"></div>
             <div id="tempqrcodeprintkodebrg${i}" style="width: 10px; height: 10px"></div>
@@ -3220,7 +3220,7 @@ function refreshUpdateHeader () {
               <td>${satuan}</td>
               <td class="text-right">${r.Harga ? formatAngkaX(r.Harga) : '0.00' }</td>
             <td class="text-right">${r.DiscRp1 ? formatAngkaX(r.DiscRp1) : '0.00' }</td>
-            <td class="text-right">${r.NDPP ? formatAngkaX(r.NDPP) : '0.00' }</td>
+            <td class="text-right">${r.TotalIDR ? formatAngkaX(r.TotalIDR) : '0.00' }</td>
               <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
                   
             });
@@ -3258,7 +3258,7 @@ function refreshUpdateHeader () {
 
 
             document.getElementById("input_edit_disc").value = formatAngkaX(edit_pembelian_row_data[0].disc)
-            document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].DISCRP)
+            document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].TotDiskon)
             document.getElementById("input_edit_dpp").value = formatAngkaX(edit_pembelian_row_data[0].TotDPP)
             document.getElementById("input_edit_ppn").value = formatAngkaX(edit_pembelian_row_data[0].TotPPN)
             document.getElementById("input_edit_grandtotal").value = formatAngkaX(edit_pembelian_row_data[0].TotNet)
@@ -3576,7 +3576,7 @@ if (pcekglobal) {
               <td>${satuan}</td>
               <td class="text-right">${r.Harga ? formatAngkaX(r.Harga) : '0.00' }</td>
             <td class="text-right">${r.DiscRp1 ? formatAngkaX(r.DiscRp1) : '0.00' }</td>
-            <td class="text-right">${r.NDPP ? formatAngkaX(r.NDPP) : '0.00' }</td>
+            <td class="text-right">${r.TotalIDR ? formatAngkaX(r.TotalIDR) : '0.00' }</td>
               <td class="text-center">
               <button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button>
               
@@ -3620,7 +3620,7 @@ if (pcekglobal) {
 
 
             document.getElementById("input_edit_disc").value = formatAngkaX(edit_pembelian_row_data[0].disc)
-            document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].DISCRP)
+            document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].TotDiskon)
             document.getElementById("input_edit_dpp").value = formatAngkaX(edit_pembelian_row_data[0].TotDPP)
             document.getElementById("input_edit_ppn").value = formatAngkaX(edit_pembelian_row_data[0].TotPPN)
             document.getElementById("input_edit_grandtotal").value = formatAngkaX(edit_pembelian_row_data[0].TotNet)
@@ -3705,7 +3705,7 @@ if (pcekglobal) {
         <td>${detail_row.Satuan}</td>
         <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
         <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-        <td class="text-right">${detail_row.NDPP ? formatAngkaX(detail_row.NDPP) : '0.00' }</td></tr>`   
+        <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`   
         });
 
 
@@ -3739,7 +3739,7 @@ if (pcekglobal) {
       
         document.getElementById("detailDate").value = formatDate(detail_row_data[0].TANGGAL)
         document.getElementById("input_det_disc").value = formatAngkaX(detail_row_data[0].disc)
-        document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].DISCRP)
+        document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].TotDiskon)
         document.getElementById("input_det_dpp").value = formatAngkaX(detail_row_data[0].TotDPP)
         document.getElementById("input_det_ppn").value = formatAngkaX(detail_row_data[0].TotPPN)
         document.getElementById("input_det_grandtotal").value = formatAngkaX(detail_row_data[0].TotNet ) 
@@ -3790,7 +3790,7 @@ if (pcekglobal) {
           if (r.Satuan) {
             satuan = r.Satuan
           }
-          table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.Qnt}</td><td>${r.QNTPO}</td><td>${satuan}</td><td>${Number(r.Qnt) ? r.Qnt : "0.00"}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
+          table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.Qnt)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td><td>${formatAngka(r.Qnt)}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
           });
         document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
         document.getElementById("editPembelianSupp").value = edit_pembelian_row_data[0].NamaSupplier
@@ -3932,7 +3932,7 @@ if (pcekglobal) {
         <td>${detail_row.Satuan}</td>
         <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
         <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-        <td class="text-right">${detail_row.NDPP ? formatAngkaX(detail_row.NDPP) : '0.00' }</td></tr>`
+        <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
 
 
          
@@ -3974,7 +3974,7 @@ if (pcekglobal) {
         document.getElementById("detailNoSopir").value = detail_row_data[0].SOPIR
 
         document.getElementById("input_det_disc").value = formatAngkaX(detail_row_data[0].disc)
-        document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].DISCRP)
+        document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].TotDiskon)
         document.getElementById("input_det_dpp").value = formatAngkaX(detail_row_data[0].TotDPP)
         document.getElementById("input_det_ppn").value = formatAngkaX(detail_row_data[0].TotPPN)
         document.getElementById("input_det_grandtotal").value = formatAngkaX(detail_row_data[0].TotNet)
@@ -4053,7 +4053,7 @@ if (pcekglobal) {
         row_data = add_row_data
         let table_row_add = ""
         add_row_data.forEach((add_row, i) => {
-          table_row_add += `<tr><td class="text-center"><input id="add_checkbox${i}" class="" type="checkbox" ></td><td>${add_row.namaBrg}</td><td class="text-right">${parseFloat(add_row.QNT).toFixed(2)}</td><td class="text-right">${parseFloat(add_row.QntBeli).toFixed(2)}</td><td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td><td>${add_row.Satuan}</td><td><input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=0.00></td><td>-</td><td>-</td></tr>`
+          table_row_add += `<tr><td class="text-center"><input id="add_checkbox${i}" class="" type="checkbox" ></td><td>${add_row.namaBrg}</td><td class="text-right">${formatAngka(add_row.QNT)}</td><td class="text-right">${formatAngka(add_row.QntBeli)}</td><td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td><td>${add_row.Satuan}</td><td><input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=0.00></td><td>-</td><td>-</td></tr>`
         });
 
         document.getElementById("addTableData").innerHTML = table_row_add
@@ -4197,7 +4197,7 @@ if (pcekglobal) {
           }
         });
         if (flag) {
-          alertify.warning("QtyTerima lebih besar dari QNTOS ataupun negatif");
+          alertify.warning("Qty Terima lebih besar dari Qty OS ataupun negatif");
           return
         }
 
@@ -4969,7 +4969,7 @@ tempPrintStr += `
     <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NamaBrg}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 15%;">${itemSub.KodeBrg}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Satuan}</td>
-    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? formatAngka(itemSub.Qnt) : ''}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngkaRound(itemSub.harga)}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.DISC}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngka(Math.round(Number(itemSub.subtotal))).split('.')[0]}</td>

@@ -713,7 +713,7 @@ td input[type="checkbox"] {
                     <th scope="col">Qty</th>
                     <th scope="col">Qty PO</th>
                     <th scope="col">Satuan</th>
-                    <th scope="col">Qnt OUT</th>
+                    <th scope="col">Qty OS</th>
                     <th scope="col">No. PO Customer</th>
                     <th scope="col">Customer</th>
                   </tr>
@@ -796,7 +796,7 @@ td input[type="checkbox"] {
                     <th scope="col">Qty</th>
                     <th scope="col">Qty PO</th>
                     <th scope="col">Satuan</th>
-                    <th scope="col">Qnt OUT</th>
+                    <th scope="col">Qty OS</th>
                     <th scope="col">No. PO Customer</th>
                     <th scope="col">Customer</th>
                     <th scope="col">Actions</th>
@@ -1190,6 +1190,40 @@ td input[type="checkbox"] {
      "Reset kolom"), disamakan dengan newpo.blade.php / purchaseOrder.blade.php / uangmukabeli.blade.php. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
   <script type="text/javascript">
+
+// format angka ribuan (separator koma, 2 desimal) - dipakai untuk tampilan Qty
+function formatAngka (angkaString) {
+  if (!Number(angkaString)) {
+    return '0.00';
+  }
+
+  angkaString = parseFloat(angkaString).toFixed(2);
+
+  let tempAngka = angkaString.split('.');
+
+  if (tempAngka[0][0] == '-') {
+    let temp2 = '';
+    let tempAngka1 = tempAngka[0].split('-');
+    for (let i = 0; i < tempAngka1[1].length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        temp2 = ',' + temp2;
+      }
+      temp2 = tempAngka1[1][tempAngka1[1].length - i - 1] + temp2;
+    }
+    temp2 += '.' + tempAngka[1];
+    return '-' + temp2;
+  }
+
+  let temp1 = '';
+  for (let i = 0; i < tempAngka[0].length; i++) {
+    if (i != 0 && i % 3 == 0) {
+      temp1 = ',' + temp1;
+    }
+    temp1 = tempAngka[0][tempAngka[0].length - i - 1] + temp1;
+  }
+  temp1 += '.' + tempAngka[1];
+  return temp1;
+}
 
     let row_id = "";
     let action = "";
@@ -1761,7 +1795,7 @@ td input[type="checkbox"] {
         if (detail_pembelian_row.Satuan) {
           satuan = detail_pembelian_row.Satuan
         }
-        table_pembelian_row_detail += `<tr><td>${detail_pembelian_row.KodeBrg}</td><td>${detail_pembelian_row.namabrgx}</td><td class="text-right">${detail_pembelian_row.QntTerima}</td><td class="text-right">${detail_pembelian_row.QNTPO}</td><td>${satuan}</td><td class="text-right">${Number(detail_pembelian_row.QNTOUT )? detail_pembelian_row.QNTOUT : "0.00"}</td><td>-</td><td>-</td></tr>`});
+        table_pembelian_row_detail += `<tr><td>${detail_pembelian_row.KodeBrg}</td><td>${detail_pembelian_row.namabrgx}</td><td class="text-right">${formatAngka(detail_pembelian_row.QntTerima)}</td><td class="text-right">${formatAngka(detail_pembelian_row.QNTPO)}</td><td>${satuan}</td><td class="text-right">${formatAngka(detail_pembelian_row.QNTOUT)}</td><td>-</td><td>-</td></tr>`});
 
       let fakturSupp = ""
       let keterangan = ""
@@ -2005,10 +2039,10 @@ td input[type="checkbox"] {
           <tr>
             <td>${r.KodeBrg}</td>
             <td>${r.namabrgx}</td>
-            <td class="text-right">${Number(r.Qnt || 0).toFixed(2)}</td>
-            <td class="text-right">${Number(r.QNTPO || 0).toFixed(2)}</td>
+            <td class="text-right">${formatAngka(r.Qnt)}</td>
+            <td class="text-right">${formatAngka(r.QNTPO)}</td>
             <td>${satuan}</td>
-            <td class="text-right">${Number(r.QNTOUT || 0).toFixed(2)}</td>
+            <td class="text-right">${formatAngka(r.QNTOUT)}</td>
             <td>-</td>
             <td>-</td>
             <td class="text-center">
@@ -2608,8 +2642,8 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.KODEBRG}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 30%;">${itemSub.NAMABRG}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: center;">${itemSub.SATUAN}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QNTPO ? parseFloat(itemSub.QNTPO).toFixed(2) : ''}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QntTerima ? parseFloat(itemSub.QntTerima).toFixed(2) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QNTPO ? formatAngka(itemSub.QNTPO) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QntTerima ? formatAngka(itemSub.QntTerima) : ''}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.SISA ? parseFloat(itemSub.SISA).toFixed(2) : ''}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.KETERANGAN}</td>
     </tr>`;
@@ -3374,7 +3408,7 @@ if (pcekglobal) {
             if (r.Satuan) {
               satuan = r.Satuan
             }
-            table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td class="text-right">${r.Qnt}</td><td class="text-right">${r.QNTPO}</td><td>${satuan}</td><td class="text-right">${Number(r.QNTOUT) ? r.QNTOUT : "0.00"}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
+            table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td class="text-right">${formatAngka(r.Qnt)}</td><td class="text-right">${formatAngka(r.QNTPO)}</td><td>${satuan}</td><td class="text-right">${formatAngka(r.QNTOUT)}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
             });
           document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
           document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
@@ -3453,7 +3487,7 @@ if (pcekglobal) {
         if (r.Satuan) {
           satuan = r.Satuan
         }
-        table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.Qnt}</td><td>${r.QNTPO}</td><td>${satuan}</td><td>${Number(r.QNTOUT) ? r.QNTOUT : "0.00"}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
+        table_row_edit_pembelian += `<tr><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.Qnt)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td><td>${formatAngka(r.QNTOUT)}</td><td>-</td><td>-</td><td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
         });
       document.getElementById("editPembelianModalLabel").innerHTML = "Edit " +  edit_pembelian_row_data[0].NoBukti;
       document.getElementById("editPembelianNoPO").value = edit_pembelian_row_data[0].NoPO
@@ -3542,7 +3576,7 @@ if (pcekglobal) {
         // console.log(detail_row)
         // console.log(detail_row.QntPO)
         // console.log(detail_row.Satuan)
-        table_row_detail += `<tr><td>${detail_row.namaBrg}</td><td class="text-right">${parseFloat(detail_row.QNT).toFixed(2)}</td><td class="text-right">${parseFloat(detail_row.QntBeli).toFixed(2)}</td><td class="text-right">${parseFloat(detail_row.OSPO).toFixed(2)}</td><td>${detail_row.Satuan}</td><td>-</td><td>-</td></tr>`
+        table_row_detail += `<tr><td>${detail_row.namaBrg}</td><td class="text-right">${formatAngka(detail_row.QNT)}</td><td class="text-right">${formatAngka(detail_row.QntBeli)}</td><td class="text-right">${parseFloat(detail_row.OSPO).toFixed(2)}</td><td>${detail_row.Satuan}</td><td>-</td><td>-</td></tr>`
       });
 
       document.getElementById("detailModalLabel").innerHTML = "Detail " +  detail_row_data[0].NoBukti;
@@ -3661,8 +3695,8 @@ if (pcekglobal) {
             <input id="add_checkbox${i}" type="checkbox">
           </td>
           <td>${add_row.namaBrg}</td>
-          <td class="text-right">${parseFloat(add_row.QNT).toFixed(2)}</td>
-          <td class="text-right">${parseFloat(add_row.QntBeli).toFixed(2)}</td>
+          <td class="text-right">${formatAngka(add_row.QNT)}</td>
+          <td class="text-right">${formatAngka(add_row.QntBeli)}</td>
           <td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td>
           <td>${add_row.Satuan}</td>
           <td>
@@ -3810,7 +3844,7 @@ if (pcekglobal) {
         }
       });
       if (flag) {
-        alertify.warning("QtyTerima lebih besar dari QNTOS ataupun negatif");
+        alertify.warning("Qty Terima lebih besar dari Qty OS ataupun negatif");
         return
       }
 

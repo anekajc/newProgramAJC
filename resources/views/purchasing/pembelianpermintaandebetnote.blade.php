@@ -1426,7 +1426,7 @@ function buttonAddPickInvoice () {
     }
 
     if (checkMinus) {
-      alertify.warning("Qnt < 0");
+      alertify.warning("Qty < 0");
       return
     }
 
