@@ -34,7 +34,7 @@ class SuratJalanController extends Controller
     // Periode filter di toolbar (po-filter-wrap, sama seperti so.blade.php/closingso.blade.php)
     // -- sebelumnya cuma dipakai tab "Surat Jalan Otorisasi" (queryOtorisasiSPB), sekarang
     // dipindah ke toolbar yang dipakai bersama semua tab jadi ikut menyaring tempOutstanding/
-    // tempOutstanding2/tempOutstanding5 juga (tempOutstanding4 dilewati -- tab "Out SO Booking"
+    // tempOutstanding2 juga (tempOutstanding4 dilewati -- tab "Out SO Booking"
     // yang menampungnya sudah tidak terhubung ke nav manapun).
     $tglawalspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
     $tglakhirspb = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
@@ -74,7 +74,6 @@ $listBarang = [];
 //                 and isnull(A.Isaktif,0)=1
 //                 order by a.Kodebrg ASC" );
 $listGudang = DB::connection('SML')->select("select KODEGDG, NAMA , ALAMAT from dbgudang" );
-
 
 $tempOutstanding4 = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
@@ -209,11 +208,6 @@ and Isnull(B.PBooking,0)=1
 
 
 
-    $__page1 = $this->queryOutstanding5SJ('', 0, 10);
-    $tempOutstanding5 = $__page1['rows'];
-    $tempOutstanding5Total = $__page1['total'];
-
-
     return view('marketing.suratjalan' , [
       "menul0" => $menul0,
       "periode" => $periode,
@@ -223,8 +217,6 @@ and Isnull(B.PBooking,0)=1
       "tempOutstanding2Total" => $tempOutstanding2Total,
       "tempOutstanding4" => $tempOutstanding4,
       "tempOutstanding6" => $tempOutstanding6,
-      "tempOutstanding5" => $tempOutstanding5,
-      "tempOutstanding5Total" => $tempOutstanding5Total,
       "akses" => $akses,
       "listBarang" => $listBarang,
       "listGudang" => $listGudang
@@ -240,7 +232,7 @@ and Isnull(B.PBooking,0)=1
   // sekarang dapat tombol Otorisasi (tabel6ActionsCell di Blade), baris Sudah
   // Otorisasi tetap dapat Kirim/Terima Acc plus Batal Otorisasi.
   //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
-  private function queryOutstandingSJ ($search, $offset, $fetchlen) {
+  private function queryOutstandingSJ ($search, $offset, $fetchlen, $prioritas = '') {
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $rows = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
@@ -292,6 +284,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg, A.NOBUKTI+cast(B.URUT as varcha
          when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End QNTzx
     ,A.catatan   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
+    ,case when Isnull(B.PUrgent,0)=1 then 'URGENT' else 'NON-URGENT' end URGENT
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
 left outer join dbBarang C on C.KodeBrg=B.KodeBrg
@@ -393,19 +386,21 @@ case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnul
      when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
 End
 and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
+and (:prioritas1 = '' or cast(Isnull(B.PUrgent,0) as varchar(1)) = :prioritas2)
 ) AS PagedResult
 WHERE RowNum BETWEEN :rowstart AND :rowend
 ORDER BY RowNum
 ", [
       "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
       "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
+      "prioritas1" => $prioritas ?: '', "prioritas2" => $prioritas ?: '',
       "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
     ]);
     $total = $rows ? (int) $rows[0]->TotalRows : 0;
     return ["rows" => $rows, "total" => $total];
   }
 
-  private function queryOutstanding2SJ ($search, $offset, $fetchlen) {
+  private function queryOutstanding2SJ ($search, $offset, $fetchlen, $prioritas = '') {
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $rows = DB::connection("SML")->select("
 Declare @bulan Int,@tahun Int,@IDuser varchar(20)
@@ -525,6 +520,7 @@ select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
 			when b.nosat=3 then (m62.saldoqnt/c.isi3) + (m63.saldoqnt/c.isi3) end
     End
     END QNTXZ   ,case when datediff(day,getdate(),A.TGLKIRIM)<5 then 'y' else 'n' end KetW
+    ,case when Isnull(B.PUrgent,0)=1 then 'URGENT' else 'NON-URGENT' end URGENT
     ,ISNULL(B.NOserah,'') NOSERAH ,m2.KodeKebun KodeKebun2,m2.Nama AlamatLokasi
 from	dbSO A
 left outer join dBSODet B on B.NoBukti=A.NoBukti
@@ -654,170 +650,29 @@ AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M62.SALDOQNT,0)
 		  Else   isnull(M63.SALDOQNT,0) End
 >0
 and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
+and (:prioritas1 = '' or cast(Isnull(B.PUrgent,0) as varchar(1)) = :prioritas2)
 ) AS PagedResult
 WHERE RowNum BETWEEN :rowstart AND :rowend
 ORDER BY RowNum
 ", [
       "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
       "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
+      "prioritas1" => $prioritas ?: '', "prioritas2" => $prioritas ?: '',
       "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
     ]);
     $total = $rows ? (int) $rows[0]->TotalRows : 0;
     return ["rows" => $rows, "total" => $total];
   }
-
-  private function queryOutstanding5SJ ($search, $offset, $fetchlen) {
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    $rows = DB::connection("SML")->select("
-Declare @bulan Int,@tahun Int,@IDuser varchar(20)
-select @Bulan= :bulan ,@Tahun= :tahun ,@IDUser= :username
-SELECT * FROM (
-select 	A.NOBUKTI, B.URUT, B.KODEBRG, C.NamaBrg,
-        COUNT(*) OVER() AS TotalRows,
-        ROW_NUMBER() OVER (ORDER BY A.NOBUKTI, B.URUT) AS RowNum,
-        case when B.NOSAT=1 Then B.QNT when B.NOSAT=2 Then B.QNT2 when B.Nosat=3 then B.qnt2  End Qnt,
-        B.SATUAN,
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-		     when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-                     when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End QntOut,
-    D.KodeCustSupp,D.NamaCustSupp,A.KodeGdg,A.Tanggal,
-    A.Nobukti+cast(B.urut as varchar(3)) KeyNobukti,Isnull(A.TipePPN,0) TipePPN,
-    A.NoResi,A.NoPolKend,A.Sopir,A.JumlahTagihan,A.Kodeexp,
-    D.namaCustSupp+'('+A.KodeCust+')' CXcust ,  A.NOBUKTI+cast(B.URUT as varchar(3)) KeyUrut,
-    M2.NAMA+'('+A.KODEKEBUN+')' xcKEBUN,isnull(A.DP,0) DP,
-    M3.ALAMAT ,A.kodekebun,A.Nopesanan,C.PartNumber,M5.NamaMerk,A.TGLKIRIM DUEDATE,A.UserID ,A.RefPR ,
-
-    case when ISNULL(B.NOserah,'')  IN ('','-')
-    then
-         case when b.nosat=1 then m6.saldoQnt
-         when b.nosat=2 then m6.saldoqnt/c.isi2
-         when b.nosat=3 then m6.saldoqnt/c.isi3 end
-    else
-         case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-         when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-         when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-    SaldoQnt ,A.tglKirim,A.TglKirim TglKirim2,ISnull(M7.Nama,'-') namakebun,
-
-    case when
-         case when ISNULL(B.NOserah,'') IN ('','-')
-		 then
-				case when b.nosat=1 then m6.saldoQnt
-				when b.nosat=2 then m6.saldoqnt/c.isi2
-				when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-				case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-				when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-				when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-		End
-         >
-		case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		End THEN
-		        case when B.NOSAT=1 then B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)
-			when B.NOSAT=2 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-			when B.NOSAT=3 Then B.QNT2-(Isnull(m1.QNT2SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT2RSPB,0)
-		END
-	ELSE
-	     case when ISNULL(B.NOserah,'')  IN ('','-')
-		 then
-			case when b.nosat=1 then m6.saldoQnt
-			when b.nosat=2 then m6.saldoqnt/c.isi2
-			when b.nosat=3 then m6.saldoqnt/c.isi3 end
-		else
-			case when b.nosat=1 then (m6.saldoQnt) + (ISNULL(m61.saldoQnt,0))
-			when b.nosat=2 then (m6.saldoqnt/c.isi2) + (m61.saldoqnt/c.isi2)
-			when b.nosat=3 then (m6.saldoqnt/c.isi3) + (m61.saldoqnt/c.isi3) end
-    End
-
-
-    END QNTXZ
-
-    ,Isnull(A.RefPR,0) RefPR2,A.catatan ,ISnull(D.pBlackLIst,0) pBlackLIst
-from	dbSO A
-left outer join dBSODet B on B.NoBukti=A.NoBukti
-left outer join dbBarang C on C.KodeBrg=B.KodeBrg
-left outer join dbCustSupp D on D.KodeCustSupp=A.KODECUST
-lEFT oUTER JOIN (SELECT NOSO,UrutSO,SUM(iSNULL(QNT,0)) QNT1SPB,SUM(ISNULL(QNT2,0)) QNT2SPB
-				FROM dbSPBDet
-				GROUP BY NoSO,UrutSO) M1 ON B.NOBUKTI=M1.NoSO AND B.URUT=M1.UrutSO
-lEFT oUTER JOIN (SELECT b.NoSo,B.UrutSo,SUM(iSNULL(A.QNT,0)) QNT1RSPB,SUM(ISNULL(A.QNT2,0)) QNT2RSPB
-				FROM dbRSPBDet A
-				LEFT OUTER JOIN dbSPBDet B ON A.NoSPB=B.NoBukti AND A.UrutSPB=B.Urut
-				GROUP BY b.NoSo,B.UrutSo) M4 ON B.NOBUKTI=M4.NoSO AND B.URUT=M4.UrutSO
-left outer join dbkebuncustsupp m2 on A.KODEKEBUN=M2.KODEKEBUN AND A.KODECUST=M2.KODECUSTSUPP
-LEFT OUTER JOIN DBALAMATCUST M3 ON A.NOALAMATKIRIM=M3.NOMOR   AND A.KODECUST=M3.KODECUSTSUPP
-Left Outer Join Dbmerk M5 on C.KodeMerk=M5.kodeMerk
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-                 Where BUlan=@bulan and Tahun=@Tahun  and KOdeGdg<>'GTC'
-                 and kodegdg in (Select kodegdg from dbPemakaigdg
-                          where userid=@IDuser)
-                 and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=0)
-                 group by KODEBRG,BULAN,TAHUN
-                 ) M6 ON B.KODEBRG=M6.KODEBRG
-
-LEFT OUTER JOIN (select kodebrg, sum(SALDOQNT)SaldoQnt,BULAN,TAHUN  from DBSTOCKBRG
-				  where BUlan=@bulan and Tahun=@Tahun
-                        and kodegdg in (Select kodegdg from dbPemakaigdg where userid=@IDUser)
-					    and KodeGdg in (select kodegdg from dbgudang where Isnull(IStakeinOut,0)=1)
-				  group by KODEBRG,BULAN,TAHUN
-				) M61 ON B.KODEBRG=M61.KODEBRG
-
-LEFT OUTER JOIN DBKEBUNCUSTSUPP m7 on a.KODECUST=m7.KODECUSTSUPP and a.KODEKEBUN=m7.KODEKEBUN
-where
-      Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                 else 1
-            end As Bit)=0
-and
-
-/*B.QNT-(Isnull(m1.QNT1SPB,0)+Isnull(B.QntBatal,0))+Isnull(m4.QNT1RSPB,0)>0  */
-case when b.NOSAT=1 then
-			B.QNT-(Isnull(m1.QNT1SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)
-			 when b.nosat=2 then isnull(b.qntBatal,0) * B.isi
-			 when b.nosat=3 then isnull(b.qntBatal,0) * B.isi end)
-			+ Isnull(m4.QNT1RSPB,0)
-	 when b.NOSAT=2 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-	when b.NOSAT=3 then
-			B.QNT2-(Isnull(m1.QNT2SPB,0)+
-			 case when b.nosat=1 then Isnull(B.QntBatal,0)/b.ISI
-			 when b.nosat=2 then isnull(b.qntBatal,0)
-			 when b.nosat=3 then isnull(b.qntBatal,0) end)
-			+ Isnull(m4.QNT2RSPB,0)
-end>0
-AND  case when ISNULL(B.NOserah,'')  IN ('','-') then isnull(M6.SALDOQNT,0)
-		  Else isnull(M6.SALDOQNT,0) + isnull(M61.SALDOQNT,0) End
->0
-and Isnull(B.PUrgent,0)=1
-and (:search1 = '' or A.NOBUKTI like '%' + :search2 + '%' or D.NamaCustSupp like '%' + :search3 + '%' or C.NamaBrg like '%' + :search4 + '%')
-) AS PagedResult
-WHERE RowNum BETWEEN :rowstart AND :rowend
-ORDER BY RowNum
-", [
-      "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
-      "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
-      "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
-    ]);
-    $total = $rows ? (int) $rows[0]->TotalRows : 0;
-    return ["rows" => $rows, "total" => $total];
-  }
-
 
   // Endpoint AJAX generik utk pagination server-side "SO Belum Siap Kirim"/
-  // "SO Siap Kirim"/"Out SO Prioritas" -- ketiganya TIDAK dibatasi periode (beda
-  // dari "Surat Jalan Otorisasi"/queryOtorisasiSPB yang memang periode-scoped),
-  // masing-masing punya search & page sendiri, tidak saling memengaruhi.
+  // "SO Siap Kirim" -- keduanya TIDAK dibatasi periode (beda dari "Surat Jalan
+  // Otorisasi"/queryOtorisasiSPB yang memang periode-scoped), masing-masing
+  // punya search & page sendiri, tidak saling memengaruhi. (Tab "Out SO
+  // Prioritas"/tabel5/queryOutstanding5SJ dihapus -- query-nya cuma varian
+  // queryOutstanding2SJ yang difilter B.PUrgent=1 dengan kalkulasi saldo yang
+  // lebih lama/sederhana; sekarang "SO Siap Kirim" sendiri sudah menampilkan
+  // kolom URGENT/NOTURGENT jadi baris prioritas tetap kelihatan tanpa tab
+  // terpisah.)
   public function paginateOutstanding (Request $req) {
     $table = $req->table;
     $page = max(1, (int) ($req->page ?: 1));
@@ -825,13 +680,12 @@ ORDER BY RowNum
     if ($length <= 0) { $length = 10; }
     $offset = ($page - 1) * $length;
     $search = trim((string) $req->search);
+    $prioritas = trim((string) $req->prioritas);
 
     if ($table === 'tabel2') {
-      $res = $this->queryOutstanding2SJ($search, $offset, $length);
-    } else if ($table === 'tabel5') {
-      $res = $this->queryOutstanding5SJ($search, $offset, $length);
+      $res = $this->queryOutstanding2SJ($search, $offset, $length, $prioritas);
     } else {
-      $res = $this->queryOutstandingSJ($search, $offset, $length);
+      $res = $this->queryOutstandingSJ($search, $offset, $length, $prioritas);
     }
 
     return ["rows" => $res['rows'], "total" => $res['total'], "page" => $page, "length" => $length];

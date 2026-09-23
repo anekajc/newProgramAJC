@@ -141,12 +141,15 @@
 /* {{-- Kolom Aksi -- pastel round-button treatment, copied verbatim (rescoped to this
      page's own #tabel/#addTable/#detailTable/#giroModalTable/#giroBGTModalTable/
      #tabel_add_list_dphuhtbbm/#tabel_add_list_pencairangiroedit) from so.blade.php's
-     own @section('css'). #tabel's Actions column is LAST (not first like so.blade.php's
-     #tabel2), so this is scoped with td:last-child throughout, matching addTable's own
-     existing convention in invoicejasa.blade.php/so.blade.php. The extra ids are the
-     other data-entry grids in this file that also have a real (non-picker) Actions
-     column -- add/koreksi line items, giro correction entries. --}} */
-     
+     own @section('css'). Unlike the other ids here, #tabel's Actions column is
+     actually FIRST (tabelActionsCell() is prepended before the data cells in
+     renderTabelRows()), so #tabel is additionally scoped with td:first-child; the
+     other ids keep td:last-child, matching addTable's own existing convention in
+     invoicejasa.blade.php/so.blade.php. The extra ids are the other data-entry grids
+     in this file that also have a real (non-picker) Actions column -- add/koreksi
+     line items, giro correction entries. --}} */
+
+#tabel td:first-child,
 #tabel td:last-child,
 #addTable td:last-child,
 #detailTable td:last-child,
@@ -160,6 +163,7 @@
   align-items: center;
 }
 
+#tabel td:first-child .btn,
 #tabel td:last-child .btn,
 #addTable td:last-child .btn,
 #detailTable td:last-child .btn,
@@ -180,6 +184,7 @@
   transition: all .12s ease;
 }
 
+#tabel td:first-child .btn:hover,
 #tabel td:last-child .btn:hover,
 #addTable td:last-child .btn:hover,
 #detailTable td:last-child .btn:hover,
@@ -191,6 +196,7 @@
   transform: translateY(-1px);
 }
 
+#tabel td:first-child .btn-success,
 #tabel td:last-child .btn-success,
 #addTable td:last-child .btn-success,
 #detailTable td:last-child .btn-success,
@@ -201,6 +207,7 @@
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
+#tabel td:first-child .btn-warning,
 #tabel td:last-child .btn-warning,
 #addTable td:last-child .btn-warning,
 #detailTable td:last-child .btn-warning,
@@ -211,6 +218,7 @@
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
+#tabel td:first-child .btn-primary,
 #tabel td:last-child .btn-primary,
 #addTable td:last-child .btn-primary,
 #detailTable td:last-child .btn-primary,
@@ -221,6 +229,7 @@
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
+#tabel td:first-child .btn-danger,
 #tabel td:last-child .btn-danger,
 #addTable td:last-child .btn-danger,
 #detailTable td:last-child .btn-danger,
@@ -231,6 +240,7 @@
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
+#tabel td:first-child .btn-info,
 #tabel td:last-child .btn-info,
 #addTable td:last-child .btn-info,
 #detailTable td:last-child .btn-info,
@@ -478,8 +488,44 @@
                 <div class="po-len-wrap"><label for="giroLen1">Tampilkan</label>
                   <select id="giroLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                 </div>
+                <button class="po-btn-filter" type="button" onclick="$('#modalFilterGiro').modal('show')"><i class="bi bi-funnel"></i> Filter</button>
                 <div class="po-toolbar-act">
                   <button id="AddVisibility" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                </div>
+              </div>
+
+              {{-- Filter Transaksi (BBG/BCG), pola modal rt-filter sama seperti
+                   modalFilterSPB milik suratjalan.blade.php -- klien-side saja,
+                   memfilter lastTabelRows sebelum di-render, karena tabel ini
+                   sudah full-load (bukan server-paginated). --}}
+              <div class="modal fade rt-filter" id="modalFilterGiro">
+                <div class="modal-dialog modal-md">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterGiro').modal('hide')"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="rt-section">
+                        <div class="rt-group-label">Status</div>
+                        <div>
+                          <label class="rt-field-label" for="input_filtertransgiro">Transaksi</label>
+                          <select class="rt-native" id="input_filtertransgiro">
+                            <option value="" selected>Semua</option>
+                            <option value="BBG">BBG</option>
+                            <option value="BCG">BCG</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="rt-reset-link" onclick="$('#input_filtertransgiro').val('')">Reset semua</button>
+                      <div class="rt-footer-buttons">
+                        <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" onclick="$('#modalFilterGiro').modal('hide')">Batal</button>
+                        <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterGiro(); $('#modalFilterGiro').modal('hide');">Terapkan</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div id="rtBarTabel"></div>
@@ -4142,10 +4188,19 @@ function giroIkatPanjangHalaman () {
 
 const GIRO_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
 
+let giroFilterTrans = ''
+function buttonFilterGiro () {
+  giroFilterTrans = $('#input_filtertransgiro').val()
+  reinitTabel()
+}
+function giroFilterRows (rows) {
+  if (!giroFilterTrans) { return rows }
+  return (rows || []).filter(function (r) { return giroPickCI(r, 'TipeTransHd') === giroFilterTrans })
+}
 function reinitTabel () {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
-    renderTabelRows(lastTabelRows);
+    renderTabelRows(giroFilterRows(lastTabelRows));
     $('#tabel').DataTable({ dom: GIRO_DOM_STRING, lengthChange: false, pageLength: giroPanjangHalaman, paging: true });
     giroIkatSearch(); giroIkatPanjangHalaman();
   } catch (e) { console.error('reinitTabel failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }

@@ -500,8 +500,44 @@
                 <div class="po-len-wrap"><label for="giroLen1">Tampilkan</label>
                   <select id="giroLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                 </div>
+                <button class="po-btn-filter" type="button" onclick="$('#modalFilterGiro').modal('show')"><i class="bi bi-funnel"></i> Filter</button>
                 <div class="po-toolbar-act">
                   <button id="AddVisibility" class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                </div>
+              </div>
+
+              {{-- Filter Transaksi (BGT/BGC), pola modal rt-filter sama seperti
+                   modalFilterSPB milik suratjalan.blade.php -- klien-side saja,
+                   memfilter lastTabelRows sebelum di-render, karena tabel ini
+                   sudah full-load (bukan server-paginated). --}}
+              <div class="modal fade rt-filter" id="modalFilterGiro">
+                <div class="modal-dialog modal-md">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterGiro').modal('hide')"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="rt-section">
+                        <div class="rt-group-label">Status</div>
+                        <div>
+                          <label class="rt-field-label" for="input_filtertransgiro">Transaksi</label>
+                          <select class="rt-native" id="input_filtertransgiro">
+                            <option value="" selected>Semua</option>
+                            <option value="BGT">BGT</option>
+                            <option value="BGC">BGC</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="rt-reset-link" onclick="$('#input_filtertransgiro').val('')">Reset semua</button>
+                      <div class="rt-footer-buttons">
+                        <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" onclick="$('#modalFilterGiro').modal('hide')">Batal</button>
+                        <button type="button" class="rt-btn rt-btn-primary" onclick="buttonFilterGiro(); $('#modalFilterGiro').modal('hide');">Terapkan</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div id="rtBarTabel"></div>
@@ -3937,10 +3973,19 @@ function giroIkatPanjangHalaman () {
 
 const GIRO_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
 
+let giroFilterTrans = ''
+function buttonFilterGiro () {
+  giroFilterTrans = $('#input_filtertransgiro').val()
+  reinitTabel()
+}
+function giroFilterRows (rows) {
+  if (!giroFilterTrans) { return rows }
+  return (rows || []).filter(function (r) { return giroPickCI(r, 'TipeTransHd') === giroFilterTrans })
+}
 function reinitTabel () {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
-    renderTabelRows(lastTabelRows);
+    renderTabelRows(giroFilterRows(lastTabelRows));
     $('#tabel').DataTable({ dom: GIRO_DOM_STRING, lengthChange: false, pageLength: giroPanjangHalaman, paging: true });
     giroIkatSearch(); giroIkatPanjangHalaman();
   } catch (e) { console.error('reinitTabel failed:', e); alertify.error('Gagal memperbarui tabel: ' + e.message); }
