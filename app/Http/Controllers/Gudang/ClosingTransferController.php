@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Model\NewMenu;
 use App\Model\NewAksesMenu;
 use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
+use App\Models\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 

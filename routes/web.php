@@ -24,6 +24,7 @@ Route::get('/test', function () {
 
 
 
+
 // Login
 Route::get('/', function () {
     if (Auth::check()) {

@@ -393,7 +393,11 @@ ORDER BY RowNum
 ", [
       "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
       "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
-      "prioritas1" => $prioritas ?: '', "prioritas2" => $prioritas ?: '',
+      // NOTE: bukan "$prioritas ?: ''" -- string "0" (Not Urgent) itu falsy di PHP,
+      // jadi "?:" diam-diam membuangnya jadi '' dan malah menonaktifkan filternya
+      // (persis dengan filter kosong "Semua"), padahal $prioritas dari
+      // paginateOutstanding() sudah pasti string ('' / '0' / '1').
+      "prioritas1" => (string) $prioritas, "prioritas2" => (string) $prioritas,
       "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
     ]);
     $total = $rows ? (int) $rows[0]->TotalRows : 0;
@@ -657,7 +661,11 @@ ORDER BY RowNum
 ", [
       "bulan" => $periode->bulan, "tahun" => $periode->tahun, "username" => \Auth::user()->username,
       "search1" => $search ?: '', "search2" => $search ?: '', "search3" => $search ?: '', "search4" => $search ?: '',
-      "prioritas1" => $prioritas ?: '', "prioritas2" => $prioritas ?: '',
+      // NOTE: bukan "$prioritas ?: ''" -- string "0" (Not Urgent) itu falsy di PHP,
+      // jadi "?:" diam-diam membuangnya jadi '' dan malah menonaktifkan filternya
+      // (persis dengan filter kosong "Semua"), padahal $prioritas dari
+      // paginateOutstanding() sudah pasti string ('' / '0' / '1').
+      "prioritas1" => (string) $prioritas, "prioritas2" => (string) $prioritas,
       "rowstart" => $offset + 1, "rowend" => $offset + $fetchlen,
     ]);
     $total = $rows ? (int) $rows[0]->TotalRows : 0;
