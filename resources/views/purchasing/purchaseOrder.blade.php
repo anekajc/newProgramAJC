@@ -92,13 +92,23 @@
      #tabel (Outstanding PR) SENGAJA tidak ikut lagi di grup ini: kolom Actions-nya
      sudah dimatikan (lihat PO_OUT[1].aksi), jadi sel pertamanya sekarang kolom data
      biasa - kalau masih dipaksa display:flex + justify-content:center, isinya jadi
-     rata tengah dan perataan barisnya rusak. */
-  #tabel2 td:first-child,
-  #tabel3 td:first-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
+     rata tengah dan perataan barisnya rusak.
+     JANGAN pakai display:flex pada <td>: sel yang di-flex berhenti jadi sel tabel, tingginya
+     cuma setinggi tombol dan tidak ikut vertical-align:middle baris - tombolnya jadi kelihatan
+     naik dibanding teks kolom lain. Cukup text-align + vertical-align; font-size:0 membuang
+     spasi antar tombol (tombolnya sendiri punya font-size 13px) supaya jaraknya pas 4px.
+     :not(.dataTables_empty) - baris "No data available" jangan ikut font-size:0. */
+  #tabel2 tbody td:first-child:not(.dataTables_empty),
+  #tabel3 tbody td:first-child:not(.dataTables_empty) {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 0;
+  }
+
+  #tabel2 td:first-child .btn + .btn,
+  #tabel3 td:first-child .btn + .btn {
+    margin-left: 4px;
   }
 
   /* Di #tabel_add kolom Actions ada di paling kanan, bukan paling kiri. */
@@ -110,6 +120,7 @@
     height: 30px;
     padding: 0;
     display: inline-flex;
+    vertical-align: middle;
     align-items: center;
     justify-content: center;
     border-radius: 7px;
@@ -8063,15 +8074,16 @@ if (baris2) {
 
         // PO yang sudah terotorisasi tidak boleh diedit lagi - tombol Edit/Otorisasi
         // diganti Batal Otorisasi + Print. Yang belum terotorisasi sebaliknya.
+        // Warna & ikon disamakan dengan pembelianpermintaanagen.blade.php.
         let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>`
         if (Number(item.IsOtorisasi1)) {
           tombolAksiPO += `
-            <button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key-fill"></i></button>
-            <button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Print" onclick="openPrintModal('${item.NoBukti}')"><i class="bi bi-printer"></i></button>`
+            <button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
+            <button class="btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="Print" onclick="openPrintModal('${item.NoBukti}')"><i class="bi bi-printer"></i></button>`
         } else {
           tombolAksiPO += `
-            <button class="btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NoBukti}' , ${item.IsOtorisasi1})"><i class="bi bi-key"></i></button>
-            <button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Edit" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pencil-fill"></i></button>`
+            <button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NoBukti}' , ${item.IsOtorisasi1})"><i class="bi bi-key"></i></button>
+            <button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Edit" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pen"></i></button>`
         }
 
         rowTable2 += `
