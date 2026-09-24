@@ -757,6 +757,22 @@ td input[type="checkbox"] {
       font-weight: 600;
       border-top: 1px solid var(--border);
     }
+
+    /* Tombol Otorisasi di footer modal: warna soft (latar biru muda, teks biru),
+       mengikuti pola .modal-footer .btn-primary di bonsementara.blade.php. */
+    #modalOtorisasi .modal-footer .btn-primary {
+      background-color: #e8edff;
+      border-color: #cfdcff;
+      color: #2563eb;
+      border-radius: 8px !important;
+      text-transform: none !important;
+      box-shadow: none;
+    }
+    #modalOtorisasi .modal-footer .btn-primary:hover {
+      background-color: #dce6ff;
+      border-color: #b9c9ff;
+      color: #1d4ed8;
+    }
   </style>
 {{-- end tampilan search modal barang all --}}
 @endsection
