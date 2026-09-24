@@ -872,7 +872,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQty" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputAddQty" type="number" value="0.00" class="form-control">
+                    <input id="editPembelianInputAddQty" type="text" inputmode="decimal" value="0.00" class="form-control" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)">
                   </div>
                 </div>
               </div>
@@ -895,7 +895,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQtyOS" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty OS</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputAddQtyOS" type="number" value="0.00" class="form-control" disabled>
+                    <input id="editPembelianInputAddQtyOS" type="text" value="0.00" class="form-control" disabled>
                   </div>
                 </div>
               </div>
@@ -908,7 +908,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQtyPO" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty PO</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputAddQtyPO" type="number" value="0.00" class="form-control" disabled>
+                    <input id="editPembelianInputAddQtyPO" type="text" value="0.00" class="form-control" disabled>
                   </div>
                 </div>
               </div>
@@ -960,7 +960,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQty" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputEditQty" type="number" value="0.00" class="form-control">
+                    <input id="editPembelianInputEditQty" type="text" inputmode="decimal" value="0.00" class="form-control" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)">
                   </div>
                 </div>
               </div>
@@ -982,7 +982,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQtyOS" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty OS</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputEditQtyOS" type="number" value="0.00" class="form-control" disabled>
+                    <input id="editPembelianInputEditQtyOS" type="text" value="0.00" class="form-control" disabled>
                   </div>
                 </div>
               </div>
@@ -991,7 +991,7 @@ td input[type="checkbox"] {
                 <div class="row align-items-center">
                   <label for="editPembelianInputAddQtyPO" style="margin-top:10px;" class="col-sm-4 fw-bold">Qty PO</label>
                   <div class="col-sm-8">
-                    <input id="editPembelianInputEditQtyPO" type="number" value="0.00" class="form-control" disabled>
+                    <input id="editPembelianInputEditQtyPO" type="text" value="0.00" class="form-control" disabled>
                   </div>
                 </div>
               </div>
@@ -1190,6 +1190,39 @@ td input[type="checkbox"] {
      "Reset kolom"), disamakan dengan newpo.blade.php / purchaseOrder.blade.php / uangmukabeli.blade.php. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
   <script type="text/javascript">
+
+// Input Qty diketik dengan separator ribuan (koma) - pola sama dengan newpobeliacc.blade.php.
+// Saat nilainya dibaca untuk validasi/simpan, koma dibuang dulu dengan .replace(/,/g, '').
+function formatRibuan (el) {
+  let raw = String(el.value).replace(/,/g, '')
+  if (raw === '' || isNaN(Number(raw))) return
+  let parts = Number(raw).toFixed(2).split('.')
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  el.value = parts.join('.')
+}
+
+function formatRibuanLive (el) {
+  let cursorPos = el.selectionStart
+  let digitsBeforeCursor = el.value.slice(0, cursorPos).replace(/[^0-9]/g, '').length
+
+  let raw = el.value.replace(/,/g, '')
+  if (raw !== '' && isNaN(Number(raw))) {
+    raw = raw.replace(/[^0-9.]/g, '')
+  }
+  if (raw === '') { el.value = ''; return }
+
+  let parts = raw.split('.')
+  if (parts.length > 1) parts[1] = parts[1].slice(0, 2)
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  el.value = parts.length > 1 ? parts[0] + '.' + parts[1] : parts[0]
+
+  let pos = 0, digitCount = 0
+  while (pos < el.value.length && digitCount < digitsBeforeCursor) {
+    if (/[0-9]/.test(el.value[pos])) digitCount++
+    pos++
+  }
+  el.setSelectionRange(pos, pos)
+}
 
 // format angka ribuan (separator koma, 2 desimal) - dipakai untuk tampilan Qty
 function formatAngka (angkaString) {
@@ -1865,9 +1898,9 @@ function formatAngka (angkaString) {
       }
       document.getElementById("editPembelianInputEditKode").value = dataEditPembelianEdit[indexBarang].KodeBrg
       document.getElementById("editPembelianInputEditNamaBarang").value = dataEditPembelianEdit[indexBarang].namabrgx
-      document.getElementById("editPembelianInputEditQtyPO").value = dataEditPembelianEdit[indexBarang].QNTPO
+      document.getElementById("editPembelianInputEditQtyPO").value = formatAngka(dataEditPembelianEdit[indexBarang].QNTPO)
       document.getElementById("editPembelianInputEditSatuan").value = dataEditPembelianEdit[indexBarang].Satuan
-      document.getElementById("editPembelianInputEditQty").value = dataEditPembelianEdit[indexBarang].Qnt
+      document.getElementById("editPembelianInputEditQty").value = formatAngka(dataEditPembelianEdit[indexBarang].Qnt)
       $('#formPembelianEdit').show();
       document.getElementById('formPembelianEdit').scrollIntoView();
     }
@@ -2644,7 +2677,7 @@ item.forEach((itemSub, j) => {
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: center;">${itemSub.SATUAN}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QNTPO ? formatAngka(itemSub.QNTPO) : ''}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QntTerima ? formatAngka(itemSub.QntTerima) : ''}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.SISA ? parseFloat(itemSub.SISA).toFixed(2) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.SISA ? formatAngka(itemSub.SISA) : ''}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.KETERANGAN}</td>
     </tr>`;
   z++;
@@ -2981,7 +3014,7 @@ for (let f = 0; f < fillerCount; f++) {
       let _token = $("#_token").val();
       let choice = "U"
       let dataLPBEdit = dataEditPembelianEdit[indexEditPembelianEdit]
-      let reqQtyTerima = parseInt($("#editPembelianInputEditQty").val(), 10) || 0;
+      let reqQtyTerima = parseInt($("#editPembelianInputEditQty").val().replace(/,/g, ''), 10) || 0;
       // console.log(dataLPBEdit.QNTOUT, dataLPBEdit.Qnt , reqQtyTerima)
       // console.log(Number(reqQtyTerima) , Number(dataLPBEdit.QNTOUT) , Number(dataLPBEdit.Qnt))
       // console.log(Number(reqQtyTerima) , (Number(dataLPBEdit.QNTOUT) + Number(dataLPBEdit.Qnt)))
@@ -3098,7 +3131,7 @@ for (let f = 0; f < fillerCount; f++) {
         return;
       }
 
-      let reqQtyTerima = $("#editPembelianInputAddQty").val() || 0;
+      let reqQtyTerima = $("#editPembelianInputAddQty").val().replace(/,/g, '') || 0;
 
       if (Number(reqQtyTerima) > Number(data.OSPO)) {
         alertify.warning("Qty melebihi Qty OS");
@@ -3208,8 +3241,8 @@ for (let f = 0; f < fillerCount; f++) {
       // editPembelianInputAddQtyPO
       document.getElementById("editPembelianInputAddKode").value = dataEditPembelianAdd[indexBarang].KodeBrg
       document.getElementById("editPembelianInputAddNamaBarang").value = dataEditPembelianAdd[indexBarang].namaBrg
-      document.getElementById("editPembelianInputAddQtyOS").value =  parseFloat(dataEditPembelianAdd[indexBarang].OSPO).toFixed(2)
-      document.getElementById("editPembelianInputAddQtyPO").value =  parseFloat(dataEditPembelianAdd[indexBarang].QNT).toFixed(2)
+      document.getElementById("editPembelianInputAddQtyOS").value =  formatAngka(dataEditPembelianAdd[indexBarang].OSPO)
+      document.getElementById("editPembelianInputAddQtyPO").value =  formatAngka(dataEditPembelianAdd[indexBarang].QNT)
       document.getElementById("editPembelianInputAddSatuan").value = dataEditPembelianAdd[indexBarang].Satuan
     }
 
@@ -3311,8 +3344,8 @@ for (let f = 0; f < fillerCount; f++) {
       $("#editPembelianAddSelect").val(d.KodeBrg);
       $("#editPembelianInputAddKode").val(d.KodeBrg);
       $("#editPembelianInputAddNamaBarang").val(d.namaBrg);
-      $("#editPembelianInputAddQtyOS").val((Number(d.OSPO) || 0).toFixed(2));
-      $("#editPembelianInputAddQtyPO").val((Number(d.QNT) || 0).toFixed(2));
+      $("#editPembelianInputAddQtyOS").val(formatAngka(d.OSPO));
+      $("#editPembelianInputAddQtyPO").val(formatAngka(d.QNT));
       $("#editPembelianInputAddSatuan").val(d.Satuan);
 
       closeListItemAdd();
@@ -3576,7 +3609,7 @@ if (pcekglobal) {
         // console.log(detail_row)
         // console.log(detail_row.QntPO)
         // console.log(detail_row.Satuan)
-        table_row_detail += `<tr><td>${detail_row.namaBrg}</td><td class="text-right">${formatAngka(detail_row.QNT)}</td><td class="text-right">${formatAngka(detail_row.QntBeli)}</td><td class="text-right">${parseFloat(detail_row.OSPO).toFixed(2)}</td><td>${detail_row.Satuan}</td><td>-</td><td>-</td></tr>`
+        table_row_detail += `<tr><td>${detail_row.namaBrg}</td><td class="text-right">${formatAngka(detail_row.QNT)}</td><td class="text-right">${formatAngka(detail_row.QntBeli)}</td><td class="text-right">${formatAngka(detail_row.OSPO)}</td><td>${detail_row.Satuan}</td><td>-</td><td>-</td></tr>`
       });
 
       document.getElementById("detailModalLabel").innerHTML = "Detail " +  detail_row_data[0].NoBukti;
@@ -3697,10 +3730,10 @@ if (pcekglobal) {
           <td>${add_row.namaBrg}</td>
           <td class="text-right">${formatAngka(add_row.QNT)}</td>
           <td class="text-right">${formatAngka(add_row.QntBeli)}</td>
-          <td class="text-right">${parseFloat(add_row.OSPO).toFixed(2)}</td>
+          <td class="text-right">${formatAngka(add_row.OSPO)}</td>
           <td>${add_row.Satuan}</td>
           <td>
-            <input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min="0" value="0.00">
+            <input id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="text" inputmode="decimal" value="0.00" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)">
           </td>
           <td>-</td>
           <td>-</td>
@@ -3719,7 +3752,7 @@ if (pcekglobal) {
 
       checkbox.addEventListener('change', function () {
         if (this.checked) {
-          inputQnt.value = parseFloat(add_row.OSPO).toFixed(2);
+          inputQnt.value = formatAngka(add_row.OSPO);
         } else {
           inputQnt.value = '0.00';
         }
@@ -3819,7 +3852,7 @@ if (pcekglobal) {
           // console.log(id)
           // let tes = $(`#add_checkbox${i}`).val();
           // console.log(tes)
-          row_data[i].inputQntTerima = $(`#input_add_qntTerima${i}`).val();
+          row_data[i].inputQntTerima = $(`#input_add_qntTerima${i}`).val().replace(/,/g, '');
           tempData.push(row_data[i])
         }
       }
