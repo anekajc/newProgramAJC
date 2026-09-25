@@ -313,9 +313,20 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
   }
 
 
+  // Dipakai juga oleh route bankgetnourutaktiva. Selain no. urut berikutnya, ikut mengembalikan
+  // setting aktiva TERAKHIR (NoBelakang terbesar) di group ini sebagai nilai awal form aktiva baru.
+  // MAX() dan kolom setting dipisah (subquery + OUTER APPLY) karena kolom biasa tidak boleh
+  // dicampur dengan agregat tanpa GROUP BY; OUTER APPLY tetap mengembalikan 1 baris (kolom
+  // setting NULL) bila group ini belum punya aktiva.
   public function getNoUrutAktiva (Request $req) {
-    $nourut = DB::connection('SML')->select("SELECT RIGHT('00000' + (CAST(ISNULL(MAX(CONVERT(int, NoBelakang)), 0) + 1 AS VARCHAR(10))), 5) AS NoUrut
-FROM dbAktiva where nomuka = :nomuka " , ["nomuka" => $req->nomuka]);
+    $nourut = DB::connection('SML')->select("SELECT RIGHT('00000' + (CAST(ISNULL(M.MaxNo, 0) + 1 AS VARCHAR(10))), 5) AS NoUrut,
+       L.Persen, L.Tipe, L.Akumulasi, L.Biaya, L.PersenBiaya1, L.Biaya2, L.PersenBiaya2, L.biaya3, L.persenbiaya3
+FROM (SELECT MAX(CONVERT(int, NoBelakang)) AS MaxNo FROM dbAktiva WHERE nomuka = :nomuka) M
+OUTER APPLY (
+  SELECT TOP 1 Persen, Tipe, Akumulasi, Biaya, PersenBiaya1, Biaya2, PersenBiaya2, biaya3, persenbiaya3
+  FROM dbAktiva WHERE nomuka = :nomuka2
+  ORDER BY CONVERT(int, NoBelakang) DESC
+) L " , ["nomuka" => $req->nomuka, "nomuka2" => $req->nomuka]);
 
   return $nourut;
   }

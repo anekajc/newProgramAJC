@@ -411,51 +411,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row kas-row-tight">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Keterangan</label>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-8">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKeterangan" type="text" value=""
-                                                        class="form-control">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row kas-row-tight">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Ket. Det</label>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-4 text-right">
-
-              </div> -->
-                                            <div class="col-md-8">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKeteranganDetail" type="text" value=""
-                                                        class="form-control">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-12 col-lg-5">
-                                <div class="row">
+                                <div class="col">
+
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
@@ -478,6 +437,7 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="row kas-row-tight">
                                         <div class="col-md-12">
                                             <div class="form-check form-group text-left">
@@ -536,7 +496,33 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- Keterangan & Ket. Det dipindah dari kolom tengah (col-lg-3) ke baris penuh
+                             supaya inputnya panjang. ID tidak berubah. --}}
                         <div class="row kas-row-tight">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Keterangan</label>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="input-group form-group">
+                                    <input id="AddAddKeterangan" type="text" value=""
+                                        class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row kas-row-tight">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Ket. Det</label>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="input-group form-group">
+                                    <input id="AddAddKeteranganDetail" type="text" value=""
+                                        class="form-control">
+                                </div>
+                            </div>
                         </div>
                     </div>
 

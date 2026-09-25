@@ -12,6 +12,11 @@
   <link rel="stylesheet"
     href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
 
+  {{-- Dimuat ULANG setelah report-table.css/tableMaster2.css/newmaster.css supaya .po-* menang saat
+       spesifisitas seri — sama seperti accounting/pengajuandphtunai.blade.php. --}}
+  <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+
   <style>
   .showhide {
     display: none;
@@ -19,230 +24,259 @@
   </style>
 
   <style>
-  
-  #tabel_add thead th {
-    background: #f8f9fb !important;
-    color: #6b7280 !important;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 600;
-    border-bottom: 1px solid #e7e9ee;
-    border-top: none;
-  }
+        /* Jarak kartu ke bar atas — sama seperti pengajuandph/bonsementara. `section#content` (bukan
+                   `#content` saja): layout gudang menulis `#content { padding: 28px 32px }` di <style>
+                   inline SETELAH @yield('css')
 
-  #tabel_add.table-bordered th,
-  #tabel_add.table-bordered td {
-    border-color: #e7e9ee !important;
-  }
+        ,
+        jadi selector ber-ID saja kalah urutan (spesifisitas seri). */ section#content {
+            padding-top: 12px;
+        }
 
-  #tabel_add tbody tr:nth-of-type(odd) {
-    background-color: #fbfbfc;
-  }
+        /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar. po-table-header.css tidak
+                   menulis .po-len-wrap/.po-len-inp, jadi ditulis lokal di sini — disalin dari
+                   accounting/pengajuandph.blade.php. */
+        .po-len-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--rt-card, #fff);
+            border: 1.5px solid var(--rt-border, #E7E8F0);
+            border-radius: 8px;
+            padding: 5px 12px;
+        }
 
-  #tabel_add tbody tr:hover {
-    background-color: #f5f3ff;
-  }
+        .po-len-wrap label {
+            margin: 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--rt-ink-soft, #6B7180);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
 
-  #tabel_add tbody td {
-    font-size: 12px;
-    padding: 6px 12px;
-    vertical-align: middle;
-  }
+        .po-len-inp {
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--rt-ink, #1D2130);
+            outline: none;
+            cursor: pointer;
+            padding: 2px 20px 2px 0;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right center;
+        }
 
-  #tabel_add td:last-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
-  }
+        /* ==========================================================================
+                   Dari sini ke bawah: disalin dari accounting/pengajuandph.blade.php (#page1),
+                   yang sendiri disalin dari memorialkoreksi/bonsementara — kelas & tampilan tabel daftar
+                   yang sama persis. Halaman ini masih memuat report-table.css/tableMaster2.css/newmaster.css
+                   lewat layout gudang, jadi aturan penetral di bagian bawah menimpa balik nilai file-file itu
+                   hanya untuk #page1 (bukan melepas file-nya, yang akan merusak halaman lain).
+                   ========================================================================== */
 
-  #tabel_add td:last-child .btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 13px;
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition: all .12s ease;
-  }
+        /* Rule .card global di sebagian layout (flex + align-items:center + efek melayang
+                   saat hover) diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
+        #page1 .card {
+            position: relative;
+            background: var(--white, #fff);
+            border: 1.5px solid var(--border, #e5e7eb) !important;
+            border-radius: var(--radius, 12px) !important;
+            display: block !important;
+            align-items: stretch !important;
+            padding: 0 !important;
+            text-align: left !important;
+            cursor: default !important;
+        }
 
-  #tabel_add td:last-child .btn:hover {
-    filter: brightness(0.97);
-    transform: translateY(-1px);
-  }
+        #page1 .card:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            border-color: var(--border, #e5e7eb) !important;
+        }
 
-  #tabel_add td:last-child .btn-success {
-    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-  }
+        /* ---------- Gaya dasar tabel daftar (layout gudang tidak mendefinisikan .data-table) ---------- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
 
-  #tabel_add td:last-child .btn-danger {
-    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-  }
+        .data-table thead th {
+            background: #f9fafb;
+            padding: 11px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-muted, #6b7280);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border, #e5e7eb);
+        }
 
-  .btn-pill-action {
-    height: 30px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-width: 1px;
-    border-style: solid;
-  }
+        .data-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: var(--text-main, #1f2937);
+        }
 
-  .btn-pill-flat {
-    height: 30px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    border-width: 1px;
-    border-style: solid;
-  }
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
 
-  .btn-chip-biru {
-    background-color: #e8edff;
-    border-color: #cfdcff;
-    color: #2563eb;
-  }
+        .data-table tbody tr:hover td {
+            background: #f9fafb;
+        }
 
-  .btn-chip-biru:hover,
-  .btn-chip-biru:focus {
-    background-color: #dce6ff;
-    border-color: #b9c9ff;
-    color: #1d4ed8;
-  }
+        /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
+                   inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
+                   Dipakai min-width, BUKAN width. */
+        #tabel {
+            min-width: 100%;
+        }
 
-  .btn-chip-biru:active {
-    background-color: #cfdcff !important;
-    border-color: #a8bdff !important;
-    color: #1d4ed8 !important;
-  }
+        /* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
+        #tabel td:first-child:not([colspan]) {
+            vertical-align: middle;
+        }
 
-  .btn-batal-add {
-    background-color: #f1f3f5;
-    border-color: #dee2e6;
-    color: #495057;
-  }
+        #tabel td:first-child .po-aksi-wrap {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+        }
 
-  .btn-batal-add:hover,
-  .btn-batal-add:focus {
-    background-color: #e9ecef;
-    border-color: #ced4da;
-    color: #343a40;
-  }
+        #tabel td:first-child .btn {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            font-size: 13px;
+            border: 1px solid transparent;
+            box-shadow: none;
+            transition: all .12s ease;
+        }
 
-  .btn-batal-add:active {
-    background-color: #dee2e6 !important;
-    border-color: #ced4da !important;
-    color: #343a40 !important;
-  }
+        #tabel td:first-child .btn:hover {
+            filter: brightness(0.97);
+            transform: translateY(-1px);
+        }
 
-  .btn-danger-solid:hover,
-  .btn-danger-solid:focus,
-  .btn-danger-solid:active {
-    color: #fff;
-  }
+        #tabel td:first-child .btn-success {
+            color: #16a34a;
+            border-color: #cdebd7;
+            background: #e7f7ed;
+        }
 
-  .btn-danger-solid {
-    color: #b91c1c;
-    background-color: #fef2f2;
-    border: 1.5px solid #fecaca;
-  }
+        #tabel td:first-child .btn-warning {
+            color: #b45309;
+            border-color: #fbe3bd;
+            background: #fef3e0;
+        }
 
-  .btn-danger-solid:hover,
-  .btn-danger-solid:focus,
-  .btn-danger-solid:active {
-    background-color: #c82333;
-    border-color: #bd2130;
-  }
-  </style>
+        #tabel td:first-child .btn-primary {
+            color: #2563eb;
+            border-color: #cfdcff;
+            background: #e8edff;
+        }
 
-  <style>
-  #contentContainer .toolbar {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+        #tabel td:first-child .btn-danger {
+            color: #dc2626;
+            border-color: #f7cfcf;
+            background: #fdeaea;
+        }
 
-  #contentContainer .toolbar .action-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-  }
-  </style>
+        #tabel td:first-child .btn-info {
+            color: #0891b2;
+            border-color: #a5f3fc;
+            background: #ecfeff;
+        }
 
-  <style>
-  #mainTable th.rt-fixed-th,
-  #mainTable td:first-child {
-    min-width: 112px;
-  }
+        /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
+        table.data-table.po-aksi-hover tbody td:first-child .btn {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity .12s ease;
+        }
 
-  #mainTable td:first-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
-  }
+        table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+            visibility: visible;
+            opacity: 1;
+        }
 
-  #mainTable td:first-child .btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 13px;
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition: all .12s ease;
-  }
+        /* ---------- Penetral kebocoran gaya (lihat catatan di atas) ---------- */
 
-  #mainTable td:first-child .btn:hover {
-    filter: brightness(0.97);
-    transform: translateY(-1px);
-  }
+        /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
+        #page1 #tabel tbody td {
+            padding: 12px 16px !important;
+        }
 
-  #mainTable tbody td:first-child .btn {
-    visibility: hidden;
-    opacity: 0;
-  }
+        /* tableMaster2.css: skin khusus id #tabel — dikembalikan ke nilai .data-table di atas. */
+        #page1 #tabel thead th {
+            background: #f9fafb !important;
+            color: var(--text-muted, #6b7280) !important;
+            font-size: 12px !important;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border, #e5e7eb) !important;
+            border-top: none;
+            white-space: normal;
+        }
 
-  #mainTable tbody tr:hover td:first-child .btn {
-    visibility: visible;
-    opacity: 1;
-  }
+        /* font-size/color SENGAJA TANPA !important pada td: tableMaster2.css tidak menandainya
+                   !important, jadi spesifisitas ID #page1 sudah cukup, dan !important akan
+                   mengalahkan utilitas Bootstrap (.text-success/.text-danger) pada sel. */
+        #page1 #tabel tbody td {
+            font-size: 14px;
+            color: var(--text-main, #1f2937);
+            border-color: #f3f4f6 !important;
+            border-left: none;
+            border-right: none;
+        }
 
-  #mainTable td:first-child .btn-success {
-    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-  }
+        #page1 #tabel tbody tr:hover {
+            background-color: transparent !important;
+        }
 
-  #mainTable td:first-child .btn-warning {
-    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
-  }
+        #page1 #tabel td:last-child {
+            font-weight: inherit !important;
+        }
 
-  #mainTable td:first-child .btn-primary {
-    color: #2563eb; border-color: #cfdcff; background: #e8edff;
-  }
+        /* tableMaster2.css: chrome DataTables (info/pagination) diwarnai ungu (--sp-primary) dan
+                   diberi padding tambahan — dikembalikan ke nilai bawaan jquery.dataTables.css 1.13.2. */
+        #page1 .dataTables_wrapper {
+            padding: 0;
+        }
 
-  #mainTable td:first-child .btn-danger {
-    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-  }
+        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 2px !important;
+            margin-left: 2px;
+            border: 1px solid transparent !important;
+            color: #333 !important;
+        }
 
-  #mainTable td:first-child .btn-info {
-    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
-  }
+        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #fff !important;
+            border-color: #979797 !important;
+            color: #333 !important;
+        }
+
+        #page1 .dataTables_wrapper .dataTables_info {
+            color: inherit;
+            font-size: inherit;
+            padding-top: 0.755em !important;
+        }
   </style>
 
   <style>
@@ -255,23 +289,23 @@
   #tabel_filter {
       display: flex;
       align-items: flex-end;
-      margin-top: 8px;  
+      margin-top: 8px;
       margin-right: 10px;
       margin-bottom: -10px;
     }
 
   #tabel_filter label input {
       width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
 
   #tabel_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
+      font-weight: 600;
+      font-size: 0.9rem;
       color: #333;
     }
   </style>
@@ -289,22 +323,22 @@
 
   #tabel2_filter label input {
       width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
 
   #tabel2_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
+      font-weight: 600;
+      font-size: 0.9rem;
       color: #333;
     }
 
   #tabel2_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
+      border-color: #007bff;
+      outline: none;
     }
   </style>
 {{-- end tampilan search bar 2 --}}
@@ -319,10 +353,10 @@
     }
     #tabel_add_list_pelanggan_filter label input {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
   </style>
 {{-- end tampilan search bar modal add pelanggan --}}
@@ -336,9 +370,9 @@
     }
     #tabel_add_list_sales_filter label input {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
       font-size: 0.65rem;
     }
   </style>
@@ -348,9 +382,9 @@
   <style>
     #input_search_barang_all {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
       font-size: 0.65rem;
       display: flex;
       align-items: flex-end;
@@ -374,19 +408,11 @@
 </div>
 
 <div id="page1" class="container-fluid">
-  <div class="">
-    <!-- <div id="qrcode"></div> -->
-    <div class="row">
-      <div class="col-12 text-left">
-        <h2 style="margin-top:-85px;">Permintaan Transfer Barang</h2>
-      </div>
-    </div>
-  </div>
 
-  {{-- PRT Belum Otorisasi & PRT Sudah Otorisasi yang tadinya 2 tab terpisah
-       (#tabel/#tabel2) digabung jadi 1 tabel (#mainTable), status otorisasinya
-       dibedakan lewat kolom badge "Otorisasi" + filter di modal Filter. --}}
-  <div id="contentContainer" class="tb-report">
+  {{-- PRT Belum Otorisasi & PRT Sudah Otorisasi yang tadinya 2 tab terpisah digabung jadi 1 tabel
+       (#tabel), status otorisasinya dibedakan lewat kolom Oto + filter di modal Filter. Kartu +
+       toolbar + tabel mengikuti gudang/ubahkemasanbarang.blade.php (skema po-*, DataTables). --}}
+  <div id="contentContainer" class="container-fluid">
     <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
     <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
     <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
@@ -397,66 +423,68 @@
     <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    <div class="toolbar">
-      {{-- Date range (.filter-wrap + #inputDate1/#inputDate2, onchange memanggil ulang loadAll()). --}}
-      <div class="filter-wrap">
-        <label>Periode</label>
-        <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
-          onchange="loadAll()">
-        <span class="filter-sep">s/d</span>
-        <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
-          onchange="loadAll()">
-      </div>
+    <div class="card">
+      <div class="card-body" style="padding:0;">
 
-      <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
-        oninput="currentPage = 1; renderTabel()" style="width:200px">
+        <div class="po-toolbar">
+          <div class="po-filter-wrap">
+            <label>Periode</label>
+            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+            <span class="po-filter-sep">s/d</span>
+            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
+          </div>
 
-      <div class="period-select-wrap">
-        <label for="tampilLen">Tampilkan</label>
-        <select class="period-select" id="tampilLen" onchange="onChangeTampilLen()">
-          <option value="10" selected>10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="-1">Semua</option>
-        </select>
-      </div>
+          <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
 
-      <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-        <i class="bi bi-filter-lg"></i> Filter
-      </button>
+          {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — diikat ke
+               DataTables lewat ikatPanjangHalaman() di renderTabel(), bukan onchange inline. --}}
+          <div class="po-len-wrap">
+            <label for="tampilLen">Tampilkan</label>
+            <select class="po-len-inp" id="tampilLen">
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="-1">Semua</option>
+            </select>
+          </div>
 
-      @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
-        <div class="action-group">
-          <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
+          <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
+            <i class="bi bi-funnel"></i> Filter
+          </button>
+
+          @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
+            <div class="po-toolbar-act">
+              <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
+            </div>
+          @endif
         </div>
-      @endif
-    </div>
 
-    <!-- Bar kolom tersembunyi (diisi oleh report-table.js / ReportTable) -->
-    <div id="rtBar"></div>
+        {{-- Bar kolom tersembunyi — diisi ReportTable.init() (lihat $(document).ready). --}}
+        <div id="rtBar"></div>
 
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table class="tb" id="mainTable">
+        <table id="tabel" class="data-table po-aksi-hover">
           <thead>
             <tr>
-              <th>Aksi</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th style="padding: 4px 12px;" scope="col">No Bukti</th>
+              <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+              <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+              <th style="padding: 4px 12px;" scope="col">Oto</th>
+              <th style="padding: 4px 12px;" scope="col">User Oto</th>
+              <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
             </tr>
           </thead>
-          <tbody id="tabel2_data"></tbody>
+          <tbody id="tabel2_data" class="text-left"></tbody>
         </table>
-      </div>
-      <div class="table-footer">
-        <span id="footerLabel2">Belum ada data</span>
-        <div class="pager-btns" id="pagerBtns"></div>
-      </div>
-    </div>
 
-    <div class="rt-hint">
-      <i class="bi bi-info-circle"></i>
-      Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-      sembunyikan kolom.
+        <div class="po-rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+          untuk menyembunyikan kolom.
+        </div>
+
+      </div>
     </div>
 
   </div>
@@ -520,8 +548,8 @@
            show/hide kolom Actions di fungsi yang sama ikut batal jalan. --}}
       <h2 id="formTitle" style="display:none;"></h2>
     </div>
-    <div class="col-6 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid"
+    <div class="col-6 text-right" id="contentContainer">
+      <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
           onclick="buttonCloseForm()">
         Close
       </button>
@@ -530,7 +558,7 @@
 
   <div id="modalBodyAddMain" class="">
     <div class="modal-body">
-      <div class="row"> 
+      <div class="row">
         <div class="col-md-3">
           <div class="row">
             <input type="hidden" class="form-control" id="input_add_nourut" placeholder="No Urut" disabled>
@@ -571,7 +599,7 @@
                 <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
-            
+
           </div>
         </div>
 
@@ -598,7 +626,7 @@
 
             <div class="col-md-12">
               <div class="form-group">
-        
+
                 <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal" class="form-control text-left align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
               </div>
             </div>
@@ -615,7 +643,7 @@
             </div>
             <div class="col-md-12">
               <div class="form-group">
-          
+
                 <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="onChangeGudangTujuan()">
                 </select>
               </div>
@@ -650,8 +678,8 @@
           <hr/>
 
           <div class="row ">
-            <div class="col-md-12 mt-2 text-left" hidden>
-              <button type="button" class="btn btn-lg btn-pill-flat btn-chip-biru" style="margin-top: -35px;"
+            <div class="col-md-12 mt-2 text-left" id="contentContainer" hidden>
+              <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary" style="margin-top: -35px;"
                 onclick="buttonShowHideHeader()"><b>Show/Hide Header</b></button>
             </div>
           </div>
@@ -696,7 +724,7 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="col-md-3">
                   <div class="row">
 
@@ -714,7 +742,7 @@
                         </div>
                       </div>
                     </div>
-  
+
                     <div class="col-md-12">
                       <div class="row">
                         <div class="col-4" style="margin-top:-10px">
@@ -729,7 +757,7 @@
                         </div>
                       </div>
                     </div>
-  
+
                   </div>
                 </div>
 
@@ -750,7 +778,7 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="col-md-6">
                   <div class="row">
                     <div class="col-md-12">
@@ -766,10 +794,10 @@
                     </div>
                   </div>
                 </div>
-  
+
               </div>
             </div>
-  
+
             {{-- budi sementara 2 --}}
             <div class="col-md-3" hidden>
               <div class="row">
@@ -800,7 +828,7 @@
                 </div>
               </div>
             </div>
-  
+
             <div class="col-md-3" hidden>
               <div class="row">
                 <div class="col-md-6">
@@ -821,7 +849,7 @@
                 </div>
               </div>
             </div>
-  
+
             <div class="col-md-3" hidden>
               <div class="row">
                 <div class="col-6" style="margin-top:-40px">
@@ -829,7 +857,7 @@
                     <label>Draft PO</label>
                   </div>
                 </div>
-  
+
                 <div class="col-md-6" style="margin-top:-40px">
                   <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
                     <option value=0 selected>Tidak</option>
@@ -838,65 +866,50 @@
                 </div>
               </div>
             </div>
-  
+
           </div>
-            
+
         </div>
             <hr/>
       </div>
 
     </div>
-    
+
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
-        <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
-            <table id="tabel_add" class="table table-bordered table-hover table-responsive-lg">
-              <thead class="text-center">
-                <tr>
-                  <th style="padding: 4px 12px; width:120px;" scope="col">Kode Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                  <th style="padding: 4px 12px;" scope="col">Qnt</th>
-                  <th style="padding: 4px 12px;" scope="col">Sat</th>
-                  <th id="thAction" style="padding: 4px 12px;" scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tabel_data_add" class="text-left" >
-                <tr>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>1</td>
-                  <td class="text-center tdAction">
-                    <div class="btn-group" role="group">
-                      <button class="btn btn-warning btn-sm" type="button" title="Details" onclick="">
-                        <i class="bi bi-info-circle-fill"></i>
-                      </button>
-                      <button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="">
-                        <i class="bi bi-key-fill"></i>
-                      </button>
-                      <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="">
-                        <i class="bi bi-pencil-fill"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        {{-- .tb-report cuma membungkus tabel item — TIDAK seluruh form, karena
+             `.tb-report *{margin:0;padding:0}` di report-table.css akan menghapus gutter grid
+             Bootstrap dan padding form-control di bawahnya. Isi tbody dirender ulang oleh
+             refreshDataTableAdd(); id #thAction / class .tdAction dipakai setFormMode() untuk
+             menyembunyikan kolom Actions di mode Detail. --}}
+        <div class="tb-report container-fluid mt-2">
+          <div class="table-outer">
+            <div class="table-wrap" style="max-height:40vh;">
+              <table id="tabel_add" class="tb">
+                <thead>
+                  <tr>
+                    <th style="width:120px;">Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th class="num">Qnt</th>
+                    <th class="text-center">Sat</th>
+                    <th id="thAction" class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_add">
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <div class="row">
-          <div class="col-md-12 mt-2 text-right">
-            <button id='buttonPlusTambahItem' type="button" class="btn btn-lg btn-pill-flat btn-chip-biru"
+          <div class="col-md-12 mt-2 text-right" id="contentContainer">
+            <button id='buttonPlusTambahItem' type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
               onclick="buttonAddAddItem()">Tambah Item</button>
           </div>
         </div>
 
         <!-- ADD add -->
         <div id="addAddItem" class="container-fluid showhide">
-          <hr/>
-          
             <div class="row">
               <div class="col-4">
                 <h4 id="h4AddAddItem" style="margin-left:-35px;">Add Item</h4>
@@ -904,7 +917,7 @@
               </div>
             </div>
 
-          <div class="row">
+          <div class="row" id="formBsGrid">
             <div class="col-md-12">
               <div class="row">
 
@@ -916,7 +929,7 @@
                           <label>Kode Barang</label>
                         </div>
                       </div>
-                      <div class="col-md-4" style="margin-top:-10px;"> 
+                      <div class="col-md-4" style="margin-top:-10px;">
                         <div class="input-group form-group">
                           <input type="text" class="form-control" id="input_add_add_kodebarang">
                           <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" tabindex="1">
@@ -939,7 +952,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
                   </div>
 
                 {{-- <div class="col-md-6" style="margin-left:-50px;"> --}}
@@ -969,7 +982,7 @@
                     </div>
                   </div>
 {{-- onchange="onChangeInputAddAddHarga()" --}}
-                    
+
 
                 {{-- </div> --}}
 
@@ -978,14 +991,14 @@
           </div>
 
           <div class="row mt-2">
-            <div class="col-md-12 text-right" style="margin-top:-40px;">
-              <button type="button" class="btn btn-lg btn-pill-action btn-batal-add"
+            <div class="col-md-12 text-right" id="contentContainer" style="margin-top:-40px;">
+              <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
               onclick="closeShowHideAdd()">Batal</button>
 
-              <button type="button" id="submitAddAdd" class="btn btn-lg btn-pill-action btn-chip-biru"
+              <button type="button" id="submitAddAdd" class="btn btn-primary btn-action-primary btn-pill-primary"
               onclick="submitAddAdd()">Simpan</button>
 
-              <button type="button" id="submitAddEdit" class="btn btn-lg btn-pill-action btn-chip-biru"
+              <button type="button" id="submitAddEdit" class="btn btn-primary btn-action-primary btn-pill-primary"
               onclick="submitAddEdit()">Submit Edit</button>
             </div>
 
@@ -1343,7 +1356,7 @@
           <div class="col-4 d-flex align-items-center">
             <label style="margin-top:6px;">Disc %</label>
           </div>
-          <div class="col-9" style="margin-left:-25px;"> 
+          <div class="col-9" style="margin-left:-25px;">
             <input type="number" class="form-control text-right" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00">
           </div>
         </div>
@@ -1354,7 +1367,7 @@
           <div class="col-4 d-flex align-items-center">
             <label style="margin-top:6px;">DiscRp</label>
           </div>
-          <div class="col-9" style="margin-left:-25px;"> 
+          <div class="col-9" style="margin-left:-25px;">
             <input type="number" class="form-control text-right" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value ="0.00" >
           </div>
         </div>
@@ -1365,7 +1378,7 @@
           <div class="col-4 d-flex align-items-center">
             <label style="margin-top:6px;">DPP</label>
           </div>
-          <div class="col-9" style="margin-left:-45px;"> 
+          <div class="col-9" style="margin-left:-45px;">
             <input type="text" class="form-control text-right" id="input_add_dpp" value ="0.00" disabled>
           </div>
         </div>
@@ -1407,14 +1420,14 @@
         </div>
         <div class="col-6 text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
-          height: 30px;  
-          padding: 4px 12px; 
-          border-radius: 20px; 
-          font-size: 0.75rem; 
-          font-weight: 600; 
-          text-transform: uppercase; 
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="buttonCloseForm()">Close</button>
         </div>
       </div>
@@ -1479,7 +1492,7 @@
             <textarea  style="width: 100%; resize: none" rows=3  class="form-control text-left" id="input_detail_alamatpelanggan" disabled></textarea>
           </div>
         </div>
-        
+
       </div>
     </div>
 
@@ -1626,13 +1639,13 @@
 <div class="row ">
 <div class="col-md-12 mt-2 text-left">
   <button type="button" class="btn btn-primary btn-lg" style="
-  height: 30px; 
+  height: 30px;
   margin-top: -40px;
-  padding: 4px 12px; 
-  border-radius: 20px; 
-  font-size: 0.75rem; 
-  font-weight: 600; 
-  text-transform: uppercase; 
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
   onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
@@ -2157,8 +2170,7 @@ let lastRows = (function() {
   return belum.concat(sudah);
 })();
 let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
-let pageSize = 10;
-let currentPage = 1;
+let pageSize = 10; // dipakai sebagai pageLength DataTables di renderTabel()
 
 var g_href = 'permintaantransferbarang';
 var g_modeReport = '2';
@@ -2172,10 +2184,7 @@ function setDefaultHeader() {
   gcart_header = [
     ['nobukti', 'No Bukti', 1, 'varchar', 0, 0],
     ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-    ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
-    ['IsOtorisasi1', 'Otorisasi', 1, 'varchar', 0, 0],
-    ['OtoUser1', 'User Oto', 1, 'varchar', 0, 0],
-    ['TglOto1', 'Tanggal Oto', 1, 'date', 0, 0]
+    ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0]
   ];
 }
 
@@ -2305,137 +2314,193 @@ function filterByOtorisasi(rows, filterVal) {
   return rows;
 }
 
+// Markup + pemetaan warna/ikon tombol mengikuti aksiButtonsHtml() di gudang/ubahkemasanbarang.blade.php
+// (.po-aksi-wrap, cuma title, tanpa tooltip Bootstrap). Fungsi yang dipanggil tetap milik halaman ini.
 function aksiButtonsHtml(r) {
   const nobukti = r.nobukti;
-  const detailBtn =
-    '<button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
+  let tombolAksi =
+    '<button type="button" class="btn btn-warning btn-sm" title="Detail" onclick="buttonDetail(\'' +
     nobukti + '\')"><i class="bi bi-info"></i></button>';
 
   if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
     // Sudah otorisasi (Detail + Batal Otorisasi + Print)
-    return detailBtn +
-      '<button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
+    tombolAksi +=
+      '<button type="button" class="btn btn-danger btn-sm" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
       nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
-      '<button type="button" class="btn btn-info btn-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
+      '<button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint(\'' +
       nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  } else {
+    // Belum otorisasi (Detail + Otorisasi + Edit)
+    tombolAksi +=
+      '<button type="button" class="btn btn-primary btn-sm" title="Otorisasi" onclick="buttonOtorisasi(\'' +
+      nobukti + '\')"><i class="bi bi-key"></i></button>' +
+      '<button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonEdit(\'' +
+      nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
   }
 
-  // Belum otorisasi (Detail + Otorisasi + Edit)
-  return detailBtn +
-    '<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
-    nobukti + '\')"><i class="bi bi-key"></i></button>' +
-    '<button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
-    nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
+  return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
 }
 
+/* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel dengan
+   #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti rtPindahBar() di
+   gudang/ubahkemasanbarang.blade.php. */
+function rtPindahBar(idBar, idTabel) {
+  let bar = document.getElementById(idBar);
+  let tabel = document.getElementById(idTabel);
+  if (!bar || !tabel) { return; }
+
+  let acuan = tabel;
+  if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+    acuan = document.getElementById(idTabel + '_wrapper') || tabel;
+  }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan);
+  }
+}
+
+// Kotak cari, dropdown "Tampilkan", dan periode diikat lewat JS (bukan atribut inline) dengan
+// penjaga dataset.rtBound supaya tidak terpasang dobel tiap renderTabel().
+function ikatSearch() {
+  let input = document.getElementById('searchBox2');
+  if (!input || input.dataset.rtBound) { return; }
+  input.dataset.rtBound = '1';
+
+  input.addEventListener('input', function() {
+    $('#tabel').DataTable().search(input.value).draw();
+  });
+}
+
+function ikatPanjangHalaman() {
+  let sel = document.getElementById('tampilLen');
+  if (!sel || sel.dataset.rtBound) { return; }
+  sel.dataset.rtBound = '1';
+  sel.value = String(pageSize);
+
+  sel.addEventListener('change', function() {
+    let n = Number(sel.value);
+    pageSize = (n === -1 || n > 0) ? n : 10;
+    $('#tabel').DataTable().page.len(pageSize).draw();
+  });
+}
+
+// Rentang yang belum lengkap tidak memicu request, dan urutan tanggal terbalik ditolak dengan
+// peringatan — sama seperti ikatPeriode() di gudang/ubahkemasanbarang.blade.php.
+function ikatPeriode() {
+  let awal = document.getElementById('inputDate1');
+  let akhir = document.getElementById('inputDate2');
+  if (!awal || !akhir || awal.dataset.rtBound) { return; }
+  awal.dataset.rtBound = '1';
+
+  let onUbah = function() {
+    if (!awal.value || !akhir.value) { return; }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
+      return;
+    }
+    loadAll();
+  };
+  awal.addEventListener('change', onUbah);
+  akhir.addEventListener('change', onUbah);
+}
+
+// Tinggi tabel mengikuti sisa ruang layar. Berhenti diam-diam kalau #page1 sedang disembunyikan
+// (loadAll() masih bisa terpanggil saat #page2/#page3 tampil); dihitung ulang begitu #page1
+// ditampilkan lagi (lihat buttonCloseForm()).
+function aturTinggiTabel() {
+  let page = document.getElementById('page1');
+  if (!page || page.offsetParent === null) { return; }
+
+  let area = document.getElementById('content');
+  let wrap = document.querySelector('#page1 .po-table-wrap');
+  if (!area || !wrap) { return; }
+
+  wrap.style.maxHeight = 'none';
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+  let kotak = wrap.getBoundingClientRect();
+  let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+  let sisa = batasBawah - kotak.top - bawah - 4;
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
+}
+
+// IsOtorisasi1/OtoUser1/TglOto1 dikeluarkan dari cols meski masih tersimpan di susunan kolom lama —
+// ketiganya kolom tetap (Oto/User Oto/Tgl Oto) yang ditambahkan sendiri di bawah, bukan kolom
+// geser/sembunyi.
 function renderTabel() {
-  const cols = gcart_header.filter(c => c[2] === 1);
-  const thead = document.querySelector('#mainTable thead');
-  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+  const cols = gcart_header.filter(c => c[2] === 1 &&
+    c[0] !== 'IsOtorisasi1' && c[0] !== 'OtoUser1' && c[0] !== 'TglOto1');
 
-  const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-  let rows = lastRows;
-  if (search) {
-    rows = rows.filter(function(r) {
-      return cols.some(function(c) {
-        const v = pickCI(r, c[0]);
-        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-      });
-    });
-  }
-  rows = filterByOtorisasi(rows, globalOtorisasi);
-
-  const tbody = document.getElementById('tabel2_data');
-  $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
-
-  if (!rows.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-    document.getElementById('footerLabel2').textContent = 'Tidak ada data';
-    document.getElementById('pagerBtns').innerHTML = '';
-    return;
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
   }
 
-  const total = rows.length;
-  const totalPages = (pageSize === -1) ? 1 : Math.max(1, Math.ceil(total / pageSize));
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
-
-  let pageRows = rows;
-  let startIdx = 0;
-  if (pageSize !== -1) {
-    startIdx = (currentPage - 1) * pageSize;
-    pageRows = rows.slice(startIdx, startIdx + pageSize);
+  const thead = document.querySelector('#tabel thead');
+  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>',
+    '<tr><th style="padding: 4px 12px;" scope="col">Actions</th>');
+  const barisHead = thead.querySelector('tr');
+  if (barisHead) {
+    barisHead.insertAdjacentHTML('beforeend', `
+      <th style="padding: 4px 12px;" scope="col">Oto</th>
+      <th style="padding: 4px 12px;" scope="col">User Oto</th>
+      <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
+    `);
   }
+
+  // Cari/paging/sorting dipegang DataTables — di sini cuma filter Otorisasi dari modal.
+  const rows = filterByOtorisasi(lastRows, globalOtorisasi);
 
   let html = '';
-  pageRows.forEach(function(r) {
-    html += '<tr class="data-row">';
+  rows.forEach(function(r) {
+    html += '<tr>';
     html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
     html += cols.map(function(c) {
       const v = pickCI(r, c[0]);
-      if (c[0] === 'IsOtorisasi1') {
-        return (Number(v) === 1) ?
-          '<td><span class="sp-badge is-active">Sudah</span></td>' :
-          '<td><span class="sp-badge is-inactive">Belum</span></td>';
-      }
       if (c[3] === 'date') {
         return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
       }
       return '<td>' + nullToEmpty(v) + '</td>';
     }).join('');
+
+    const sudahOto = Number(pickCI(r, 'IsOtorisasi1')) === 1;
+    const otoUser = pickCI(r, 'OtoUser1');
+    const tglOto = pickCI(r, 'TglOto1');
+    html += sudahOto ?
+      '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>' :
+      '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+    html += '<td>' + nullToEmpty(otoUser) + '</td>';
+    html += '<td>' + (tglOto ? doSetFormatDate(tglOto, '/') : '') + '</td>';
     html += '</tr>';
   });
 
-  tbody.innerHTML = html;
-  document.getElementById('footerLabel2').textContent =
-    'Menampilkan ' + (startIdx + 1) + '-' + (startIdx + pageRows.length) + ' dari ' + total + ' baris';
-  renderPager(totalPages);
-  $('[data-toggle="tooltip"]').tooltip({
-    container: 'body',
-    boundary: 'window'
+  document.getElementById('tabel2_data').innerHTML = html;
+
+  // dom membuat sendiri kotak scroll .po-table-wrap (header sticky) + baris info & pager.
+  $('#tabel').DataTable({
+    lengthChange: false,
+    pageLength: pageSize,
+    order: [],
+    columnDefs: [{ targets: [0], orderable: false }],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
   });
-}
 
-// Dropdown "Tampilkan"
-function onChangeTampilLen() {
-  pageSize = Number($('#tampilLen').val());
-  currentPage = 1;
-  renderTabel();
-}
+  rtPindahBar('rtBar', 'tabel');
+  ikatSearch();
+  ikatPanjangHalaman();
+  ikatPeriode();
 
-function goToPage(p) {
-  currentPage = p;
-  renderTabel();
-}
-
-// render tombol Prev/nomor halaman/Next di kanan table-footer, maksimal 5
-// nomor halaman sekaligus, digeser mengikuti currentPage.
-function renderPager(totalPages) {
-  const el = document.getElementById('pagerBtns');
-  if (!el) return;
-
-  if (totalPages <= 1) {
-    el.innerHTML = '';
-    return;
+  let inputSearch = document.getElementById('searchBox2');
+  if (inputSearch && inputSearch.value) {
+    $('#tabel').DataTable().search(inputSearch.value).draw();
   }
 
-  let html = '';
-  html += '<div class="pg' + (currentPage === 1 ? ' disabled' : '') +
-    '" onclick="goToPage(' + Math.max(1, currentPage - 1) + ')"><i class="bi bi-chevron-left"></i></div>';
-
-  let start = Math.max(1, currentPage - 2);
-  let end = Math.min(totalPages, start + 4);
-  start = Math.max(1, end - 4);
-
-  for (let p = start; p <= end; p++) {
-    html += '<div class="pg' + (p === currentPage ? ' active' : '') +
-      '" onclick="goToPage(' + p + ')">' + p + '</div>';
-  }
-
-  html += '<div class="pg' + (currentPage === totalPages ? ' disabled' : '') +
-    '" onclick="goToPage(' + Math.min(totalPages, currentPage + 1) + ')"><i class="bi bi-chevron-right"></i></div>';
-
-  el.innerHTML = html;
+  aturTinggiTabel();
 }
 
 // Filter Modal (Otorisasi: Semua/Sudah Otorisasi/Belum)
@@ -2458,8 +2523,7 @@ $(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
 
 function applyModalFilter() {
   globalOtorisasi = $('#modalOtorisasi').val();
-  currentPage = 1;
-  renderTabel();
+  renderTabel(); // DataTables di-init ulang, jadi otomatis kembali ke halaman 1
   $('#modalFilter').modal('hide');
 }
 
@@ -2486,7 +2550,7 @@ let tipeformitem = ''
 $(document).ready(function(){
       doSetHeader(g_modeReport);
       ReportTable.init({
-        table: '#mainTable',
+        table: '#tabel',
         bar: '#rtBar',
         onChange: renderTabel
       });
@@ -2544,7 +2608,7 @@ $(document).ready(function(){
 
           if (dataAddAddListItem.length === 1) {
             buttonAddAddPickBarangAll(0);
-            return; 
+            return;
           }
 
           buttonAddAddListBarang();
@@ -2725,7 +2789,7 @@ function onChangeDraftPO () {
 
 function onChangeHari () {
   console.log('onChangeHari')
-  if (tipeform == 'edit') 
+  if (tipeform == 'edit')
   {
     let value = $("#input_add_hari").val()
     console.log(value)
@@ -2749,7 +2813,7 @@ function onChangeInputAddDisc () {
     }
 }
 
-function onChangeInputAddDiscRp () 
+function onChangeInputAddDiscRp ()
 {
   // document.getElementById("input_add_disc").value = '0.00'
   console.log('onChangeDiscRp')
@@ -2766,7 +2830,7 @@ function onChangeInputAddDiscRp ()
     }
 }
 
-function refreshUpdateHeader () 
+function refreshUpdateHeader ()
 {
   let _token  = $("#_token").val()
   let nobukti = $("#input_add_nobukti").val()
@@ -2790,7 +2854,7 @@ function refreshUpdateHeader ()
   })
 }
 
-function onChangeHeaderSP (field, value , field1 = null , value2 = null) 
+function onChangeHeaderSP (field, value , field1 = null , value2 = null)
 {
   let _token  = $("#_token").val()
   let nobukti = $("#input_add_nobukti").val()
@@ -2844,7 +2908,7 @@ function submitAddAdd () {
   console.log('submitAddAdd')
 
   let checkDate = new Date($("#input_add_tanggal").val())
-  
+
   let periode_bulan = document.getElementById("periode_bulan").value
   let periode_tahun = document.getElementById("periode_tahun").value
 
@@ -2966,7 +3030,7 @@ function submitAddEdit () {
   console.log('submitAddEdit')
 
   let checkDate = new Date($("#input_add_tanggal").val())
-  
+
   let periode_bulan = document.getElementById("periode_bulan").value
   let periode_tahun = document.getElementById("periode_tahun").value
 
@@ -3221,7 +3285,7 @@ function buttonAddAddItem () {
 }
 
 function buttonAddEditItem (i) {
-  
+
   tipeformitem = 'edit'
   let _token = $("#_token").val();
   $('.showhide').hide();
@@ -3529,7 +3593,7 @@ function buttonAddListLokasiPenerima () {
 }
 
 function buttonAddListValas () {
-  
+
   $('#tabel_add_list_valas').DataTable().destroy();
   $.ajax({
     url: "{!! url('polistvalas') !!}",
@@ -3797,7 +3861,7 @@ function onChangeInputAddAddNosat () {
   })
 
 }
-      
+
 function loadAll () {
   let dataBelum = [], dataSudah = [];
 
@@ -3820,7 +3884,6 @@ function loadAll () {
   });
 
   lastRows = dataBelum.concat(dataSudah);
-  currentPage = 1;
   renderTabel();
 
   console.log('load all selesai');
@@ -3846,12 +3909,12 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-        
+
         // console.log(res[0][0].IsOtorisasi1)
 
       }
     })
-    
+
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=7) {
       let tempArray = dataPrint.slice(i,i+7)
@@ -4397,7 +4460,7 @@ function submitPrint (nobukti) {
          tempPrintStr += `</tbody>`;
 
          tempPrintStr += `</table>
-         
+
           <hr style="margin-top: -6px" />
 
          <div class="footer-sign font-family: sans-serif;
@@ -4453,7 +4516,7 @@ function submitPrint (nobukti) {
                <td class="no-border text-right">Page ${i+1} of ${arrayDataPrint.length}</td>
              </tr>
            </table>
-           
+
          </div>`
 
 
@@ -4475,9 +4538,9 @@ function submitPrint (nobukti) {
 
 function formatDateTime (dateString) {
   if (!dateString) return '-';
-  
+
   const date = new Date(dateString);
-  
+
   // Format: DD/MM/YYYY - HH:MM:SS
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -4485,7 +4548,7 @@ function formatDateTime (dateString) {
   // const hours = String(date.getHours()).padStart(2, '0');
   // const minutes = String(date.getMinutes()).padStart(2, '0');
   // const seconds = String(date.getSeconds()).padStart(2, '0');
-  
+
   return `${day}/${month}/${year}`;
   // return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
 }
@@ -4860,7 +4923,7 @@ function lockFormAdd () {
   document.getElementById("input_add_kodeGudangTujuan").disabled = true;
 }
 
-function buttonShowHideHeader () 
+function buttonShowHideHeader ()
 {
   var modal = document.getElementById("modalBodyAddMainHeader");
   console.log($('#modalBodyAddMainHeader').css('display'))
@@ -4981,16 +5044,18 @@ function buttonCloseForm () {
   $('#page3').hide();
   $('#page2').hide();
   $('#page1').show();
+  aturTinggiTabel();
 
 }
 
 function buttonCloseFormDetail () {
   $('#page3').hide();
   $('#page1').show();
+  aturTinggiTabel();
 
 }
 
-function submitAdd () 
+function submitAdd ()
 {
 
   let alamatpelanggan = $("#input_add_alamatsupplier").val();
@@ -5101,10 +5166,10 @@ function refreshDataTableAdd (NOBUKTI) {
 
   console.log('refreshDataTableAdd' , NOBUKTI)
   if (!NOBUKTI) {
-    
+
     // if(!dataTableAdd.length) {
       let rowTable = `<tr>
-      <td colspan="5">Belum ada barang</td>
+      <td colspan="5" class="text-center text-muted">Belum ada barang</td>
       </tr>`
     // }
     document.getElementById("tabel_data_add").innerHTML = rowTable
@@ -5130,6 +5195,7 @@ function refreshDataTableAdd (NOBUKTI) {
           $('#page3').hide();
           $('#page2').hide();
           $('#page1').show();
+          aturTinggiTabel();
         } else {
           dataHeaderAdd = res.list[0]
           dataTableAdd = res.list
@@ -5137,16 +5203,18 @@ function refreshDataTableAdd (NOBUKTI) {
           let rowTable = ""
           dataTableAdd.forEach((item, i) => {
 
-            rowTable += 
+            rowTable +=
             `<tr>
               <td>${item.KODEBRG}</td>
               <td>${item.NamaBrg}</td>
               <td class="text-right">${item.QNT2 ? parseFloat(item.QNT2).toFixed(2) : '0.00'}</td>
               <td class="text-center">${item.SAT_1}</td>
               <td class="text-center tdAction">
-                ${tipeform == 'edit' ? 
-                `<button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>`
+                ${tipeform == 'edit' ?
+                `<div class="action-buttons">
+                  <button class="btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                  <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+                </div>`
                 : `-`
                 }
               </td>
@@ -5155,7 +5223,7 @@ function refreshDataTableAdd (NOBUKTI) {
 
           if(!dataTableAdd.length) {
             rowTable = `<tr>
-            <td colspan="5">Belum ada barang</td>
+            <td colspan="5" class="text-center text-muted">Belum ada barang</td>
             </tr>`
           }
           document.getElementById("tabel_data_add").innerHTML = rowTable

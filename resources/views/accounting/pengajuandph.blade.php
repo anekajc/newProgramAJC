@@ -1658,7 +1658,7 @@
             if (Number(pickCI(r, 'IsOtorisasi1')) === 1) {
                 // Sudah otorisasi — Batal Otorisasi + Cetak
                 tombolAksi += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
+                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
                     '<button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {
