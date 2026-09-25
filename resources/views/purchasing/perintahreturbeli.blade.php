@@ -5718,7 +5718,7 @@ function refreshDataTableAdd (NOBUKTI) {
             `<tr>
               <td>${item.KODEBRG}</td>
               <td>${item.NamaBrg}</td>
-              <td class="text-right">${item.QNT ? formatAngka(item.QNT) : '0.00'}</td>
+              <td class="text-right">${item.QNT ? formatAngka(Number(item.QNT).toFixed(2)) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td>${item.NORJual}</td>
               <td>${item.nopbl}</td>
