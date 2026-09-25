@@ -2,10 +2,122 @@
 @section('page-title', 'Memorial/Koreksi')
 
 @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
 
 {{-- Header tabel interaktif (geser kolom + roda gigi sembunyikan kolom + bar kolom
      tersembunyi + modal filter) - sama seperti menu purchasing / pengajuandpp. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
+<style>
+  /* Tombol browse (kaca pembesar) tetap menempel ke input, tapi sudutnya membulat
+     (bukan kotak). !important untuk menimpa inline
+     style="border-radius:0" dan aturan .input-group bawaan Bootstrap. */
+  .btn-chip-biru:has(> .bi-search),
+  .btn-browsing:has(> .bi-search) {
+    border-radius: 6px !important;
+  }
+  /* Input di kiri tombol browse ikut membulat di sisi kanannya (lewati input hidden). */
+  .form-control:has(+ .btn > .bi-search),
+  .form-control:has(+ :is([type=hidden], [hidden]) + .btn > .bi-search),
+  .form-control:has(+ .input-group-append > .btn > .bi-search) {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+  }
+</style>
+<style>
+  /* Dropdown "Tampilkan" (jumlah data) di modal browsing - kontrol length bawaan DataTables
+     (lengthChange + lengthMenu 10/25/50/100/Semua), digaya seperti .po-len-wrap di newpo.
+     Letaknya kiri atas, sejajar tepi kiri tabel; kotak pencarian tetap di kanan pada baris
+     yang sama. Hanya baris toolbar yang memang berisi dropdown ini yang diatur (:has), jadi
+     browsing barang yang lengthChange-nya false tidak ikut berubah. !important di flex/max-width
+     untuk menimpa aturan "#form .dataTables_wrapper > .row:first-child > div { flex: 0 0 100% }"
+     yang memaksa tiap kolom toolbar selebar tabel. */
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) > div {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    width: auto;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) .dataTables_filter {
+    margin-bottom: 0 !important;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    background: var(--rt-card, #FFFFFF);
+    border: 1.5px solid var(--rt-border, #E7E8F0);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft, #6B7180);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length select {
+    width: auto;
+    height: auto;
+    margin: 0;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink, #1D2130);
+    text-transform: none;
+    letter-spacing: normal;
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0 !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right center !important;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 
@@ -694,11 +806,11 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   color: #343a40;
 }
 
-/* Tombol browsing tetap menyatu dengan input di sebelah kirinya. */
+/* Tombol browsing berdiri sendiri di samping input, sudutnya membulat semua. */
 #page2 .input-group .btn-browsing,
 #page3 .input-group .btn-browsing,
 .modal-body .input-group .btn-browsing {
-  border-radius: 0 6px 6px 0 !important;
+  border-radius: 6px !important;
 }
 /* Samakan tinggi kaca pembesar dengan input di sampingnya. */
 #page2 .input-group .form-control,
@@ -989,6 +1101,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 <!-- end modal filter otorisasi -->
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
   <div class="row">
     <div class="col-8 text-left">
@@ -1424,9 +1537,11 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <!-- </div> -->
 
+  </div>{{-- /#formBsGrid --}}
   </div>
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
+  <div id="formBsGrid">
 
     <div class="row">
       <div class="col-8 text-left">
@@ -1528,6 +1643,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
 
+    </div>{{-- /#formBsGrid --}}
     </div>
 
 
@@ -2021,6 +2137,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
 
@@ -2214,6 +2331,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
       </div>
@@ -4313,7 +4431,20 @@ function buttonAddListCustomerPT () {
         </tr>`
       })
 
+      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
+      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
+      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
+      // urutan baris tetap urutan dari server.
+      if ($.fn.DataTable.isDataTable('#tabel_mk_customerpt')) { $('#tabel_mk_customerpt').DataTable().destroy() }
       document.getElementById("tabel_data_mk_customerpt").innerHTML = rowTable
+      $("#tabel_mk_customerpt").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
+        "paging": true,
+        "order": [],
+        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      })
       document.getElementById("mkCustomerJudul").innerHTML = pihak
 
       let inputCari = document.getElementById('input_search_customerpt')
@@ -4340,11 +4471,14 @@ function mkIkatSearchCustomerPT () {
   input.dataset.rtBound = '1'
 
   input.addEventListener('input', function () {
-    let cari = input.value.toLowerCase()
-    let baris = document.querySelectorAll('#tabel_data_mk_customerpt tr')
-    baris.forEach(function (tr) {
-      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
-    })
+    // Dulu menyembunyikan baris langsung; sekarang lewat DataTables supaya pencarian
+    // menjangkau semua halaman, bukan hanya baris yang sedang tampil.
+    // let cari = input.value.toLowerCase()
+    // let baris = document.querySelectorAll('#tabel_data_mk_customerpt tr')
+    // baris.forEach(function (tr) {
+    //   tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    // })
+    if ($.fn.DataTable.isDataTable('#tabel_mk_customerpt')) { $('#tabel_mk_customerpt').DataTable().search(input.value).draw() }
   })
 }
 
@@ -5262,7 +5396,20 @@ function buttonAddListPerkiraan (idTujuan) {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
+      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
+      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
+      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
+      // urutan baris tetap urutan dari server.
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_perkiraan')) { $('#tabel_add_list_perkiraan').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
+      $("#tabel_add_list_perkiraan").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
+        "paging": true,
+        "order": [],
+        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      })
 
       let inputCariPerkiraan = document.getElementById('input_search_perkiraan')
       if (inputCariPerkiraan) { inputCariPerkiraan.value = '' }
@@ -5299,11 +5446,14 @@ function mkIkatSearchPerkiraan () {
   input.dataset.rtBound = '1'
 
   input.addEventListener('input', function () {
-    let cari = input.value.toLowerCase()
-    let baris = document.querySelectorAll('#tabel_data_add_list_perkiraan tr')
-    baris.forEach(function (tr) {
-      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
-    })
+    // Dulu menyembunyikan baris langsung; sekarang lewat DataTables supaya pencarian
+    // menjangkau semua halaman, bukan hanya baris yang sedang tampil.
+    // let cari = input.value.toLowerCase()
+    // let baris = document.querySelectorAll('#tabel_data_add_list_perkiraan tr')
+    // baris.forEach(function (tr) {
+    //   tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    // })
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_perkiraan')) { $('#tabel_add_list_perkiraan').DataTable().search(input.value).draw() }
   })
 }
 
@@ -5455,11 +5605,25 @@ function mkAktivaBukaList (idTujuan, perkiraan, keterangan, bukaModal = false) {
           + '<td>' + mkAktivaTgl(item.Tanggal) + '</td>'
           + '</tr>'
       })
-      if (!mkAktivaRows.length) {
-        rowTable = `<tr><td class="text-center" colspan=3>Belum ada data</td></tr>`
-      }
+      // Baris colspan "Belum ada data" ditolak DataTables - diganti language.emptyTable di bawah.
+      // if (!mkAktivaRows.length) {
+      //   rowTable = `<tr><td class="text-center" colspan=3>Belum ada data</td></tr>`
+      // }
 
+      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
+      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
+      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
+      // urutan baris tetap urutan dari server.
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_aktiva')) { $('#tabel_add_list_aktiva').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
+      $("#tabel_add_list_aktiva").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
+        "paging": true,
+        "order": [],
+        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      })
       document.getElementById("mkAktivaJudulPane").innerText = kodeSet === 'AKM' ? 'Akumulasi Penyusutan' : 'Aktiva'
       document.getElementById("mkAktivaJudulGroup").innerText = perkiraan + ' - ' + keterangan
 
@@ -5488,11 +5652,14 @@ function mkIkatSearchAktiva () {
   input.dataset.rtBound = '1'
 
   input.addEventListener('input', function () {
-    let cari = input.value.toLowerCase()
-    let baris = document.querySelectorAll('#tabel_data_add_list_aktiva tr')
-    baris.forEach(function (tr) {
-      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
-    })
+    // Dulu menyembunyikan baris langsung; sekarang lewat DataTables supaya pencarian
+    // menjangkau semua halaman, bukan hanya baris yang sedang tampil.
+    // let cari = input.value.toLowerCase()
+    // let baris = document.querySelectorAll('#tabel_data_add_list_aktiva tr')
+    // baris.forEach(function (tr) {
+    //   tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    // })
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_aktiva')) { $('#tabel_add_list_aktiva').DataTable().search(input.value).draw() }
   })
 }
 
@@ -5892,7 +6059,20 @@ function buttonAddListTitipan (lanjutDariPerkiraan = false) {
         </tr>`
       });
 
+      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
+      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
+      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
+      // urutan baris tetap urutan dari server.
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_titipan')) { $('#tabel_add_list_titipan').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_titipan").innerHTML = rowTable
+      $("#tabel_add_list_titipan").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
+        "paging": true,
+        "order": [],
+        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      })
 
       let inputCariTitipan = document.getElementById('input_search_titipan')
       if (inputCariTitipan) { inputCariTitipan.value = '' }
@@ -5922,11 +6102,14 @@ function mkIkatSearchTitipan () {
   input.dataset.rtBound = '1'
 
   input.addEventListener('input', function () {
-    let cari = input.value.toLowerCase()
-    let baris = document.querySelectorAll('#tabel_data_add_list_titipan tr')
-    baris.forEach(function (tr) {
-      tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
-    })
+    // Dulu menyembunyikan baris langsung; sekarang lewat DataTables supaya pencarian
+    // menjangkau semua halaman, bukan hanya baris yang sedang tampil.
+    // let cari = input.value.toLowerCase()
+    // let baris = document.querySelectorAll('#tabel_data_add_list_titipan tr')
+    // baris.forEach(function (tr) {
+    //   tr.style.display = tr.textContent.toLowerCase().indexOf(cari) !== -1 ? '' : 'none'
+    // })
+    if ($.fn.DataTable.isDataTable('#tabel_add_list_titipan')) { $('#tabel_add_list_titipan').DataTable().search(input.value).draw() }
   })
 }
 

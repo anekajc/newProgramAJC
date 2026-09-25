@@ -5,10 +5,61 @@
 @endsection
 
 @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
 
 {{-- Header tabel interaktif (geser kolom + roda gigi sembunyikan kolom + bar kolom
      tersembunyi + modal filter) - sama seperti menu purchasing. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
+<style>
+  /* Tombol browse (kaca pembesar) tetap menempel ke input, tapi sudutnya membulat
+     (bukan kotak). !important untuk menimpa inline
+     style="border-radius:0" dan aturan .input-group bawaan Bootstrap. */
+  .btn-chip-biru:has(> .bi-search),
+  .btn-browsing:has(> .bi-search) {
+    border-radius: 6px !important;
+  }
+  /* Input di kiri tombol browse ikut membulat di sisi kanannya (lewati input hidden). */
+  .form-control:has(+ .btn > .bi-search),
+  .form-control:has(+ :is([type=hidden], [hidden]) + .btn > .bi-search),
+  .form-control:has(+ .input-group-append > .btn > .bi-search) {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 
@@ -531,11 +582,11 @@ td input[type="checkbox"] {
   color: #343a40;
 }
 
-/* Tombol browsing tetap menyatu dengan input di sebelah kirinya. */
+/* Tombol browsing berdiri sendiri di samping input, sudutnya membulat semua. */
 #page2 .input-group .btn-browsing,
 #page3 .input-group .btn-browsing,
 .modal-body .input-group .btn-browsing {
-  border-radius: 0 6px 6px 0 !important;
+  border-radius: 6px !important;
 }
 </style>
 @endsection
@@ -689,6 +740,7 @@ td input[type="checkbox"] {
 <!-- end modal filter otorisasi -->
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
   <div class="row">
     <div class="col-8 text-left">
@@ -1266,12 +1318,14 @@ td input[type="checkbox"] {
 
 
 
+  </div>{{-- /#formBsGrid --}}
   </div>
 
 
 
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
+  <div id="formBsGrid">
 
     <div class="row">
       <div class="col-8 text-left">
@@ -1464,6 +1518,7 @@ td input[type="checkbox"] {
 
 
 
+    </div>{{-- /#formBsGrid --}}
     </div>
 
 

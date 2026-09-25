@@ -5,9 +5,105 @@
 @endsection
 
 @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter) --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
+<style>
+  /* Dropdown "Tampilkan" (jumlah data) di modal browsing - kontrol length bawaan DataTables
+     (lengthChange + lengthMenu 10/25/50/100/Semua), digaya seperti .po-len-wrap di newpo.
+     Letaknya kiri atas, sejajar tepi kiri tabel; kotak pencarian tetap di kanan pada baris
+     yang sama. Hanya baris toolbar yang memang berisi dropdown ini yang diatur (:has), jadi
+     browsing barang yang lengthChange-nya false tidak ikut berubah. !important di flex/max-width
+     untuk menimpa aturan "#form .dataTables_wrapper > .row:first-child > div { flex: 0 0 100% }"
+     yang memaksa tiap kolom toolbar selebar tabel. */
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) > div {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    width: auto;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) .dataTables_filter {
+    margin-bottom: 0 !important;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    background: var(--rt-card, #FFFFFF);
+    border: 1.5px solid var(--rt-border, #E7E8F0);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft, #6B7180);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length select {
+    width: auto;
+    height: auto;
+    margin: 0;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink, #1D2130);
+    text-transform: none;
+    letter-spacing: normal;
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0 !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right center !important;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 <style>
@@ -361,6 +457,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 </div>
 
 <div id="page2" style="display: none" class="mainpage container-fluid">
+<div id="formBsGrid">
 
   <div class="row" style="margin-bottom: 14px;">
     <div class="col-8 text-left">
@@ -1064,10 +1161,12 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <!-- </div> -->
 
+  </div>{{-- /#formBsGrid --}}
   </div>
 
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
+  <div id="formBsGrid">
 
     <div class="row" style="margin-bottom: 14px;">
       <div class="col-8 text-left">
@@ -1380,6 +1479,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
 
+  </div>{{-- /#formBsGrid --}}
   </div>
 </div>
 
@@ -2663,8 +2763,10 @@ function buttonAddListNoBeli () {
       // }
       document.getElementById("tabel_data_add_list_nobeli").innerHTML = rowTable
       $("#tabel_add_list_nobeli").DataTable({
-        "lengthChange": false,
-          "paging": false ,
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
+          "paging": true ,
     });
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListNoBeli').show();

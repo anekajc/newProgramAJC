@@ -6,6 +6,14 @@
      dengan resources/views/purchasing/pembelianclosingpr.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 <style>

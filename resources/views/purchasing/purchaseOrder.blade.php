@@ -6,12 +6,124 @@
 @endsection
 {{-- tab bar baru--}}
   @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
     {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi).
        File khusus halaman ini: aturannya disalin dari public/css/report-table.css
        dengan scope diganti ke #tabel/#tabel2/#rtBar (satu bar dipakai bersama,
        dipindah lewat JS - lihat poPindahBar()), supaya reset ganas
        `.tb-report * { margin:0; padding:0 }` di file aslinya tidak ikut terbawa. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
+<style>
+  /* Tombol browse (kaca pembesar) tetap menempel ke input, tapi sudutnya membulat
+     (bukan kotak). !important untuk menimpa inline
+     style="border-radius:0" dan aturan .input-group bawaan Bootstrap. */
+  .btn-chip-biru:has(> .bi-search),
+  .btn-browsing:has(> .bi-search) {
+    border-radius: 6px !important;
+  }
+  /* Input di kiri tombol browse ikut membulat di sisi kanannya (lewati input hidden). */
+  .form-control:has(+ .btn > .bi-search),
+  .form-control:has(+ :is([type=hidden], [hidden]) + .btn > .bi-search),
+  .form-control:has(+ .input-group-append > .btn > .bi-search) {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+  }
+</style>
+<style>
+  /* Dropdown "Tampilkan" (jumlah data) di modal browsing - kontrol length bawaan DataTables
+     (lengthChange + lengthMenu 10/25/50/100/Semua), digaya seperti .po-len-wrap di newpo.
+     Letaknya kiri atas, sejajar tepi kiri tabel; kotak pencarian tetap di kanan pada baris
+     yang sama. Hanya baris toolbar yang memang berisi dropdown ini yang diatur (:has), jadi
+     browsing barang yang lengthChange-nya false tidak ikut berubah. !important di flex/max-width
+     untuk menimpa aturan "#form .dataTables_wrapper > .row:first-child > div { flex: 0 0 100% }"
+     yang memaksa tiap kolom toolbar selebar tabel. */
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) > div {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    width: auto;
+  }
+
+  .modal .dataTables_wrapper > .row:first-child:has(.dataTables_length) .dataTables_filter {
+    margin-bottom: 0 !important;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    background: var(--rt-card, #FFFFFF);
+    border: 1.5px solid var(--rt-border, #E7E8F0);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft, #6B7180);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .modal .dataTables_wrapper .dataTables_length select {
+    width: auto;
+    height: auto;
+    margin: 0;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink, #1D2130);
+    text-transform: none;
+    letter-spacing: normal;
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0 !important;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right center !important;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
@@ -1360,6 +1472,7 @@ td input[type="checkbox"] {
 </div>
 
 <div id="page2" class="container-fluid" style="display: none" >
+<div id="formBsGrid">
   <div class="row">
     <div class="col-6 text-left">
       <!-- <h2 style="">Form Purchase Order</h2> -->
@@ -2508,6 +2621,14 @@ td input[type="checkbox"] {
   <div class="container-fluid" style="margin-top: -10px;">
   <div class="row">
 
+    <!-- Total = jumlah Subtotal seluruh item -->
+    <div class="col">
+      <div class="form-group">
+        <label>Total</label>
+        <input type="text" class="form-control text-right" id="input_add_total" value="0.00" disabled>
+      </div>
+    </div>
+
     <!-- Disc % -->
     <div class="col">
       <div class="form-group">
@@ -2551,11 +2672,13 @@ td input[type="checkbox"] {
   </div>
 </div>
 
+</div>{{-- /#formBsGrid --}}
 </div>
 
 <!-- page3 -->
 
 <div id="page3" class="container-fluid" style="display: none" >
+<div id="formBsGrid">
       <div class="row">
         <div class="col-6 text-left">
           <h2>Detail SO</h2>
@@ -3299,6 +3422,7 @@ td input[type="checkbox"] {
 
   </div>
 </div>
+</div>{{-- /#formBsGrid --}}
 </div>
 
 <div id="page4" class="container-fluid" style="display: none" >
@@ -3410,6 +3534,7 @@ td input[type="checkbox"] {
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body" style="overflow-x: auto;">
         <div class="data-table-wrap">
           <table class="data-table">
@@ -3431,6 +3556,7 @@ td input[type="checkbox"] {
           </table>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" id="btn-confirm-otorisasi">
           <i class="fa fa-check"></i> Otorisasi
@@ -6101,6 +6227,8 @@ function buttonAddListPIC () {
     return
   }
 
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pic')) { $('#tabel_add_list_pic').DataTable().destroy() }
+
   $.ajax({
     url: "{!! url('solistpic') !!}",
     type: "post",
@@ -6120,6 +6248,12 @@ function buttonAddListPIC () {
       });
 
       document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
+      $("#tabel_add_list_pic").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
+        "paging": true,
+      });
 
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListPIC').show();
@@ -6842,7 +6976,9 @@ function buttonAddListLokasiPenerima () {
 
       document.getElementById("tabel_data_add_list_lokasipenerima").innerHTML = rowTable
       $("#tabel_add_list_lokasipenerima").DataTable({
-        "lengthChange": false,
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
         "paging": true,
       });
 
@@ -6939,7 +7075,9 @@ function buttonAddListPelanggan ()
 
       document.getElementById("tabel_data_add_list_pelanggan").innerHTML = rowTable
       $("#tabel_add_list_pelanggan").DataTable({
-        "lengthChange": false,
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
           "paging": true ,
       });
 
@@ -6960,6 +7098,7 @@ function buttonAddListPelanggan ()
 }
 
 function buttonAddListBackOffice () {
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_backoffice')) { $('#tabel_add_list_backoffice').DataTable().destroy() }
   $.ajax({
     url: "{!! url('solistbackoffice') !!}",
     type: "get",
@@ -6979,6 +7118,12 @@ function buttonAddListBackOffice () {
 
 
       document.getElementById("tabel_data_add_list_backoffice").innerHTML = rowTable
+      $("#tabel_add_list_backoffice").DataTable({
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
+        "paging": true,
+      });
 
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListBackOffice').show();
@@ -7020,8 +7165,10 @@ function buttonAddListSales () {
 
       document.getElementById("tabel_data_add_list_sales").innerHTML = rowTable
       $("#tabel_add_list_sales").DataTable({
-        "lengthChange": false,
-          "paging": false ,
+        "lengthChange": true,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+        "language": { "lengthMenu": "Tampilkan _MENU_" },
+          "paging": true ,
     });
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListSales').show();
@@ -9458,6 +9605,7 @@ function cleanFormAdd () {
   document.getElementById("input_add_disc").disabled = false
   document.getElementById("input_add_discrp").disabled = false
 
+  document.getElementById("input_add_total").value = '0.00'
   document.getElementById("input_add_disc").value = '0.00'
   document.getElementById("input_add_discrp").value = '0.00'
   document.getElementById("input_add_ppn").value = '0.00'
@@ -9789,6 +9937,8 @@ function refreshDataTableAdd (NOBUKTI) {
           document.getElementById("input_add_tipeppn").value = dataHeaderAdd.PPN
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
+          // Total = jumlah Subtotal (Total) seluruh item.
+          document.getElementById("input_add_total").value = formatAngka(dataTableAdd.reduce((jml, item) => jml + (parseFloat(item.Total) || 0), 0).toFixed(2))
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
           document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
@@ -9914,6 +10064,8 @@ function refreshDataTableEdit (NOBUKTI) {
           document.getElementById("input_add_tipeppn").value = dataHeaderAdd.PPN
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
+          // Total = jumlah Subtotal (Total) seluruh item.
+          document.getElementById("input_add_total").value = formatAngka(dataTableAdd.reduce((jml, item) => jml + (parseFloat(item.Total) || 0), 0).toFixed(2))
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
           document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
@@ -10031,6 +10183,8 @@ function refreshDataTableDetail (NOBUKTI) {
           document.getElementById("input_add_tipeppn").value = dataHeaderAdd.PPN
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
+          // Total = jumlah Subtotal (Total) seluruh item.
+          document.getElementById("input_add_total").value = formatAngka(dataTableAdd.reduce((jml, item) => jml + (parseFloat(item.Total) || 0), 0).toFixed(2))
           document.getElementById("input_add_disc").value = parseFloat(dataHeaderAdd.Disc).toFixed(2)
           document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))
