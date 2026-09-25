@@ -111,33 +111,9 @@
   border-color: var(--border, #e5e7eb) !important;
 }
 
-/* ---------- Gaya dasar tabel daftar ---------- */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.data-table thead th {
-  background: #f9fafb;
-  padding: 11px 16px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--text-muted, #6b7280);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 1px solid var(--border, #e5e7eb);
-}
-
-.data-table tbody td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f3f4f6;
-  color: var(--text-main, #1f2937);
-}
-
-.data-table tbody tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover td { background: #f9fafb; }
+/* Gaya dasar .data-table (tabel, thead th, tbody td, baris terakhir, hover) tidak ditulis
+   di sini - sudah dideklarasikan layout newmasterTest di <style>-nya sendiri, yang dimuat
+   SETELAH @yield('css') sehingga selalu menang (sama seperti marketing/so.blade.php). */
 
 /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
    inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
@@ -207,8 +183,11 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
    pengajuandphtunai, sudah diperbaiki di sana juga).
    ========================================================================== */
 
-/* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
-#page1 #tabel tbody td { padding: 12px 16px !important; }
+/* newmaster.css: `table tbody td { padding: 0 10px !important }` global.
+   Sengaja TIDAK ditimpa lagi - baris dibuat rapat (0 10px) persis seperti memorialkoreksi,
+   yang juga membiarkan aturan global itu menang. padding 13px 14px milik tableMaster2.css
+   tidak !important, jadi ikut kalah. */
+/* #page1 #tabel tbody td { padding: 12px 16px !important; } */
 
 /* tableMaster2.css: skin khusus id #tabel (dipakai juga oleh halaman lain yang
    memuat file itu) - dikembalikan ke nilai .data-table di atas. */
@@ -221,14 +200,15 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
   font-weight: 600;
   border-bottom: 1px solid var(--border, #e5e7eb) !important;
   border-top: none;
-  white-space: normal;
+  white-space: nowrap; /* judul sebaris - kolom panjang digeser lewat scroll horizontal .po-table-wrap */
 }
 #page1 #tabel tbody td {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-main, #1f2937);
   border-color: #f3f4f6 !important;
   border-left: none;
   border-right: none;
+  white-space: nowrap; /* isi sebaris, sama seperti memorialkoreksi */
 }
 #page1 #tabel tbody tr:hover { background-color: transparent !important; }
 #page1 #tabel td:last-child { font-weight: inherit !important; }

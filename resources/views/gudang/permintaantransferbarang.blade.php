@@ -1,19 +1,21 @@
-@extends('gudang.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Permintaan Transfer Barang')
 {{-- tampilan search bar 1 --}}
   @section('css')
 
-  {{-- Tampilan tabel list pakai styling report-table.css +
-       tableMaster2.css yang biasanya di-load global lewat gudang.newmasterx. --}}
+  {{-- Layout newmasterTest (sama seperti accounting/memorialkoreksi) sudah memuat newmaster.css +
+       po-table-header.css, dan TIDAK memuat tableMaster2.css — jadi tabel daftar tidak perlu lagi
+       aturan penetral. Tampilan tabel daftar diambil dari blok .po-list-page di po-table-header.css
+       (class-nya dipasang di div#page1).
+       report-table.css tetap dimuat untuk tabel item (.tb-report) dan modal filter (.rt-filter). --}}
   <link rel="stylesheet"
     href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
-  <link rel="stylesheet"
-    href="{!! URL::asset('css/tableMaster2.css') !!}?v={{ @filemtime(base_path('public/css/tableMaster2.css')) ?: '1' }}">
 
-  {{-- Dimuat ULANG setelah report-table.css/tableMaster2.css/newmaster.css supaya .po-* menang saat
-       spesifisitas seri — sama seperti accounting/pengajuandphtunai.blade.php. --}}
+  {{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
+       saat spesifisitas seri. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
   <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
 
@@ -23,261 +25,6 @@
   }
   </style>
 
-  <style>
-        /* Jarak kartu ke bar atas — sama seperti pengajuandph/bonsementara. `section#content` (bukan
-                   `#content` saja): layout gudang menulis `#content { padding: 28px 32px }` di <style>
-                   inline SETELAH @yield('css')
-
-        ,
-        jadi selector ber-ID saja kalah urutan (spesifisitas seri). */ section#content {
-            padding-top: 12px;
-        }
-
-        /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar. po-table-header.css tidak
-                   menulis .po-len-wrap/.po-len-inp, jadi ditulis lokal di sini — disalin dari
-                   accounting/pengajuandph.blade.php. */
-        .po-len-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--rt-card, #fff);
-            border: 1.5px solid var(--rt-border, #E7E8F0);
-            border-radius: 8px;
-            padding: 5px 12px;
-        }
-
-        .po-len-wrap label {
-            margin: 0;
-            font-size: 11.5px;
-            font-weight: 700;
-            color: var(--rt-ink-soft, #6B7180);
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            white-space: nowrap;
-        }
-
-        .po-len-inp {
-            border: none;
-            background: transparent;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--rt-ink, #1D2130);
-            outline: none;
-            cursor: pointer;
-            padding: 2px 20px 2px 0;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right center;
-        }
-
-        /* ==========================================================================
-                   Dari sini ke bawah: disalin dari accounting/pengajuandph.blade.php (#page1),
-                   yang sendiri disalin dari memorialkoreksi/bonsementara — kelas & tampilan tabel daftar
-                   yang sama persis. Halaman ini masih memuat report-table.css/tableMaster2.css/newmaster.css
-                   lewat layout gudang, jadi aturan penetral di bagian bawah menimpa balik nilai file-file itu
-                   hanya untuk #page1 (bukan melepas file-nya, yang akan merusak halaman lain).
-                   ========================================================================== */
-
-        /* Rule .card global di sebagian layout (flex + align-items:center + efek melayang
-                   saat hover) diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
-        #page1 .card {
-            position: relative;
-            background: var(--white, #fff);
-            border: 1.5px solid var(--border, #e5e7eb) !important;
-            border-radius: var(--radius, 12px) !important;
-            display: block !important;
-            align-items: stretch !important;
-            padding: 0 !important;
-            text-align: left !important;
-            cursor: default !important;
-        }
-
-        #page1 .card:hover {
-            transform: none !important;
-            box-shadow: none !important;
-            border-color: var(--border, #e5e7eb) !important;
-        }
-
-        /* ---------- Gaya dasar tabel daftar (layout gudang tidak mendefinisikan .data-table) ---------- */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-
-        .data-table thead th {
-            background: #f9fafb;
-            padding: 11px 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--text-muted, #6b7280);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            border-bottom: 1px solid var(--border, #e5e7eb);
-        }
-
-        .data-table tbody td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-            color: var(--text-main, #1f2937);
-        }
-
-        .data-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tbody tr:hover td {
-            background: #f9fafb;
-        }
-
-        /* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
-                   inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
-                   Dipakai min-width, BUKAN width. */
-        #tabel {
-            min-width: 100%;
-        }
-
-        /* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
-        #tabel td:first-child:not([colspan]) {
-            vertical-align: middle;
-        }
-
-        #tabel td:first-child .po-aksi-wrap {
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #tabel td:first-child .btn {
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 7px;
-            font-size: 13px;
-            border: 1px solid transparent;
-            box-shadow: none;
-            transition: all .12s ease;
-        }
-
-        #tabel td:first-child .btn:hover {
-            filter: brightness(0.97);
-            transform: translateY(-1px);
-        }
-
-        #tabel td:first-child .btn-success {
-            color: #16a34a;
-            border-color: #cdebd7;
-            background: #e7f7ed;
-        }
-
-        #tabel td:first-child .btn-warning {
-            color: #b45309;
-            border-color: #fbe3bd;
-            background: #fef3e0;
-        }
-
-        #tabel td:first-child .btn-primary {
-            color: #2563eb;
-            border-color: #cfdcff;
-            background: #e8edff;
-        }
-
-        #tabel td:first-child .btn-danger {
-            color: #dc2626;
-            border-color: #f7cfcf;
-            background: #fdeaea;
-        }
-
-        #tabel td:first-child .btn-info {
-            color: #0891b2;
-            border-color: #a5f3fc;
-            background: #ecfeff;
-        }
-
-        /* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
-        table.data-table.po-aksi-hover tbody td:first-child .btn {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity .12s ease;
-        }
-
-        table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* ---------- Penetral kebocoran gaya (lihat catatan di atas) ---------- */
-
-        /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
-        #page1 #tabel tbody td {
-            padding: 12px 16px !important;
-        }
-
-        /* tableMaster2.css: skin khusus id #tabel — dikembalikan ke nilai .data-table di atas. */
-        #page1 #tabel thead th {
-            background: #f9fafb !important;
-            color: var(--text-muted, #6b7280) !important;
-            font-size: 12px !important;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border, #e5e7eb) !important;
-            border-top: none;
-            white-space: normal;
-        }
-
-        /* font-size/color SENGAJA TANPA !important pada td: tableMaster2.css tidak menandainya
-                   !important, jadi spesifisitas ID #page1 sudah cukup, dan !important akan
-                   mengalahkan utilitas Bootstrap (.text-success/.text-danger) pada sel. */
-        #page1 #tabel tbody td {
-            font-size: 14px;
-            color: var(--text-main, #1f2937);
-            border-color: #f3f4f6 !important;
-            border-left: none;
-            border-right: none;
-        }
-
-        #page1 #tabel tbody tr:hover {
-            background-color: transparent !important;
-        }
-
-        #page1 #tabel td:last-child {
-            font-weight: inherit !important;
-        }
-
-        /* tableMaster2.css: chrome DataTables (info/pagination) diwarnai ungu (--sp-primary) dan
-                   diberi padding tambahan — dikembalikan ke nilai bawaan jquery.dataTables.css 1.13.2. */
-        #page1 .dataTables_wrapper {
-            padding: 0;
-        }
-
-        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button {
-            border-radius: 2px !important;
-            margin-left: 2px;
-            border: 1px solid transparent !important;
-            color: #333 !important;
-        }
-
-        #page1 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #fff !important;
-            border-color: #979797 !important;
-            color: #333 !important;
-        }
-
-        #page1 .dataTables_wrapper .dataTables_info {
-            color: inherit;
-            font-size: inherit;
-            padding-top: 0.755em !important;
-        }
-  </style>
 
   <style>
   .rodokNdukurTitik{
@@ -407,7 +154,7 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="page1" class="container-fluid">
+<div id="page1" class="container-fluid po-list-page">
 
   {{-- PRT Belum Otorisasi & PRT Sudah Otorisasi yang tadinya 2 tab terpisah digabung jadi 1 tabel
        (#tabel), status otorisasinya dibedakan lewat kolom Oto + filter di modal Filter. Kartu +
@@ -537,7 +284,7 @@
   </div>
 </div>
 <!-- modal filter -->
-<div id="page2" class="container-fluid" style="display: none" >
+<div id="page2" class="container-fluid po-form-page" style="display: none" >
   <div class="row">
     <div class="col-6 text-left">
       {{-- Judul H2 disembunyikan (disamakan dengan #pageForm di
@@ -674,8 +421,6 @@
       </div>
 
     </div>
-
-          <hr/>
 
           <div class="row ">
             <div class="col-md-12 mt-2 text-left" id="contentContainer" hidden>
@@ -870,7 +615,6 @@
           </div>
 
         </div>
-            <hr/>
       </div>
 
     </div>
@@ -932,7 +676,7 @@
                       <div class="col-md-4" style="margin-top:-10px;">
                         <div class="input-group form-group">
                           <input type="text" class="form-control" id="input_add_add_kodebarang">
-                          <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" tabindex="1">
+                          <button onclick="buttonAddAddListBarang()" id="buttonAddAddListBarang" class="btn btn-chip-biru text-right" tabindex="1">
                             <i class="bi bi-search"></i>
                           </button>
                         </div>
@@ -1340,12 +1084,10 @@
           </div>
 
 
-          <hr/>
 
           </div>
 
 
-        <hr/>
     </div>
 {{-- budi sementara --}}
   <div class="container-fluid" style="margin-top: -10px;" hidden>
@@ -1413,7 +1155,7 @@
 
 <!-- page3 -->
 
-<div id="page3" class="container-fluid" style="display: none" >
+<div id="page3" class="container-fluid po-form-page" style="display: none" >
       <div class="row">
         <div class="col-6 text-left">
           <h2>Detail SO</h2>
@@ -2011,7 +1753,7 @@
           <td></td>
           <td></td>
 
-            <td class="text-center">
+            <td class="text-center action-buttons">
               <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
               <button class="btn btn-success btn-sm" type="button" ><i class="bi bi-pen"></i></button>
               <button class="btn btn-danger btn-sm" type="button" ><i class="bi bi-trash"></i></button>
@@ -2335,7 +2077,7 @@ function aksiButtonsHtml(r) {
       '<button type="button" class="btn btn-primary btn-sm" title="Otorisasi" onclick="buttonOtorisasi(\'' +
       nobukti + '\')"><i class="bi bi-key"></i></button>' +
       '<button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonEdit(\'' +
-      nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
+      nobukti + '\')"><i class="bi bi-pen"></i></button>';
   }
 
   return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
@@ -5211,9 +4953,9 @@ function refreshDataTableAdd (NOBUKTI) {
               <td class="text-center">${item.SAT_1}</td>
               <td class="text-center tdAction">
                 ${tipeform == 'edit' ?
-                `<div class="action-buttons">
-                  <button class="btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                  <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+                `<div class="">
+                  <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                  <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
                 </div>`
                 : `-`
                 }
