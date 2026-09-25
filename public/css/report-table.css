@@ -1944,6 +1944,30 @@
   box-shadow: 0 0 0 3px var(--rt-blue-soft);
 }
 
+/* Dropdown "Tampilkan" (page length selector) — hanya muncul di picker yang mengaktifkan
+   lengthChange (mis. tabel_add_list_* di accounting/kas & bank lewat kasInitPicker/
+   bankInitPicker). Picker lain memakai lengthChange:false, jadi aturan ini tak berdampak. */
+.rt-picker-v2 .dataTables_length label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.rt-picker-v2 .dataTables_length select {
+  width: auto;
+  padding: 4px 24px 4px 8px;
+  font-size: 13px;
+  outline: none;
+}
+
+.rt-picker-v2 .dataTables_length select:focus {
+  border-color: var(--rt-blue);
+  box-shadow: 0 0 0 3px var(--rt-blue-soft);
+}
+
 .rt-picker-v2 .dataTables_paginate .paginate_button {
   /* border: 1px solid var(--rt-border) !important;
   border-radius: var(--rt-radius-sm) !important; */

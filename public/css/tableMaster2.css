@@ -677,3 +677,22 @@
         line-height: 0;
         vertical-align: middle;
         }
+
+        .btn-browsing {
+            height: 38px;
+            width: 40px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 6px 6px 0;
+            background-color: #e8edff;
+            border: 1px solid #cfdcff;
+            color: #2563eb;
+            font-size: 15px;
+            box-shadow: none;
+            border-radius: 0 6px 6px 0 !important;
+        }
+.btn-browsing:hover,
+.btn-browsing:focus { background-color: #dce6ff; border-color: #b9c9ff; color: #1d4ed8; }
+.btn-browsing:disabled { background-color: #f1f3f5; border-color: #dee2e6; color: #adb5bd; }

@@ -218,7 +218,8 @@ function aksiButtonsHtml(r) {
     return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
 }
 
-/* Paginasi tabel picker (10 baris/halaman). Dipanggil SETELAH <tbody> diisi dan
+/* Paginasi tabel picker (default 10 baris/halaman; pilihan Tampilkan 10/25/50/100/Semua
+   lewat lengthMenu bawaan DataTables, kembali ke 10 tiap picker dibuka). Dipanggil SETELAH <tbody> diisi dan
    SEBELUM modal-nya di-show(). Placeholder ber-colspan dibuang dulu supaya
    DataTables tidak menganggapnya baris data (jumlah kolomnya tidak cocok);
    pesan kosongnya diserahkan ke language.emptyTable.
@@ -230,20 +231,91 @@ function aksiButtonsHtml(r) {
 function kasInitPicker(idTabel, opsi) {
     var sel = '#' + idTabel;
     if ($.fn.DataTable.isDataTable(sel)) {
+        // destroy() (DataTables 1.10) mengosongkan <tbody> lalu memasang kembali baris-baris
+        // LAMA dari cache-nya, sehingga baris baru yang barusan diisi pemanggil hilang dan
+        // picker menampilkan data sebelumnya (index klik tidak cocok lagi dengan list-nya,
+        // mis. listAktiva[index] undefined). Simpan baris baru dulu, pasang lagi setelah destroy.
+        var $tbody = $(sel).children('tbody');
+        var barisBaru = $tbody.children().detach();
         $(sel).DataTable().destroy();
+        $tbody.empty().append(barisBaru);
     }
     if ($(sel + ' tbody td[colspan]').length) {
         $(sel + ' tbody').empty();
     }
     $(sel).DataTable($.extend({
-        lengthChange: false,
+        lengthChange: true,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
         paging: true,
         pageLength: 10,
         language: {
+            lengthMenu: 'Tampilkan _MENU_',
             emptyTable: 'Tidak ada data',
             zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
         }
     }, opsi || {}));
+}
+
+/* Tombol "+ Aktiva baru" di picker Aktiva ditaruh di sebelah dropdown Tampilkan milik
+   DataTables. destroy() di kasInitPicker() menghapus blok .dataTables_length beserta isinya,
+   jadi tombolnya diparkir dulu ke #holderButtonAddNewAktiva sebelum init ulang. */
+function kasParkirTombolAktivaBaru() {
+    $('#buttonAddNewAktiva').hide().appendTo('#holderButtonAddNewAktiva');
+}
+
+// Hanya untuk BKK - transaksi BKM tidak membuat aktiva baru.
+function kasPasangTombolAktivaBaru() {
+    let btn = $('#buttonAddNewAktiva');
+    let wadah = $('#tabel_add_list_aktiva_wrapper .dataTables_length');
+    if (wadah.length) {
+        btn.appendTo(wadah);
+    }
+    btn.toggle($('#input_add_transaksi').val() === 'BKK');
+}
+
+// Klik baris aktiva saat BKK (mode tambah) - baris tidak bisa dipilih.
+function kasAktivaHanyaTambah() {
+    alertify.warning('Hanya bisa tambah aktiva baru');
+}
+
+/* Riwayat pane di modal #form. Semua picker di _pickers.blade.php adalah pane di dalam SATU
+   modal, jadi picker bertingkat (mis. Lawan -> Aktiva -> Detail -> Akumulasi/Biaya) hanya
+   berganti pane. kasBukaPane() mencatat pane sebelumnya supaya tombol Batal / x bisa
+   kembali satu langkah lewat buttonAddListKembali(). Pilih baris / Simpan tetap menutup
+   semuanya lewat buttonAddListBatal(). */
+let kasPaneStack = [];
+let kasPaneSekarang = null;
+
+function kasBukaPane(id) {
+    let modalTerbuka = $('#form').hasClass('show');
+    if (!modalTerbuka) {
+        // Modal baru dibuka - mulai riwayat dari nol.
+        kasPaneStack = [];
+    } else if (kasPaneSekarang && kasPaneSekarang !== id) {
+        let idx = kasPaneStack.indexOf(id);
+        if (idx !== -1) {
+            // Kembali ke pane yang sudah ada di riwayat (mis. setelah pilih Biaya kembali ke form
+            // aktiva baru) - buang pane di atasnya.
+            kasPaneStack = kasPaneStack.slice(0, idx);
+        } else {
+            kasPaneStack.push(kasPaneSekarang);
+        }
+    }
+    $('.showhidemodalbodyadd').hide();
+    $('#' + id).show();
+    kasPaneSekarang = id;
+}
+
+// Batal / x: kembali ke pane sebelumnya; di pane pertama tutup modalnya.
+function buttonAddListKembali() {
+    if (!kasPaneStack.length) {
+        buttonAddListBatal();
+        return;
+    }
+    let id = kasPaneStack.pop();
+    $('.showhidemodalbodyadd').hide();
+    $('#' + id).show();
+    kasPaneSekarang = id;
 }
 
 /* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel
@@ -825,7 +897,7 @@ function buttonAddPickBiayaX (id , perkiraan) {
   document.getElementById(`${id}`).value = perkiraan
 
   $('.showhidemodalbodyadd').hide();
-  $('#modalAddListAktivaDetailX').show();
+  kasBukaPane('modalAddListAktivaDetailX');
 }
 
 
@@ -858,7 +930,7 @@ function buttonAddListXBiaya (id) {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListAkumulasiBiaya').show();
+        kasBukaPane('modalAddListAkumulasiBiaya');
       } else {
         alertify.warning("Biaya tidak ditemukkan")
       }
@@ -902,7 +974,7 @@ function buttonAddListXAkumulasi () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListAkumulasiBiaya').show();
+        kasBukaPane('modalAddListAkumulasiBiaya');
       } else {
         alertify.warning("Biaya tidak ditemukkan")
       }
@@ -958,7 +1030,7 @@ function buttonAddListCosting () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListCosting').show();
+        kasBukaPane('modalAddListCosting');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Costing tidak ditemukkan")
@@ -1018,7 +1090,7 @@ function buttonAddListSubCosting () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListSubCosting').show();
+        kasBukaPane('modalAddListSubCosting');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Sub Costing tidak ditemukkan")
@@ -2763,7 +2835,7 @@ function buttonAddListLawan () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListLawan').show();
+        kasBukaPane('modalAddListLawan');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Perkiraan tidak ditemukkan")
@@ -2830,7 +2902,7 @@ function modalDPP (dataLawan) {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDPP').show();
+        kasBukaPane('modalAddListDPP');
         // $("#form").modal('toggle')
       } else {
         alertify.warning("DPP tidak ditemukkan")
@@ -2900,7 +2972,7 @@ function modalDPHUHTBKM (dataLawan) {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDPHUHTBKM').show();
+        kasBukaPane('modalAddListDPHUHTBKM');
         // $("#form").modal('toggle')
       } else {
         alertify.warning("C tidak ditemukkan")
@@ -2968,7 +3040,7 @@ function modalDPHUHT (dataLawan) {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDPHUHT').show();
+        kasBukaPane('modalAddListDPHUHT');
         // $("#form").modal('toggle')
       } else {
         alertify.warning("DPH tidak ditemukkan")
@@ -3071,6 +3143,28 @@ function setNewNoAktiva (groupaktiva) {
     }})
 }
 
+/* Nilai awal form aktiva baru = setting aktiva terakhir di group yang sama (lihat
+   KasController::getNoUrutAktiva()). Kolom yang NULL (group belum punya aktiva) dilewati,
+   jadi form tetap memakai default dari cleanFormAktivaDetailX(). */
+function kasIsiSettingAktivaBaru(r) {
+  if (!r) { return }
+  let isiTeks = (id, v) => { if (v !== null && v !== undefined) { document.getElementById(id).value = String(v).trim() } }
+  let isiPersen = (id, v) => { if (v !== null && v !== undefined) { document.getElementById(id).value = parseFloat(v || 0).toFixed(2) } }
+
+  isiPersen('input_aktivax_susut', r.Persen)
+  let metode = (r.Tipe || '').trim().toUpperCase()
+  if (['L', 'M', 'P'].includes(metode)) {
+    document.getElementById('input_aktivax_metodepenyusutan').value = metode
+  }
+  isiTeks('input_aktivax_akumulasi', r.Akumulasi)
+  isiTeks('input_aktivax_biaya1', r.Biaya)
+  isiPersen('input_aktivax_persen1', r.PersenBiaya1)
+  isiTeks('input_aktivax_biaya2', r.Biaya2)
+  isiPersen('input_aktivax_persen2', r.PersenBiaya2)
+  isiTeks('input_aktivax_biaya3', r.biaya3)
+  isiPersen('input_aktivax_persen3', r.persenbiaya3)
+}
+
 function buttonAddNewAktiva () {
   console.log('buttonAddNewAktiva')
   cleanFormAktivaDetailX()
@@ -3095,10 +3189,11 @@ function buttonAddNewAktiva () {
       document.getElementById("input_aktivax_namadevisi").value = $('#AddAddNamaDevisi').val();
       document.getElementById("input_aktivax_noaktiva").value = xlawan.Perkiraan + '.' + res[0].NoUrut
       document.getElementById("input_aktivax_nobelakang").value = res[0].NoUrut
+      kasIsiSettingAktivaBaru(res[0])
       // cari nourut
 
       $('.showhidemodalbodyadd').hide();
-      $('#modalAddListAktivaDetailX').show();
+      kasBukaPane('modalAddListAktivaDetailX');
     }})
 
 
@@ -3110,7 +3205,7 @@ function modalAktiva (dataLawan) {
   console.log('modalAktiva')
   dataLawanx = dataLawan
   console.log(dataLawan)
-  $('#buttonAddNewAktiva').hide();
+  kasParkirTombolAktivaBaru();
 
   let _token = $("#_token").val();
   let devisi = $("#AddAddKodeDevisi").val();
@@ -3132,9 +3227,13 @@ function modalAktiva (dataLawan) {
         console.log(res)
         listAktiva = res
         let rowTable = ``
+        // BKK + AKV = mode tambah: baris hanya informasi, lanjutnya lewat "+ Aktiva baru".
+        let hanyaTambah = $('#input_add_transaksi').val() === 'BKK'
         res.forEach((item, i) => {
           rowTable += `
-          <tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">
+          ${hanyaTambah
+            ? `<tr onclick="kasAktivaHanyaTambah()">`
+            : `<tr class="pick-row" onclick="buttonAddPickAktiva(${i} , '${dataLawan.Perkiraan}', '${dataLawan.Kode}' , '${dataLawan.Keterangan}')">`}
           <td>${item.Perkiraan}</td>
           <td>${item.Keterangan}</td>
           <td>${formatDate(item.Tanggal)}</td>
@@ -3152,7 +3251,6 @@ function modalAktiva (dataLawan) {
 
         document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
 
-        $('#buttonAddNewAktiva').show();
         if (res.length) {
 
 
@@ -3168,9 +3266,10 @@ function modalAktiva (dataLawan) {
 
         }
         kasInitPicker('tabel_add_list_aktiva');
+        kasPasangTombolAktivaBaru();
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListAktiva').show();
+        kasBukaPane('modalAddListAktiva');
 
 
       },
@@ -3219,7 +3318,7 @@ function modalAktiva (dataLawan) {
         if (res.length) {
 
           $('.showhidemodalbodyadd').hide();
-          $('#modalAddListAktiva').show();
+          kasBukaPane('modalAddListAktiva');
           // $("#form").modal('toggle')
         } else {
           alertify.warning("Akumulasi tidak ditemukkan")
@@ -3289,7 +3388,7 @@ function modalDPH (dataLawan) {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDPH').show();
+        kasBukaPane('modalAddListDPH');
         // $("#form").modal('toggle')
       } else {
         alertify.warning("DPH tidak ditemukkan")
@@ -3831,7 +3930,7 @@ function buttonAddListDepartemen () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDepartemen').show();
+        kasBukaPane('modalAddListDepartemen');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Departemen tidak ditemukkan")
@@ -3895,7 +3994,7 @@ function buttonAddListValas () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListValas').show();
+        kasBukaPane('modalAddListValas');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Valas tidak ditemukkan")
@@ -3957,7 +4056,7 @@ function buttonAddListDevisi () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListDevisi').show();
+        kasBukaPane('modalAddListDevisi');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Devisi tidak ditemukkan")
@@ -4260,7 +4359,7 @@ function onChangeAddAddJumlah () {
             document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
             kasInitPicker('tabel_add_list_customer');
 
-                    $('#modalAddListCustomer').show();
+                    kasBukaPane('modalAddListCustomer');
                     $("#form").modal('toggle')
 
           },
@@ -4324,7 +4423,7 @@ function buttonAddListPerkiraan () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListPerkiraan').show();
+        kasBukaPane('modalAddListPerkiraan');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Perkiraan tidak ditemukkan")
@@ -4391,7 +4490,7 @@ function buttonAddListBon () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListBon').show();
+        kasBukaPane('modalAddListBon');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Bon tidak ditemukkan")
@@ -4471,7 +4570,7 @@ function buttonAddListInvoice () {
       if (res.length) {
 
         $('.showhidemodalbodyadd').hide();
-        $('#modalAddListInvoice').show();
+        kasBukaPane('modalAddListInvoice');
         $("#form").modal('toggle')
       } else {
         alertify.warning("Tidak ada invoice untuk ditambah")
@@ -4544,7 +4643,7 @@ function buttonAddListNoBeli () {
           "paging": false ,
     });
       $('.showhidemodalbodyadd').hide();
-      $('#modalAddListNoBeli').show();
+      kasBukaPane('modalAddListNoBeli');
       $("#form").modal('toggle')
 
     },
@@ -4622,7 +4721,7 @@ function buttonAddListNoInvoice () {
           "paging": false ,
     });
       $('.showhidemodalbodyadd').hide();
-      $('#modalAddListNoInvoice').show();
+      kasBukaPane('modalAddListNoInvoice');
       $("#form").modal('toggle')
 
     },
@@ -4666,7 +4765,7 @@ function buttonAddListCustsupp () {
       document.getElementById("tabel_data_add_list_custsupp").innerHTML = rowTable
       kasInitPicker('tabel_add_list_custsupp');
       $('.showhidemodalbodyadd').hide();
-      $('#modalAddListCustsupp').show();
+      kasBukaPane('modalAddListCustsupp');
       $("#form").modal('toggle')
 
     },
@@ -4719,7 +4818,7 @@ function buttonAddPickAktiva (index) {
 
 
   $('.showhidemodalbodyadd').hide();
-  $('#modalAddListAktivaDetail').show();
+  kasBukaPane('modalAddListAktivaDetail');
 
 
 
