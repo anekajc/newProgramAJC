@@ -490,12 +490,12 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
       <div class="row">
 
-        <!-- Kolom 1: Customer -->
+        <!-- Kolom 1: Supplier -->
         <div class="col-md-3">
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label>Customer</label>
+                <label>Supplier</label>
               </div>
             </div>
             <div class="col-md-8">
@@ -1111,7 +1111,15 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 <div class="container-fluid mt-3">
   <div class="row">
-    
+
+    <!-- Total = jumlah Subtotal seluruh item -->
+      <div class="col">
+        <div class="form-group">
+          <label>Total</label>
+          <input type="text" class="form-control text-right" id="input_add_total" value="0.00" disabled>
+        </div>
+      </div>
+
     <!-- Disc % -->
       <div class="col">
         <div class="form-group">
@@ -1401,6 +1409,14 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     </div>
 <div class="container-fluid mt-3">
   <div class="row">
+
+    <!-- Total = jumlah Subtotal seluruh item -->
+    <div class="col">
+      <div class="form-group">
+        <label>Total</label>
+        <input type="text" class="form-control text-right" id="input_detail_total" value="0.00" disabled>
+      </div>
+    </div>
 
     <div class="col">
       <div class="form-group">
@@ -2654,7 +2670,7 @@ function buttonAddListBarang () {
   let noso = $("#input_add_noso").val();
 
   if (!kodecustsupp || !noinvoice ) {
-    alertify.warning("Pilih customer & invoice terlebih dahulu")
+    alertify.warning("Pilih supplier & invoice terlebih dahulu")
     return
   }
 
@@ -2790,7 +2806,7 @@ function buttonAddListNoInvoice () {
   let kodecustsupp = $("#input_add_kodecustomer").val();
 
   if (!kodecustsupp) {
-    alertify.warning("Pilih customer terlebih dahulu")
+    alertify.warning("Pilih supplier terlebih dahulu")
     return
   }
 
@@ -3134,15 +3150,16 @@ function refreshDataTableAdd (NOBUKTI = "") {
             document.getElementById("input_add_nobukti").value = res[0].NoBukti
             document.getElementById("input_add_nourut").value = res[0].NoUrut
 
+            // Total = jumlah Subtotal (Total) seluruh item.
+            document.getElementById('input_add_total').value = formatAngka(res.reduce((jml, item) => jml + (parseFloat(item.Total) || 0), 0).toFixed(2));
             document.getElementById('input_add_grandtotal').value = formatAngka(parseFloat(res[0].TotalNetto || 0).toFixed(2));
             document.getElementById('input_add_ppnTotal').value = formatAngka(parseFloat(res[0].TotalPPn || 0).toFixed(2));
             document.getElementById('input_add_dpp').value = formatAngka(parseFloat(res[0].TotalDPP || 0).toFixed(2));
 
             document.getElementById('input_add_disc').value = formatAngka(parseFloat(res[0].Disc || 0).toFixed(2));
-            // DiscRp = persentase Disc dikali total DPP dokumen, bukan harga baris pertama
-            // (bug sebelumnya salah pakai harga satu baris - hasilnya keliru untuk dokumen
-            // dengan lebih dari satu baris barang).
-            document.getElementById('input_add_discrp').value = formatAngka((parseFloat(res[0].TotalDPP || 0) * (parseFloat(res[0].Disc || 0) / 100)).toFixed(2));
+            // DiscRp diambil dari kolom Diskon (total NDiskon dbRBeliDet lewat vwMasterRBeli).
+            // Sebelumnya dihitung TotalDPP x Disc% - salah, karena DPP sudah nilai setelah diskon.
+            document.getElementById('input_add_discrp').value = formatAngka(parseFloat(res[0].Diskon || 0).toFixed(2));
           }
 
 
@@ -3227,6 +3244,8 @@ function buttonDetail (nobukti) {
             document.getElementById("input_detail_nobukti").value = res[0].NoBukti
             document.getElementById("input_detail_nourut").value = res[0].NoUrut
 
+            // Total = jumlah Subtotal (Total) seluruh item.
+            document.getElementById('input_detail_total').value = formatAngka(res.reduce((jml, item) => jml + (parseFloat(item.Total) || 0), 0).toFixed(2))
             document.getElementById('input_detail_grandtotal').value = formatAngka(parseFloat(res[0].TotalNetto || 0).toFixed(2))
             document.getElementById('input_detail_ppnTotal').value = formatAngka(parseFloat(res[0].TotalPPn || 0).toFixed(2))
             document.getElementById('input_detail_dpp').value = formatAngka(parseFloat(res[0].TotalDPP || 0).toFixed(2))
@@ -3235,7 +3254,9 @@ function buttonDetail (nobukti) {
             // #input_add_disc/#input_add_discrp milik halaman Edit yang mungkin sedang
             // menampilkan dokumen lain).
             document.getElementById('input_detail_disc').value = formatAngka(parseFloat(res[0].Disc || 0).toFixed(2))
-            document.getElementById('input_detail_discrp').value = formatAngka(parseFloat(res[0].DiscRp || 0).toFixed(2))
+            // DiscRp diambil dari kolom Diskon (total NDiskon dbRBeliDet lewat vwMasterRBeli) -
+            // kolom header dbRBeli.DiscRp tidak pernah terisi (selalu 0).
+            document.getElementById('input_detail_discrp').value = formatAngka(parseFloat(res[0].Diskon || 0).toFixed(2))
 
           } else {
             alertify.warning("Data tidak ditemukan")
@@ -3774,10 +3795,10 @@ function onChangeInputAddDiscRp () {
       if (tipeform == 'edit') {
         let value = bersihkanAngka($("#input_add_discrp").val())
         console.log(dataHeaderAdd)
-        // Persentase = DiscRp / total DPP dokumen - sebelumnya dibagi harga baris pertama
-        // saja, sehingga hasilnya salah untuk dokumen dengan lebih dari satu baris barang.
-        let totalDpp = bersihkanAngka($("#input_add_dpp").val()) || parseFloat(dataHeaderAdd.TotalDPP) || 0
-        let x = totalDpp ? (value * 100) / totalDpp : 0
+        // Persentase = DiscRp / Total (jumlah Subtotal seluruh item, sebelum diskon).
+        // Jangan dibagi DPP - DPP sudah nilai setelah diskon, hasil persennya jadi kebesaran.
+        let total = bersihkanAngka($("#input_add_total").val())
+        let x = total ? (value * 100) / total : 0
         console.log(x)
         console.log(value)
         onChangeHeader('DISC' , x)
