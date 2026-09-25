@@ -5,8 +5,43 @@
   @endsection
 
     @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
       {{-- Header tabel interaktif drag kolom + roda gigi + bar kolom tersembunyi + modal --}}
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
     <style>
@@ -380,6 +415,7 @@ td input[type="checkbox"] {
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
+          <div id="formBsGrid">
           <div class="modal-body">
             <!-- <h1>Tes Modal</h1> -->
             <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
@@ -465,6 +501,7 @@ td input[type="checkbox"] {
 
 
           </div>
+          </div>{{-- /#formBsGrid --}}
             <div class="container-fluid" style="overflow-x: auto;">
 
                   <table id="addTable" class="table table-bordered table-striped"  >
@@ -519,6 +556,7 @@ td input[type="checkbox"] {
 
   <!-- start page edit pembelian (dulu modal #editPembelian) -->
 <div id="page2" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+<div id="formBsGrid">
   <div class="row">
     <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -835,6 +873,12 @@ td input[type="checkbox"] {
         <div class="row mt-4">
           <div class="col-md-2 col-4">
             <div class="form-group">
+              <label>Total</label>
+              <input type="text" class="form-control text-right" id="input_edit_total" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
               <label>Disc %</label>
               <input type="number" class="form-control text-right" id="input_edit_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
             </div>
@@ -851,13 +895,13 @@ td input[type="checkbox"] {
               <input type="text" class="form-control text-right" id="input_edit_dpp" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>PPN</label>
               <input type="text" class="form-control text-right" id="input_edit_ppn" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>Grand Total</label>
               <input type="text" class="form-control text-right" id="input_edit_grandtotal" value="0.00" disabled>
@@ -871,6 +915,7 @@ td input[type="checkbox"] {
         <!-- submitUnOtorisasi1   -->
         <!-- submitOtorisasi1 -->
       </div>
+</div>{{-- /#formBsGrid --}}
 </div>
   <!-- End page edit pembelian -->
 
@@ -879,6 +924,7 @@ td input[type="checkbox"] {
 
   <!-- start page tab kiri detail INFORMASI (dulu modal #detail) -->
 <div id="page3" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+<div id="formBsGrid">
   <div class="row">
     <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -1062,6 +1108,12 @@ td input[type="checkbox"] {
         <div class="row mt-4">
           <div class="col-md-2 col-4">
             <div class="form-group">
+              <label>Total</label>
+              <input type="text" class="form-control text-right" id="input_det_total" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
               <label>Disc %</label>
               <input type="number" class="form-control text-right" id="input_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
             </div>
@@ -1078,13 +1130,13 @@ td input[type="checkbox"] {
               <input type="text" class="form-control text-right" id="input_det_dpp" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>PPN</label>
               <input type="text" class="form-control text-right" id="input_det_ppn" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>Grand Total</label>
               <input type="text" class="form-control text-right" id="input_det_grandtotal" value="0.00" disabled>
@@ -1094,8 +1146,9 @@ td input[type="checkbox"] {
       </div>
 
       <div class="modal-footer">
-        <button type="button" id="btnotokiri" class="btn btn-primary" onclick="submitOtorisasi1()">Approve</button>
+        <button type="button" id="btnotokiri" class="btn btn-primary" onclick="submitOtorisasi1()">Otorisasi</button>
       </div>
+</div>{{-- /#formBsGrid --}}
 </div>
     <!-- End page detail Informasi -->
 
@@ -1110,6 +1163,7 @@ td input[type="checkbox"] {
   
     <!-- TAB KANAN detail INFORMASI (dulu modal #IdetailPembelian) -->
 <div id="page4" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
+<div id="formBsGrid">
   <div class="row">
     <div class="col-12 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
@@ -1294,6 +1348,12 @@ td input[type="checkbox"] {
         <div class="row mt-4">
           <div class="col-md-2 col-4">
             <div class="form-group">
+              <label>Total</label>
+              <input type="text" class="form-control text-right" id="Iinput_det_total" value="0.00" disabled>
+            </div>
+          </div>
+          <div class="col-md-2 col-4">
+            <div class="form-group">
               <label>Disc %</label>
               <input type="number" class="form-control text-right" id="Iinput_det_disc" onblur="onChangeInputAddDisc()" value="0.00" disabled>
             </div>
@@ -1310,13 +1370,13 @@ td input[type="checkbox"] {
               <input type="text" class="form-control text-right" id="Iinput_det_dpp" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>PPN</label>
               <input type="text" class="form-control text-right" id="Iinput_det_ppn" value="0.00" disabled>
             </div>
           </div>
-          <div class="col-md-3 col-6">
+          <div class="col-md-2 col-4">
             <div class="form-group">
               <label>Grand Total</label>
               <input type="text" class="form-control text-right" id="Iinput_det_grandtotal" value="0.00" disabled>
@@ -1330,6 +1390,7 @@ td input[type="checkbox"] {
         <!-- submitUnOtorisasi1   -->
         <!-- submitOtorisasi1 -->
       </div>
+</div>{{-- /#formBsGrid --}}
 </div>
   <!-- End page detail INFORMASI tab kanan -->
 
@@ -1935,6 +1996,8 @@ function detailPembelian1(index) {
 
         document.getElementById("IdetailNoSopir").value = table_pembelian_row_detail[0].SOPIR
 
+        // Total = jumlah Subtotal (TotalIDR) seluruh item.
+        document.getElementById("Iinput_det_total").value = formatAngkaX(table_pembelian_row_detail.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
         document.getElementById("Iinput_det_disc").value = formatAngkaX(table_pembelian_row_detail[0].disc)
         document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].TotDiskon)
         document.getElementById("Iinput_det_dpp").value = formatAngkaX(table_pembelian_row_detail[0].TotDPP)
@@ -2126,6 +2189,8 @@ function detailPembelian1(index) {
 
         document.getElementById("IdetailNoSopir").value = table_pembelian_row_detail[0].SOPIR
 
+        // Total = jumlah Subtotal (TotalIDR) seluruh item.
+        document.getElementById("Iinput_det_total").value = formatAngkaX(table_pembelian_row_detail.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
         document.getElementById("Iinput_det_disc").value = formatAngkaX(table_pembelian_row_detail[0].disc)
         document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].TotDiskon)
         document.getElementById("Iinput_det_dpp").value = formatAngkaX(table_pembelian_row_detail[0].TotDPP)
@@ -3257,6 +3322,8 @@ function refreshUpdateHeader () {
             document.getElementById("editPembelianNoSopir").value = edit_pembelian_row_data[0].SOPIR
 
 
+            // Total = jumlah Subtotal (TotalIDR) seluruh item.
+            document.getElementById("input_edit_total").value = formatAngkaX(edit_pembelian_row_data.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
             document.getElementById("input_edit_disc").value = formatAngkaX(edit_pembelian_row_data[0].disc)
             document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].TotDiskon)
             document.getElementById("input_edit_dpp").value = formatAngkaX(edit_pembelian_row_data[0].TotDPP)
@@ -3619,6 +3686,8 @@ if (pcekglobal) {
             document.getElementById("editPembelianNoSopir").value = edit_pembelian_row_data[0].SOPIR
 
 
+            // Total = jumlah Subtotal (TotalIDR) seluruh item.
+            document.getElementById("input_edit_total").value = formatAngkaX(edit_pembelian_row_data.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
             document.getElementById("input_edit_disc").value = formatAngkaX(edit_pembelian_row_data[0].disc)
             document.getElementById("input_edit_discrp").value = formatAngkaX(edit_pembelian_row_data[0].TotDiskon)
             document.getElementById("input_edit_dpp").value = formatAngkaX(edit_pembelian_row_data[0].TotDPP)
@@ -3738,6 +3807,8 @@ if (pcekglobal) {
         document.getElementById("detailgudang").value = detail_row_data[0].NAMAGUDANG
       
         document.getElementById("detailDate").value = formatDate(detail_row_data[0].TANGGAL)
+        // Total = jumlah Subtotal (TotalIDR) seluruh item.
+        document.getElementById("input_det_total").value = formatAngkaX(detail_row_data.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
         document.getElementById("input_det_disc").value = formatAngkaX(detail_row_data[0].disc)
         document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].TotDiskon)
         document.getElementById("input_det_dpp").value = formatAngkaX(detail_row_data[0].TotDPP)
@@ -3973,6 +4044,8 @@ if (pcekglobal) {
 
         document.getElementById("detailNoSopir").value = detail_row_data[0].SOPIR
 
+        // Total = jumlah Subtotal (TotalIDR) seluruh item.
+        document.getElementById("input_det_total").value = formatAngkaX(detail_row_data.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
         document.getElementById("input_det_disc").value = formatAngkaX(detail_row_data[0].disc)
         document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].TotDiskon)
         document.getElementById("input_det_dpp").value = formatAngkaX(detail_row_data[0].TotDPP)

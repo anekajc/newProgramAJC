@@ -6,7 +6,42 @@
 {{-- tampilan tampilan baru: tab custom, tabel .data-table, header interaktif - disamakan
      dengan resources/views/purchasing/newpo.blade.php. --}}
   @section('css')
+<style>
+  /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
+     #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled). Dua pengecualian tinggi:
+     - textarea tetap setinggi aslinya (atribut rows), supaya isi beberapa baris tetap terbaca;
+     - input di dalam tabel item ikut gaya baru tapi tingginya kembali ke ukuran aslinya
+       (termasuk form-control-sm), supaya baris tabel tidak ikut lebih tinggi. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+
+  /* Tombol browse (kaca pembesar) di dalam #formBsGrid disamakan tingginya dengan input.
+     Banyak tombol masih membawa inline style="height:32px" dari tata letak lama, sedangkan
+     input di sini 38px - karena itu !important. Tombol yang berada di .input-group dilepas
+     tingginya supaya meregang (align-items: stretch) mengikuti input di sebelahnya: 38px di
+     form, dan tetap setinggi input di dalam sel tabel. Tombol yang berdiri sendiri (bukan di
+     .input-group) dipaku 38px. */
+  #formBsGrid .btn:has(> .bi-search) {
+    height: 38px !important;
+  }
+
+  #formBsGrid .input-group .btn:has(> .bi-search) {
+    height: auto !important;
+    align-self: stretch;
+  }
+</style>
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<style>
+  /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
+     cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+</style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
   <style>
@@ -460,6 +495,7 @@ td input[type="checkbox"] {
 
 <!-- start page detail tab kiri (out beli) -->
 <div id="page3" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;" >
+<div id="formBsGrid">
   <div class="row">
     <div class="col-6 text-left">
       <h2 id="detailModalLabelout" style="display:none;"></h2>
@@ -680,6 +716,7 @@ td input[type="checkbox"] {
         <button type="button" id="btnotokiri" class="btn btn-primary" style="height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitOtorisasi1()">Approve</button>
       </div>
       -->
+</div>{{-- /#formBsGrid --}}
 </div>
     <!-- End page detail Informasi-->
 
@@ -701,6 +738,7 @@ td input[type="checkbox"] {
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
         <input type="hidden" name="noUrut" id="input_add_noUrut" value="{!! csrf_token() !!}" />
@@ -776,6 +814,7 @@ td input[type="checkbox"] {
           </table>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
 
       <div class="modal-footer">
         <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
@@ -801,6 +840,7 @@ td input[type="checkbox"] {
         </button>
       </div>
       
+      <div id="formBsGrid">
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="editnoUrut" value="{!! csrf_token() !!}" />
 
@@ -1045,6 +1085,7 @@ td input[type="checkbox"] {
           </div>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
     </div>
   </div>
 </div>
@@ -1072,6 +1113,7 @@ td input[type="checkbox"] {
 
 
 
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
           <div class="row">
@@ -1277,6 +1319,7 @@ td input[type="checkbox"] {
           </div>
           </div>
         </div>
+      </div>{{-- /#formBsGrid --}}
 
 
 
@@ -1321,7 +1364,7 @@ td input[type="checkbox"] {
               </table>
         </div>
         <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="submitOtorisasi1()"  >Approve</button>
+                    <button type="button" class="btn btn-primary" onclick="submitOtorisasi1()"  >Otorisasi</button>
 
                   </div>
     </div>
@@ -1343,6 +1386,7 @@ td input[type="checkbox"] {
         </button>
       </div>
 
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="pba-fgrid">
           <div class="pba-fcol">
@@ -1427,6 +1471,7 @@ td input[type="checkbox"] {
           </table>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
     </div>
   </div>
 </div>
@@ -1444,6 +1489,7 @@ td input[type="checkbox"] {
         </button>
       </div>
 
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="pba-fgrid">
           <div class="pba-fcol">
@@ -1530,6 +1576,7 @@ td input[type="checkbox"] {
           </table>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
 
       <div class="modal-footer">
         <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
