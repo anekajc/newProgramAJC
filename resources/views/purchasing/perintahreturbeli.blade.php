@@ -1217,10 +1217,15 @@
                         </div>
                         <div class="col-md-9">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="input_add_add_gudang">
+                            <!-- Gudang dipilih lewat dropdown (diisi loadOptionGudang() dari prblistgudang), menggantikan browse modal -->
+                            <select id="input_add_add_gudang" class="form-control form-select-lg text-left" aria-label=".form-select-lg example">
+                              <option value="">Pilih Gudang</option>
+                            </select>
+                            <!-- NONAKTIF: tombol browse gudang, diganti dropdown di atas
                             <button id="buttonBrowseGudang" class="btn btn-chip-biru btn-sm" style="height:32px; border-radius:0;" onclick='buttonGudang()'>
                               <i class="bi bi-search"></i>
                             </button>
+                            -->
                           </div>
                         </div>
                       </div>
@@ -2497,6 +2502,7 @@
 <script type="text/javascript">
 
     window.onload = function(){
+      loadOptionGudang();
       loadAll();
     };
     
@@ -3242,7 +3248,8 @@ function buttonAddAddItem () {
   document.getElementById('input_add_add_kodebrg').disabled = false
   document.getElementById('input_add_add_gudang').disabled = false
   document.getElementById('buttonBrowseBarang').disabled = false
-  document.getElementById('buttonBrowseGudang').disabled = false
+  // NONAKTIF: tombol browse gudang diganti dropdown
+  // document.getElementById('buttonBrowseGudang').disabled = false
   document.getElementById('buttonBrowseNoBeli').disabled = false
 
   // cleanFormAddAdd()
@@ -3318,7 +3325,7 @@ function buttonAddEditItem (i) {
   isi1Temp = tempAddEdit.brgIsi1 ?? isi1Temp
   isi2Temp = tempAddEdit.brgIsi2 ?? isi2Temp
 
-  document.getElementById("input_add_add_gudang").value = tempAddEdit.KodeGdg
+  setInputGudang(tempAddEdit.KodeGdg)
   document.getElementById("input_add_add_keterangan").value = tempAddEdit.ketdet ?? ''
   document.getElementById("input_add_add_urutPbl").value = tempAddEdit.URUTPBL
   document.getElementById("input_add_add_urutRJual").value = tempAddEdit.UrutRJual
@@ -3327,7 +3334,8 @@ function buttonAddEditItem (i) {
   document.getElementById("input_add_add_kodebrg").disabled = true
   document.getElementById("input_add_add_gudang").disabled = true
   document.getElementById("buttonBrowseBarang").disabled = true
-  document.getElementById("buttonBrowseGudang").disabled = true
+  // NONAKTIF: tombol browse gudang diganti dropdown
+  // document.getElementById("buttonBrowseGudang").disabled = true
   document.getElementById("buttonBrowseNoBeli").disabled = true
 
   $('#divhargaterakhir').hide();
@@ -4629,7 +4637,8 @@ function renderTabelPRB () {
     lengthChange: false,
     pageLength: prbPanjangHalaman[1],
     // "order": [] WAJIB - tanpa ini DataTables jatuh ke default [[0,'asc']] (kolom Actions).
-    // Data sudah diurutkan berdasarkan NoBukti oleh loadAll().
+    // Data sudah datang terurut dari server (Tanggal/NoBukti terbaru dulu - lihat
+    // PerintahReturBeliController@loadAll), jadi urutan DOM dipertahankan apa adanya.
     order: [],
     dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
     language: {
@@ -5378,7 +5387,8 @@ function cleanFormAddAdd () {
   document.getElementById("input_add_add_kodebrg").disabled = false
   document.getElementById("input_add_add_gudang").disabled = false
   document.getElementById("buttonBrowseBarang").disabled = false
-  document.getElementById("buttonBrowseGudang").disabled = false
+  // NONAKTIF: tombol browse gudang diganti dropdown
+  // document.getElementById("buttonBrowseGudang").disabled = false
 
 }
 
@@ -6139,7 +6149,7 @@ function buttonNoBeli () {
 function buttonSelectNoBeli(NoBukti, kodeSupp, kodegdg){
   document.getElementById('input_add_add_nobeli').value = NoBukti;
   document.getElementById('input_add_add_supplier').value = kodeSupp;
-  document.getElementById('input_add_add_gudang').value = kodegdg;
+  setInputGudang(kodegdg);
   // document.getElementById('input_detailAkun_edit_hutPiut').value = perkiraan;
 
   lockSupplier()
@@ -6275,6 +6285,42 @@ function buttonSelectGudang (NoBukti){
   // document.getElementById('input_detailAkun_edit_hutPiut').value = perkiraan;
 
   $("#formModalOpen").modal("hide");
+}
+
+// Isi dropdown gudang sekali saat halaman dibuka (gudang aktif dari prblistgudang).
+function loadOptionGudang () {
+  let select = document.getElementById('input_add_add_gudang')
+
+  $.ajax({
+    url: "{!! url('prblistgudang') !!}",
+    type: "get",
+    async: false,
+    success: function (res) {
+      (res || []).forEach((item) => {
+        let kode = (item.KodeGdg ?? '').toString().trim()
+        select.add(new Option(kode + ' ' + (item.Nama ?? ''), kode))
+      })
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal memuat daftar gudang, silahkan refresh browser')
+    }
+  })
+}
+
+// Pilih gudang di dropdown. Kalau kodenya tidak ada di daftar (mis. gudang sudah tidak
+// aktif tapi masih dipakai item lama), ditambahkan sebagai opsi supaya nilainya tidak
+// hilang saat Edit disimpan.
+function setInputGudang (kodegdg) {
+  let select = document.getElementById('input_add_add_gudang')
+  let kode = (kodegdg ?? '').toString().trim()
+  let opsi = Array.from(select.options).find((o) => o.value.toUpperCase() === kode.toUpperCase())
+
+  if (!opsi && kode) {
+    opsi = new Option(kode, kode)
+    select.add(opsi)
+  }
+  select.value = opsi ? opsi.value : ''
 }
 
 

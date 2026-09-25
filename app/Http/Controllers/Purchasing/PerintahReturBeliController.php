@@ -104,7 +104,7 @@ class PerintahReturBeliController extends Controller
       From dbPRRBeli A
       Left Outer Join vwBrowsPrRBeli V on V.NOBUKTI = A.NOBUKTI
       where A.Tanggal between @tglawal and @tglakhir
-      order by A.NoBukti
+      order by A.Tanggal desc, A.NoBukti desc
       " , ["tglawal" => $tglawal , "tglakhir" => $tglakhir]);
 
     // urut 2 = tabel "List Retur Jual" - VwOUtPRJUALPRBELI tidak punya kolom tanggal, jadi
@@ -120,7 +120,7 @@ class PerintahReturBeliController extends Controller
       from VwOUtPRJUALPRBELI A
         inner join dbSPBRJual B on A.Nobukti = B.NoBukti
       where Cast(B.Tanggal as date) between @tglawal2 and @tglakhir2
-      order by A.Nobukti, A.Urut", ["tglawal2" => $tglawal2, "tglakhir2" => $tglakhir2]);
+      order by B.Tanggal desc, A.Nobukti desc, A.Urut", ["tglawal2" => $tglawal2, "tglakhir2" => $tglakhir2]);
 
     return [
       "listPRB"            => $listPRB,
