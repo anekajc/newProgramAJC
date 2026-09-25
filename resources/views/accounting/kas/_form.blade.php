@@ -499,12 +499,12 @@
                         {{-- Keterangan & Ket. Det dipindah dari kolom tengah (col-lg-3) ke baris penuh
                              supaya inputnya panjang. ID tidak berubah. --}}
                         <div class="row kas-row-tight">
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <div class="form-group">
                                     <label>Keterangan</label>
                                 </div>
                             </div>
-                            <div class="col-md-10">
+                            <div class="col-md-6 ">
                                 <div class="input-group form-group">
                                     <input id="AddAddKeterangan" type="text" value=""
                                         class="form-control">
@@ -512,12 +512,12 @@
                             </div>
                         </div>
                         <div class="row kas-row-tight">
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 <div class="form-group">
                                     <label>Ket. Det</label>
                                 </div>
                             </div>
-                            <div class="col-md-10">
+                            <div class="col-md-6">
                                 <div class="input-group form-group">
                                     <input id="AddAddKeteranganDetail" type="text" value=""
                                         class="form-control">

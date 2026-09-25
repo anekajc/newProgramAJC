@@ -819,3 +819,267 @@
   .po-toolbar-act { margin-left: 0; }
   .po-filter-wrap { flex: 1 1 100%; justify-content: space-between; }
 }
+
+/* ============ Halaman daftar gaya memorialkoreksi (.po-list-page) ============
+   Disalin dari accounting/memorialkoreksi.blade.php supaya halaman lain yang memakai
+   layout newmasterTest cukup menambah class "po-list-page" di div pembungkus daftar
+   (#page1/#pageHome) tanpa menyalin ulang blok <style> ini.
+   :where() membuat awalan .po-list-page TIDAK menambah spesifisitas, jadi hasil
+   cascade-nya persis sama dengan aturan inline di memorialkoreksi (termasuk kalah dari
+   `table tbody td { padding: 0 10px !important }` di newmaster.css - sengaja, baris rapat). */
+
+/* Isi tabel dibuat sebaris; kolom panjang digeser lewat scroll horizontal .po-table-wrap. */
+:where(.po-list-page) .po-table-wrap table.dataTable thead th,
+:where(.po-list-page) .po-table-wrap table.dataTable tbody td {
+  white-space: nowrap;
+}
+
+/* Rule .card global di layout (flex + align-items:center + efek melayang saat hover)
+   diperuntukkan kartu menu dashboard, bukan kartu berisi tabel. */
+:where(.po-list-page) .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+
+:where(.po-list-page) .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border, #e5e7eb) !important;
+}
+
+/* ---------- Gaya dasar tabel daftar ---------- */
+:where(.po-list-page) .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+:where(.po-list-page) .data-table thead th {
+  background: #f9fafb;
+  padding: 11px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+:where(.po-list-page) .data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: var(--text-main, #1f2937);
+}
+
+:where(.po-list-page) .data-table tbody tr:last-child td { border-bottom: none; }
+:where(.po-list-page) .data-table tbody tr:hover td { background: #f9fafb; }
+
+/* DataTables (autoWidth bawaan = true) selalu menulis hasil pengukurannya sebagai
+   inline style pada <table>, yang mengalahkan `.data-table { width: 100% }`.
+   Dipakai min-width, BUKAN width. */
+:where(.po-list-page) #tabel { min-width: 100%; }
+
+/* ---------- Kolom Aksi - tombol bulat kecil warna pastel ---------- */
+:where(.po-list-page) #tabel td:first-child:not([colspan]) { vertical-align: middle; }
+
+:where(.po-list-page) #tabel td:first-child .po-aksi-wrap {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+:where(.po-list-page) #tabel td:first-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+:where(.po-list-page) #tabel td:first-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+:where(.po-list-page) #tabel td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+:where(.po-list-page) #tabel td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+:where(.po-list-page) #tabel td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+:where(.po-list-page) #tabel td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+:where(.po-list-page) #tabel td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+/* Tombol di kolom Aksi baru muncul saat barisnya di-hover. */
+:where(.po-list-page) table.data-table.po-aksi-hover tbody td:first-child .btn {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+
+:where(.po-list-page) table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ---------- Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar ---------- */
+:where(.po-list-page) .po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card, #fff);
+  border: 1.5px solid var(--rt-border, #E7E8F0);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+:where(.po-list-page) .po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft, #6B7180);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+:where(.po-list-page) .po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink, #1D2130);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+/* ============ Tombol form (Add/Edit/Detail) tanpa tableMaster2.css (.po-form-page) ============
+   Halaman yang memakai layout newmasterTest tapi TIDAK memuat tableMaster2.css (supaya #tabel
+   di daftar tetap bergaya memorialkoreksi) kehilangan gaya tombol .btn-action-* dan
+   .btn-pill-primary. Aturannya disalin dari tableMaster2.css (nilai sama, termasuk --sp-*
+   sebagai nilai cadangan) dan hanya berlaku di dalam div pembungkus form yang diberi class
+   "po-form-page" (#page2/#page3/#pageForm) - sengaja class terpisah dari .po-list-page,
+   supaya `#contentContainer .btn` di bawah tidak ikut mengenai toolbar/kolom Aksi daftar.
+   :where() = tanpa tambahan spesifisitas, jadi cascade-nya sama seperti saat tableMaster2.css
+   dimuat di @section('css') (contoh: accounting/kas.blade.php). */
+
+:where(.po-form-page) #contentContainer .btn {
+  border-radius: var(--sp-radius-sm, 7px);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 16px;
+  box-shadow: none;
+  border: 1px solid transparent;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .04s ease;
+}
+
+:where(.po-form-page) #contentContainer .btn:active { transform: translateY(1px); }
+
+/* Tombol ikon kecil di baris tabel item (Edit/Hapus). */
+:where(.po-form-page) .btn-action-sm {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--sp-border, #e7e9ee);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin: 2px;
+  color: var(--sp-text-soft, #6b7280);
+  transition: all .12s ease;
+}
+
+:where(.po-form-page) .btn-action-sm:hover { filter: brightness(0.97); transform: translateY(-1px); }
+
+:where(.po-form-page) .btn-action-success { color: var(--sp-green, #16a34a); border-color: #cdebd7; background: var(--sp-green-bg, #e7f7ed); }
+:where(.po-form-page) .btn-action-warning { color: var(--sp-amber, #b45309); border-color: #fbe3bd; background: var(--sp-amber-bg, #fef3e0); }
+:where(.po-form-page) .btn-action-primary { color: var(--sp-blue, #2563eb);  border-color: #cfdcff; background: var(--sp-blue-bg, #e8edff); }
+:where(.po-form-page) .btn-action-danger  { color: var(--sp-red, #dc2626);   border-color: #f7cfcf; background: var(--sp-red-bg, #fdeaea); }
+:where(.po-form-page) .btn-action-info    { color: var(--sp-cyan, #0891b2);  border-color: #a5f3fc; background: var(--sp-cyan-bg, #ecfeff); }
+
+/* Tombol pill (Close / Simpan / Batal / Tambah Item). 0,3,0 saat diam mengalahkan
+   .btn-primary/.btn-danger milik layout (0,1,0); 0,4,0 saat hover mengalahkan
+   .btn-*:hover bootstrap (0,2,0) - lihat catatan panjangnya di tableMaster2.css. */
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-primary {
+  color: var(--sp-blue, #2563eb);
+  background: var(--sp-blue-bg, #e8edff);
+  border-color: #cfdcff;
+}
+
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-danger {
+  color: var(--sp-red, #dc2626);
+  background: var(--sp-red-bg, #fdeaea);
+  border-color: #f7cfcf;
+}
+
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-success {
+  color: var(--sp-green, #16a34a);
+  background: var(--sp-green-bg, #e7f7ed);
+  border-color: #cdebd7;
+}
+
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-primary:hover,
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-primary:focus {
+  color: #fff;
+  background: #0069d9;
+  border-color: #0062cc;
+}
+
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-danger:hover,
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-danger:focus {
+  color: #fff;
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-success:hover,
+:where(.po-form-page) .btn.btn-pill-primary.btn-action-success:focus {
+  color: #fff;
+  background: #218838;
+  border-color: #1e7e34;
+}
+
+/* Layout menulis `.btn:hover { opacity: .85 }` - dibatalkan di tombol pill saja. */
+:where(.po-form-page) .btn.btn-pill-primary:hover,
+:where(.po-form-page) .btn.btn-pill-secondary:hover {
+  opacity: 1;
+}
+
+:where(.po-form-page) #contentContainer .btn.btn-pill-primary,
+:where(.po-form-page) #contentContainer .btn.btn-pill-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Pembungkus tombol aksi di sel tabel item. */
+:where(.po-form-page) .action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}

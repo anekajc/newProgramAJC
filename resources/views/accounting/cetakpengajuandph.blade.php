@@ -233,8 +233,10 @@
        diperbaiki di sana juga).
        ========================================================================== */
 
-    /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
-    #page1 #tabelOut tbody td, #page1 #tabelPenerimaan tbody td { padding: 12px 16px !important; }
+    /* newmaster.css: `table tbody td { padding: 0 10px !important }` global.
+       Sengaja TIDAK ditimpa lagi - baris dibuat rapat (0 10px) persis seperti memorialkoreksi,
+       yang juga membiarkan aturan global itu menang. */
+    /* #page1 #tabelOut tbody td, #page1 #tabelPenerimaan tbody td { padding: 12px 16px !important; } */
 
     /* tableMaster2.css: skin khusus id #tabel (tidak match #tabelOut/#tabelPenerimaan
        langsung, tapi thead th/tbody td-nya dituliskan generik lewat selector lain di file

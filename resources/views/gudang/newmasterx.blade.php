@@ -409,6 +409,16 @@
             opacity: 0.4;
             color: var(--text-muted);
         }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.15s;
+        }
     </style>
 </head>
 

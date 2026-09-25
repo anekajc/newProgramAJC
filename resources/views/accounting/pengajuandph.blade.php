@@ -200,8 +200,11 @@
            dengan referensi, tanpa melepas file-nya (yang akan merusak halaman lain).
            ========================================================================== */
 
-        /* newmaster.css: `table tbody td { padding: 0 10px !important }` global. */
-        #page1 #tabel tbody td { padding: 12px 16px !important; }
+        /* newmaster.css: `table tbody td { padding: 0 10px !important }` global.
+           Sengaja TIDAK ditimpa lagi - baris dibuat rapat (0 10px) persis seperti memorialkoreksi,
+           yang juga membiarkan aturan global itu menang. padding 13px 14px milik tableMaster2.css
+           tidak !important, jadi ikut kalah. */
+        /* #page1 #tabel tbody td { padding: 12px 16px !important; } */
 
         /* tableMaster2.css: skin khusus id #tabel (dipakai juga oleh halaman lain yang
            memuat file itu) - dikembalikan ke nilai .data-table di atas. */
