@@ -2,7 +2,7 @@
 
     <div class="row" style="margin-top: 0px" id="contentContainer">
         <div class="col-8 text-left">
-            {{-- <h2>Form Kas</h2> --}}
+            {{-- <ka2>Form Kas</ka2> --}}
         </div>
         <div class="col-4 text-right">
             <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
@@ -398,14 +398,18 @@
                                                     <label>Jumlah</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddJumlah" type="text" value="0.00"
                                                         class="text-right form-control"
                                                         oninput='formatAngkaKetik(this)'
-                                                        onblur='formatAngkaInput(this); onChangeAddAddJumlah()'>
-                                                    <input id="AddAddJumlahTunai" type="hidden" value="0.00"
-                                                        class="text-right form-control" onblur=''>
+                                                        onblur='formatAngkaInput(this)'>
+                                                    {{-- Buka ulang Pelunasan Hutang (BKK + Lawan lokal/exim, mode tambah).
+                                                         Tampil/sembunyi lewat aturTombolBukaTunai() di public/js/kas.js. --}}
+                                                    <button id="buttonBukaTunai" type="button"
+                                                        onclick="buttonBukaTunai()" class="btn btn-chip-biru"
+                                                        title="Pelunasan Hutang" style="display:none"><i
+                                                            class="bi bi-list-check"></i></button>
                                                 </div>
                                             </div>
                                         </div>

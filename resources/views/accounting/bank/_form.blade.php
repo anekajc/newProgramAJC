@@ -349,9 +349,13 @@
                                                     <input id="AddAddJumlah" type="text" value="0.00"
                                                         class="text-right form-control"
                                                         oninput='formatAngkaKetik(this)'
-                                                        onblur='formatAngkaInput(this); onChangeAddAddJumlah()'>
-                                                    <input id="AddAddJumlahTunai" type="hidden" value="0.00"
-                                                        class="text-right form-control" onblur=''>
+                                                        onblur='formatAngkaInput(this)'>
+                                                    {{-- Buka ulang Pelunasan Hutang (BBK + Lawan lokal/exim, mode tambah).
+                                                         Tampil/sembunyi lewat aturTombolBukaTunai() di public/js/bank.js. --}}
+                                                    <button id="buttonBukaTunai" type="button"
+                                                        onclick="buttonBukaTunai()" class="btn btn-chip-biru"
+                                                        title="Pelunasan Hutang" style="display:none"><i
+                                                            class="bi bi-list-check"></i></button>
                                                 </div>
                                             </div>
                                         </div>
