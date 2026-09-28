@@ -1003,6 +1003,12 @@ Order by a.Nobukti,a.Urut
 
         // $jmlrecord = 1;
 
+        // DINONAKTIFKAN - mutasi aktiva ke dbAktivaDet SUDAH dibukukan otomatis oleh trigger
+        // TRI_ADD/TRI_UPD/TRI_DEL_DBTRANSAKSI di tabel dbTransaksi (jalan saat sp_TransaksiMemorial
+        // insert/update/delete baris), memakai StatusAktivaP/L + DebetRp. Kalau blok di bawah ikut
+        // jalan, MD/MK/SD/SK tercatat DUA KALI (contoh SML/BMM/00005/0926: MD 24 jt padahal 12 jt).
+        // kolomAktivaDet()/mutasiAktivaDet() sengaja dibiarkan, hanya pemanggilannya yang dimatikan.
+        /*
         // Mutasi aktiva ke dbAktivaDet. sp_TransaksiMemorial HANYA menyimpan NoAktivaP/L +
         // StatusAktivaP/L di baris dbTransaksi, ia tidak menyentuh dbAktivaDet sama sekali -
         // jadi pembukuan mutasinya dikerjakan di sini (pola yang sama dipakai KasController).
@@ -1045,6 +1051,7 @@ Order by a.Nobukti,a.Urut
             $this->mutasiAktivaDet($barangL, $kolL, $nilai, $devisi, $bulan, $tahun);
           }
         }
+        */
 
         // Baris kerja piutang/hutang sudah dipindahkan ke DBHUTPIUT oleh sp_TransaksiMemorial
         // di atas (filter StatusUID 'I'/'U'), jadi sisa isi dbTempHutPiut tinggal dibuang supaya

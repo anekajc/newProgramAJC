@@ -32,9 +32,14 @@
     height: 38px !important;
   }
 
+  /* Padding atas-bawah dinolkan: dengan padding 8px tombol setinggi 35,5px, lebih tinggi dari
+     input (34,25px) - stretch hanya bisa memanjangkan, jadi tombol menonjol ke bawah. Tanpa
+     padding vertikal tinggi tombol sepenuhnya mengikuti input di sebelahnya. */
   #formBsGrid .input-group .btn:has(> .bi-search) {
     height: auto !important;
     align-self: stretch;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 </style>
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
