@@ -273,21 +273,18 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-5">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddKodeDevisi" type="text" class="form-control"
-                                                        value="01" disabled>
-
-                                                    <button id="buttonAddListDevisi" type="button"
-                                                        onclick="buttonAddListDevisi()" class="btn btn-chip-biru"><i
-                                                            class="bi bi-search"></i></button>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-5">
-                                                <div class="input-group form-group">
-                                                    <input id="AddAddNamaDevisi" type="text" class="form-control"
-                                                        value="Accounting" disabled>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{-- Devisi & Valas: dropdown, bukan modal picker lagi. Kelasnya sama dengan
+                                                         dropdown Transaksi di atas. Opsi diisi kasMuatDevisiValas() di
+                                                         public/js/kas.js saat halaman dibuka; opsi di sini hanya cadangan
+                                                         sampai daftarnya termuat. Nama devisi tetap disimpan di
+                                                         #AddAddNamaDevisi (hidden) untuk kode yang membacanya. --}}
+                                                    <select id="AddAddKodeDevisi" class="form-control form-select-lg"
+                                                        onchange="onChangeDevisi()">
+                                                        <option value="01" data-nama="Accounting">01 - Accounting</option>
+                                                    </select>
+                                                    <input id="AddAddNamaDevisi" type="hidden" value="Accounting">
                                                 </div>
                                             </div>
                                         </div>
@@ -302,14 +299,14 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-5">
-                                                        <div class="input-group form-group">
-                                                            <input id="AddAddValas" type="text"
-                                                                class="form-control" value="IDR" disabled>
-                                                            <button id="buttonAddListValas" type="button"
-                                                                onclick="buttonAddListValas()"
-                                                                class="btn btn-chip-biru"><i
-                                                                    class="bi bi-search"></i></button>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            {{-- Opsi "IDR - Rupiah - 1.00"; data-kurs mengisi Kurs saat dipilih
+                                                                 (onChangeValas() di public/js/kas.js). --}}
+                                                            <select id="AddAddValas" class="form-control form-select-lg"
+                                                                onchange="onChangeValas()">
+                                                                <option value="IDR" data-kurs="1">IDR</option>
+                                                            </select>
                                                         </div>
                                                     </div>
 
@@ -319,7 +316,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-4">
                                                         <div class="input-group form-group">
                                                             <input id="AddAddKurs" type="number" value="1.00"
                                                                 class="text-right form-control" disabled>

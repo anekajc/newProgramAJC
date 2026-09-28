@@ -12,6 +12,9 @@
      Kurs/Qty per row, explicit Submit button) and DPHUHTBKM's main bukti table (editable
      Qty input + a per-row add/remove toggle, not a single pick). bank.blade.php's identical
      picker set was intentionally left untouched. --}}
+{{-- Navigasi antar pane di modal #form: "Kembali" (footer) = buttonAddListKembali(), mundur
+     satu pane (di pane pertama menutup modal). "Close" (header, pengganti tombol x) =
+     buttonAddListTutup(), menutup seluruh modal sekaligus apa pun riwayat pane-nya. --}}
 <div class="modal fade rt-picker-v2" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -20,9 +23,8 @@
             <div id= "modalAddListValas" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Valas</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
                 <div id="" class="">
                     <div class="modal-body">
@@ -59,17 +61,16 @@
                     </div>
                 </div>
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListAktivaDetail" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Aktiva</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="formBsGrid" class="" style="margin-top: 1rem;">
@@ -105,7 +106,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <input type="date" class="form-control text-center"
-                                            id="input_aktiva_tglperolehan" placeholder="">
+                                            id="input_aktiva_tglperolehan" placeholder="" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +137,7 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <input type="date" class="form-control text-center"
-                                            id="input_aktiva_tglpemakaian" placeholder="">
+                                            id="input_aktiva_tglpemakaian" placeholder="" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -321,8 +322,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                     <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
                         onclick="submitAddAktiva()">Simpan</button>
                 </div>
@@ -332,9 +333,8 @@
             <div id= "modalAddListAktivaDetailX" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Aktiva</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="formBsGrid" class="" style="margin-top: 1rem;">
@@ -599,8 +599,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                     <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
                         onclick="submitAddAktivaX()">Simpan</button>
                 </div>
@@ -609,9 +609,8 @@
             <div id= "modalAddListCosting" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Costing</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="" class="">
@@ -655,8 +654,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
@@ -665,9 +664,8 @@
 
 
                     <h5 class="modal-title" id="">SubCosting</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -713,8 +711,8 @@
 
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
@@ -723,9 +721,8 @@
 
 
                     <h5 class="modal-title" id="">CustSupp</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -772,17 +769,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDPP" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">DPP</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="" class="">
@@ -834,8 +830,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
@@ -844,9 +840,8 @@
 
 
                     <h5 class="modal-title" id="">Akumulasi / Biaya</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -891,17 +886,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListAktiva" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Aktiva</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="" class="">
@@ -951,17 +945,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDPH" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">DPH</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1014,17 +1007,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDPHUHT" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">DPH</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="" class="">
@@ -1078,17 +1070,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDPHUHTBKM" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Proses - Retur Uang Muka</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
                 <div id="" class="">
@@ -1201,17 +1192,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDevisi" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Devisi</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
                 <div id="" class="">
                     <div class="modal-body">
@@ -1251,17 +1241,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListPerkiraan" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Perkiraan</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
                 <div id="" class="">
                     <div class="modal-body">
@@ -1305,17 +1294,16 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListBon" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Bon</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1368,17 +1356,16 @@
 
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListDepartemen" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Departemen</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1424,17 +1411,16 @@
 
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
             <div id= "modalAddListLawan" class="showhidemodalbodyadd">
                 <div class="modal-header">
                     <h5 class="modal-title" id="">Lawan</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1481,8 +1467,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
@@ -1492,9 +1478,8 @@
 
 
                     <h5 class="modal-title" id="">Customer</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1548,8 +1533,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                 </div>
             </div>
 
@@ -1558,9 +1543,8 @@
 
 
                     <h5 class="modal-title" id="">Invoice</h5>
-                    <button type="button" class="close" onclick="buttonAddListKembali()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
+                        onclick="buttonAddListTutup()">Close</button>
                 </div>
 
 
@@ -1626,8 +1610,8 @@
                 </div>
 
                 <div id="contentContainer" class="modal-footer ">
-                    <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
-                        onclick="buttonAddListKembali()">Batal</button>
+                    <button type="button" class="btn btn-secondary btn-pill-secondary"
+                        onclick="buttonAddListKembali()">Kembali</button>
                     <button type="button" class="btn btn-primary btn-action-primary btn-pill-primary"
                         onclick="buttonAddPickInvoice()">Simpan</button>
                 </div>

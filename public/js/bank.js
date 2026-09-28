@@ -306,7 +306,7 @@ function bankBukaPane(id) {
     bankPaneSekarang = id;
 }
 
-// Batal / x: kembali ke pane sebelumnya; di pane pertama tutup modalnya.
+// Kembali (footer): kembali ke pane sebelumnya; di pane pertama tutup modalnya.
 function buttonAddListKembali() {
     if (!bankPaneStack.length) {
         buttonAddListBatal();
@@ -316,6 +316,15 @@ function buttonAddListKembali() {
     $('.showhidemodalbodyadd').hide();
     $('#' + id).show();
     bankPaneSekarang = id;
+}
+
+// Close (header): tutup seluruh modal sekaligus dari pane mana pun, dan kosongkan riwayat
+// pane-nya. .modal('hide') (bukan 'toggle') supaya tidak pernah malah membuka modal.
+function buttonAddListTutup() {
+    bankPaneStack = [];
+    bankPaneSekarang = null;
+    $('.showhidemodalbodyadd').hide();
+    $('#form').modal('hide');
 }
 
 /* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel
@@ -606,6 +615,7 @@ $(document).ready(function(){
       doSetHeader(g_modeReport);
       bankInitReportTableSekali();
       renderTabel();
+      bankMuatDevisiValas();
 
       // Picker tabel_add_list_* tidak lagi di-init di sini terhadap baris statis "-"
       // bawaan blade — bankInitPicker() menginisialisasi ulang tiap tabel picker saat
@@ -1137,6 +1147,10 @@ function submitAddAktivaX () {
 
             document.getElementById("AddAddLawan").value = dataLawanx.Perkiraan
 
+            // Sama seperti submitAddAktiva(): Keterangan aktiva baru disalin ke Keterangan item
+            // (menimpa), hanya bila aktiva berhasil disimpan; tetap bisa diubah setelahnya.
+            document.getElementById("AddAddKeterangan").value = keterangan
+
             $("#form").modal('toggle')
           }
           console.log(res)
@@ -1281,9 +1295,9 @@ function setNewNoBukti () {
 function cleanFormAddAdd () {
 
   if (tipeform == 'add') {
-    document.getElementById("AddAddKodeDevisi").value = '01'
+    bankPilihOpsi('AddAddKodeDevisi', '01', '01 - Accounting')
     document.getElementById("AddAddNamaDevisi").value = 'Accounting'
-    document.getElementById("AddAddValas").value = 'IDR'
+    bankPilihOpsi('AddAddValas', 'IDR')
     document.getElementById("AddAddKurs").value = '1.00'
 
     document.getElementById("AddAddKodeDepartemen").value = ''
@@ -3884,7 +3898,7 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr class="pick-row" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' , '${item.KURS}' )">
+        <tr class="pick-row" onclick="buttonAddPickValas(${i},'${item.KODEVLS}' , '${item.NAMAVLS}' )">
         <td>${item.KODEVLS}</td>
         <td>${item.NAMAVLS}</td>
         <td class="text-right">${parseFloat(item.KURS).toFixed(2)}</td>
@@ -4317,6 +4331,109 @@ function buttonAddListCustsupp () {
 
 }
 
+/* Devisi & Valas di form item kini dropdown (lihat bank/_form.blade.php), bukan modal picker.
+   Opsinya dimuat sekali saat halaman dibuka dari endpoint yang sama dengan picker lamanya
+   (banklistdevisi / banklistvalas); nilai yang sedang terpilih dipertahankan. Opsi dibuat lewat
+   DOM (bukan string HTML) supaya nama berisi tanda kutip tidak merusak atribut.
+   buttonAddListDevisi()/buttonAddListValas() + pane-nya di _pickers.blade.php tidak dipakai lagi. */
+function bankMuatDevisiValas () {
+  let _token = $("#_token").val();
+
+  $.ajax({
+    url: BANK_ROUTES.banklistdevisi,
+    type: "get",
+    data: {
+      _token,
+    },
+    success: function(res) {
+      listDevisi = res
+      let sel = document.getElementById("AddAddKodeDevisi")
+      let nilai = sel.value
+      sel.innerHTML = ''
+      res.forEach((item) => {
+        let opsi = document.createElement('option')
+        opsi.value = item.Devisi
+        opsi.textContent = item.Devisi + ' - ' + item.NamaDevisi
+        opsi.dataset.nama = item.NamaDevisi
+        sel.appendChild(opsi)
+      });
+      bankPilihOpsi('AddAddKodeDevisi', nilai)
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Daftar Devisi gagal dimuat, silahkan refresh browser')
+    }
+  })
+
+  $.ajax({
+    url: BANK_ROUTES.banklistvalas,
+    type: "get",
+    data: {
+      _token,
+    },
+    success: function(res) {
+      listValas = res
+      let sel = document.getElementById("AddAddValas")
+      let nilai = sel.value
+      sel.innerHTML = ''
+      res.forEach((item) => {
+        let kurs = Number(item.KURS) || 0
+        let opsi = document.createElement('option')
+        opsi.value = item.KODEVLS
+        opsi.textContent = item.KODEVLS + ' - ' + item.NAMAVLS
+        opsi.dataset.kurs = kurs
+        sel.appendChild(opsi)
+      });
+      bankPilihOpsi('AddAddValas', nilai)
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Daftar Valas gagal dimuat, silahkan refresh browser')
+    }
+  })
+}
+
+// Pilih nilai di dropdown Devisi/Valas. Kalau nilainya tidak ada di daftar (mis. data lama
+// saat edit), opsinya ditambahkan dulu supaya tetap tampil dan tetap terkirim apa adanya.
+function bankPilihOpsi (idSelect, nilai, label) {
+  let sel = document.getElementById(idSelect)
+  if (!sel) {
+    return
+  }
+  nilai = nilai == null ? '' : String(nilai)
+  let ada = Array.prototype.some.call(sel.options, (o) => o.value === nilai)
+  if (!ada && nilai !== '') {
+    let opsi = document.createElement('option')
+    opsi.value = nilai
+    opsi.textContent = label || nilai
+    sel.appendChild(opsi)
+  }
+  sel.value = nilai
+}
+
+function onChangeDevisi () {
+  let opsi = document.getElementById("AddAddKodeDevisi").selectedOptions[0]
+  document.getElementById("AddAddNamaDevisi").value = opsi ? (opsi.dataset.nama || '') : ''
+
+  // Sama seperti buttonAddPickDevisi() lama di halaman ini: Lawan TIDAK dikosongkan
+  // (berbeda dengan Kas - dipertahankan apa adanya).
+}
+
+// Efek sama seperti buttonAddPickValas() lama, minus menutup modal.
+function onChangeValas () {
+  let opsi = document.getElementById("AddAddValas").selectedOptions[0]
+  let kurs = opsi ? (Number(opsi.dataset.kurs) || 0) : 0
+
+  $('#rowCustsupp').hide();
+  document.getElementById("AddAddKurs").value = kurs.toFixed(2)
+
+  tempDPPDPH = {}
+
+  document.getElementById("AddAddLawan").value = ''
+  document.getElementById("AddAddKodeLawan").value = ''
+  document.getElementById("AddAddKeteranganLawan").value = ''
+}
+
 function buttonAddPickDevisi (index, kode, nama) {
   console.log('buttonAddPickDevisi')
   document.getElementById("AddAddKodeDevisi").value = kode
@@ -4377,6 +4494,11 @@ function submitAddAktiva () {
 
   document.getElementById("AddAddLawan").value = dataLawanx.Perkiraan
 
+  // Keterangan di jendela Aktiva (terisi keterangan aktiva, boleh diubah) disalin ke Keterangan
+  // item saat Simpan - menimpa isi sebelumnya; setelah itu Keterangan item tetap bisa diubah.
+  // Batal tidak menyalin apa-apa.
+  document.getElementById("AddAddKeterangan").value = $("#input_aktiva_keterangan").val()
+
   $("#form").modal('toggle')
 
 
@@ -4387,7 +4509,7 @@ function submitAddAktiva () {
 function buttonAddPickAktiva (index) {
   tipemodalaktiva = 1
   document.getElementById("input_aktiva_keterangan").value = ''
-  document.getElementById("input_aktiva_keterangan").disabled = false
+  document.getElementById("input_aktiva_keterangan").disabled = true
 
   console.log(listAktiva[index])
   xaktiva = listAktiva[index]
@@ -5006,16 +5128,16 @@ function lockFormAdd () {
 function lockFormAddAdd () {
   document.getElementById("buttonAddListDepartemen").disabled = true
   document.getElementById("buttonAddListLawan").disabled = true
-  document.getElementById("buttonAddListValas").disabled = true
-  document.getElementById("buttonAddListDevisi").disabled = true
+  document.getElementById("AddAddValas").disabled = true
+  document.getElementById("AddAddKodeDevisi").disabled = true
 
 }
 
 function unlockFormAddAdd () {
   document.getElementById("buttonAddListDepartemen").disabled = false
   document.getElementById("buttonAddListLawan").disabled = false
-  document.getElementById("buttonAddListValas").disabled = false
-  document.getElementById("buttonAddListDevisi").disabled = false
+  document.getElementById("AddAddValas").disabled = false
+  document.getElementById("AddAddKodeDevisi").disabled = false
 }
 
 
@@ -5417,9 +5539,9 @@ function buttonKoreksi (nobukti ) {
   $('.mainpage').hide();
   $('#page2').show();
 
-  document.getElementById("AddAddKodeDevisi").value = '01'
+  bankPilihOpsi('AddAddKodeDevisi', '01', '01 - Accounting')
   document.getElementById("AddAddNamaDevisi").value = 'Accounting'
-  document.getElementById("AddAddValas").value = 'IDR'
+  bankPilihOpsi('AddAddValas', 'IDR')
   document.getElementById("AddAddKurs").value = '1.00'
 
   document.getElementById("AddAddKodeDepartemen").value = ''
@@ -5517,7 +5639,8 @@ function buttonAddEditItem (i) {
     document.getElementById("AddAddJumlah").disabled = false
   }
 
-  document.getElementById("AddAddKodeDevisi").value = tempBarangAddEdit.Devisi
+  bankPilihOpsi('AddAddKodeDevisi', tempBarangAddEdit.Devisi,
+    tempBarangAddEdit.Devisi + ' - ' + (tempBarangAddEdit.NamaDevisi || ''))
   document.getElementById("AddAddNamaDevisi").value = tempBarangAddEdit.NamaDevisi
 
   document.getElementById("AddAddKodeCosting").value = tempBarangAddEdit.KODECOST ? tempBarangAddEdit.KODECOST : ''
@@ -5532,7 +5655,7 @@ function buttonAddEditItem (i) {
     document.getElementById("checkBoxSKB").checked = false
   }
 
-  document.getElementById("AddAddValas").value = tempBarangAddEdit.Valas
+  bankPilihOpsi('AddAddValas', tempBarangAddEdit.Valas)
   document.getElementById("AddAddKurs").value = parseFloat(tempBarangAddEdit.Kurs).toFixed(2)
 
   document.getElementById("AddAddLawan").value = tempBarangAddEdit.TipeTrans == 'BBK' ? tempBarangAddEdit.Perkiraan : tempBarangAddEdit.Lawan
