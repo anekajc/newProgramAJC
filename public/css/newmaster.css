@@ -305,9 +305,13 @@
 /* Input yang membentang dari kolom input pertama sampai tepi kanan. */
 #formBsGrid .bs-form .bs-full { grid-column: 2 / -1; }
 
-/* Appearance only -- no height/width here, so this never fights a page's own
-   sizing (fixed-height inputs, multi-row textareas, input-group children, etc). */
+/* height: 38px dipakai ~20 halaman (Kas, Bank, Memorial Koreksi, Bon Sementara, DPP/DPH,
+   form purchasing, dll.) yang tombol cari-nya juga dipaku 38px. Halaman yang butuh ukuran
+   lain membuat pengecualian SENDIRI di halamannya (pola yang sama seperti pengecualian
+   textarea di memorialkoreksi.blade.php, mis. marketing/invoicejasa.blade.php untuk tombol
+   cari 31px) - jangan hapus tinggi ini di sini, karena semua halaman lain ikut rusak. */
 #formBsGrid .form-control {
+  height: 38px;
   border-radius: 8px;
   border: 1px solid var(--rt-border);
   font-size: 13.5px;
