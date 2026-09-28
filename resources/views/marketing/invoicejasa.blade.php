@@ -437,6 +437,17 @@
     white-space: nowrap;
   }
 
+  /* #formBsGrid di public/css/newmaster.css memaku input 38px (dipakai ~20 halaman lain).
+     Halaman ini memakai tombol cari 31px (.btn-icon-search di atas), jadi tinggi input
+     dikembalikan ke ukuran bawaan tema di sini saja; textarea tetap mengikuti atribut rows. */
+  #formBsGrid .form-control {
+    height: calc(1.5em + 0.75rem + 2px);
+  }
+
+  #formBsGrid textarea.form-control {
+    height: auto;
+  }
+
 </style>
 {{-- end tampilan search modal barang all --}}
 @endsection
