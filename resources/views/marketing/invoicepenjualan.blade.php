@@ -6,13 +6,6 @@
 
 @endsection
 
-{{--
-  Rerouted from newmaster -> purchasing.newmasterx to match Purchase Order's UI 1:1,
-  same as marketing/so.blade.php before it. All total functionality (loadAll(),
-  buttonAdd/buttonDetail/buttonKoreksi/submitOtorisasi/buttonBatalOtorisasi/
-  openPrintModal, the whole Add-invoice page2 flow) is unchanged -- only the
-  layout, tab bar, toolbar and column-header interactivity were touched.
---}}
 @section('css')
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <style>
@@ -3726,9 +3719,7 @@ function buttonAdd (noso , namacust, kodecust, tglso , ppncust) {
 
   })
 
-
 }
-
 
 function buttonBatalOtorisasi (nobukti) {
   console.log('buttonBatalOtorisasi' , nobukti)
@@ -3739,8 +3730,7 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  alertify.prompt("Batal Otorisasi","Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -3750,8 +3740,6 @@ function buttonBatalOtorisasi (nobukti) {
           $.abort();
         }
         let _token = $("#_token").val();
-
-
 
         $.ajax({
           url: "{!! url('invoicepenjualanspbatalotorisasi') !!}",

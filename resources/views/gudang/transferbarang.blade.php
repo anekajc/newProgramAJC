@@ -4677,7 +4677,7 @@ function applyModalFilter() {
   $('#modalFilter').modal('hide');
 }
 
-function reloadData(_focusNobukti) {
+function reloadData (_focusNobukti) {
   let listTransfer = [];
 
   $.ajax({

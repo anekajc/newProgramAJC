@@ -25,6 +25,13 @@ class ClosingTransferController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
+    // Periode range default buat tab "Closing Transfer Barang" (tempPenerimaan) --
+    // satu bulan penuh periode kerja user, sama seperti transferbarang.blade.php.
+    // Tidak dipakai buat tempOutstanding ("Transfer Barang"), itu memang selalu
+    // menampilkan semua transfer outstanding tanpa filter tanggal.
+    $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-t', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+
     // sheet kiri
     $tempOutstanding = DB::connection("SML")->select("
     SELECT 
@@ -199,17 +206,14 @@ class ClosingTransferController extends Controller
         LEFT OUTER JOIN DBGUDANG E ON A1.GDGTUJUAN = E.KODEGDG
         -- WHERE A1.GDGTUJUAN = 'GSM'   
     ) C ON A.NOBUKTI = C.NOBUKTI
-    WHERE 
+    WHERE
         ISNULL(C.isbatal,0) = 1
-        -- AND MONTH(C.TglBatal) = :bulan
-        -- AND YEAR(C.TglBatal) = :tahun
+        AND CAST(C.TglBatal AS DATE) BETWEEN :date1 AND :date2
     ORDER BY A.NoBukti
-");
-
-// , [
-//     "bulan" => $periode->bulan,
-//     "tahun" => $periode->tahun
-// ]
+", [
+    "date1" => $date1,
+    "date2" => $date2
+]);
 
 
     return view('gudang.closingtransfer', [
@@ -217,6 +221,8 @@ class ClosingTransferController extends Controller
         "periode" => $periode,
         "tempOutstanding" => $tempOutstanding,
         "tempPenerimaan" => $tempPenerimaan,
+        "date1" => $date1,
+        "date2" => $date2,
         "akses" => $akses
     ]);
 }
@@ -225,6 +231,13 @@ class ClosingTransferController extends Controller
   public function loadAll(Request $request)
 {
     $periode = NewPeriode::where('user_id', \Auth::user()->username)->first();
+
+    // Periode range utk tab "Closing Transfer Barang" (tempPenerimaan), dikirim dari
+    // input date picker di halaman -- default satu bulan penuh periode kerja user
+    // kalau belum dipilih (reload pertama kali). tempOutstanding tidak difilter
+    // tanggal sama sekali, sesuai index().
+    $date1 = $request->date1 ?: date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = $request->date2 ?: date('Y-m-t', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
 
     // Sheet kiri (Outstanding)
     $tempOutstanding = DB::connection("SML")->select("
@@ -395,21 +408,20 @@ class ClosingTransferController extends Controller
             LEFT OUTER JOIN DBGUDANG D ON A1.GDGASAL = D.KODEGDG
             LEFT OUTER JOIN DBGUDANG E ON A1.GDGTUJUAN = E.KODEGDG
         ) C ON A.NOBUKTI = C.NOBUKTI
-        WHERE 
+        WHERE
             ISNULL(C.isbatal,0) = 1
-            -- AND MONTH(C.TglBatal) = :bulan
-            -- AND YEAR(C.TglBatal) = :tahun
+            AND CAST(C.TglBatal AS DATE) BETWEEN :date1 AND :date2
         ORDER BY A.NoBukti
-    ");
-
-    // , [
-    //     "bulan" => $periode->bulan,
-    //     "tahun" => $periode->tahun
-    // ]
+    ", [
+        "date1" => $date1,
+        "date2" => $date2
+    ]);
 
     return response()->json([
         "tempOutstanding" => $tempOutstanding,
-        "tempPenerimaan" => $tempPenerimaan
+        "tempPenerimaan" => $tempPenerimaan,
+        "date1" => $date1,
+        "date2" => $date2
     ]);
 }
 

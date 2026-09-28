@@ -20,9 +20,26 @@
   .rodokNdukurTitik{
     margin-top:-12px;
   }
-  </style>
 
-  <style>
+  .btn-histori-harga {
+    background-color: #e7f7ed;
+    border-color: #cdebd7;
+    color: #16a34a;
+  }
+
+  .btn-histori-harga:hover,
+  .btn-histori-harga:focus {
+    background-color: #d8f0e2;
+    border-color: #b6e0c6;
+    color: #15803d;
+  }
+
+  .btn-histori-harga:active {
+    background-color: #c8e9d5 !important;
+    border-color: #a5d8b8 !important;
+    color: #15803d !important;
+  }
+
     .dataTables_wrapper {
     overflow-x: auto;
   }
@@ -343,15 +360,6 @@
   color: #343a40 !important;
 }
 
-/* Search-icon button appended flush to an input (e.g. Customer/Valas/Lokasi picker). */
-.btn-icon-search {
-  height: 32px;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .data-table th,
 .data-table td {
   white-space: nowrap;
@@ -458,7 +466,7 @@
                       <select id="psoLen1" class="po-len-inp"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="-1">Semua</option></select>
                     </div>
                     <div class="po-toolbar-act">
-                      <button id='AddVisibility' class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                      <button id='AddVisibility' class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   <div id="rtBarTabel2"></div>
@@ -626,7 +634,7 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="">
+    <div id="formBsGrid" class="modal-body" style="">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
         <div class="col-md-3">
@@ -641,7 +649,7 @@
             <div class="col-md-8">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" placeholder="Kode Customer" id="input_add_kodesupplier" onkeyup="checkKodeSupplier()">
-                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListPelanggan" onclick="performSearchSupplier()">
+                <button class="btn btn-chip-biru btn-sm" id="buttonAddListPelanggan" onclick="performSearchSupplier()">
                   <i class="bi bi-search"></i>
                 </button>
               </div>
@@ -726,7 +734,7 @@
                 <div class="col-md-12">
                   <div class="input-group form-group">
                     <input type="text" class="form-control" id="input_add_valas"  disabled>
-                    <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                    <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -931,7 +939,7 @@
                         <div class="col-8" style="margin-top:-5px">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="input_add_noso" value='-' readonly>
-                            <button onclick="buttonAddListNoSO()" id="buttonAddListNoSo" class="btn btn-chip-biru btn-sm btn-icon-search">
+                            <button onclick="buttonAddListNoSO()" id="buttonAddListNoSo" class="btn btn-chip-biru btn-sm">
                               <i class="bi bi-search"></i>
                             </button>
                           </div>
@@ -1077,7 +1085,7 @@
                           <div class="input-group form-group">
 
                             <input type="text" class="form-control" id="input_add_lokasipenerima" value='-' readonly>
-                             <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                             <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                  
 
                           </div>
@@ -1149,7 +1157,7 @@
                           <div class="input-group form-group">
                             <input type="hidden" class="form-control" id="input_add_kodebackoffice" >
                             <input type="text" class="form-control" id="input_add_namabackoffice"  disabled>
-                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                            <button onclick="buttonAddListBackOffice()" id="buttonAddListBackOffice" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                           </div>
                         </div>
                       </div>
@@ -1183,7 +1191,7 @@
                       <div class="input-group form-group">
                         <input type="hidden" class="form-control" id="input_add_kodepic"  >
                         <input type="text" class="form-control" id="input_add_namapic"  disabled>
-                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                        <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                       </div>
                     </div>
                   </div>
@@ -1206,7 +1214,7 @@
                   <div class="input-group form-group">
                     <input type="hidden" class="form-control" id="input_add_kodesales" >
                     <input type="text" class="form-control" id="input_add_namasales"  disabled>
-                    <button onclick="buttonAddListSales()" id="buttonAddListSales" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                    <button onclick="buttonAddListSales()" id="buttonAddListSales" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -1301,6 +1309,7 @@
 
         <!-- ADD add -->
         <div id="addAddItem" class="container-fluid showhide">
+          <div id='formBsGrid'>
           <hr/>
 
             <div class="row">
@@ -1432,7 +1441,7 @@
                           <div class="col-md-6">
                             <div class="input-group form-group">
                               <input type="text" class="form-control" id="input_add_add_kodebarang">
-                              <button onclick="performSearch()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm btn-icon-search">
+                              <button onclick="performSearch()" id="buttonAddAddListBarang" class="btn btn-chip-biru btn-sm">
                                   <i class="bi bi-search"></i>
                               </button>
                             </div>
@@ -1836,7 +1845,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
+              <button onclick="" class="btn btn-chip-biru btn-sm" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -1863,7 +1872,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
+              <button onclick="" class="btn btn-chip-biru btn-sm" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -1891,7 +1900,7 @@
               </div>
               <div class="col-3 text-right">
                 <div class="form-group">
-              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang" class="btn btn-chip-biru btn-sm btn-icon-search" disabled><i class="bi bi-search"></i></button>
+              <button onclick="buttonAddEditListBarang()" id="buttonAddEditListBarang" class="btn btn-chip-biru btn-sm" disabled><i class="bi bi-search"></i></button>
               </div>
 
             </div>
@@ -2154,7 +2163,7 @@
 
 
         <hr/>
-    </div>
+    </div></div>
 
   <div class="container-fluid" style="margin-top: -10px;">
   <div class="row">
@@ -2289,7 +2298,7 @@
         </div>
         <div class="col-3 text-right">
           <div class="form-group">
-        <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
+        <button class="btn btn-chip-biru btn-sm" id="buttonAddListPelanggan" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
         </div>
 
       </div>

@@ -186,7 +186,7 @@
 
 <!-- start modal add -->
 <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered"  role="document">
+  <div id="formBsGrid" class="modal-dialog modal-xl modal-dialog-centered"  role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
@@ -370,7 +370,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
     <button id="buttonSubmitAdd" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Otorisasi</button>
     <button id="buttonSubmitBatalOto" type="button" class="btn btn-danger" onclick="submitBatalOto()">Batal Otorisasi</button>
   </div>
