@@ -932,7 +932,10 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
     }
 
 
-    DB::connection('SML')->statement('exec sp_TempHutPiut ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', [
+    // 29 parameter (sampai @NODPh, @UrutDPH) - lihat daftar bernama di
+    // MemorialKoreksiController::addKartuPT(). Dulu hanya 28 "?" untuk 29 nilai: driver sqlsrv
+    // (Windows/lokal) diam saja, tapi driver dblib di server menolak (SQLSTATE HY093).
+    DB::connection('SML')->statement('exec sp_TempHutPiut ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', [
       $req->choice,
 $data['NoFaktur'],
 $data['NoRetur'] ? $data['NoRetur'] : '',
@@ -961,7 +964,7 @@ $data['Kurs_'],
 0,
 '',
 $data['NoDPH'] ? $data['NoDPH'] : '',
-$data['urutDPH'] ? $data['urutDPH'] : ''
+$data['urutDPH'] ? $data['urutDPH'] : 0
 
     ]);
 

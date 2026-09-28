@@ -8,8 +8,9 @@
          po-table-header.css, dan TIDAK memuat tableMaster2.css — jadi tabel daftar tidak perlu lagi
          aturan penetral. Tampilan tabel daftar diambil dari blok .po-list-page di po-table-header.css
          (class-nya dipasang di div#pageHome).
-         report-table.css dimuat di sini (dulu dari layout gudang) untuk tabel item (.tb-report),
-         modal picker Barang (.rt-picker-v2) dan modal filter (.rt-filter). --}}
+         report-table.css dimuat di sini (dulu dari layout gudang) untuk modal picker Barang
+         (.rt-picker-v2) dan modal filter (.rt-filter). Tabel item #tabelitem tidak lagi memakai
+         .tb-report — tampilannya ditulis di blok CSS #tabelitem di bawah. --}}
     <link rel="stylesheet"
         href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
     {{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
@@ -27,6 +28,61 @@
             width: 260px;
             max-width: 100%;
             margin-left: auto;
+        }
+
+        /* Tabel item form Add/Edit/Detail (#tabelitem) — tampilannya disamakan dengan tabel daftar
+           #tabel di #pageHome: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
+           kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
+           hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
+           po-table-header.css (sama seperti #tabel_add di permintaantransferbarang.blade.php); blok
+           itu sendiri tidak dipakai di sini karena #pageForm bukan .po-list-page. Padding sel isi
+           sengaja tidak ditulis: `table tbody td { padding: 0 10px !important }` di newmaster.css
+           berlaku sama seperti di #tabel (baris rapat). */
+        #pageForm .po-item-card {
+            background: var(--white, #fff);
+            border: 1.5px solid var(--border, #e5e7eb);
+            border-radius: var(--radius, 12px);
+            overflow: hidden;
+        }
+
+        #tabelitem {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        #tabelitem thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f9fafb;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-muted, #6b7280);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border, #e5e7eb);
+        }
+
+        #tabelitem thead th.num {
+            text-align: right;
+        }
+
+        #tabelitem tbody td {
+            border-bottom: 1px solid #f3f4f6;
+            color: var(--text-main, #1f2937);
+            vertical-align: middle;
+        }
+
+        #tabelitem tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        #tabelitem tbody tr:hover td {
+            background: #f9fafb;
         }
     </style>
 @endsection
@@ -179,7 +235,7 @@
         </div>
 
         <div id="modalBodyAddMain" class="">
-            <div class="modal-body">
+            <div class="modal-body" id="formBsGrid">
                 <div class="row">
 
                     <input type="hidden" class="form-control" id="input_nourut">
@@ -250,14 +306,14 @@
         </div>
 
         <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
-            {{-- .tb-report cuma membungkus tabel item — TIDAK seluruh form, karena
-                 `.tb-report *{margin:0;padding:0}` di report-table.css akan menghapus gutter
-                 grid Bootstrap dan padding form-control di bawahnya. Header tabel ini dirender
-                 ulang oleh refreshForm() (kolom Actions hilang di mode Detail). --}}
-            <div class="tb-report container-fluid mt-4">
-                <div class="table-outer">
-                    <div class="table-wrap" style="max-height:40vh;">
-                        <table id="tabelitem" class="tb">
+            {{-- Tampilan tabel item disamakan dengan tabel daftar #tabel (lihat blok CSS #tabelitem di
+                 @section('css')): kartu berbingkai + kotak scroll .po-table-wrap dengan judul kolom
+                 sticky. Header tabel ini dirender ulang oleh refreshForm() (kolom Actions hilang di
+                 mode Detail). --}}
+            <div class="container-fluid mt-4">
+                <div class="po-item-card">
+                    <div class="po-table-wrap" style="max-height:40vh;">
+                        <table id="tabelitem" class="data-table">
                             <thead id="tabelitem_header">
                                 <tr>
                                     <th>Kode</th>
