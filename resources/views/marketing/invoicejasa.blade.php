@@ -366,8 +366,8 @@
 <style>
   /* Search-icon button appended flush to an input, ported from so.blade.php. */
   .btn-icon-search {
-    height: 32px;
-    border-radius: 0;
+    height: 31px;
+    border-radius: 0% 20% 20% 0%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -431,6 +431,12 @@
     visibility: visible;
     transform: translateX(0);
   }
+
+  .data-table th,
+  .data-table td {
+    white-space: nowrap;
+  }
+
 </style>
 {{-- end tampilan search modal barang all --}}
 @endsection
@@ -580,7 +586,7 @@
       <!-- <button onclick="loadAll()">tes</button> -->
     </div>
 
-    <div id="" class="">
+    <div id="formBsGrid" class="">
       <div class="">
         <!-- <h1>Tes Modal</h1> -->
 
@@ -603,7 +609,7 @@
                 <div class="col-md-8">
                   <div class="form-group input-group">
                     <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
+                    <button class="btn-chip-biru btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
               </div>
@@ -704,7 +710,7 @@
                   <div class="form-group input-group">
                     <input type="text" class="form-control" id="input_add_sales" value="" disabled >
                     <input type="hidden" class="form-control text-center" id="input_add_kodesales" value="" disabled >
-                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-search"></i></button>
+                    <button class=" btn-chip-biru btn-icon-search" id="buttonAddListSales" onclick="buttonAddListSales()"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
 
@@ -731,7 +737,7 @@
                   <div class="form-group input-group">
                     <input type="hidden" class="form-control text-center" id="input_add_kodelokasipenerima" value="" disabled >
                     <input type="text" class="form-control" id="input_add_lokasipenerima" value="" disabled >
-                    <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListLokasiPenerima" onclick="buttonAddListLokasiPenerima()"><i class="bi bi-search"></i></button>
+                    <button class="btn-chip-biru btn-icon-search" id="buttonAddListLokasiPenerima" onclick="buttonAddListLokasiPenerima()"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
                 <!-- </div>
@@ -982,7 +988,7 @@
               <div class="input-group form-group">
 
                 <input id="AddAddKodeBrg" type="text" class="form-control" onkeypress="onKeyPressBarang(event)">
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                <button type="button" onclick="buttonAddListBarang()" class="btn-chip-biru btn-icon-search"><i class="bi bi-search"></i></button>
               </div>
             </div>
 

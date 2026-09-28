@@ -221,6 +221,14 @@
   #tabel_add_harga_terakhir tbody tr:hover { background-color: #f2fbf5; }
   #tabel_add_harga_beli tbody tr:hover { background-color: #fef8ef; }
 
+  {{-- Every table on this page uses class="data-table" -- one rule keeps all their
+       header/body cells on a single line instead of wrapping long values, matching
+       the horizontal-scroll .po-table-wrap they already sit in. --}}
+  .data-table th,
+  .data-table td {
+    white-space: nowrap;
+  }
+
   #tabel2.table-bordered th,
   #tabel2.table-bordered td,
   #tabel_oto.table-bordered th,
@@ -407,10 +415,10 @@
     to { transform: rotate(360deg); }
   }
 
-  {{-- Row actions only reveal on hover/focus, port 1:1 dari pola
+  /* {{-- Row actions only reveal on hover/focus, port 1:1 dari pola
        .action-buttons-wrap milik master (public/css/tableMaster2.css) --
        scoped ke setiap tabel SO yang punya kolom Actions (#tabel/#tabel2/
-       #tabel_oto -- #tabel7 tidak punya Actions sama sekali). --}}
+       #tabel_oto -- #tabel7 tidak punya Actions sama sekali). --}} */
   #tabel tbody .action-buttons-wrap,
   #tabel2 tbody .action-buttons-wrap,
   #tabel_oto tbody .action-buttons-wrap {
@@ -703,7 +711,7 @@
                       <i class="bi bi-funnel"></i> Filter
                     </button>
                     <div class="po-toolbar-act">
-                      <button id='AddVisibility' class="btn btn-primary" onclick="buttonAdd()">Tambah</button>
+                      <button id='AddVisibility' class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
                     </div>
                   </div>
                   <div id="rtBarTabel"></div>

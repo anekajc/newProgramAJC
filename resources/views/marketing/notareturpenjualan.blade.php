@@ -141,6 +141,11 @@
   line-height: 0;
   vertical-align: middle;
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 

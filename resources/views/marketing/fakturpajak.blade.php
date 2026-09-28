@@ -379,6 +379,11 @@
     visibility: visible;
     transform: translateX(0);
   }
+
+  .data-table th,
+  .data-table td {
+    white-space: nowrap;
+  }
 </style>
 {{-- end tampilan search modal barang all --}}
 @endsection

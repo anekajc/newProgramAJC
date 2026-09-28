@@ -525,9 +525,22 @@
       transform: translateX(0);
     }
 
-    #tabel th:first-child,
-    #tabel td:first-child {
+    #tabel th:first-child {
       width: 1%;
+      white-space: nowrap;
+    }
+
+    /* .action-buttons-wrap (below) makes this <td> display:flex, which takes it
+       out of normal table-cell layout -- "width: 1%" then resolves against the
+       whole table's width instead of shrink-wrapping to its buttons, collapsing
+       the cell to ~20px and making the centered (justify-content:center) buttons
+       overflow symmetrically past both edges of that sliver, spilling off the
+       left edge of the table entirely on wide tables. min-width instead of a
+       percentage keeps it sized to its own 3 action buttons regardless of how
+       many columns the rest of the table has. */
+    #tabel td:first-child {
+      width: auto;
+      min-width: 110px;
       white-space: nowrap;
     }
 
@@ -585,15 +598,6 @@
       white-space: nowrap;
     }
 
-    /* Tombol pill bersama (pengganti style= inline yang berulang di tombol modal).
-       Scoped #contentContainer .btn.btn-pill-* (specificity 1 id + 2 classes) so it
-       beats the generic "#contentContainer .btn" rule above (1 id + 1 class) — without
-       this extra scoping the pill look (radius/padding/font-size/shadow) is silently
-       flattened to the generic button style on every page that loads this file.
-       .modal .btn.btn-pill-* ditambahkan supaya tombol modal (Batal/Submit/dst) juga
-       bisa pakai kelas ini — modal-modal itu sengaja diletakkan DI LUAR #contentContainer
-       (lihat catatan .tb-report di halaman gudang/pemakaianbarang.blade.php), jadi rule
-       #contentContainer di atas tidak menjangkaunya. */
     #contentContainer .btn.btn-pill-primary,
     #contentContainer .btn.btn-pill-secondary,
     .modal .btn.btn-pill-primary,

@@ -307,6 +307,15 @@
     visibility: visible;
     transform: translateX(0);
   }
+
+  {{-- This page still uses its own table ids/classes instead of po-table-header.css's
+       .data-table, so the nowrap rule is scoped to those ids directly. --}}
+  #tabel th, #tabel td,
+  #addTable th, #addTable td,
+  #otorisasiTable th, #otorisasiTable td,
+  #tabel_add_list_lokasi th, #tabel_add_list_lokasi td {
+    white-space: nowrap;
+  }
 </style>
 @endsection
 

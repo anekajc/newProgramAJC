@@ -114,6 +114,11 @@
   border-color: #a8bdff !important;
   color: #1d4ed8 !important;
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 

@@ -305,8 +305,9 @@
 /* Input yang membentang dari kolom input pertama sampai tepi kanan. */
 #formBsGrid .bs-form .bs-full { grid-column: 2 / -1; }
 
+/* Appearance only -- no height/width here, so this never fights a page's own
+   sizing (fixed-height inputs, multi-row textareas, input-group children, etc). */
 #formBsGrid .form-control {
-  height: 38px;
   border-radius: 8px;
   border: 1px solid var(--rt-border);
   font-size: 13.5px;

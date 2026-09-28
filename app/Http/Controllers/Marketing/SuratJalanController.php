@@ -1421,7 +1421,7 @@ order by B.Urut
 
   public function listEkspedisi (Request $req) {
 
-    $listData = DB::connection('SML')->select("select KODECUSTSUPP , NAMACUSTSUPP from dbcustsupp where JENIS = 2");
+    $listData = DB::connection('SML')->select("select KODECUSTSUPP , NAMACUSTSUPP from dbcustsupp where JENIS = 3");
     return $listData;
   }
 
