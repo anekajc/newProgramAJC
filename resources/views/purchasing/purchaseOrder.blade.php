@@ -126,6 +126,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
   <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -3925,6 +3927,18 @@ td input[type="checkbox"] {
      purchasing/newmasterx, supaya halaman purchasing yang lain tidak ikut terpengaruh.
      File-nya berupa IIFE ber-guard, jadi aman meski dimuat lebih dari sekali. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
+{{-- Modal pemilih bersama (purchasing/modals/modalPOAdd, #form) disamakan persis dengan modal
+     pemilih menu Kas. Class picker-kas dipasang dari halaman ini (bukan di file modalnya) karena
+     modalPOAdd juga di-include marketing/penawaranso, yang tidak ikut diubah. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#form').addClass('picker-kas')
+  jQuery('#form .modal-footer .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Batal'
+  }).addClass('picker-kas-batal')
+})
+</script>
 <script type="text/javascript">
 
 let urutHeaderTable = 0
@@ -6248,12 +6262,7 @@ function buttonAddListPIC () {
       });
 
       document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
-      $("#tabel_add_list_pic").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-        "paging": true,
-      });
+      pickerKasInit('tabel_add_list_pic')
 
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListPIC').show();
@@ -6494,10 +6503,7 @@ function buttonAddAddListBarang (opsi = {}) {
         }
         document.getElementById("tabel_data_add_list_barang_nonfoc").innerHTML = rowTable
         document.getElementById("namaHeaderTable").textContent = 'Barang dari PR'
-        $("#tabel_add_list_barang_nonfoc").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-        });
+        pickerKasInit('tabel_add_list_barang_nonfoc')
 
         // Kata kunci yang diketik user ikut terbawa ke kotak cari bawaan DataTables,
         // supaya jelas daftar yang tampil ini hasil pencarian apa dan bisa langsung diubah.
@@ -6528,7 +6534,7 @@ function buttonAddAddListBarang (opsi = {}) {
       // Kata kunci dari kolom kode barang dibawa ke kotak cari modal, lalu dicarikan ke
       // server sekarang juga (poMuatBarangFOC async:false) supaya jumlah hasilnya bisa
       // dipakai memutuskan auto-pick sebelum modal sempat dibuka.
-      $('#input_search_barang_foc').val(keyword)
+      // $('#input_search_barang_foc').val(keyword)  - kata kuncinya kini tampil di kotak Search DataTables
 
       let jml = poMuatBarangFOC(keyword)
 
@@ -6538,18 +6544,21 @@ function buttonAddAddListBarang (opsi = {}) {
         return
       }
 
-      poRenderBarangFOC()
+      poRenderBarangFOC(keyword)
 
     } else {
 
-      $('#input_search_barang_foc').val('')
-      document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+      // $('#input_search_barang_foc').val('')
+      // document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+      poTabelBarangFOCInit('', '')
 
     }
 
     document.getElementById("namaHeaderTable").textContent = 'Master Barang'
     $('.showhidemodalbodyadd').hide();
-    $('#wrapSearchBarangFOC').show();
+    // Kotak cari lama (#wrapSearchBarangFOC) tidak dimunculkan lagi - diganti kotak Search
+    // DataTables (picker-kas), lihat poTabelBarangFOCInit().
+    // $('#wrapSearchBarangFOC').show();
     $('#modalBodyAddAddListBarangFOC').show();
 
     $("#form").modal('toggle')
@@ -6600,10 +6609,7 @@ function buttonAddAddListBarang (opsi = {}) {
 
         document.getElementById("tabel_data_add_list_barang_nonfocplus").innerHTML = rowTable
 
-        $("#tabel_add_list_barang_nonfocplus").DataTable({
-          "lengthChange": false,
-            "paging": true ,
-        });
+        pickerKasInit('tabel_add_list_barang_nonfocplus')
 
         if (keyword) { $("#tabel_add_list_barang_nonfocplus").DataTable().search(keyword).draw() }
 
@@ -6874,10 +6880,7 @@ function buttonAddListNoSO () {
       });
 
       document.getElementById("tabel_data_add_list_noSo").innerHTML = rowTable
-      $("#tabel_add_list_noSo").DataTable({
-        "lengthChange": false,
-        "paging": true,
-      });
+      pickerKasInit('tabel_add_list_noSo')
       document.getElementById("namaHeaderTable").textContent = 'Nomor SO'
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListNoSo').show();
@@ -6975,12 +6978,7 @@ function buttonAddListLokasiPenerima () {
       });
 
       document.getElementById("tabel_data_add_list_lokasipenerima").innerHTML = rowTable
-      $("#tabel_add_list_lokasipenerima").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-        "paging": true,
-      });
+      pickerKasInit('tabel_add_list_lokasipenerima')
 
       document.getElementById("namaHeaderTable").textContent = 'Ekspedisi'
 
@@ -7074,12 +7072,7 @@ function buttonAddListPelanggan ()
 
 
       document.getElementById("tabel_data_add_list_pelanggan").innerHTML = rowTable
-      $("#tabel_add_list_pelanggan").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-      });
+      pickerKasInit('tabel_add_list_pelanggan')
 
       document.getElementById("namaHeaderTable").textContent = 'Supplier'
 
@@ -7118,12 +7111,7 @@ function buttonAddListBackOffice () {
 
 
       document.getElementById("tabel_data_add_list_backoffice").innerHTML = rowTable
-      $("#tabel_add_list_backoffice").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-        "paging": true,
-      });
+      pickerKasInit('tabel_add_list_backoffice')
 
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListBackOffice').show();
@@ -7164,12 +7152,7 @@ function buttonAddListSales () {
 
 
       document.getElementById("tabel_data_add_list_sales").innerHTML = rowTable
-      $("#tabel_add_list_sales").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-    });
+      pickerKasInit('tabel_add_list_sales')
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListSales').show();
       $("#form").modal('toggle')
@@ -11859,11 +11842,9 @@ function poMuatBarangFOC (search) {
 }
 
 // Render isi dataAddAddListItem ke tabel browse FOC.
-function poRenderBarangFOC () {
-  if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
-
+function poRenderBarangFOC (cari) {
   if (!dataAddAddListItem.length) {
-    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>'
+    poTabelBarangFOCInit('', cari, 'Tidak ada data')
     return
   }
 
@@ -11878,13 +11859,28 @@ function poRenderBarangFOC () {
     </tr>`
   });
 
-  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable
+  poTabelBarangFOCInit(rowTable, cari)
+}
 
-  $("#tabel_add_list_barang_foc").DataTable({
-    "lengthChange": false,
-    "paging": false,
-    "searching": false,
-  });
+/* Browse FOC (Master Barang) - tampilan disamakan dengan modal pemilih menu Kas (picker-kas):
+   dropdown "Tampilkan" + kotak Search bawaan DataTables. Datanya tetap dicari ke server
+   (seluruh master barang terlalu besar untuk dimuat sekaligus), jadi kotak Search DataTables
+   itu sekaligus menjadi kotak cari server: tekan Enter -> searchBarangFOC(). Sambil mengetik,
+   DataTables tetap menyaring hasil yang sedang tampil. */
+function poTabelBarangFOCInit (rowTable, cari, pesanKosong) {
+  document.getElementById("tabel_data_add_list_barang_foc").innerHTML = rowTable || ''
+  pickerKasInit('tabel_add_list_barang_foc', {
+    search: { search: cari || '' },
+    language: {
+      lengthMenu: 'Tampilkan _MENU_',
+      emptyTable: pesanKosong || 'Ketik kode / nama barang di kotak Search, lalu tekan Enter',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
+  })
+  $('#tabel_add_list_barang_foc_filter input')
+    .off('keypress.poFOC')
+    .on('keypress.poFOC', searchBarangFOC)
+    .trigger('focus')
 }
 
 // Pencarian server-side untuk browse FOC (Master Barang) - mengikuti pola searchBarangAll
@@ -11894,17 +11890,17 @@ function poRenderBarangFOC () {
 function searchBarangFOC (e) {
   if (e.which != 13) { return }
 
-  let search = $("#input_search_barang_foc").val().trim()
-
-  if ($.fn.DataTable.isDataTable('#tabel_add_list_barang_foc')) { $('#tabel_add_list_barang_foc').DataTable().destroy() }
+  // Dipanggil dari kotak Search DataTables (lihat poTabelBarangFOCInit), bukan lagi
+  // #input_search_barang_foc.
+  let search = $(e.target).val().trim()
 
   if (!search) {
-    document.getElementById("tabel_data_add_list_barang_foc").innerHTML = '<tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>'
+    poTabelBarangFOCInit('', '')
     return
   }
 
   poMuatBarangFOC(search)
-  poRenderBarangFOC()
+  poRenderBarangFOC(search)
 }
 
 function generateInputNumber (id , style, classes, onchange) {

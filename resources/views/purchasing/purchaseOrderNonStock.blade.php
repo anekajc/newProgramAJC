@@ -125,6 +125,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
   <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -2742,6 +2744,17 @@
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
+{{-- Modal pemilih (purchasing/modals/modalPONonStockAdd, #form) disamakan persis dengan modal
+     pemilih menu Kas - class picker-kas dipasang di sini, sama seperti di purchaseOrder. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#form').addClass('picker-kas')
+  jQuery('#form .modal-footer .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Batal'
+  }).addClass('picker-kas-batal')
+})
+</script>
 <script type="text/javascript">
 
 let dataTableAdd = []
@@ -2822,10 +2835,7 @@ $(document).ready(function(){
       "searching" : false,
   });
 
-  $("#tabel_add_list_pelanggan").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-  });
+  pickerKasInit('tabel_add_list_pelanggan')
 
   $("#tabel_add_list_sales").DataTable({
     "lengthChange": false,
@@ -4140,10 +4150,7 @@ function buttonAddAddListBarang (opsi = {}) {
 
         document.getElementById("tabel_data_add_list_barang_jasa").innerHTML = rowTable
 
-        $("#tabel_add_list_barang_jasa").DataTable({
-          "lengthChange": false,
-            "paging": true ,
-        });
+        pickerKasInit('tabel_add_list_barang_jasa')
 
         // Kata kunci yang diketik user ikut terbawa ke kotak cari bawaan DataTables.
         if (keyword) { $("#tabel_add_list_barang_jasa").DataTable().search(keyword).draw() }
@@ -4212,10 +4219,7 @@ function buttonAddAddListBarang (opsi = {}) {
 
         document.getElementById("tabel_data_add_list_barang_nonfoc").innerHTML = rowTable
 
-        $("#tabel_add_list_barang_nonfoc").DataTable({
-          "lengthChange": false,
-            "paging": true ,
-        });
+        pickerKasInit('tabel_add_list_barang_nonfoc')
 
         if (keyword) { $("#tabel_add_list_barang_nonfoc").DataTable().search(keyword).draw() }
 
@@ -4417,12 +4421,7 @@ function buttonAddListLokasiPenerima () {
       });
 
       document.getElementById("tabel_data_add_list_lokasipenerima").innerHTML = rowTable
-      $("#tabel_add_list_lokasipenerima").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-        "paging": true,
-      });
+      pickerKasInit('tabel_add_list_lokasipenerima')
 
       document.getElementById("namaHeaderTable").textContent = 'Ekspedisi'
 
@@ -4516,12 +4515,7 @@ function buttonAddListPelanggan ()
       });
 
       document.getElementById("tabel_data_add_list_pelanggan").innerHTML = rowTable
-      $("#tabel_add_list_pelanggan").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-      });
+      pickerKasInit('tabel_add_list_pelanggan')
 
       document.getElementById("namaHeaderTable").textContent = 'Supplier'
 
@@ -4585,12 +4579,7 @@ function buttonAddListCosting ()
       });
 
       document.getElementById("tabel_data_add_list_costing").innerHTML = rowTable
-      $("#tabel_add_list_costing").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-      });
+      pickerKasInit('tabel_add_list_costing')
 
       document.getElementById("namaHeaderTable").textContent = 'Costing'
 
@@ -4635,12 +4624,7 @@ function buttonAddListSubCosting ()
       });
 
       document.getElementById("tabel_data_add_list_subcosting").innerHTML = rowTable
-      $("#tabel_add_list_subcosting").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-      });
+      pickerKasInit('tabel_add_list_subcosting')
 
       document.getElementById("namaHeaderTable").textContent = 'Sub-Costing'
 
@@ -4679,12 +4663,7 @@ function buttonAddListPerkiraan ()
       });
 
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
-      $("#tabel_add_list_perkiraan").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-      });
+      pickerKasInit('tabel_add_list_perkiraan')
 
       document.getElementById("namaHeaderTable").textContent = 'Perkiraan'
 

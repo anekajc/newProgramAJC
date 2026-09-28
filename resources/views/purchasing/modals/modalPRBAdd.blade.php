@@ -757,8 +757,11 @@
   #tabelModalOpen.modalOpen-plain tbody { display: block; max-height: 420px; overflow-y: auto; }
   #tabelModalOpen.modalOpen-plain thead, #tabelModalOpen.modalOpen-plain tbody tr { display: table; width: 100%; table-layout: fixed; }
 </style>
-<div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
+{{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas.css / pickerKasInit):
+     modal-xl, dropdown "Tampilkan" + kotak Search bawaan DataTables, tombol Batal gaya pil.
+     Modal ini hanya di-include perintahreturbeli.blade.php. --}}
+<div class="modal fade picker-kas" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="namaModalOpen"></h5>
@@ -770,17 +773,23 @@
         <div id="modalOpenCustomSearch" style="display:none;">
           <input type="search" placeholder="Cari data">
         </div>
-        <table id="tabelModalOpen" class="table table-hover">
-          <thead id='theadOpen' class="text-center">
-            <tr></tr>
-          </thead>
-          <tbody id="tabel_dataModalOpen" class="text-left">
-            <tr></tr>
-          </tbody>
-        </table>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
+              <table id="tabelModalOpen">
+                <thead id='theadOpen'>
+                  <tr></tr>
+                </thead>
+                <tbody id="tabel_dataModalOpen" class="text-left">
+                  <tr></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -790,6 +799,8 @@
 document.addEventListener('DOMContentLoaded', function () {
   if (typeof jQuery === 'undefined') { return }
   jQuery(document).on('shown.bs.modal', '#formModalOpen', function () {
+    // Modal pemilih bergaya menu Kas (picker-kas): kotak Search tanpa placeholder, persis Kas.
+    if (jQuery('#formModalOpen').hasClass('picker-kas')) { return }
     jQuery('#tabelModalOpen_filter input').attr('placeholder', 'Cari Data')
   })
 })

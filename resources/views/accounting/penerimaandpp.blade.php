@@ -62,6 +62,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
 
 <style>
@@ -1798,8 +1800,11 @@ td input[type="checkbox"] {
 
 
 
-  <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
+  {{-- Disamakan persis dengan modal Perkiraan menu Kas (picker-kas): modal-xl, dropdown
+       "Tampilkan" + kotak Search bawaan DataTables (kotak cari lama #input_search_perkiraanmodal
+       dilepas), tombol Batal gaya pil. --}}
+  <div class="modal fade picker-kas" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="">
       <div id="" class="modal-content ">
 
         <div id= "" class="">
@@ -1818,33 +1823,21 @@ td input[type="checkbox"] {
 
         <div class="modal-body">
 
-          <div class="container-fluid" >
+          <div class="container-fluid mt-4" >
             <div class="row">
-                <div class="col-md-12">
-                  {{-- Kotak pencarian - lihat pdppIkatCariPerkiraanModal(). --}}
-                  <div class="row mb-2">
-                    <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
-                      <input id="input_search_perkiraanmodal" type="search" class="form-control cari-modal-pdpp" placeholder="Cari data">
-                    </div>
-                  </div>
+                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                   {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih. --}}
-                  <table id="perkiraanModalTable" class="data-table tabel-modal-pdpp"  >
-                    <thead class="text-center">
+                  <table id="perkiraanModalTable">
+                    <thead>
                       <tr>
-                        <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                        <th style="padding: 4px 12px;" scope="col">Nama</th>
+                        <th scope="col">Perkiraan</th>
+                        <th scope="col">Nama</th>
 
                       </tr>
                     </thead>
 
 
-                    <tbody id="perkiraanModalTableData" class="" >
-                      <tr >
-
-
-                          <td colspan=2 class="text-center">Belum ada data</td>
-                    </tr>
-
+                    <tbody id="perkiraanModalTableData" class="text-left" >
                     </tbody>
 
 
@@ -1878,7 +1871,7 @@ td input[type="checkbox"] {
 
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
+          <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
           <button type="button" id="buttonSubmitAdd" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
           <button type="button" id="buttonSubmitEdit" class="btn btn-chip-biru d-none" onclick="submitEdit()">SubmitE</button>
         </div>
@@ -2438,8 +2431,11 @@ td input[type="checkbox"] {
 
 
 
-          <div class="modal fade" id="formPerkiraanKLLB" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
+          {{-- Disamakan persis dengan modal Perkiraan menu Kas (picker-kas): modal-xl, dropdown
+               "Tampilkan" + kotak Search bawaan DataTables (kotak cari lama
+               #input_search_perkiraankllb dilepas), tombol Batal gaya pil. --}}
+          <div class="modal fade picker-kas" id="formPerkiraanKLLB" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="">
               <div id="" class="modal-content ">
 
                 <div id= "" class="">
@@ -2456,26 +2452,16 @@ td input[type="checkbox"] {
                 <div id="" class="">
                 <div class="modal-body">
 
-                  <div class="container-fluid" >
+                  <div class="container-fluid mt-4" >
                     <div class="row">
-                    </div>
-                    {{-- Kotak pencarian tabel Perkiraan - lihat pdppIkatCariPerkiraanKLLB(). --}}
-                    <div class="row mb-2">
-                      <div class="col-12 d-flex justify-content-end">
-                        <input id="input_search_perkiraankllb" type="search" class="form-control cari-modal-pdpp" placeholder="Cari data">
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-12" style="overflow:auto;  max-height: 400px">
+                      <div class="col-12" style="overflow:auto; margin-top:0px; ">
 
                       {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih. --}}
-                      <table id="tabel_add_list_perkiraankllb" class="data-table tabel-modal-pdpp" style="overflow:auto; " >
-                        <thead class="text-center" style="position: sticky;
-                      top: 0;
-                      z-index: 1;">
+                      <table id="tabel_add_list_perkiraankllb">
+                        <thead>
                           <tr>
-                            <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                            <th style="padding: 4px 12px;" scope="col">Nama</th>
+                            <th scope="col">Perkiraan</th>
+                            <th scope="col">Nama</th>
 
                           </tr>
                         </thead>
@@ -2510,7 +2496,7 @@ td input[type="checkbox"] {
 
 
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
+                  <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
                   <button type="button" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
                 </div>
                 </div>
@@ -2539,6 +2525,7 @@ td input[type="checkbox"] {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 
@@ -2601,8 +2588,13 @@ $(document).ready(function(){
         // Tabel Penerimaan DPP (#tabelPdpp) digambar renderTabelPdpp() setelah loadAll()
         // selesai. #tabel3 sudah tidak ada - tabnya dilebur jadi filter otorisasi.
         pdppInitReportTableSekali()
-        pdppIkatCariPerkiraanKLLB()
-        pdppIkatCariPerkiraanModal()
+        // Modal Perkiraan (#formPerkiraan & #formPerkiraanKLLB) disamakan dengan modal Perkiraan
+        // menu Kas (picker-kas): kotak cari buatan sendiri diganti dropdown "Tampilkan" + kotak
+        // Search bawaan DataTables. Tabel KL/LB digambar blade, jadi DataTables-nya dibuat sekali di
+        // sini; tabel #perkiraanModalTable dibuat ulang tiap dibuka (lihat buttonAddItem()).
+        // pdppIkatCariPerkiraanKLLB()
+        // pdppIkatCariPerkiraanModal()
+        pickerKasInit('tabel_add_list_perkiraankllb')
 
         // DataTables mengukur lebar kolom saat init. Tabel di tab yang awalnya
         // tersembunyi terukur 0, jadi lebarnya dihitung ulang begitu tabnya dibuka.
@@ -5423,6 +5415,7 @@ function renderTabelOutstanding () {
             });
 
             document.getElementById("perkiraanModalTableData").innerHTML = rowTable
+            pickerKasInit('perkiraanModalTable')
 
             $("#formPerkiraan").modal("show")
           },

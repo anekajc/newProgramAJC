@@ -106,6 +106,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -1504,8 +1506,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 <!--  -->
 
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialo g-centered"  role="document">
+<div class="modal fade picker-kas" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered"  role="document">
     <div id="" class="modal-content ">
 
 
@@ -1524,43 +1526,24 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Customer</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px; ">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_customer" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_customer">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
-                  <th style="padding: 4px 12px;" scope="col">Kota</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th scope="col">Kode</th>
+                  <th scope="col">Nama</th>
+                  <th scope="col">Kota</th>
 
                 </tr>
               </thead>
 
 
               <tbody id="tabel_data_add_list_customer" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
-              </tr>
               </tbody>
 
 
@@ -1584,7 +1567,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1603,45 +1586,25 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>No Beli</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto;margin-top:-60px;">
+            <div class="col-12" style="overflow:auto;margin-top:0px;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_noinvoice" class="table table-bordered table-striped"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_noinvoice">
+              <thead>
                 <tr>
                   <th scope="col">No Bukti</th>
                   <th scope="col">Tanggal</th>
                   <th scope="col">No SO</th>
                   <th scope="col">Gudang</th>
-                  <th scope="col">Actions</th>
 
                 </tr>
               </thead>
 
 
               <tbody id="tabel_data_add_list_noinvoice" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>-</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
-              </tr>
               </tbody>
 
 
@@ -1665,7 +1628,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1684,39 +1647,22 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>No Beli</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto;margin-top:-60px;">
+            <div class="col-12" style="overflow:auto;margin-top:0px;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_nobeli" class="table table-bordered table-striped"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_nobeli">
+              <thead>
                 <tr>
                   <th scope="col">No Bukti</th>
-                  <th scope="col">Actions</th>
 
                 </tr>
               </thead>
 
 
               <tbody id="tabel_data_add_list_nobeli" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-
-
-                    <td class="text-center">
-                      <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                      <button class="btn btn-primary btn-sm" type="button" ><i class="bi bi-plus"></i></button>
-                    </td>
-              </tr>
               </tbody>
 
 
@@ -1740,7 +1686,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1760,35 +1706,27 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
 
         <div class="container-fluid mt-4" >
-          <div class="row">
-            <div class="col-12">
-              <h3>Barang</h3>
-            </div>
-          </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-60px;">
+            <div class="col-12" style="overflow:auto; margin-top:0px;">
             <!-- <div class="container-fluid"> -->
 
 
-            <table id="tabel_add_list_barang" class="table table-bordered table-striped"  >
-              <thead class="text-center bg-primary text-white">
+            <table id="tabel_add_list_barang">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+                  <th scope="col">Kode Brg</th>
+                  <th scope="col">Nama Brg</th>
 
-                  <th style="padding: 4px 12px;" scope="col">Qty Sisa</th>
+                  <th scope="col">Qty Sisa</th>
 
-                  <th style="padding: 4px 12px;" scope="col">Satuan</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th scope="col">Satuan</th>
 
                 </tr>
               </thead>
 
 
               <tbody id="tabel_data_add_list_barang" class="text-left" >
-
-
               </tbody>
 
 
@@ -1812,7 +1750,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1881,6 +1819,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 // let tempNoBukti = ''
@@ -2211,23 +2150,11 @@ window.doSetHeader = function (mode, reset) {
 
 $(document).ready(function(){
         irbInitReportTableSekali()
-        $("#tabel_add_list_customer").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-        });
-        $("#tabel_add_list_noinvoice").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-        });
-        $("#tabel_add_list_barang").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
+        pickerKasInit('tabel_add_list_customer')
+        pickerKasInit('tabel_add_list_noinvoice')
+        pickerKasInit('tabel_add_list_barang')
 
-      $("#tabel_add_list_nobeli").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      pickerKasInit('tabel_add_list_nobeli')
 
 
 
@@ -2690,13 +2617,11 @@ function buttonAddListBarang () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickBarang(${i})">
         <td>${item.KodeBrg}</td>
         <td>${item.NamaBrg ? item.NamaBrg : item.NamaBrgx }</td>
         <td>${formatAngka(item.QntSisa)}</td>
         <td class="text-center">${item.Satuan}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickBarang(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2709,10 +2634,7 @@ function buttonAddListBarang () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
-      $("#tabel_add_list_barang").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      pickerKasInit('tabel_add_list_barang')
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListBarang').show();
       $("#form").modal('toggle')
@@ -2756,17 +2678,13 @@ function buttonAddListNoBeli () {
     },
     success: function(res) {
       let rowTable = ``
-      rowTable += `<tr>
+      rowTable += `<tr class="pick-row" onclick="buttonAddPickNoBeli('-' , 0)">
       <td>-</td>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoBeli('-' , 0)" type="button" ><i class="bi bi-plus"></i></button></td>
-
       </tr>`
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickNoBeli('${item.NOBUKTI}' ,${item.urut} )">
         <td>${item.NOBUKTI}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoBeli('${item.NOBUKTI}' ,${item.urut} )" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2778,12 +2696,7 @@ function buttonAddListNoBeli () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_nobeli").innerHTML = rowTable
-      $("#tabel_add_list_nobeli").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-    });
+      pickerKasInit('tabel_add_list_nobeli')
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListNoBeli').show();
       $("#form").modal('toggle')
@@ -2823,13 +2736,11 @@ function buttonAddListNoInvoice () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickNoInvoice('${item.NOBUKTI}' , '${item.NoSO}' , '${item.KODEGDG}', ${item.flagtipe}, ${item.ppn})">
         <td>${item.NOBUKTI}</td>
         <td>${item.TANGGAL}</td>
         <td>${item.NoSO}</td>
         <td>${item.NAMAGDG}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickNoInvoice('${item.NOBUKTI}' , '${item.NoSO}' , '${item.KODEGDG}', ${item.flagtipe}, ${item.ppn})" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2840,10 +2751,7 @@ function buttonAddListNoInvoice () {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
       document.getElementById("tabel_data_add_list_noinvoice").innerHTML = rowTable
-      $("#tabel_add_list_noinvoice").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      pickerKasInit('tabel_add_list_noinvoice')
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListNoInvoice').show();
       $("#form").modal('toggle')
@@ -2872,12 +2780,10 @@ function buttonAddListCustomer () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr>
+        <tr class="pick-row" onclick="buttonAddPickCustomer('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}' , '${item.ALAMAT1}')">
         <td>${item.KODECUSTSUPP}</td>
         <td>${item.NAMACUSTSUPP}</td>
         <td>${item.NamaKota}</td>
-        <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickCustomer('${item.KODECUSTSUPP}' , '${item.NAMACUSTSUPP}' , '${item.ALAMAT1}')" type="button" ><i class="bi bi-plus"></i></button></td>
-
         </tr>`
       });
 
@@ -2885,13 +2791,10 @@ function buttonAddListCustomer () {
 
 
       if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
+        rowTable= `<tr><td class="text-center" colspan=3>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
-      $("#tabel_add_list_customer").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-    });
+      pickerKasInit('tabel_add_list_customer')
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListCustomer').show();
       $("#form").modal('toggle')

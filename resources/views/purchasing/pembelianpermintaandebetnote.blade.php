@@ -122,6 +122,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -863,28 +865,25 @@ td input[type="checkbox"] {
 <!-- end modal filter otorisasi -->
 
 <!-- start modal add (lookup Customer / Invoice) -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade picker-kas" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
 
       <div id="modalAddListCustomer" class="showhidemodalbodyadd">
         <div class="modal-header">
           <h5 class="modal-title">Supplier</h5>
-          <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
-            data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
+          {{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas): kotak cari lama
+               (#input_search_customer_debetnote) diganti kotak Search bawaan DataTables. --}}
           <div class="container-fluid mt-4">
-            <div class="row mb-2" style="margin-top:-30px;">
-              <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
-                <input id="input_search_customer_debetnote" type="search" class="form-control" placeholder="Cari data">
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table id="tabel_add_list_customer" class="data-table">
-                <thead class="text-center">
+            <div class="row">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
+              <table id="tabel_add_list_customer">
+                <thead>
                   <tr>
                     <th scope="col">Kode</th>
                     <th scope="col">Nama</th>
@@ -893,28 +892,22 @@ td input[type="checkbox"] {
                   </tr>
                 </thead>
                 <tbody id="tabel_data_add_list_customer" class="text-left">
-                  <tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-batal-add" onclick="buttonAddListBatal()">Batal</button>
+          <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()">Batal</button>
         </div>
       </div>
 
       <div id="modalAddListInvoice" class="showhidemodalbodyadd">
         <div class="modal-header">
           <h5 class="modal-title">Invoice</h5>
-          <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
-            data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
@@ -965,6 +958,7 @@ td input[type="checkbox"] {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let listInvoice = []
 let listData = []
@@ -1690,19 +1684,10 @@ function buttonAddListCustomer () {
         rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
-      // dom: dropdown "Tampilkan" (l) di kiri atas tabel, info + tombol halaman (i, p) di
-      // bawah. Kotak pencarian bawaan (f) tetap tidak dipakai - diganti #input_search_customer_debetnote.
-      $("#tabel_add_list_customer").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-        "paging": true,
-        "searching": true,
-        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-    });
-      $('#input_search_customer_debetnote').off('keyup').on('keyup', function () {
-        $('#tabel_add_list_customer').DataTable().search(this.value).draw();
-      });
+      // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+      // dropdown "Tampilkan" + kotak Search bawaan DataTables (kotak cari lama
+      // #input_search_customer_debetnote dilepas dari markup).
+      pickerKasInit('tabel_add_list_customer')
       $('.showhidemodalbodyadd').hide();
       $('#modalAddListCustomer').show();
       $("#form").modal('toggle')

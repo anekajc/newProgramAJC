@@ -122,6 +122,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -758,21 +760,23 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 
 <!-- start modal list item add: pilih PO -->
-<div class="modal fade" id="formAddListItem" tabindex="-1" role="dialog" aria-labelledby="formAddListItemLabel" aria-hidden="true">
+{{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas): modal-xl, dropdown
+     "Tampilkan" + kotak Search bawaan DataTables, tombol x dan Batal gaya Kas. --}}
+<div class="modal fade picker-kas" id="formAddListItem" tabindex="-1" role="dialog" aria-labelledby="formAddListItemLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content" id="modalAddListPO">
       <div class="modal-header">
         <h5 class="modal-title" id="formAddListItemLabel">Pilih PO</h5>
-        <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
-          data-dismiss="modal" aria-label="Close"
-          style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-          <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <div class="table-responsive">
-          <table id="tabel_add_list_po" class="table table-bordered table-striped table-hover">
-            <thead class="text-center">
+        <div class="container-fluid mt-4">
+          <div class="row">
+          <div class="col-12" style="overflow:auto; margin-top:0px; ">
+          <table id="tabel_add_list_po">
+            <thead>
               <tr>
                 <th scope="col">No Bukti</th>
                 <th scope="col">Customer</th>
@@ -782,22 +786,14 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               </tr>
             </thead>
             <tbody id="tabel_data_add_list_po" class="text-left">
-              <tr>
-                <td class="text-center" colspan="5">Memuat data...</td>
-              </tr>
             </tbody>
           </table>
+          </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" style="
-          height: 30px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;"
-          data-dismiss="modal">Batal</button>
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -886,6 +882,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let tipeform = ''
@@ -1756,15 +1753,9 @@ function buttonAddListPO () {
       }
 
       document.getElementById("tabel_data_add_list_po").innerHTML = rowTable
-      $("#tabel_add_list_po").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_" },
-          "paging": true ,
-          "columnDefs": [
-        ]
-        });
-      $('#formAddListItem .dataTables_filter input').attr('placeholder', 'Cari Data')
+      pickerKasInit('tabel_add_list_po')
+      // Placeholder "Cari Data" dilepas - kotak Search disamakan persis dengan modal pemilih menu Kas.
+      // $('#formAddListItem .dataTables_filter input').attr('placeholder', 'Cari Data')
       $("#formAddListItem").modal("show")
 
     }})

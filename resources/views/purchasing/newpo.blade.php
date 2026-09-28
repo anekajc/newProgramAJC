@@ -46,6 +46,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
   <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -1214,7 +1216,11 @@ td input[type="checkbox"] {
 <!-- End modal editpembelian-->
 
 <!-- start modal list item add -->
-  <div class="modal fade"  id="formAddListItem" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  {{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas): dropdown "Tampilkan" +
+       kotak Search bawaan DataTables (kotak cari lama #input_search_barang_all + Enter dilepas -
+       getDetailPO di server tidak memakai parameter search, jadi daftarnya sudah lengkap),
+       tombol Batal gaya pil di footer. --}}
+  <div class="modal fade picker-kas"  id="formAddListItem" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" style=""  role="document" >
       <div class="modal-content">
         <div class="modal-header">
@@ -1224,13 +1230,12 @@ td input[type="checkbox"] {
           </button>
         </div>
         <div class="modal-body">
-          <div class="d-flex justify-content-end mb-2">
-            <input id="input_search_barang_all" type="text" placeholder="Cari Data, lalu tekan Enter" class="form-control" onkeypress="searchBarangAll(event)">
-          </div>
-          <div class="container-fluid p-0" style="overflow:auto;">
+          <div class="container-fluid mt-4">
+            <div class="row">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
 
-              <table id="tabel_add_list_item" class="data-table">
-                <thead class="text-center">
+              <table id="tabel_add_list_item">
+                <thead>
                   <tr>
                     <th scope="col">Kode Barang</th>
                     <th scope="col">Nama Barang</th>
@@ -1241,15 +1246,16 @@ td input[type="checkbox"] {
                 </tbody>
 
               </table>
+            </div>
+            </div>
           </div>
 
 
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" onclick="closeFormList()">Batal</button>
+      </div>
     </div>
-    <!-- <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-      <button type="button" class="btn btn-primary" onclick="">Submit</button>
-    </div> -->
   </div>
   </div>
   </div>
@@ -1260,6 +1266,7 @@ td input[type="checkbox"] {
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
      "Reset kolom"), disamakan dengan purchaseOrder.blade.php / uangmukabeli.blade.php. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
   <script type="text/javascript">
 
 // Input Qty diketik dengan separator ribuan (koma) - pola sama dengan newpobeliacc.blade.php.
@@ -3596,12 +3603,7 @@ for (let f = 0; f < fillerCount; f++) {
 
           $("#tabel_data_add_list_item").html(rowTable);
 
-          $("#tabel_add_list_item").DataTable({
-            lengthChange: false,
-            paging: false,
-            searching: false,
-            order: [[0, 'asc']]
-          });
+          pickerKasInit('tabel_add_list_item')
         }
       });
     }
