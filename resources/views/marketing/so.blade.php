@@ -6,28 +6,21 @@
 
 @endsection
 
-{{--
-  Rerouted from newmaster -> purchasing.newmasterx to match Purchase Order's UI 1:1.
-  No new CSS was written for this file: every rule below is either
-    (a) copied verbatim from purchaseOrder.blade.php's own @section('css'), or
-    (b) one of purchaseOrder's selector lists widened to also include this page's
-        actual table/filter ids (#tabel7, #tabel_oto, #tabel_add_list_* etc.) so the
-        existing rule bodies apply to elements that share the same visual role but a
-        different id -- no new property, color, or spacing value was introduced.
-  All ids / onclick handlers are left untouched since JS elsewhere depends on them.
-
-  ASSUMPTION FLAGGED: this file links public/css/po-table-header.css exactly like
-  purchaseOrder.blade.php does, but I have not seen that file's contents (only PO's
-  blade markup). po-table-header.css appears (per PO's own comments) to be scoped to
-  PO's literal ids (#tabel/#tabel2), not to a generic class. If so, the drag-column /
-  gear-icon header behavior may only visually activate for whichever ids that file
-  targets, not automatically for #tabel7/#tabel_oto here. If the "Reset kolom" /
-  column-drag polish doesn't appear on this page, that file needs #tabel7 and
-  #tabel_oto added to its own selector lists (same edit pattern used below).
---}}
 @section('css')
 
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+
+  <style>
+  /* Form Add/Edit/Detail dibungkus div#formBsGrid supaya input memakai gaya #formBsGrid
+     di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
+     disabled) -- sama seperti purchaseOrder.blade.php. Pengecualian tinggi: textarea
+     (Keterangan/Alamat Kirim/Lokasi Penerima) tetap setinggi aslinya (atribut rows),
+     supaya isi beberapa baris tetap terbaca, bukan dipepetkan ke satu baris 38px. */
+  #formBsGrid textarea.form-control,
+  #formBsGrid table .form-control {
+    height: auto;
+  }
+  </style>
 
   <style>
   /* {{-- Copied verbatim from purchaseOrder.blade.php's tab bar / toolbar CSS. --}} */
@@ -495,15 +488,6 @@
       outline: none;
     }
 
-  /* Search-icon button appended flush to an input (e.g. PIC/Alamat Kirim/Lokasi Penerima pickers). */
-  .btn-icon-search {
-      height: 32px;
-      border-radius: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius:0;
-    }
   </style>
 
   {{-- Same "search modal barang all" pattern PO uses, retargeted. --}}
@@ -822,7 +806,13 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    <div class="modal-body" style="">
+    {{-- id="formBsGrid" -- appearance-only pastel/rounded input styling (newmaster.css's
+         #formBsGrid .form-control), same convention as bank/_form.blade.php and
+         invoicejasa.blade.php. Doesn't touch width/height: that rule intentionally has
+         no size properties, so every existing col-md-*/input-group sizing here is
+         untouched. Scoped to this one div (not a new global id) since it wraps every
+         field in this form -- Header, Add Item, and Edit Item all live inside it. --}}
+    <div class="modal-body" style="" id="formBsGrid">
       <div class="row">
         <input type="hidden" class="form-control" id="input_add_nourut">
 
@@ -835,7 +825,7 @@
               <div class="input-group mb-3 position-relative">
                 <input type="text" class="form-control text-left" placeholder="Cari Pelanggan..."
                   id="input_add_kodepelanggan" onkeyup="searchPelanggan(this.value)" autocomplete="off">
-                <button type="button" class="btn btn-chip-biru btn-sm btn-icon-search" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
+                <button type="button" class="btn btn-chip-biru btn-sm" onclick="buttonAddListPelanggan()"><i class="bi bi-search"></i></button>
                 <div id="dropdown_pelanggan" class="dropdown-menu w-100"></div>
               </div>
             </div>
@@ -971,7 +961,7 @@
               <div class="col-md-12">
                 <div class="input-group form-group">
                   <input class="form-control" id="input_add_kodealamatkirim" value ='-' readonly>
-                  <button onclick="buttonAddListAlamatKirim()" id="buttonAddListAlamatKirim" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                  <button onclick="buttonAddListAlamatKirim()" id="buttonAddListAlamatKirim" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                 </div>
               </div>
               <div class="col-md-12">
@@ -988,7 +978,7 @@
               <div class="col-md-12">
                 <div class="input-group form-group">
                   <input class="form-control" id="input_add_kodelokasipenerima" value ='-' readonly>
-                  <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                  <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                 </div>
               </div>
               <div class="col-md-12">
@@ -1037,7 +1027,7 @@
                 <input type="hidden" id="input_add_idpo">
                 <button
                   type="button"
-                  class="btn btn-chip-biru btn-icon-search flex-shrink-0"
+                  class="btn btn-chip-biru flex-shrink-0"
                   onclick="buttonAddListNoPo()"
                 >
                   <i class="bi bi-search"></i>
@@ -1081,7 +1071,7 @@
                 <div class="input-group form-group">
                   <input type="hidden" class="form-control" id="input_add_kodepic">
                   <input type="text" class="form-control" id="input_add_namapic" disabled>
-                  <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                  <button onclick="buttonAddListPIC()" id="buttonAddListPIC" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             </div>
@@ -1096,7 +1086,7 @@
               <div class="col-md-8">
                 <div class="input-group form-group">
                   <input type="text" class="form-control" id="input_add_valas" readonly>
-                  <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                  <button onclick="buttonAddListValas()" id="buttonAddListValas" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             </div>
@@ -1159,22 +1149,31 @@
     <div class="row mb-3">
       <div class="col-md-6 mt-2 text-left">
         <button type="button" id='buttonTambahSOAll' class="btn btn-lg btn-chip-biru" style="
-          height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-          text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonTambahSOAll()"><b>Tambah Penawaran</b></button>
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          transition: background-color 0.3s, box-shadow 0.3s;"
+          onclick="buttonTambahSOAll()">Tambah Penawaran</button>
       </div>
       <div class="col-md-6 mt-2 text-right">
         <button type="button" id='buttonTambahItem' class="btn btn-lg btn-chip-biru" style="
-          height: 30px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-          text-transform: uppercase; transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="buttonAddAddItem()"><b>Tambah Item</b></button>
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          transition: background-color 0.3s, box-shadow 0.3s;"
+          onclick="buttonAddAddItem()">Tambah Item</button>
       </div>
     </div>
 
     <!-- ADD add -->
     <div id="addAddItem" class="container-fluid showhide">
+      {{-- id already taken by addAddItem, so a plain inner div carries formBsGrid
+           instead -- same appearance-only pastel/rounded styling, no size changes. --}}
+      <div id="formBsGrid">
       <hr/>
       <div class="row">
         <div class="col-12">
@@ -1190,14 +1189,14 @@
             <div class="col-md-4">
               <div class="input-group">
                 <input type="text" class="form-control" id="input_add_add_refpr" disabled>
-                <button onclick="buttonAddAddListRefPr()" id="buttonAddAddListRefPr" class="btn btn-chip-biru btn-sm btn-icon-search" tabindex="1"><i class="bi bi-search"></i></button>
+                <button onclick="buttonAddAddListRefPr()" id="buttonAddAddListRefPr" class="btn btn-chip-biru btn-sm" tabindex="1"><i class="bi bi-search"></i></button>
               </div>
             </div>
             <label class="col-md-2 mb-0">No. Penye</label>
             <div class="col-md-3">
               <div class="input-group">
                 <input type="text" class="form-control text-right" id="input_add_add_nopenyerahan" value="" tabindex="5" disabled>
-                <button onclick="buttonAddAddListNoPenyerahan()" id="buttonAddAddListNoPenyerahan" class="btn btn-chip-biru btn-sm btn-icon-search" tabindex="1"><i class="bi bi-search"></i></button>
+                <button onclick="buttonAddAddListNoPenyerahan()" id="buttonAddAddListNoPenyerahan" class="btn btn-chip-biru btn-sm" tabindex="1"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -1211,7 +1210,7 @@
             <div class="col-md-4">
               <div class="input-group">
                 <input type="text" class="form-control text-left" id="input_add_add_kodebarang" onkeypress="onKeyPressBarang(event)">
-                <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddAddListBarang" onclick="buttonAddAddListBarang()" tabindex="1"><i class="bi bi-search"></i></button>
+                <button class="btn btn-chip-biru btn-sm" id="buttonAddAddListBarang" onclick="buttonAddAddListBarang()" tabindex="1"><i class="bi bi-search"></i></button>
               </div>
             </div>
             <div class="col-md-5">
@@ -1258,7 +1257,7 @@
               <div class="input-group">
                 <input type="hidden" class="form-control" id="input_add_add_kodesattax" disabled>
                 <input type="text" class="form-control" id="input_add_add_sattax" disabled>
-                <button onclick="buttonAddAddListSattax()" id="buttonAddAddListSattax" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+                <button onclick="buttonAddAddListSattax()" id="buttonAddAddListSattax" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -1425,11 +1424,13 @@
           onclick="submitAddEdit()">Simpan</button>
         </div>
       </div>
+      </div>
     </div>
     <!-- END ADD ADD -->
 
     <!-- ADD EDIT -->
     <div id="addEditItem" class="container-fluid showhide">
+      <div id="formBsGrid">
       <div class="row"><div class="col-4"><h4>Edit Item</h4></div></div>
 
       <div class="row">
@@ -1526,8 +1527,20 @@
       <hr/>
     </div>
 
+  </div>
+  </div>
+
+  {{-- SO-wide Disc/DPP/PPN/Grand Total summary -- moved out of #addEditItem
+       (it used to be the last thing inside that .showhide panel, so it vanished
+       any time buttonAdd()/buttonCloseForm()/etc ran $('.showhide').hide(), e.g.
+       right when opening a fresh Add SO). It reflects the whole SO document's
+       total, not a single line item, so it belongs as a sibling of
+       #addAddItem/#addEditItem instead -- always visible whenever page2 is,
+       regardless of which item sub-panel (if any) is open. --}}
+  <div id="formBsGrid">
     <div class="container-fluid" style="margin-top: -10px;">
       <div class="row">
+        <div class="col"><div class="form-group"><label>Total</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_totalDisplay" value="0.00" disabled></div></div>
         <div class="col"><div class="form-group"><label>Disc %</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_disc" onblur="onChangeInputAddDisc()" value="0.00"></div></div>
         <div class="col"><div class="form-group"><label>DiscRp</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_add_discrp" onblur="onChangeInputAddDiscRp()" value="0.00"></div></div>
         <div class="col"><div class="form-group"><label>DPP</label><input type="text" class="form-control text-right" id="input_add_dpp" value="0.00" disabled></div></div>
@@ -1535,7 +1548,6 @@
         <div class="col"><div class="form-group"><label>Grand Total</label><input type="text" class="form-control text-right" id="input_add_grandtotal" value="0.00" disabled></div></div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -1579,7 +1591,7 @@
   </div>
 
   <div id="modalBodyDetailMain" class="">
-    <div class="modal-body" style="">
+    <div class="modal-body" style="" id="formBsGrid">
       <div class="row">
         <input type="hidden" class="form-control" id="input_detail_nourut">
 
@@ -1874,8 +1886,9 @@
     </div>
   </div>
 
-  <div class="container-fluid" style="margin-top: -10px;">
+  <div id="formBsGrid" class="container-fluid" style="margin-top: -10px;">
     <div class="row">
+        <div class="col"><div class="form-group"><label>Total</label><input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-right input-partial-number" id="input_detail_totalDisplay" value="0.00" disabled></div></div>
       <div class="col"><div class="form-group"><label>Disc %</label><input type="text" class="form-control text-right" id="input_detail_disc" disabled value="0.00"></div></div>
       <div class="col"><div class="form-group"><label>DiscRp</label><input type="text" class="form-control text-right" id="input_detail_discrp" value="0.00" disabled></div></div>
       <div class="col"><div class="form-group"><label>DPP</label><input type="text" class="form-control text-right" id="input_detail_dpp" value="0.00" disabled></div></div>
@@ -1900,7 +1913,7 @@
     </div>
   </div>
 
-  <div class="modal-body">
+  <div class="modal-body" id="formBsGrid">
     <div class="row">
       <input type="hidden" class="form-control" id="input_detail_nourut">
       <div class="col-md-6">
@@ -4287,8 +4300,6 @@ function lockCBD (nobukti) {
 function buttonBatalOtorisasi (nobukti) {
   console.log(nobukti)
 
-
-
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
     alertify.warning('No access')
@@ -4297,9 +4308,7 @@ function buttonBatalOtorisasi (nobukti) {
 
 
 
-
-
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  alertify.prompt("Batal Otorisasi","Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -4345,8 +4354,6 @@ function buttonBatalOtorisasi (nobukti) {
         })
       }
     ,function(){
-      console.log('no')
-      alertify.error("Action cancelled");
     });
 
 }
@@ -8642,10 +8649,12 @@ function buttonDetail (NOBUKTI) {
         } else {
           $('#btnOtorisasiDetail')
             .removeClass('btn-danger')
-            .addClass('btn-primary')
+            .addClass('btn-chip-biru')
             .text('Otorisasi')
             .attr('onclick', `buttonOtorisasi('${nobukti}')`);
         }
+
+        let totalDisplayNumber = 0
 
         let rowTable = ""
         dataTableDetail.forEach((item, i) => {
@@ -8663,6 +8672,9 @@ function buttonDetail (NOBUKTI) {
           <td>${item.noserah ? item.noserah : ''}</td>
 
           </tr>`
+
+          totalDisplayNumber += parseFloat(item.Total) || 0
+
         });
 
         if(!dataTableDetail.length) {
@@ -8702,6 +8714,7 @@ function buttonDetail (NOBUKTI) {
         document.getElementById("input_detail_tanggalpo").value = formatDate(dataHeaderDetail.TglPO)
         document.getElementById("input_detail_tanggalkirim").value = formatDate(dataHeaderDetail.TglKirim)
 
+        document.getElementById("input_detail_totalDisplay").value = formatAngka(parseFloat(totalDisplayNumber).toFixed(2))
         document.getElementById("input_detail_disc").value = parseFloat(dataHeaderDetail.Disc).toFixed(2)
         document.getElementById("input_detail_discrp").value = parseFloat(dataHeaderDetail.TotDiskon).toFixed(2)
         document.getElementById("input_detail_dpp").value = formatAngka(parseFloat(dataHeaderDetail.TotDPP).toFixed(2))
@@ -8783,6 +8796,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
         console.log('aaa')
         console.log('res' , res)
 
+        let totalDisplayNumber = 0;
         // res.header.forEach((item, i) => {
         //   console.log('a' , i)
         // });
@@ -8819,6 +8833,9 @@ function refreshDataTableAdd (NOBUKTI = "") {
             <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
              <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
             </tr>`
+
+            totalDisplayNumber += parseFloat(item.Total) || 0
+
           });
 
           if(!dataTableAdd.length) {
@@ -8871,6 +8888,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
           document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd.Tanggal)
           document.getElementById("input_add_tanggalpo").value = formatDate(dataHeaderAdd.TglPO)
           document.getElementById("input_add_tanggalkirim").value = formatDate(dataHeaderAdd.TglKirim)
+          document.getElementById("input_add_totalDisplay").value = formatAngka(parseFloat(totalDisplayNumber).toFixed(2))
           document.getElementById("input_add_disc").value = formatAngka(parseFloat(dataHeaderAdd.Disc).toFixed(2))
           document.getElementById("input_add_discrp").value = formatAngka(parseFloat(dataHeaderAdd.TotDiskon).toFixed(2))
           document.getElementById("input_add_dpp").value = formatAngka(parseFloat(dataHeaderAdd.TotDPP).toFixed(2))

@@ -281,6 +281,14 @@
             <div class="col-md-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" class="po-filter-inp" id="cxInputDate1" value="{!! $date1 !!}"
+                      onchange="cxReloadTabel2()">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" class="po-filter-inp" id="cxInputDate2" value="{!! $date2 !!}"
+                      onchange="cxReloadTabel2()">
+                  </div>
                   <input type="search" id="cxSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
                     <label for="cxLen2">Tampilkan</label>
@@ -385,8 +393,8 @@ function cxDefaultCart (urut) {
       ['GdgAsal',   'Gudang Asal',       1, 'varchar', 0, 0],
       ['GdgTujuan', 'Gudang Tujuan',     1, 'varchar', 0, 0],
       ['Satx',      'Satuan',            1, 'varchar', 0, 0],
-      ['QNT',       'Qnt',               1, 'float',   0, 2],
-      ['QntBatal',  'Qnt Batal',         1, 'float',   0, 2],
+      ['QNT',       'Qty',               1, 'float',   0, 2],
+      ['QntBatal',  'Qty Batal',         1, 'float',   0, 2],
       ['TglBatal',  'Tgl Batal',         1, 'date',    0, 0],
       ['UserBatal', 'User Batal',        1, 'varchar', 0, 0],
       ['KetBatal',  'Keterangan Batal',  1, 'varchar', 0, 0],
@@ -399,7 +407,7 @@ function cxDefaultCart (urut) {
     ['GdgAsal',   'Gudang Asal',   1, 'varchar', 0, 0],
     ['GdgTujuan', 'Gudang Tujuan', 1, 'varchar', 0, 0],
     ['Satx',      'Sat',           1, 'varchar', 0, 0],
-    ['Qntx',      'Qnt Sisa',      1, 'float',   0, 2],
+    ['Qntx',      'Qty Sisa',      1, 'float',   0, 2],
   ]
 }
 
@@ -815,6 +823,10 @@ function loadAll () {
   $.ajax({
     url: "{!! url('closingtransferloadall') !!}",
     type: "get",
+    data: {
+      date1: $('#cxInputDate1').val(),
+      date2: $('#cxInputDate2').val()
+    },
     success: function (res) {
       cxAktifkanTabel(1);
       lastTabelRows = res.tempOutstanding || [];
@@ -824,6 +836,31 @@ function loadAll () {
       lastTabel2Rows = res.tempPenerimaan || [];
       reinitTabel2();
 
+      cxAktifkanTabel(activeVisibleTabKeyCX());
+    },
+    error: function (xhr) {
+      alertify.error("Gagal memuat data: " + (xhr.responseJSON?.message || 'Unknown error'));
+    }
+  });
+}
+
+// Periode range di tab "Closing Transfer Barang" -- cuma reload #tabel2 (tempPenerimaan),
+// #tabel ("Transfer Barang") tidak difilter tanggal sama sekali jadi tidak disentuh.
+function cxReloadTabel2 () {
+  let date1 = $('#cxInputDate1').val();
+  let date2 = $('#cxInputDate2').val();
+  if (date1 && date2 && date1 > date2) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir');
+    return;
+  }
+  $.ajax({
+    url: "{!! url('closingtransferloadall') !!}",
+    type: "get",
+    data: { date1, date2 },
+    success: function (res) {
+      cxAktifkanTabel(2);
+      lastTabel2Rows = res.tempPenerimaan || [];
+      reinitTabel2();
       cxAktifkanTabel(activeVisibleTabKeyCX());
     },
     error: function (xhr) {

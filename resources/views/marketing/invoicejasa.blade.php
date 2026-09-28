@@ -443,12 +443,7 @@
 
 @section('content')
 
-
-
 <div id="page1" class="mainpage container-fluid">
-
-
-
 
 <div id="printContainer" style="display:none">
 
@@ -4282,15 +4277,6 @@ function formatAngka (angkaString) {
 
 
 </script>
-
-
-{{-- setActiveTab()/its click listeners removed: they only existed to manually flip
-     each tab link's inline background-color/color, needed back when the tab bar
-     used inline styles for its active state. The new .custom-tabs/.nav-link.active
-     CSS (added in @section('css')) plus Bootstrap's own data-toggle="tab" already
-     toggles the .active class on click, so this is handled natively now, same as
-     so.blade.php / invoicepenjualan.blade.php / suratjalan.blade.php. --}}
-
 
 
 
