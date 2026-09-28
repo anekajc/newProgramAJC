@@ -972,6 +972,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof jQuery === 'undefined') { return }
 
   jQuery(document).on('shown.bs.modal', '#form', function () {
+    // Halaman yang memasang gaya modal pemilih menu Kas (#form.picker-kas, mis.
+    // purchaseOrder) memakai kotak Search tanpa placeholder, persis seperti di Kas.
+    if (jQuery('#form').hasClass('picker-kas')) { return }
     jQuery('#form .dataTables_filter input').attr('placeholder', 'Cari Data')
   })
 })

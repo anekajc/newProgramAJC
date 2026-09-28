@@ -124,6 +124,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
 <style>
   .btn .bi-plus {
@@ -2256,8 +2258,11 @@ td input[type="checkbox"] {
 
 
 
-    <div class="modal fade" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="">
+    {{-- Disamakan persis dengan modal Perkiraan menu Kas (picker-kas): modal-xl, dropdown
+         "Tampilkan" + kotak Search bawaan DataTables (kotak cari lama #input_search_perkiraanmodal
+         dilepas), tombol Batal gaya pil. --}}
+    <div class="modal fade picker-kas" id="formPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" style="">
         <div id="" class="modal-content ">
 
           <div id= "" class="">
@@ -2274,25 +2279,17 @@ td input[type="checkbox"] {
           <div id="" class="">
           <div class="modal-body">
 
-            <div class="container-fluid" >
-              {{-- Kotak pencarian - lihat pldIkatCariPerkiraanModal(). --}}
-              <div class="row mb-2">
-                <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
-                  <input id="input_search_perkiraanmodal" type="search" class="form-control cari-modal-pdpp" placeholder="Cari data">
-                </div>
-              </div>
+            <div class="container-fluid mt-4" >
               <div class="row">
-                <div class="col-12" style="overflow:auto;  max-height: 400px">
+                <div class="col-12" style="overflow:auto; margin-top:0px; ">
                 <!-- <div class="container-fluid"> -->
 
 
-                <table id="tabel_add_list_perkiraan" class="data-table tabel-modal-pdpp" style="overflow:auto; " >
-                  <thead class="text-center" style="position: sticky;
-                top: 0;
-                z-index: 1;">
+                <table id="tabel_add_list_perkiraan">
+                  <thead>
                     <tr>
-                      <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                      <th style="padding: 4px 12px;" scope="col">Nama</th>
+                      <th scope="col">Perkiraan</th>
+                      <th scope="col">Nama</th>
                     </tr>
                   </thead>
 
@@ -2321,7 +2318,7 @@ td input[type="checkbox"] {
 
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+            <button type="button" class="btn picker-kas-batal" data-dismiss="modal" >Batal</button>
             <button type="button" id="buttonSubmitAdd" class="btn btn-chip-biru d-none" onclick="submitAdd()">Submit</button>
           </div>
           </div>
@@ -2380,8 +2377,10 @@ td input[type="checkbox"] {
 </div>
 
 <!-- Modal daftar customer untuk browse dari modal Koreksi Customer. -->
-<div class="modal fade" id="formKoreksiCustomerList" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+{{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas); kotak cari lama
+     (#input_search_koreksicustomer) diganti kotak Search bawaan DataTables. --}}
+<div class="modal fade picker-kas" id="formKoreksiCustomerList" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Customer</h5>
@@ -2390,20 +2389,15 @@ td input[type="checkbox"] {
         </button>
       </div>
       <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-12 d-flex justify-content-end">
-              <input id="input_search_koreksicustomer" type="search" class="form-control cari-modal-pdpp" placeholder="Cari customer">
-            </div>
-          </div>
+        <div class="container-fluid mt-4">
           <div class="row">
-            <div class="col-12" style="overflow:auto; max-height: 400px">
-              <table id="tabel_add_list_koreksicustomer" class="data-table tabel-modal-pdpp" style="overflow:auto;">
-                <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
+              <table id="tabel_add_list_koreksicustomer">
+                <thead>
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama</th>
-                    <th style="padding: 4px 12px;" scope="col">Alamat</th>
+                    <th scope="col">Kode</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Alamat</th>
                   </tr>
                 </thead>
                 <tbody id="tabel_data_add_list_koreksicustomer" class="text-left"></tbody>
@@ -2413,7 +2407,7 @@ td input[type="checkbox"] {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -2437,6 +2431,7 @@ td input[type="checkbox"] {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let listData = []
 let listOutstanding = []
@@ -2495,7 +2490,11 @@ $(document).ready(function(){
       // Kedua tabel (Outstanding Pembayaran & Pelunasan Piutang) memakai pola
       // ReportTable (geser + sembunyikan kolom), sama seperti penerimaandpp.
       pldInitReportTableSekali()
-      pldIkatCariPerkiraanModal()
+      // Modal Perkiraan (#formPerkiraan): barisnya digambar blade, jadi DataTables-nya cukup
+      // dibuat sekali - tampilan disamakan dengan modal Perkiraan menu Kas (picker-kas). Kotak
+      // cari buatan sendiri (pldIkatCariPerkiraanModal) diganti kotak Search bawaan DataTables.
+      // pldIkatCariPerkiraanModal()
+      pickerKasInit('tabel_add_list_perkiraan')
       $('a[data-toggle="tab"]').on('shown.bs.tab', function () {
         if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().columns.adjust() }
         if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().columns.adjust() }
@@ -3218,20 +3217,12 @@ function koreksiCustRenderDaftar (list) {
         <td>${c.ALAMAT1 || ''}</td>
       </tr>`
   })
-  // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
-  // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
-  // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
-  // urutan baris tetap urutan dari server.
+  // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+  // dropdown "Tampilkan" + kotak Search bawaan DataTables. Tabel dihancurkan dulu sebelum
+  // isinya ditulis ulang, lalu dibuat lagi. order: [] supaya urutan baris tetap urutan dari server.
   if ($.fn.DataTable.isDataTable('#tabel_add_list_koreksicustomer')) { $('#tabel_add_list_koreksicustomer').DataTable().destroy() }
   document.getElementById('tabel_data_add_list_koreksicustomer').innerHTML = rowTable
-  $("#tabel_add_list_koreksicustomer").DataTable({
-    "lengthChange": true,
-    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-    "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
-    "paging": true,
-    "order": [],
-    "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-  })
+  pickerKasInit('tabel_add_list_koreksicustomer', { "order": [] })
 }
 
 function koreksiCustIkatCari () {

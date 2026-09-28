@@ -62,6 +62,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -823,61 +825,39 @@ td input[type="checkbox"] {
 <!-- End modal add-->
 
 <!-- start modal list item add -->
-<div class="modal fade" id="formAddListItem" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{{-- Disamakan persis dengan modal pemilih menu Kas (picker-kas). Kotak cari lama (#input_search_barang_all) diganti kotak Search bawaan DataTables - Enter di kotak itu tetap mencari ke server, lihat prTabelBarangInit()/searchBarangAll(). --}}
+<div class="modal fade picker-kas" id="formAddListItem" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
-
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Master Barang</h5>
-        <button type="button" class="btn btn-sm btn-danger rounded-circle shadow-sm ms-auto"
-          data-dismiss="modal" aria-label="Close"
-          style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-          <span aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">&times;</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
         </button>
       </div>
-
       <div class="modal-body">
         <div class="container-fluid mt-4">
-
-          <div class="row mb-2" style="margin-top:-30px;">
-            <div class="col-12 d-flex justify-content-end" style="padding-right: 0px;">
-              <input id="input_search_barang_all" type="text" class="form-control"
-                placeholder="Cari Data, lalu tekan Enter" onkeypress="searchBarangAll(event)">
-            </div>
-          </div>
-
           <div class="row">
-            <div class="table-responsive">
-            <table id="tabel_add_list_item" class="table table-bordered table-striped">
-              <thead class="text-center">
-                <tr>
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
+              <table id="tabel_add_list_item">
+                <thead>
+                  <tr>
                   <th scope="col">Kode Barang</th>
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Merk</th>
                   <th scope="col">Part Number</th>
-                </tr>
-              </thead>
-              <tbody id="tabel_data_add_list_item" class="text-left">
-                <tr>
-                  <td class="text-center" colspan="4">Silakan ketik pencarian</td>
-                </tr>
-              </tbody>
-            </table>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_add_list_item" class="text-left">
+                </tbody>
+              </table>
+            </div>
           </div>
-          </div>
-
-          {{-- <div class="d-flex justify-content-end mt-3">
-            <button type="button" class="btn btn-danger btn-lg"
-              style="height: 30px; padding: 4px 12px; border-radius: 20px;
-              font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
-              transition: background-color 0.3s, box-shadow 0.3s;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="closeListItemAdd()">Close</button>
-          </div> --}}
-
         </div>
       </div>
-
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1110,6 +1090,7 @@ td input[type="checkbox"] {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let dataAddListItem = []
 let dataRefresh = []
@@ -1178,13 +1159,6 @@ $(document).ready(function(){
       return;
     }
 
-    if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
-      $('#tabel_add_list_item').DataTable().clear().destroy();
-    }
-
-    $('#tabel_data_add_list_item').empty().append(`
-      <tr><td class="text-center" colspan="4">Mencari data...</td></tr>
-    `);
 
     $.ajax({
       url: "{!! url('pembelianpermintaannonagenlistbarang') !!}",
@@ -1199,9 +1173,7 @@ $(document).ready(function(){
 
         if (!res.length) {
           $('#formAddListItem').modal('show');
-          $('#tabel_data_add_list_item').empty().append(`
-            <tr><td class="text-center" colspan="4">Tidak ada data</td></tr>
-          `);
+          prTabelBarangInit('', search, 'Tidak ada data');
           return;
         }
 
@@ -1223,13 +1195,7 @@ $(document).ready(function(){
             </tr>`;
         });
 
-        $('#tabel_data_add_list_item').empty().append(rowTable);
-
-        $('#tabel_add_list_item').DataTable({
-          lengthChange: false,
-          paging: false,
-          searching: false
-        });
+        prTabelBarangInit(rowTable, search);
       },
       error: function(err) {
         console.log(err);
@@ -2576,46 +2542,47 @@ function buttonCloseForm () {
 }
 
 function buttonAddListKodeBarang () {
-  if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
-    $('#tabel_add_list_item').DataTable().destroy();
-  }
-
-  $('#tabel_data_add_list_item').empty().append(`
-    <tr>
-      <td class="text-center" colspan="4">Silakan ketik pencarian</td>
-    </tr>`);
+  prTabelBarangInit('', '');
 
   $('#formAddListItem').modal('show');
 }
 
-// Reset input search ketika modal ditutup
-$('#formAddListItem').on('hidden.bs.modal', function () {
-  $('#input_search_barang_all').val('');
-});
+// Kotak cari lama (#input_search_barang_all) sudah diganti kotak Search DataTables, yang
+// dikosongkan lagi setiap modal dibuka lewat prTabelBarangInit('', '') di atas.
+// $('#formAddListItem').on('hidden.bs.modal', function () {
+//   $('#input_search_barang_all').val('');
+// });
 
 
+/* Modal Master Barang - tampilan disamakan dengan modal pemilih menu Kas (picker-kas):
+   dropdown "Tampilkan" + kotak Search bawaan DataTables (lihat public/js/picker-kas.js).
+   Data barang tetap dicari ke server (listBarang() hanya mengembalikan data kalau ada kata
+   kunci), jadi kotak Search DataTables itu sekaligus menjadi kotak cari server: tekan Enter
+   -> searchBarangAll(). Sambil mengetik, DataTables tetap menyaring hasil yang sedang tampil. */
+function prTabelBarangInit (rowTable, cari, pesanKosong) {
+  $('#tabel_data_add_list_item').html(rowTable || '');
+  pickerKasInit('tabel_add_list_item', {
+    search: { search: cari || '' },
+    language: {
+      lengthMenu: 'Tampilkan _MENU_',
+      emptyTable: pesanKosong || 'Ketik kode / nama barang di kotak Search, lalu tekan Enter',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
+  });
+  $('#tabel_add_list_item_filter input')
+    .off('keypress.prBarang')
+    .on('keypress.prBarang', searchBarangAll)
+    .trigger('focus');
+}
 function searchBarangAll (e) {
   if (e.which == 13) {
-    let search = $("#input_search_barang_all").val().trim();
+    let search = $(e.target).val().trim();
 
     if (!search) {
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
-        $('#tabel_add_list_item').DataTable().clear().destroy();
-      }
-
-      $('#tabel_data_add_list_item').empty().append(`
-        <tr><td class="text-center" colspan="4">Silakan ketik pencarian</td></tr>
-      `);
+      prTabelBarangInit('', '');
       return;
     }
 
-    if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
-      $('#tabel_add_list_item').DataTable().clear().destroy();
-    }
-
-    $('#tabel_data_add_list_item').empty().append(`
-      <tr><td class="text-center" colspan="4">Mencari data...</td></tr>
-    `);
 
     $.ajax({
       url: "{!! url('pembelianpermintaannonagenlistbarang') !!}",
@@ -2630,8 +2597,7 @@ function searchBarangAll (e) {
         let rowTable = "";
 
         if (!res.length) {
-          rowTable = `<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>`;
-          $('#tabel_data_add_list_item').empty().append(rowTable);
+          prTabelBarangInit('', search, 'Tidak ada data');
           return;
         }
 
@@ -2645,13 +2611,7 @@ function searchBarangAll (e) {
             </tr>`;
         });
 
-        $('#tabel_data_add_list_item').empty().append(rowTable);
-
-        $('#tabel_add_list_item').DataTable({
-          lengthChange: false,
-          paging: false,
-          searching: false
-        });
+        prTabelBarangInit(rowTable, search);
       },
       error: function (err) {
         console.log(err);

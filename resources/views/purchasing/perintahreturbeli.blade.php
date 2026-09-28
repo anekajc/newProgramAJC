@@ -122,6 +122,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
   <style>
   .btn .bi-plus {
     font-size: 1.5rem;
@@ -2499,6 +2501,7 @@
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
      "Reset kolom"), disamakan dengan newpo.blade.php / uangmukabeli.blade.php. --}}
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
     window.onload = function(){
@@ -6051,10 +6054,7 @@ function LockFreeOfCharge(){
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'No. Retur Jual'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -6135,13 +6135,7 @@ function buttonNoBeli () {
   $('#tabelModalOpen').removeClass('modalOpen-plain');
   $('#modalOpenCustomSearch').hide().find('input').val('');
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-    "language": { "lengthMenu": "Tampilkan _MENU_" },
-    "paging": true,
-    "order": [],
-  });
+  pickerKasInit('tabelModalOpen', { "order": [] })
 
   $("#formModalOpen").modal('toggle')
 }
@@ -6209,10 +6203,7 @@ function buttonSupplier () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'No. Beli'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -6228,7 +6219,8 @@ function renderModalPickTable (headers, rows, callbacks) {
   let headerHtml = '<tr>' + headers.map(h => `<th scope="col">${h}</th>`).join('') + '</tr>'
   document.querySelector("#theadOpen").innerHTML = headerHtml
 
-  let bodyHtml = rows.map((r, i) => `<tr class="modalPickRow" data-idx="${i}" style="cursor:pointer">` + r.map(c => `<td>${c}</td>`).join('') + `</tr>`).join('')
+  // .pick-row: baris pilihan bergaya modal pemilih menu Kas (picker-kas.css).
+  let bodyHtml = rows.map((r, i) => `<tr class="modalPickRow pick-row" data-idx="${i}" style="cursor:pointer">` + r.map(c => `<td>${c}</td>`).join('') + `</tr>`).join('')
   document.getElementById("tabel_dataModalOpen").innerHTML = bodyHtml
 
   window.modalPickCallbacks = callbacks
@@ -6270,12 +6262,7 @@ function buttonGudang () {
 
   document.getElementById("namaModalOpen").innerHTML = 'Gudang'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-    "language": { "lengthMenu": "Tampilkan _MENU_" },
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
 
   $("#formModalOpen").modal('toggle')
 }
@@ -6408,10 +6395,7 @@ if (isEmpty(kodeBeli)){
 
   document.getElementById("namaModalOpen").innerHTML = 'Barang'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": false,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }

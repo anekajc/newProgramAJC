@@ -120,6 +120,8 @@
 </style>
 {{-- Scrollbar auto-hide: tidak terlihat sampai kursor ada di area yang bisa di-scroll --}}
 <link rel="stylesheet" href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+{{-- Modal pemilih (Perkiraan/Barang/Supplier/Customer/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
 <!-- Blok gaya lama pencarian tabel Bootstrap (#tabel_filter dkk) sudah tidak dipakai -
      kotak cari sekarang #mkSearch di toolbar. Dibiarkan sebagai komentar, tidak
@@ -1655,7 +1657,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 <!--  -->
 
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade picker-kas" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document">
     <div id="" class="modal-content ">
 
@@ -1743,26 +1745,19 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         <div class="container-fluid mt-4" >
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-          {{-- Kotak pencarian tabel modal - diikat lewat mkIkatSearchPerkiraan(). --}}
-          <div class="row mb-2">
-            <div class="col-12 d-flex justify-content-end">
-              <input id="input_search_perkiraan" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
-            </div>
-          </div>
-
+          {{-- Kotak cari buatan sendiri (#input_search_perkiraan) diganti kotak Search bawaan
+               DataTables - modal disamakan dengan modal Perkiraan di menu Kas (picker-kas). --}}
           <div class="row">
-            <div class="col-12" style="overflow:auto; max-height: 400px">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
             <!-- <div class="container-fluid"> -->
 
             {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih
                  (lihat buttonAddPickPerkiraan()). --}}
-            <table id="tabel_add_list_perkiraan" class="data-table" style="overflow:auto; " >
-              <thead class="text-center" style="position: sticky;
-            top: 0;
-            z-index: 1;">
+            <table id="tabel_add_list_perkiraan">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  <th scope="col">Perkiraan</th>
+                  <th scope="col">Nama</th>
                 </tr>
               </thead>
 
@@ -1782,7 +1777,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -1805,25 +1800,22 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       <div class="modal-body">
         <div class="container-fluid mt-4">
 
-          {{-- Tombol Tambah (hanya AKV sisi Debet, lihat mkAktivaBukaList()) di kiri, kotak
-               pencarian di kanan - keduanya di ATAS tabel aktiva. --}}
-          <div class="row mb-2 align-items-center">
-            <div class="col-6">
-              <button type="button" id="mkAktivaButtonTambah" class="btn btn-mk-tambah" onclick="mkAktivaBukaForm()">Tambah</button>
-            </div>
-            <div class="col-6 d-flex justify-content-end">
-              <input id="input_search_aktiva" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
-            </div>
+          {{-- Tombol Tambah (hanya AKV sisi Debet, lihat mkAktivaBukaList()) diparkir di sini,
+               lalu dipindah ke sebelah dropdown "Tampilkan" setelah DataTables dibuat - sama
+               seperti tombol "+ Aktiva baru" di picker Aktiva menu Kas. Kotak cari buatan
+               sendiri diganti kotak Search bawaan DataTables (picker-kas). --}}
+          <div id="mkAktivaHolderTambah" style="display:none">
+            <button type="button" id="mkAktivaButtonTambah" class="btn btn-mk-tambah" onclick="mkAktivaBukaForm()">Tambah</button>
           </div>
 
           <div class="row">
-            <div class="col-12" style="overflow:auto; max-height: 400px">
-            <table id="tabel_add_list_aktiva" class="data-table" style="overflow:auto;">
-              <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
+            <table id="tabel_add_list_aktiva">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode Aktiva</th>
-                  <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                  <th scope="col">Kode Aktiva</th>
+                  <th scope="col">Keterangan</th>
+                  <th scope="col">Tanggal</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_aktiva" class="text-left"></tbody>
@@ -1835,7 +1827,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2020,29 +2012,22 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
         <div class="container-fluid mt-4" >
 
-          {{-- Kotak pencarian tabel modal - diikat lewat mkIkatSearchTitipan(). --}}
-          <div class="row mb-2">
-            <div class="col-12 d-flex justify-content-end">
-              <input id="input_search_titipan" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
-            </div>
-          </div>
-
+          {{-- Kotak cari buatan sendiri (#input_search_titipan) diganti kotak Search bawaan
+               DataTables (picker-kas). --}}
           <div class="row">
-            <div class="col-12" style="overflow:auto; max-height: 400px">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
 
             {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih
                  (lihat buttonAddPickTitipan()). --}}
-            <table id="tabel_add_list_titipan" class="data-table" style="overflow:auto; " >
-              <thead class="text-center" style="position: sticky;
-            top: 0;
-            z-index: 1;">
+            <table id="tabel_add_list_titipan">
+              <thead>
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">No Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Customer</th>
-                  <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-                  <th style="padding: 4px 12px;" scope="col">Jumlah Rp</th>
-                  <th style="padding: 4px 12px;" scope="col">Sisa</th>
+                  <th scope="col">No Bukti</th>
+                  <th scope="col">Tanggal</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Keterangan</th>
+                  <th scope="col">Jumlah Rp</th>
+                  <th scope="col">Sisa</th>
                 </tr>
               </thead>
 
@@ -2060,7 +2045,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
 
       <div id="" class="modal-footer ">
-        <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()" >Batal</button>
+        <button type="button" class="btn picker-kas-batal" onclick="buttonAddListBatal()" >Batal</button>
       </div>
       </div>
 
@@ -2078,8 +2063,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
      Dibuka dari buttonAddPickPerkiraan() saat modal #form (pane Perkiraan) masih
      terbuka - jadi ia menjadi modal bertumpuk di atasnya.
      ============================================================================ --}}
-<div class="modal fade" id="formMkCustomerPT" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+<div class="modal fade picker-kas" id="formMkCustomerPT" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="mkCustomerJudul">Customer</h5>
@@ -2088,22 +2073,19 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </button>
       </div>
       <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row mb-2">
-            <div class="col-12 d-flex justify-content-end">
-              <input id="input_search_customerpt" type="search" class="form-control cari-modal-mk" placeholder="Cari data">
-            </div>
-          </div>
+        {{-- Disamakan dengan modal pemilih menu Kas (picker-kas): kotak cari buatan sendiri
+             (#input_search_customerpt) diganti kotak Search bawaan DataTables. --}}
+        <div class="container-fluid mt-4">
           <div class="row">
-            <div class="col-12" style="overflow:auto; max-height: 400px">
+            <div class="col-12" style="overflow:auto; margin-top:0px; ">
               {{-- Tidak ada kolom Actions: barisnya diklik langsung untuk memilih. --}}
-              <table id="tabel_mk_customerpt" class="data-table" style="overflow:auto;">
-                <thead class="text-center" style="position: sticky; top: 0; z-index: 1;">
+              <table id="tabel_mk_customerpt">
+                <thead>
                   <tr>
-                    <th style="padding: 4px 12px;" scope="col">Kode</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama</th>
-                    <th style="padding: 4px 12px;" scope="col">Alamat</th>
-                    <th style="padding: 4px 12px;" scope="col">Kota</th>
+                    <th scope="col">Kode</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">Kota</th>
                   </tr>
                 </thead>
                 {{-- Sengaja dikosongkan - lihat catatan soal _DT_CellIndex. --}}
@@ -2114,7 +2096,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -2348,6 +2330,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let listData = []
@@ -4431,20 +4414,12 @@ function buttonAddListCustomerPT () {
         </tr>`
       })
 
-      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
-      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
-      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
-      // urutan baris tetap urutan dari server.
+      // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+      // dropdown "Tampilkan" + kotak Search bawaan DataTables. Tabel dihancurkan dulu sebelum
+      // isinya ditulis ulang, lalu dibuat lagi. order: [] supaya urutan baris tetap urutan dari server.
       if ($.fn.DataTable.isDataTable('#tabel_mk_customerpt')) { $('#tabel_mk_customerpt').DataTable().destroy() }
       document.getElementById("tabel_data_mk_customerpt").innerHTML = rowTable
-      $("#tabel_mk_customerpt").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
-        "paging": true,
-        "order": [],
-        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-      })
+      pickerKasInit('tabel_mk_customerpt', { "order": [] })
       document.getElementById("mkCustomerJudul").innerHTML = pihak
 
       let inputCari = document.getElementById('input_search_customerpt')
@@ -5396,20 +5371,12 @@ function buttonAddListPerkiraan (idTujuan) {
       // if(!res.length) {
       //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
       // }
-      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
-      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
-      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
-      // urutan baris tetap urutan dari server.
+      // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+      // dropdown "Tampilkan" + kotak Search bawaan DataTables. Tabel dihancurkan dulu sebelum
+      // isinya ditulis ulang, lalu dibuat lagi. order: [] supaya urutan baris tetap urutan dari server.
       if ($.fn.DataTable.isDataTable('#tabel_add_list_perkiraan')) { $('#tabel_add_list_perkiraan').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_perkiraan").innerHTML = rowTable
-      $("#tabel_add_list_perkiraan").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
-        "paging": true,
-        "order": [],
-        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-      })
+      pickerKasInit('tabel_add_list_perkiraan', { "order": [] })
 
       let inputCariPerkiraan = document.getElementById('input_search_perkiraan')
       if (inputCariPerkiraan) { inputCariPerkiraan.value = '' }
@@ -5610,26 +5577,22 @@ function mkAktivaBukaList (idTujuan, perkiraan, keterangan, bukaModal = false) {
       //   rowTable = `<tr><td class="text-center" colspan=3>Belum ada data</td></tr>`
       // }
 
-      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
-      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
-      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
-      // urutan baris tetap urutan dari server.
+      // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+      // dropdown "Tampilkan" + kotak Search bawaan DataTables. Tabel dihancurkan dulu sebelum
+      // isinya ditulis ulang, lalu dibuat lagi. order: [] supaya urutan baris tetap urutan dari server.
+      // Tombol Tambah ikut terhapus bersama blok .dataTables_length saat destroy() - parkir dulu.
+      $('#mkAktivaButtonTambah').appendTo('#mkAktivaHolderTambah')
       if ($.fn.DataTable.isDataTable('#tabel_add_list_aktiva')) { $('#tabel_add_list_aktiva').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_aktiva").innerHTML = rowTable
-      $("#tabel_add_list_aktiva").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
-        "paging": true,
-        "order": [],
-        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-      })
+      pickerKasInit('tabel_add_list_aktiva', { "order": [] })
       document.getElementById("mkAktivaJudulPane").innerText = kodeSet === 'AKM' ? 'Akumulasi Penyusutan' : 'Aktiva'
       document.getElementById("mkAktivaJudulGroup").innerText = perkiraan + ' - ' + keterangan
 
       let inputCari = document.getElementById('input_search_aktiva')
       if (inputCari) { inputCari.value = '' }
 
+      // Tombol Tambah di sebelah dropdown "Tampilkan" - sama seperti tombol "+ Aktiva baru" di menu Kas.
+      $('#mkAktivaButtonTambah').appendTo('#tabel_add_list_aktiva_wrapper .dataTables_length')
       if (modeTambah) { $('#mkAktivaButtonTambah').show() } else { $('#mkAktivaButtonTambah').hide() }
 
       $('.showhidemodalbodyadd').hide()
@@ -6059,20 +6022,12 @@ function buttonAddListTitipan (lanjutDariPerkiraan = false) {
         </tr>`
       });
 
-      // Dropdown "Tampilkan" (jumlah data): tabel ini sekarang DataTables - dihancurkan dulu
-      // sebelum isinya ditulis ulang, lalu dibuat lagi. Kotak pencarian bawaan (f) tidak
-      // dipakai; kotak cari di atas tabel diarahkan ke DataTable().search(). order: [] supaya
-      // urutan baris tetap urutan dari server.
+      // Tampilan disamakan dengan modal pemilih menu Kas (pickerKasInit, public/js/picker-kas.js):
+      // dropdown "Tampilkan" + kotak Search bawaan DataTables. Tabel dihancurkan dulu sebelum
+      // isinya ditulis ulang, lalu dibuat lagi. order: [] supaya urutan baris tetap urutan dari server.
       if ($.fn.DataTable.isDataTable('#tabel_add_list_titipan')) { $('#tabel_add_list_titipan').DataTable().destroy() }
       document.getElementById("tabel_data_add_list_titipan").innerHTML = rowTable
-      $("#tabel_add_list_titipan").DataTable({
-        "lengthChange": true,
-        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
-        "language": { "lengthMenu": "Tampilkan _MENU_", "emptyTable": "Belum ada data" },
-        "paging": true,
-        "order": [],
-        "dom": "<'row'<'col-sm-12'l>><'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-      })
+      pickerKasInit('tabel_add_list_titipan', { "order": [] })
 
       let inputCariTitipan = document.getElementById('input_search_titipan')
       if (inputCariTitipan) { inputCariTitipan.value = '' }
