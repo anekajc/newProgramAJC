@@ -710,15 +710,38 @@ function refreshDataTableTunai (diam) {
 
 
 
-/* Baris tabel Pelunasan Hutang (#tabel_add_list_tunai) — gaya picker rt-picker-v2 (lihat
-   docs/new-cust-supp-modal-guide.md): tanpa kolom Actions, seluruh baris diklik lewat
-   buttonKlikTunai(). Baris pelunasan milik bukti ini ditandai .is-selected (biru); mengkliknya
-   membatalkan pelunasan itu. Dipakai buttonAddPickCustSuppX() dan refreshDataTableTunai()
-   supaya kedua render selalu sama. */
+/* Baris tabel Pelunasan Hutang (#tabel_add_list_tunai) — mengikuti tabel kartu hutang
+   Memorial Koreksi (mkKartuRender() di accounting/memorialkoreksi.blade.php):
+     - Baris faktur (Debet <= 0): tombol + di kolom Action -> tanya nominal lewat prompt
+       (buttonTambahTunai); dobel-klik baris -> langsung lunasi sebesar sisa saldo faktur tanpa
+       prompt (buttonLunasCepatTunai). Tombol + mati dan dobel-klik tidak aktif kalau saldo
+       faktur sudah habis.
+     - Baris pelunasan milik bukti ini: ditandai merah (.tunai-baris-lunas), tombol hapus, dan
+       dobel-klik = hapus - keduanya lewat konfirmasi (buttonHapusTunai).
+     - Baris pelunasan milik bukti lain: tanpa aksi.
+   Tombol di kolom Action menghentikan dblclick-nya supaya klik cepat dua kali pada tombol
+   tidak ikut memicu aksi dobel-klik barisnya. Dipakai buttonAddPickCustSuppX() dan
+   refreshDataTableTunai() (keduanya mengisi listTunai lebih dulu) supaya kedua render sama. */
 function tunaiRowHtml (item, i, xsaldo, nobukti) {
-  let milikBukti = Number(item.Debet) > 0 && item.NoBukti == nobukti
+  let aksi = ``
+  let kelas = ``
+
+  if (Number(item.Debet) > 0) {
+    if (item.NoBukti == nobukti) {
+      aksi = `<button class="btn btn-danger btn-tunai-hapus" type="button" onclick="buttonHapusTunai(${i})" ondblclick="event.stopPropagation()" title="Hapus"><i class="bi bi-trash"></i></button>`
+      kelas = ` class="tunai-baris-lunas tunai-bisa-dobel" ondblclick="buttonHapusTunai(${i})"`
+    }
+  } else {
+    let bisaLunas = sisaSaldoFakturTunai(item.NoFaktur) > 0
+    aksi = `<button class="btn btn-tunai-lunas" type="button" onclick="buttonTambahTunai(${i})" ondblclick="event.stopPropagation()" title="Pelunasan"${bisaLunas ? '' : ' disabled'}><i class="bi bi-plus-lg"></i></button>`
+    if (bisaLunas) {
+      kelas = ` class="tunai-bisa-dobel" ondblclick="buttonLunasCepatTunai(${i})"`
+    }
+  }
+
   return `
-        <tr class="pick-row${milikBukti ? ' is-selected' : ''}" onclick="buttonKlikTunai(${i})">
+        <tr${kelas}>
+        <td class="kolom-tunai-action">${aksi}</td>
         <td>${item.NoFaktur}</td>
         <td>${item.NoRetur}</td>
         <td>${formatDate(item.Tanggal)}</td>
@@ -731,15 +754,39 @@ function tunaiRowHtml (item, i, xsaldo, nobukti) {
         </tr>`
 }
 
-// Klik baris: baris faktur (Debet <= 0) -> tanya nominal pelunasan (buttonTambahTunai);
-// baris pelunasan -> konfirmasi dulu, lalu batalkan (buttonDeleteTunai). Pelunasan milik
-// bukti lain langsung diberi peringatan, tanpa konfirmasi yang pasti gagal.
-function buttonKlikTunai (index) {
+// Sisa saldo satu faktur = jumlah Saldo seluruh barisnya di listTunai (faktur + pelunasannya).
+function sisaSaldoFakturTunai (nofaktur) {
+  let sisasaldo = 0
+  listTunai.forEach((item) => {
+    if (item.NoFaktur == nofaktur) {
+      sisasaldo += Number(item.Saldo)
+    }
+  })
+  return Number(sisasaldo.toFixed(2))
+}
+
+// Dobel-klik baris faktur: langsung lunasi SELURUH sisa saldonya tanpa prompt nominal
+// (sama seperti mkKartuLunasCepat() di Memorial Koreksi). Untuk pelunasan sebagian, pakai +.
+function buttonLunasCepatTunai (index) {
   let data = listTunai[index]
-  if (Number(data.Debet) <= 0) {
-    buttonTambahTunai(index)
+  if (!data) {
     return
   }
+
+  let sisasaldo = sisaSaldoFakturTunai(data.NoFaktur)
+  if (sisasaldo <= 0) {
+    alertify.warning("Saldo habis")
+    return
+  }
+
+  simpanTambahTunai(data, sisasaldo)
+}
+
+// Tombol hapus / dobel-klik baris pelunasan (merah): konfirmasi dulu, lalu batalkan
+// (buttonDeleteTunai). Pelunasan milik bukti lain langsung diberi peringatan, tanpa
+// konfirmasi yang pasti gagal.
+function buttonHapusTunai (index) {
+  let data = listTunai[index]
 
   if ($("#input_add_nobukti").val() != data.NoBukti) {
     alertify.warning("Nobukti berbeda")
@@ -780,14 +827,7 @@ function pulihkanFokusModalTunai () {
 function buttonTambahTunai (index) {
   let data = listTunai[index]
 
-  let sisasaldo = 0
-
-  listTunai.forEach((item, i) => {
-    if (data.NoFaktur == item.NoFaktur) {
-      sisasaldo += Number(item.Saldo)
-    }
-  });
-  sisasaldo = Number(sisasaldo.toFixed(2))
+  let sisasaldo = sisaSaldoFakturTunai(data.NoFaktur)
 
   if (sisasaldo <= 0) {
     alertify.warning("Saldo habis")
@@ -888,7 +928,7 @@ function bankBukaFormTunai () {
   }
 }
 
-// Selesai / x: hanya menutup. Tiap klik baris sudah langsung tersimpan ke dbTempHutPiut
+// Selesai / x: hanya menutup. Tiap +/dobel-klik baris sudah langsung tersimpan ke dbTempHutPiut
 // (spTempHutPiut); pelunasan itu baru dibukukan saat item disimpan (spAdd), yang lalu
 // mengosongkan dbTempHutPiut. Jadi tidak ada yang perlu disimpan atau dibatalkan di sini.
 function selesaiTunai () {

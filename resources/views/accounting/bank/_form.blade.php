@@ -340,7 +340,7 @@
                                                     <label>Jumlah</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-8">
                                                 <div class="input-group form-group">
                                                     <input id="AddAddJumlah" type="text" value="0.00"
                                                         class="text-right form-control"

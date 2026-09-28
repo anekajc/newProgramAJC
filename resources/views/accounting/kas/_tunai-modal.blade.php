@@ -1,6 +1,7 @@
-  {{-- rt-picker-v2 (docs/new-cust-supp-modal-guide.md): tanpa kolom Actions, seluruh baris diklik.
-       Baris faktur -> tanya nominal pelunasan; baris pelunasan biru (.is-selected, milik bukti ini)
-       -> konfirmasi lalu batalkan. Lihat tunaiRowHtml()/buttonKlikTunai() di public/js/kas.js. --}}
+  {{-- Kolom Action + dobel-klik mengikuti kartu hutang Memorial Koreksi (#formMkKartuPT):
+       baris faktur -> + (tanya nominal) atau dobel-klik (lunasi seluruh sisa saldo); baris
+       pelunasan milik bukti ini merah -> tombol hapus atau dobel-klik (konfirmasi lalu batalkan).
+       Lihat tunaiRowHtml() di public/js/kas.js; warnanya di @section('css') kas.blade.php. --}}
   <div class="modal fade rt-picker-v2" id="formTunai" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="min-width: 1400px">
           <div id="" class="modal-content ">
@@ -51,14 +52,17 @@
                           </div>
                           <div class="row" style="margin-top:20px">
                               <div class="col-12">
-                                  <p class="text-muted small mb-2">Klik baris faktur untuk membayar; klik baris
-                                      pelunasan (biru) untuk <b>membatalkan</b>.</p>
+                                  <p class="text-muted small mb-2">Klik <b>+</b> untuk membayar faktur (nominal bisa
+                                      diubah), atau dobel-klik baris faktur untuk langsung melunasi seluruh sisa
+                                      saldonya. Baris merah = pelunasan bukti ini; klik tombol hapus atau dobel-klik
+                                      barisnya untuk <b>membatalkan</b>.</p>
                               </div>
                               <div class="col-12" style="overflow:auto;  max-height: 400px">
                                   <!-- <div class="container-fluid"> -->
                                   <table id="tabel_add_list_tunai" class="dph-tb">
                                       <thead>
                                           <tr>
+                                              <th scope="col">Action</th>
                                               <th scope="col">NoFaktur</th>
                                               <th scope="col">NoRetur</th>
                                               <th scope="col">Tanggal</th>
@@ -76,6 +80,7 @@
 
                                           <tr>
 
+                                              <td>-</td>
                                               <td>-</td>
                                               <td>-</td>
                                               <td>-</td>

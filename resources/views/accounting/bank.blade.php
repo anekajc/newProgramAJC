@@ -406,6 +406,46 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       box-shadow: none;
       font-size: 0.65rem;
     }
+
+/* Pelunasan Hutang (#formTunai, _tunai-modal.blade.php): kolom Action, tombol +/hapus dan
+   warna baris pelunasan disalin dari kartu hutang Memorial Koreksi (.btn-mk-hapus,
+   .btn-mk-lunas, .mk-baris-lunas di memorialkoreksi.blade.php). Baris dibuat oleh
+   tunaiRowHtml() di public/js/bank.js. */
+#tabel_add_list_tunai th:first-child,
+#tabel_add_list_tunai td.kolom-tunai-action {
+  width: 52px;
+  white-space: nowrap;
+  text-align: center;
+}
+.btn-tunai-hapus {
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+}
+.btn-tunai-lunas {
+  background-color: #eaf1ff;
+  border: 1px solid #c7dbff;
+  color: #1d4ed8;
+  padding: 1px 6px;
+  font-size: .72rem;
+  line-height: 1.3;
+  border-radius: 5px !important;
+  box-shadow: none;
+}
+.btn-tunai-lunas:hover {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+.btn-tunai-lunas:disabled {
+  opacity: .4;
+}
+#tabel_add_list_tunai tr.tunai-baris-lunas td {
+  color: #dc3545;
+  background-color: #fffbea;
+}
+#tabel_add_list_tunai tr.tunai-bisa-dobel { cursor: pointer; }
 </style>
 @endsection
 
