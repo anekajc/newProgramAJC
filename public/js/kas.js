@@ -568,6 +568,9 @@ let flagtunai = 1
 let tipeformdet = ''
 let listtunai = []
 let xislocalorexim = 0
+// Supplier yang sudah dipilih untuk Pelunasan Hutang — dipakai tombol #buttonBukaTunai
+// supaya bisa kembali ke daftar faktur tanpa memilih ulang Lawan dan supplier.
+let tunaiKodeCustsupp = ''
 let xaktiva = {}
 let listData = []
 let listAktiva = []
@@ -643,6 +646,7 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
       }
       listTunai = res
       flagtunai = 1
+      tunaiKodeCustsupp = kodecustsupp
 
 
       document.getElementById("input_tunai_nobukti").value=nobukti
@@ -652,8 +656,14 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
       // listLawan  = res
 
       let xsaldo = 0
+      // Total pelunasan bukti ini — Jumlah diisi dari sini (sama seperti refreshDataTableTunai()),
+      // supaya saat dibuka ulang Jumlah langsung benar, tidak menunggu "+"/"-" berikutnya.
+      let xdebet = 0
       let rowTable = ``
       res.forEach((item, i) => {
+        if (item.NoBukti == nobukti && item.StatusUID == 'I') {
+          xdebet += Number(item.Debet)
+        }
         if (Number(item.Debet) <= 0) {
           console.log("saldo")
           xsaldo = Number(item.Saldo)
@@ -662,41 +672,16 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
           console.log("minus")
           xsaldo += Number(item.Saldo)
         }
-        rowTable += `
-        <tr>
-
-        ${Number(item.Debet) <= 0 ?
-          `<td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonTambahTunai(${i})" type="button" ><i class="bi bi-plus"></i></button></td>`
-
-          :
-          `<td class="text-center"><button class="btn btn-danger btn-sm" onclick="buttonDeleteTunai(${i})" type="button" ><i class="bi bi-dash"></i></button></td>`
-
-
-        }
-
-        <td>${item.NoFaktur}</td>
-        <td>${item.NoRetur}</td>
-        <td>${formatDate(item.Tanggal)}</td>
-        <td>${item.NoBukti}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
-
-        <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
-        <td class="text-right">${formatAngka(parseFloat(xsaldo).toFixed(2))}</td>
-
-        <td>${item.Valas}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.Kurs).toFixed(2))}</td>
-
-        </tr>`
+        rowTable += tunaiRowHtml(item, i, xsaldo, nobukti)
       });
 
 
 
 
-      $("#form").modal("toggle");
-
+      document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
       document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
 
-      $("#formTunai").modal("toggle");
+      kasBukaFormTunai()
 
 
     },
@@ -709,9 +694,26 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
 
 }
 
-function batalTunai () {
+/* Buka #formTunai. Kalau picker #form masih terbuka, tutup dulu dan tunggu sampai benar-benar
+   tertutup: bila keduanya dianimasikan bersamaan, event 'hidden' milik #form mencabut class
+   modal-open dari <body> setelah #formTunai tampil, sehingga halaman di belakang ikut ter-scroll. */
+function kasBukaFormTunai () {
+  if ($('#form').hasClass('show')) {
+    $('#form').one('hidden.bs.modal', function () {
+      $('#formTunai').modal('show')
+    })
+    $('#form').modal('hide')
+  } else {
+    $('#formTunai').modal('show')
+  }
+}
 
-  $("#formTunai").modal('toggle')
+// Selesai / x: hanya menutup. Tiap klik baris sudah langsung tersimpan ke dbTempHutPiut
+// (spTempHutPiut); pelunasan itu baru dibukukan saat item disimpan (spAdd), yang lalu
+// mengosongkan dbTempHutPiut. Jadi tidak ada yang perlu disimpan atau dibatalkan di sini.
+function selesaiTunai () {
+
+  $("#formTunai").modal('hide')
 
 
 }
@@ -1233,6 +1235,7 @@ function cleanFormAddAdd () {
   document.getElementById("AddAddNamaCustsupp").value = ''
 
   document.getElementById("AddAddLawan").value = ''
+  $('#buttonBukaTunai').hide()
   document.getElementById("checkBoxSKB").checked = false
   document.getElementById("AddAddKeteranganLawan").value = ''
   document.getElementById("AddAddJumlah").value = '0.00'
@@ -4074,8 +4077,11 @@ function buttonAddListDevisi () {
 
 }
 
-function refreshDataTableTunai () {
+// diam = true: jangan tampilkan peringatan kalau kosong (dipakai buttonBukaTunai(), yang
+// lalu jatuh ke daftar supplier). Mengembalikan true bila dbTempHutPiut berisi data.
+function refreshDataTableTunai (diam) {
   let nobukti = $("#input_add_nobukti").val()
+  let adaData = false
   $.ajax({
     url: KAS_ROUTES.kaslisttunaix,
     type: "get",
@@ -4087,10 +4093,13 @@ function refreshDataTableTunai () {
 
       if (!res.length) {
 
-        alertify.warning("Tidak ada transaksi ditemukkan")
+        if (!diam) {
+          alertify.warning("Tidak ada transaksi ditemukkan")
+        }
         return
       }
       listTunai = res
+      adaData = true
 
       // listLawan  = res
       let rowTable = ``
@@ -4115,31 +4124,7 @@ function refreshDataTableTunai () {
         console.log(item.Saldo)
         console.log(Number(item.Saldo))
         console.log(xsaldo ,'.')
-        rowTable += `
-        <tr>
-
-        ${Number(item.Debet) <= 0 ?
-          `<td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonTambahTunai(${i})" type="button" ><i class="bi bi-plus"></i></button></td>`
-
-          :
-          `<td class="text-center"><button class="btn btn-danger btn-sm" onclick="buttonDeleteTunai(${i})" type="button" ><i class="bi bi-dash"></i></button></td>`
-
-
-        }
-
-        <td>${item.NoFaktur}</td>
-        <td>${item.NoRetur}</td>
-        <td>${formatDate(item.Tanggal)}</td>
-        <td>${item.NoBukti}</td>
-        <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
-
-        <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
-        <td class="text-right">${formatAngka(parseFloat(xsaldo).toFixed(2))}</td>
-
-        <td>${item.Valas}</td>
-        <td>${formatAngka(parseFloat(item.Kurs).toFixed(2))}</td>
-
-        </tr>`
+        rowTable += tunaiRowHtml(item, i, xsaldo, nobukti)
       });
 
 
@@ -4158,22 +4143,78 @@ function refreshDataTableTunai () {
 
   })
 
+  return adaData
 }
 
-function buttonTambahTunai (index) {
-  let _token = $("#_token").val()
+/* Baris tabel Pelunasan Hutang (#tabel_add_list_tunai) — gaya picker rt-picker-v2 (lihat
+   docs/new-cust-supp-modal-guide.md): tanpa kolom Actions, seluruh baris diklik lewat
+   buttonKlikTunai(). Baris pelunasan milik bukti ini ditandai .is-selected (biru); mengkliknya
+   membatalkan pelunasan itu. Dipakai buttonAddPickCustSuppX() dan refreshDataTableTunai()
+   supaya kedua render selalu sama. */
+function tunaiRowHtml (item, i, xsaldo, nobukti) {
+  let milikBukti = Number(item.Debet) > 0 && item.NoBukti == nobukti
+  return `
+        <tr class="pick-row${milikBukti ? ' is-selected' : ''}" onclick="buttonKlikTunai(${i})">
+        <td>${item.NoFaktur}</td>
+        <td>${item.NoRetur}</td>
+        <td>${formatDate(item.Tanggal)}</td>
+        <td>${item.NoBukti}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(xsaldo).toFixed(2))}</td>
+        <td>${item.Valas}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Kurs).toFixed(2))}</td>
+        </tr>`
+}
+
+// Klik baris: baris faktur (Debet <= 0) -> tanya nominal pelunasan (buttonTambahTunai);
+// baris pelunasan -> konfirmasi dulu, lalu batalkan (buttonDeleteTunai). Pelunasan milik
+// bukti lain langsung diberi peringatan, tanpa konfirmasi yang pasti gagal.
+function buttonKlikTunai (index) {
   let data = listTunai[index]
-  let maxJumlah = $("#AddAddJumlahTunai").val()
+  if (Number(data.Debet) <= 0) {
+    buttonTambahTunai(index)
+    return
+  }
 
-  let choice = 'I'
-  let tipetrans = 'L'
-  let nobukti = $("#input_add_nobukti").val()
-  let urut = 0
+  if ($("#input_add_nobukti").val() != data.NoBukti) {
+    alertify.warning("Nobukti berbeda")
+    return
+  }
 
+  lepasFokusModalTunai()
+  let dlgHapus = alertify.confirm('Hapus Pelunasan',
+    'Hapus pelunasan faktur ' + data.NoFaktur + ' sebesar ' +
+      formatAngka(parseFloat(data.Debet).toFixed(2)) + '?',
+    function () {
+      buttonDeleteTunai(index)
+    },
+    function () {})
+  // Sama seperti dialog Hapus Item: 'is-danger' membuat tombol OK merah.
+  dlgHapus.elements.root.classList.add('ajs-app-buttons', 'is-danger')
+  dlgHapus.set('onclose', pulihkanFokusModalTunai)
+}
 
+// Bootstrap 4.0 menarik fokus kembali ke modal yang sedang terbuka (#formTunai) setiap kali
+// fokus pindah ke luar modal, sehingga dialog alertify (dipasang di <body>) tidak bisa diketik
+// atau dipakai lewat keyboard. Matikan SEBELUM dialog dibuka, pulihkan lewat onclose dialog.
+function lepasFokusModalTunai () {
+  $(document).off('focusin.bs.modal')
+}
 
-  let kredit = 0
-  let debet = 0
+function pulihkanFokusModalTunai () {
+  let modalTunai = $('#formTunai').data('bs.modal')
+  if (modalTunai && $('#formTunai').hasClass('show') && typeof modalTunai._enforceFocus === 'function') {
+    modalTunai._enforceFocus()
+  }
+}
+
+/* "+" pada satu faktur: tanya nominal yang dibayar (default = sisa saldo faktur; ketik angka
+   lebih kecil untuk pelunasan sebagian). Dulu nominalnya diambil dari Jumlah yang wajib
+   diketik lebih dulu; sekarang Jumlah justru terisi otomatis dari total pelunasan lewat
+   refreshDataTableTunai(). */
+function buttonTambahTunai (index) {
+  let data = listTunai[index]
 
   let sisasaldo = 0
 
@@ -4182,22 +4223,51 @@ function buttonTambahTunai (index) {
       sisasaldo += Number(item.Saldo)
     }
   });
+  sisasaldo = Number(sisasaldo.toFixed(2))
 
-
-
-  if (Number(maxJumlah) > Number(sisasaldo)) {
-
-    debet = sisasaldo
-
-  } else {
-    debet = maxJumlah
-
-  }
-
-  if (debet <= 0) {
+  if (sisasaldo <= 0) {
     alertify.warning("Saldo habis")
     return
   }
+
+  lepasFokusModalTunai()
+
+  let dlgNominal = alertify.prompt('Pelunasan ' + data.NoFaktur,
+    'Nominal dibayar (sisa saldo ' + formatAngka(sisasaldo.toFixed(2)) + ')',
+    formatAngka(sisasaldo.toFixed(2)),
+    function (evt, value) {
+      let debet = Number(unformatAngka(value).toFixed(2))
+      if (!(debet > 0)) {
+        alertify.warning('Nominal harus lebih dari 0')
+        return false
+      }
+      if (debet > sisasaldo) {
+        alertify.warning('Nominal melebihi sisa saldo')
+        return false
+      }
+      simpanTambahTunai(data, debet)
+    },
+    function () {})
+  dlgNominal.elements.root.classList.add('ajs-app-buttons')
+  dlgNominal.set('onclose', pulihkanFokusModalTunai)
+
+  let inputNominal = dlgNominal.elements.content.querySelector('input')
+  if (inputNominal && !inputNominal.dataset.formatAngka) {
+    inputNominal.dataset.formatAngka = '1'
+    inputNominal.classList.add('text-right')
+    inputNominal.addEventListener('input', function () { formatAngkaKetik(inputNominal) })
+  }
+}
+
+function simpanTambahTunai (data, debet) {
+  let _token = $("#_token").val()
+
+  let choice = 'I'
+  let tipetrans = 'L'
+  let nobukti = $("#input_add_nobukti").val()
+  let urut = 0
+
+  let kredit = 0
 
   let noinvoice = 'LNS'
 
@@ -4223,8 +4293,6 @@ function buttonTambahTunai (index) {
         if (res == 1) {
           // $("#form").modal('toggle')
           alertify.success('Pelunasan telah ditambah');
-          let xjumlahtunai = $("#AddAddJumlahTunai").val()
-          document.getElementById("AddAddJumlahTunai").value = Number(xjumlahtunai) -  Number(debet)
           refreshDataTableTunai()
 
         }
@@ -4248,7 +4316,6 @@ function buttonDeleteTunai (index) {
   let _token = $("#_token").val()
   let data = listTunai[index]
   console.log(data)
-  let maxJumlah = $("#AddAddJumlahTunai").val()
 
   let choice = 'D'
   let tipetrans = 'L'
@@ -4256,20 +4323,14 @@ function buttonDeleteTunai (index) {
   let urut = data.Urut
 
   let kredit = 0
-  let debet = 0
+  // Dulu min(sisa Jumlah yang diketik, Kredit); tanpa anggaran Jumlah lagi, kirim Kredit apa
+  // adanya (nilai yang sama yang dulu terkirim setiap kali sisa Jumlah masih mencukupi).
+  let debet = data.Kredit
 
   if(nobukti != data.NoBukti) {
 
     alertify.warning("Nobukti berbeda")
     return
-  }
-  if (Number(maxJumlah) > Number(data.Kredit)) {
-
-    debet = data.Kredit
-
-  } else {
-    debet = maxJumlah
-
   }
 
   let noinvoice = 'LNS'
@@ -4296,8 +4357,6 @@ function buttonDeleteTunai (index) {
         if (res == 1) {
           // $("#form").modal('toggle')
           alertify.success('Pelunasan telah dihapus');
-          let xjumlahtunai = $("#AddAddJumlahTunai").val()
-          document.getElementById("AddAddJumlahTunai").value = Number(xjumlahtunai) +  Number(data.Debet)
           refreshDataTableTunai()
 
         }
@@ -4313,70 +4372,81 @@ function buttonDeleteTunai (index) {
 
 }
 
-function onChangeAddAddJumlah () {
+/* Pelunasan Hutang — BKK dengan Lawan IsLokalOrExim = 1, saat menambah item. Alurnya:
+   pilih Lawan -> daftar supplier (pane Customer di modal #form yang sama) -> #formTunai.
+   Jumlah tidak perlu diketik lebih dulu (dulu onblur Jumlah yang membuka alur ini);
+   tombol #buttonBukaTunai di samping Jumlah membuka ulang alurnya setelah ditutup. */
+function isModeTunai () {
+  return $("#input_add_transaksi").val() == 'BKK' && xislocalorexim == 1 && tipeformdet == 'add'
+}
 
-    let trans =  $("#input_add_transaksi").val();
-    if (trans == 'BKK' && xislocalorexim == 1 && tipeformdet == 'add') {
-      let _token = $("#_token").val()
-      let xnum =  unformatAngka($("#AddAddJumlah").val()).toFixed(2);
-      document.getElementById("AddAddJumlahTunai").value= xnum
-      let lawan = $("#AddAddLawan").val();
-      if (flagtunai == 0) {
-        $('.showhidemodalbodyadd').hide();
+function aturTombolBukaTunai () {
+  $('#buttonBukaTunai').toggle(isModeTunai())
+}
 
-        $.ajax({
-          url: KAS_ROUTES.kaslistcustsupptunai,
-          type: "post",
-          async: false,
-          data: {
-            _token,
-            lawan
-          },
-          success: function(res) {
-            console.log(res)
+// Isi daftar supplier lalu tampilkan pane-nya. Dipanggil dari buttonAddPickLawan() saat
+// #form masih terbuka (hanya ganti pane; Batal/x kembali ke pane Lawan) atau dari
+// #buttonBukaTunai saat #form tertutup (modalnya dibuka).
+function bukaListCustSuppTunai () {
+  let _token = $("#_token").val()
+  let lawan = $("#AddAddLawan").val();
 
+  $.ajax({
+    url: KAS_ROUTES.kaslistcustsupptunai,
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      lawan
+    },
+    success: function(res) {
+      console.log(res)
 
+      let rowTable = ``
+      res.forEach((item, i) => {
 
+        rowTable += `
+        <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
 
-            // listLawan  = res
+          <td>${item.KODECUSTSUPP}</td>
+          <td>${item.NAMACUSTSUPP}</td>
+          <td>${item.ALAMAT}</td>
+          <td>${item.NAMAKOTA}</td>
+      </tr>
+        `
+      });
 
-            let rowTable = ``
-            res.forEach((item, i) => {
+      document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
+      kasInitPicker('tabel_add_list_customer');
 
-              rowTable += `
-              <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
-
-                <td>${item.KODECUSTSUPP}</td>
-                <td>${item.NAMACUSTSUPP}</td>
-                <td>${item.ALAMAT}</td>
-                <td>${item.NAMAKOTA}</td>
-            </tr>
-              `
-            });
-
-
-
-            document.getElementById("tabel_data_add_list_customer").innerHTML = rowTable
-            kasInitPicker('tabel_add_list_customer');
-
-                    kasBukaPane('modalAddListCustomer');
-                    $("#form").modal('toggle')
-
-          },
-          error: function (err) {
-            console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
-          }
-
-        })
-      } else {
-        $("#formTunai").modal('toggle')
-
+      kasBukaPane('modalAddListCustomer');
+      if (!$('#form').hasClass('show')) {
+        $("#form").modal('show')
       }
 
-      // open modal kartu hutang
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
 
+  })
+}
+
+// Tombol di samping Jumlah: kembali ke daftar faktur supplier yang sudah dipilih, atau ke
+// daftar supplier kalau belum ada yang dipilih / datanya sudah habis (mis. item sudah disimpan).
+// Daftar faktur dibaca ulang lewat refreshDataTableTunai() yang membaca dbTempHutPiut apa
+// adanya — BUKAN lewat buttonAddPickCustSuppX(): listTunai() di controller mengosongkan
+// dbTempHutPiut lebih dulu, sehingga pelunasan yang sudah diklik (item belum disimpan) hilang.
+function buttonBukaTunai () {
+  if (!isModeTunai()) {
+    return
+  }
+  if (flagtunai == 1 && tunaiKodeCustsupp && refreshDataTableTunai(true)) {
+    kasBukaFormTunai()
+  } else {
+    bukaListCustSuppTunai()
+  }
 }
 
 function buttonAddListPerkiraan () {
@@ -4906,6 +4976,7 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   console.log(trans)
   xislocalorexim = islocalorexim
   xlawan = listLawan[index]
+  aturTombolBukaTunai()
 
   document.getElementById("AddAddJumlah").value = '0.00'
   document.getElementById("AddAddKodeCosting").value = ''
@@ -4918,11 +4989,18 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
 
     flagtunai = 0
     listtunai = []
+    tunaiKodeCustsupp = ''
     console.log(index, perkiraan, keterangan , simbol, kode)
     document.getElementById("AddAddLawan").value = perkiraan
     document.getElementById("AddAddKodeLawan").value = kode
     document.getElementById("AddAddKeteranganLawan").value = keterangan
-    buttonAddListBatal()
+    if (isModeTunai()) {
+      // Langsung ke daftar supplier (ganti pane di modal yang sama) — Jumlah tidak perlu
+      // diketik dulu. Lihat bukaListCustSuppTunai().
+      bukaListCustSuppTunai()
+    } else {
+      buttonAddListBatal()
+    }
     return
   }
 
