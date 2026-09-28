@@ -351,6 +351,11 @@
   align-items: center;
   justify-content: center;
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 @section('content')

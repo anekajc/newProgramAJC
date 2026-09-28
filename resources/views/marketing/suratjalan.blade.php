@@ -398,6 +398,21 @@
 </style>
 
 <style>
+  #tabel_add_list_ekspedisi_filter{
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: -10px;
+  }
+  #tabel_add_list_ekspedisi_filter label input {
+    width: 150px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    font-size: 0.65rem;
+  }
+</style>
+
+<style>
   /* Search-icon button appended flush to an input, ported from so.blade.php. */
   .btn-icon-search {
     height: 32px;
@@ -474,6 +489,7 @@
   #tabel6 .action-buttons-wrap .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
   #tabel6 .action-buttons-wrap .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
   #tabel6 .action-buttons-wrap .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel6 .action-buttons-wrap .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
 
   /* Same pastel round-button treatment for #tabel2's ("SO Siap Kirim") own "+"
      action, copied 1:1 from returpenjualangudang.blade.php's #tabel/#tabel2/#tabel3
@@ -507,6 +523,11 @@
   #koreksiTable td:last-child .btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
   #koreksiTable td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
   #koreksiTable td:last-child .btn-danger { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+
+  .data-table th,
+  .data-table td {
+    white-space: nowrap;
+  }
 </style>
 
 @endsection
@@ -977,10 +998,19 @@
           </div>
         </div> -->
           <div class="col-md-8">
-            <div class="form-group input-group">
-              <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" >
-              <input type="text" class="form-control" id="input_add_gdg" placeholder="" disabled>
-              <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListGudang" onclick="buttonAddListGudang()"><i class="bi bi-search"></i></button>
+            <div class="form-group">
+              {{-- Native <select>, sama seperti Gudang milik purchasing/newpo.blade.php
+                   (id="input_add_gudang" -> @foreach ($gudang as $g)) -- id tetap
+                   input_add_kodegdg supaya submitAdd()/dst yang sudah baca field ini
+                   tidak perlu diubah; value select LANGSUNG kode gudangnya, jadi
+                   input_add_gdg (nama tampilan terpisah) dan modal picker
+                   buttonAddListGudang()/buttonAddPickGudang() sudah tidak dipakai lagi. --}}
+              <select class="form-control" id="input_add_kodegdg">
+                <option value="">- Pilih Gudang -</option>
+                @foreach ($listGudang as $g)
+                  <option value="{{ $g->KODEGDG }}">{{ $g->KODEGDG }} - {{ $g->NAMA }}</option>
+                @endforeach
+              </select>
             </div>
           </div>
         </div>
@@ -1554,7 +1584,9 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-12  text-right">
+      {{-- id dipakai buttonDetail() buat menyembunyikan tombol Tambah -- halaman ini
+           dipakai bersama oleh Edit (buttonKoreksiSPB) dan Detail (read-only). --}}
+      <div class="col-12  text-right" id="koreksiTambahWrap">
         <button type="button" class="btn btn-chip-biru btn-lg" style="
           height: 30px;
           padding: 4px 12px;
@@ -1637,11 +1669,18 @@
 
             </div> -->
             <div class="col-md-8">
-              <div class="form-group input-group">
-
-                <input id="AddAddNamaGdg" type="text" class="form-control" disabled>
-                <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled>
-                <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+              <div class="form-group">
+                {{-- Native <select>, sama seperti Gudang header (input_add_kodegdg)
+                     dan purchasing/newpo.blade.php -- AddAddNamaGdg (nama tampilan
+                     terpisah) dan modal picker buttonKoreksiListGudang()/
+                     buttonKoreksiPickGudang() sudah tidak dipakai lagi; nama gudang
+                     dibaca dari data-nama option terpilih (lihat submitAddAdd()). --}}
+                <select class="form-control" id="AddAddKodeGdg">
+                  <option value="">- Pilih Gudang -</option>
+                  @foreach ($listGudang as $g)
+                    <option value="{{ $g->KODEGDG }}" data-nama="{{ $g->NAMA }}">{{ $g->KODEGDG }} - {{ $g->NAMA }}</option>
+                  @endforeach
+                </select>
               </div>
             </div>
 
@@ -1763,11 +1802,15 @@
 
           </div> -->
           <div class="col-8">
-            <div class="input-group form-group">
-
-              <input id="AddEditNamaGdg" type="text" class="form-control" disabled>
-              <input id="AddEditKodeGdg" type="hidden" class="form-control" disabled>
-              <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-chip-biru btn-sm btn-icon-search"><i class="bi bi-search"></i></button>
+            <div class="form-group">
+              {{-- Native <select>, sama seperti pasangannya di Tambah Item (AddAddKodeGdg
+                   di atas) -- AddEditNamaGdg dan modal picker sudah tidak dipakai lagi. --}}
+              <select class="form-control" id="AddEditKodeGdg">
+                <option value="">- Pilih Gudang -</option>
+                @foreach ($listGudang as $g)
+                  <option value="{{ $g->KODEGDG }}" data-nama="{{ $g->NAMA }}">{{ $g->KODEGDG }} - {{ $g->NAMA }}</option>
+                @endforeach
+              </select>
             </div>
           </div>
 
@@ -2208,46 +2251,6 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div id="modalBodyAddListGudang" class="showhidemodalbodyadd">
-        <div class="modal-body" >
-
-        <div class="container-fluid mt-4" >
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
-            <div class="col-12" style="overflow:auto;">
-            <!-- <div class="container-fluid"> -->
-
-
-            <table id="tabel_add_list_gudang" class="data-table">
-              <thead class="text-center">
-                <tr>
-
-                  <th style="padding: 4px 12px;" scope="col">Kode</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
-
-                </tr>
-              </thead>
-
-
-              <tbody id="tabel_data_add_list_gudang" class="text-left" >
-
-                <tr >
-
-                  <td>-</td>
-                  <td>-</td>
-              </tr>
-              </tbody>
-
-
-            </table>
-          <!-- </div> -->
-            <!-- <button onclick="buttonSubKategori()">tes</button> -->
-          </div>
-            </div>
-            </div>
-      </div>
-
-    </div>
     <div id="modalBodyAddListEkspedisi" class="showhidemodalbodyadd">
       <div class="modal-body" >
 
@@ -3058,48 +3061,6 @@
       </div>
 
     </div>
-      <div id="modalKoreksiListGudang" class="showhidemodalkoreksi">
-        <div class="modal-body" >
-
-        <div class="container-fluid mt-4" >
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
-            <div class="col-12" style="overflow:auto;">
-            <!-- <div class="container-fluid"> -->
-
-
-            <table id="tabel_koreksi_list_gudang" class="data-table">
-              <thead class="text-center">
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
-
-                </tr>
-              </thead>
-
-
-              <tbody id="tabel_data_koreksi_list_gudang" class="text-left" >
-                @for ($i = 0; $i < count($listGudang); $i++)
-
-                <tr class="pick-row" onclick="buttonKoreksiPickGudang('{{ $listGudang[$i]->KODEGDG }}' , '{{ $listGudang[$i]->NAMA }}')">
-
-                  <td>{{ $listGudang[$i]->KODEGDG }}</td>
-                  <td>{{ $listGudang[$i]->NAMA }}</td>
-              </tr>
-              @endfor
-              </tbody>
-
-
-            </table>
-          <!-- </div> -->
-            <!-- <button onclick="buttonSubKategori()">tes</button> -->
-          </div>
-            </div>
-            </div>
-      </div>
-
-    </div>
-
       <div id="" class="modal-footer ">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
         <!-- <button type="button" class="btn btn-primary" onclick="submitKoreksi()">Koreksi</button> -->
@@ -3505,6 +3466,7 @@ function tabel6ActionsCell(row) {
   var tglSpbInvc = sjPickCI(row, 'TglSPBINVC');
   var isOto = Number(sjPickCI(row, 'IsOtorisasi1'));
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button> ';
   if (isOto) {
     html += '<button class="btn btn-danger btn-sm" title="Otorisasi" type="button" onclick="buttonBatalOtorisasiSPB(\'' + nobukti + '\')"><i class="bi bi-key"></i></button> ';
     html += '<button class="btn btn-primary btn-sm" title="Kirim Terima" type="button" onclick="buttonKirimTerima(\'' + nobukti + '\',\'' + namaCustSupp + '\',\'' + tglKirim + '\',\'' + tglTerimaBrg + '\',\'' + tglTerima + '\')"><i class="bi bi-calendar4-week"></i></button> ';
@@ -4038,23 +4000,6 @@ dataKoreksiAdd = listAddBarangKoreksi[index]
 
 }
 
-function buttonKoreksiPickGudang (kode , nama ) {
-  // tipeformitem
-  document.getElementById(`Add${tipeformitem}KodeGdg`).value = kode
-  document.getElementById(`Add${tipeformitem}NamaGdg`).value = nama
-  $('.showhidemodalkoreksi').hide();
-  $('#modalKoreksiMain').show();
-  $('#formKoreksi .modal-title').text('Koreksi SPB')
-  document.getElementById(`Add${tipeformitem}NamaGdg`).scrollIntoView();
-  $("#formKoreksi").modal('toggle')
-}
-
-function buttonKoreksiListGudang () {
-  $('.showhidemodalkoreksi').hide();
-  $('#modalKoreksiListGudang').show();
-  $('#formKoreksi .modal-title').text('Gudang')
-  $("#formKoreksi").modal('toggle')
-}
 
 function buttonAddListEkspedisi () {
   // $('.showhidemodalbodyadd').hide();
@@ -4062,7 +4007,6 @@ function buttonAddListEkspedisi () {
   // // showhidemodalfooteradd
   // $('.showhidemodalfooteradd').hide();
   // $('#modalBodyFooterList').show();
-
 
   $.ajax({
     url: "{!! url('suratjalanlistekspedisi') !!}",
@@ -4084,12 +4028,23 @@ function buttonAddListEkspedisi () {
       });
 
 
-
-
       if(!res.length) {
         rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
       }
       document.getElementById("tabel_data_add_list_ekspedisi").innerHTML = rowTable
+
+      // Search box: DataTables is (re)initialized AFTER the rows are injected, not
+      // once on document ready -- this table's body is replaced wholesale via
+      // innerHTML every time this modal opens, and initializing beforehand would
+      // leave DataTables searching its own stale/empty row cache instead of what's
+      // actually on screen.
+      if ($.fn.DataTable.isDataTable('#tabel_add_list_ekspedisi')) {
+        $('#tabel_add_list_ekspedisi').DataTable().destroy();
+      }
+      $('#tabel_add_list_ekspedisi').DataTable({
+        lengthChange: false,
+        paging: false
+      });
 
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListEkspedisi').show();
@@ -4123,7 +4078,7 @@ function submitAddAdd () {
   let NamaBrg = $("#AddAddNamaBrg").val();
   let KodeBrg = $("#AddAddKodeBrg").val();
   let KodeGdg = $("#AddAddKodeGdg").val();
-  let NamaGdg = $("#AddAddNamaGdg").val();
+  let NamaGdg = $("#AddAddKodeGdg option:selected").data('nama') || '';
   let Satuan = $("#AddAddInputSatuan").val();
   let Qty = $("#AddAddInputQty").val();
   let Isi = $("#AddAddInputIsi").val();
@@ -4265,7 +4220,7 @@ function submitAddEdit () {
   let NamaBrg = $("#AddEditNamaBrg").val();
   let KodeBrg = $("#AddEditKodeBrg").val();
   let KodeGdg = $("#AddEditKodeGdg").val();
-  let NamaGdg = $("#AddEditNamaGdg").val();
+  let NamaGdg = $("#AddEditKodeGdg option:selected").data('nama') || '';
   let Satuan = $("#AddEditInputSatuan").val();
 
   let sat1 = $("#AddEditInputSatuan1").val();
@@ -4383,19 +4338,6 @@ function submitAddEdit () {
   })
 }
 
-function buttonAddPickGudang (kode, nama) {
-  console.log('buttonAddPickGudang')
-  console.log(kode, nama)
-  // if (tipeform == 'edit') {
-  //   onChangeHeader('KODEVLS' , kode)
-  //   onChangeHeader('KURS' , kurs)
-  // }
-  document.getElementById("input_add_kodegdg").value = kode
-  document.getElementById("input_add_gdg").value = nama
-  // buttonAddListBatal()
-  $("#form").modal('toggle')
-}
-
 function buttonAddPickEkspedisi (kode, nama) {
   console.log('buttonAddPickEkspedisi')
   console.log(kode, nama)
@@ -4408,59 +4350,6 @@ function buttonAddPickEkspedisi (kode, nama) {
   buttonAddListBatal()
   $("#form").modal('toggle')
 }
-
-
-function buttonAddListGudang () {
-
-
-  // return
-
-  $.ajax({
-    url: "{!! url('suratjalanlistgudang') !!}",
-    type: "get",
-    async: false,
-    data: {
-
-    },
-    success: function(res) {
-      let rowTable = ``
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr class="pick-row" onclick="buttonAddPickGudang('${item.kodegdg}' , '${item.nama}'  )">
-
-        <td>${item.kodegdg}</td>
-        <td>${item.nama}</td>
-
-        </tr>`
-      });
-
-
-
-
-      if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
-      }
-      document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable
-
-      $('.showhidemodalbodyadd').hide();
-      $('#modalBodyAddListGudang').show();
-      // showhidemodalfooteradd
-      $('.showhidemodalfooteradd').hide();
-      $('#modalBodyFooterList').show();
-      $('#form .modal-title').text('Gudang')
-      $("#form").modal('toggle')
-
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-
-  })
-
-
-}
-
 
 
 function sjResetFilterFieldsSPB () {
@@ -4596,7 +4485,6 @@ function cleanFormAdd () {
   document.getElementById("input_add_noso").value = ''
   document.getElementById("input_add_tanggal").value = formatDate(new Date())
   document.getElementById("input_add_kodegdg").value = ''
-  document.getElementById("input_add_gdg").value = ''
   document.getElementById("input_add_nopol").value = ''
   document.getElementById("input_add_sopir").value = ''
   document.getElementById("input_add_refukm").value = ''
@@ -4703,7 +4591,6 @@ function buttonKoreksiAdd () {
     document.getElementById("AddAddKodeBrg").value = ''
     document.getElementById("AddAddNamaBrg").value = ''
     document.getElementById("AddAddKodeGdg").value = ''
-    document.getElementById("AddAddNamaGdg").value = ''
     document.getElementById("AddAddInputSatuan").value = ''
     document.getElementById("AddAddInputQty").value = '0.00'
     $('.showhide').hide();
@@ -4804,7 +4691,6 @@ function buttonKoreksiEdit (urut , index) {
     document.getElementById("AddEditNamaBrg").value = dataKoreksiEdit.NAMABRG
 
     document.getElementById("AddEditKodeGdg").value = dataKoreksiEdit.KODEGDG
-    document.getElementById("AddEditNamaGdg").value = dataKoreksiEdit.NAMAGDG
     document.getElementById("AddEditInputSatuan1").value = dataKoreksiEdit.SAT_1
 
     document.getElementById("AddEditInputQty").value = dataKoreksiEdit.QNT2 ? parseFloat(dataKoreksiEdit.QNT2).toFixed(2) : '0.00'
@@ -4909,6 +4795,7 @@ function buttonKoreksiSPB (NOBUKTI) {
 
   // $('.showhidemodalkoreksi').hide();
   $('.showhide').hide();
+  $('#koreksiTambahWrap').show();
   // modalKoreksiMain
   // $('#modalKoreksiMain').show();
   console.log('buttonKoreksiSPB' , NOBUKTI)
@@ -5353,16 +5240,24 @@ function submitAdd () {
 
 
 
+// Read-only counterpart to buttonKoreksiSPB() -- reuses the same #page3/
+// suratjalangetdetailkoreksi (correct SJ-shaped fields: gudang/ekspedisi/sopir/qty,
+// not so.blade.php's customer-shaped #formDetail this used to call via the wrong
+// "sogetdetail" SO-items endpoint), but skips the "sudah otorisasi" block and the
+// akses_iskoreksi gate (Detail is meant to work on EVERY row, unlike Edit, which is
+// otorisasi-gated and permission-gated) and renders item rows without the
+// Edit/Delete buttons, so nothing here is actually editable.
 function buttonDetail (NOBUKTI) {
-  console.log('buttonDetail' , NOBUKTI)
+  tipeform = 'detail'
+  console.log('buttonDetail', NOBUKTI)
+
   $('.showhide').hide();
-  $('.showhidemodalbodydetailmain').hide();
-
-  let _token  = $("#_token").val()
-
+  $('#koreksiTambahWrap').hide();
+  dataTableKoreksi = []
+  let _token = $("#_token").val();
 
   $.ajax({
-    url: "{!! url('sogetdetail') !!}",
+    url: "{!! url('suratjalangetdetailkoreksi') !!}",
     type: "post",
     async: false,
     data: {
@@ -5370,69 +5265,55 @@ function buttonDetail (NOBUKTI) {
       nobukti: NOBUKTI
     },
     success: function(res) {
-      // console.log('aaa')
-      console.log('res' , res)
-
-      // res.header.forEach((item, i) => {
-      //   console.log('a' , i)
-      // });
-      //
-      // res.list.forEach((item, i) => {
-      //   console.log('b' , i)
-      // });
-
-      if (!res.list) {
-        alertify.warning("Data habis")
-        // $("#form").modal('toggle')
+      console.log(res)
+      if (!res.header || !res.header.length) {
+        alertify.warning('Data tidak ditemukan')
         return
-      } else {
-        let dataHeaderDetail = res.header[0]
-        let dataTableDetail = res.list
-
-        let rowTable = ""
-        dataTableDetail.forEach((item, i) => {
-          rowTable += `<tr>
-          <td>${item.KodeBrg}</td>
-          <td>${item.NamaBrg}</td>
-          <td class="text-right">${item.Qnt ? parseFloat(item.Qnt).toFixed(2) : '0.00'}</td>
-          <td>${item.Satuan}</td>
-          <td class="text-right">${item.Harga ? parseFloat(item.Harga).toFixed(2) : '0.00'}</td>
-          <td class="text-right">${item.DiscRp1 ? parseFloat(item.DiscRp1).toFixed(2) : '0.00'}</td>
-          <td class="text-right">${item.NDPP ? parseFloat(item.NDPP).toFixed(2) : '0.00'}</td>
-
-          </tr>`
-        });
-
-        if(!dataTableDetail.length) {
-          rowTable = `<tr>
-          <td class="text-center" colspan="5">Belum ada barang</td>
-          </tr>`
-        }
       }
 
-      $('.showhidemodalbodydetail').hide();
-      // $('#modalBodyAddListPelanggan').show();
-      $('#modalBodyDetailMain').show();
-      // setNewNoBukti()
+      dataTableKoreksiHeader = res.header
+      dataTableKoreksi = res.detail
+      document.getElementById("input_koreksi_catatanso").value = res.header[0].Catatan
+      document.getElementById("input_koreksi_nobukti").value = res.header[0].NOBUKTI
+      document.getElementById("input_koreksi_customer").value = res.header[0].NamaCustSupp
+      document.getElementById("input_koreksi_noso").value = res.header[0].NOSOT
+      document.getElementById("input_koreksi_ekspedisi").value = res.header[0].KODEEXP
+      document.getElementById("input_koreksi_nopol").value = res.header[0].NoPolKend
+      document.getElementById("input_koreksi_alamatkirim").value = res.header[0].AlamatKirimX
+      document.getElementById("input_koreksi_gdg").value = '-'
+      document.getElementById("input_koreksi_lokasipenerima").value = res.header[0].NamaKebunX
+      document.getElementById("input_koreksi_sopir").value = res.header[0].SOPIR
+      document.getElementById("input_koreksi_refukm").value = res.header[0].RefUKM
 
-      // refreshDataTableAdd()
-      $("#formDetail").modal('toggle')
+      let rowTableKoreksi = ``
+      res.detail.forEach((item) => {
+        rowTableKoreksi += `
+          <tr class="text-left">
+            <td>${item.KODEBRG}</td>
+            <td>${item.NAMABRG}</td>
+            <td>${item.namabrgx ? item.namabrgx : ''}</td>
+            <td class="text-right">${parseFloat(item.QNT).toFixed(2)}</td>
+            <td>${item.SAT_1}</td>
+            <td>${item.NAMAGDG}</td>
+            <td></td>
+          </tr>
+        `
+      });
 
+      if (!res.detail.length) {
+        rowTableKoreksi = `<tr><td class="text-center" colspan="7">Belum ada barang</td></tr>`
+      }
 
+      document.getElementById("koreksiTableData").innerHTML = rowTableKoreksi
 
+      $('#page1').hide();
+      $('#page3').show();
     },
     error: function (err) {
       console.log(err)
-      console.log(err.status)
-      console.log(err.statusText)
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
-
   })
-
-
-
-
 }
 
 

@@ -87,6 +87,11 @@
   background: #f8f9fb !important; color: #6b7280 !important; font-size: 12px; text-transform: uppercase;
   letter-spacing: .04em; font-weight: 600; border-bottom: 1px solid #e7e9ee; border-top: none;
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 

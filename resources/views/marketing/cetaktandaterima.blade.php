@@ -276,6 +276,11 @@ input[type=number] {
   visibility: visible;
   transform: translateX(0);
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 

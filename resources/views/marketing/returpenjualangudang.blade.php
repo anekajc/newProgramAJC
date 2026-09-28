@@ -148,6 +148,11 @@
 .btn-batal-add:active {
   background-color: #dee2e6 !important; border-color: #ced4da !important; color: #343a40 !important;
 }
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
 </style>
 @endsection
 @section('content')
