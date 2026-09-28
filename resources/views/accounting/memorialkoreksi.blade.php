@@ -2108,14 +2108,21 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
      Panel form tambah ada di dalam modal ini sendiri (bukan modal ke-4), muncul saat
      tombol + ditekan.
      ============================================================================ --}}
-<div class="modal fade" id="formMkKartuPT" tabindex="-1" role="dialog" aria-hidden="true">
+{{-- data-backdrop="static" data-keyboard="false": modal ini hanya boleh ditutup lewat tombol
+     Close/x (mkKartuTutup()), BUKAN Esc atau klik backdrop - supaya pengecekan Sisa yang belum
+     dialokasikan (pop-up "Masih Ada Sisa") selalu lewat jalur yang sama, tidak ada jalan pintas
+     yang melewatinya. Lihat mkKartuTutup(). --}}
+<div class="modal fade" id="formMkKartuPT" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         {{-- Judul ikut mkModeLunas(): "Penambahan Piutang"/"Pelunasan Piutang" (PT) atau
              "Pelunasan Hutang"/"Penambahan Hutang" (HT) - lihat mkMulaiAlurPT()/mkBukaKartuEditPT() --}}
         <h5 class="modal-title"><span id="mkKartuJudul">Penambahan Piutang</span> <span id="mkKartuJudulPerkiraan"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        {{-- Bukan data-dismiss="modal" - lihat mkKartuTutup(): menutup SELURUH modal Kartu
+             (beda dengan tombol "Tutup" di panel detail tambah/pelunasan yang hanya menutup
+             panel itu sendiri, lihat mkKartuTutupFormTambah()). --}}
+        <button type="button" class="close" onclick="mkKartuTutup()" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -2315,7 +2322,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
       </div>
       </div>{{-- /#formBsGrid --}}
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-secondary" onclick="mkKartuTutup()">Close</button>
       </div>
     </div>
   </div>
@@ -4286,11 +4293,12 @@ $(document).on('hidden.bs.modal', '.modal', function () {
   mkSisakanSatuBackdrop()
 })
 
-// Tutup SELURUH rantai modal kartu sekaligus (#formMkKartuPT -> #formMkCustomerPT -> #form),
-// bukan mundur satu tingkat seperti perilaku Batal / tombol x / Esc / klik backdrop.
-// Dipakai saat user menekan Simpan di kartu: pekerjaannya sudah selesai, jadi user langsung
-// dikembalikan ke form item memorial. Berlaku untuk perkiraan Debet maupun Kredit, dan untuk
-// piutang usaha (PT) maupun hutang usaha (HT) - ketiganya memakai rantai modal yang sama.
+// Tutup SELURUH rantai modal kartu sekaligus (#formMkKartuPT -> #formMkCustomerPT -> #form).
+// Dipanggil dari mkKartuTutup() (tombol Close/x di modal Kartu, termasuk saat user memilih Yes
+// di pop-up "Masih Ada Sisa") - satu-satunya jalan modal Kartu ditutup, karena Simpan sendiri
+// tidak lagi menutup modal (lihat mkKirimBarisKartu()). Berlaku untuk perkiraan Debet maupun
+// Kredit, dan untuk piutang usaha (PT) maupun hutang usaha (HT) - ketiganya memakai rantai
+// modal yang sama.
 function mkTutupRantaiKartu () {
   // Tumpukan dikosongkan dulu supaya handler hidden.bs.modal di atas tidak memunculkan
   // kembali modal induk yang barusan kita tutup. Dikosongkan lewat .length (bukan = [])
@@ -4758,9 +4766,9 @@ function mkBarisBuatanSesiIni (item) {
   return ['I', 'U'].indexOf((item.StatusUID || '').trim()) !== -1
 }
 
-// Sisa yang belum dialokasikan = Jumlah item memorial (dalam Rupiah) - yang sudah dipakai.
-function mkKartuSisa () {
-  let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+// Jumlah (dalam Rupiah) yang sudah dialokasikan ke baris buatan sesi ini - dipakai mkKartuSisa()
+// dan mkKartuTutup() (untuk menyamakan Jumlah form item memorial dengan jumlah pelunasan).
+function mkKartuTerpakai () {
   let terpakai = 0
 
   listKartuPT.forEach(function (item) {
@@ -4768,7 +4776,13 @@ function mkKartuSisa () {
     terpakai += (mkModePT === 'K' ? (parseFloat(item.Kredit) || 0) : (parseFloat(item.Debet) || 0))
   })
 
-  return total - terpakai
+  return terpakai
+}
+
+// Sisa yang belum dialokasikan = Jumlah item memorial (dalam Rupiah) - yang sudah dipakai.
+function mkKartuSisa () {
+  let total = Number(unformatAngka($("#AddAddJumlah").val()) || 0) * Number(unformatAngka($("#AddAddKurs").val()) || 1)
+  return total - mkKartuTerpakai()
 }
 
 // Saldo satu faktur di dalam kartu ini, termasuk baris pelunasan yang baru dibuat user. Dipakai
@@ -4973,15 +4987,15 @@ function mkKartuSimpanTambah () {
     valas,
     kurs,
     catatan: $("#mkKartuCatatan").val()
-  }, pesan, true)
+  }, pesan)
 }
 
 // Satu pintu untuk menambah baris kartu - dipakai form Tambah (Debet), form Pelunasan (Kredit),
-// dan dobel-klik pelunasan cepat.
-// tutupSemua = true hanya dikirim dari tombol Simpan di kartu: begitu barisnya tersimpan,
-// SELURUH rantai modal ditutup (tidak mundur ke modal Customer / Perkiraan). Dobel-klik
-// pelunasan cepat tidak memakainya, supaya kartu tetap terbuka untuk melunasi faktur lain.
-function mkKirimBarisKartu (baris, pesanSukses, tutupSemua) {
+// dan dobel-klik pelunasan cepat. Simpan HANYA menutup panel detail tambah/pelunasan
+// (mkKartuTutupFormTambah()) - modal Kartu sendiri TETAP terbuka supaya user bisa lanjut
+// menambah/melunasi faktur lain. Modal Kartu baru ditutup lewat tombol Close/x, lihat
+// mkKartuTutup().
+function mkKirimBarisKartu (baris, pesanSukses) {
   $.ajax({
     url: "{!! url('memorialkoreksiaddkartupt') !!}",
     type: "post",
@@ -5006,7 +5020,6 @@ function mkKirimBarisKartu (baris, pesanSukses, tutupSemua) {
       mkKartuRender(res)
       mkKartuTutupFormTambah()
       alertify.success(pesanSukses)
-      if (tutupSemua) { mkTutupRantaiKartu() }
     },
     error: function (err) {
       console.log(err)
@@ -5060,6 +5073,39 @@ function mkKartuHapus (index) {
     , function () {
       console.log('no')
     })
+}
+
+// Close/x modal Kartu - SATU-SATUNYA tempat modal Kartu ditutup (Simpan tidak lagi menutupnya,
+// lihat mkKirimBarisKartu()). Tidak pernah menghapus/membatalkan data apa pun.
+//   - Mode Tambah, atau Pelunasan yang belum ada baris tersimpan, atau Sisa sudah 0:
+//     langsung tutup SELURUH rantai modal.
+//   - Mode Pelunasan dengan baris tersimpan DAN Sisa masih > 0: tanya dulu lewat
+//     alertify.confirm apakah Jumlah item memorial mau disamakan dengan jumlah yang sudah
+//     dipakai. Yes -> Jumlah disamakan lalu seluruh rantai modal ditutup. No -> batal keluar,
+//     modal Kartu tetap terbuka supaya user bisa melanjutkan pelunasan.
+function mkKartuTutup () {
+  let terpakai = mkKartuTerpakai()
+  let sisa = Number(mkKartuSisa().toFixed(2))
+
+  if (!mkModeLunas() || terpakai <= 0 || sisa <= 0) { mkTutupRantaiKartu(); return }
+
+  let istilah = mkIstilah()
+  alertify.confirm(
+    'Masih Ada Sisa',
+    'Sisa ' + istilah.entitas + ' yang belum dialokasikan: ' + formatAngka(sisa.toFixed(2)) +
+      '. Samakan nilai memorial dengan jumlah yang sudah dipakai (' +
+      formatAngka(terpakai.toFixed(2)) + ')?',
+    function () {
+      let kurs = Number(unformatAngka($("#AddAddKurs").val()) || 1)
+      let jumlahBaru = mkKartuTerpakai() / kurs
+      $("#AddAddJumlah").val(formatAngka(jumlahBaru.toFixed(2)))
+      mkAturTombolBrowse()
+      mkTutupRantaiKartu()
+    },
+    function () {
+      console.log('no')
+    }
+  )
 }
 
 // Bersihkan pilihan customer + baris kerja di dbTempHutPiut. Dipanggil kalau Debet berubah
