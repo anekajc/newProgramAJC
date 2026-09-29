@@ -10,6 +10,9 @@
 
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
+  {{-- Modal pemilih (Pelanggan/Supplier/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+  <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
   <style>
   #formBsGrid textarea.form-control,
   #formBsGrid table .form-control {
@@ -2117,7 +2120,7 @@
             <div class="row">
               <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="margin-top:-30px;"></div>
               <div class="col-3 text-right form-group">
-                <input id="input_search_barang_all" style="margin-top:-30px;" type="text" class="form-control" onkeypress="searchBarangAll(event)">
+                <input id="input_search_barang_all" style="margin-top:-1px;" type="text" class="form-control" onkeypress="searchBarangAll(event)">
                 <label for="input_search_barang_all" class="search-label">SEARCH:</label>
               </div>
             </div>
@@ -2408,6 +2411,18 @@
 
 @section('js')
 <script src="{{ asset('js/report-table.js') }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
+{{-- Modal pemilih bersama (#form) disamakan persis dengan modal pemilih menu Kas.
+     Class picker-kas dipasang dari sini (bukan di markup modalnya) - lihat pola yang sama
+     di purchaseOrder.blade.php / public/css/picker-kas.css. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#form').addClass('picker-kas')
+  jQuery('#form .modal-footer .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Batal'
+  }).addClass('picker-kas-batal')
+})
+</script>
 <script type="text/javascript">
 
 let dataTambahSO = []
@@ -5877,6 +5892,8 @@ function buttonAddListPIC () {
     return
   }
 
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pic')) { $('#tabel_add_list_pic').DataTable().destroy() }
+
   $.ajax({
     url: "{!! url('solistpic') !!}",
     type: "post",
@@ -5886,9 +5903,6 @@ function buttonAddListPIC () {
       kodecustsupp
     },
     success: function(res) {
-      if ($.fn.DataTable.isDataTable('#tabel_add_list_pic')) {
-        $('#tabel_add_list_pic').DataTable().destroy();
-      }
       listpic = res
 
       let rowTable = ``
@@ -5902,20 +5916,9 @@ function buttonAddListPIC () {
         </tr>`
       });
 
-
-
-
-      if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=2>Tidak ada data</td></tr>`
-      }
       document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
 
-      document.getElementById("tabel_data_add_list_pic").innerHTML = rowTable
-      $("#tabel_add_list_pic").DataTable({
-        lengthChange: false,
-        paging: false,
-        searching: true,
-      });
+      pickerKasInit('tabel_add_list_pic')
 
       $('.showhidemodalbodyadd').hide();
       $('#exampleModalLabel').text('PIC');
@@ -6534,7 +6537,7 @@ function buttonAddListValas () {
 
 function buttonAddListPelanggan () {
   console.log('buttonAddListPelanggan')
-  $('#tabel_add_list_pelanggan').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_pelanggan')) { $('#tabel_add_list_pelanggan').DataTable().destroy() }
 
   $.ajax({
     url: "{!! url('solistpelanggan') !!}",
@@ -6583,11 +6586,7 @@ function buttonAddListPelanggan () {
 
       document.getElementById("tabel_data_add_list_pelanggan").innerHTML = rowTable
 
-      $("#tabel_add_list_pelanggan").DataTable({
-        "lengthChange": false,
-        "paging": false,
-        "order": [[0, 'asc']]
-      });
+      pickerKasInit('tabel_add_list_pelanggan', { order: [[0, 'asc']] })
 
       $('.showhidemodalbodyadd').hide();
       $('#exampleModalLabel').text('Pelanggan');

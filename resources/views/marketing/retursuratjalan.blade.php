@@ -18,6 +18,9 @@
 
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
+{{-- Modal pemilih (Barang/SJ/Customer) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 <style>
   .custom-tabs {
     display: inline-flex;
@@ -1603,6 +1606,18 @@
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
+{{-- Modal pemilih bersama (#form) disamakan persis dengan modal pemilih menu Kas.
+     Class picker-kas dipasang dari sini (bukan di markup modalnya) - lihat pola yang sama
+     di purchaseOrder.blade.php / marketing/so.blade.php / public/css/picker-kas.css. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#form').addClass('picker-kas')
+  jQuery('#form .modal-footer .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Batal'
+  }).addClass('picker-kas-batal')
+})
+</script>
 <script type="text/javascript">
 
 let listSJ = []
@@ -2746,6 +2761,9 @@ function buttonAddListBarang () {
 
   listBarang = []
   let _token = $("#_token").val();
+
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_barang')) { $('#tabel_add_list_barang').DataTable().destroy() }
+
   $.ajax({
     url: "{!! url('retursuratjalanlistbarang') !!}",
     type: "post",
@@ -2778,10 +2796,8 @@ function buttonAddListBarang () {
 
 
 
-      if(!res.length) {
-        rowTable= `<tr><td class="text-center" colspan=4>Tidak ada data</td></tr>`
-      }
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
+      pickerKasInit('tabel_add_list_barang')
       loadAll()
       $('#exampleModalLabel').text('Barang');
       $('.showhidemodalbodyadd').hide();
@@ -2805,6 +2821,9 @@ function buttonAddListBarang () {
 function buttonAddListCustSupp () {
 
   listCust = []
+
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_custsupp')) { $('#tabel_add_list_custsupp').DataTable().destroy() }
+
   $.ajax({
     url: "{!! url('retursuratjalanlistcustsuppbaru') !!}",
     type: "get",
@@ -2814,7 +2833,6 @@ function buttonAddListCustSupp () {
     },
     success: function(res) {
       console.log(res)
-      $('#tabel_add_list_custsupp').DataTable().destroy();
 
       listCust = res
       let rowTable = ``
@@ -2827,19 +2845,9 @@ function buttonAddListCustSupp () {
         </tr>`
       });
 
-
-
-
-      if(!res.length) {
-        rowTable= ``
-      }
       document.getElementById("tabel_data_add_list_custsupp").innerHTML = rowTable
 
-      $("#tabel_add_list_custsupp").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "order": [[0, 'asc']],
-        });
+      pickerKasInit('tabel_add_list_custsupp', { order: [[0, 'asc']] })
 
       $('#exampleModalLabel').text('Customer');
       $('.showhidemodalbodyadd').hide();
@@ -2869,6 +2877,9 @@ function buttonAddListNoSJ () {
   let _token = $("#_token").val()
 
   listSJ = []
+
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_nosj')) { $('#tabel_add_list_nosj').DataTable().destroy() }
+
   $.ajax({
     url: "{!! url('retursuratjalanlistsj') !!}",
     type: "post",
@@ -2880,7 +2891,6 @@ function buttonAddListNoSJ () {
     },
     success: function(res) {
       console.log(res)
-      $('#tabel_add_list_nosj').DataTable().destroy();
 
       listSJ = res
       let rowTable = ``
@@ -2896,19 +2906,9 @@ function buttonAddListNoSJ () {
         </tr>`
       });
 
-
-
-
-      if(!res.length) {
-        rowTable= ``
-      }
       document.getElementById("tabel_data_add_list_nosj").innerHTML = rowTable
 
-      $("#tabel_add_list_nosj").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "order": [[0, 'asc']],
-        });
+      pickerKasInit('tabel_add_list_nosj', { order: [[0, 'asc']] })
 
       $('#exampleModalLabel').text('SJ');
       $('.showhidemodalbodyadd').hide();
