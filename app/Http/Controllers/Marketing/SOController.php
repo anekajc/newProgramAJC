@@ -539,13 +539,7 @@ Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
         Left Outer Join DBPICCUSTSUPP M3 on A.KodePF=M3.KODEPIC and A.KODECUST=m3.KODECUSTSUPP
         left outer join [user] Mx on a.boffice=Mx.keynik
         where
-        a.TANGGAL between @bulan and @tahun and Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
-                             Case when A.IsOtorisasi2=1 then 1 else 0 end+
-                              Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                              Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                              Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
-                         else 1
-                    end As Bit) = :needoto " . $queryTipeBayar , ["tglawal" => $req->tglawal, "tglakhir" =>$req->tglakhir ] );
+        a.TANGGAL between @bulan and @tahun " . $queryTipeBayar , ["tglawal" => $req->tglawal, "tglakhir" =>$req->tglakhir ] );
   $tempOutstanding1 = collect($tempOutstanding)->groupBy('NOBUKTI')->values();
 
 
@@ -1380,6 +1374,7 @@ return 1;
     A.PPN,
     A.HARI,
     A.KodeSls,
+    A.pBlacklist,
     B.Nama as NamaSales,
     A.BOffice,
     C.Nama as NamaBackOffice
