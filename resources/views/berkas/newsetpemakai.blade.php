@@ -360,7 +360,7 @@
             <input type="text" class="form-control" id="input_add_kodeKasir" placeholder="Kode Kasir" maxlength="3">
 
             <label for="input_add_limit">Limit</label>
-            <input type="number" class="form-control text-right" id="input_add_limit" value="0" min="0" step="any">
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_limit" value="0" step="any">
           </div>
         </div>
       </div>
@@ -437,7 +437,7 @@
             <input type="text" class="form-control" id="input_edit_kodeKasir" placeholder="Kode Kasir" maxlength="3">
 
             <label for="input_edit_limit">Limit</label>
-            <input type="number" class="form-control text-right" id="input_edit_limit" value="0" min="0" step="any">
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_limit" value="0" step="any">
           </div>
         </div>
       </div>
@@ -1092,7 +1092,7 @@
       .forEach(f => { document.getElementById('input_add_' + f).value = '' })
     document.getElementById('input_add_level').value = '0'
     document.getElementById('input_add_status').value = '0'
-    document.getElementById('input_add_limit').value = '0'
+    setNum("input_add_limit", '0')
     passwordCheckState = 0
 
     $("#formAddUser").modal('show')
@@ -1126,7 +1126,7 @@
         document.getElementById('input_edit_level').value = String(Number(res[0].TINGKAT) || 0)
         document.getElementById('input_edit_status').value = String(Number(res[0].STATUS) || 0)
         document.getElementById('input_edit_kodeKasir').value = res[0].KodeKasir ?? ''
-        document.getElementById('input_edit_limit').value = Number(res[0].limit) || 0
+        setNum("input_edit_limit", Number(res[0].limit) || 0)
 
         $("#formEditUser").modal('show')
       },
@@ -1267,7 +1267,8 @@
       level: v('level'),
       status: v('status'),
       kodeKasir: v('kodeKasir'),
-      limit: v('limit') === '' ? '0' : v('limit')
+      // Limit memakai separator ribuan (.format-number) - koma dibuang sebelum dikirim.
+      limit: v('limit').replace(/,/g, '') === '' ? '0' : v('limit').replace(/,/g, '')
     }
   }
 
@@ -1343,6 +1344,29 @@
     })
 
   }
+
+  // Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+  // autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+  // membuang koma dengan .replace(/,/g, '') sebelum dikirim.
+  function toNum (v) {
+    let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+    return isNaN(n) ? 0 : n
+  }
+  function setNum (id, v) {
+    let el = document.getElementById(id)
+    if (!el) return
+    // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+    if (v === '' || v == null) {
+      el.value = ''
+    } else if ($(el).data('autoNumeric')) {
+      $(el).autoNumeric('set', toNum(v))
+    } else {
+      el.value = v
+    }
+  }
+  $(function () {
+    $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+  })
 
   window.onload = function(){
     loadAll()

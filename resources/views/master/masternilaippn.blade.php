@@ -1,90 +1,39 @@
-@extends('master.newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Nilai PPN')
 @section('content')
 
-<div class="container-fluid">
+{{-- Dimigrasikan dari layout master.newmaster ke newmasterTest, mengikuti master/mastermerk.blade.php. --}}
 
-  <!-- <div id="qrcode"></div> -->
-<div class="row mt-4">
-      <div class="col-6 text-left">
-        <h2 style="margin-top:-85px;">Master Nilai PPN</h2>
-      </div>
-      <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="buttonAdd()">
-          Add Nilai PPN
-        </button>
-      </div>
-      {{-- <div class="col-6 text-right">
-        <button type="button" class="btn btn-primary btn-lg" style="
-            height: 30px; 
-            margin-top: -150px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-            onclick="loadAll()">
-          tes load all
-        </button>
-      </div> --}}
-    </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
-
-<div id="printContainer" style="display:none">
-
-</div>
-<div id="contentContainer" class="container-fluid" style="max-width: 900px; margin-top:-95px;">
+<div id="contentContainer" class="container-fluid po-list-page">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-          <div class="row mt-4">
-              <!-- <div class="col-12 text-right">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Koreksi Stock Gudang</button>
-              </div> -->
-          </div>
-          <div class="row mt-3">
-            <div class="col-12" style="overflow:auto;">
-              <div class="">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
-                      <thead id='theadCustom' class="text-center">
-                        <tr>
-                          <th scope="col">Action</th>
-                          <th scope="col">PPN</th>
-                          <th scope="col">Tanggal Awal</th>
-                          <th scope="col">Tanggal Akhir</th>
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-                        </tr>
-                      </thead>
+      @include('master.partials.toolbarMaster')
 
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead>
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">PPN</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal Awal</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal Akhir</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+        </tbody>
+      </table>
 
-                      <tbody id="tabel_data" class="text-left">
-                      </tbody>
-
-
-                    </table>
-              </div>
-            </div>
-          </div>
-
+    </div>
+  </div>
 
 </div>
-
 
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -92,85 +41,39 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Urut</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="No. Urut PPN"disabled>
-                </div>
-              </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_add_kode">Urut</label>
+            <input type="text" class="form-control" id="input_add_kode" placeholder="No. Urut PPN" disabled>
 
-            </div>
+            <label for="input_add_tglAwal">Tanggal Awal</label>
+            <input type="date" class="form-control" id="input_add_tglAwal">
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Awal</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglAwal">
-                </div>
-              </div>
+            <label for="input_add_tglAkhir">Tanggal Akhir</label>
+            <input type="date" class="form-control" id="input_add_tglAkhir">
 
-            </div>
+            <label for="input_add_PPN">PPN</label>
+            <input type="text" class="form-control" id="input_add_PPN" placeholder="PPN">
+          </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Akhir</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglAkhir">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_PPN" placeholder="PPN">
-                </div>
-              </div>
-
-            </div>
-
-
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-     
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal add-->
-
-
-
-
 
 <!-- start modal edit -->
 <div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -178,90 +81,43 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Urut PPN</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" disabled>
-                </div>
-              </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_edit_kode">Urut PPN</label>
+            <input type="text" class="form-control" id="input_edit_kode" disabled>
 
-            </div>
+            <label for="input_edit_tglAwal">Tanggal Awal</label>
+            <input type="date" class="form-control" id="input_edit_tglAwal">
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Awal</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglAwal">
-                </div>
-              </div>
+            <label for="input_edit_tglAkhir">Tanggal Akhir</label>
+            <input type="date" class="form-control" id="input_edit_tglAkhir">
 
-            </div>
+            <label for="input_edit_PPN">PPN</label>
+            <input type="text" class="form-control" id="input_edit_PPN" placeholder="PPN">
+          </div>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Akhir</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglAkhir">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_PPN" placeholder="PPN">
-                </div>
-              </div>
-
-            </div>
-
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-     
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal edit-->
-
-
-
-
-
-
 
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -315,9 +171,11 @@ function loadAll () {
     let formattedDate2 = `${formattedDay2}-${formattedMonth2}-${formattedYear2}`;
 
     rowTable += `<tr>
-    <td class="text-center">
-      <button class="btn btn-success btn-sm hover-tooltip" data-tooltip='Edit Nilai PPN' type="button" onclick="buttonEdit('${item.Urut}')"><i class="bi bi-pen"></i></button>
-      <button class="btn btn-danger btn-sm hover-tooltip" data-tooltip='Delete Nilai PPN' type="button" onclick="buttonDelete('${item.Urut}')"><i class="bi bi-trash"></i></button>
+    <td style="white-space:nowrap;" class='text-center'>
+      <div class="action-buttons-wrap">
+        <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Urut}')"><i class="bi bi-pen"></i></button>
+        <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Urut}')"><i class="bi bi-trash"></i></button>
+      </div>
     </td>
     <td>${item.NilaiPPN}</td>
     <td>${formattedDate}</td>
@@ -330,10 +188,8 @@ function loadAll () {
 
 
   document.getElementById("tabel_data").innerHTML = rowTable
-  $("#tabel").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-    });
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
 
 }
 //
@@ -382,7 +238,7 @@ function buttonDelete (kode) {
   let _token = $("#_token").val();
 
 
-  alertify.confirm('Hapus Area', 'Apakah yakin ingin menghapus Jenis ' + kode + ' ?',
+  alertify.confirm('Hapus Nilai PPN', 'Apakah yakin ingin menghapus Nilai PPN urut ' + kode + ' ?',
       function() {
         console.log('yes')
 
@@ -400,7 +256,7 @@ function buttonDelete (kode) {
             } else {
               console.log(res)
               loadAll()
-              alertify.success("Jenis telah dihapus");
+              alertify.success("Nilai PPN telah dihapus");
 
             }
           }})

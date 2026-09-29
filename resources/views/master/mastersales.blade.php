@@ -278,7 +278,7 @@
             </div>
 
             <label for="input_target_add_target">Target</label>
-            <input type="number" class="form-control text-right" id="input_target_add_target" placeholder="Target">
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_target_add_target" placeholder="Target">
           </div>
           <div class="text-right mt-3">
             <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
@@ -302,7 +302,7 @@
             <input type="text" class="form-control" id="input_target_edit_merk" placeholder="Merk" disabled>
 
             <label for="input_target_edit_target">Target</label>
-            <input type="number" class="form-control text-right" id="input_target_edit_target" placeholder="Target">
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_target_edit_target" placeholder="Target">
           </div>
           <div class="text-right mt-3">
             <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
@@ -468,7 +468,7 @@ function buttonAddSales () {
 function buttonAddTarget () {
   document.getElementById("input_target_add_tahun").value = ''
   document.getElementById("input_target_add_merk").value = ''
-  document.getElementById("input_target_add_target").value = ''
+  setNum("input_target_add_target", '')
 
   $('.showhide').hide();
   $('#addTarget').show()
@@ -580,7 +580,7 @@ function submitAddTarget () {
   let _token = $("#_token").val();
   let Tahun = $("#input_target_add_tahun").val();
   let Merk = $("#input_target_add_merk").val();
-  let TgtSales = $("#input_target_add_target").val();
+  let TgtSales = $("#input_target_add_target").val().replace(/,/g, '');
 
   if (!Tahun) {
     alertify.warning("Tahun harus diisi");
@@ -660,7 +660,7 @@ function submitEditTarget () {
 
   let _token = $("#_token").val();
 
-  let TgtSales = $("#input_target_edit_target").val();
+  let TgtSales = $("#input_target_edit_target").val().replace(/,/g, '');
   let Merk = $("#input_target_edit_merk").val();
   let Tahun = $("#input_target_edit_tahun").val();
 
@@ -713,7 +713,7 @@ function buttonEditTarget (keynik, Tahun, Merk) {
       ketemu = true
       document.getElementById("input_target_edit_tahun").value = res[0].Tahun
       document.getElementById("input_target_edit_merk").value = res[0].Merk
-      document.getElementById("input_target_edit_target").value = res[0].TgtSales
+      setNum("input_target_edit_target", res[0].TgtSales)
 
     }})
 
@@ -1219,6 +1219,29 @@ function buttonSelectMerk (merk){
 
   $("#formModalOpen").modal("hide");
 }
+
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
 
 window.onload = function(){
   MasterList.kolom({ href: 'mastersales', kolom: MSL_KOLOM, onChange: renderTabel })

@@ -1,48 +1,35 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Lokasi Barang')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
+{{-- Dimigrasikan dari layout newmaster ke newmasterTest, mengikuti master/mastermerk.blade.php. --}}
 
-
-  {{-- <div class="sp-breadcrumb">
-    <span>Beranda</span>
-    <span class="sp-sep">›</span>
-    <span>Master</span>
-    <span class="sp-sep">›</span>
-    <span class="sp-crumb-active">Lokasi Barang</span>
-  </div> --}}
-
-  {{-- <div class="sp-page-head">
-    <div>
-      <h1>Master Lokasi Barang</h1>
-    </div>
-    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Lokasi Barang</button>
-  </div> --}}
-
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
+      @include('master.partials.toolbarMaster')
+
+      <table id="tabel" class="data-table po-aksi-hover">
         <thead>
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Lokasi</th>
-            <th scope="col">Keterangan</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Lokasi</th>
+            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left">
+        </tbody>
       </table>
+
     </div>
-</div>
+  </div>
 
 </div>
 
@@ -52,45 +39,28 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-        <div class="modal-body">
-          <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
 
-          <div class="container-fluid">
-            <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
+        <div class="container-fluid">
+          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-              <div class="row">
-                <div class="col-4 text-left">
-                  <div class="form-group text-left">
-                    <label class="text-left">Kode Lokasi</label>
-                  </div>
-                </div>
-                <div class="col-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Lokasi">
-                  </div>
-                </div>
-              </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_add_kode">Kode Lokasi</label>
+            <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Lokasi">
 
-              <div class="row mt-2">
-                <div class="col-4 text-left">
-                  <div class="form-group text-left">
-                    <label class="text-left">Keterangan</label>
-                  </div>
-                </div>
-                <div class="col-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_add_nama" placeholder="Keterangan">
-                  </div>
-                </div>
-              </div>
-
+            <label for="input_add_nama">Keterangan</label>
+            <input type="text" class="form-control" id="input_add_nama" placeholder="Keterangan">
           </div>
+
         </div>
+      </div>
       <div class="modal-footer">
-         
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
   </div>
@@ -103,57 +73,37 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Lokasi</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Lokasi" disabled>
-                </div>
-              </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_edit_kode">Kode Lokasi</label>
+            <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Lokasi" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Keterangan">
-                </div>
-              </div>
-            </div>
+            <label for="input_edit_nama">Keterangan</label>
+            <input type="text" class="form-control" id="input_edit_nama" placeholder="Keterangan">
+          </div>
 
         </div>
       </div>
       <div class="modal-footer">
-         
-        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
     </div>
   </div>
-
 </div>
 <!-- End modal edit-->
 
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -162,7 +112,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Lokasi Barang"
+  // document.getElementById('breadcrumb').innerHTML = "Master Lokasi Barang" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -189,20 +139,21 @@ function loadAll () {
         <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODELOKASI}')"><i class="bi bi-trash"></i></button>
       </div>
     </td>
-    <td>${item.KODELOKASI}</td>
-    <td>${item.KETERANGAN}</td>
+    <td>${item.KODELOKASI || ''}</td>
+    <td>${item.KETERANGAN || ''}</td>
     </tr>`
   });
- 
+
    let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
       "lengthChange": false,
       "paging": true,
       "searching": true,
-      "dom": 'tip',
+      "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
       "pageLength": currentLength
     });
+    MasterList.selesai('#tabel')
 }
 
 function buttonAdd () {
@@ -240,7 +191,7 @@ function buttonDelete (kode) {
   let _token = $("#_token").val();
 
 
-  alertify.confirm('Hapus Valas', 'Apakah yakin ingin menghapus Kode Valas ' + kode + ' ?',
+  alertify.confirm('Hapus Lokasi Barang', 'Apakah yakin ingin menghapus Kode Lokasi ' + kode + ' ?',
       function() {
         console.log('yes')
 
@@ -344,7 +295,7 @@ function submitAdd () {
       }  else {
         console.log(res ,'!')
 
-        alertify.success("Data Valas telah ditambah");
+        alertify.success("Data Lokasi Barang telah ditambah");
         loadAll()
         $("#form").modal('toggle')
       }

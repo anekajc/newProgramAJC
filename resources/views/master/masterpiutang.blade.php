@@ -97,11 +97,11 @@
           <label for="input_add_valas">Valas</label>
           <select class="form-control" id="input_add_valas" onchange="onChangeValas('add')"></select>
           <label for="input_add_kurs">Kurs</label>
-          <input type="text" class="form-control text-right" id="input_add_kurs" value='1.00' disabled>
+          <input type="text" class="form-control text-right format-number" id="input_add_kurs" value='1.00' disabled>
           <label for="input_add_jumlah">Jumlah</label>
-          <input type="number" class="form-control text-right" id="input_add_jumlah" value="0">
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_jumlah" value="0">
           <label for="input_add_jumlahRp">Jumlah (Rp)</label>
-          <input type="number" class="form-control text-right" id="input_add_jumlahRp" value="0" disabled>
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_jumlahRp" value="0" disabled>
           <div hidden>
           <label for="input_add_kredit">Kredit</label>
           <input type="number" class="form-control text-right" id="input_add_kredit" value=0>
@@ -169,11 +169,11 @@
           <label for="input_edit_valas">Valas</label>
           <select class="form-control" id="input_edit_valas" onchange="onChangeValas('edit')"></select>
           <label for="input_edit_kurs">Kurs</label>
-          <input type="number" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_kurs" placeholder="Kurs" disabled>
           <label for="input_edit_jumlah">Jumlah</label>
-          <input type="number" class="form-control text-right" id="input_edit_jumlah" value="0">
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_jumlah" value="0">
           <label for="input_edit_jumlahRp">Jumlah (Rp)</label>
-          <input type="number" class="form-control text-right" id="input_edit_jumlahRp" value="0" disabled>
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_jumlahRp" value="0" disabled>
           <div hidden>
           <label for="input_edit_kredit">Kredit</label>
           <input type="number" class="form-control text-right" id="input_edit_kredit">
@@ -316,8 +316,8 @@ function buttonAdd (kodeSupplier, Perkiraan, namaSupplier) {
   document.getElementById("input_add_noFaktur").value = ''
   document.getElementById("input_add_tanggalFaktur").value = ''
   document.getElementById("input_add_jatuhTempo").value = ''
-  document.getElementById("input_add_jumlah").value = ''
-  document.getElementById("input_add_jumlahRp").value = ''
+  setNum("input_add_jumlah", '')
+  setNum("input_add_jumlahRp", '')
   document.getElementById("input_add_noPO").value = ''
   document.getElementById("input_add_lokasiPenerima").value = ''
   document.getElementById("input_add_namaLokasi").value = ''
@@ -347,9 +347,9 @@ function buttonEdit (kode, perkiraanCust) {
       document.getElementById("input_edit_tanggalFaktur").value = new Date(res[0].Tanggal).toLocaleDateString('en-CA');
       document.getElementById("input_edit_jatuhTempo").value = new Date(res[0].JatuhTempo).toLocaleDateString('en-CA');
       pilihValas("input_edit_valas", res[0].Valas)
-      document.getElementById("input_edit_kurs").value = formatAngka(parseFloat(res[0].Kurs).toFixed(2))
-      document.getElementById("input_edit_jumlah").value = res[0].DebetD
-      document.getElementById("input_edit_jumlahRp").value = res[0].Debet
+      setNum("input_edit_kurs", formatAngka(parseFloat(res[0].Kurs).toFixed(2)))
+      setNum("input_edit_jumlah", res[0].DebetD)
+      setNum("input_edit_jumlahRp", res[0].Debet)
       document.getElementById("input_edit_kredit").value = res[0].Kredit
       document.getElementById("input_edit_kreditRp").value = res[0].KreditD
       document.getElementById("input_edit_noPO").value = res[0].POcust
@@ -417,9 +417,9 @@ function submitEdit () {
   let tanggalFaktur = $("#input_edit_tanggalFaktur").val();
   let jatuhTempo = $("#input_edit_jatuhTempo").val();
   let valas = $("#input_edit_valas").val();
-  let kurs = $("#input_edit_kurs").val();
-  let jumlah = $("#input_edit_jumlah").val();
-  let jumlahRp = $("#input_edit_jumlahRp").val();
+  let kurs = $("#input_edit_kurs").val().replace(/,/g, '');
+  let jumlah = $("#input_edit_jumlah").val().replace(/,/g, '');
+  let jumlahRp = $("#input_edit_jumlahRp").val().replace(/,/g, '');
   let noPo = $("#input_edit_noPO").val();
   let lokasiPenerima = $("#input_edit_lokasiPenerima").val();
   let namaLokasi = $("#input_edit_namaLokasi").val();
@@ -467,9 +467,9 @@ function submitAdd () {
   let tanggalFaktur = $("#input_add_tanggalFaktur").val();
   let jatuhTempo = $("#input_add_jatuhTempo").val();
   let valas = $("#input_add_valas").val();
-  let kurs = $("#input_add_kurs").val();
-  let jumlah = $("#input_add_jumlah").val();
-  let jumlahRp = $("#input_add_jumlahRp").val();
+  let kurs = $("#input_add_kurs").val().replace(/,/g, '');
+  let jumlah = $("#input_add_jumlah").val().replace(/,/g, '');
+  let jumlahRp = $("#input_add_jumlahRp").val().replace(/,/g, '');
   let kredit = $("#input_add_kredit").val();
   let kreditRp = $("#input_add_kreditRp").val();
   let noPo = $("#input_add_noPO").val();
@@ -606,7 +606,7 @@ function pilihValas (id, kode) {
 function onChangeValas (mode) {
   let kode = $("#input_" + mode + "_valas").val()
   let itemX = listValas.find(item => item.KODEVLS === kode)
-  $("#input_" + mode + "_kurs").val(itemX ? itemX.KURS : '')
+  setNum("input_" + mode + "_kurs", itemX ? itemX.KURS : '')
 }
 
 const inputKredit = document.getElementById('input_add_jumlah');
@@ -616,14 +616,14 @@ const inputKurs = document.getElementById('input_add_kurs');
 // Add event listener to the Kredit input field
 inputKredit.addEventListener('input', function() {
     // Get the values from the input fields
-    const kredit = parseFloat(inputKredit.value);
-    const kurs = parseFloat(inputKurs.value);
+    const kredit = toNum(inputKredit.value);
+    const kurs = toNum(inputKurs.value);
 
     // Calculate the Kredit(Rp)
     const kreditRp = kredit * kurs;
 
     // Update the value of the Kredit(Rp) input field
-    inputKreditRp.value = kreditRp; // Assuming you want to display two decimal places
+    setNum(inputKreditRp.id, kreditRp); // Assuming you want to display two decimal places
 });
 
 const inputKreditEdit = document.getElementById('input_edit_jumlah');
@@ -633,15 +633,38 @@ const inputKursEdit = document.getElementById('input_edit_kurs');
 // Add event listener to the Kredit input field
 inputKreditEdit.addEventListener('input', function() {
     // Get the values from the input fields
-    const kreditEdit = parseFloat(inputKreditEdit.value);
-    const kursEdit = parseFloat(inputKursEdit.value);
+    const kreditEdit = toNum(inputKreditEdit.value);
+    const kursEdit = toNum(inputKursEdit.value);
 
     // Calculate the Kredit(Rp)
     const kreditRpEdit = kreditEdit * kursEdit;
 
     // Update the value of the Kredit(Rp) input field
-    inputKreditRpEdit.value = kreditRpEdit; // Assuming you want to display two decimal places
+    setNum(inputKreditRpEdit.id, kreditRpEdit); // Assuming you want to display two decimal places
 });
+
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
 
 window.onload = function(){
     MasterList.kolom({ href: 'masterpiutang', kolom: MPT_KOLOM, onChange: renderTabel })
