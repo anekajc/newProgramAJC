@@ -20,6 +20,21 @@
   }
   </style>
 
+  {{-- Baris pelanggan blacklist di modal picker: tidak boleh dipilih (lihat
+       buttonAddListPelanggan/alertify.error), jadi tampil beda dari baris .pick-row biasa. --}}
+  <style>
+  .modal.picker-kas:is(.picker-kas, #pk#pk) table.dataTable tbody tr.pick-row-blacklist {
+    cursor: not-allowed !important;
+  }
+  .modal.picker-kas:is(.picker-kas, #pk#pk) table.dataTable tbody tr.pick-row-blacklist td {
+    cursor: not-allowed !important;
+    background: #fff5f5 !important;
+  }
+  .modal.picker-kas:is(.picker-kas, #pk#pk) table.dataTable tbody tr.pick-row-blacklist:hover td {
+    background: #ffe3e3 !important;
+  }
+  </style>
+
   <style>
   .po-kpi-strip {
     display: grid;
@@ -2034,11 +2049,12 @@
                       <th style="padding: 4px 12px;" scope="col">Kode</th>
                       <th style="padding: 4px 12px;" scope="col">Nama</th>
                       <th style="padding: 4px 12px;" scope="col">Alamat</th>
+                      <th style="padding: 4px 12px;" scope="col">Blacklist</th>
                       <th style="padding: 4px 12px;" scope="col">PKP</th>
                     </tr>
                   </thead>
                   <tbody id="tabel_data_add_list_pelanggan" class="text-left">
-                    <tr><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                    <tr><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -6549,9 +6565,11 @@ function buttonAddListPelanggan () {
 
       res.forEach((item, i) => {
 
-        rowTable += `
-        <tr class="pick-row" onclick="
+        let isBlacklist = Number(item.pBlacklist ?? 0) === 1
 
+        let onclickAksi = isBlacklist
+          ? `alertify.error('Pelanggan di blacklist, tidak bisa dipilih');`
+          : `
             if (!'${item.KodeSls ?? ''}' || !'${item.NamaSales ?? ''}') {
               alertify.warning('Warning: Sales belum lengkap untuk pelanggan ini');
             }
@@ -6571,10 +6589,18 @@ function buttonAddListPelanggan () {
               '${item.BOffice ?? ''}',
               '${item.NamaBackOffice ?? ''}'
             )
-          ">
+          `
+
+        rowTable += `
+        <tr class="${isBlacklist ? 'pick-row-blacklist' : 'pick-row'}" onclick="${onclickAksi}">
           <td>${item.kodecustsupp}</td>
           <td>${item.namacustsupp}</td>
           <td>${item.alamat1}</td>
+          ${
+              isBlacklist
+                ? '<td class="text-danger text-center"><i class="bi bi-exclamation-triangle-fill" style="font-size:1.25rem;"></i></td>'
+                : '<td class="text-success text-center"><i class="bi bi-check-circle-fill" style="font-size:1.25rem;"></i></td>'
+            }
 
           ${
             Number(item.PPN)
@@ -7039,7 +7065,10 @@ function loadAll () {
         filterso,
         needoto,
         cbdneedopen,
-        tipebayar
+        tipebayar,
+        tipefilter,
+        ketproses,
+        ketclose
     },
     success: function(res) {
       console.log('res loadall')
