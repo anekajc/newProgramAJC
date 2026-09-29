@@ -479,6 +479,15 @@
     padding: 14px 22px 0 22px;
   }
 
+  /* Tab berupa <button>: Bootstrap 4 (layout newmasterTest) tidak mereset gaya bawaan tombol
+     seperti Bootstrap 5, jadi latar abu & garis fokusnya dihapus di sini. */
+  .stp-main-tabs button.nav-link,
+  .stp-sub-tabs button.nav-link {
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+  }
+
   .stp-main-tabs .nav-link {
     font-weight: 600;
     font-size: 14px;

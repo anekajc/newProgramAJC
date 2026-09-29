@@ -316,7 +316,7 @@
             </div>
 
             <label for="input_add_user">User</label>
-            <input type="text" class="form-control" id="input_add_user" placeholder="User" maxlength="15" autocomplete="off">
+            <input type="text" class="form-control" id="input_add_user" placeholder="User" maxlength="10" autocomplete="off">
 
             <label for="input_add_password">Password</label>
             <input type="password" class="form-control" id="input_add_password" maxlength="12" placeholder="Password" autocomplete="new-password">
@@ -694,14 +694,14 @@
     let checkBox = document.getElementById(`akses_checkbox_${field}${index}`).checked
     let nilai = checkBox ? 1 : 0
 
-    // Centang menu induk ikut mencentang semua sub menu di bawahnya.
-    let kodeLength = kodemenu.length
-    for (let i = Number(index) + 1 ; i < listAkses.length; i++) {
-      if (listAkses[i].KODEMENU.slice(0,kodeLength) !== kodemenu || Number(listAkses[i].L0) === 0 ) {
-        break
+    // Centang menu induk ikut mencentang semua sub menu (kode diawali kode induk) - aturan yang
+    // sama dengan update di server, jadi tampilan selalu sesuai isi database.
+    let awal = String(kodemenu).trim()
+    listAkses.forEach((item, i) => {
+      if (String(item.KODEMENU).startsWith(awal)) {
+        document.getElementById(`akses_checkbox_${field}${i}`).checked = checkBox
       }
-      document.getElementById(`akses_checkbox_${field}${i}`).checked = checkBox
-    }
+    })
 
     $.ajax({
       url: "{!! url('newsetpemakaispupdateaksesheader') !!}",
@@ -747,6 +747,8 @@
       ISOTO3: 0,
       ISOTO4: 0,
       ISOTO5: 0,
+      // Tidak tampil di layar - nilai lamanya dikirim balik supaya tidak ter-reset.
+      PEMBATALAN: Number(listAkses[index].pembatalan) === 1 ? 1 : 0,
     }
     const peta = {
       hasaccess: 'HASACCESS', istambah: 'ISTAMBAH', isKoreksi: 'ISKOREKSI', isHapus: 'ISHAPUS',
@@ -913,7 +915,7 @@
       <tr>
       <td class="cek"><input type="checkbox" id="aksesCOA_checkbox${i}"></td>
       <td>${spEsc(item.Perkiraan)}</td>
-      <td>${spEsc(item.Keterangan)}</td>
+      <td>${item.Keterangan === null || item.Keterangan === undefined ? '<i style="color:#dc2626;">(perkiraan sudah tidak ada)</i>' : spEsc(item.Keterangan)}</td>
       </tr>
       `
     })
@@ -1089,7 +1091,7 @@
     ['NIK', 'user', 'password', 'passwordConfirm', 'namaLengkap', 'departemen', 'jabatan', 'kodeKasir']
       .forEach(f => { document.getElementById('input_add_' + f).value = '' })
     document.getElementById('input_add_level').value = '0'
-    document.getElementById('input_add_status').value = '1'
+    document.getElementById('input_add_status').value = '0'
     document.getElementById('input_add_limit').value = '0'
     passwordCheckState = 0
 
@@ -1149,6 +1151,12 @@
     })
     if (!hasil) { return }
     dataRefresh = hasil
+
+    // Tabel pemilih dilepas dari DataTables dulu sebelum header & isinya diganti (NIK /
+    // Departemen / Jabatan memakai tabel yang sama).
+    if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
+      $('#tabelModalOpen').DataTable().destroy()
+    }
 
     document.querySelector("#theadOpen").innerHTML = '<tr><th scope="col">Actions</th>' +
       kolom.map(k => `<th scope="col">${k}</th>`).join('') + '</tr>'
@@ -1302,11 +1310,6 @@
     let pesan = cekFormUser(data, 'add')
     if (pesan) {
       alertify.warning(pesan)
-      return
-    }
-
-    if (/\s/.test(data.user)) {
-      alertify.warning("User tidak boleh mengandung spasi")
       return
     }
 

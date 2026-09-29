@@ -54,8 +54,26 @@ class NewSetPemakaiController extends Controller
         $req->userid,
       ];
 
-    // return [$values];  
+    if (!$req->userid || !DB::connection('SML')->select('select top 1 USERID from DBFLPASS where USERID = :u', ['u' => $req->userid])) {
+      return [];
+    }
+
+    // return [$values];
     DB::connection('SML')->update('exec sp_updateMenuWeb1 ?',$values);
+
+    // sp_updateMenuWeb1 ternyata mengisi DBFLMENU (tabel lama), bukan DBFLMENUWEB yang dibaca
+    // web - akibatnya menu yang belum punya baris hak akses (mis. PO, PR, DPP, Invoice) tidak
+    // muncul di daftar dan tidak bisa diberikan ke user mana pun. Baris yang kurang dibuatkan di
+    // sini dengan semua hak 0 (= belum ada akses), TIPE 'STK' seperti baris lain.
+    // SP-nya tetap dipanggil karena DBFLMENU masih dibaca (mis. otorisasi SO).
+    DB::connection('SML')->insert(
+      "insert into DBFLMENUWEB (USERID, L1, HASACCESS, ISTAMBAH, ISKOREKSI, ISHAPUS, ISCETAK, ISEXPORT,
+         IsOtorisasi1, IsOtorisasi2, IsOtorisasi3, IsOtorisasi4, IsOtorisasi5, TIPE, IsBatal, pembatalan)
+       select :userid, m.KODEMENU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'STK', 0, 0
+       from DBMENUWEB m
+       where not exists (select 1 from DBFLMENUWEB w where w.USERID = :cek and w.L1 = m.KODEMENU)",
+      ['userid' => $req->userid, 'cek' => $req->userid]
+    );
 
 
     $listAkses = DB::connection("SML")->select('select a.* , b.* from DBMENUWEB a join DBFLMENUWEB b ON a.KODEMENU = b.L1 where b.USERID = :username order by a.KODEMENU' , ['username' => $req->userid]);
@@ -82,7 +100,9 @@ class NewSetPemakaiController extends Controller
   public function listCoa (Request $req) {
     $tes = DB::connection("SML")->update('update DBPERKIRAAN set iskirim = 0');
     $listCoa = DB::connection("SML")->select('select Perkiraan, Keterangan from DBPERKIRAAN where Perkiraan not in ( select Perkiraan from DBAKSESPERKIRAAN where UserID = :username ) order by Perkiraan', ['username' => $req->username]);
-    $listAksesCoa = DB::connection("SML")->select('select a.Keterangan , b.Perkiraan from DBAKSESPERKIRAAN b join DBPERKIRAAN a on a.Perkiraan = b.Perkiraan where b.UserID = :username order by b.Perkiraan', ['username' => $req->username]);
+    // left join: akses ke perkiraan yang sudah dihapus dari DBPERKIRAAN tetap tampil (dulu hilang dari
+    // daftar dan hanya bisa dibuang lewat "cabut semua").
+    $listAksesCoa = DB::connection("SML")->select('select a.Keterangan , b.Perkiraan from DBAKSESPERKIRAAN b left join DBPERKIRAAN a on a.Perkiraan = b.Perkiraan where b.UserID = :username order by b.Perkiraan', ['username' => $req->username]);
 
     return [
       'listCoa' => $listCoa, 'listAksesCoa' => $listAksesCoa, 'tes'=>$tes
@@ -142,6 +162,11 @@ class NewSetPemakaiController extends Controller
       return 'User ' . $req->username . ' tidak ditemukan';
     }
 
+    // Hak akses menu web & akses COA milik user yang dihapus ikut dibuang - kalau tertinggal,
+    // user baru yang kelak dibuat dengan nama sama langsung mewarisi semua akses lamanya.
+    DB::connection("SML")->update('delete from DBFLMENUWEB where USERID = :username', ['username' => $req->username]);
+    DB::connection("SML")->update('delete from DBAKSESPERKIRAAN where UserID = :username', ['username' => $req->username]);
+
     return 1;
   }
 
@@ -193,6 +218,10 @@ class NewSetPemakaiController extends Controller
 
     $data = $req->input('tempData');
 
+    if (!$username || !is_array($data) || empty($data['KODEMENU'])) {
+      return 'Data akses menu tidak lengkap';
+    }
+
     // DB::connection('SML')->statement('delete	DBFLMENUWEB where USERID = :USERID',['USERID' => $username ]);
 
     // foreach ($data as $d) {
@@ -211,7 +240,9 @@ class NewSetPemakaiController extends Controller
          $data['ISOTO4'],
          $data['ISOTO5'],
          $data['ISBATAL'],
-         ''
+         // @pembatalan tidak tampil di layar; dulu dikirim '' sehingga setiap centang di baris
+         // itu mereset pembatalan jadi 0. Sekarang nilai lamanya (dari daftar akses) dikirim balik.
+         !empty($data['PEMBATALAN']) ? 1 : 0
         ];
       DB::connection('SML')->update('exec SP_FlmenuWeb1 ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?',$values);
     // }
@@ -238,8 +269,31 @@ class NewSetPemakaiController extends Controller
          $req->input('username'),
          $req->input('field'),
         ];
+    // Nama field -> kolom DBFLMENUWEB (daftar putih, nama kolom tidak pernah diambil langsung
+    // dari input).
+    $kolom = [
+      'hasaccess' => 'HASACCESS', 'istambah' => 'ISTAMBAH', 'isKoreksi' => 'ISKOREKSI',
+      'isHapus' => 'ISHAPUS', 'isCetak' => 'ISCETAK', 'isExport' => 'ISEXPORT',
+      'isOtorisasi1' => 'IsOtorisasi1', 'isOtorisasi2' => 'IsOtorisasi2', 'isOtorisasi3' => 'IsOtorisasi3',
+      'isOtorisasi4' => 'IsOtorisasi4', 'isOtorisasi5' => 'IsOtorisasi5', 'isBatal' => 'IsBatal',
+    ];
+    $field = (string) $req->input('field');
+    if (!isset($kolom[$field]) || !$req->input('username') || trim((string) $req->input('headermenu')) === '') {
+      return 'Data akses menu tidak lengkap';
+    }
+
       DB::connection('SML')->update('exec sp_updatesetmenuweb1 ?,?,?,?',$values);
     // }
+
+    // sp_updatesetmenuweb1 ternyata meng-update DBFLMENU (tabel lama), bukan DBFLMENUWEB yang
+    // dibaca web - centang di baris menu induk (mis. "Berkas") dulu tidak mengubah akses web sama
+    // sekali. SP tetap dipanggil (DBFLMENU masih dibaca, mis. otorisasi SO), lalu DBFLMENUWEB
+    // di-update dengan aturan yang sama: menu induk + semua sub menu yang kodenya diawali kode induk.
+    $awal = str_replace(['[', '%', '_'], ['[[]', '[%]', '[_]'], rtrim((string) $req->input('headermenu'))) . '%';
+    DB::connection('SML')->update(
+      'update DBFLMENUWEB set ' . $kolom[$field] . ' = :nilai where USERID = :userid and L1 like :awal',
+      ['nilai' => $req->input('nilai') == 1 ? 1 : 0, 'userid' => $req->input('username'), 'awal' => $awal]
+    );
 
     return 1;
 
@@ -279,8 +333,10 @@ class NewSetPemakaiController extends Controller
     }
     // Batas panjang & tipe mengikuti parameter Sp_FLpassWEB - nilai yang melebihi membuat SP
     // gagal (500) atau terpotong diam-diam.
-    if (strlen($user) > 15) {
-      return 'User maksimal 15 karakter';
+    // Sp_FLpassWEB menerima 15 karakter, tapi sp_updateMenuWeb1 & sp_updateMenuReportWeb1 hanya
+    // varchar(10) - user yang lebih panjang terpotong di sana.
+    if ($choice == 'I' && strlen($user) > 10) {
+      return 'User maksimal 10 karakter';
     }
     if (strlen(trim((string) $req->input('namaLengkap'))) > 50) {
       return 'Nama Lengkap maksimal 50 karakter';

@@ -62,6 +62,13 @@ class BerkasMenuController extends Controller
         if ($pesan = $this->cekAngka($req)) {
             return $pesan;
         }
+        // Panjang kolom DBMENUWEB: KODEMENU varchar(25), Keterangan varchar(500).
+        if (strlen($kode) > 25 || strpos($kode, ' ') !== false) {
+            return 'Kode menu maksimal 25 karakter dan tanpa spasi';
+        }
+        if (strlen(trim((string) $req->Keterangan)) > 500) {
+            return 'Keterangan maksimal 500 karakter';
+        }
 
         $check = DB::connection('SML')->select(
             'SELECT * FROM DBMENUWEB where KODEMENU = :KODEMENU',
@@ -118,6 +125,12 @@ class BerkasMenuController extends Controller
     }
 
     $delete = DB::connection('SML')->update('delete from DBMENUWEB where KODEMENU = :kode' , ['kode' => $kode ]);
+
+    // Hak akses web untuk menu ini ikut dibuang - kalau tertinggal, menu baru yang kelak memakai
+    // kode yang sama langsung "mewarisi" akses user lama.
+    if ($delete) {
+      DB::connection('SML')->update('delete from DBFLMENUWEB where L1 = :kode' , ['kode' => $kode ]);
+    }
     // Dulu jumlah baris dikembalikan apa adanya: 0 (kode tidak ada) tampil sebagai peringatan "0".
     return $delete ? 1 : 'Menu ' . $kode . ' tidak ditemukan';
   }
@@ -128,6 +141,9 @@ class BerkasMenuController extends Controller
     }
     if ($pesan = $this->cekAngka($req)) {
       return $pesan;
+    }
+    if (strlen(trim((string) $req->Keterangan)) > 500) {
+      return 'Keterangan maksimal 500 karakter';
     }
 
     $edit = DB::connection('SML')->update('update DBMENUWEB set Keterangan = :Keterangan, L0 = :L0, ACCESS = :ACCESS, OL = :OL where KODEMENU = :KODEMENU' , ['KODEMENU' => $req->KODEMENU , 'Keterangan' => trim((string) $req->Keterangan), 'L0' => $req->L0, 'ACCESS' => $req->ACCESS, 'OL' => $req->OL]);
