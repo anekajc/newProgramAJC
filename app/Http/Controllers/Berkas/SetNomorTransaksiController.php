@@ -18,17 +18,16 @@ class SetNomorTransaksiController extends Controller
 
   public function index(Request $req) {
 
-    // $user = DB::connection("SML")->select('select * from DBGUDANG where KODEGDG <> :id', ['id' => 'GTC']);
-    $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // Daftar user & menu samping tidak dipakai halaman ini (layout newmasterTest mengambil menu
+    // lewat AJAX /getmenu) - query-nya dimatikan supaya halaman lebih ringan.
+    // $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
 
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
-
     return view('berkas.setnomortransaksi' , [
-      "menul0" => $menul0,
+      "menul0" => [],
       "periode" => $periode,
-      "users"=> $users
     ]);
 
   }
@@ -69,6 +68,29 @@ class SetNomorTransaksiController extends Controller
   }
 
     public function submitEdit(Request $req) {
+    // Kolom teks DBPERUSAHAAN hampir semuanya NOT NULL, sedangkan Laravel mengubah isian kosong
+    // jadi null - dulu mengosongkan Fax/Alamat 2/dst membuat simpan gagal (500). Semua teks
+    // dikirim sebagai string (kosong = ''); tanggal kosong tetap null (kolomnya boleh null).
+    $t = function ($nama) use ($req) { return trim((string) $req->input($nama)); };
+    $tgl = function ($nama) use ($req) {
+      $v = trim((string) $req->input($nama));
+      return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
+    };
+
+    if ($t('nama') === '') {
+      return 'Nama perusahaan harus diisi';
+    }
+    // Batas panjang kolom DBPERUSAHAAN.
+    $batas = ['nama' => 40, 'alamat1' => 100, 'alamat2' => 100, 'kota' => 40, 'telpon' => 30, 'fax' => 30, 'email' => 100,
+      'namapkp' => 40, 'alamatpkp1' => 100, 'alamatpkp2' => 100, 'kotapkp' => 40, 'npwp' => 40,
+      'namapkp1' => 40, 'alamatpkp21' => 100, 'alamatpkp22' => 100, 'kotapkp1' => 40, 'npwp1' => 40,
+      'direksi' => 50, 'jabatan' => 50];
+    foreach ($batas as $nama => $maks) {
+      if (strlen($t($nama)) > $maks) {
+        return 'Isian ' . $nama . ' maksimal ' . $maks . ' karakter';
+      }
+    }
+
     DB::connection('SML')->update(
         "UPDATE DBPERUSAHAAN SET
             NAMA = :nama,
@@ -95,27 +117,27 @@ class SetNomorTransaksiController extends Controller
             L_Update = GETDATE()
         ",
         [
-            "nama"           => $req->nama,
-            "alamat1"        => $req->alamat1,
-            "alamat2"        => $req->alamat2,
-            "kota"           => $req->kota,
-            "telpon"         => $req->telpon,
-            "fax"            => $req->fax,
-            "email"          => $req->email,
-            "namapkp"        => $req->namapkp,
-            "alamatpkp1"     => $req->alamatpkp1,
-            "alamatpkp2"     => $req->alamatpkp2,
-            "kotapkp"        => $req->kotapkp,
-            "npwp"           => $req->npwp,
-            "tglpengukuhan"  => $req->tglpengukuhan,
-            "namapkp1"       => $req->namapkp1,
-            "alamatpkp21"    => $req->alamatpkp21,
-            "alamatpkp22"    => $req->alamatpkp22,
-            "kotapkp1"       => $req->kotapkp1,
-            "npwp1"          => $req->npwp1,
-            "tglpengukuhan1" => $req->tglpengukuhan1,
-            "direksi"        => $req->direksi,
-            "jabatan"        => $req->jabatan,
+            "nama"           => $t('nama'),
+            "alamat1"        => $t('alamat1'),
+            "alamat2"        => $t('alamat2'),
+            "kota"           => $t('kota'),
+            "telpon"         => $t('telpon'),
+            "fax"            => $t('fax'),
+            "email"          => $t('email'),
+            "namapkp"        => $t('namapkp'),
+            "alamatpkp1"     => $t('alamatpkp1'),
+            "alamatpkp2"     => $t('alamatpkp2'),
+            "kotapkp"        => $t('kotapkp'),
+            "npwp"           => $t('npwp'),
+            "tglpengukuhan"  => $tgl('tglpengukuhan'),
+            "namapkp1"       => $t('namapkp1'),
+            "alamatpkp21"    => $t('alamatpkp21'),
+            "alamatpkp22"    => $t('alamatpkp22'),
+            "kotapkp1"       => $t('kotapkp1'),
+            "npwp1"          => $t('npwp1'),
+            "tglpengukuhan1" => $tgl('tglpengukuhan1'),
+            "direksi"        => $t('direksi'),
+            "jabatan"        => $t('jabatan'),
         ]
     );
 

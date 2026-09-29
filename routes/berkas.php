@@ -9,6 +9,12 @@ use App\Http\Controllers\Berkas\BerkasMenuController;
 use App\Http\Controllers\Berkas\BerkasStatusController;
 use Illuminate\Support\Facades\Route;
 
+// Semua route Berkas wajib login. Dulu hanya berkasstatus & gantipassword yang memakai
+// middleware auth - route lain (newsetpemakai, berkasmenu, kunciperiode, setnomortransaksi)
+// langsung membaca \Auth::User()->username, jadi begitu sesi habis halaman jatuh ke
+// 500 Internal Server Error, bukan diarahkan ke halaman login.
+Route::middleware('auth')->group(function () {
+
 // Berkas
 Route::controller(NewSetPemakaiController::class)->group(function () {
     Route::get('/newsetpemakai', 'index');
@@ -59,3 +65,5 @@ Route::get('/berkasstatusspdetail', [BerkasStatusController::class, 'spDetail'])
 // GANTI PASSWORD
 Route::get('/gantipassword', [GantiPasswordController::class, 'index'])->middleware('auth');
 Route::post('/gantipassworduser', [GantiPasswordController::class, 'gantiPassword'])->middleware('auth');
+
+});

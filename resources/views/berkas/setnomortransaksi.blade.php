@@ -1,10 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Atur Nomor Transaksi dan Perusahaan')
 @section('content')
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+<link rel="stylesheet" href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -38,10 +39,10 @@
 
         <ul class="nav nav-tabs stp-main-tabs" id="stpMainTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-perusahaan-btn" data-bs-toggle="tab" data-bs-target="#tab-perusahaan" type="button" role="tab">Perusahaan</button>
+            <button class="nav-link active" id="tab-perusahaan-btn" data-toggle="tab" data-target="#tab-perusahaan" type="button" role="tab">Perusahaan</button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-nomortransaksi-btn" data-bs-toggle="tab" data-bs-target="#tab-nomortransaksi" type="button" role="tab">Set Nomor Transaksi</button>
+            <button class="nav-link" id="tab-nomortransaksi-btn" data-toggle="tab" data-target="#tab-nomortransaksi" type="button" role="tab">Set Nomor Transaksi</button>
           </li>
         </ul>
 
@@ -52,42 +53,42 @@
 
             <div class="stp-row">
               <label class="stp-label">Nama</label>
-              <input type="text" class="form-control form-control-sm" id="input_nama">
+              <input type="text" class="form-control form-control-sm" id="input_nama" maxlength="40">
             </div>
 
             <div class="stp-row">
               <label class="stp-label">Alamat</label>
               <div class="stp-field-stack">
-                <input type="text" class="form-control form-control-sm mb-1" id="input_alamat1">
-                <input type="text" class="form-control form-control-sm" id="input_alamat2">
+                <input type="text" class="form-control form-control-sm mb-1" id="input_alamat1" maxlength="100">
+                <input type="text" class="form-control form-control-sm" id="input_alamat2" maxlength="100">
               </div>
             </div>
 
             <div class="stp-row">
               <label class="stp-label">Kota</label>
-              <input type="text" class="form-control form-control-sm" id="input_kota">
+              <input type="text" class="form-control form-control-sm" id="input_kota" maxlength="40">
             </div>
 
             <div class="stp-row">
               <label class="stp-label">Telpon</label>
-              <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_telpon">
+              <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_telpon" maxlength="30">
             </div>
 
             <div class="stp-row">
               <label class="stp-label">Fax</label>
               <div class="d-flex align-items-center stp-field-stack" style="gap: 16px;">
-                <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_fax">
+                <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_fax" maxlength="30">
                 <label class="stp-label stp-inline-label mb-0">E-Mail</label>
-                <input type="text" class="form-control form-control-sm" id="input_email">
+                <input type="text" class="form-control form-control-sm" id="input_email" maxlength="100">
               </div>
             </div>
 
             <ul class="nav nav-tabs stp-sub-tabs mt-2" id="stpNpwpTab" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="tab-npwp1-btn" data-bs-toggle="tab" data-bs-target="#tab-npwp1" type="button" role="tab">NPWP 1</button>
+                <button class="nav-link active" id="tab-npwp1-btn" data-toggle="tab" data-target="#tab-npwp1" type="button" role="tab">NPWP 1</button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-npwp2-btn" data-bs-toggle="tab" data-bs-target="#tab-npwp2" type="button" role="tab">NPWP 2</button>
+                <button class="nav-link" id="tab-npwp2-btn" data-toggle="tab" data-target="#tab-npwp2" type="button" role="tab">NPWP 2</button>
               </li>
             </ul>
 
@@ -98,25 +99,25 @@
 
                 <div class="stp-row">
                   <label class="stp-label">Nama PKP</label>
-                  <input type="text" class="form-control form-control-sm" id="input_namapkp_1">
+                  <input type="text" class="form-control form-control-sm" id="input_namapkp_1" maxlength="40">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Alamat PKP</label>
                   <div class="stp-field-stack">
-                    <input type="text" class="form-control form-control-sm mb-1" id="input_alamatpkp1_1">
-                    <input type="text" class="form-control form-control-sm" id="input_alamatpkp2_1">
+                    <input type="text" class="form-control form-control-sm mb-1" id="input_alamatpkp1_1" maxlength="100">
+                    <input type="text" class="form-control form-control-sm" id="input_alamatpkp2_1" maxlength="100">
                   </div>
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Kota PKP</label>
-                  <input type="text" class="form-control form-control-sm" id="input_kotapkp_1">
+                  <input type="text" class="form-control form-control-sm" id="input_kotapkp_1" maxlength="40">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">NPWP</label>
-                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_npwp_1">
+                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_npwp_1" maxlength="40">
                 </div>
 
                 <div class="stp-row">
@@ -126,12 +127,12 @@
 
                 <div class="stp-row">
                   <label class="stp-label">Penandatanganan FPJ</label>
-                  <input type="text" class="form-control form-control-sm" id="input_penandatangan_1">
+                  <input type="text" class="form-control form-control-sm" id="input_penandatangan_1" maxlength="50">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Jabatan</label>
-                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_jabatan_1">
+                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_jabatan_1" maxlength="50">
                 </div>
 
                 <div class="stp-row">
@@ -174,25 +175,25 @@
 
                 <div class="stp-row">
                   <label class="stp-label">Nama PKP</label>
-                  <input type="text" class="form-control form-control-sm" id="input_namapkp_2">
+                  <input type="text" class="form-control form-control-sm" id="input_namapkp_2" maxlength="40">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Alamat PKP</label>
                   <div class="stp-field-stack">
-                    <input type="text" class="form-control form-control-sm mb-1" id="input_alamatpkp1_2">
-                    <input type="text" class="form-control form-control-sm" id="input_alamatpkp2_2">
+                    <input type="text" class="form-control form-control-sm mb-1" id="input_alamatpkp1_2" maxlength="100">
+                    <input type="text" class="form-control form-control-sm" id="input_alamatpkp2_2" maxlength="100">
                   </div>
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Kota PKP</label>
-                  <input type="text" class="form-control form-control-sm" id="input_kotapkp_2">
+                  <input type="text" class="form-control form-control-sm" id="input_kotapkp_2" maxlength="40">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">NPWP</label>
-                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_npwp_2">
+                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_npwp_2" maxlength="40">
                 </div>
 
                 <div class="stp-row">
@@ -202,12 +203,12 @@
 
                 <div class="stp-row">
                   <label class="stp-label">Penandatanganan FPJ</label>
-                  <input type="text" class="form-control form-control-sm" id="input_penandatangan_2">
+                  <input type="text" class="form-control form-control-sm" id="input_penandatangan_2" maxlength="50">
                 </div>
 
                 <div class="stp-row">
                   <label class="stp-label">Jabatan</label>
-                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_jabatan_2">
+                  <input type="text" class="form-control form-control-sm stp-input-narrow" id="input_jabatan_2" maxlength="50">
                 </div>
 
                 <div class="stp-row">
@@ -346,7 +347,7 @@
 
                 <div class="stn-config-row">
                   <label class="stn-config-label">Pemisah</label>
-                  <select class="form-select form-select-sm" id="input_pemisah" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm" id="input_pemisah" onchange="updateContohFormat()">
                     <option value="/">/</option>
                     <option value="-">-</option>
                     <option value=".">.</option>
@@ -357,7 +358,7 @@
                 <div class="stn-config-row mt-3">
                   <label class="stn-config-label">Format Nomor Transaksi</label>
 
-                  <select class="form-select form-select-sm mb-2" id="input_format1" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm mb-2" id="input_format1" onchange="updateContohFormat()">
                     <option>Inisial Perusahaan</option>
                     <option>Kode Transaksi</option>
                     <option>Nomor Urut</option>
@@ -366,7 +367,7 @@
                     <option>Tag</option>
                   </select>
 
-                  <select class="form-select form-select-sm mb-2" id="input_format2" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm mb-2" id="input_format2" onchange="updateContohFormat()">
                     <option>Kode Transaksi</option>
                     <option>Inisial Perusahaan</option>
                     <option>Nomor Urut</option>
@@ -375,7 +376,7 @@
                     <option>Tag</option>
                   </select>
 
-                  <select class="form-select form-select-sm mb-2" id="input_format3" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm mb-2" id="input_format3" onchange="updateContohFormat()">
                     <option>Nomor Urut</option>
                     <option>Inisial Perusahaan</option>
                     <option>Kode Transaksi</option>
@@ -384,7 +385,7 @@
                     <option>Tag</option>
                   </select>
 
-                  <select class="form-select form-select-sm" id="input_format4" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm" id="input_format4" onchange="updateContohFormat()">
                     <option>MMYY</option>
                     <option>YYMM</option>
                     <option>Inisial Perusahaan</option>
@@ -396,7 +397,7 @@
 
                 <div class="stn-config-row mt-3">
                   <label class="stn-config-label">Reset Nomor Per</label>
-                  <select class="form-select form-select-sm" id="input_resetnomor" onchange="updateContohFormat()">
+                  <select class="form-control form-control-sm" id="input_resetnomor" onchange="updateContohFormat()">
                     <option>Bulan</option>
                     <option>Tahun</option>
                     <option>Tidak Pernah</option>
@@ -426,12 +427,8 @@
     </div>
 
     <div class="stp-footer">
-      <button type="button" class="btn stp-btn-ok" onclick="submitSetingPerusahaan()">
-        <i class="bi bi-check-lg"></i> Ok
-      </button>
-      <button type="button" class="btn stp-btn-cancel" onclick="batalSetingPerusahaan()">
-        <i class="bi bi-x-lg"></i> Batal
-      </button>
+      <button type="button" class="btn btn-sm btn-batal-add" onclick="batalSetingPerusahaan()">Batal</button>
+      <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitSetingPerusahaan()">Simpan</button>
     </div>
 
   </div>
@@ -707,9 +704,9 @@
 @section('js')
 <script type="text/javascript">
 
-$(document).ready(function () {
-  document.getElementById('breadcrumb').innerHTML = "Atur Nomor Transaksi dan Perusahaan"
-});
+// $(document).ready(function () {
+//   document.getElementById('breadcrumb').innerHTML = "Atur Nomor Transaksi dan Perusahaan" // dimatikan: judul sekarang di bar atas (page-title)
+// });
 
 function previewUploadImage(inputEl, targetBoxId) {
   let file = inputEl.files && inputEl.files[0];
@@ -722,9 +719,34 @@ function previewUploadImage(inputEl, targetBoxId) {
   reader.readAsDataURL(file);
 }
 
+// Batal = buang perubahan yang belum disimpan, isi form dikembalikan ke data di database.
+// (Dulu tombol ini belum berfungsi sama sekali.)
 function batalSetingPerusahaan() {
-  // TODO: decide navigation/close behavior later
-  console.log('batalSetingPerusahaan - UI only for now');
+  alertify.confirm('Batal', 'Buang perubahan yang belum disimpan?',
+    function () {
+      if (loadAll()) { alertify.message('Perubahan dibatalkan') }
+    },
+    function () {})
+}
+
+// DBPERUSAHAAN hanya punya satu Direksi & satu Jabatan - kolom Penandatangan FPJ dan Jabatan
+// di tab NPWP 1 & NPWP 2 menunjuk ke data yang sama, jadi isinya dibuat selalu kembar.
+// Dulu yang disimpan hanya isian NPWP 1; ketikan di NPWP 2 hilang diam-diam.
+function kembarkan (a, b) {
+  let elA = document.getElementById(a)
+  let elB = document.getElementById(b)
+  elA.addEventListener('input', () => { elB.value = elA.value })
+  elB.addEventListener('input', () => { elA.value = elB.value })
+}
+kembarkan('input_penandatangan_1', 'input_penandatangan_2')
+kembarkan('input_jabatan_1', 'input_jabatan_2')
+
+// Tanggal dari SQL Server ("2020-01-31 00:00:00.000") -> "2020-01-31" untuk <input type=date>.
+// Tanggal kosong tetap kosong (dulu jadi 1970-01-01 karena new Date(null)).
+function tanggalInput (v) {
+  if (!v) { return '' }
+  let m = String(v).match(/^(\d{4}-\d{2}-\d{2})/)
+  return m ? m[1] : ''
 }
 
 // ── Set Nomor Transaksi: live "Contoh Format" preview ─────────────────
@@ -746,15 +768,23 @@ function updateContohFormat() {
 }
 
 function loadAll(){
-  
+
   let _token = $("#_token").val();
+  let berhasil = false
   $.ajax({
     url: "{!! url('dbnomorspdetail') !!}",
     type: "get",
     async: false,
     success: function(res) {
+      if (!Array.isArray(res)) {
+        alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+        return
+      }
+      if (!res.length) {
+        alertify.warning('Data perusahaan belum ada di database')
+        return
+      }
 
-      console.log(res)
       document.getElementById("input_nama").value = res[0].NAMA
       document.getElementById("input_alamat1").value = res[0].ALAMAT1
       document.getElementById("input_alamat2").value = res[0].ALAMAT2
@@ -768,7 +798,7 @@ function loadAll(){
       document.getElementById("input_alamatpkp2_1").value = res[0].ALAMATPKP2
       document.getElementById("input_kotapkp_1").value = res[0].KOTAPKP
       document.getElementById("input_npwp_1").value = res[0].NPWP
-      document.getElementById("input_tglpengukuhan_1").value = new Date(res[0].TGLPENGUKUHAN).toLocaleDateString('en-CA');
+      document.getElementById("input_tglpengukuhan_1").value = tanggalInput(res[0].TGLPENGUKUHAN);
       document.getElementById("input_penandatangan_1").value = res[0].Direksi
       document.getElementById("input_jabatan_1").value = res[0].Jabatan
 
@@ -777,16 +807,28 @@ function loadAll(){
       document.getElementById("input_alamatpkp2_2").value = res[0].ALAMATPKP22
       document.getElementById("input_kotapkp_2").value = res[0].KOTAPKP1
       document.getElementById("input_npwp_2").value = res[0].NPWP1
-      document.getElementById("input_tglpengukuhan_2").value = new Date(res[0].TGLPENGUKUHAN1).toLocaleDateString('en-CA');
+      document.getElementById("input_tglpengukuhan_2").value = tanggalInput(res[0].TGLPENGUKUHAN1);
       document.getElementById("input_penandatangan_2").value = res[0].Direksi
       document.getElementById("input_jabatan_2").value = res[0].Jabatan
 
-    }})
+      berhasil = true
+    },
+    error: function (err) {
+      console.log(err);
+      alertify.warning('Gagal memuat data perusahaan, silakan refresh browser');
+    }
+  })
 
+  return berhasil
 }
 
 function submitSetingPerusahaan() {
   let _token = $("#_token").val();
+
+  if (!String($("#input_nama").val()).trim()) {
+    alertify.warning("Nama perusahaan harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('setnomortransaksispedit') !!}",

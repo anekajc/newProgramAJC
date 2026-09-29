@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Kunci Periode')
 @section('content')
 
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -15,11 +15,12 @@
     <span class="sp-crumb-active">Kunci Periode</span>
   </div> --}}
 
+  {{-- Judul sekarang di bar atas (page-title) layout newmasterTest.
   <div class="sp-page-head">
     <div>
       <h1>Kunci Periode</h1>
     </div>
-  </div>
+  </div> --}}
 
 <div id="contentContainer" class="container-fluid">
 
@@ -34,7 +35,7 @@
         </div>
         <div>
           <div class="kp-header-title">Buka/Tutup Periode</div>
-          <div class="kp-header-subtitle">Pilih Bulan, Klik OK !</div>
+          <div class="kp-header-subtitle">Centang bulan untuk mengunci, hapus centang untuk membuka</div>
         </div>
       </div>
 
@@ -42,7 +43,9 @@
 
         <div class="kp-tahun-row">
           <label for="input_tahun">Tahun</label>
-          <input type="text" id="input_tahun" class="kp-tahun-input" value="{{ date('Y') }}" maxlength="4" onchange="loadKunciPeriode()">
+          <button type="button" class="kp-tahun-geser" title="Tahun sebelumnya" onclick="geserTahun(-1)"><i class="bi bi-chevron-left"></i></button>
+          <input type="text" id="input_tahun" class="kp-tahun-input" value="{{ date('Y') }}" maxlength="4" inputmode="numeric" onchange="loadKunciPeriode()">
+          <button type="button" class="kp-tahun-geser" title="Tahun berikutnya" onclick="geserTahun(1)"><i class="bi bi-chevron-right"></i></button>
         </div>
 
         <div class="kp-month-list kp-month-list-cols">
@@ -200,6 +203,29 @@
     box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
   }
 
+  .kp-tahun-geser {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #cfdcff;
+    background: #e8edff;
+    color: #2563eb;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .kp-tahun-geser:hover {
+    background: #dce6ff;
+  }
+
+  .kp-month-list.is-memuat {
+    opacity: .55;
+    pointer-events: none;
+  }
+
   .kp-month-list {
     background: #fbfbfb;
     border: 1px solid #e9e9e9;
@@ -250,24 +276,25 @@
     justify-content: flex-end;
   }
 
+  /* Tombol soft seperti tombol utama memorialkoreksi (.btn-dpp-utama). */
   .kp-ok-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    padding: 9px 22px;
+    background: #e8edff;
+    color: #2563eb;
+    border: 1px solid #cfdcff;
+    padding: 7px 18px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
-    box-shadow: 0 3px 8px rgba(37,99,235,0.25);
     transition: background 0.12s ease;
   }
 
   .kp-ok-btn:hover {
-    background: #1d4ed8;
+    background: #dce6ff;
+    color: #1d4ed8;
   }
 </style>
 @endsection
@@ -275,13 +302,30 @@
 @section('js')
 <script type="text/javascript">
 
-function loadKunciPeriode () {
-  let tahun = $("#input_tahun").val();
+// Tahun yang daftar bulannya sedang tampil. Centang/hapus centang selalu memakai tahun ini,
+// bukan isi kotak Tahun yang mungkin sudah diketik ulang tapi belum dimuat.
+let tahunTampil = ''
 
-  if (!tahun) {
-    alertify.warning("Tahun harus diisi");
+function tahunValid (tahun) {
+  return /^\d{4}$/.test(tahun) && Number(tahun) >= 1900 && Number(tahun) <= 2999
+}
+
+function geserTahun (arah) {
+  let tahun = String($("#input_tahun").val()).trim()
+  if (!tahunValid(tahun)) { tahun = tahunTampil || String(new Date().getFullYear()) }
+  $("#input_tahun").val(Number(tahun) + arah)
+  loadKunciPeriode()
+}
+
+function loadKunciPeriode () {
+  let tahun = String($("#input_tahun").val()).trim();
+
+  if (!tahunValid(tahun)) {
+    alertify.warning("Tahun harus diisi 4 angka, mis. " + new Date().getFullYear());
+    if (tahunTampil) { $("#input_tahun").val(tahunTampil) }
     return;
   }
+  $("#input_tahun").val(tahun)
 
   // Uncheck everything first so a switch to a different year doesn't
   // carry over checks from the previous year while the request is in flight.
@@ -289,34 +333,53 @@ function loadKunciPeriode () {
     document.getElementById(`bulan_${i}`).checked = false;
   }
 
+  let daftar = document.querySelector('.kp-month-list')
+  daftar.classList.add('is-memuat')
+
   $.ajax({
     url: "{!! url('kunciperiodeload') !!}",
     type: "get",
     async: false,
     data: { tahun },
     success: function(res) {
+      if (!Array.isArray(res)) {
+        alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+        return
+      }
       // res = array of locked BULAN numbers for this TAHUN, e.g. [1, 2, 5]
       res.forEach((bulan) => {
-        let cb = document.getElementById(`bulan_${bulan}`);
+        let cb = document.getElementById(`bulan_${Number(bulan)}`);
         if (cb) cb.checked = true;
       });
+      tahunTampil = tahun
     },
     error: function(err) {
       console.log(err);
       alertify.warning('Terjadi kesalahan, silakan refresh browser');
     }
   });
+
+  // async:false - permintaan sudah selesai di sini, berhasil atau gagal.
+  daftar.classList.remove('is-memuat')
 }
 
 function toggleBulan (checkbox) {
   let bulan   = checkbox.value;
-  let tahun   = $("#input_tahun").val();
+  let tahun   = tahunTampil;
   let checked = checkbox.checked ? 1 : 0;
   let _token  = $("#_token").val();
 
   if (!tahun) {
-    alertify.warning("Tahun harus diisi");
+    alertify.warning("Muat dulu daftar bulan untuk tahun yang dipilih");
     checkbox.checked = !checkbox.checked; // revert
+    return;
+  }
+
+  // Kotak Tahun sudah diganti tapi belum dimuat - jangan kunci/buka bulan di tahun yang salah.
+  if (String($("#input_tahun").val()).trim() !== tahun) {
+    checkbox.checked = !checkbox.checked; // revert
+    loadKunciPeriode();
+    alertify.warning("Tahun diganti - daftar bulan dimuat ulang, silakan centang lagi");
     return;
   }
 

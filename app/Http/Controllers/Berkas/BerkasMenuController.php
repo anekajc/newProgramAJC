@@ -18,44 +18,66 @@ class BerkasMenuController extends Controller
 
   public function index(Request $req) {
 
-    // $user = DB::connection("SML")->select('select * from DBGUDANG where KODEGDG <> :id', ['id' => 'GTC']);
-    $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // Daftar user & menu samping tidak dipakai halaman ini (layout newmasterTest mengambil menu
+    // lewat AJAX /getmenu) - query-nya dimatikan supaya halaman lebih ringan.
+    // $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
 
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
-
     return view('berkas.berkasmenu' , [
-      "menul0" => $menul0,
+      "menul0" => [],
       "periode" => $periode,
-      "users"=> $users
     ]);
 
   }
 
+  // L0 & OL tinyint, ACCESS int, ketiganya NOT NULL - isian kosong/bukan angka dulu membuat
+  // simpan gagal (500).
+  private function cekAngka (Request $req) {
+    foreach (['L0' => 255, 'ACCESS' => 2147483647, 'OL' => 255] as $kolom => $maks) {
+      $v = (string) $req->input($kolom);
+      if (!ctype_digit($v) || (int) $v > $maks) {
+        return $kolom . ' harus diisi angka 0-' . $maks;
+      }
+    }
+    return '';
+  }
+
   public function loadAll () {
-    $users = DB::connection("SML")->select('select * from DBMENUWEB');
+    $users = DB::connection("SML")->select('select * from DBMENUWEB order by KODEMENU');
     return $users;
 
   }
 
-    public function spAdd (Request $req) 
+    public function spAdd (Request $req)
     {
+        $kode = trim((string) $req->KODEMENU);
+        if ($kode === '') {
+            return 'Kode menu harus diisi';
+        }
+        if (trim((string) $req->Keterangan) === '') {
+            return 'Keterangan harus diisi';
+        }
+        if ($pesan = $this->cekAngka($req)) {
+            return $pesan;
+        }
+
         $check = DB::connection('SML')->select(
             'SELECT * FROM DBMENUWEB where KODEMENU = :KODEMENU',
-            ['KODEMENU' => $req->KODEMENU]
+            ['KODEMENU' => $kode]
         );
 
         if ($check) {
-            return 'Kode jenis sudah ada di database';
+            return 'Kode menu ' . $kode . ' sudah ada di database';
         }
 
         DB::connection('SML')->insert(
             'insert into DBMENUWEB (KODEMENU, Keterangan, L0, ACCESS, OL, TipeTrans, HeaderMenu, href, icon)
             values (:KODEMENU, :Keterangan, :L0, :ACCESS, :OL, :TipeTrans, :HeaderMenu, :href, :icon)',
             [
-                'KODEMENU'   => $req->KODEMENU,
-                'Keterangan' => $req->Keterangan,
+                'KODEMENU'   => $kode,
+                'Keterangan' => trim((string) $req->Keterangan),
                 'L0'         => $req->L0,
                 'ACCESS'     => $req->ACCESS,
                 'OL'         => $req->OL,
@@ -80,14 +102,38 @@ class BerkasMenuController extends Controller
     //if ($check) {
       //return 'ga bisa hapus';
     //}
-    $delete = DB::connection('SML')->update('delete from DBMENUWEB where KODEMENU = :kode' , ['kode' => $req->kode ]);
-    return $delete;
+    $kode = (string) $req->kode;
+    if (trim($kode) === '') {
+      return 'Kode menu belum dipilih';
+    }
+
+    // Menu yang masih punya sub menu (kode diawali kode ini) tidak boleh dihapus - sub menunya
+    // akan tertinggal tanpa induk di pohon menu.
+    $anak = DB::connection('SML')->select(
+      'SELECT top 1 KODEMENU FROM DBMENUWEB where KODEMENU like :awal and KODEMENU <> :kode',
+      ['awal' => str_replace(['[', '%', '_'], ['[[]', '[%]', '[_]'], rtrim($kode)) . '%', 'kode' => $kode]
+    );
+    if ($anak) {
+      return 'Menu ' . $kode . ' masih punya sub menu (' . $anak[0]->KODEMENU . '), hapus sub menunya dulu';
+    }
+
+    $delete = DB::connection('SML')->update('delete from DBMENUWEB where KODEMENU = :kode' , ['kode' => $kode ]);
+    // Dulu jumlah baris dikembalikan apa adanya: 0 (kode tidak ada) tampil sebagai peringatan "0".
+    return $delete ? 1 : 'Menu ' . $kode . ' tidak ditemukan';
   }
 
   public function spEdit (Request $req) {
-    $edit = DB::connection('SML')->update('update DBMENUWEB set Keterangan = :Keterangan, L0 = :L0, ACCESS = :ACCESS, OL = :OL where KODEMENU = :KODEMENU' , ['KODEMENU' => $req->KODEMENU , 'Keterangan' => $req->Keterangan, 'L0' => $req->L0, 'ACCESS' => $req->ACCESS, 'OL' => $req->OL]);
+    if (trim((string) $req->Keterangan) === '') {
+      return 'Keterangan harus diisi';
+    }
+    if ($pesan = $this->cekAngka($req)) {
+      return $pesan;
+    }
 
-    return $edit;
+    $edit = DB::connection('SML')->update('update DBMENUWEB set Keterangan = :Keterangan, L0 = :L0, ACCESS = :ACCESS, OL = :OL where KODEMENU = :KODEMENU' , ['KODEMENU' => $req->KODEMENU , 'Keterangan' => trim((string) $req->Keterangan), 'L0' => $req->L0, 'ACCESS' => $req->ACCESS, 'OL' => $req->OL]);
+
+    // Kode menu dikunci di form edit, jadi 0 baris berarti menunya sudah dihapus orang lain.
+    return $edit ? 1 : 'Menu ' . $req->KODEMENU . ' tidak ditemukan';
   }
 
   public function spDetail (Request $req) {

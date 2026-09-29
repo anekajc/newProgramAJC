@@ -1,10 +1,72 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
-@section('content')
+@section('page-title', 'Set Pemakai')
 
-  <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
+@section('css')
+<style>
+  /* Kartu ringkasan di atas tabel - nilai disalin dari tableMaster2.css (tidak dimuat lagi di
+     layout newmasterTest karena menimpa gaya tabel daftar .data-table). */
+  .sp-stats-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .sp-stat-card {
+    background: #fff;
+    border: 1px solid #e7e9ee;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20,20,43,.04), 0 1px 1px rgba(20,20,43,.03);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 200px;
+    flex: 1 1 200px;
+  }
+  .sp-stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex: none;
+  }
+  .sp-stat-icon.is-purple { background: #efe9ff; color: #6f42f3; }
+  .sp-stat-icon.is-green  { background: #e7f7ed; color: #16a34a; }
+  .sp-stat-icon.is-blue   { background: #e8edff; color: #2563eb; }
+  .sp-stat-label { font-size: 13px; color: #6b7280; margin-bottom: 2px; }
+  .sp-stat-value { font-size: 22px; font-weight: 700; line-height: 1.1; color: #1f2430; }
+  .sp-stat-sub   { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Tabel hak akses di modal Akses Menu / Akses Report / Akses COA. */
+  .akses-user { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13.5px; color: #6b7280; }
+  .akses-user b { color: #1f2430; font-size: 15px; }
+  .akses-wrap { max-height: 62vh; overflow: auto; border: 1px solid #e7e9ee; border-radius: 8px; }
+  .akses-tabel { width: 100%; margin: 0; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .akses-tabel thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: #f7f8fa; color: #6b7280; font-weight: 700; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .03em; text-align: center;
+    padding: 8px 6px; border-bottom: 1px solid #e7e9ee; white-space: nowrap;
+  }
+  .akses-tabel tbody td { padding: 5px 8px; border-bottom: 1px solid #f0f1f4; vertical-align: middle; white-space: nowrap; }
+  .akses-tabel tbody td.cek { text-align: center; }
+  .akses-tabel tbody tr:hover td { background: #f7f9ff; }
+  .akses-tabel tbody tr.akses-induk td { background: #fff8e1; font-weight: 600; }
+  .akses-tabel input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #2563eb; vertical-align: middle; }
+  .akses-kosong { text-align: center; color: #9ca3af; padding: 18px !important; }
+
+  /* Modal Akses COA: dua daftar berdampingan + tombol pindah di tengah. */
+  .coa-grid { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 14px; align-items: stretch; }
+  .coa-panel { display: flex; flex-direction: column; min-width: 0; }
+  .coa-judul { font-size: 12.5px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .coa-judul span { font-weight: 600; text-transform: none; letter-spacing: 0; }
+  .coa-panel .akses-wrap { height: 55vh; max-height: none; }
+  .coa-tombol { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+  .coa-tombol .btn { width: 44px; height: 36px; padding: 0; border-radius: 8px; }
+  @media (max-width: 767.98px) {
+    .coa-grid { grid-template-columns: 1fr; }
+    .coa-tombol { flex-direction: row; justify-content: center; }
+  }
+</style>
+@endsection
+
+@section('content')
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -22,174 +84,101 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add User</button>
   </div> --}}
 
+<div id="contentContainer" class="container-fluid po-list-page">
 
-  <div id="contentContainer" class="container-fluid">
+  <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-
-    <!-- Stat summary cards -->
-    <div class="sp-stats-row">
-      <div class="sp-stat-card">
-        <div class="sp-stat-icon is-purple"><i class="bi bi-people"></i></div>
-        <div>
-          <div class="sp-stat-label">Total User</div>
-          <div class="sp-stat-value">{{ count($users) }}</div>
-        </div>
-      </div>
-      <div class="sp-stat-card">
-        <div class="sp-stat-icon is-green"><i class="bi bi-check-circle"></i></div>
-        <div>
-          <div class="sp-stat-label">User Aktif</div>
-          <div class="sp-stat-value">{{ collect($users)->where('STATUS', 1)->count() }}</div>
-          <div class="sp-stat-sub">{{ collect($users)->where('STATUS', '!=', 1)->count() }} Tidak Aktif</div>
-        </div>
-      </div>
-      <div class="sp-stat-card">
-        <div class="sp-stat-icon is-blue"><i class="bi bi-shield-check"></i></div>
-        <div>
-          <div class="sp-stat-label">Administrator</div>
-          <div class="sp-stat-value">{{ collect($users)->where('TINGKAT', 2)->count() }}</div>
-        </div>
+  <!-- Kartu ringkasan - angkanya diisi loadAll() -->
+  <div class="sp-stats-row">
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-purple"><i class="bi bi-people"></i></div>
+      <div>
+        <div class="sp-stat-label">Total User</div>
+        <div class="sp-stat-value" id="stat_total">-</div>
       </div>
     </div>
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-green"><i class="bi bi-check-circle"></i></div>
+      <div>
+        <div class="sp-stat-label">User Aktif</div>
+        <div class="sp-stat-value" id="stat_aktif">-</div>
+        <div class="sp-stat-sub"><span id="stat_nonaktif">-</span> Tidak Aktif</div>
+      </div>
+    </div>
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-blue"><i class="bi bi-shield-check"></i></div>
+      <div>
+        <div class="sp-stat-label">Administrator</div>
+        <div class="sp-stat-value" id="stat_admin">-</div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Toolbar: search box (visual only — table search stays disabled per existing DataTables config) -->
-      @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-            <div class="table-outer">
-              <div class="table-wrap">
-                <table class="tb" id="tabel">
-                  <thead>
-                    <tr>
-                      <th scope="col">Actions</th>
-                      <th scope="col">Username</th>
-                      <th scope="col">Nama</th>
-                      <th scope="col">Level</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tabel_data" class="text-right" >
-                  @for ($i = 0; $i < count($users); $i++)
-                  <tr>
-                    
-                <td style="text-align:center;">
-                  <div class="action-buttons-wrap">
-                      <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" title="Koreksi" type="button" onclick="editUser('{{ $users[$i]->username }}', '{{ $users[$i]->FullName }}', '{{ $users[$i]->kodeBag }}', '{{ $users[$i]->KodeJab }}', '{{ $users[$i]->KodeKasir }}', '{{ $users[$i]->limit }}', '{{ $users[$i]->STATUS }}', '{{ $users[$i]->TINGKAT }}', '{{ $users[$i]->keynik }}')" ><i class="bi bi-pen"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('{{ $users[$i]->username }}')"><i class="bi bi-card-checklist"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="Set Report" class="btn-action-sm btn-action-primary" type="button" onclick="editAksesReport('{{ $users[$i]->username }}')"><i class="bi bi-card-list"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="Akses Gudang" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('{{ $users[$i]->username }}')"><i class="bi bi-box2"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="Akses COA" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA('{{ $users[$i]->username }}')"><i class="bi bi-card-heading"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="COA Report" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA('{{ $users[$i]->username }}')"><i class="bi bi-postcard"></i></button>
-                      <button data-toggle="tooltip" data-placement="top" title="Akses COA BS" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA('{{ $users[$i]->username }}')"><i class="bi bi-postcard"></i></button> 
-                      <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="deleteUser('{{ $users[$i]->username }}')"><i class="bi bi-trash"></i></button>
-                  </div>
-                </td>
-                    <td>{{ $users[$i]->USERID }}</td>
-                    <td>{{ $users[$i]->FullName }}</td>
-                    <td>
-                      @if($users[$i]->TINGKAT == 0)
-                      <span class="sp-badge is-user">User</span>
-                      @elseif($users[$i]->TINGKAT == 1)
-                      <span class="sp-badge is-supervisor">Supervisor</span>
-                      @elseif($users[$i]->TINGKAT == 2)
-                      <span class="sp-badge is-admin">Administrator</span>
-                      @endif
-                    </td>
+  @include('master.partials.toolbarMaster')
 
-                  </tr>
-                  @endfor
-                </tbody>
-                </table>
-              </div>
-          </div>
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead>
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">User ID</th>
+            <th style="padding: 4px 12px;" scope="col">Nama</th>
+            <th style="padding: 4px 12px;" scope="col">Level</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+        </tbody>
+      </table>
+
+    </div>
   </div>
 
 </div>
 
 <!-- start modal akses menu -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 90%; max-width:1500px;" role="document">
+<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="judulAksesMenu" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 95%; max-width:1400px;" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akses Menu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="judulAksesMenu">Akses Menu</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="input_add_username" value="" />
+        <div class="akses-user">User <b id="label_akses_username">-</b> <span>· perubahan langsung tersimpan saat kotak dicentang</span></div>
 
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-          <div class="row">
-
-            <div class="col-2">
-              <div class="form-group">
-                <label>Username</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_username" placeholder="Username" disabled>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-
-
+        <div class="akses-wrap">
+          <table id="addTable" class="akses-tabel">
+            <thead>
+              <tr>
+                <th scope="col" style="text-align:left;">Kode Menu</th>
+                <th scope="col" style="text-align:left;">Keterangan</th>
+                <th scope="col">Akses</th>
+                <th scope="col">Tambah</th>
+                <th scope="col">Koreksi</th>
+                <th scope="col">Hapus</th>
+                <th scope="col">Cetak</th>
+                <th scope="col">Export</th>
+                <th scope="col">Oto1</th>
+                <th scope="col">Oto2</th>
+                <th scope="col">Oto3</th>
+                <th scope="col">Oto4</th>
+                <th scope="col">Oto5</th>
+                <th scope="col">Batal</th>
+              </tr>
+            </thead>
+            <tbody id="addTableData">
+            </tbody>
+          </table>
         </div>
-        <div class="row">
-
-
-        </div>
-
-        </div>
-
-
-
       </div>
-        <div class="container-fluid" style="overflow-x: auto;">
-
-              <table id="addTable" class="table table-bordered table-striped"  >
-                <thead class="text-center">
-                  <tr>
-                    <th style="" scope="col">Kode Menu</th>
-                    <th scope="col">Ket</th>
-                    <th scope="col">ACCESS</th>
-                    <th scope="col">TAMBAH</th>
-                    <th scope="col">KOREKSI</th>
-                    <th scope="col">HAPUS</th>
-                    <th scope="col">CETAK</th>
-                    <th scope="col">EXPORT</th>
-                    <th scope="col">OTO1</th>
-                    <th scope="col">OTO2</th>
-                    <th scope="col">OTO3</th>
-                    <th scope="col">OTO4</th>
-                    <th scope="col">OTO5</th>
-                    <th scope="col">BATAL</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="addTableData" class="text-left" >
-                  <tr>
-
-                      <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                </tr>
-
-                </tbody>
-
-
-              </table>
-        </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
         {{-- <button type="button" class="btn btn-primary" onclick="submitAkses()">Submit</button> --}}
       </div>
     </div>
@@ -198,77 +187,38 @@
 <!-- End modal akses menu-->
 
 <!-- start modal akses menu report -->
-<div class="modal fade" id="formReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 90%; max-width:1500px;" role="document">
+<div class="modal fade" id="formReport" tabindex="-1" role="dialog" aria-labelledby="judulAksesReport" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:900px;" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akses Menu Report</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="judulAksesReport">Akses Menu Report</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="input_report_username" value="" />
+        <div class="akses-user">User <b id="label_report_username">-</b> <span>· perubahan langsung tersimpan saat kotak dicentang</span></div>
 
-        <div class="container-fluid">
-          <div class="row">
-
-
-            <div class="col-2">
-              <div class="form-group">
-                <label>Username</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_report_username" placeholder="Username" disabled>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="row">
-
-
+        <div class="akses-wrap">
+          <table id="reportTable" class="akses-tabel">
+            <thead>
+              <tr>
+                <th scope="col" style="text-align:left;">Kode Menu</th>
+                <th scope="col" style="text-align:left;">Keterangan</th>
+                <th scope="col">Akses</th>
+                <th scope="col">Design</th>
+                <th scope="col">Export</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableData">
+            </tbody>
+          </table>
         </div>
-        <div class="row">
-
-
-        </div>
-
-        </div>
-
-
-
       </div>
-        <div class="container-fluid" style="overflow-x: auto;">
-
-              <table id="reportTable" class="table table-bordered table-striped"  >
-                <thead class="text-center">
-                  <tr>
-                    <th style="" scope="col">Kode Menu</th>
-                    <th scope="col">Ket</th>
-                    <th scope="col">ACCESS</th>
-                    <th scope="col">DESIGN</th>
-                    <th scope="col">EXPORT</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="reportTableData" class="text-left" >
-                  <tr >
-
-                      <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                </tr>
-
-                </tbody>
-
-
-              </table>
-        </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
         {{-- <button type="button" class="btn btn-primary" onclick="submitAksesReport()">Submit</button> --}}
       </div>
     </div>
@@ -278,285 +228,145 @@
 
 
 <!-- start modal akses coa -->
-<div class="modal fade" id="formCOA" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 90%; max-width:1500px;" role="document">
+<div class="modal fade" id="formCOA" tabindex="-1" role="dialog" aria-labelledby="judulAksesCOA" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 95%; max-width:1300px;" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit COA</h5>
+        <h5 class="modal-title" id="judulAksesCOA">Akses COA</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="input_coa_username" value="" />
+        <div class="akses-user">User <b id="label_coa_username">-</b> <span>· centang perkiraan, lalu pakai tombol di tengah untuk memindahkan</span></div>
 
-        <div class="container-fluid">
-          <div class="row">
-
-
-            <div class="col-2">
-              <div class="form-group">
-                <label>Username</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_coa_username" placeholder="Username" disabled>
-              </div>
+        <div class="coa-grid">
+          <div class="coa-panel">
+            <div class="coa-judul">Perkiraan yang tersedia <span id="jumlahCOA">0</span></div>
+            <div class="akses-wrap">
+              <table id="tableCOA" class="akses-tabel">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width:44px;">Pilih</th>
+                    <th scope="col" style="text-align:left;">Perkiraan</th>
+                    <th scope="col" style="text-align:left;">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tableDataCOA">
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <div class="row">
+          <div class="coa-tombol">
+            <button class="btn btn-chip-biru" type="button" title="Beri akses semua perkiraan" onclick="buttonAddAllCOA()"><i class="bi bi-chevron-double-right"></i></button>
+            <button class="btn btn-chip-biru" type="button" title="Beri akses perkiraan yang dicentang" onclick="buttonAddCOA()"><i class="bi bi-chevron-right"></i></button>
+            <button class="btn btn-batal-add" type="button" title="Cabut akses perkiraan yang dicentang" onclick="buttonDeleteCOA()"><i class="bi bi-chevron-left"></i></button>
+            <button class="btn btn-batal-add" type="button" title="Cabut semua akses perkiraan" onclick="buttonDeleteAllCOA()"><i class="bi bi-chevron-double-left"></i></button>
+          </div>
 
-
+          <div class="coa-panel">
+            <div class="coa-judul">Akses perkiraan yang diberikan <span id="jumlahAksesCOA">0</span></div>
+            <div class="akses-wrap">
+              <table id="tableAksesCOA" class="akses-tabel">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width:44px;">Pilih</th>
+                    <th scope="col" style="text-align:left;">Perkiraan</th>
+                    <th scope="col" style="text-align:left;">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tableDataAksesCOA">
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="row">
-
-
-        </div>
-
-        </div>
-
-
-
       </div>
-        <div class="container-fluid" >
 
-              <div class="row text-left justify-content-center">
-                <div class="col-5 ">
-                  <label>Perkiraan yang tersedia</label>
-                </div>
-                <div class="col-1">
-                </div>
-                <div class="col-5">
-                  <label>Akses Perkiraan yang diberikan</label>
-                </div>
-              </div>
-              <div class="row justify-content-center" style="maxrgin-bottom: 30px">
-                <div class="col-5 bg-primary" style="overflow-y: scroll; height: 500px" >
-                  <table id="tableCOA" class="table table-bordered table-striped"  >
-                    <thead class="text-center">
-                      <tr>
-                        <th style="" scope="col">Perkiraan</th>
-                        <th scope="col">Keterangan</th>
-                        <th scope="col">Pilih</th>
-                      </tr>
-                    </thead>
-
-
-                    <tbody id="tableDataCOA" class="text-left" >
-                      <tr >
-
-                          <td>-</td>
-                          <td>-</td>
-                          <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                    </tr>
-
-                    </tbody>
-
-
-                  </table>
-                </div>
-                <div class="col-1 my-auto text-center" >
-                    <div class="row">
-                      <div class="col-12">
-                        <button  data-toggle="tooltip" data-placement="top"  class="btn btn-success btn-sm" type="button" onclick="buttonAddAllCOA()"><i class="bi bi-chevron-double-right"></i></button>
-                      </div>
-
-                    </div>
-                    <div class="row mt-4">
-
-                      <div class="col-12">
-                        <button  data-toggle="tooltip" data-placement="top" class="btn btn-success btn-sm" type="button" onclick="buttonDeleteAllCOA()"><i class="bi bi-chevron-double-left"></i></button>
-                      </div>
-                    </div>
-                    <div class="row mt-4">
-
-                      <div class="col-12">
-                        <button  data-toggle="tooltip" data-placement="top" class="btn btn-success btn-sm" type="button" onclick="buttonAddCOA()"><i class="bi bi-chevron-right"></i></button>
-                      </div>
-                    </div>
-                    <div class="row mt-4">
-
-                      <div class="col-12">
-                        <button  data-toggle="tooltip" data-placement="top" class="btn btn-success btn-sm" type="button" onclick="buttonDeleteCOA()"><i class="bi bi-chevron-left"></i></button>
-                      </div>
-                    </div>
-                </div>
-                <div class="col-5 bg-warning" style="overflow-y: scroll; height: 500px" >
-                  <table id="tableAksesCOA" class="table table-bordered table-striped"  >
-                    <thead class="text-center">
-                      <tr>
-                        <th style="" scope="col">Pilih</th>
-                        <th scope="col">Perkiraan</th>
-                        <th scope="col">Keterangan</th>
-                      </tr>
-                    </thead>
-
-
-                    <tbody id="tableDataAksesCOA" class="text-left" >
-                      <tr >
-
-                          <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                          <td>-</td>
-                          <td>-</td>
-                    </tr>
-
-
-                    </tbody>
-
-
-                  </table>
-                </div>
-              </div>
-        </div>
-
-
-
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+      </div>
     </div>
   </div>
 </div>
 <!-- End modal akses coa-->
 
 <!-- start modal add -->
-<div class="modal fade"  id="formAddUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<div class="modal fade"  id="formAddUser" tabindex="-1" role="dialog" aria-labelledby="judulAddUser" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 540px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="judulAddUser">Tambah User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="row">
-                <div class="col-4">
-                    <label class="form-label">NIK</label>
-                </div>
-                <div class="col-8">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_NIK">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonNIK()">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                  <label class="form-label">User</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_user">
-                </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_add_NIK">NIK</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_NIK" placeholder="NIK">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonNIK('add')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                  <label class="text-left">Password</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="password" class="form-control" id="input_add_password" maxlength="12">
-                </div>
+            <label for="input_add_user">User</label>
+            <input type="text" class="form-control" id="input_add_user" placeholder="User" maxlength="15" autocomplete="off">
+
+            <label for="input_add_password">Password</label>
+            <input type="password" class="form-control" id="input_add_password" maxlength="12" placeholder="Password" autocomplete="new-password">
+
+            <label for="input_add_passwordConfirm">Konfirmasi PW</label>
+            <input type="password" class="form-control" id="input_add_passwordConfirm" onchange="checkPassword()" maxlength="12" placeholder="Ulangi password" autocomplete="new-password">
+
+            <label for="input_add_namaLengkap">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_add_namaLengkap" placeholder="Nama Lengkap" maxlength="50">
+
+            <label for="input_add_departemen">Departemen</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_departemen" placeholder="Kode Departemen" maxlength="15">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDepartemen('add')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Konfirmasi PW</label>
-              </div>
-              <div class="col-8">
-                  <input type="password" class="form-control" id="input_add_passwordConfirm" onchange="checkPassword()" maxlength="12">
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Nama Lengkap</label>
-              </div>
-              <div class="col-8">
-                  <input type="text" class="form-control" id="input_add_namaLengkap">
+            <label for="input_add_jabatan">Jabatan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_jabatan" placeholder="Kode Jabatan" maxlength="15">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonJabatan('add')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="text-left">Departemen</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_departemen">
-                  <div class="input-group-append">
-                    <button type="button" class="btn btn-primary btn-select" onclick="buttonDepartemen()">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <label for="input_add_level">Level</label>
+            <select class="form-control" id="input_add_level">
+              <option value="0">User</option>
+              <option value="1">Supervisor</option>
+              <option value="2">Administrator</option>
+            </select>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                  <label class="text-left">Jabatan</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_jabatan">
-                  <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonJabatan()">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <label for="input_add_status">Status</label>
+            <select class="form-control" id="input_add_status">
+              <option value="0">Offline</option>
+              <option value="1">Online</option>
+            </select>
 
-            <div class="row mt-2">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Level</label>
-                  <select class="form-control" id="input_add_level">
-                    <option value="0">User</option>
-                    <option value="1">Supervisor</option>
-                    <option value="2">Administrator</option>
-                  </select>
-                </div>
-              </div>
+            <label for="input_add_kodeKasir">Kode Kasir</label>
+            <input type="text" class="form-control" id="input_add_kodeKasir" placeholder="Kode Kasir" maxlength="3">
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Status</label>
-                  <select class="form-control" id="input_add_status">
-                    <option value="0">Offline</option>
-                    <option value="1">Online</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Kode Kasir</label>
-              </div>
-              <div class="col-8">
-                  <input type="text" class="form-control" id="input_add_kodeKasir">
-                </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Limit</label>
-              </div>
-              <div class="col-8">
-                <input type="number" class="form-control text-right" id="input_add_limit" value = '0.00'>
-              </div>
-            </div>
-
+            <label for="input_add_limit">Limit</label>
+            <input type="number" class="form-control text-right" id="input_add_limit" value="0" min="0" step="any">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitAddUserData()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddUserData()">Simpan</button>
       </div>
     </div>
   </div>
@@ -564,171 +374,223 @@
 <!-- End modal add-->
 
 
-<!-- start modal add -->
-<div class="modal fade" id="formEditUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<!-- start modal edit -->
+<div class="modal fade" id="formEditUser" tabindex="-1" role="dialog" aria-labelledby="judulEditUser" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 540px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
+        <h5 class="modal-title" id="judulEditUser">Edit User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
-
-            <div class="row">
-                <div class="col-4">
-                    <label class="form-label">NIK</label>
-                </div>
-                <div class="col-8">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="input_edit_NIK">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonNIK()">+</button>
-                        </div>
-                    </div>
-                </div>
+          <div class="bs-form bs-form-1">
+            <label for="input_edit_NIK">NIK</label>
+            <div class="input-group">
+              {{-- NIK hanya ditampilkan: Sp_FLpassWEB mode U tidak mengubah keynik (baris update-nya di-comment
+                   di SP), jadi mengganti NIK di form Edit dulu tidak pernah tersimpan. --}}
+              <input type="text" class="form-control" id="input_edit_NIK" placeholder="NIK" disabled>
+              {{-- <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonNIK('edit')" title="Cari"><i class="bi bi-search"></i></button>
+              </div> --}}
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                  <label class="form-label">User</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_user" disabled>
-                </div>
-              </div>
-            </div>
+            <label for="input_edit_user">User</label>
+            <input type="text" class="form-control" id="input_edit_user" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Nama Lengkap</label>
-              </div>
-              <div class="col-8">
-                  <input type="text" class="form-control" id="input_edit_namaLengkap">
+            <label for="input_edit_namaLengkap">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_edit_namaLengkap" placeholder="Nama Lengkap" maxlength="50">
+
+            <label for="input_edit_departemen">Departemen</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_edit_departemen" placeholder="Kode Departemen" maxlength="15">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDepartemen('edit')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="text-left">Departemen</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_departemen">
-                  <div class="input-group-append">
-                    <button type="button" class="btn btn-primary btn-select" onclick="buttonDepartemen()">+</button>
-                  </div>
-                </div>
+            <label for="input_edit_jabatan">Jabatan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_edit_jabatan" placeholder="Kode Jabatan" maxlength="15">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonJabatan('edit')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col-4">
-                  <label class="text-left">Jabatan</label>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_jabatan">
-                  <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonJabatan()">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <label for="input_edit_level">Level</label>
+            <select class="form-control" id="input_edit_level">
+              <option value="0">User</option>
+              <option value="1">Supervisor</option>
+              <option value="2">Administrator</option>
+            </select>
 
-            <div class="row mt-2">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Level</label>
-                  <select class="form-control" id="input_edit_level">
-                    <option value="0">User</option>
-                    <option value="1">Supervisor</option>
-                    <option value="2">Administrator</option>
-                  </select>
-                </div>
-              </div>
+            <label for="input_edit_status">Status</label>
+            <select class="form-control" id="input_edit_status">
+              <option value="0">Offline</option>
+              <option value="1">Online</option>
+            </select>
 
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>Status</label>
-                  <select class="form-control" id="input_edit_status">
-                    <option value="0">Offline</option>
-                    <option value="1">Online</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            <label for="input_edit_kodeKasir">Kode Kasir</label>
+            <input type="text" class="form-control" id="input_edit_kodeKasir" placeholder="Kode Kasir" maxlength="3">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Kode Kasir</label>
-              </div>
-              <div class="col-8">
-                  <input type="text" class="form-control" id="input_edit_kodeKasir">
-                </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                  <label class="text-left">Limit</label>
-              </div>
-              <div class="col-8">
-                <input type="number" class="form-control text-right" id="input_edit_limit" value = '0.00'>
-              </div>
-            </div>
-
+            <label for="input_edit_limit">Limit</label>
+            <input type="number" class="form-control text-right" id="input_edit_limit" value="0" min="0" step="any">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAddUserEdit()">Submit Edit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddUserEdit()">Simpan</button>
       </div>
     </div>
   </div>
 </div>
-<!-- End modal add-->
+<!-- End modal edit-->
 
+@include('master.partials.modalOpenMaster')
 
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
-
-$(document).ready(function () {
-  document.getElementById('breadcrumb').innerHTML = "Set Pemakai"
-});
-
 
 // addEventListener("beforeunload", (event) => {
 //   window.location.href = "{{ url('logout')}}";
 // });
 
+  let dataRefresh = []
+  let listUser = []
   let listAkses = []
   let listAksesReport = []
   let listCOA = []
   let listAksesCOA = []
 
+  // Modal pemilih (NIK / Departemen / Jabatan) dipakai form Tambah dan Edit - hasil pilihan
+  // diisikan ke form yang membukanya. Dulu selalu ke form Tambah, jadi pemilih di form Edit
+  // tidak mengubah apa-apa.
+  let pickerTarget = 'add'
 
-  // Cosmetic search box wired to the existing DataTable instance.
-  // Table searching itself stays governed by the DataTables config above;
-  // this just gives users a visible field that filters client-side.
-  $("#tabel_filter_visual").on("keyup", function () {
-    $("#tabel").DataTable().search(this.value).draw();
-  });
+  // Nilai dari database ditulis ke HTML lewat fungsi ini: nama/keterangan yang mengandung
+  // kutip atau < > tidak lagi merusak baris tabel & onclick.
+  function spEsc (v) {
+    if (v === null || v === undefined) { return '' }
+    return String(v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
 
-  function deleteUser (username ) {
-    console.log('deleteUser')
-    let _token = $("#_token").val()
-    console.log(username)
+  // Respons AJAX yang bukan data (mis. halaman login karena sesi habis) ditangani di sini.
+  function spBukanData (res, harap) {
+    let ok = harap === 'array' ? Array.isArray(res) : (res && typeof res === 'object')
+    if (!ok) {
+      alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+      return true
+    }
+    return false
+  }
 
+  function spGagal (err) {
+    console.log(err)
+    alertify.error('Gagal terhubung ke server, silakan coba lagi')
+  }
 
-    alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus user ' + username + ' ?',
+  function badgeLevel (tingkat) {
+    if (Number(tingkat) === 0) { return '<span class="sp-badge is-user">User</span>' }
+    if (Number(tingkat) === 1) { return '<span class="sp-badge is-supervisor">Supervisor</span>' }
+    if (Number(tingkat) === 2) { return '<span class="sp-badge is-admin">Administrator</span>' }
+    return spEsc(tingkat)
+  }
+
+  function isiRingkasan (res) {
+    let aktif = res.filter(u => Number(u.STATUS) === 1).length
+    document.getElementById('stat_total').textContent = res.length
+    document.getElementById('stat_aktif').textContent = aktif
+    document.getElementById('stat_nonaktif').textContent = res.length - aktif
+    document.getElementById('stat_admin').textContent = res.filter(u => Number(u.TINGKAT) === 2).length
+  }
+
+  function loadAll () {
+
+    let berhasil = false
+    $.ajax({
+      url: "{!! url('newsetpemakailoadall') !!}",
+      type: "get",
+      async: false,
+      success: function(res) {
+        if (spBukanData(res, 'array')) { return }
+        listUser = res
+        berhasil = true
+      },
+      error: spGagal
+    })
+    if (!berhasil) { return }
+
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+      $('#tabel').DataTable().destroy()
+    }
+
+    // Urutan sel HARUS sama dengan <thead>: Actions, User ID, Nama, Level. Dulu baris hasil
+    // loadAll() menaruh tombol aksi di kolom terakhir, jadi setelah edit/hapus tombolnya
+    // pindah ke bawah kolom Level.
+    let rowTable = ''
+    listUser.forEach((item, i) => {
+      rowTable += `<tr>
+        <td style="white-space:nowrap;" class="text-center">
+          <div class="action-buttons-wrap">
+            <button title="Edit User" class="btn-action-sm btn-action-success" type="button" onclick="editUser(${i})"><i class="bi bi-pen"></i></button>
+            <button title="Akses Menu" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses(${i})"><i class="bi bi-card-checklist"></i></button>
+            <button title="Akses Report" class="btn-action-sm btn-action-primary" type="button" onclick="editAksesReport(${i})"><i class="bi bi-card-list"></i></button>
+            <button title="Akses COA" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA(${i})"><i class="bi bi-card-heading"></i></button>
+            <button title="Hapus User" class="btn-action-sm btn-action-danger" type="button" onclick="deleteUser(${i})"><i class="bi bi-trash"></i></button>
+          </div>
+        </td>
+        <td>${spEsc(item.USERID)}</td>
+        <td>${spEsc(item.FullName)}</td>
+        <td>${badgeLevel(item.TINGKAT)}</td>
+      </tr>`
+    })
+    {{-- Dinonaktifkan: tiga tombol ini belum punya fungsi sendiri - "Akses Gudang" membuka
+         modal Akses Menu, "COA Report" & "Akses COA BS" membuka modal Akses COA biasa.
+         Aktifkan lagi setelah modal & route-nya dibuat.
+      <button title="Akses Gudang" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses(${i})"><i class="bi bi-box2"></i></button>
+      <button title="COA Report" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA(${i})"><i class="bi bi-postcard"></i></button>
+      <button title="Akses COA BS" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA(${i})"><i class="bi bi-postcard"></i></button>
+    --}}
+
+    document.getElementById("tabel_data").innerHTML = rowTable
+    isiRingkasan(listUser)
+
+    $("#tabel").DataTable({
+      "lengthChange": false,
+      "paging": true,
+      "searching": true,
+      "ordering": false,
+      "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
+      "pageLength": MasterList.panjang()
+    })
+    MasterList.selesai('#tabel')
+
+  }
+
+  function userDari (idx) {
+    return listUser[idx] ? listUser[idx].username : ''
+  }
+
+  function deleteUser (idx) {
+    let username = userDari(idx)
+    if (!username) { return }
+
+    alertify.confirm('Hapus User', 'Apakah yakin ingin menghapus user ' + spEsc(username) + ' ?',
         function() {
-          let _token = $("#_token").val();
-          let choice = "D"
+          let _token = $("#_token").val()
 
           $.ajax({
             url: "{!! url('newsetpemakaideleteuser') !!}",
@@ -739,339 +601,42 @@ $(document).ready(function () {
               username: username
             },
             success: function(res) {
-              console.log(res)
-              // res.forEach((item, i) => {
-              //   console.log(item)
-              // });
-              alertify.success("Berhasil delete user")
-              loadAll()
-
-            }
+              if (res != 1) {
+                alertify.warning(res)
+              } else {
+                alertify.success("User " + spEsc(username) + " telah dihapus")
+                loadAll()
+              }
+            },
+            error: spGagal
           })
         }
       ,function(){
-        console.log('no')
-      });
+      })
 
   }
 
-  function loadAll () {
+  /* ================= Akses Menu ================= */
 
+  // [id checkbox, kolom DBFLMENUWEB, nama field untuk sp_updatesetmenuweb1]
+  const kolomAkses = [
+    ['hasaccess', 'HASACCESS'],
+    ['istambah', 'ISTAMBAH'],
+    ['isKoreksi', 'ISKOREKSI'],
+    ['isHapus', 'ISHAPUS'],
+    ['isCetak', 'ISCETAK'],
+    ['isExport', 'ISEXPORT'],
+    ['isOtorisasi1', 'IsOtorisasi1'],
+    ['isOtorisasi2', 'IsOtorisasi2'],
+    ['isOtorisasi3', 'IsOtorisasi3'],
+    ['isOtorisasi4', 'IsOtorisasi4'],
+    ['isOtorisasi5', 'IsOtorisasi5'],
+    ['isBatal', 'IsBatal']
+  ]
 
-    $.ajax({
-      url: "{!! url('newsetpemakailoadall') !!}",
-      type: "get",
-      async: false,
-      data: {
-        // _token : _token,
-        // username: username
-      },
-      success: function(res) {
-        console.log(res)
-        // res.forEach((item, i) => {
-        //   console.log(item)
-        // });
-        rowTable = ''
-        res.forEach((item, i) => {
-          rowTable +=
-          `<tr>
-            <td>${item.USERID}</td>
-            <td>${item.FullName}</td>
-            <td>
-            `
-            if (Number(item.TINGKAT) == 0) {
-              rowTable += '<span class="sp-badge is-user">User</span>'
-            } else if (Number(item.TINGKAT) == 1) {
-              rowTable += '<span class="sp-badge is-supervisor">Supervisor</span>'
-            } else {
-              rowTable += '<span class="sp-badge is-admin">Administrator</span>'
-            }
-            rowTable +=
-            `
-            </td>
-                <td class="text-center">
-                <div class="action-buttons-wrap">
-                <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" title="Koreksi" type="button" onclick="editUser('${item.username}', '${item.FullName}', '${item.kodeBag}', '${item.KodeJab}', '${item.KodeKasir}', '${item.limit}', '${item.STATUS}', '${item.TINGKAT}', '${item.keynik}')" ><i class="bi bi-pen"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('${item.username}')"><i class="bi bi-card-checklist"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="Set Report" class="btn-action-sm btn-action-primary" type="button" onclick="editAksesReport('${item.username}')"><i class="bi bi-card-list"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="Akses Gudang" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('${item.username}')"><i class="bi bi-box2"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="Akses COA" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA('${item.username}')"><i class="bi bi-card-heading"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="COA Report" class="btn-action-sm btn-action-primary" type="button" onclick="editCOA('${item.username}')"><i class="bi bi-postcard"></i></button>
-                <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="deleteUser('${item.username}')"><i class="bi bi-trash"></i></button>
-                </div>
-                </td>
-          </tr>
-          `
-        });
-        document.getElementById("tabel_data").innerHTML = rowTable
-        
-
-      }
-    })
-
-  }
-
-  function checkAll (index , kodemenu , field) {
-    console.log(index, kodemenu, field)
-
-    // console.log(checkBox)
-    let checkBox = document.getElementById(`akses_checkbox_${field}${index}`).checked
-    let kodeLength = kodemenu.length
-    for (let i = Number(index) + 1 ; i < listAkses.length; i++) {
-      // console.log(listAkses[i].KODEMENU.slice(0,kodeLength) , kodeLen)
-      console.log(kodeLength)
-      console.log(listAkses[i].KODEMENU.slice(0,kodeLength) , kodemenu)
-      if (listAkses[i].KODEMENU.slice(0,kodeLength) !== kodemenu || listAkses[i].L0 == 0 ) {
-        break
-      }
-      document.getElementById(`akses_checkbox_${field}${i}`).checked = checkBox
-      console.log(listAkses[i].KODEMENU)
-    }
-  }
-
-
-  function refreshCOA (username) {
-    console.log('refreshCOA')
-    console.log(username)
-    let _token = $("#_token").val();
-
-
-    $.ajax({
-      url: "{!! url('newsetpemakailistcoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username: username
-      },
-      success: function(res) {
-        console.log(res)
-        // res.forEach((item, i) => {
-        //   console.log(item)
-        // });
-        listCOA = res.listCoa
-        listAksesCOA = res.listAksesCoa
-
-      }
-    })
-    let rowTable = ""
-    listCOA.forEach((item, i) => {
-      rowTable += `
-      <tr>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      <td class="text-center"><input type="checkbox" onclick="clickCheckboxCOA('${item.Perkiraan}', '${i}')"  id="COA_checkbox${i}"></input></td>
-      </tr>
-      `
-    });
-    document.getElementById("tableDataCOA").innerHTML = rowTable
-
-    let rowTableAkses = ""
-    listAksesCOA.forEach((item, i) => {
-      rowTableAkses += `
-      <tr>
-      <td class="text-center"><input type="checkbox" onclick="clickCheckboxAksesCOA('${item.Perkiraan}', '${i}')" id="aksesCOA_checkbox${i}"></input></td>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      </tr>
-      `
-    });
-
-    document.getElementById("tableDataAksesCOA").innerHTML = rowTableAkses
-
-  }
-
-  function editCOA (username) {
-
-    console.log('editCOA')
-    console.log(username)
-
-    let _token = $("#_token").val();
-
-    document.getElementById("input_coa_username").value = username
-
-    $.ajax({
-      url: "{!! url('newsetpemakailistcoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username: username
-      },
-      success: function(res) {
-        console.log(res)
-        // res.forEach((item, i) => {
-        //   console.log(item)
-        // });
-        listCOA = res.listCoa
-        listAksesCOA = res.listAksesCoa
-
-      }
-    })
-    let rowTable = ""
-    listCOA.forEach((item, i) => {
-      rowTable += `
-      <tr>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      <td class="text-center"><input type="checkbox" onclick="clickCheckboxCOA('${item.Perkiraan}', '${i}')"  id="COA_checkbox${i}"></input></td>
-      </tr>
-      `
-    });
-    document.getElementById("tableDataCOA").innerHTML = rowTable
-
-    let rowTableAkses = ""
-    listAksesCOA.forEach((item, i) => {
-      rowTableAkses += `
-      <tr>
-      <td class="text-center"><input type="checkbox" onclick="clickCheckboxAksesCOA('${item.Perkiraan}', '${i}')" id="aksesCOA_checkbox${i}"></input></td>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      </tr>
-      `
-    });
-
-    document.getElementById("tableDataAksesCOA").innerHTML = rowTableAkses
-    $("#formCOA").modal('toggle')
-
-  }
-
-  function buttonDeleteAllCOA () {
-    // newsetpemakaideleteallaksescoa
-
-    let _token = $("#_token").val();
-    let username = $("#input_coa_username").val();
-    $.ajax({
-      url: "{!! url('newsetpemakaideleteallaksescoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username,
-      },
-      success: function(res) {
-        console.log(res)
-        refreshCOA(username)
-      }
-    })
-
-  }
-
-  function buttonDeleteCOA () {
-    deleteAksesCOA = []
-
-    let _token = $("#_token").val();
-    let username = $("#input_coa_username").val();
-    listAksesCOA.forEach((item, i) => {
-        if (document.getElementById(`aksesCOA_checkbox${i}`).checked) {
-          deleteAksesCOA.push(item)
-        }
-    });
-    console.log(deleteAksesCOA)
-    // newsetpemakaideleteaksescoa
-    $.ajax({
-      url: "{!! url('newsetpemakaideleteaksescoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username,
-        perkiraan: deleteAksesCOA
-      },
-      success: function(res) {
-        console.log(res)
-        refreshCOA(username)
-
-      }
-    })
-  }
-
-  function buttonAddAllCOA () {
-    // newsetpemakaiupdateaddallcoa
-    let username = $("#input_coa_username").val();
-
-    let _token = $("#_token").val();
-    $.ajax({
-      url: "{!! url('newsetpemakaiupdateaddallcoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username
-      },
-      success: function(res) {
-        console.log(res)
-        refreshCOA(username)
-
-      }
-    })
-  }
-
-  function buttonAddCOA () {
-    // newsetpemakaiupdateaddcoa
-    let username = $("#input_coa_username").val();
-
-    let _token = $("#_token").val();
-    $.ajax({
-      url: "{!! url('newsetpemakaiupdateaddcoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        username
-      },
-      success: function(res) {
-        console.log(res)
-        refreshCOA(username)
-
-      }
-    })
-  }
-
-  function clickCheckboxCOA (perkiraan, index) {
-    console.log('clickCheckboxCOA')
-    let username = $("#input_coa_username").val();
-
-    let _token = $("#_token").val();
-    let nilai = 0
-    if (document.getElementById(`COA_checkbox${index}`).checked) {
-      nilai = 1
-    }
-
-    console.log(perkiraan, username, index, nilai)
-
-    $.ajax({
-      url: "{!! url('newsetpemakaiupdateiskirimcoa') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        perkiraan,
-        nilai
-      },
-      success: function(res) {
-        console.log(res)
-
-      }
-    })
-
-  }
-
-  function clickCheckboxAksesCOA (perkiraan, index) {
-    console.log('clickCheckboxAksesCOA')
-    let username = $("#input_coa_username").val();
-
-    let nilai = 0
-    if (document.getElementById(`aksesCOA_checkbox${index}`).checked) {
-      nilai = 1
-    }
-
-    console.log(perkiraan , username, index , nilai)
-  }
-
-  function editAkses (username) {
-    console.log(username)
-    let _token = $("#_token").val();
+  function muatAkses (username) {
+    let _token = $("#_token").val()
+    let berhasil = false
     $.ajax({
       url: "{!! url('newsetpemakailistakses') !!}",
       type: "post",
@@ -1081,182 +646,62 @@ $(document).ready(function () {
         userid: username
       },
       success: function(res) {
-        console.log(res)
-        res.forEach((item, i) => {
-          console.log(item)
-        });
+        if (spBukanData(res, 'array')) { return }
         listAkses = res
-
-      }
-    })
-
-    let rowTable = ""
-    listAkses.forEach((item, i) => {
-      if (item.L0 == 0) {
-        rowTable += `<tr style="background-color: #FDFD96">
-        <td>${item.KODEMENU}</td>
-        <td>${item.Keterangan}</td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","hasaccess")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","istambah")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isKoreksi")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isHapus")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isCetak")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isExport")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi1")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi2")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi3")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi4")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi5")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isBatal")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
-        </tr>`
-      } else {
-        rowTable += `<tr>
-        <td>${item.KODEMENU}</td>
-        <td>${item.Keterangan}</td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
-        </tr>`
-      }
-
-    });
-
-    document.getElementById("input_add_username").value = username
-
-    document.getElementById("addTableData").innerHTML = rowTable
-
-    listAkses.forEach((item, i) => {
-      if (item.HASACCESS == 1) {
-        document.getElementById(`akses_checkbox_hasaccess${i}`).checked = true;
-      }
-      if (item.ISTAMBAH == 1) {
-        document.getElementById(`akses_checkbox_istambah${i}`).checked = true;
-      }
-      if (item.ISKOREKSI == 1) {
-        document.getElementById(`akses_checkbox_isKoreksi${i}`).checked = true;
-      }
-      if (item.IsOtorisasi1 == 1) {
-        document.getElementById(`akses_checkbox_isOtorisasi1${i}`).checked = true;
-      }
-      if (item.IsOtorisasi2 == 1) {
-        document.getElementById(`akses_checkbox_isOtorisasi2${i}`).checked = true;
-      }
-      if (item.IsOtorisasi3 == 1) {
-        document.getElementById(`akses_checkbox_isOtorisasi3${i}`).checked = true;
-      }
-      if (item.IsOtorisasi4 == 1) {
-        document.getElementById(`akses_checkbox_isOtorisasi4${i}`).checked = true;
-      }
-      if (item.IsOtorisasi5 == 1) {
-        document.getElementById(`akses_checkbox_isOtorisasi5${i}`).checked = true;
-      }
-      if (item.ISHAPUS == 1) {
-        document.getElementById(`akses_checkbox_isHapus${i}`).checked = true;
-      }
-      if (item.ISCETAK == 1) {
-        document.getElementById(`akses_checkbox_isCetak${i}`).checked = true;
-      }
-      if (item.ISEXPORT == 1) {
-        document.getElementById(`akses_checkbox_isExport${i}`).checked = true;
-      }
-      if (item.IsBatal == 1) {
-        document.getElementById(`akses_checkbox_isBatal${i}`).checked = true;
-      }
-    });
-
-    $("#form").modal('toggle')
-
-  }
-
-  function editAksesReport (username) {
-    console.log(username)
-    let _token = $("#_token").val();
-    $.ajax({
-      url: "{!! url('newsetpemakailistaksesreport') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        userid: username
+        berhasil = true
       },
-      success: function(res) {
-        console.log(res)
-        // res.forEach((item, i) => {
-        //   console.log(item)
-        // });
-        listAksesReport = res
-
-      }
+      error: spGagal
     })
+    if (!berhasil) { return false }
 
     let rowTable = ""
-    listAksesReport.forEach((item, i) => {
-        rowTable += `<tr>
-        <td>${item.KODEMENU}</td>
-        <td>${item.Keterangan}</td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}" ,"${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_report_checkbox_hasaccess${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}" ,"${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_report_checkbox_isdesign${i}"></td>
-        <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}" ,"${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_report_checkbox_isexport${i}"></td>
-        </tr>`
+    listAkses.forEach((item, i) => {
+      let induk = Number(item.L0) === 0
+      rowTable += `<tr${induk ? ' class="akses-induk"' : ''}>
+        <td>${spEsc(item.KODEMENU)}</td>
+        <td>${spEsc(item.Keterangan)}</td>`
+      kolomAkses.forEach(([field, kolom]) => {
+        let klik = induk
+          ? `clickUpdateAksesMenuHeader(${i}, '${field}')`
+          : `clickUpdateAksesMenu(${i})`
+        rowTable += `<td class="cek"><input type="checkbox" id="akses_checkbox_${field}${i}" onclick="${klik}"${Number(item[kolom]) === 1 ? ' checked' : ''}></td>`
+      })
+      rowTable += `</tr>`
+    })
 
-    });
-
-
-
-    document.getElementById("input_report_username").value = username
-    //
-    document.getElementById("reportTableData").innerHTML = rowTable
-    //
-    listAksesReport.forEach((item, i) => {
-      if (item.Access == 1) {
-        document.getElementById(`akses_report_checkbox_hasaccess${i}`).checked = true;
-      }
-      if (item.IsDesign == 1) {
-        document.getElementById(`akses_report_checkbox_isdesign${i}`).checked = true;
-      }
-      if (item.Isexport == 1) {
-        document.getElementById(`akses_report_checkbox_isexport${i}`).checked = true;
-      }
-    });
-
-    $("#formReport").modal('toggle')
-
-  }
-
-  function clickUpdateAksesMenuHeader (index, kodemenu, field) {
-    console.log('clickUpdateAksesMenuHeader')
-    console.log(index, kodemenu, field)
-
-    let _token = $("#_token").val();
-    let username = $("#input_add_username").val();
-    let nilai = 0
-
-    if (document.getElementById(`akses_checkbox_${field}${index}`).checked) {
-      nilai = 1
+    if (!listAkses.length) {
+      rowTable = '<tr><td colspan="14" class="akses-kosong">Tidak ada data menu</td></tr>'
     }
 
+    document.getElementById("input_add_username").value = username
+    document.getElementById("label_akses_username").textContent = username
+    document.getElementById("addTableData").innerHTML = rowTable
+    return true
+  }
+
+  function editAkses (idx) {
+    let username = userDari(idx)
+    if (!username) { return }
+    if (muatAkses(username)) {
+      $("#form").modal('show')
+    }
+  }
+
+  function clickUpdateAksesMenuHeader (index, field) {
+    let _token = $("#_token").val()
+    let username = $("#input_add_username").val()
+    let kodemenu = listAkses[index].KODEMENU
     let checkBox = document.getElementById(`akses_checkbox_${field}${index}`).checked
+    let nilai = checkBox ? 1 : 0
+
+    // Centang menu induk ikut mencentang semua sub menu di bawahnya.
     let kodeLength = kodemenu.length
     for (let i = Number(index) + 1 ; i < listAkses.length; i++) {
-      if (listAkses[i].KODEMENU.slice(0,kodeLength) !== kodemenu || listAkses[i].L0 == 0 ) {
+      if (listAkses[i].KODEMENU.slice(0,kodeLength) !== kodemenu || Number(listAkses[i].L0) === 0 ) {
         break
       }
       document.getElementById(`akses_checkbox_${field}${i}`).checked = checkBox
     }
-
-
-    console.log(kodemenu , nilai , username , field)
-
-    // newsetpemakaispupdateaksesheader
 
     $.ajax({
       url: "{!! url('newsetpemakaispupdateaksesheader') !!}",
@@ -1270,21 +715,22 @@ $(document).ready(function () {
         headermenu: kodemenu
       },
       success: function(res) {
-        console.log(res)
-
-
+        if (res != 1) {
+          alertify.warning('Akses menu ' + spEsc(kodemenu) + ' gagal disimpan')
+          muatAkses(username)
+        }
+      },
+      error: function (err) {
+        spGagal(err)
+        // Tampilan dikembalikan ke isi database supaya tidak menyesatkan.
+        muatAkses(username)
       }
     })
   }
 
-  function clickUpdateAksesMenu (index , kodemenu) {
-
-    console.log('clickUpdateAksesMenu')
-    console.log(index, kodemenu)
-    let _token = $("#_token").val();
-    let akses = []
-    let aksesObj = {}
-    let username = $("#input_add_username").val();
+  function clickUpdateAksesMenu (index) {
+    let _token = $("#_token").val()
+    let username = $("#input_add_username").val()
 
     let tempData = {
       KODEMENU: listAkses[index].KODEMENU,
@@ -1301,46 +747,17 @@ $(document).ready(function () {
       ISOTO3: 0,
       ISOTO4: 0,
       ISOTO5: 0,
-
     }
-    if (document.getElementById(`akses_checkbox_hasaccess${index}`).checked) {
-      tempData.HASACCESS = 1
+    const peta = {
+      hasaccess: 'HASACCESS', istambah: 'ISTAMBAH', isKoreksi: 'ISKOREKSI', isHapus: 'ISHAPUS',
+      isCetak: 'ISCETAK', isBatal: 'ISBATAL', isExport: 'ISEXPORT',
+      isOtorisasi1: 'ISOTO1', isOtorisasi2: 'ISOTO2', isOtorisasi3: 'ISOTO3', isOtorisasi4: 'ISOTO4', isOtorisasi5: 'ISOTO5'
     }
-    if (document.getElementById(`akses_checkbox_istambah${index}`).checked) {
-      tempData.ISTAMBAH = 1
-    }
-    if (document.getElementById(`akses_checkbox_isKoreksi${index}`).checked) {
-      tempData.ISKOREKSI = 1
-    }
-    if (document.getElementById(`akses_checkbox_isHapus${index}`).checked) {
-      tempData.ISHAPUS = 1
-    }
-    if (document.getElementById(`akses_checkbox_isCetak${index}`).checked) {
-      tempData.ISCETAK = 1
-    }
-    if (document.getElementById(`akses_checkbox_isBatal${index}`).checked) {
-      tempData.ISBATAL = 1
-    }
-    if (document.getElementById(`akses_checkbox_isExport${index}`).checked) {
-      tempData.ISEXPORT = 1
-    }
-    if (document.getElementById(`akses_checkbox_isOtorisasi1${index}`).checked) {
-      tempData.ISOTO1 = 1
-    }
-    if (document.getElementById(`akses_checkbox_isOtorisasi2${index}`).checked) {
-      tempData.ISOTO2 = 1
-    }
-    if (document.getElementById(`akses_checkbox_isOtorisasi3${index}`).checked) {
-      tempData.ISOTO3 = 1
-    }
-    if (document.getElementById(`akses_checkbox_isOtorisasi4${index}`).checked) {
-      tempData.ISOTO4 = 1
-    }
-    if (document.getElementById(`akses_checkbox_isOtorisasi5${index}`).checked) {
-      tempData.ISOTO5 = 1
-    }
-    console.log(username)
-    console.log(tempData)
+    Object.keys(peta).forEach(field => {
+      if (document.getElementById(`akses_checkbox_${field}${index}`).checked) {
+        tempData[peta[field]] = 1
+      }
+    })
 
     $.ajax({
       url: "{!! url('newsetpemakaispupdateakses') !!}",
@@ -1352,44 +769,81 @@ $(document).ready(function () {
         tempData: tempData
       },
       success: function(res) {
-        console.log(res)
-
+        if (res != 1) {
+          alertify.warning('Akses menu ' + spEsc(tempData.KODEMENU) + ' gagal disimpan')
+          muatAkses(username)
+        }
+      },
+      error: function (err) {
+        spGagal(err)
+        muatAkses(username)
       }
     })
 
   }
 
-  function clickUpdateAksesMenuReport (index , kodemenu) {
+  /* ================= Akses Report ================= */
 
-    console.log('clickUpdateAksesMenuReport')
-    console.log(index, kodemenu)
-    let _token = $("#_token").val();
-    let akses = []
-    let aksesObj = {}
-    let username = $("#input_report_username").val();
+  function muatAksesReport (username) {
+    let _token = $("#_token").val()
+    let berhasil = false
+    $.ajax({
+      url: "{!! url('newsetpemakailistaksesreport') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        userid: username
+      },
+      success: function(res) {
+        if (spBukanData(res, 'array')) { return }
+        listAksesReport = res
+        berhasil = true
+      },
+      error: spGagal
+    })
+    if (!berhasil) { return false }
+
+    let rowTable = ""
+    listAksesReport.forEach((item, i) => {
+        rowTable += `<tr>
+        <td>${spEsc(item.KODEMENU)}</td>
+        <td>${spEsc(item.Keterangan)}</td>
+        <td class="cek"><input onclick="clickUpdateAksesMenuReport(${i})" type="checkbox" id="akses_report_checkbox_hasaccess${i}"${Number(item.Access) === 1 ? ' checked' : ''}></td>
+        <td class="cek"><input onclick="clickUpdateAksesMenuReport(${i})" type="checkbox" id="akses_report_checkbox_isdesign${i}"${Number(item.IsDesign) === 1 ? ' checked' : ''}></td>
+        <td class="cek"><input onclick="clickUpdateAksesMenuReport(${i})" type="checkbox" id="akses_report_checkbox_isexport${i}"${Number(item.Isexport) === 1 ? ' checked' : ''}></td>
+        </tr>`
+    })
+
+    if (!listAksesReport.length) {
+      rowTable = '<tr><td colspan="5" class="akses-kosong">Tidak ada data report</td></tr>'
+    }
+
+    document.getElementById("input_report_username").value = username
+    document.getElementById("label_report_username").textContent = username
+    document.getElementById("reportTableData").innerHTML = rowTable
+    return true
+  }
+
+  function editAksesReport (idx) {
+    let username = userDari(idx)
+    if (!username) { return }
+    if (muatAksesReport(username)) {
+      $("#formReport").modal('show')
+    }
+  }
+
+  function clickUpdateAksesMenuReport (index) {
+    let _token = $("#_token").val()
+    let username = $("#input_report_username").val()
 
     let tempData = {
       KODEMENU: listAksesReport[index].KODEMENU,
       Keterangan: listAksesReport[index].Keterangan,
-      HASACCESS: 0,
-      ISDESIGN: 0,
-      ISEXPORT: 0
-
+      HASACCESS: document.getElementById(`akses_report_checkbox_hasaccess${index}`).checked ? 1 : 0,
+      ISDESIGN: document.getElementById(`akses_report_checkbox_isdesign${index}`).checked ? 1 : 0,
+      ISEXPORT: document.getElementById(`akses_report_checkbox_isexport${index}`).checked ? 1 : 0
     }
-
-        if (document.getElementById(`akses_report_checkbox_hasaccess${index}`).checked) {
-          tempData.HASACCESS = 1
-        }
-        if (document.getElementById(`akses_report_checkbox_isdesign${index}`).checked) {
-          tempData.ISDESIGN = 1
-        }
-        if (document.getElementById(`akses_report_checkbox_isexport${index}`).checked) {
-          tempData.ISEXPORT = 1
-        }
-
-
-    console.log(username)
-    console.log(tempData)
 
     $.ajax({
       url: "{!! url('newsetpemakaispupdateaksesreport') !!}",
@@ -1401,385 +855,496 @@ $(document).ready(function () {
         tempData: tempData
       },
       success: function(res){
-        console.log(res)
-
-
+        if (res != 1) {
+          alertify.warning('Akses report ' + spEsc(tempData.KODEMENU) + ' gagal disimpan')
+          muatAksesReport(username)
+        }
+      },
+      error: function (err) {
+        spGagal(err)
+        muatAksesReport(username)
       }
     })
 
-
   }
 
-function buttonAdd () {
-  $("#formAddUser").modal('toggle')
-}
+  /* ================= Akses COA ================= */
 
-function editUser (user, fullname, kodebag, kodejab, kodekasir, limit, status, tingkat, nik) {
- let _token = $("#_token").val();
+  function refreshCOA (username) {
+    let _token = $("#_token").val()
+    let berhasil = false
 
-  $.ajax({
-    url: "{!! url('newsetpemakaidetailuser') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token : _token,
-      username: user
-    },
-    success: function(res) {
-      console.log("==========")
+    $.ajax({
+      url: "{!! url('newsetpemakailistcoa') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        username: username
+      },
+      success: function(res) {
+        if (spBukanData(res, 'object') || !Array.isArray(res.listCoa)) { return }
+        listCOA = res.listCoa
+        listAksesCOA = res.listAksesCoa || []
+        berhasil = true
+      },
+      error: spGagal
+    })
+    if (!berhasil) { return false }
 
-      document.getElementById('input_edit_NIK').value = res[0].keynik;
-      document.getElementById('input_edit_user').value = res[0].USERID;
-      document.getElementById('input_edit_namaLengkap').value = res[0].FullName;
-      document.getElementById('input_edit_departemen').value = res[0].kodeBag;
-      document.getElementById('input_edit_jabatan').value = res[0].KodeJab;
-      document.getElementById('input_edit_level').value = res[0].TINGKAT;
-      document.getElementById('input_edit_status').value = res[0].STATUS;
-      document.getElementById('input_edit_kodeKasir').value = res[0].KodeKasir
-      document.getElementById('input_edit_limit').value = Number(res[0].limit) ? res[0].limit : '0.00'
-
-      $("#formEditUser").modal('toggle')
-
+    let rowTable = ""
+    listCOA.forEach((item, i) => {
+      rowTable += `
+      <tr>
+      <td class="cek"><input type="checkbox" onclick="clickCheckboxCOA(${i})" id="COA_checkbox${i}"></td>
+      <td>${spEsc(item.Perkiraan)}</td>
+      <td>${spEsc(item.Keterangan)}</td>
+      </tr>
+      `
+    })
+    if (!listCOA.length) {
+      rowTable = '<tr><td colspan="3" class="akses-kosong">Semua perkiraan sudah diberikan</td></tr>'
     }
-  })
+    document.getElementById("tableDataCOA").innerHTML = rowTable
 
+    let rowTableAkses = ""
+    listAksesCOA.forEach((item, i) => {
+      rowTableAkses += `
+      <tr>
+      <td class="cek"><input type="checkbox" id="aksesCOA_checkbox${i}"></td>
+      <td>${spEsc(item.Perkiraan)}</td>
+      <td>${spEsc(item.Keterangan)}</td>
+      </tr>
+      `
+    })
+    if (!listAksesCOA.length) {
+      rowTableAkses = '<tr><td colspan="3" class="akses-kosong">Belum ada akses perkiraan</td></tr>'
+    }
+    document.getElementById("tableDataAksesCOA").innerHTML = rowTableAkses
 
-}
-
-function buttonNIK () {
-  console.log('asd');
-
-  let _token = $("#_token").val();
-
-   if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
-    $('#tabelModalOpen').DataTable().destroy();
+    document.getElementById("jumlahCOA").textContent = listCOA.length
+    document.getElementById("jumlahAksesCOA").textContent = listAksesCOA.length
+    return true
   }
 
-  $.ajax({
-    url: "{!! url('newsetpemakaiLoadKaryawan') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function (res) {
-      console.log(res);
-      dataRefresh = res;
-    },
-  });
+  function editCOA (idx) {
+    let username = userDari(idx)
+    if (!username) { return }
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
+    document.getElementById("input_coa_username").value = username
+    document.getElementById("label_coa_username").textContent = username
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectKaryawan('${item.NIK}')"><i class="bi bi-plus"></i></button>
-      </td>
-      <td>${item.NIK}</td>
-      <td>${item.Nama}</td>
-    </tr>`;
-  });
-
-  document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-  let headerTable = `
-  <tr>
-    <th scope="col">Actions</th>
-    <th scope="col">NIK</th>
-    <th scope="col">Nama</th>
-  </tr>
-  `
-  document.querySelector("#theadOpen").innerHTML = headerTable;
-  document.getElementById("namaModalOpen").innerHTML = 'NIK Karyawan'
-
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
-
-  $("#formModalOpen").modal('toggle')
-}
-
-function buttonSelectKaryawan(karyawan){
-  document.getElementById('input_add_NIK').value = karyawan;
-  // document.getElementById('input_edit_NIK').value = karyawan;
-
-  $("#formModalOpen").modal("hide");
-}
-
-function buttonJabatan () {
-  console.log('asd');
-
-  let _token = $("#_token").val();
-
-   if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
-    $('#tabelModalOpen').DataTable().destroy();
+    if (refreshCOA(username)) {
+      $("#formCOA").modal('show')
+    }
   }
 
-  $.ajax({
-    url: "{!! url('newsetpemakaiLoadJabatan') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function (res) {
-      console.log(res);
-      dataRefresh = res;
-    },
-  });
+  function buttonDeleteAllCOA () {
+    let _token = $("#_token").val()
+    let username = $("#input_coa_username").val()
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
+    if (!listAksesCOA.length) {
+      alertify.warning('Belum ada akses perkiraan yang bisa dicabut')
+      return
+    }
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectJabatan('${item.KODEJAB}')"><i class="bi bi-plus"></i></button>
-      </td>
-      <td>${item.KODEJAB}</td>
-      <td>${item.NamaJab}</td>
-    </tr>`;
-  });
+    alertify.confirm('Cabut Semua Akses COA', 'Cabut semua akses perkiraan milik user ' + spEsc(username) + ' ?',
+      function () {
+        $.ajax({
+          url: "{!! url('newsetpemakaideleteallaksescoa') !!}",
+          type: "post",
+          async: false,
+          data: {
+            _token : _token,
+            username,
+          },
+          success: function(res) {
+            refreshCOA(username)
+            alertify.success('Semua akses perkiraan telah dicabut')
+          },
+          error: spGagal
+        })
+      },
+      function () {})
 
-  document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-  let headerTable = `
-  <tr>
-    <th scope="col">Actions</th>
-    <th scope="col">Kode</th>
-    <th scope="col">Jabatan</th>
-  </tr>
-  `
-  document.querySelector("#theadOpen").innerHTML = headerTable;
-  document.getElementById("namaModalOpen").innerHTML = 'Jabatan'
-
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
-
-  $("#formModalOpen").modal('toggle')
-}
-
-function buttonSelectJabatan(jabatan){
-  document.getElementById('input_add_jabatan').value = jabatan;
-  // document.getElementById('input_edit_NIK').value = jabatan;
-
-  $("#formModalOpen").modal("hide");
-}
-
-function buttonDepartemen () {
-  console.log('asd');
-
-  let _token = $("#_token").val();
-
-   if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
-    $('#tabelModalOpen').DataTable().destroy();
   }
 
-  $.ajax({
-    url: "{!! url('newsetpemakaiLoadDepartemen') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function (res) {
-      console.log(res);
-      dataRefresh = res;
-    },
-  });
+  function buttonDeleteCOA () {
+    let deleteAksesCOA = []
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
+    let _token = $("#_token").val()
+    let username = $("#input_coa_username").val()
+    listAksesCOA.forEach((item, i) => {
+      let cb = document.getElementById(`aksesCOA_checkbox${i}`)
+      if (cb && cb.checked) {
+        deleteAksesCOA.push({ Perkiraan: item.Perkiraan })
+      }
+    })
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSelectDepartemen('${item.KDDEP}')"><i class="bi bi-plus"></i></button>
-      </td>
-      <td>${item.KDDEP}</td>
-      <td>${item.NMDEP}</td>
-    </tr>`;
-  });
+    if (!deleteAksesCOA.length) {
+      alertify.warning('Centang dulu perkiraan di daftar kanan yang akan dicabut aksesnya')
+      return
+    }
 
-  document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-  let headerTable = `
-  <tr>
-    <th scope="col">Actions</th>
-    <th scope="col">Kode</th>
-    <th scope="col">Departemen</th>
-  </tr>
-  `
-  document.querySelector("#theadOpen").innerHTML = headerTable;
-  document.getElementById("namaModalOpen").innerHTML = 'Departemen'
-
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
-
-  $("#formModalOpen").modal('toggle')
-}
-
-function buttonSelectDepartemen(departemen){
-  document.getElementById('input_add_departemen').value = departemen;
-  // document.getElementById('input_edit_NIK').value = jabatan;
-
-  $("#formModalOpen").modal("hide");
-}
-
-let passwordCheckState = 0
-
-function checkPassword (){
-
-  var password = document.getElementById("input_add_password").value
-  var passwordConfirm = document.getElementById("input_add_passwordConfirm").value
-
-  if (password == passwordConfirm){
-    passwordCheckState = 1
-    alertify.success('Konfirmasi Password Sama')
+    $.ajax({
+      url: "{!! url('newsetpemakaideleteaksescoa') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        username,
+        perkiraan: deleteAksesCOA
+      },
+      success: function(res) {
+        if (res != 1) {
+          alertify.warning(res)
+        }
+        refreshCOA(username)
+      },
+      error: spGagal
+    })
   }
-  else if (password != passwordConfirm){
+
+  function buttonAddAllCOA () {
+    let username = $("#input_coa_username").val()
+    let _token = $("#_token").val()
+
+    if (!listCOA.length) {
+      alertify.warning('Semua perkiraan sudah diberikan')
+      return
+    }
+
+    $.ajax({
+      url: "{!! url('newsetpemakaiupdateaddallcoa') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        username
+      },
+      success: function(res) {
+        refreshCOA(username)
+        alertify.success('Semua perkiraan telah diberikan')
+      },
+      error: spGagal
+    })
+  }
+
+  function buttonAddCOA () {
+    let username = $("#input_coa_username").val()
+    let _token = $("#_token").val()
+
+    let adaPilihan = listCOA.some((item, i) => {
+      let cb = document.getElementById(`COA_checkbox${i}`)
+      return cb && cb.checked
+    })
+    if (!adaPilihan) {
+      alertify.warning('Centang dulu perkiraan di daftar kiri yang akan diberikan')
+      return
+    }
+
+    $.ajax({
+      url: "{!! url('newsetpemakaiupdateaddcoa') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        username
+      },
+      success: function(res) {
+        refreshCOA(username)
+      },
+      error: spGagal
+    })
+  }
+
+  // Centang di daftar kiri langsung menandai DBPERKIRAAN.iskirim; tombol ">" lalu memberi
+  // akses semua perkiraan yang bertanda iskirim=1 (alur lama, tidak diubah).
+  function clickCheckboxCOA (index) {
+    let _token = $("#_token").val()
+    let cb = document.getElementById(`COA_checkbox${index}`)
+    let nilai = cb.checked ? 1 : 0
+    let perkiraan = listCOA[index].Perkiraan
+
+    $.ajax({
+      url: "{!! url('newsetpemakaiupdateiskirimcoa') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        perkiraan,
+        nilai
+      },
+      error: function (err) {
+        spGagal(err)
+        cb.checked = !cb.checked
+      }
+    })
+
+  }
+
+  /* ================= Tambah / Edit user ================= */
+
+  function buttonAdd () {
+    ['NIK', 'user', 'password', 'passwordConfirm', 'namaLengkap', 'departemen', 'jabatan', 'kodeKasir']
+      .forEach(f => { document.getElementById('input_add_' + f).value = '' })
+    document.getElementById('input_add_level').value = '0'
+    document.getElementById('input_add_status').value = '1'
+    document.getElementById('input_add_limit').value = '0'
     passwordCheckState = 0
-    alertify.error('Konfirmasi Password Salah')
+
+    $("#formAddUser").modal('show')
   }
 
-}
+  function editUser (idx) {
+    let username = userDari(idx)
+    if (!username) { return }
+    let _token = $("#_token").val()
 
+    $.ajax({
+      url: "{!! url('newsetpemakaidetailuser') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : _token,
+        username: username
+      },
+      success: function(res) {
+        if (spBukanData(res, 'array')) { return }
+        if (!res.length) {
+          alertify.warning('User ' + spEsc(username) + ' tidak ditemukan')
+          return
+        }
 
-function submitAddUserEdit () {
-  let choice = 'U'
-  let _token = $("#_token").val();
-  let nik = $("#input_edit_NIK").val();
-  let user = $("#input_edit_user").val();
-  let password = $("#input_edit_password").val();
-  let namaLengkap = $("#input_edit_namaLengkap").val();
-  let departemen = $("#input_edit_departemen").val();
-  let jabatan = $("#input_edit_jabatan").val();
-  let level = $("#input_edit_level").val();
-  let status = $("#input_edit_status").val();
-  let kodeKasir = $("#input_edit_kodeKasir").val();
-  let limit = $("#input_edit_limit").val();
+        document.getElementById('input_edit_NIK').value = res[0].keynik ?? ''
+        document.getElementById('input_edit_user').value = res[0].USERID ?? ''
+        document.getElementById('input_edit_namaLengkap').value = res[0].FullName ?? ''
+        document.getElementById('input_edit_departemen').value = res[0].kodeBag ?? ''
+        document.getElementById('input_edit_jabatan').value = res[0].KodeJab ?? ''
+        document.getElementById('input_edit_level').value = String(Number(res[0].TINGKAT) || 0)
+        document.getElementById('input_edit_status').value = String(Number(res[0].STATUS) || 0)
+        document.getElementById('input_edit_kodeKasir').value = res[0].KodeKasir ?? ''
+        document.getElementById('input_edit_limit').value = Number(res[0].limit) || 0
 
-  if (!nik) {
-    alertify.warning("NIK harus diisi");
-    return
+        $("#formEditUser").modal('show')
+      },
+      error: spGagal
+    })
+
   }
 
-  if( !user || !namaLengkap || !departemen || !jabatan || !level || !status || !kodeKasir ) {
-    alertify.warning("Data tidak lengkap");
-    return
+  /* ---------- Modal pemilih (NIK / Jabatan / Departemen) ---------- */
+
+  function bukaPemilih (url, judul, kolom, render) {
+    let hasil = null
+    $.ajax({
+      url: url,
+      type: "get",
+      async: false,
+      success: function (res) {
+        if (spBukanData(res, 'array')) { return }
+        hasil = res
+      },
+      error: spGagal
+    })
+    if (!hasil) { return }
+    dataRefresh = hasil
+
+    document.querySelector("#theadOpen").innerHTML = '<tr><th scope="col">Actions</th>' +
+      kolom.map(k => `<th scope="col">${k}</th>`).join('') + '</tr>'
+    document.getElementById("tabel_dataModalOpen").innerHTML = hasil.map(render).join('')
+    document.getElementById("namaModalOpen").innerHTML = judul
+
+    pickerKasInit('tabelModalOpen')
+    $("#formModalOpen").modal('show')
+  }
+
+  function buttonNIK (mode) {
+    pickerTarget = mode === 'edit' ? 'edit' : 'add'
+    bukaPemilih("{!! url('newsetpemakaiLoadKaryawan') !!}", 'NIK Karyawan', ['NIK', 'Nama'], (item, i) => `<tr>
+      <td class="text-center">
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectKaryawan(${i})"><i class="bi bi-plus-square"></i></button>
+      </td>
+      <td>${spEsc(item.NIK)}</td>
+      <td>${spEsc(item.Nama)}</td>
+    </tr>`)
+  }
+
+  function buttonSelectKaryawan (i) {
+    let item = dataRefresh[i]
+    document.getElementById('input_' + pickerTarget + '_NIK').value = item.NIK
+    // Nama Lengkap yang masih kosong diisi nama karyawan yang dipilih.
+    let nama = document.getElementById('input_' + pickerTarget + '_namaLengkap')
+    if (!nama.value.trim()) { nama.value = item.Nama ?? '' }
+
+    $("#formModalOpen").modal("hide")
+  }
+
+  function buttonJabatan (mode) {
+    pickerTarget = mode === 'edit' ? 'edit' : 'add'
+    bukaPemilih("{!! url('newsetpemakaiLoadJabatan') !!}", 'Jabatan', ['Kode', 'Jabatan'], (item, i) => `<tr>
+      <td class="text-center">
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectJabatan(${i})"><i class="bi bi-plus-square"></i></button>
+      </td>
+      <td>${spEsc(item.KODEJAB)}</td>
+      <td>${spEsc(item.NamaJab)}</td>
+    </tr>`)
+  }
+
+  function buttonSelectJabatan (i) {
+    document.getElementById('input_' + pickerTarget + '_jabatan').value = dataRefresh[i].KODEJAB
+    $("#formModalOpen").modal("hide")
+  }
+
+  function buttonDepartemen (mode) {
+    pickerTarget = mode === 'edit' ? 'edit' : 'add'
+    bukaPemilih("{!! url('newsetpemakaiLoadDepartemen') !!}", 'Departemen', ['Kode', 'Departemen'], (item, i) => `<tr>
+      <td class="text-center">
+        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectDepartemen(${i})"><i class="bi bi-plus-square"></i></button>
+      </td>
+      <td>${spEsc(item.KDDEP)}</td>
+      <td>${spEsc(item.NMDEP)}</td>
+    </tr>`)
+  }
+
+  function buttonSelectDepartemen (i) {
+    document.getElementById('input_' + pickerTarget + '_departemen').value = dataRefresh[i].KDDEP
+    $("#formModalOpen").modal("hide")
+  }
+
+  let passwordCheckState = 0
+
+  function checkPassword () {
+
+    let password = document.getElementById("input_add_password").value
+    let passwordConfirm = document.getElementById("input_add_passwordConfirm").value
+
+    if (!passwordConfirm) {
+      passwordCheckState = 0
+      return
+    }
+
+    if (password == passwordConfirm){
+      passwordCheckState = 1
+      alertify.success('Konfirmasi Password Sama')
+    }
+    else {
+      passwordCheckState = 0
+      alertify.error('Konfirmasi Password Salah')
+    }
+
+  }
+
+  // Validasi yang sama untuk Tambah dan Edit.
+  function cekFormUser (d, mode) {
+    // NIK hanya dicek saat tambah: di form Edit NIK tidak bisa diubah (lihat komentar di form).
+    if (mode === 'add' && !d.nik) { return "NIK harus diisi" }
+    if (mode === 'add' && !/^\d+$/.test(d.nik)) { return "NIK harus berupa angka" }
+    if (!d.user) { return "User harus diisi" }
+    if (!d.namaLengkap) { return "Nama Lengkap harus diisi" }
+    if (!d.departemen) { return "Departemen harus diisi" }
+    if (!d.jabatan) { return "Jabatan harus diisi" }
+    if (d.limit !== '' && (isNaN(Number(d.limit)) || Number(d.limit) < 0)) { return "Limit harus angka 0 atau lebih" }
+    return ''
+  }
+
+  function ambilFormUser (mode) {
+    let v = id => String($('#input_' + mode + '_' + id).val() ?? '').trim()
+    return {
+      nik: v('NIK'),
+      user: v('user'),
+      namaLengkap: v('namaLengkap'),
+      departemen: v('departemen'),
+      jabatan: v('jabatan'),
+      level: v('level'),
+      status: v('status'),
+      kodeKasir: v('kodeKasir'),
+      limit: v('limit') === '' ? '0' : v('limit')
+    }
+  }
+
+  function submitAddUserEdit () {
+    let _token = $("#_token").val()
+    let data = ambilFormUser('edit')
+
+    let pesan = cekFormUser(data, 'edit')
+    if (pesan) {
+      alertify.warning(pesan)
+      return
+    }
+
+    $.ajax({
+      url: "{!! url('newsetpemakaiAddUser') !!}",
+      type: "post",
+      async: false,
+      data: Object.assign({ _token: _token, choice: 'U' }, data),
+      success: function(res) {
+        if (res != 1) {
+          alertify.warning(res)
+        }  else {
+          alertify.success("Data User telah diedit")
+          $("#formEditUser").modal('hide')
+          loadAll()
+        }
+      },
+      error: spGagal
+    })
+
   }
 
 
+  function submitAddUserData () {
+    let _token = $("#_token").val()
+    let data = ambilFormUser('add')
+    let password = $("#input_add_password").val()
+    let passwordConfirm = $("#input_add_passwordConfirm").val()
 
-  $.ajax({
-    url: "{!! url('newsetpemakaiAddUser') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token : _token, choice,
-      nik, user, password, namaLengkap, departemen, jabatan, level, status, kodeKasir, limit
-    },
-    success: function(res) {
-      console.log(res)
-      if (res != 1) {
-        alertify.warning(res);
-      }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
-        alertify.success("Data User telah diedit");
-        loadAll()
-        $("#formEditUser").modal('toggle')
-      }
+    let pesan = cekFormUser(data, 'add')
+    if (pesan) {
+      alertify.warning(pesan)
+      return
+    }
 
-    }})
+    if (/\s/.test(data.user)) {
+      alertify.warning("User tidak boleh mengandung spasi")
+      return
+    }
 
-  // console.log(kodearea, namaarea)
-}
+    if (!password) {
+      alertify.warning("Password harus diisi")
+      return
+    }
 
+    // Dulu hanya memunculkan pesan lalu tetap menyimpan walau konfirmasi password salah.
+    if (password !== passwordConfirm) {
+      passwordCheckState = 0
+      alertify.error('Password tidak cocok, silahkan konfirmasi ulang.')
+      return
+    }
 
-function submitAddUserData () {
-  let choice = 'I'
-  let _token = $("#_token").val();
-  let nik = $("#input_add_NIK").val();
-  let user = $("#input_add_user").val();
-  let password = $("#input_add_password").val();
-  let namaLengkap = $("#input_add_namaLengkap").val();
-  let departemen = $("#input_add_departemen").val();
-  let jabatan = $("#input_add_jabatan").val();
-  let level = $("#input_add_level").val();
-  let status = $("#input_add_status").val();
-  let kodeKasir = $("#input_add_kodeKasir").val();
-  let limit = $("#input_add_limit").val();
+    $.ajax({
+      url: "{!! url('newsetpemakaiAddUser') !!}",
+      type: "post",
+      async: false,
+      data: Object.assign({ _token: _token, choice: 'I', password: password }, data),
+      success: function(res) {
+        if (res != 1) {
+          alertify.warning(res)
+        }  else {
+          alertify.success("Data User telah ditambah")
+          $("#formAddUser").modal('hide')
+          loadAll()
+        }
+      },
+      error: spGagal
+    })
 
-  if (!nik) {
-    alertify.warning("NIK harus diisi");
-    return
   }
 
-  if (!password) {
-    alertify.warning("Password harus diisi");
-    return
+  window.onload = function(){
+    loadAll()
   }
-
-  if (passwordCheckState == 0){
-    alertify.error('Password tidak cocok, silahkan konfirmasi ulang.')
-  }
-
-  $.ajax({
-    url: "{!! url('newsetpemakaiAddUser') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token : _token, choice,
-      nik, user, password, namaLengkap, departemen, jabatan, level, status, kodeKasir, limit
-    },
-    success: function(res) {
-
-      if (res != 1) {
-        alertify.warning(res);
-      }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
-        alertify.success("Data User telah ditambah");
-        loadAll()
-        $("#formAddUser").modal('toggle')
-      }
-
-    }})
-
-  // console.log(kodearea, namaarea)
-}
 
 </script>
-
-      <!-- start modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data ) -->
-      <div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="namaModalOpen"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <table id="tabelModalOpen" class="table table-bordered table-striped">
-                <thead id='theadOpen' class="text-center bg-primary text-white">
-                  <tr></tr>
-                </thead>
-                <tbody id="tabel_dataModalOpen" class="text-left">
-                  <tr></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- End modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data )-->
-
 
 @endsection
