@@ -1,146 +1,177 @@
 @extends('newmasterTest')
 @section('buttons')
 
-
-@section('page-title', 'Transfer Barang')
 @section('title', 'SML - Transfer Barang')
+@section('page-title', 'Transfer Barang')
 
 @endsection
-{{-- Diport ke pola marketing-full-menu-guide.md (po-table-header.css/po-toolbar/
-     data-table) di bawah newmasterTest, menggantikan tableMaster2.css milik
-     gudang.newmasterx yang sebelumnya dipakai page1 (toolbar/tabel utama saja --
-     page2/page3/page4 form Tambah/Edit/Detail dan tabel statisnya sengaja tidak
-     disentuh, sesuai instruksi). --}}
-  @section('css')
+@section('css')
+
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
+  {{-- Blok CSS lokal halaman ini -- disalin verbatim dari @section('css') purchaseOrder.blade.php
+       (custom-tabs/tab-card override layout .card, po-len-wrap/po-len-inp, tombol aksi
+       bulat kecil pastel di kolom pertama), sesuai docs/marketing-full-menu-guide.md
+       langkah 6. Tidak ada CSS baru -- report-table.js/po-table-header.css sudah
+       menyediakan sisanya. --}}
   <style>
-  .rodokNdukurTitik{
-    margin-top:-12px;
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  /* layout newmasterTest punya rule .card global (align-items:center, text-align:center)
+     yang bikin tab-bar ini ikut rata tengah kalau tidak ditimpa. so.blade.php/purchaseOrder
+     .blade.php's .tab-card override tidak eksplisit menimpa text-align, tapi text-align
+     ikut menurun (inherited) ke #nav-tab/.custom-tabs (display:inline-flex tetap ikut
+     rata tengah teks leluhurnya) -- itu sebabnya baris "Permintaan Transfer Barang" /
+     "Transaksi Transfer Barang" / "OutStanding Transfer" sempat muncul di tengah,
+     bukan rata kiri. Ditimpa eksplisit di sini karena halaman ini baru terkena masalah
+     yang sama. */
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .po-len-wrap label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #dbe0e6;
+    font-size: 12.5px;
+    padding: 0 8px;
+  }
+
+  /* ---------- Kolom Aksi tabel (#tabel/#tabel2/#tabel3) - tombol bulat kecil, warna
+     pastel, sama seperti punya purchaseOrder.blade.php. JANGAN pakai display:flex pada
+     <td>: sel yang di-flex berhenti jadi sel tabel, tingginya cuma setinggi tombol dan
+     tidak ikut vertical-align:middle baris. Cukup text-align + vertical-align;
+     font-size:0 membuang spasi antar tombol. */
+  #tabel tbody td:first-child:not(.dataTables_empty),
+  #tabel2 tbody td:first-child:not(.dataTables_empty),
+  #tabel3 tbody td:first-child:not(.dataTables_empty) {
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 0;
+  }
+
+  #tabel td:first-child .btn + .btn,
+  #tabel2 td:first-child .btn + .btn,
+  #tabel3 td:first-child .btn + .btn {
+    margin-left: 4px;
+  }
+
+  #tabel td:first-child .btn,
+  #tabel2 td:first-child .btn,
+  #tabel3 td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel td:first-child .btn:hover,
+  #tabel2 td:first-child .btn:hover,
+  #tabel3 td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel td:first-child .btn-success,
+  #tabel2 td:first-child .btn-success,
+  #tabel3 td:first-child .btn-success {
+    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+  }
+
+  #tabel td:first-child .btn-warning,
+  #tabel2 td:first-child .btn-warning,
+  #tabel3 td:first-child .btn-warning {
+    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+  }
+
+  #tabel td:first-child .btn-primary,
+  #tabel2 td:first-child .btn-primary,
+  #tabel3 td:first-child .btn-primary {
+    color: #2563eb; border-color: #cfdcff; background: #e8edff;
+  }
+
+  #tabel td:first-child .btn-danger,
+  #tabel2 td:first-child .btn-danger,
+  #tabel3 td:first-child .btn-danger {
+    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+  }
+
+  #tabel td:first-child .btn-info,
+  #tabel2 td:first-child .btn-info,
+  #tabel3 td:first-child .btn-info {
+    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
   }
   </style>
-
-  <style>
-  #tabel_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;  
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-  </style>
-{{-- end tampilan search bar 1 --}}
-
-{{-- tampilan search bar 2 --}}
-  <style>
-  #tabel2_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel2_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel2_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-
-  #tabel2_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
-    }
-  </style>
-{{-- end tampilan search bar 2 --}}
-
-{{-- tampilan search bar 3 --}}
-  <style>
-  #tabel3_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel3_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel3_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-
-  #tabel3_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
-    }
-  </style>
-{{-- end tampilan search bar 3 --}}
-
-{{-- tampilan search bar 4 --}}
-  <style>
-  #tabel4_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel4_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel4_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-
-  #tabel4_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
-    }
-  </style>
-{{-- end tampilan search bar 4 --}}
 
 
 {{-- tampilan search bar modal add pelanggan --}}
@@ -200,172 +231,6 @@
     }
   </style>
 {{-- end tampilan search modal barang all --}}
-
-{{-- Beberapa potongan po-toolbar (.po-len-wrap/.po-len-inp), styling <thead>/baris
-     #tabel, dan override kartu #page1 .card BUKAN bagian dari po-table-header.css --
-     ini dicopy verbatim dari so.blade.php/invoicejasa.blade.php's own css section
-     (aslinya dari purchaseOrder.blade.php), wajib ada di tiap halaman yang dipakai. --}}
-<style>
-#page1 .card {
-  display: block !important;
-  align-items: stretch !important;
-  padding: 0 !important;
-  text-align: left !important;
-  cursor: default !important;
-}
-
-#page1 .card:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  border-color: var(--border) !important;
-}
-
-.po-len-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--rt-card);
-  border: 1.5px solid var(--rt-border);
-  border-radius: 8px;
-  padding: 5px 12px;
-}
-
-.po-len-wrap label {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--rt-ink-soft);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  white-space: nowrap;
-}
-
-.po-len-inp {
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--rt-ink);
-  outline: none;
-  cursor: pointer;
-  padding: 2px 20px 2px 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right center;
-}
-
-#tabel thead th {
-  background: #f8f9fb !important;
-  color: #6b7280 !important;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  font-weight: 600;
-  border-bottom: 1px solid #e7e9ee;
-  border-top: none;
-}
-
-#tabel tbody tr:nth-of-type(odd) {
-  background-color: #fbfbfc;
-}
-
-#tabel tbody tr:hover {
-  background-color: #f5f3ff;
-}
-</style>
-
-{{-- styling tabel gabungan ala terimatransferbarang -- #contentContainer .toolbar/
-     .action-group (tableMaster2.css punya gudang.newmasterx) sudah tidak dipakai lagi
-     sejak toolbar page1 pindah ke po-toolbar (po-table-header.css), jadi dibuang.
-     #mainTable diganti #tabel mengikuti id tabel yang baru. --}}
-<style>
-  #tabel th.rt-fixed-th,
-  #tabel td:first-child {
-    min-width: 160px;
-  }
-
-  #tabel td:first-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  #tabel td:first-child .btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 13px;
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition: all .12s ease;
-  }
-
-  #tabel td:first-child .btn:hover {
-    filter: brightness(0.97);
-    transform: translateY(-1px);
-  }
-
-  #tabel tbody td:first-child .btn {
-    visibility: hidden;
-    opacity: 0;
-  }
-
-  #tabel tbody tr:hover td:first-child .btn {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  #tabel td:first-child .btn-success {
-    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-  }
-
-  #tabel td:first-child .btn-warning {
-    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
-  }
-
-  #tabel td:first-child .btn-primary {
-    color: #2563eb; border-color: #cfdcff; background: #e8edff;
-  }
-
-  #tabel td:first-child .btn-danger {
-    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-  }
-
-  #tabel td:first-child .btn-info {
-    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
-  }
-
-  .sp-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-  }
-
-  .sp-badge.is-active {
-    color: #16a34a; background: #e7f7ed;
-  }
-
-  .sp-badge.is-inactive {
-    color: #b45309; background: #fef3e0;
-  }
-
-  .sp-badge.is-neutral {
-    color: #2563eb; background: #e8edff;
-  }
-</style>
-{{-- end styling tabel gabungan --}}
 @endsection
 @section('content')
 
@@ -373,130 +238,249 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="page1" class="mainpage">
-
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
-  <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
-  <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
-  <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
-  <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
-  <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
-  <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
-  <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-
-  <div class="card">
-    <div class="card-body" style="padding: 0">
-      <div class="po-toolbar">
-        <div class="po-filter-wrap">
-          <label>Periode</label>
-          <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}"
-            onchange="reloadData()">
-          <span class="po-filter-sep">s/d</span>
-          <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}"
-            onchange="reloadData()">
-        </div>
-
-        <input type="search" class="po-search-inp" id="searchBox2" placeholder="Cari data...">
-
-        <div class="po-len-wrap">
-          <label for="tampilLen">Tampilkan</label>
-          <select class="po-len-inp" id="tampilLen">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="-1">Semua</option>
-          </select>
-        </div>
-
-        <button class="po-btn-filter" type="button" onclick="$('#modalFilter').modal('show')">
-          <i class="bi bi-funnel"></i> Filter
+<div id="page1" class="container-fluid">
+  <div class="">
+    <!-- <div id="qrcode"></div> -->
+    <div class="row">
+      <div class="col-6 text-left">
+        <h2 style="margin-top:-85px;">Transfer Barang</h2>
+      </div>
+      {{-- <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px; 
+            margin-top: -150px; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="buttonAdd()">
+          Add Transfer Barang
         </button>
-      </div>
-
-      <div id="rtBarTabel"></div>
-      <table id="tabel" class="data-table">
-        <thead style="white-space:nowrap;"></thead>
-        <tbody id="tabel_data" class="text-left"></tbody>
-      </table>
-
-      <div class="po-rt-hint">
-        <i class="bi bi-info-circle"></i>
-        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-        sembunyikan kolom.
-      </div>
+      </div> --}}
+      {{-- <div class="col-6 text-right">
+        <button type="button" class="btn btn-primary btn-lg" style="
+            height: 30px; 
+            margin-top: -150px; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+            onclick="loadAll()">
+          tes load all
+        </button>
+      </div> --}}
     </div>
   </div>
-</div>
 
-{{-- modal filter --}}
-<div class="modal fade rt-filter" id="modalFilter">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
+  <div id="contentContainer" class="">
+    <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
+    <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+    <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
+    <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
+    <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
+    <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+    <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+    <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
+    <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-filter"></i>
-          Filter Laporan
-          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+    {{-- Tab bar: purchaseOrder.blade.php's exact card.tab-card + custom-tabs anchor
+         pattern (BS4 data-toggle) -- same wrapper markup, same ordering convention (tab
+         utama/transaksi di depan dan aktif, mirip "Purchase Order" di depan "Outstanding
+         PR"/"Outstanding SO" milik PO). Non-Otorisasi/Otorisasi digabung jadi satu tab
+         "Transaksi Transfer Barang" dengan filter status Otorisasi (lihat toolbar tab
+         #profile di bawah) -- 3 tab, bukan 4 lagi. Pane id="1"/#tabelRetur (di bawah,
+         tanpa tombol nav sendiri) sengaja tidak disentuh -- sudah dead markup sebelum
+         task ini, di luar scope. --}}
+    <div class="card mb-3 tab-card">
+      <div class="card-body">
+        <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
+            Transaksi Transfer Barang
+          </a>
+          <a class="nav-item nav-link" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="false">
+            Permintaan Transfer Barang
+          </a>
+          <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile1" aria-selected="false">
+            OutStanding Transfer (Transaksi Belum Terima)
+          </a>
+        </div>
       </div>
+    </div>
 
-      <div class="modal-body">
-        <div class="rt-section">
-          <div class="rt-group-label">Pengaturan Laporan</div>
-          <div class="rt-grid-2">
-            <div>
-              <label class="rt-field-label" for="modalOtorisasi">Otorisasi</label>
-              <select class="rt-native" id="modalOtorisasi">
-                <option value="2">Semua</option>
-                <option value="1">Sudah Otorisasi</option>
-                <option value="0">Belum Otorisasi</option>
-              </select>
-            </div>
-            <div>
-              <label class="rt-field-label" for="modalStatusTerima">Status</label>
-              <select class="rt-native" id="modalStatusTerima">
-                <option value="2">Semua</option>
-                <option value="1">Terima</option>
-                <option value="0">Belum</option>
-              </select>
+      <div class="card">
+      <div class="card-body" style="padding:0;">
+        <div class="tab-content" id="myTabContent">
+
+          {{-- Transaksi Transfer Barang: gabungan Non-Otorisasi + Otorisasi, dipilah lewat
+               dropdown #tbFilterOtorisasi (Semua/Sudah/Belum, berdasar NeedOtorisasi dari
+               fetchHeaderList()) -- bukan dua tab terpisah lagi. Tab utama & aktif
+               default, sama seperti "Purchase Order" di purchaseOrder.blade.php. Periode
+               di sini juga mendorong data tab Outstanding lewat loadAll() yang sama. --}}
+          <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <div class="po-filter-wrap">
+                      <label>Periode</label>
+                      <input type="date" onchange="onChangePeriodeTransfer()" class="po-filter-inp" id="tbTanggalAwal" value="{!! $date1 !!}">
+                      <span class="po-filter-sep">s/d</span>
+                      <input type="date" onchange="onChangePeriodeTransfer()" class="po-filter-inp" id="tbTanggalAkhir" value="{!! $date2 !!}">
+                    </div>
+                    <div class="po-filter-wrap">
+                      <label>Otorisasi</label>
+                      <select id="tbFilterOtorisasi" class="po-filter-inp" onchange="tbTerapkanFilterOtorisasi()">
+                        <option value="">Semua</option>
+                        <option value="0">Sudah Otorisasi</option>
+                        <option value="1">Belum Otorisasi</option>
+                      </select>
+                    </div>
+                    <input type="search" id="tbSearch2" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap">
+                      <label for="tbLen2">Tampilkan</label>
+                      <select id="tbLen2" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="rtBarTabel2"></div>
+                  <table id="tabel2" class="data-table po-aksi-hover">
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel2_data" class="text-left"></tbody>
+                  </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                    untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="modal-footer">
-        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
-        <div class="rt-footer-buttons">
-          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
-          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+          <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="nav-home-tab">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <input type="search" id="tbSearch1" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap">
+                      <label for="tbLen1">Tampilkan</label>
+                      <select id="tbLen1" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="rtBarTabel"></div>
+                  <table id="tabel" class="data-table">
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel_data" class="text-left"></tbody>
+                  </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                    untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{-- Outstanding: header-level (bukan per-item lagi), difilter IsTerima=0 dari
+               data yang sama dengan tab Transaksi -- lihat tbTerapkanDataOutstanding(). --}}
+          <div class="tab-pane fade" id="profile1" role="tabpanel" aria-labelledby="nav-profile1-tab">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                  <div class="po-toolbar">
+                    <input type="search" id="tbSearch3" class="po-search-inp" placeholder="Cari data">
+                    <div class="po-len-wrap">
+                      <label for="tbLen3">Tampilkan</label>
+                      <select id="tbLen3" class="po-len-inp">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="-1">Semua</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="rtBarTabel3"></div>
+                  <table id="tabel3" class="data-table">
+                    <thead style="white-space:nowrap;"></thead>
+                    <tbody id="tabel3_data" class="text-left"></tbody>
+                  </table>
+                  <div class="po-rt-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                    untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="1" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="row">
+              <div class="col-12" style="overflow:auto;">
+                <div class="container-fluid">
+
+                      <table id="tabelRetur" class="table table-bordered table-striped"  >
+                        <thead class="text-center">
+                          <tr>
+                            <th scope="col">Profile 3</th>
+                            <th scope="col">No. SSP</th>
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">No. Out</th>
+                            <th scope="col">Gudang</th>
+                          </tr>
+                        </thead>
+
+                        <tbody id="tabelRetur_data" class="text-left" >
+
+                        </tbody>
+                      </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
     </div>
   </div>
-</div>
-{{-- end modal filter --}}
-
-<div id="printContainer" style="display:none">
+  
 </div>
 
 <div id="page2" class="container-fluid" style="display: none" >
   <div class="row">
-    <div class="col-6 text-left"></div>
+    <div class="col-6 text-left">
+      <h2 style="margin-top: -80px;">Form Transfer Barang</h2>
+    </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
-          height: 30px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
+          height: 30px; 
+          margin-top: -120px; 
+          padding: 4px 12px; 
+          border-radius: 20px; 
+          font-size: 0.75rem; 
+          font-weight: 600; 
+          text-transform: uppercase; 
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="buttonCloseFormAdd()">
@@ -506,12 +490,8 @@
   </div>
 
   <div id="modalBodyAddMain" class="">
-    {{-- margin-top:-60px dibuang -- itu dikalibrasi buat spacing header gudang.newmasterx
-         yang lama, di bawah newmasterTest malah menarik baris field ini naik sampai
-         menimpa baris tombol Close di atas. --}}
-    <div class="modal-body">
+    <div class="modal-body" style="margin-top:-60px;">
       <div class="row"> 
-        
         <div class="col-md-3">
           <div class="row">
 
@@ -860,10 +840,8 @@
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            {{-- data-table, sama seperti #tabel_add milik so.blade.php -- bg-primary
-                 text-white dibuang, abu-abu/teks gelap datang gratis dari newmasterTest. --}}
-            <table id="tabel_add" class="data-table">
-              <thead class="text-center">
+            <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
+              <thead class="text-center bg-primary text-white">
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
@@ -2507,7 +2485,8 @@ let dataHeaderAdd = [];
 
 let dataAddAddListItem = []
 
-
+let dataRefreshOutstanding = []
+let dataRefreshOutstanding2 = []
 
 let dataRefreshPenerimaan = []
 
@@ -4294,416 +4273,552 @@ function onChangeInputAddAddNosat () {
 
 }
 
-function pickCI(r, key) {
-  if (r[key] !== undefined) {
-    return r[key];
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Port dari engine so.blade.php sendiri (soCart/soAktifkanTabel/soInitReportTableSekali,
+ * itu sendiri port dari purchaseOrder.blade.php) -- lihat docs/marketing-full-menu-guide.md.
+ * 3 tabel independen: #tabel (Permintaan Transfer Barang, dari dbPRTransfer -- domain
+ * berbeda dari dua lainnya), #tabel2 (Transaksi Transfer Barang -- gabungan Non-Otorisasi
+ * + Otorisasi, dipilah client-side lewat dropdown #tbFilterOtorisasi/NeedOtorisasi) dan
+ * #tabel3 (Outstanding Transfer -- data SAMA dengan #tabel2, difilter IsTerima=0).
+ */
+let tbCart = { 1 : [], 2 : [], 3 : [] } // 1 = #tabel (Permintaan), 2 = #tabel2 (Transaksi), 3 = #tabel3 (Outstanding)
+let tbActiveUrut = 0
+const TB_HREF = 'gudangtransferbarang'
+const TB_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+const TB_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
+
+var lastTabelRows = []       // #tabel  -- listPermintaan
+var lastTabel2Rows = []      // #tabel2 -- listTransfer, difilter status Otorisasi
+var lastTabel3Rows = []      // #tabel3 -- listTransfer, difilter IsTerima=0
+var tbRawListTransfer = []   // listTransfer APA ADANYA dari server (sebelum difilter client-side)
+
+// Tabel yang tabnya sedang tidak aktif tetap ditandai di sini, baru benar-benar digambar
+// ulang saat tabnya dibuka (lihat handler shown.bs.tab di bawah) -- port dari
+// soPerluGambar/poPerluGambar milik so.blade.php/purchaseOrder.blade.php.
+var tbPerluGambar = { tabel: false, tabel2: false, tabel3: false }
+
+function activeVisibleTabKey() {
+  if ($('#home').hasClass('active')) { return 'tabel' }
+  if ($('#profile').hasClass('active')) { return 'tabel2' }
+  return 'tabel3'
+}
+
+function tbUrutDariKey(key) {
+  return key === 'tabel' ? 1 : (key === 'tabel2' ? 2 : 3)
+}
+
+// Dua sumber data di halaman ini (dbPRTransfer utk #tabel, fetchHeaderList() utk
+// #tabel2/#tabel3) punya casing field yang beda (nobukti vs NOBUKTI, Tanggal vs
+// TANGGAL) -- cari case-insensitive, port dari soPickCI() milik so.blade.php.
+function tbPickCI(row, key) {
+  if (!row) { return undefined }
+  if (row[key] !== undefined) { return row[key] }
+  let lower = key.toLowerCase()
+  for (let k in row) {
+    if (k.toLowerCase() === lower) { return row[k] }
   }
-  let lk = String(key).toLowerCase();
-  for (let k in r) {
-    if (k.toLowerCase() === lk) {
-      return r[k];
-    }
+  return undefined
+}
+
+// Default kolom tiap tabel -- dipakai saat kunjungan pertama (belum ada yang tersimpan
+// di DBHEADERTABLE) maupun saat tombol "Reset kolom" diklik. Port dari soDefaultCart().
+function tbDefaultCart(urut) {
+  if (urut === 1) {
+    return [
+      ['nobukti',      'No. Bukti',      1, 'varchar', 0, 0],
+      ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
+      ['Keterangan',   'Keterangan',     1, 'varchar', 0, 0],
+      ['NoPenyerahan', 'No. Penyerahan', 1, 'varchar', 0, 0]
+    ]
   }
-  return null;
-}
-
-if (typeof nullToEmpty !== 'function') {
-  window.nullToEmpty = function(v) {
-    return (v === null || v === undefined) ? '' : v;
-  };
-}
-
-if (typeof doSetFormatDate !== 'function') {
-  window.doSetFormatDate = function(dateVal, sep) {
-    if (!dateVal) return '';
-    sep = sep || '/';
-    let d = new Date(dateVal);
-    if (isNaN(d.getTime())) return String(dateVal);
-    let yyyy = d.getFullYear();
-    let mm = String(d.getMonth() + 1).padStart(2, '0');
-    let dd = String(d.getDate()).padStart(2, '0');
-    return yyyy + sep + mm + sep + dd;
-  };
-}
-
-var g_href = 'transferbarang';
-var g_modeReport = '2';
-var gcart_header = [];
-var gsum_issubtotal = 0;
-var gsum_isgrandtotal = 0;
-var gct_desimal_max = 4;
-
-let lastRows = @json($listTransfer);
-let globalOtorisasi = "2";    // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
-let globalStatusTerima = "2"; // filter modal: 2=Semua, 1=Sudah Terima, 0=Belum Terima
-let pageSize = 10;
-
-function setDefaultHeader() {
-  // [ field, label, visible, type, total, decimals ]
-  gcart_header = [
-    ['NOBUKTI', 'No. Bukti', 1, 'varchar', 0, 0],
-    ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
-    ['NamagdgAsal', 'Gudang Asal', 1, 'varchar', 0, 0],
+  if (urut === 3) {
+    return [
+      ['NOBUKTI',       'No. Bukti',     1, 'varchar', 0, 0],
+      ['TANGGAL',       'Tanggal',       1, 'date',    0, 0],
+      ['NOTE',          'Keterangan',    1, 'varchar', 0, 0],
+      ['NamagdgAsal',   'Gudang Asal',   1, 'varchar', 0, 0],
+      ['NamagdgTujuan', 'Gudang Tujuan', 1, 'varchar', 0, 0],
+      ['JmlItem',       'Jml Item',      1, 'float',   0, 0]
+    ]
+  }
+  return [
+    ['NOBUKTI',       'No. Bukti',     1, 'varchar', 0, 0],
+    ['TANGGAL',       'Tanggal',       1, 'date',    0, 0],
+    ['NOTE',          'Keterangan',    1, 'varchar', 0, 0],
+    ['NamagdgAsal',   'Gudang Asal',   1, 'varchar', 0, 0],
     ['NamagdgTujuan', 'Gudang Tujuan', 1, 'varchar', 0, 0],
-    ['NOTE', 'Keterangan', 1, 'varchar', 0, 0],
-    ['NeedOtorisasi', 'Otorisasi', 1, 'varchar', 0, 0],
-    ['IsTerima', 'Status', 1, 'varchar', 0, 0],
-    ['OtoUser1', 'User Oto', 0, 'varchar', 0, 0],
-    ['TglOto1', 'Tanggal Oto', 0, 'date', 0, 0]
-  ];
+    ['JmlItem',       'Jml Item',      1, 'float',   0, 0],
+    ['OtoUser1',      'User Oto',      1, 'varchar', 0, 0],
+    ['TglOto1',       'Tgl Oto',       1, 'date',    0, 0]
+  ]
 }
 
-function doSetHeader(_modereport, _isReset = false) {
-  let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
-
-  if (_strHeader != "") {
-    gcart_header = doGetHeader(_strHeader);
-  } else if ($.isFunction(window.setDefaultHeader)) {
-    setDefaultHeader();
-    doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
-  }
+// Port dari soBuatCart().
+function tbBuatCart (headers, values, isnumerics, isshowns, desimals) {
+  headers = headers || []
+  let cart = []
+  headers.forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+    cart.push([
+      values[i],
+      h,
+      Number(isshowns[i]) === 1 ? 1 : 0,
+      TB_TIPE_NAMA[tipe] || 'varchar',
+      0,
+      isNaN(des) ? 0 : des
+    ])
+  });
+  return cart
 }
 
-function doLoadHeader(_href, _mode) {
-  let _header = "";
+// Arahkan komponen ke tabel tertentu. Port dari soAktifkanTabel().
+function tbAktifkanTabel (urut) {
+  tbActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = tbCart[urut]
+}
+
+// Dipanggil report-table.js sendiri tiap kali kolom digeser/disembunyikan/diubah
+// desimalnya. Port dari soOnChangeAktif().
+function tbOnChangeAktif () {
+  if (tbActiveUrut === 1) { reinitTabel() }
+  else if (tbActiveUrut === 2) { reinitTabel2() }
+  else { reinitTabel3() }
+}
+
+window.g_href = TB_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+// Port dari doSimpanHeader() milik so.blade.php.
+window.doSimpanHeader = function (href, mode) {
+  let urut = mode || 1
+  let cart = tbCart[urut] || []
+
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[1])
+    value.push(c[0])
+    isnumber.push(TB_TIPE_KODE[c[3]] ?? 0)
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
 
   $.ajax({
-    url: "{!! url('globalfunctions_doLoadHeader') !!}",
-    type: "get",
-    async: false,
-    data: {
-      href: _href,
-      mode: _mode
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : TB_HREF,
+      urut     : urut
     },
-    success: function(res) {
-      _header = (res.length > 0) ? res[0].header : "";
-      if (res.length > 0) {
-        gsum_issubtotal = Number(res[0].issubtotal);
-        gsum_isgrandtotal = Number(res[0].isgrandtotal);
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+// Port dari doSetHeader() milik so.blade.php -- getheadertable tidak punya pembuat
+// default sisi server untuk href ini, jadi jatuh ke tbDefaultCart() kalau kosong.
+window.doSetHeader = function (mode, reset) {
+  let urut = mode || 1
+
+  $.ajax({
+    url   : "{!! url('getheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val(),
+      href   : TB_HREF,
+      urut   : urut,
+      reset  : reset ? 1 : 0
+    },
+    success : function (res) {
+      if (!reset && res && res.headertableheader && res.headertableheader.length) {
+        let header = res.headertableheader
+        let value = res.headertablevalue
+        let isnumeric = res.isnumeric
+        let isshown = res.isshown
+        let tipe = res.desimal || []
+        tbCart[urut] = tbBuatCart(header, value, isnumeric, isshown, tipe)
+      } else {
+        tbCart[urut] = tbDefaultCart(urut)
+        window.gcart_header = tbCart[urut]
+        window.doSimpanHeader(TB_HREF, urut)
       }
-    }
-  })
-
-  return _header;
-}
-
-function doGetHeader(_strHeader) {
-  let _cart = [];
-
-  _strHeader.split("||").forEach((item, i) => {
-    let temp = [];
-    temp.push(item.split(";;")[0]);
-    temp.push(item.split(";;")[1]);
-    temp.push(Number(item.split(";;")[2]));
-    temp.push(item.split(";;")[3]);
-    temp.push(Number(item.split(";;")[4]));
-    temp.push(Number(item.split(";;")[5]));
-    _cart.push(temp);
-  });
-
-  return _cart;
-}
-
-function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
-  let _strHeader = "";
-
-  _cart.forEach((item, i) => {
-    if (i != 0) {
-      _strHeader += '||';
-    }
-    _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
-      item[5];
-  });
-
-  $.ajax({
-    url: "{!! url('globalfunctions_doSimpanHeader') !!}",
-    type: "get",
-    async: false,
-    data: {
-      href: _href,
-      mode: _mode,
-      header: _strHeader,
-      issubtotal: _issubtotal,
-      isgrandtotal: _isgrandtotal
+      window.gcart_header = tbCart[urut]
     },
-    success: function(res) {
-      // nothing to do
+    error : function (err) {
+      console.log(err)
+      alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+      tbCart[urut] = tbDefaultCart(urut)
+      window.gcart_header = tbCart[urut]
     }
   })
 }
 
-function doMoveHeader(_from, _to) {
-  if (_from < 0 || _to < 0 || _from === _to) {
-    return;
-  }
-  if (_from >= gcart_header.length || _to >= gcart_header.length) {
-    return;
-  }
+const TB_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
+const TB_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
 
-  let _moved = gcart_header.splice(_from, 1)[0];
-  gcart_header.splice(_to, 0, _moved);
+// Ikat handler drag & roda gigi ke <thead> TEPAT SEKALI seumur halaman. Port 1:1 dari
+// soInitReportTableSekali().
+let tbRtSudahInit = false
+function tbInitReportTableSekali () {
+  if (tbRtSudahInit || typeof ReportTable === 'undefined') { return }
+  tbRtSudahInit = true
 
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  let urutAktif = tbUrutDariKey(activeVisibleTabKey())
+  let idTabel = { 1: '#tabel', 2: '#tabel2', 3: '#tabel3' }
+  let idBar = { 1: '#rtBarTabel', 2: '#rtBarTabel2', 3: '#rtBarTabel3' }
+  Object.keys(idTabel).forEach((u) => {
+    if (Number(u) === urutAktif) { return }
+    ReportTable.init({ table: idTabel[u], bar: idBar[u], onChange: tbOnChangeAktif })
+  });
+
+  ReportTable.init({
+    table    : TB_SELEKTOR_TABEL_AKTIF,
+    bar      : TB_SELEKTOR_BAR_AKTIF,
+    onChange : tbOnChangeAktif
+  })
+
+  let tbGuardUlangKlik = false;
+  ['#tabel', '#tabel2', '#tabel3'].forEach((sel) => {
+    let thead = document.querySelector(sel + ' thead')
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (tbGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+
+      e.stopPropagation()
+      e.preventDefault()
+
+      tbGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      tbGuardUlangKlik = false
+    }, true)
+  });
 }
 
-function doButtonVisibility(_id) {
-  gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
-
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+function tbFormatDate (raw) {
+  if (!raw) { return '' }
+  let d = new Date(raw)
+  if (isNaN(d.getTime())) { return raw }
+  let dd = ('0' + d.getDate()).slice(-2)
+  let mm = ('0' + (d.getMonth() + 1)).slice(-2)
+  return dd + '/' + mm + '/' + d.getFullYear()
 }
 
-function doSetDesimal(_index, _step) {
-  let _next = Number(gcart_header[_index][5]) + _step;
-  if (_next < 0 || _next > gct_desimal_max) {
-    return;
+function tulisTheadHeader (sel, cols, withActions) {
+  if (withActions === undefined) { withActions = true }
+  let thead = document.querySelector(sel + ' thead')
+  if (!thead) { return }
+  let cols2 = cols.filter(function (c) { return c[2] === 1 })
+  let headRowHtml = ReportTable.headHtml(cols2)
+  if (withActions) {
+    headRowHtml = headRowHtml.replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>')
   }
-
-  gcart_header[_index][5] = _next;
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  thead.setAttribute('style', 'white-space:nowrap;')
+  thead.innerHTML = headRowHtml
 }
 
-function doButtonTotal(_index) {
-  gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+// col[5] (jumlah desimal) bisa diubah pengguna lewat roda gigi, jadi dibaca live dari
+// cart, bukan diasumsikan tetap. Port dari tabelValueCell() milik so.blade.php.
+function tbValueCell(row, col) {
+  let raw = tbPickCI(row, col[0])
+  let type = col[3]
 
-  doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  if (type === 'date') {
+    if (!raw) { return '<td></td>' }
+    return '<td>' + tbFormatDate(raw) + '</td>'
+  }
+  if (type === 'float') {
+    let dp = Number(col[5]) || 0
+    let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0
+    return '<td style="text-align:right;">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>'
+  }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>'
 }
 
-// filter Otorisasi (Semua / Sudah / Belum)
-function filterByOtorisasi(rows, filterVal) {
-  if (filterVal === '1') { // sudah otorisasi; NeedOtorisasi = 0
-    return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 0);
-  }
-  if (filterVal === '0') { // belum otorisasi; NeedOtorisasi = 1
-    return rows.filter(r => Number(pickCI(r, 'NeedOtorisasi')) === 1);
-  }
-  return rows; // Semua
+// Markup tombol flat, tanpa div pembungkus -- persis pola purchaseOrder.blade.php
+// (poRenderTabelPO()/tombolAksiPO(): <td class="text-center" style=''>${tombol}</td>,
+// tiap <button> langsung bertetangga, memakai data-toggle="tooltip" bukan title-hover
+// bawaan browser). #tabel/#tabel2 di-init dengan tooltip Bootstrap lewat
+// reinitTabel()/reinitTabel2() di bawah, sama seperti so.blade.php melakukannya.
+function tbTabelActionsCell (row) {
+  let nobukti = tbPickCI(row, 'nobukti')
+  return '<td class="text-center" style="white-space:nowrap;">'
+    + '<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetailAdd(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>'
+    + '<button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Add" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus-lg"></i></button>'
+    + '</td>'
 }
 
-// filter Status Terima (Semua / Terima / Belum)
-function filterByStatusTerima(rows, filterVal) {
-  if (filterVal === '1') { // sudah diterima
-    return rows.filter(r => Number(pickCI(r, 'IsTerima')) === 1);
-  }
-  if (filterVal === '0') { // belum diterima
-    return rows.filter(r => Number(pickCI(r, 'IsTerima')) === 0);
-  }
-  return rows; // Semua
-}
-
-function getVisibleRows() {
-  const cols = gcart_header.filter(c => c[2] === 1);
-  const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-  let rows = lastRows;
-  if (search) {
-    rows = rows.filter(function(r) {
-      return cols.some(function(c) {
-        const v = pickCI(r, c[0]);
-        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-      });
-    });
-  }
-  rows = filterByOtorisasi(rows, globalOtorisasi);
-  rows = filterByStatusTerima(rows, globalStatusTerima);
-  return rows;
-}
-
-function aksiButtonsHtml(r) {
-  const nobukti = pickCI(r, 'NOBUKTI');
-  const needOtorisasi = Number(pickCI(r, 'NeedOtorisasi')) === 1;
-  const isTerima = Number(pickCI(r, 'IsTerima')) === 1;
-
-  let html = '<button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' +
-    nobukti + '\')"><i class="bi bi-info"></i></button>';
-
-  if (isTerima) {
-    // Sudah diterima 
-    if (!needOtorisasi) {
-      html += '<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-        nobukti + '\')"><i class="bi bi-printer"></i></button>';
-    }
-    return html;
-  }
-
-  if (needOtorisasi) {
-    // Belum otorisasi
-    html += '<button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' +
-      nobukti + '\')"><i class="bi bi-pencil"></i></button>';
-    html += '<button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Hapus" onclick="deleteTransferData(\'' +
-      nobukti + '\')"><i class="bi bi-trash"></i></button>';
-    html += '<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' +
-      nobukti + '\')"><i class="bi bi-key-fill"></i></button>';
+// Gabungan tombol lama tabel2 (Non-Otorisasi: Detail/Edit/Hapus/Otorisasi) dan tabel4
+// (Otorisasi: Detail/BatalOtorisasi/Print) -- dipilih berdasar IsOtorisasi1 tiap baris,
+// bukan lagi berdasar tab mana yang sedang dibuka. Warna/ikon Otorisasi (btn-info) dan
+// Batal Otorisasi/Print (btn-danger/btn-primary) disamakan persis dengan tombolAksiPO()
+// milik purchaseOrder.blade.php; Hapus (btn-danger) tetap ada karena itu kebutuhan
+// bisnis transferbarang sendiri, PO tidak punya delete di tab ini.
+function tbTabel2ActionsCell (row) {
+  let nobukti = tbPickCI(row, 'NOBUKTI')
+  let html = '<td class="text-center" style="white-space:nowrap;">'
+  html += '<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>'
+  if (Number(tbPickCI(row, 'IsOtorisasi1')) === 0) {
+    html += '<button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>'
+    html += '<button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>'
+    html += '<button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Hapus" onclick="deleteTransferData(\'' + nobukti + '\')"><i class="bi bi-trash"></i></button>'
   } else {
-    // Sudah otorisasi
-    html += '<button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-      nobukti + '\')"><i class="bi bi-key-fill"></i></button>';
-    html += '<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' +
-      nobukti + '\')"><i class="bi bi-printer"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>'
+    html += '<button class="btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>'
   }
-
-  return html;
+  html += '</td>'
+  return html
 }
 
-// Menulis ulang <thead>#tabel lewat window.ReportTable (rt-bar/gear/drag) --
-// port 1:1 dari tulisTheadHeaderIJ() milik invoicejasa.blade.php, kolom Aksi
-// tetap fixed (tidak ikut drag) sama seperti markup lama.
-function tulisTheadHeaderTB(cols) {
-  let thead = document.querySelector('#tabel thead');
-  if (!thead || !window.ReportTable) { return; }
-  thead.setAttribute('style', 'white-space:nowrap;');
-  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
-}
-
-function renderTabelRows(rows) {
-  const cols = gcart_header.filter(c => c[2] === 1);
-  const tbody = document.getElementById('tabel_data');
-  $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
-
-  let html = '';
-  (rows || []).forEach(function(r) {
-    html += '<tr>';
-    html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
-    html += cols.map(function(c) {
-      const v = pickCI(r, c[0]);
-      if (c[0] === 'NeedOtorisasi') {
-        return (Number(v) === 0) ?
-          '<td><span class="sp-badge is-active">Sudah Otorisasi</span></td>' :
-          '<td><span class="sp-badge is-inactive">Belum Otorisasi</span></td>';
-      }
-      if (c[0] === 'IsTerima') {
-        return (Number(v) === 1) ?
-          '<td><span class="sp-badge is-active">Sudah Terima</span></td>' :
-          '<td><span class="sp-badge is-inactive">Belum Terima</span></td>';
-      }
-      if (c[3] === 'date') {
-        return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
-      }
-      return '<td>' + nullToEmpty(v) + '</td>';
-    }).join('');
-    html += '</tr>';
+function renderTabelRows (rows) {
+  if (tbActiveUrut !== 1) { tbAktifkanTabel(1) }
+  let cols = gcart_header || []
+  let colsTampil = cols.filter(function (c) { return c[2] === 1 })
+  let html = ""
+  ;(rows || []).forEach(function (row) {
+    html += '<tr>' + tbTabelActionsCell(row)
+    colsTampil.forEach(function (col) { html += tbValueCell(row, col) })
+    html += '</tr>'
   });
-
-  tbody.innerHTML = html;
-  tulisTheadHeaderTB(cols);
-  $(tbody).find('[data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' });
+  document.getElementById('tabel_data').innerHTML = html
+  tulisTheadHeader('#tabel', cols, true)
 }
 
-let tbRtSudahInit = false;
-function tbInitReportTableSekali() {
-  if (tbRtSudahInit || typeof ReportTable === 'undefined') { return; }
-  tbRtSudahInit = true;
-  ReportTable.init({ table: '#tabel', bar: '#rtBarTabel', onChange: reinitTabel });
-}
-
-function tbIkatSearch() {
-  let input = document.getElementById('searchBox2');
-  if (!input || input.dataset.rtBound) { return; }
-  input.dataset.rtBound = '1';
-  let timer = null;
-  input.addEventListener('input', function() {
-    if (timer) { clearTimeout(timer); }
-    timer = setTimeout(function() { reinitTabel(); }, 400);
+function renderTabel2Rows (rows) {
+  if (tbActiveUrut !== 2) { tbAktifkanTabel(2) }
+  let cols = gcart_header || []
+  let colsTampil = cols.filter(function (c) { return c[2] === 1 })
+  let html = ""
+  ;(rows || []).forEach(function (row) {
+    html += '<tr>' + tbTabel2ActionsCell(row)
+    colsTampil.forEach(function (col) { html += tbValueCell(row, col) })
+    html += '</tr>'
   });
+  document.getElementById('tabel2_data').innerHTML = html
+  tulisTheadHeader('#tabel2', cols, true)
 }
 
-function tbIkatPanjangHalaman() {
-  let sel = document.getElementById('tampilLen');
-  if (!sel || sel.dataset.rtBound) { return; }
-  sel.dataset.rtBound = '1';
-  sel.value = String(pageSize);
-  sel.addEventListener('change', function() {
-    let n = Number(sel.value);
-    pageSize = (n === -1 || n > 0) ? n : 10;
-    reinitTabel();
+function renderTabel3Rows (rows) {
+  if (tbActiveUrut !== 3) { tbAktifkanTabel(3) }
+  let cols = gcart_header || []
+  let colsTampil = cols.filter(function (c) { return c[2] === 1 })
+  let html = ""
+  ;(rows || []).forEach(function (row) {
+    html += '<tr>'
+    colsTampil.forEach(function (col) { html += tbValueCell(row, col) })
+    html += '</tr>'
   });
+  document.getElementById('tabel3_data').innerHTML = html
+  tulisTheadHeader('#tabel3', cols, false)
 }
 
-// DataTables cuma dipakai buat pagination (search box/panjang halaman sendiri
-// via tbIkatSearch()/tbIkatPanjangHalaman(), data sudah difilter getVisibleRows()
-// sebelum masuk sini) -- pola dom string sama dengan so.blade.php/invoicejasa.
-const TB_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
+const TB_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+let tbPanjangHalaman = { 1: 10, 2: 10, 3: 10 }
 
-function reinitTabel(_focusNobukti) {
+function tbIkatSearch (urut) {
+  let inputId = { 1: 'tbSearch1', 2: 'tbSearch2', 3: 'tbSearch3' }[urut]
+  let idTabel = { 1: 'tabel', 2: 'tabel2', 3: 'tabel3' }[urut]
+  let input = document.getElementById(inputId)
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  let timer = null
+  input.addEventListener('input', function () {
+    let nilai = input.value
+    if (timer) { clearTimeout(timer) }
+    timer = setTimeout(function () {
+      if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+        $('#' + idTabel).DataTable().search(nilai).draw()
+      }
+    }, 400)
+  })
+}
+
+function tbIkatPanjangHalaman (urut) {
+  let selId = { 1: 'tbLen1', 2: 'tbLen2', 3: 'tbLen3' }[urut]
+  let idTabel = { 1: 'tabel', 2: 'tabel2', 3: 'tabel3' }[urut]
+  let sel = document.getElementById(selId)
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(tbPanjangHalaman[urut])
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    tbPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+      $('#' + idTabel).DataTable().page.len(tbPanjangHalaman[urut]).draw()
+    }
+  })
+}
+
+function reinitTabel () {
   try {
-    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
-    let rows = getVisibleRows();
-    renderTabelRows(rows);
-    let dt = $('#tabel').DataTable({
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy() }
+    renderTabelRows(lastTabelRows)
+    $('#tabel').DataTable({
       dom: TB_DOM_STRING,
       lengthChange: false,
-      pageLength: pageSize,
+      pageLength: tbPanjangHalaman[1],
       paging: true,
-      searching: false,
-      ordering: false,
+      ordering: false
     });
-    if (_focusNobukti && pageSize !== -1) {
-      let idx = rows.findIndex(function(r) { return String(pickCI(r, 'NOBUKTI')) === String(_focusNobukti); });
-      if (idx >= 0) { dt.page(Math.floor(idx / pageSize)).draw('page'); }
-    }
-    tbIkatSearch();
-    tbIkatPanjangHalaman();
-    tbInitReportTableSekali();
+    tbIkatSearch(1)
+    tbIkatPanjangHalaman(1)
+    $('#tabel_data [data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+    tbPerluGambar.tabel = false
   } catch (e) {
-    console.error('reinitTabel failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
+    console.error('reinitTabel failed:', e)
+    alertify.error('Gagal memperbarui tabel: ' + e.message)
   }
 }
 
-// Filter Modal (Otorisasi: Semua/Sudah/Belum, Status: Semua/Terima/Belum)
-function updateFilterBadge() {
-  let count = 0;
-  if ($('#modalOtorisasi').val() !== '2') count++;
-  if ($('#modalStatusTerima').val() !== '2') count++;
-  $('#filterBadge').text(count + ' aktif');
+function reinitTabel2 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy() }
+    renderTabel2Rows(lastTabel2Rows)
+    $('#tabel2').DataTable({
+      dom: TB_DOM_STRING,
+      lengthChange: false,
+      pageLength: tbPanjangHalaman[2],
+      paging: true,
+      ordering: false
+    });
+    tbIkatSearch(2)
+    tbIkatPanjangHalaman(2)
+    $('#tabel2_data [data-toggle="tooltip"]').tooltip({ container: 'body', boundary: 'window' })
+    tbPerluGambar.tabel2 = false
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e)
+    alertify.error('Gagal memperbarui tabel: ' + e.message)
+  }
 }
 
-function resetAllFilters() {
-  $('#modalOtorisasi').val('2');
-  $('#modalStatusTerima').val('2');
-  updateFilterBadge();
+function reinitTabel3 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel3')) { $('#tabel3').DataTable().destroy() }
+    renderTabel3Rows(lastTabel3Rows)
+    $('#tabel3').DataTable({
+      dom: TB_DOM_STRING,
+      lengthChange: false,
+      pageLength: tbPanjangHalaman[3],
+      paging: true,
+      ordering: false
+    });
+    tbIkatSearch(3)
+    tbIkatPanjangHalaman(3)
+    tbPerluGambar.tabel3 = false
+  } catch (e) {
+    console.error('reinitTabel3 failed:', e)
+    alertify.error('Gagal memperbarui tabel: ' + e.message)
+  }
 }
 
-$(document).on('show.bs.modal', '#modalFilter', function() {
-  $('#modalOtorisasi').val(globalOtorisasi);
-  $('#modalStatusTerima').val(globalStatusTerima);
-  updateFilterBadge();
-});
-
-$(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
-
-function applyModalFilter() {
-  globalOtorisasi = $('#modalOtorisasi').val();
-  globalStatusTerima = $('#modalStatusTerima').val();
-  reinitTabel();
-  $('#modalFilter').modal('hide');
+// #tabel2 (Transaksi Transfer Barang) & #tabel3 (Outstanding) berbagi SATU sumber data
+// (tbRawListTransfer, dari fetchHeaderList()/trfbrgloadall) -- dipilah lagi di client
+// lewat dua fungsi ini, bukan dua panggilan server terpisah.
+function tbFilterListTransferOtorisasi (list) {
+  let sel = document.getElementById('tbFilterOtorisasi')
+  let val = sel ? sel.value : ''
+  if (val === '') { return list || [] }
+  return (list || []).filter(function (r) { return String(Number(tbPickCI(r, 'NeedOtorisasi'))) === val })
 }
 
-function reloadData (_focusNobukti) {
-  let listTransfer = [];
+function tbFilterListTransferOutstanding (list) {
+  return (list || []).filter(function (r) { return Number(tbPickCI(r, 'IsTerima')) === 0 })
+}
+
+// Dipanggil dropdown #tbFilterOtorisasi onchange -- filter ulang di client saja, tidak
+// perlu memanggil server lagi.
+function tbTerapkanFilterOtorisasi () {
+  lastTabel2Rows = tbFilterListTransferOtorisasi(tbRawListTransfer)
+  if (activeVisibleTabKey() === 'tabel2') { reinitTabel2() } else { tbPerluGambar.tabel2 = true }
+}
+
+// Dipanggil onchange periode (#tbTanggalAwal/#tbTanggalAkhir) -- periode ini yang
+// mendorong ulang fetchHeaderList() lewat trfbrgloadall, dipakai bersama oleh #tabel2
+// dan #tabel3 (port dari pola periode-SO-tab-only milik so.blade.php).
+function onChangePeriodeTransfer () {
+  loadAll()
+}
+
+function loadAll () {
+  let date1 = document.getElementById('tbTanggalAwal') ? document.getElementById('tbTanggalAwal').value : ''
+  let date2 = document.getElementById('tbTanggalAkhir') ? document.getElementById('tbTanggalAkhir').value : ''
 
   $.ajax({
     url: "{!! url('trfbrgloadall') !!}",
     type: "get",
     async: false,
-    data: {
-      date1: $('#inputDate1').val(),
-      date2: $('#inputDate2').val()
+    data: { date1: date1, date2: date2 },
+    success: function (res) {
+      lastTabelRows = res.listPermintaan || []
+      tbRawListTransfer = res.listTransfer || []
     },
-    success: function(res) {
-      listTransfer = res.listTransfer || [];
-    },
-    error: function(err) {
-      console.log(err);
-      alertify.warning('Terjadi kesalahan saat memuat data, silakan refresh browser.');
+    error: function (err) {
+      console.log(err)
+      alertify.error('Gagal memuat data transfer barang')
     }
-  });
+  })
 
-  lastRows = listTransfer;
-  reinitTabel(_focusNobukti);
+  lastTabel2Rows = tbFilterListTransferOtorisasi(tbRawListTransfer)
+  lastTabel3Rows = tbFilterListTransferOutstanding(tbRawListTransfer)
+
+  let visibleKey = activeVisibleTabKey()
+  tbPerluGambar = { tabel: visibleKey !== 'tabel', tabel2: visibleKey !== 'tabel2', tabel3: visibleKey !== 'tabel3' }
+  if (visibleKey === 'tabel') { reinitTabel() }
+  else if (visibleKey === 'tabel2') { reinitTabel2() }
+  else { reinitTabel3() }
 }
 
-function loadAll(_focusNobukti) {
-  reloadData(_focusNobukti);
-}
+$(function () {
+  if (document.getElementById('breadcrumb')) { document.getElementById('breadcrumb').innerHTML = 'Transfer Barang' }
+
+  window.doSetHeader(1, false)
+  window.doSetHeader(2, false)
+  window.doSetHeader(3, false)
+
+  loadAll()
+
+  tbInitReportTableSekali()
+
+  $('#nav-home-tab').on('shown.bs.tab', function () {
+    tbAktifkanTabel(1)
+    if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
+    if (tbPerluGambar.tabel) { reinitTabel() }
+  })
+  $('#nav-profile-tab').on('shown.bs.tab', function () {
+    tbAktifkanTabel(2)
+    if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
+    if (tbPerluGambar.tabel2) { reinitTabel2() }
+  })
+  $('#nav-profile1-tab').on('shown.bs.tab', function () {
+    tbAktifkanTabel(3)
+    if (typeof ReportTable !== 'undefined') { ReportTable.refresh() }
+    if (tbPerluGambar.tabel3) { reinitTabel3() }
+  })
+})
 
 function submitPrint (nobukti) {
     // for (var i = 0; i < 30; i++) {
@@ -7215,12 +7330,90 @@ function calculateDiscRp() {
 
 
 </script>
-{{-- tabel gabungan --}}
+{{-- script buat hover po belum otorisasi dan sudah otorisasi --}}
   <script>
-    $(document).ready(function(){
-      doSetHeader(g_modeReport);
-      reinitTabel();
+    const tabHome = document.getElementById('nav-home-tab');
+    const tabProfile = document.getElementById('nav-profile-tab');
+    const tabProfile1 = document.getElementById('nav-profile1-tab');
+    const tabProfile2 = document.getElementById('nav-profile2-tab');
+  
+    function setActiveTab(homeActive) {
+      if (homeActive == 0) {
+        tabHome.style.backgroundColor = '#007bff';
+        tabHome.style.color = '#fff';
+        tabProfile.style.backgroundColor = '#f8f9fa';
+        tabProfile.style.color = '#007bff';
+
+        tabProfile1.style.backgroundColor = '#f8f9fa';
+        tabProfile1.style.color = '#007bff';
+        
+        tabProfile2.style.backgroundColor = '#f8f9fa';
+        tabProfile2.style.color = '#007bff';
+
+      } else if (homeActive == 1){
+        tabHome.style.backgroundColor = '#f8f9fa';
+        tabHome.style.color = '#007bff';
+
+        tabProfile.style.backgroundColor = '#007bff';
+        tabProfile.style.color = '#fff';
+
+        tabProfile1.style.backgroundColor = '#f8f9fa';
+        tabProfile1.style.color = '#007bff';
+        
+        tabProfile2.style.backgroundColor = '#f8f9fa';
+        tabProfile2.style.color = '#007bff';
+      }
+      else if (homeActive == 2){
+        tabProfile.style.backgroundColor = '#f8f9fa';
+        tabProfile.style.color = '#007bff';
+
+        tabHome.style.backgroundColor = '#f8f9fa';
+        tabHome.style.color = '#007bff';
+
+        tabProfile1.style.backgroundColor = '#007bff';
+        tabProfile1.style.color = '#fff';
+
+        tabProfile2.style.backgroundColor = '#f8f9fa';
+        tabProfile2.style.color = '#007bff';
+      }
+      
+      else if (homeActive == 3){
+        tabProfile.style.backgroundColor = '#f8f9fa';
+        tabProfile.style.color = '#007bff';
+
+        tabHome.style.backgroundColor = '#f8f9fa';
+        tabHome.style.color = '#007bff';
+
+        tabProfile1.style.backgroundColor = '#f8f9fa';
+        tabProfile1.style.color = '#007bff';
+        
+        tabProfile2.style.backgroundColor = '#007bff';
+        tabProfile2.style.color = '#fff';
+      }
+    }
+  
+    // Default warna tab
+    setActiveTab(0);
+  
+    // buat ganti tab
+    tabHome.addEventListener('click', function () {
+      setActiveTab(0);
     });
+  
+    tabProfile.addEventListener('click', function () {
+      setActiveTab(1);
+    });
+
+    tabProfile1.addEventListener('click', function () {
+      setActiveTab(2);
+    });
+    tabProfile2.addEventListener('click', function () {
+      setActiveTab(3);
+    });
+
+    window.onload = function(){
+      loadAll();
+    }
   </script>
 
 @endsection

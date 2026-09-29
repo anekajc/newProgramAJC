@@ -11,11 +11,6 @@
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
   <style>
-  /* Form Add/Edit/Detail dibungkus div#formBsGrid supaya input memakai gaya #formBsGrid
-     di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
-     disabled) -- sama seperti purchaseOrder.blade.php. Pengecualian tinggi: textarea
-     (Keterangan/Alamat Kirim/Lokasi Penerima) tetap setinggi aslinya (atribut rows),
-     supaya isi beberapa baris tetap terbaca, bukan dipepetkan ke satu baris 38px. */
   #formBsGrid textarea.form-control,
   #formBsGrid table .form-control {
     height: auto;
@@ -23,7 +18,40 @@
   </style>
 
   <style>
-  /* {{-- Copied verbatim from purchaseOrder.blade.php's tab bar / toolbar CSS. --}} */
+  .po-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) {
+    .po-kpi-strip { grid-template-columns: 1fr; }
+  }
+  .po-kpi-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .po-kpi-ic {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+  .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
+  </style>
+
+  <style>
   .toolbar {
     display: flex;
     align-items: center;
@@ -535,8 +563,9 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
-    {{-- Tab bar: PO's exact card.tab-card + custom-tabs anchor pattern, BS4 data-toggle
-         (newmasterx runs the Canvas BS4 theme's jQuery plugin, not BS5). --}}
+    
+    <div class="po-kpi-strip" id="poKpiStrip"></div>
+
     <div class="card mb-3 tab-card">
       <div class="card-body">
         <div class="nav nav-tabs border-0 custom-tabs" id="giroTab" role="tablist">
@@ -2484,7 +2513,7 @@ function soDefaultCart(urut) {
       ['NAMABRG',      'Nama Barang', 1, 'varchar', 0, 0],
       ['QNT',          'Qty',         1, 'float',   0, 2],
       ['QntSO',        'Qty SO',      1, 'float',   0, 2],
-      ['Sisa',         'Sisa',        1, 'float',   0, 2],
+      ['Sisa',         'Sisa',        1, 'float',   0, 2]
     ];
   }
   return [
@@ -2502,7 +2531,7 @@ function soDefaultCart(urut) {
     ['OtoUser1',     'UserOto',        1, 'varchar', 0, 0],
     ['TglOto1',      'TglOto',         1, 'date',    0, 0],
     ['userunblock',  'User Open CBD',  1, 'varchar', 0, 0],
-    ['tglunblock',   'Tgl Open CBD',   1, 'date',    0, 0],
+    ['tglunblock',   'Tgl Open CBD',   1, 'date',    0, 0]
   ];
 }
 
@@ -3143,6 +3172,8 @@ $(document).ready(function(){
       reinitTabel2();
       lastTabelOtoRows = @json($tempOutstanding5);
       reinitTabelOto();
+
+      setPoKpiDariTabel();
 
       // ReportTable.init()'s listeners were already bound once (per table) by
       // soInitReportTableSekali() below -- switching tabs only needs to point
@@ -7043,6 +7074,8 @@ function loadAll () {
     lastTabelOtoRows = dataRefreshOutstanding5;
     reinitTabelOto();
 
+    setPoKpiDariTabel();
+
     buttonFilterSO()
 
     // No re-bind/re-activate needed here (unlike before this port): ReportTable's
@@ -8312,6 +8345,75 @@ function unlockFormAdd () {
 
   document.getElementById("input_add_disc").disabled = false
   document.getElementById("input_add_discrp").disabled = false
+}
+
+// Kartu ringkasan (Jumlah SO / Total DPP / Penawaran) di atas tab-content. Jumlah SO &
+// Total DPP dihitung dari poKpiDPP (= lastTabelRows, baris tab "SO"/#tabel, sudah kena
+// filter periode dari soloadall()). Penawaran diambil dari panjang lastTabel7Rows
+// (tab #tabel7) -- keduanya di-refresh lewat setPoKpiDariTabel() tiap kali lastTabelRows/
+// lastTabel7Rows berganti isi (initial load & loadAll()), port dari poKpiDPP/dataTampil2
+// milik purchaseOrder.blade.php, disesuaikan field-nya (NOBUKTI/TotDPP, bukan NoBukti/
+// TotDPPRp) dan baris #tabel/#tabel7 yang berbentuk [row] (rowWrap), bukan objek polos.
+// Port 1:1 dari poFormatAngkaDes() milik purchaseOrder.blade.php -- dipanggil renderKpiPO()
+// di bawah untuk memformat kartu "Total DPP". Tanpa ini renderKpiPO() melempar
+// ReferenceError yang tidak tertangkap di tengah $(document).ready(), sehingga setiap
+// baris SETELAHNYA (binding tab shown.bs.tab, soInitReportTableSekali(), dst) ikut gagal
+// dijalankan -- itulah sebabnya #poKpiStrip terlihat kosong sama sekali di halaman.
+function poFormatAngkaDes (nilai, des) {
+  let d = Number(des)
+  if (isNaN(d) || d < 0) { d = 0 }
+
+  let mentah = (nilai === null || nilai === undefined || nilai === '') ? 0 : nilai
+  let angka = Number(String(mentah).split(',').join(''))
+  if (isNaN(angka)) {
+    return (nilai === null || nilai === undefined) ? '' : nilai
+  }
+
+  let teks = angka.toFixed(d)
+  let minus = teks.charAt(0) === '-'
+  if (minus) { teks = teks.substring(1) }
+
+  let bagian = teks.split('.')
+  let bulat = bagian[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return (minus ? '-' : '') + bulat + (bagian[1] ? '.' + bagian[1] : '')
+}
+
+let poKpiDPP = []
+let poKpiOut = { 1 : null }
+
+function setPoKpiDariTabel () {
+  poKpiDPP = lastTabelRows
+  poKpiOut[1] = (lastTabel7Rows || []).length
+  renderKpiPO()
+}
+
+function renderKpiPO () {
+  let totalDPP = 0
+  let soSet = new Set()
+  ;(poKpiDPP || []).forEach((rowWrap) => {
+    let r = (rowWrap || [])[0]
+    if (!r) { return }
+    totalDPP += Number(r.TotDPP) || 0
+    if (r.NOBUKTI) { soSet.add(r.NOBUKTI) }
+  })
+
+  let cards = [
+    ['Jumlah SO', soSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
+    ['Penawaran', poKpiOut[1] === null ? '-' : poKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false]
+  ]
+
+  document.getElementById('poKpiStrip').innerHTML = cards.map((c) => `
+    <div class="po-kpi-card">
+      <div class="po-kpi-ic" style="background:${c[3]};color:${c[2]}">
+        <i class="${c[4]}"></i>
+      </div>
+      <div>
+        <div class="po-kpi-label">${c[0]}</div>
+        <div class="po-kpi-val">${c[5] ? 'Rp ' + poFormatAngkaDes(c[1], 2) : c[1]}</div>
+      </div>
+    </div>
+  `).join('')
 }
 
 function cleanFormAdd () {

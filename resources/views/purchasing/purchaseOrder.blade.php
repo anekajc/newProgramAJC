@@ -139,9 +139,7 @@
     line-height: 0;
     vertical-align: middle;
   }
-  {{-- Tampilan disamakan dengan gudang/permintaanpemakaian.blade.php (tab-toggle,
-       toolbar + page-title, tombol aksi bulat) - hanya CSS, id/class yang dipakai
-       JS (onclick, #tabel/#tabel2/#tabel3, nav-tab, dst) tidak diubah. --}}
+  
   .toolbar {
     display: flex;
     align-items: center;
