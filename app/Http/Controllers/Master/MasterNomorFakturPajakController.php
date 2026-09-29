@@ -48,7 +48,7 @@ class MasterNomorFakturPajakController extends Controller
     $check = DB::connection('SML')->select('SELECT * FROM DBNomorFP where Kode = :kode' , ['kode' => $req->kode]);
 
     if ($check) {
-      return 'Kode jenis sudah ada di database';
+      return 'Kode faktur pajak sudah ada di database';
     }
     $listData = DB::connection('SML')->update('insert into DBNomorFP (Kode, NoSeri, NoAwal, NoAkhir, IsPenuh) values (:kode, :nama, :noawal, :noakhir, :isPenuh)' , ['kode' => $req->kode , 'nama' => $req->nama, 'noawal' => $req->noawal, 'noakhir' => $req->noakhir, 'isPenuh'=>$req->isPenuh]);
     return 1;

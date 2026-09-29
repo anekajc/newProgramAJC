@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Giro')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
 {{-- <div class="sp-breadcrumb">
@@ -25,53 +25,12 @@
   </div>
 </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
   <style>
-    .sp-length-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }    
-    
-    .sp-filter-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .sp-length-wrap label {
-      margin: 0; /* stops default label margin from pushing the select down/over */
-    }
-
-    .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
-    }
-
-    .sp-toolbar {
-      display: flex;
-      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
-      align-items: center;
-      row-gap: 10px;
-      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
-    }
-
-    .sp-filter-wrap select {
-      width: auto;
-      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
-    }
-
-    .sp-length-wrap {
-      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
-    }
-    
   .radioChoiceMaster {
     display: inline-flex;
     list-style: none;
@@ -121,105 +80,56 @@
 
   </style>
 
-  <div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
+  {{-- Tab Giro Dibuka / Diterima dan dua tombol Tambah dipasang di toolbar bersama. Kelas "nav"
+       ditambahkan pada <ul>: tab Bootstrap 4 membutuhkannya untuk menonaktifkan tab sebelumnya. --}}
+  @php
+    $slotTabGiro = '<ul class="nav radioChoiceMaster" id="giroTab" role="tablist">'
+      . '<li class="radioChoiceMaster-item" role="presentation"><button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-toggle="tab" data-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button></li>'
+      . '<li class="radioChoiceMaster-item" role="presentation"><button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-toggle="tab" data-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button></li>'
+      . '</ul>';
+    $slotAksiGiro = '<button id="divAddBuka" class="btn btn-dpp-utama" type="button" onclick="buttonAddBuka()">Tambah Giro Buka</button>'
+      . '<button id="divAddTerima" class="btn btn-dpp-utama" type="button" onclick="buttonAddTerima()" hidden>Tambah Giro Terima</button>';
+  @endphp
 
-    <div class="sp-filter-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
-    
-  <div class="sp-filter-wrap">
-    <ul class="radioChoiceMaster" id="giroTab" role="tablist">
-      <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
-      </li>
-      <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
-      </li>
-    </ul>
-  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="sp-length-wrap">
-    <button id='divAddBuka' class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
-    <button id='divAddTerima' class="btn btn-action-primary" onclick="buttonAddTerima()" hidden>+ Add Giro Terima</button>
-    </div>
-  </div>
+      @include('master.partials.toolbarMaster', ['slotFilter' => $slotTabGiro, 'slotAksi' => $slotAksiGiro])
 
-  <div class="tab-content">
+      <div class="tab-content">
 
-    <!-- ---------- DAFTAR GIRO DIBUKA ---------- -->
-    <div class="tab-pane fade show active" id="tab-dibuka" role="tabpanel">
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table class="tb" id="tabel_dibuka">
-            <thead style="white-space:nowrap;">
+        <!-- ---------- DAFTAR GIRO DIBUKA ---------- -->
+        <div class="tab-pane fade show active" id="tab-dibuka" role="tabpanel">
+          <table id="tabel_dibuka" class="data-table po-aksi-hover">
+            <thead id="tabel_dibuka_header" class="text-center">
               <tr>
-                <th scope="col">Actions</th>
-                <th scope="col">Bank</th>
-                <th scope="col">No. Giro</th>
-                <th scope="col">Tanggal Giro Jatuh Tempo</th>
-                <th scope="col">Valas</th>
-                <th scope="col">Kurs</th>
-                <th scope="col">Debet Rupiah</th>
-                <th scope="col">Kredit Rupiah</th>
-                <th scope="col">Debet Valas</th>
-                <th scope="col">Kredit Valas</th>
-                <th scope="col">Tanggal Buka Giro</th>
-                <th scope="col">Bukti Buka Giro</th>
-                <th scope="col">Keterangan Buka Giro</th>
-                <th scope="col">Tanggal Pencairan Giro</th>
-                <th scope="col">Bukti Pencairan Giro</th>
-                <th scope="col">Keterangan Pencairan Giro</th>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_dataDibuka" class="text-left"></tbody>
           </table>
         </div>
-      </div>
-    </div>
 
-    <!-- ---------- DAFTAR GIRO DITERIMA ---------- -->
-    <div class="tab-pane fade" id="tab-diterima" role="tabpanel">
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table class="tb" id="tabel_diterima">
-            <thead style="white-space:nowrap;">
+        <!-- ---------- DAFTAR GIRO DITERIMA ---------- -->
+        <div class="tab-pane fade" id="tab-diterima" role="tabpanel">
+          <table id="tabel_diterima" class="data-table po-aksi-hover">
+            <thead id="tabel_diterima_header" class="text-center">
               <tr>
-                <th scope="col">Actions</th>
-                <th scope="col">Bank</th>
-                <th scope="col">No. Giro</th>
-                <th scope="col">Perkiraan Kas</th>
-                <th scope="col">Tanggal Giro Jatuh Tempo</th>
-                <th scope="col">Valas</th>
-                <th scope="col">Kurs</th>
-                <th scope="col">Debet Rupiah</th>
-                <th scope="col">Kredit Rupiah</th>
-                <th scope="col">Debet Valas</th>
-                <th scope="col">Kredit Valas</th>
-                <th scope="col">Tanggal Terima Giro</th>
-                <th scope="col">Bukti Terima Giro</th>
-                <th scope="col">Keterangan Terima Giro</th>
-                <th scope="col">Tanggal Pencairan Giro</th>
-                <th scope="col">Bukti Pencairan Giro</th>
-                <th scope="col">Keterangan Pencairan Giro</th>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_dataDiterima" class="text-left"></tbody>
           </table>
         </div>
-      </div>
-    </div>
 
+      </div>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
+    </div>
   </div>
 
 </div>
@@ -233,62 +143,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Giro Terima</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_bank">Bank</label>
+          <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
 
-            </div>
+          <label for="input_add_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_add_noGiro" placeholder="No. Giro">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_noGiro" placeholder="No. Giro">
-                </div>
-              </div>
+          <label for="input_add_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_add_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_add_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add_valas">Valas</label>
+          <select id="input_add_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -297,144 +175,55 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control" id="input_add_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
+          <label for="input_add_kurs">Kurs</label>
+          <input type="text" class="form-control" id="input_add_kurs" placeholder="Kurs" disabled>
 
-              <div class="col-4">
-                <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add_nilaiGiro" 
+            
+            
+          <label for="input_add_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_add_nilaiGiro" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  
-                <input type="text" class="form-control text-right" id="input_add_nilaiGiroRp" 
+            <input type="text" class="form-control text-right" id="input_add_nilaiGiroRp" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
-                  oninput="formatNumber(this)">
-                </div>
-              </div>
+                  oninput="formatNumber(this)"></div></div>
+        </div>
 
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_tglTerima">Tanggal Terima</label>
+          <input type="date" class="form-control" id="input_add_tglTerima" >
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglTerima" >
-                </div>
-              </div>
+          <label for="input_add_buktiTerima">Bukti Terima</label>
+          <input type="text" class="form-control" id="input_add_buktiTerima" disabled>
 
-            </div>
+          <label for="input_add_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_add_keterangan">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_buktiTerima" disabled>
-                </div>
-              </div>
+          <label for="input_add_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_add_tglCair" disabled>
 
-            </div>
+          <label for="input_add_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_add_buktiCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_add_keteranganCair" disabled>
+        </div>
             
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Perkiraan Kas</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_perkiraanKas">Perkiraan Kas</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
               </div>
             </div>
-          </div>
-
-    </div>
+        </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddTerima()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddTerima()">Simpan</button>
   </div>
 </div>
 </div>
@@ -447,60 +236,37 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Giro Buka</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
           
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Bank</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectBank()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add2_bank">Bank</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectBank()">+</button>
             </div>
           </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_noGiro" placeholder="No. Giro">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add2_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_add2_noGiro" placeholder="No. Giro">
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglGiro">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add2_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_add2_tglGiro">
+        </div>
             
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_add2_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add2_valas">Valas</label>
+          <select id="input_add2_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -509,133 +275,49 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_add2_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_add2_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_add2_kurs" placeholder="Kurs" disabled>
 
-            <div class="row mt-2">
 
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add2_nilaiGiro" 
+            
+          <label for="input_add2_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_add2_nilaiGiro" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  
-                <input type="text" class="form-control text-right" id="input_add2_nilaiGiroRp" 
+            <input type="text" class="form-control text-right" id="input_add2_nilaiGiroRp" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
-                  oninput="formatNumber(this)">
-                </div>
-              </div>
-
-            </div>
+                  oninput="formatNumber(this)"></div></div>
+        </div>
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglBuka" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add2_tglBuka">Tanggal Buka</label>
+          <input type="date" class="form-control" id="input_add2_tglBuka" >
 
-            </div>
+          <label for="input_add2_buktiBuka">Bukti Buka</label>
+          <input type="text" class="form-control" id="input_add2_buktiBuka" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_buktiBuka" disabled>
-                </div>
-              </div>
+          <label for="input_add2_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_add2_keterangan">
 
-            </div>
+          <label for="input_add2_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_add2_tglCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_keterangan">
-                </div>
-              </div>
+          <label for="input_add2_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_add2_buktiCair" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add2_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_add2_keteranganCair" disabled>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddBuka()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddBuka()">Simpan</button>
   </div>
 </div>
 </div>
@@ -648,62 +330,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Giro Terima</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_bank">Bank</label>
+          <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank" disabled>
 
-            </div>
+          <label for="input_edit_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_edit_noGiro" placeholder="No. Giro" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_noGiro" placeholder="No. Giro" disabled>
-                </div>
-              </div>
+          <label for="input_edit_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_edit_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_edit_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit_valas">Valas</label>
+          <select id="input_edit_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -712,137 +362,50 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_edit_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
+
 
             
-            <div class="row mt-2">
+            
+          <label for="input_edit_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_edit_nilaiGiro">
+            <input type="text" class="form-control text-right" id="input_edit_nilaiGiroRp"></div></div>
+        </div>
 
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_tglTerima">Tanggal Terima</label>
+          <input type="date" class="form-control" id="input_edit_tglTerima" >
 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit_nilaiGiro">
-                </div>
-              </div>
- 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit_nilaiGiroRp">
-                </div>
-              </div>
+          <label for="input_edit_buktiTerima">Bukti Terima</label>
+          <input type="text" class="form-control" id="input_edit_buktiTerima" placeholder="Bukti Terima" disabled>
 
-            </div>
+          <label for="input_edit_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit_keterangan">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglTerima" >
-                </div>
-              </div>
+          <label for="input_edit_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_edit_tglCair" disabled>
 
-            </div>
+          <label for="input_edit_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_edit_buktiCair" placeholder="Bukti Cair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_buktiTerima" placeholder="Bukti Terima" disabled>
-                </div>
-              </div>
+          <label for="input_edit_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_edit_keteranganCair" disabled>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_buktiCair" placeholder="Bukti Cair" disabled>
-                </div>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keteranganCair" disabled>
-                </div>
-              </div>
-            </div>
-
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Perkiraan Kas</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_perkiraanKas">Perkiraan Kas</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
               </div>
             </div>
-          </div>
-
-    </div>
+        </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEditTerima()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditTerima()">Simpan</button>
   </div>
 </div>
 </div>
@@ -855,62 +418,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Giro Buka</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-            <div class="col-4 text-left">
-              <div class="form-group text-left">
-                <label class="text-left">Bank</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit2_bank" placeholder="Bank" disabled>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit2_bank">Bank</label>
+          <input type="text" class="form-control" id="input_edit2_bank" placeholder="Bank" disabled>
 
-          </div>
+          <label for="input_edit2_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_edit2_noGiro" placeholder="No. Giro" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_noGiro" placeholder="No. Giro" disabled>
-                </div>
-              </div>
+          <label for="input_edit2_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_edit2_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_edit2_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit2_valas">Valas</label>
+          <select id="input_edit2_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -919,128 +450,44 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_edit2_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_edit2_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit2_kurs" placeholder="Kurs" disabled>
+
 
             
-            <div class="row mt-2">
-
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit2_nilaiGiro" placeholder="Nilai Giro">
-                </div>
-              </div>
- 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit2_nilaiGiroRp">
-                </div>
-              </div>
-
-            </div>
+            
+          <label for="input_edit2_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_edit2_nilaiGiro" placeholder="Nilai Giro">
+            <input type="text" class="form-control text-right" id="input_edit2_nilaiGiroRp"></div></div>
+        </div>
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglBuka" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit2_tglBuka">Tanggal Buka</label>
+          <input type="date" class="form-control" id="input_edit2_tglBuka" >
 
-            </div>
+          <label for="input_edit2_buktiBuka">Bukti Buka</label>
+          <input type="text" class="form-control" id="input_edit2_buktiBuka" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_buktiBuka" disabled>
-                </div>
-              </div>
+          <label for="input_edit2_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit2_keterangan">
 
-            </div>
+          <label for="input_edit2_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_edit2_tglCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_keterangan">
-                </div>
-              </div>
+          <label for="input_edit2_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_edit2_buktiCair" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit2_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_edit2_keteranganCair" disabled>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEditBuka()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditBuka()">Simpan</button>
   </div>
 </div>
 </div>
@@ -1048,118 +495,232 @@
 <!-- End modal edit buka giro-->
 
 <!-- start modal pilih Kas -->
-<div class="modal fade"  id="formSelectKas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formSelectKas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Kas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Select Kas</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAktivaSelectPerkiraan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal pilih Kas-->
 
 <!-- start modal pilih Bank -->
-<div class="modal fade"  id="formSelectBank" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formSelectBank" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Bank</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Select Bank</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelBukaSelectBank" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelBukaSelectBank">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataBukaSelectBank" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataBukaSelectBank" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal pilih Bank-->
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Toolbar (cari & Tampilkan) mengendalikan tabel di tab yang aktif - MasterList.pakai().
 function hideButtonBuka(){
   document.getElementById('divAddBuka').hidden = true;
   document.getElementById('divAddTerima').hidden = false;
+  MasterList.pakai('#tabel_diterima')
+  MasterList.pakaiKolom('#tabel_diterima')
 }
 
 function hideButtonTerima(){
   document.getElementById('divAddBuka').hidden = false;
   document.getElementById('divAddTerima').hidden = true;
+  MasterList.pakai('#tabel_dibuka')
+  MasterList.pakaiKolom('#tabel_dibuka')
+}
+
+// Tinggi kotak scroll dihitung ulang setelah animasi tab selesai (pane sebelumnya tersembunyi).
+$(document).on('shown.bs.tab', '#giroTab [data-toggle="tab"]', function () { MasterList.aturTinggi() })
+
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MGB_KOLOM = [
+  ['Bank',           'Bank',                      1, 'varchar', 0, 0],
+  ['NoGiro',         'No. Giro',                  1, 'varchar', 0, 0],
+  ['TglGiro',        'Tanggal Giro Jatuh Tempo',  1, 'varchar', 0, 0],
+  ['Kodevls',        'Valas',                     1, 'varchar', 0, 0],
+  ['Kurs',           'Kurs',                      1, 'varchar', 0, 0],
+  ['DebetRp',        'Debet Rupiah',              1, 'varchar', 0, 0],
+  ['KreditRp',       'Kredit Rupiah',             1, 'varchar', 0, 0],
+  ['Debet',          'Debet Valas',               1, 'varchar', 0, 0],
+  ['Kredit',         'Kredit Valas',              1, 'varchar', 0, 0],
+  ['TglBuka',        'Tanggal Buka Giro',         1, 'varchar', 0, 0],
+  ['BuktiBuka',      'Bukti Buka Giro',           1, 'varchar', 0, 0],
+  ['Keterangan',     'Keterangan Buka Giro',      1, 'varchar', 0, 0],
+  ['TglCair',        'Tanggal Pencairan Giro',    1, 'varchar', 0, 0],
+  ['BuktiCair',      'Bukti Pencairan Giro',      1, 'varchar', 0, 0],
+  ['KeteranganCair', 'Keterangan Pencairan Giro', 1, 'varchar', 0, 0],
+]
+
+const MGT_KOLOM = [
+  ['Bank',           'Bank',                      1, 'varchar', 0, 0],
+  ['NoGiro',         'No. Giro',                  1, 'varchar', 0, 0],
+  ['Kas',            'Perkiraan Kas',             1, 'varchar', 0, 0],
+  ['TglGiro',        'Tanggal Giro Jatuh Tempo',  1, 'varchar', 0, 0],
+  ['Kodevls',        'Valas',                     1, 'varchar', 0, 0],
+  ['Kurs',           'Kurs',                      1, 'varchar', 0, 0],
+  ['DebetRp',        'Debet Rupiah',              1, 'varchar', 0, 0],
+  ['KreditRp',       'Kredit Rupiah',             1, 'varchar', 0, 0],
+  ['Debet',          'Debet Valas',               1, 'varchar', 0, 0],
+  ['Kredit',         'Kredit Valas',              1, 'varchar', 0, 0],
+  ['TglBuka',        'Tanggal Terima Giro',       1, 'varchar', 0, 0],
+  ['BuktiBuka',      'Bukti Terima Giro',         1, 'varchar', 0, 0],
+  ['Keterangan',     'Keterangan Terima Giro',    1, 'varchar', 0, 0],
+  ['TglCair',        'Tanggal Pencairan Giro',    1, 'varchar', 0, 0],
+  ['BuktiCair',      'Bukti Pencairan Giro',      1, 'varchar', 0, 0],
+  ['KeteranganCair', 'Keterangan Pencairan Giro', 1, 'varchar', 0, 0],
+]
+
+// Tampilan sel sama seperti sebelumnya: tanggal yyyy-mm-dd, nilai rupiah/valas id-ID 2 desimal.
+function mgTanggal (v) {
+  return v ? (new Date(v)).toLocaleDateString('en-CA') : ''
+}
+function mgAngka (field) {
+  return function (item) {
+    return "<td class='text-right'>" + parseFloat(item[field]).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>'
+  }
+}
+function mgTeks (field) {
+  return function (item) { return '<td>' + item[field] + '</td>' }
+}
+let mgKhusus = {
+  TglGiro: function (item) { return '<td>' + mgTanggal(item.TglGiro) + '</td>' },
+  TglBuka: function (item) { return '<td>' + mgTanggal(item.TglBuka) + '</td>' },
+  TglCair: function (item) { return '<td>' + mgTanggal(item.TglCair) + '</td>' },
+  DebetRp: mgAngka('DebetRp'), KreditRp: mgAngka('KreditRp'), Debet: mgAngka('Debet'), Kredit: mgAngka('Kredit'),
+  Bank: mgTeks('Bank'), NoGiro: mgTeks('NoGiro'), Kas: mgTeks('Kas'), Kodevls: mgTeks('Kodevls'),
+  BuktiBuka: mgTeks('BuktiBuka'), Keterangan: mgTeks('Keterangan'), BuktiCair: mgTeks('BuktiCair'), KeteranganCair: mgTeks('KeteranganCair')
+}
+
+let dataBuka = []
+let dataTerima = []
+
+function renderTabelBuka () {
+  if ($.fn.DataTable.isDataTable('#tabel_dibuka')) {
+    $('#tabel_dibuka').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil('#tabel_dibuka')
+  document.getElementById('tabel_dibuka_header').innerHTML = MasterList.headHtml(cols, '#tabel_dibuka')
+
+  // Kurs giro dibuka ditampilkan apa adanya (seperti sebelumnya).
+  let khusus = $.extend({}, mgKhusus, { Kurs: function (item) { return "<td class='text-right'>" + item.Kurs + '</td>' } })
+
+  let rowTable = ""
+  dataBuka.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_dataDibuka").innerHTML = rowTable
+  $("#tabel_dibuka").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel_dibuka')
+}
+
+function renderTabelTerima () {
+  if ($.fn.DataTable.isDataTable('#tabel_diterima')) {
+    $('#tabel_diterima').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil('#tabel_diterima')
+  document.getElementById('tabel_diterima_header').innerHTML = MasterList.headHtml(cols, '#tabel_diterima')
+
+  let khusus = $.extend({}, mgKhusus, { Kurs: mgAngka('Kurs') })
+
+  let rowTable = ""
+  dataTerima.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_dataDiterima").innerHTML = rowTable
+  $("#tabel_diterima").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel_diterima')
+}
+
+// Setelah tabel digambar ulang, ReportTable & toolbar dikembalikan ke tab yang sedang tampil.
+function mgKembaliKeTabAktif () {
+  let sel = document.getElementById('divAddTerima').hidden ? '#tabel_dibuka' : '#tabel_diterima'
+  MasterList.pakai(sel)
+  MasterList.pakaiKolom(sel)
 }
 
 function loadAllBuka () {
-
   let _token = $("#_token").val();
-
-  document.getElementById('breadcrumb').innerHTML = "Master Giro"
-
-  $('#tabel_dibuka').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastergiroloadallbuka') !!}",
@@ -1169,59 +730,15 @@ function loadAllBuka () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataBuka = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr>
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-    <td>${ item.Bank }</td>
-    <td>${ item.NoGiro }</td>
-    <td>${(new Date(item.TglGiro)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.Kodevls }</td>
-    <td class='text-right'>${ item.Kurs }</td>
-    <td class='text-right'>${ parseFloat(item.DebetRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.KreditRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Debet).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Kredit).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td>${(new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiBuka }</td>
-    <td>${ item.Keterangan }</td>
-    <td>${item.TglCair ? (new Date(item.TglCair)).toLocaleDateString('en-CA') : ''}</td>
-    <td>${ item.BuktiCair }</td>
-    <td>${ item.KeteranganCair }</td>
-
-    </tr>`
-  });
-
- let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-
-  document.getElementById("tabel_dataDibuka").innerHTML = rowTable
-  $("#tabel_dibuka").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "paging": true,
-    "searching": true,
-    "pageLength": currentLength,
-    "dom": 'tip'
-  });
-
+  renderTabelBuka()
+  mgKembaliKeTabAktif()
 }
 
 function loadAllTerima () {
-
   let _token = $("#_token").val();
-
-  $('#tabel_diterima').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastergiroloadallterima') !!}",
@@ -1231,64 +748,12 @@ function loadAllTerima () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTerima = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `
-    <tr>
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-    <td>${ item.Bank }</td>
-    <td>${ item.NoGiro }</td>
-    <td>${ item.Kas }</td>
-    <td>${(new Date(item.TglGiro)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.Kodevls }</td>
-    <td class='text-right'>${ parseFloat(item.Kurs).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.DebetRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.KreditRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Debet).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Kredit).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td>${ (new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiBuka }</td>
-    <td>${ item.Keterangan }</td>
-    <td>${ (new Date(item.TglCair)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiCair }</td>
-    <td>${ item.KeteranganCair }</td>
-    </tr>`
-  });
-
-  let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-  document.getElementById("tabel_dataDiterima").innerHTML = rowTable
-  $("#tabel_diterima").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "pageLength": currentLength,
-    "dom": 'tip'
-  });
-
+  renderTabelTerima()
+  mgKembaliKeTabAktif()
 }
-
-
-$("#tabel_filter_visual").on("keyup", function () {
-  $("#tabel_dibuka").DataTable().search(this.value).draw();
-  $("#tabel_diterima").DataTable().search(this.value).draw();
-});
-
-$("#tabel_length_visual").on("change", function () {
-  $("#tabel_dibuka").DataTable().page.len(Number(this.value)).draw();
-  $("#tabel_diterima").DataTable().page.len(Number(this.value)).draw();
-});
-
 
 function buttonAddBuka () {
   document.getElementById('input_add2_bank').value = ''
@@ -1488,9 +953,27 @@ function submitEditBuka () {
   let tanggalBuka = $("#input_edit2_tglBuka").val();
   let buktiBuka = $("#input_edit2_buktiBuka").val();
   let keterangan = $("#input_edit2_keterangan").val();
-  let tanggalCair = $("#input_edit2_tanggalCair").val();
+  let tanggalCair = $("#input_edit2_tglCair").val();
   let buktiCair = $("#input_edit2_buktiCair").val();
   let keteranganCair = $("#input_edit2_keteranganCair").val();
+
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tanggalGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('mastergirospeditbuka') !!}",
@@ -1543,7 +1026,7 @@ function submitEditTerima () {
   let tanggalTerima = $("#input_edit_tglTerima").val();
   let buktiTerima = $("#input_edit_buktiTerima").val();
   let keterangan = $("#input_edit_keterangan").val();
-  let tanggalCair = $("#input_edit_tanggalCair").val();
+  let tanggalCair = $("#input_edit_tglCair").val();
   let buktiCair = $("#input_edit_buktiCair").val();
   let keteranganCair = $("#input_edit_keteranganCair").val();
   let perkiraanKas = $("#input_edit_perkiraanKas").val();
@@ -1623,6 +1106,24 @@ function submitAddTerima () {
   let keteranganCair = $("#input_add_keteranganCair").val();
   let perkiraanKas = $("#input_add_perkiraanKas").val();
 
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tglGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
+
   $.ajax({
     url: "{!! url('mastergirospaddterima') !!}",
     type: "post",
@@ -1677,6 +1178,24 @@ function submitAddBuka () {
   let buktiCair = $("#input_add2_buktiCair").val();
   let keteranganCair = $("#input_add2_keteranganCair").val();
 
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tglGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
+
   $.ajax({
     url: "{!! url('mastergirospaddbuka') !!}",
     type: "post",
@@ -1703,7 +1222,7 @@ function submitAddBuka () {
         alertify.warning(res);
       }  else {
         console.log(res ,'!')
-        alertify.success("Data Giro Terima telah ditambah");
+        alertify.success("Data Giro Buka telah ditambah");
         loadAllBuka()
         loadAllTerima()
         $("#formBuka").modal("hide")
@@ -1792,10 +1311,7 @@ function loadSelectKas() {
   });
 
   document.getElementById("tabel_dataAktivaSelectPerkiraan").innerHTML = rowTable;
-  $("#tabelAktivaSelectPerkiraan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAktivaSelectPerkiraan')
 }
 
 function loadSelectBank() {
@@ -1830,10 +1346,7 @@ function loadSelectBank() {
   });
 
   document.getElementById("tabel_dataBukaSelectBank").innerHTML = rowTable;
-  $("#tabelBukaSelectBank").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelBukaSelectBank')
 }
 
 function buttonPilihPerkiraanKas(selectedPerkiraan) {
@@ -1849,6 +1362,8 @@ function buttonPilihPerkiraanBank(selectedPerkiraan) {
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'mastergiro', mode: 1, table: '#tabel_dibuka', kolom: MGB_KOLOM, onChange: function () { renderTabelBuka(); mgKembaliKeTabAktif() } })
+  MasterList.kolom({ href: 'mastergiro', mode: 2, table: '#tabel_diterima', kolom: MGT_KOLOM, onChange: function () { renderTabelTerima(); mgKembaliKeTabAktif() } })
   loadAllBuka();
   loadAllTerima();
   hideButtonTerima();

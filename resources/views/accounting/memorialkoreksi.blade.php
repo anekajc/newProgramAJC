@@ -5479,7 +5479,8 @@ function mkIkatSearchPerkiraan () {
      Debet  : daftar aktiva cuma informasi (baris tidak bisa diklik), lanjutnya lewat tombol
               Tambah -> form aktiva baru -> aktiva itu jadi NoAktivaP + 'AKV+'.
      Kredit : pilih aktiva yang sudah ada -> NoAktivaL + 'AKV-'.
-     Dalam SATU No. Bukti hanya boleh ada satu aktiva AKV (mkAktivaBolehDipakai()).
+     Dalam SATU item hanya boleh ada satu aktiva AKV (mkAktivaBolehDipakai()); antar item
+     dalam satu No. Bukti tidak dibatasi.
 
    AKM (akumulasi penyusutan)
      Kedua sisi sama: pilih aktiva yang sudah ada, tidak ada penambahan master.
@@ -5534,12 +5535,13 @@ function mkAktivaTgl (tanggal) {
   return hari + '/' + bulan + '/' + d.getFullYear()
 }
 
-// Satu bukti hanya boleh memegang satu aktiva AKV. AKM tidak dibatasi sama sekali, dan baris
-// AKM juga TIDAK ikut dihitung saat memeriksa AKV - aturan keduanya terpisah.
+// Satu ITEM hanya boleh memegang satu aktiva AKV (Debet dan Kredit tidak boleh sama-sama AKV).
+// Antar item dalam satu No. Bukti TIDAK dibatasi - item berikutnya boleh memakai aktiva /
+// akumulasi lagi. AKM tidak dibatasi sama sekali.
 function mkAktivaBolehDipakai (idTujuan, kode) {
   if (kode !== 'AKV') { return true }
 
-  let pesan = "Dalam 1 bukti hanya boleh ada 1 aktiva"
+  let pesan = "Dalam 1 item hanya boleh ada 1 aktiva"
 
   let lawan = mkAktivaItem[idTujuan === 'Debet' ? 'Kredit' : 'Debet']
   if (lawan && lawan.kode === 'AKV') {
@@ -5547,20 +5549,20 @@ function mkAktivaBolehDipakai (idTujuan, kode) {
     return false
   }
 
-  // listData bisa tertinggal dari bukti yang dibuka sebelumnya, jadi NoBukti-nya ikut
-  // dicocokkan. Baris yang sedang diedit dikecualikan.
-  let nobukti = ($("#input_add_nobukti").val() || '').trim()
-  let urutIni = mkModeEditItem && itemEdit ? Number(itemEdit.Urut) : -1
-  let bentrok = (listData || []).some(function (item) {
-    if ((item.NoBukti || '').trim() !== nobukti) { return false }
-    if (Number(item.Urut) === urutIni) { return false }
-    return mkAktivaJenisStatus(item.StatusAktivaP) === 'AKV'
-        || mkAktivaJenisStatus(item.StatusAktivaL) === 'AKV'
-  })
-  if (bentrok) {
-    alertify.warning(pesan)
-    return false
-  }
+  // DINONAKTIFKAN - dulu satu No. Bukti hanya boleh punya satu aktiva AKV di seluruh itemnya.
+  // Ralat: boleh lebih dari satu aktiva/akumulasi dalam 1 No. Bukti asal di item yang berbeda.
+  // let nobukti = ($("#input_add_nobukti").val() || '').trim()
+  // let urutIni = mkModeEditItem && itemEdit ? Number(itemEdit.Urut) : -1
+  // let bentrok = (listData || []).some(function (item) {
+  //   if ((item.NoBukti || '').trim() !== nobukti) { return false }
+  //   if (Number(item.Urut) === urutIni) { return false }
+  //   return mkAktivaJenisStatus(item.StatusAktivaP) === 'AKV'
+  //       || mkAktivaJenisStatus(item.StatusAktivaL) === 'AKV'
+  // })
+  // if (bentrok) {
+  //   alertify.warning(pesan)
+  //   return false
+  // }
 
   return true
 }

@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Area')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,27 +22,29 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Satuan</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
         <thead>
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Area</th>
-            <th scope="col">Nama Area</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Area</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Area</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
+        <tbody id="tabel_data" class="text-left">
       </tbody>
       </table>
+
     </div>
-</div>
+  </div>
 
 </div>
 
@@ -52,48 +54,31 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kodearea">Kode Area</label>
+          <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_namaarea">Nama Area</label>
+          <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area">
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -107,45 +92,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kodearea">Kode Area</label>
+          <input type="text" class="form-control" id="input_add_kodearea" placeholder="Kode Area">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_namaarea">Nama Area</label>
+          <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area">
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -160,48 +130,31 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodearea" placeholder="Kode Area" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kodearea">Kode Area</label>
+          <input type="text" class="form-control" id="input_edit_kodearea" placeholder="Kode Area" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Area</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namaarea" placeholder="Nama Area">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit_namaarea">Nama Area</label>
+          <input type="text" class="form-control" id="input_edit_namaarea" placeholder="Nama Area">
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -211,7 +164,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -220,7 +173,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Area"
+  // document.getElementById('breadcrumb').innerHTML = "Master Area" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -258,9 +211,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 

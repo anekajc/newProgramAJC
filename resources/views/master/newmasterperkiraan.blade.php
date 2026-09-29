@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Perkiraan')
 
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,32 +23,29 @@
     <button class="btn btn-primary" onclick="buttonAdd()">+ Add Perkiraan</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-@include('master.partials.headerTableMaster')
+<div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
-            <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-            <th style="padding: 4px 12px;" scope="col">Kelompok</th>
-            <th style="padding: 4px 12px;" scope="col">Tipe</th>
-            <th style="padding: 4px 12px;" scope="col">Transaksi</th>
-            <th style="padding: 4px 12px;" scope="col">Valas</th>
-            <th style="padding: 4px 12px;" scope="col">Simbol</th>
-            <th style="padding: 4px 12px;" scope="col">PPN</th>
-            <th style="padding: 4px 12px;" scope="col">Status</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-        </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
   </div>
 
@@ -60,162 +57,72 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-3 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" onblur="onChangePerkiraan()">
-                </div>
-              </div>
-              <div class="col-2 ">
-                <div class="form-group text-center">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_isppn" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add_perkiraan">Perkiraan</label>
+          <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" onblur="onChangePerkiraan()">
+          <label for="input_add_isppn">PPN</label>
+          <select id="input_add_isppn" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     <option value=0>False</option>
                     <option value=1>True</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
 
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-9">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan">
-              </div>
-            </div>
+          
+          <label for="input_add_keterangan">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan"></div>
 
-            <!-- <div class="col-2 text-right">
-              <div class="form-group">
-            <button onclick="resetScannerKode2()" class="btn btn-success btn-sm text-right"><i class="bi bi-arrow-clockwise"></i></button>
-            </div>
-            </div> -->
-          </div>
 
-          <div class="row mt-3">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Kelompok</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_kelompok" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_add_kelompok">Kelompok</label>
+          <select id="input_add_kelompok" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 selected >Aktiva</option>
                   <option value=1 >Kewajiban</option>
                   <option value=2 >Modal</option>
                   <option value=3 >Pendapatan</option>
                   <option value=4 >Biaya</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <select id="input_add_tipe" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_add_tipe">Tipe</label>
+          <select id="input_add_tipe" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >General</option>
                   <option value=1 >Detail</option>
                 </select>
-              </div>
-            </div>
-
-          </div>
-          <!-- <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
-              </div>
-            </div>
-
-          </div> -->
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Debet/Kredit</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_debetkredit" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+        </div>
+          <!-- <div class="bs-form bs-form-1">
+          <label for="input_add_kode2">Tipe</label>
+          <input type="text" class="form-control" id="input_add_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
+        </div> -->
+          <div class="bs-form">
+          <label for="input_add_debetkredit">Debet/Kredit</label>
+          <select id="input_add_debetkredit" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Debet</option>
                   <option value=1 >Kredit</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_add_valas">Valas</label>
+          <select id="input_add_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     @foreach ($listDataValas as $valas)
                         <option value="{{ $valas->KODEVLS }}" data-kurs="{{ $valas->Simbol }}">{{ $valas->KODEVLS }}</option>
                      @endforeach
                     </select>
-                </div>
-            </div>
 
-          </div>
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Status</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_status" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_add_status">Status</label>
+          <select id="input_add_status" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Active</option>
                   <option value=1 >Inactive</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Simbol</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol">
-              </div>
-            </div>
-
-          </div>
+          <label for="input_add_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol">
+        </div>
 
 
 
@@ -235,7 +142,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -249,164 +157,72 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-3 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
-                </div>
-              </div>
-              <div class="col-2 ">
-                <div class="form-group text-center">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_edit_isppn" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit_perkiraan">Perkiraan</label>
+          <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
+          <label for="input_edit_isppn">PPN</label>
+          <select id="input_edit_isppn" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     <option value=0>False</option>
                     <option value=1>True</option>
                   </select>
-                </div>
-              </div>
 
 
+          
+          <label for="input_edit_keterangan">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan"></div>
 
-            </div>
 
-          <div class="row ">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-9">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan">
-              </div>
-            </div>
-
-            <!-- <div class="col-2 text-right">
-              <div class="form-group">
-            <button onclick="resetScannerKode2()" class="btn btn-success btn-sm text-right"><i class="bi bi-arrow-clockwise"></i></button>
-            </div>
-            </div> -->
-          </div>
-
-          <div class="row mt-3">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Kelompok</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_kelompok" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_edit_kelompok">Kelompok</label>
+          <select id="input_edit_kelompok" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 selected >Aktiva</option>
                   <option value=1 >Kewajiban</option>
                   <option value=2 >Modal</option>
                   <option value=3 >Pendapatan</option>
                   <option value=4 >Biaya</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <select id="input_edit_tipe" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_edit_tipe">Tipe</label>
+          <select id="input_edit_tipe" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >General</option>
                   <option value=1 >Detail</option>
                 </select>
-              </div>
-            </div>
-
-          </div>
-          <!-- <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
-              </div>
-            </div>
-
-          </div> -->
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Debet/Kredit</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_debetkredit" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+        </div>
+          <!-- <div class="bs-form bs-form-1">
+          <label for="input_edit_kode2">Tipe</label>
+          <input type="text" class="form-control" id="input_edit_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
+        </div> -->
+          <div class="bs-form">
+          <label for="input_edit_debetkredit">Debet/Kredit</label>
+          <select id="input_edit_debetkredit" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Debet</option>
                   <option value=1 >Kredit</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-4">
-                <div class="form-group">
-                    <select id="input_edit_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_edit_valas">Valas</label>
+          <select id="input_edit_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     @foreach ($listDataValas as $valas)
                         <option value="{{ $valas->KODEVLS }}" data-kurs="{{ $valas->Simbol }}">{{ $valas->KODEVLS }}</option>
                      @endforeach
                     </select>
-                </div>
-            </div>
 
-          </div>
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Status</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_status" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_edit_status">Status</label>
+          <select id="input_edit_status" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Active</option>
                   <option value=1 >Inactive</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Simbol</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol">
-              </div>
-            </div>
-
-          </div>
+          <label for="input_edit_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol">
+        </div>
 
 
 
@@ -426,7 +242,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -445,6 +262,8 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -591,13 +410,62 @@ function onChangePerkiraan () {
   // //     $('#input_edit_valas').html(valasOptions);
   // // }
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MPK_KOLOM = [
+  ['Perkiraan',  'Perkiraan',  1, 'varchar', 0, 0],
+  ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+  ['mKelompok',  'Kelompok',   1, 'varchar', 0, 0],
+  ['mtipe',      'Tipe',       1, 'varchar', 0, 0],
+  ['mDK',        'Transaksi',  1, 'varchar', 0, 0],
+  ['Valas',      'Valas',      1, 'varchar', 0, 0],
+  ['Simbol',     'Simbol',     1, 'varchar', 0, 0],
+  ['IsPPN',      'PPN',        1, 'varchar', 0, 0],
+  ['Status',     'Status',     1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh (dipakai juga oleh fungsi lain di halaman ini).
+let dataTabel = []
+
+  function renderTabel () {
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+      $('#tabel').DataTable().destroy();
+    }
+
+    let cols = MasterList.kolomTampil()
+    document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+    // Tampilan sel sama seperti sebelumnya: PPN berupa ikon, Status berupa badge.
+    let khusus = {
+      IsPPN: function (item) {
+        return item.IsPPN == 0
+          ? '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+          : '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      },
+      Status: function (item) {
+        return item.Status == 'Tidak Aktif'
+          ? '<td><span class="sp-badge is-user">Tidak Aktif</span></td>'
+          : '<td><span class="sp-badge is-supervisor">Aktif</span></td>'
+      }
+    }
+
+    let rowTable = ""
+    dataTabel.forEach((item, i) => {
+      let aksi = `
+        <div class="action-buttons-wrap">
+            <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
+            <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
+        </div>`
+      rowTable += MasterList.baris(item, cols, aksi, khusus)
+    });
+
+    document.getElementById("tabel_data").innerHTML = rowTable
+    $("#tabel").DataTable(MasterList.opsi())
+    MasterList.selesai('#tabel')
+  }
+
   function loadAll () {
-    console.log('asd')
     let _token = $("#_token").val();
-
-     document.getElementById('breadcrumb').innerHTML = "Master Perkiraan"
-
-    $('#tabel').DataTable().destroy();
 
     $.ajax({
       url: "{!! url('newperkiraanloadall') !!}",
@@ -607,64 +475,11 @@ function onChangePerkiraan () {
         _token : _token,
       },
       success: function(res) {
-        console.log(res)
-        dataRefresh = res
+        dataTabel = res
     }})
 
-    let rowTable = ""
-    dataRefresh.forEach((item, i) => {
-      let temp = ""
-      if (item.IsPPN == 0) {
-        temp = '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
-      } else {
-        temp = '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
-      }
-      rowTable += `<tr>
-        
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      <td>${item.mKelompok}</td>
-      <td>${item.mtipe}</td>
-      <td>${item.mDK}</td>
-      <td>${item.Valas}</td>
-      <td>${item.Simbol}</td>
-      `+ temp +`
-      ${
-          item.Status == 'Tidak Aktif'
-              ? '<td><span class="sp-badge is-user">Tidak Aktif</span></td>'
-              : '<td><span class="sp-badge is-supervisor">Aktif</span></td>'
-      }
-      </tr>`
-    });
-
-
-    document.getElementById("tabel_data").innerHTML = rowTable
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-    $("#tabel").DataTable({
-      "lengthChange": true,
-      "paging": true,
-      "searching": true,
-      "dom": 'tip',
-      "pageLength": currentLength
-    });
-
+    renderTabel()
   }
-  
-$("#tabel_filter_visual").on("keyup", function () {
-  $("#tabel").DataTable().search(this.value).draw();
-});
-
-$("#tabel_length_visual").on("change", function () {
-  $("#tabel").DataTable().page.len(Number(this.value)).draw();
-});
-
 
   function buttonEdit (perkiraan) {
 
@@ -907,6 +722,7 @@ $("#tabel_length_visual").on("change", function () {
   }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'newperkiraan', kolom: MPK_KOLOM, onChange: renderTabel })
   loadAll();
 }
 

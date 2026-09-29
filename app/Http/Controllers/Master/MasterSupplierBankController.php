@@ -40,8 +40,8 @@ class MasterSupplierBankController extends Controller
   bank,NoAcc,ATN
   from DBCUSTSUPP
   where isnull(JENIS,0)=0
-   and (ISnull(bank,'')<>ISnull(BankTemp,'')) or (ISnull(NoAcc,'')<>ISnull(NoaccTemp,'')) or  
-   (ISnull(ATN,'')<>ISnull(ATNTemp,''))
+   and ((ISnull(bank,'')<>ISnull(BankTemp,'')) or (ISnull(NoAcc,'')<>ISnull(NoaccTemp,'')) or  
+   (ISnull(ATN,'')<>ISnull(ATNTemp,'')))
    order by KODECUSTSUPP");
     return $listData;
   }

@@ -90,6 +90,11 @@ class MasterPiutangController extends Controller
   }
 
   public function spAdd (Request $req) {
+    $check = DB::connection('SML')->select("select top 1 1 as ada from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode and Tipe = 'PT' and TipeTrans = 'AWL'",
+      ['noFaktur' => $req->noFaktur, 'kode' => $req->kodeSupplier]);
+    if ($check) {
+      return 'No. Faktur ini sudah ada';
+    }
     $listData = DB::connection('SML')->update(
     'INSERT INTO DBHUTPIUT (NoFaktur, Perkiraan, NoRetur, KodeCustSupp, NoBukti, NoMsk, Urut, Tipe, TipeTrans, KodeSales,  Tanggal, JatuhTempo, Valas, Kurs, Debet, DebetD, Kredit, KreditD, POCUST, KODEKEBUN)
     VALUES (:noFaktur, :perkiraanSupplier , \'\', :kodeSupplier, \'\', 0, 1, \'PT\', \'AWL\', \'\', :tanggalFaktur, :jatuhTempo, :valas, :kurs, :jumlahRp, :jumlah, :kredit, :kreditD, :noPo, :lokasiPenerima)',
@@ -120,8 +125,26 @@ class MasterPiutangController extends Controller
     //if ($check) {
       //return 'ga bisa hapus';
     //}
-    $delete = DB::connection('SML')->update('delete from DBHUTPIUT where NoFaktur = :noFaktur' , ['noFaktur' => $req->noFaktur ]);
-    return $delete;
+    // Dulu: "delete from DBHUTPIUT where NoFaktur = :noFaktur" - ikut menghapus baris pelunasan dan
+    // baris lain yang kebetulan bernomor faktur sama. Sekarang hanya baris saldo awal (AWL) milik
+    // menu ini, dan ditolak kalau faktur itu sudah punya transaksi lain.
+    $awal = DB::connection('SML')->select("select KodeCustSupp from DBHUTPIUT where NoFaktur = :noFaktur and Tipe = 'PT' and TipeTrans = 'AWL'
+      and (:kode = '' or KodeCustSupp = :kode2)", ['noFaktur' => $req->noFaktur, 'kode' => (string) $req->kodeCustSupp, 'kode2' => (string) $req->kodeCustSupp]);
+    if (!$awal) {
+      return 'Data saldo awal tidak ditemukan';
+    }
+    if (count($awal) > 1) {
+      return 'No. Faktur ini dipakai lebih dari satu, silakan refresh halaman lalu hapus dari barisnya';
+    }
+    $kode = $awal[0]->KodeCustSupp;
+    $lain = DB::connection('SML')->select("select top 1 1 as ada from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode
+      and Tipe = 'PT' and isnull(TipeTrans,'') <> 'AWL'", ['noFaktur' => $req->noFaktur, 'kode' => $kode]);
+    if ($lain) {
+      return 'Faktur ini sudah punya transaksi (pelunasan dll), tidak bisa dihapus';
+    }
+    DB::connection('SML')->update("delete from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode and Tipe = 'PT' and TipeTrans = 'AWL'",
+      ['noFaktur' => $req->noFaktur, 'kode' => $kode]);
+    return 1;
   }
 
   public function spEdit (Request $req) {
@@ -135,7 +158,10 @@ class MasterPiutangController extends Controller
                 DebetD = :jumlah,
                 POCUST = :noPo,
                 KODEKEBUN = :lokasiPenerima
-            WHERE NoFaktur = :noFaktur',
+            WHERE NoFaktur = :noFaktur and Tipe = \'PT\' and TipeTrans = \'AWL\'
+              and (:kodeCustSupp = \'\' or KodeCustSupp = :kodeCustSupp2)',
+            // Dulu WHERE hanya NoFaktur - ikut mengubah baris pelunasan & baris lain dengan nomor
+            // faktur yang sama. Sekarang hanya baris saldo awal (AWL) piutang ini.
             [
                 'tanggalFaktur' => $req->tanggalFaktur,
                 'jatuhTempo' => $req->jatuhTempo,
@@ -145,7 +171,9 @@ class MasterPiutangController extends Controller
                 'jumlahRp' => $req->jumlahRp,
                 'noPo' => $req->noPo,
                 'noFaktur' => $req->noFaktur,
-                'lokasiPenerima' => $req->lokasiPenerima
+                'lokasiPenerima' => $req->lokasiPenerima,
+                'kodeCustSupp' => (string) $req->kodeCustSupp,
+                'kodeCustSupp2' => (string) $req->kodeCustSupp
             ]
         );
 
@@ -169,8 +197,9 @@ class MasterPiutangController extends Controller
             INNER JOIN DBPOSTHUTPIUT a ON a.Perkiraan = b.Perkiraan
             WHERE a.Kode = 'PT'
         ) b ON b.perkiraan = d.perkiraan
-        WHERE a.NoFaktur = :kode and c.KodeCustSupp = :kodeCustSupp
+        WHERE a.NoFaktur = :kode and c.KodeCustSupp = :kodeCustSupp and a.TipeTrans = 'AWL'
         ORDER BY c.kodecustsupp", ['kode' => $req->kode, 'kodeCustSupp' => $req->kodeCustSupp]);
+    // TipeTrans AWL: dulu tanpa filter ini res[0] bisa baris pelunasan faktur yang sama.
     return $detail;
   }
 

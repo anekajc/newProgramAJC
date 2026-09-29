@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Aktiva')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,39 +22,31 @@
     <button class="btn btn-action-primary" onclick="cleanFormAdd()">+ Add Aktiva</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Aktiva</th>
-            <th scope="col">Keterangan</th>
-            <th scope="col">Tanggal</th>
-            <th scope="col">Devisi</th>
-            <th scope="col">Tipe Aktiva</th>
-            <th scope="col">Kelompok</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Susut</th>
-            <th scope="col">Metode</th>
-            <th scope="col">Akumulasi</th>
-            <th scope="col">Biaya Penyusutan 1</th>
-            <th scope="col">Persen Biaya 1</th>
-            <th scope="col">Biaya Penyusutan 2</th>
-            <th scope="col">Persen Biaya 2</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
-</div>
+  </div>
 
 </div>
 <!-- start modal add -->
@@ -63,191 +55,93 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">Form Add Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <form>
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="">
 
           <!-- Group Aktiva -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Group Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonGroupAktiva()">+</button>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Devisi</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDaftarDevisi()">+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- No. Aktiva / No. Urut -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">No. Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">No. Urut</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_add_NoUrut" placeholder="No. Urut" disabled>
-            </div>
-          </div>
-
-          <!-- Tipe Aktiva / Tgl. Perolehan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Tipe Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-control" id="input_add_TipeAktiva" disabled>
+          <div class="bs-form">
+          <label for="input_add_GroupAktiva">Group Aktiva</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <label for="input_add_DaftarDevisi">Devisi</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <label for="input_add_NoAktiva">No. Aktiva</label>
+          <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
+          <label for="input_add_NoUrut">No. Urut</label>
+          <input type="text" class="form-control" id="input_add_NoUrut" placeholder="No. Urut" disabled>
+          <label for="input_add_TipeAktiva">Tipe Aktiva</label>
+          <select class="form-control" id="input_add_TipeAktiva" disabled>
                 <option value="0">Aktiva Tetap</option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Perolehan</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_add_TglPerolehan">
-            </div>
-          </div>
-
-          <!-- Tgl. Pemakaian -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-6"></div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Pemakaian</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_add_TglPemakaian">
-            </div>
-          </div>
+          <label for="input_add_TglPerolehan">Tgl. Perolehan</label>
+          <input type="date" class="form-control" id="input_add_TglPerolehan">
+          <label for="input_add_TglPemakaian">Tgl. Pemakaian</label>
+          <div class="bs-full"><input type="date" class="form-control" id="input_add_TglPemakaian"></div>
+        </div>
 
           <!-- Kuantum / Susut / Metode -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label date-label">Kuantum</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_add_Kuantum" value="1">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Susut (%)</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Metode Susut</label>
-            </div>
-            <div class="col-md-2">
-              <select class="form-control" id="input_add_MetodePenyusutan">
+          <div class="bs-form">
+          <label for="input_add_Kuantum">Kuantum</label>
+          <input type="number" class="form-control text-right" id="input_add_Kuantum" value="1">
+          <label for="input_add_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
+          <label for="input_add_MetodePenyusutan">Metode Susut</label>
+          <div class="bs-full"><select class="form-control" id="input_add_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select>
-            </div>
-          </div>
+              </select></div>
+        </div>
 
           <!-- Keterangan -->
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <label class="form-label">Keterangan</label>
-            </div>
-            <div class="col-md-10">
-              <textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add_Keterangan">Keterangan</label>
+          <textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea>
+        </div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
             </div>
           </div>
+        </div>
 
           <!-- Biaya Penyusutan 1 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('1')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_BiayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 2 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('2')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_add_BiayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 3 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 3</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('3')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_add_BiayaPenyusutan3">Biaya Penyusutan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
+              </div></div></div>
+        </div>
         </form>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
   </div>
@@ -260,191 +154,93 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">Form Edit Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <form>
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="">
 
           <!-- Group Aktiva -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Group Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonGroupAktiva()">+</button>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Devisi</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDaftarDevisi()">+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- No. Aktiva / No. Urut -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">No. Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">No. Urut</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_edit_NoUrut" placeholder="No. Urut" disabled>
-            </div>
-          </div>
-
-          <!-- Tipe Aktiva / Tgl. Perolehan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Tipe Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-control" id="input_edit_TipeAktiva" disabled>
+          <div class="bs-form">
+          <label for="input_edit_GroupAktiva">Group Aktiva</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <label for="input_edit_DaftarDevisi">Devisi</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <label for="input_edit_NoAktiva">No. Aktiva</label>
+          <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
+          <label for="input_edit_NoUrut">No. Urut</label>
+          <input type="text" class="form-control" id="input_edit_NoUrut" placeholder="No. Urut" disabled>
+          <label for="input_edit_TipeAktiva">Tipe Aktiva</label>
+          <select class="form-control" id="input_edit_TipeAktiva" disabled>
                 <option value="0">Aktiva Tetap</option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Perolehan</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_edit_TglPerolehan">
-            </div>
-          </div>
-
-          <!-- Tgl. Pemakaian -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-6"></div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Pemakaian</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_edit_TglPemakaian">
-            </div>
-          </div>
+          <label for="input_edit_TglPerolehan">Tgl. Perolehan</label>
+          <input type="date" class="form-control" id="input_edit_TglPerolehan">
+          <label for="input_edit_TglPemakaian">Tgl. Pemakaian</label>
+          <div class="bs-full"><input type="date" class="form-control" id="input_edit_TglPemakaian"></div>
+        </div>
 
           <!-- Kuantum / Susut / Metode -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label date-label">Kuantum</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_edit_Kuantum" value="1">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Susut (%)</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Metode Susut</label>
-            </div>
-            <div class="col-md-2">
-              <select class="form-control" id="input_edit_MetodePenyusutan">
+          <div class="bs-form">
+          <label for="input_edit_Kuantum">Kuantum</label>
+          <input type="number" class="form-control text-right" id="input_edit_Kuantum" value="1">
+          <label for="input_edit_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
+          <label for="input_edit_MetodePenyusutan">Metode Susut</label>
+          <div class="bs-full"><select class="form-control" id="input_edit_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select>
-            </div>
-          </div>
+              </select></div>
+        </div>
 
           <!-- Keterangan -->
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <label class="form-label">Keterangan</label>
-            </div>
-            <div class="col-md-10">
-              <textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_Keterangan">Keterangan</label>
+          <textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea>
+        </div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
             </div>
           </div>
+        </div>
 
           <!-- Biaya Penyusutan 1 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('1')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_BiayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 2 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('2')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_edit_BiayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 3 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 3</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('3')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_edit_BiayaPenyusutan3">Biaya Penyusutan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
+              </div></div></div>
+        </div>
         </form>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
     </div>
   </div>
@@ -452,362 +248,295 @@
 <!-- End modal add-->
 
 <!-- start modal select add group aktiva -->
-<div class="modal fade"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Group Aktiva</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddGroupAktiva">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddGroupAktiva" class="text-left" >
-            <tr>
-
-              <td class="text-center">
-                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-plus">Select</i></button>
-              </td>
-              <td></td>
-              <td></td>
-
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add group aktiva-->
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade"  id="formAddAkumulasiPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddAkumulasiPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Akumulasi Penyusutan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddAkumulasiPenyusutan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddAkumulasiPenyusutan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddAkumulasiPenyusutan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPenyusutan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddAkumulasiPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add akumulasi penyusutan-->
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Biaya Penyusutan</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Biaya Penyusutan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddBiayaPenyusutan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddBiayaPenyusutan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataBiayaPenyusutan" class="text-left" >
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataBiayaPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add akumulasi penyusutan-->
 
 <!-- start modal select add devisi -->
-<div class="modal fade"  id="formAddDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Devisi</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddDevisi" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddDevisi">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddDevisi" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihDevisi()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddDevisi" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add devisi-->
 
 
 <!-- start modal select add group aktiva -->
-<div class="modal fade"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Group Aktiva</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddGroupAktiva">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddGroupAktiva" class="text-left" >
-            <tr>
-
-              <td class="text-center">
-                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-plus">Select</i></button>
-              </td>
-              <td></td>
-              <td></td>
-
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal edit-->
 
 <!-- start modal select  edit group aktiva -->
-<div class="modal fade"  id="formEditGroupAktiva" style='z-index:1060;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditGroupAktiva" style='z-index:1060;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Group Aktiva</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditGroupAktiva" class="table table-bordered table-striped"  >
-          <thead class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditGroupAktiva">
+                <thead class="text-center">
+                  <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditGroupAktiva" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select edit group aktiva-->
 
 <!-- start modal select edit devisi -->
-<div class="modal fade"  id="formEditDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Devisi</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditDevisi" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditDevisi">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditDevisi" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihDevisi()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditDevisi" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select edit devisi-->
 
 <!-- start modal select edit akumulasi penyusutan -->
-<div class="modal fade"  id="formEditAkumulasiPenyusutan" style='z-index:1200;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditAkumulasiPenyusutan" style='z-index:1200;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Akumulasi Penyusutan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditAkumulasiPenyusutan" class="table table-bordered table-striped"  >
-          <thead class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditAkumulasiPenyusutan">
+                <thead class="text-center">
+                  <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditAkumulasiPenyusutan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPenyusutan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditAkumulasiPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
     </div>
   </div>
 </div>
@@ -820,40 +549,29 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Saldo Awal</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-          <div class="row">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Kode Aktiva</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="nomorPerkiraan" disabled>
-              </div>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="nomorPerkiraan">Kode Aktiva</label>
+          <input type="text" class="form-control text-left" id="nomorPerkiraan" disabled>
+        </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="row">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_SaldoValas">Valas</label>
+          <div class="bs-full"><div class="row">
                 <div class="col-5">
                   <div class="form-group">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_SaldoValas" value="IDR">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonAddListValas()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAddListValas()">+</button>
                       </div>
                   </div>
                 </div>
@@ -868,115 +586,144 @@
                     <input type="text" class="form-control text-right" id="input_saldoAwal_devisi" placeholder="devisi" hidden>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+              </div></div>
+        </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Nilai Awal</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add_SaldoNilaiAwal" 
+          <div class="bs-form bs-form-1">
+          <label for="input_add_SaldoNilaiAwal">Nilai Awal</label>
+          <input type="text" class="form-control text-right" id="input_add_SaldoNilaiAwal" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-              </div>
-            </div>
-          </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Nilai Penyusutan</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                
-                <input type="text" class="form-control text-right" id="input_add_SaldoNilaiPenyusutan" 
+          <label for="input_add_SaldoNilaiPenyusutan">Nilai Penyusutan</label>
+          <input type="text" class="form-control text-right" id="input_add_SaldoNilaiPenyusutan" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-              </div>
-            </div>
-          </div>
+        </div>
         </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitSaldoAwal()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitSaldoAwal()">Simpan</button>
   </div>
 </div>
 </div>
 </div>
 
 <!-- start modal select valas -->
-<div class="modal fade" id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Devisi</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelSelectValas" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelSelectValas">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Kode Valas</th>
               <th scope="col">Nama Valas</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataSelectValas" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihValas()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-      <div class="modal-footer">
-         
+                </thead>
+                <tbody id="tabel_dataSelectValas" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select valas-->
 <!-- End modal saldo awal-->
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
 
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MAK_KOLOM = [
+  ['KodeAktiva',    'Kode Aktiva',        1, 'varchar', 0, 0],
+  ['Keterangan',    'Keterangan',         1, 'varchar', 0, 0],
+  ['Tanggal',       'Tanggal',            1, 'varchar', 0, 0],
+  ['NamaDevisi',    'Devisi',             1, 'varchar', 0, 0],
+  ['MyTipe',        'Tipe Aktiva',        1, 'varchar', 0, 0],
+  ['NamaPerkiraan', 'Kelompok',           1, 'varchar', 0, 0],
+  ['Quantity',      'Quantity',           1, 'varchar', 0, 0],
+  ['Susut',         'Susut',              1, 'varchar', 0, 0],
+  ['Metode',        'Metode',             1, 'varchar', 0, 0],
+  ['akumulasi',     'Akumulasi',          1, 'varchar', 0, 0],
+  ['Biaya',         'Biaya Penyusutan 1', 1, 'varchar', 0, 0],
+  ['PersenBiaya1',  'Persen Biaya 1',     1, 'varchar', 0, 0],
+  ['Biaya2',        'Biaya Penyusutan 2', 1, 'varchar', 0, 0],
+  ['PersenBiaya2',  'Persen Biaya 2',     1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (group, akumulasi, devisi, dsb)
+// memakai dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  // Tampilan sel sama seperti sebelumnya: tanggal DD-MM-YYYY, angka rata kanan.
+  let tanggal = function (item) {
+    if (!item.Tanggal) { return '<td></td>' }
+    const date = new Date(item.Tanggal);
+    return '<td>' + String(date.getDate()).padStart(2, '0') + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear() + '</td>'
+  }
+  let kanan = function (field) { return function (item) { return "<td class='text-right'>" + (item[field] ?? '') + '</td>' } }
+  let khusus = { Tanggal: tanggal, Quantity: kanan('Quantity'), Susut: kanan('Susut'), PersenBiaya1: kanan('PersenBiaya1'), PersenBiaya2: kanan('PersenBiaya2') }
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Saldo Awal" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
   let _token = $("#_token").val();
-
-  document.getElementById('breadcrumb').innerHTML = "Master Aktiva"
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('masteraktivaloadall') !!}",
@@ -986,60 +733,12 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-let rowTable = ""
-dataRefresh.forEach((item, i) => {
-  let temp = ""
-  
-  // Format date to DD-MM-YYYY
-  let formattedDate = '';
-  if (item.Tanggal) {
-    const date = new Date(item.Tanggal);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    formattedDate = `${day}-${month}-${year}`;
-  }
-
-  rowTable += `<tr>
-    <td class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Saldo Awal" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-  <td>${item.KodeAktiva ?? ''}</td>
-  <td>${item.Keterangan ?? ''}</td>
-  <td>${formattedDate}</td>
-  <td>${item.NamaDevisi ?? ''}</td>
-  <td>${item.MyTipe ?? ''}</td>
-  <td>${item.NamaPerkiraan ?? ''}</td>
-  <td class='text-right'>${item.Quantity ?? ''}</td>
-  <td class='text-right'>${item.Susut ?? ''}</td>
-  <td>${item.Metode ?? ''}</td>
-  <td>${item.akumulasi ?? ''}</td>
-  <td>${item.Biaya ?? ''}</td>
-  <td class='text-right'>${item.PersenBiaya1 ?? ''}</td>
-  <td>${item.Biaya2 ?? ''}</td>
-  <td class='text-right'>${item.PersenBiaya2 ?? ''}</td>
-  </tr>`
-});
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
-
+  renderTabel()
 }
+
 
 function buttonPilihGroupAktiva(selectedPerkiraan, selectedKeterangan, selectedPersen, selectedAkumulasi, selectedBiaya1, selectedBiaya2) {
   $("#input_add_GroupAktiva").val(selectedPerkiraan);
@@ -1108,10 +807,7 @@ function buttonGroupAktiva () {
   });
 
   document.getElementById("tabel_dataAddGroupAktiva").innerHTML = rowTable;
-  $("#tabelAddGroupAktiva").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddGroupAktiva')
 }
 
 function buttonPilihAkumulasiPenyusutan (selectedPerkiraan, selectedKeterangan) {
@@ -1196,10 +892,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
   document.getElementById("tabel_dataBiayaPenyusutan").innerHTML = rowTable;
 }
 
-  $("#tabelAddBiayaPenyusutan").DataTable({
-    "lengthChange": true,
-    "paging": true
-  });
+  pickerKasInit('tabelAddBiayaPenyusutan')
 }
 
 function buttonPilihBiayaPenyusutan (selectedPerkiraan, selectedKeterangan, selectorBiaya) {
@@ -1261,10 +954,7 @@ function loadAkumulasiPenyusutan() {
   });
 
   document.getElementById("tabel_dataAddAkumulasiPenyusutan").innerHTML = rowTable;
-  $("#tabelAddAkumulasiPenyusutan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddAkumulasiPenyusutan')
 }
 
 function buttonPilihDevisi(selectedPerkiraan, selectedKeterangan) {
@@ -1317,10 +1007,7 @@ function buttonAddListValas () {
   });
 
   document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
-  $("#tabelSelectValas").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelSelectValas')
   
 }
 
@@ -1368,10 +1055,7 @@ function loadDevisi () {
   });
 
   document.getElementById("tabel_dataAddDevisi").innerHTML = rowTable;
-  $("#tabelAddDevisi").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddDevisi')
 }
 
 function buttonEdit (kode) {
@@ -1437,7 +1121,7 @@ function buttonDelete (kode) {
   console.log(kode)
   let _token = $("#_token").val();
 
-  alertify.confirm('Hapus Area', 'Apakah yakin ingin menghapus Aktiva ' + kode + ' ?',
+  alertify.confirm('Hapus Aktiva', 'Apakah yakin ingin menghapus Aktiva ' + kode + ' ?',
       function() {
         console.log('yes')
 
@@ -1755,9 +1439,8 @@ function submitSaldoAwal () {
     success: function(res) {
 
       if (res != 1) {
-        alertify.warning("Data Saldo Awal Perkiraan " + Perkiraan + " telah ditambah");
-        loadAll()
-        $("#formSaldoAwal").modal("hide");
+        // Dulu cabang gagal pun menampilkan "telah ditambah" lalu menutup modal.
+        alertify.warning(res);
       }  else {
         console.log(res ,'!')
         alertify.success("Data Saldo Awal Perkiraan " + Perkiraan + " telah ditambah");
@@ -1818,10 +1501,7 @@ function loadEditGroupAktiva() {
   });
 
   document.getElementById("tabel_dataEditGroupAktiva").innerHTML = rowTable;
-  $("#tabelEditGroupAktiva").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditGroupAktiva')
 }
 
 function buttonEditPilihDevisi(selectedPerkiraan, selectedKeterangan) {
@@ -1872,10 +1552,7 @@ function loadEditDevisi() {
   });
 
   document.getElementById("tabel_dataEditDevisi").innerHTML = rowTable;
-  $("#tabelEditDevisi").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditDevisi')
 }
 
 function buttonEditPilihAkumulasiPenyusutan(selectedPerkiraan, selectedKeterangan) {
@@ -1922,10 +1599,7 @@ function loadEditAkumulasiPenyusutan() {
   });
 
   document.getElementById("tabel_dataEditAkumulasiPenyusutan").innerHTML = rowTable;
-  $("#tabelEditAkumulasiPenyusutan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditAkumulasiPenyusutan')
 }
 
 function buttonSaldoAwal (kode) {
@@ -1975,6 +1649,7 @@ $.ajax({
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'masteraktiva', kolom: MAK_KOLOM, onChange: renderTabel })
   loadAll();
 };
 

@@ -152,6 +152,11 @@ public function spAddBuka(Request $req) {
     //if ($check) {
       //return 'ga bisa hapus';
     //}
+    // Giro yang sudah dicairkan (punya bukti pencairan) tidak boleh dihapus dari master.
+    $cair = DB::connection('SML')->select("select top 1 1 as ada from DBGIRO where NoGiro = :kode and isnull(BuktiCair,'') <> ''", ['kode' => $req->kode]);
+    if ($cair) {
+      return 'Giro sudah dicairkan, tidak bisa dihapus';
+    }
     $delete = DB::connection('SML')->update('delete from DBGIRO where NoGiro = :kode' , ['kode' => $req->kode ]);
     return $delete;
   }
@@ -167,6 +172,11 @@ public function spAddBuka(Request $req) {
     //if ($check) {
       //return 'ga bisa hapus';
     //}
+    // Giro yang sudah dicairkan (punya bukti pencairan) tidak boleh dihapus dari master.
+    $cair = DB::connection('SML')->select("select top 1 1 as ada from DBGIRO where NoGiro = :kode and isnull(BuktiCair,'') <> ''", ['kode' => $req->kode]);
+    if ($cair) {
+      return 'Giro sudah dicairkan, tidak bisa dihapus';
+    }
     $delete = DB::connection('SML')->update('delete from DBGIRO where NoGiro = :kode' , ['kode' => $req->kode ]);
     return $delete;
   }

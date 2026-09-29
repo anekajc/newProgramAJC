@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Ekspedisi')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,39 +22,32 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Ekspedisi</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode</th>
-            <th scope="col">Bentuk Usaha</th>
-            <th scope="col">Nama</th>
-            <th scope="col">Alamat</th>
-            <th scope="col">Kota</th>
-            <th scope="col">Kode Pos</th>
-            <th scope="col">Negara</th>
-            <th scope="col">Telepon</th>
-            <th scope="col">Fax</th>
-            <th scope="col">Email</th>
-            <th scope="col">Pph 23</th>
-            <th scope="col">Pph 21</th>
-            <th scope="col">PPN</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
-</div>
+  </div>
 
 </div>
 
@@ -64,86 +57,38 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row mb-1">
+            <div class="bs-form">
+          <label for="input_add_kode">Kode</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode">
+          <label for="input_add_bentukUsaha">Tipe Usaha</label>
+          <input type="text" class="form-control" id="input_add_bentukUsaha" placeholder="Bentuk Usaha">
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="Kode">
-                </div>
-              </div>
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Tipe Usaha</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_bentukUsaha" placeholder="Bentuk Usaha">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-
-              <div class="col-6 text-left">
-              </div>
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <select id='input_add_ppn' class='form-control'>
+            
+          <label>PPN</label>
+          <div class="bs-full"><select id='input_add_ppn' class='form-control'>
                     <option value=0>Tidak</option>
                     <option value=1>Iya</option>
-                  </select>
-                </div>
-              </div>
+                  </select></div>
+        </div>
 
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_nama">Nama</label>
+          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
-                </div>
-              </div>
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_alamat">Alamat</label>
+          <input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1">
+        </div>
 
             <div class="row mb-1">
               <div class="col-2 text-left">
@@ -158,211 +103,77 @@
 
             </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kota</label>
-                </div>
-              </div>
-              <div class="col-10">
-                  <div class="input-group mb-1">
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kota">Kota</label>
+          <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select">+</button>
+                          <button type="button" class="btn btn-chip-biru btn-select">+</button>
                       </div>
                   </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama Kota</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_namaArea" placeholder="Nama Kota" readonly>
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Area</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form">
+          <label for="input_add_namaArea">Nama Kota</label>
+          <input type="text" class="form-control" id="input_add_namaArea" placeholder="Nama Kota" readonly>
+          <label for="input_add_kodeArea">Area</label>
+          <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Pos</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_kodePos" placeholder="Kode Pos">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Negara</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Telepon</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_telepon" placeholder="Telepon">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPH 23</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <input type="number" class="form-control text-right" id="input_add_pph23" placeholder="PPH 23">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_add_kodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_add_kodePos" placeholder="Kode Pos">
+          <label for="input_add_negara">Negara</label>
+          <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">No. Fax</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_noFax" placeholder="Nomor Fax">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPH 21</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <input type="number" class="form-control text-right" id="input_add_pph21" placeholder="PPH 21">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">E-Mail</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_email" placeholder="E-Mail">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Aktif</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <select id="input_add_aktif" class='form-control'>
+            
+          <label for="input_add_telepon">Telepon</label>
+          <input type="text" class="form-control" id="input_add_telepon" placeholder="Telepon">
+          <label for="input_add_pph23">PPH 23</label>
+          <input type="number" class="form-control text-right" id="input_add_pph23" placeholder="PPH 23">
+
+
+            
+          <label for="input_add_noFax">No. Fax</label>
+          <input type="text" class="form-control" id="input_add_noFax" placeholder="Nomor Fax">
+          <label for="input_add_pph21">PPH 21</label>
+          <input type="number" class="form-control text-right" id="input_add_pph21" placeholder="PPH 21">
+
+
+            
+          <label for="input_add_email">E-Mail</label>
+          <input type="text" class="form-control" id="input_add_email" placeholder="E-Mail">
+          <label for="input_add_aktif">Aktif</label>
+          <select id="input_add_aktif" class='form-control'>
                     <option value=0 selected>Non-Aktif</option>
                     <option value=1>Aktif</option>
                   </select>
-                </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_att" placeholder="Att">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_att">Att</label>
+          <input type="text" class="form-control" id="input_add_att" placeholder="Att">
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att Phone</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_attPhone" placeholder="Att Phone">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att Depart</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_attDepart" placeholder="Att Depart">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form">
+          <label for="input_add_attPhone">Att Phone</label>
+          <input type="text" class="form-control" id="input_add_attPhone" placeholder="Att Phone">
+          <label for="input_add_attDepart">Att Depart</label>
+          <input type="text" class="form-control" id="input_add_attDepart" placeholder="Att Depart">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Acc. No</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_accNo" placeholder="No. Acc">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">A/N</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_atasNama" placeholder="Atas Nama">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_add_bank">Bank</label>
+          <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
+          <label for="input_add_accNo">Acc. No</label>
+          <input type="text" class="form-control" id="input_add_accNo" placeholder="No. Acc">
+        </div>
+
+            <div class="bs-form bs-form-1">
+          <label for="input_add_atasNama">A/N</label>
+          <input type="text" class="form-control" id="input_add_atasNama" placeholder="Atas Nama">
+        </div>
 
             <div class="row mb-1">
               <div class="col-12 text-left">
@@ -373,44 +184,16 @@
               </div>
             </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">NPWP</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_NPWP" placeholder="NPWP">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_NPWP">NPWP</label>
+          <input type="text" class="form-control" id="input_add_NPWP" placeholder="NPWP">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_namaPajak" placeholder="Atas Nama">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_namaPajak">Nama</label>
+          <input type="text" class="form-control" id="input_add_namaPajak" placeholder="Atas Nama">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_alamatPajak" placeholder="Alamat Pajak 1">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_alamatPajak">Alamat</label>
+          <input type="text" class="form-control" id="input_add_alamatPajak" placeholder="Alamat Pajak 1">
+        </div>
 
             <div class="row mb-1">
               <div class="col-2 text-left">
@@ -425,24 +208,17 @@
             </div>
 
             
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kota</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_pajakKota" placeholder="Kota">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_pajakKota">Kota</label>
+          <input type="text" class="form-control" id="input_add_pajakKota" placeholder="Kota">
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -455,84 +231,38 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
 
-            <div class="row mb-1">
+            <div class="bs-form">
+          <label for="input_edit_kode">Kode</label>
+          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode" disabled>
+          <label for="input_edit_bentukUsaha">Tipe Usaha</label>
+          <input type="text" class="form-control" id="input_edit_bentukUsaha" placeholder="Bentuk Usaha">
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode" disabled>
-                </div>
-              </div>
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Tipe Usaha</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_bentukUsaha" placeholder="Bentuk Usaha">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-6 text-left">
-              </div>
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <select id='input_edit_isPpn' class='form-control'>
+            
+          <label>PPN</label>
+          <div class="bs-full"><select id='input_edit_isPpn' class='form-control'>
                     <option value=0>Tidak</option>
                     <option value=1>Iya</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+                  </select></div>
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_nama">Nama</label>
+          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_alamat">Alamat</label>
+          <input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1">
+        </div>
 
             <div class="row mb-1">
               <div class="col-2 text-left">
@@ -547,211 +277,77 @@
 
             </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kota</label>
-                </div>
-              </div>
-              <div class="col-10">
-                  <div class="input-group mb-1">
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kota">Kota</label>
+          <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select">+</button>
+                          <button type="button" class="btn btn-chip-biru btn-select">+</button>
                       </div>
                   </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama Kota</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_namaArea" placeholder="Nama Kota" readonly>
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Area</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form">
+          <label for="input_edit_namaArea">Nama Kota</label>
+          <input type="text" class="form-control" id="input_edit_namaArea" placeholder="Nama Kota" readonly>
+          <label for="input_edit_kodeArea">Area</label>
+          <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Pos</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kodePos" placeholder="Kode Pos">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Negara</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Telepon</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_telepon" placeholder="Telepon">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPH 23</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <input type="number" class="form-control text-right" id="input_edit_pph23" placeholder="PPH 23">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_edit_kodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_edit_kodePos" placeholder="Kode Pos">
+          <label for="input_edit_negara">Negara</label>
+          <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">No. Fax</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_noFax" placeholder="Nomor Fax">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">PPH 21</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <input type="number" class="form-control text-right" id="input_edit_pph21" placeholder="PPH 21">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">E-Mail</label>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_email" placeholder="E-Mail">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Aktif</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group mb-1">
-                  <select id="input_edit_aktif" class='form-control'>
+            
+          <label for="input_edit_telepon">Telepon</label>
+          <input type="text" class="form-control" id="input_edit_telepon" placeholder="Telepon">
+          <label for="input_edit_pph23">PPH 23</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph23" placeholder="PPH 23">
+
+
+            
+          <label for="input_edit_noFax">No. Fax</label>
+          <input type="text" class="form-control" id="input_edit_noFax" placeholder="Nomor Fax">
+          <label for="input_edit_pph21">PPH 21</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph21" placeholder="PPH 21">
+
+
+            
+          <label for="input_edit_email">E-Mail</label>
+          <input type="text" class="form-control" id="input_edit_email" placeholder="E-Mail">
+          <label for="input_edit_aktif">Aktif</label>
+          <select id="input_edit_aktif" class='form-control'>
                     <option value=0 selected>Non-Aktif</option>
                     <option value=1>Aktif</option>
                   </select>
-                </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_att" placeholder="Att">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_att">Att</label>
+          <input type="text" class="form-control" id="input_edit_att" placeholder="Att">
+        </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att Phone</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_attPhone" placeholder="Att Phone">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Att Depart</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_attDepart" placeholder="Att Depart">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form">
+          <label for="input_edit_attPhone">Att Phone</label>
+          <input type="text" class="form-control" id="input_edit_attPhone" placeholder="Att Phone">
+          <label for="input_edit_attDepart">Att Depart</label>
+          <input type="text" class="form-control" id="input_edit_attDepart" placeholder="Att Depart">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank">
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Acc. No</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_accNo" placeholder="No. Acc">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">A/N</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_atasNama" placeholder="Atas Nama">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_edit_bank">Bank</label>
+          <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank">
+          <label for="input_edit_accNo">Acc. No</label>
+          <input type="text" class="form-control" id="input_edit_accNo" placeholder="No. Acc">
+        </div>
+
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_atasNama">A/N</label>
+          <input type="text" class="form-control" id="input_edit_atasNama" placeholder="Atas Nama">
+        </div>
 
             <div class="row mb-1">
               <div class="col-12 text-left">
@@ -762,44 +358,16 @@
               </div>
             </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">NPWP</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_NPWP" placeholder="NPWP">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_NPWP">NPWP</label>
+          <input type="text" class="form-control" id="input_edit_NPWP" placeholder="NPWP">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_namaPajak" placeholder="Atas Nama">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_namaPajak">Nama</label>
+          <input type="text" class="form-control" id="input_edit_namaPajak" placeholder="Atas Nama">
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_alamatPajak" placeholder="Alamat Pajak 1">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_alamatPajak">Alamat</label>
+          <input type="text" class="form-control" id="input_edit_alamatPajak" placeholder="Alamat Pajak 1">
+        </div>
 
             <div class="row mb-1">
               <div class="col-2 text-left">
@@ -814,24 +382,17 @@
             </div>
 
             
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kota</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_pajakKota" placeholder="Kota">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_pajakKota">Kota</label>
+          <input type="text" class="form-control" id="input_edit_pajakKota" placeholder="Kota">
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -844,64 +405,39 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Detail Akun</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
-
-            <input type="hidden" id="input_harga_kodegroup" value="" />
-            <div class="col-2">
-              <div class="form-group">
-                <label>Kode Cust Supp</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_target_kodesales" placeholder="Kode Cust Supp" disabled>
-              </div>
-            </div>
-          
-            <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddDetailAkun()" class="btn btn-secondary">Add Detail Akun</button>
-            </div>
-
-          </div>
+          <input type="hidden" id="input_harga_kodegroup" value="" /><div class="bs-form bs-form-1">
+          <label for="input_target_kodesales">Kode Cust Supp</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control" id="input_target_kodesales" placeholder="Kode Cust Supp" disabled>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddDetailAkun()">Tambah</button></div></div>
+        </div>
     </div>
 
     <!-- ADD SUBGROUP -->
 
-    <div id="addDetailAkun" class="container-fluid showhide">
+    <div id="addDetailAkun" class="showhide form-card mt-3">
 
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Detail Akun</h4>
-              </div>
-            </div>
+            <div class="form-card-title">Tambah Detail Akun</div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Hutang / Piutang</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form bs-form-1">
+          <label for="input_detailAkun_add_hutPiut">Hutang / Piutang</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_detailAkun_add_hutPiut" placeholder="Hutang Piutang">
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonHutangPiutang()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()">+</button>
                     </div>
                 </div>
-            </div>
-            </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitAddDetailAkun()" class="btn btn-primary" >Add</button>
-              </div>
-
+            <div class="text-right mt-3">
+              <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddDetailAkun()">Simpan</button>
             </div>
       </div>
 
@@ -909,36 +445,23 @@
 
     <!-- EDIT SUBGROUP -->
 
-    <div id="editDetailAkun" class="container-fluid showhide">
+    <div id="editDetailAkun" class="showhide form-card mt-3">
 
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Detail Akun</h4>
-              </div>
-            </div>
+            <div class="form-card-title">Edit Detail Akun</div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Hutang / Piutang</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form bs-form-1">
+          <label for="input_detailAkun_edit_hutPiut">Hutang / Piutang</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_detailAkun_edit_hutPiut" placeholder="Hutang Piutang">
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonHutangPiutang()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()">+</button>
                     </div>
                 </div>
-            </div>
-            </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitEditDetailAkun()" class="btn btn-primary" >Edit</button>
-              </div>
-
+            <div class="text-right mt-3">
+              <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditDetailAkun()">Simpan</button>
             </div>
       </div>
 
@@ -977,109 +500,60 @@
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Detail Akun</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="exampleModalLabel">Alamat Kirim</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
-
-            <input type="hidden" id="input_harga_kodegroup" value="" />
-            <div class="col-2">
-              <div class="form-group">
-                <label>Kode Cust Supp</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_alamatKirim_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
-              </div>
-            </div>
-          
-            <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddAlamatKirim()" class="btn btn-secondary">Add Alamat Kirim</button>
-            </div>
-
-          </div>
+          <input type="hidden" id="input_harga_kodegroup" value="" /><div class="bs-form bs-form-1">
+          <label for="input_alamatKirim_kodeCustSupp">Kode Cust Supp</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control" id="input_alamatKirim_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddAlamatKirim()">Tambah</button></div></div>
+        </div>
     </div>
 
     <!-- ADD SUBGROUP -->
 
-    <div id="addAlamatKirim" class="container-fluid showhide">
+    <div id="addAlamatKirim" class="showhide form-card mt-3">
 
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Alamat Kirim</h4>
-              </div>
-            </div>
+            <div class="form-card-title">Tambah Alamat Kirim</div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Nama</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form">
+          <label for="input_alamatKirim_nama">Nama</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_nama" placeholder="Nama">
                 </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Up</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+          <label for="input_alamatKirim_up">Up</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_up">
                 </div>
-              </div>
-            </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="input-group">
+
+            
+          <label for="input_alamatKirim_alamat">Alamat</label>
+          <div class="bs-full"><div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_alamat" placeholder="Alamat">
-                </div>
-              </div>
-            </div>
+                </div></div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Telepon</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+
+            
+          <label for="input_alamatKirim_telepon">Telepon</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_telepon" placeholder="Telepon">
                 </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Fax</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+          <label for="input_alamatKirim_fax">Fax</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_fax" placeholder="Fax">
                 </div>
-              </div>
-            </div>
+        </div>
             
 
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()">Batal</button>
-                <button type="button" onclick="submitAddAlamatKirim()" class="btn btn-primary">Add</button>
-              </div>
-
+            <div class="text-right mt-3">
+              <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddAlamatKirim()">Simpan</button>
             </div>
       </div>
 
@@ -1087,79 +561,42 @@
 
     <!-- EDIT SUBGROUP -->
 
-    <div id="editAlamatKirim" class="container-fluid showhide">
+    <div id="editAlamatKirim" class="showhide form-card mt-3">
 
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Detail Akun</h4>
-              </div>
-            </div>
+            <div class="form-card-title">Edit Alamat Kirim</div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Nama</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form">
+          <label for="input_alamatKirim_edit_nama">Nama</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_edit_nama" placeholder="Nama">
                 </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Up</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+          <label for="input_alamatKirim_edit_up">Up</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_edit_up">
                 </div>
-              </div>
-            </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="input-group">
+
+            
+          <label for="input_alamatKirim_edit_alamat">Alamat</label>
+          <div class="bs-full"><div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_edit_alamat" placeholder="Alamat">
-                </div>
-              </div>
-            </div>
+                </div></div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Telepon</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+
+            
+          <label for="input_alamatKirim_edit_telepon">Telepon</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_edit_telepon" placeholder="Telepon">
                 </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Fax</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+          <label for="input_alamatKirim_edit_fax">Fax</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_alamatKirim_edit_fax" placeholder="Fax">
                 </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitEditAlamatKirim()" class="btn btn-primary" >Edit</button>
-              </div>
-
+            <div class="text-right mt-3">
+              <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditAlamatKirim()">Simpan</button>
             </div>
       </div>
 
@@ -1196,20 +633,80 @@
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
-function loadAll () {
-  let _token = $("#_token").val();
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MEK_KOLOM = [
+  ['KODECUSTSUPP', 'Kode',         1, 'varchar', 0, 0],
+  ['USAHA',        'Bentuk Usaha', 1, 'varchar', 0, 0],
+  ['NAMACUSTSUPP', 'Nama',         1, 'varchar', 0, 0],
+  ['ALAMAT1',      'Alamat',       1, 'varchar', 0, 0],
+  ['namaKota',     'Kota',         1, 'varchar', 0, 0],
+  ['KODEPOS',      'Kode Pos',     1, 'varchar', 0, 0],
+  ['NEGARA',       'Negara',       1, 'varchar', 0, 0],
+  ['TELPON',       'Telepon',      1, 'varchar', 0, 0],
+  ['FAX',          'Fax',          1, 'varchar', 0, 0],
+  ['EMAIL',        'Email',        1, 'varchar', 0, 0],
+  ['NPPH23',       'Pph 23',       1, 'varchar', 0, 0],
+  ['NPPH22',       'Pph 21',       1, 'varchar', 0, 0],
+  ['IsPpn',        'PPN',          1, 'varchar', 0, 0],
+]
 
-  document.getElementById('breadcrumb').innerHTML = "Master Ekspedisi"
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (valas, gudang, dsb) memakai
+// dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
 
+function renderTabel () {
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
   }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  // Tampilan sel sama seperti sebelumnya: nilai kosong/0 ditulis kosong, PPN berupa ikon.
+  let kosong = function (field) { return function (item) { return '<td>' + (item[field] || '') + '</td>' } }
+  let khusus = {
+    NPPH23: kosong('NPPH23'),
+    NPPH22: kosong('NPPH22'),
+    IsPpn: function (item) {
+      return item.IsPpn == 0
+        ? '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        : '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+    }
+  }
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODECUSTSUPP}')" title="Edit Ekspedisi">
+              <i class="bi bi-pen"></i>
+            </button>
+        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODECUSTSUPP}')" title="Delete Ekspedisi">
+              <i class="bi bi-trash"></i>
+            </button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
+function loadAll () {
+  let _token = $("#_token").val();
 
   $.ajax({
     url: "{!! url('masterekspedisiloadall') !!}",
@@ -1219,59 +716,12 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    let statusCell = '';
-    if (item.IsPpn == 0) {
-      statusCell = `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>`;
-    } else {
-      statusCell = `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>`;
-    }
-    rowTable += `<tr>
-    <td class='text-center'>
-      <div class="action-buttons-wrap">
-        <button class="btn-action-sm btn-action-success hover-tooltip" type="button" onclick="buttonEdit('${item.KODECUSTSUPP}')" data-tooltip="Edit Ekspedisi">
-              <i class="bi bi-pen"></i>
-            </button>
-        <button class="btn-action-sm btn-action-danger hover-tooltip" type="button" onclick="buttonDelete('${item.KODECUSTSUPP}')" data-tooltip="Delete Ekspedisi">
-              <i class="bi bi-trash"></i>
-            </button>
-      </div>
-    </td>
-    <td>${item.KODECUSTSUPP || ''}</td>
-    <td>${item.USAHA || ''}</td>
-    <td>${item.NAMACUSTSUPP || ''}</td>
-    <td>${item.ALAMAT1 || ''}</td>
-    <td>${item.namaKota || ''}</td>
-    <td>${item.KODEPOS || ''}</td>
-    <td>${item.NEGARA || ''}</td>
-    <td>${item.TELPON || ''}</td>
-    <td>${item.FAX || ''}</td>
-    <td>${item.EMAIL || ''}</td>
-    <td>${item.NPPH23 || ''}</td>
-    <td>${item.NPPH22 || ''}</td>
-    ${statusCell}
-    </tr>`
-
-  });
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
-
+  renderTabel()
 }
+
 
 function buttonAdd () {
 
@@ -1994,6 +1444,7 @@ $.ajax({
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'masterekspedisi', kolom: MEK_KOLOM, onChange: renderTabel })
   loadAll();
 };
 
@@ -2049,10 +1500,7 @@ function buttonHutangPiutang () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Merk'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -2111,10 +1559,7 @@ function buttonKota(searchValue = '') {
     document.getElementById("namaModalOpen").innerHTML = 'Kota';
 
     // Initialize DataTable
-    currentDataTable = $("#tabelModalOpen").DataTable({
-        "lengthChange": true,
-        "paging": true,
-    });
+    currentDataTable = pickerKasInit('tabelModalOpen')
 
     // If search value is provided, search and auto-select
     if (searchValue) {
@@ -2232,25 +1677,31 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- start modal select modal open ( 1 modal buat beberapa fungsi, jadi tinggal inject data ) -->
-<div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="namaModalOpen"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelModalOpen" class="table table-bordered table-striped">
-          <thead id='theadOpen' class="text-center bg-primary text-white">
-            <tr></tr>
-          </thead>
-          <tbody id="tabel_dataModalOpen" class="text-left">
-            <tr></tr>
-          </tbody>
-        </table>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelModalOpen">
+                <thead id='theadOpen' class="text-center">
+                  <tr></tr>
+                </thead>
+                <tbody id="tabel_dataModalOpen" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-         
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>

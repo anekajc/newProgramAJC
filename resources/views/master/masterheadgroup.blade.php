@@ -1,11 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Head Group')
 @section('content')
-<div class="container-fluid">
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,28 +22,31 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Head Group</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+  <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
+          <table id="tabel" class="data-table po-aksi-hover">
                 <thead>
                   <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode Head Group</th>
-                    <th scope="col">Nama Head Group</th>
-                    <th scope="col">Group</th>
+                    <th style="padding: 4px 12px;" scope="col">Actions</th>
+                    <th style="padding: 4px 12px;" scope="col">Kode Head Group</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama Head Group</th>
+                    <th style="padding: 4px 12px;" scope="col">Group</th>
                   </tr>
                 </thead>
-                <tbody id="tabel_data" class="text-right">
+                <tbody id="tabel_data" class="text-left">
               </tbody>
               </table>
-            </div>
-        </div>
+
+    </div>
+  </div>
 
 </div>
 
@@ -55,64 +57,39 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode HDGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Group">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kode">Kode HDGroup</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Group">
 
-            </div>
+          <label for="input_add_nama">Nama HDGroup</label>
+          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Group">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama HDGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Group">
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Group</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <select id="input_add_kodegroup" class="form-control" aria-label="Default select example">
+          <label for="input_add_kodegroup">Kode Group</label>
+          <select id="input_add_kodegroup" class="form-control" aria-label="Default select example">
                   <option selected>Open this select menu</option>
                   <option value="1">One</option>
                   <option value="2">Two</option>
                   <option value="3">Three</option>
                 </select>
-              </div>
-
-            </div>
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -130,61 +107,36 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode HDGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" disabled id="input_edit_kode" placeholder="Kode Group">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kode">Kode HDGroup</label>
+          <input type="text" class="form-control" disabled id="input_edit_kode" placeholder="Kode Group">
 
-            </div>
+          <label for="input_edit_nama">Nama HDGroup</label>
+          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Group">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama HDGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Group">
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Group</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <select id="input_edit_kodegroup" class="form-control" aria-label="Default select example">
+          <label for="input_edit_kodegroup">Kode Group</label>
+          <select id="input_edit_kodegroup" class="form-control" aria-label="Default select example">
 
                 </select>
-              </div>
-
-            </div>
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -199,7 +151,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Sub Group</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -218,7 +172,7 @@
             </div>
 
             <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddSubGroup()">Add Item</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddSubGroup()">Tambah</button>
             </div>
           </div>
         </div>
@@ -226,141 +180,70 @@
     <!-- ADD SUBGROUP -->
 
     <div id="addSubGroup" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row mt-2">
-              <div class="col-4">
-                <h4>Add Subgroup</h4>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Tambah Sub Group</div>
+          <div class="bs-form bs-form-lebar">
+            <label for="input_subgroup_add_kodesubgroup">Kode Subgroup</label>
+            <input id="input_subgroup_add_kodesubgroup" type="text" class="form-control">
+            <label for="input_add_perkPers">Perk. Persiapan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_perkPers">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('1')">+</button>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Kode Subgroup</label>
+            <label for="input_subgroup_add_namasubgroup">Nama Subgroup</label>
+            <input id="input_subgroup_add_namasubgroup" type="text" class="form-control">
+            <label for="input_add_perkJual">Perk. Jual</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_perkJual">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('2')">+</button>
               </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subgroup_add_kodesubgroup" type="text" class="form-control">
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              
-              <div class="col-md-4">
-                  <div class="input-group">
-                      <input type="text" class="form-control" id="input_add_perkPers">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('1')">+</button>
-                      </div>
-                  </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Nama Subgroup</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subgroup_add_namasubgroup" type="text" class="form-control">
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              
-              <div class="col-md-4">
-                  <div class="input-group">
-                      <input type="text" class="form-control" id="input_add_perkJual">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('2')">+</button>
-                      </div>
-                  </div>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHideSubGroup()" >Batal</button>
-                <button type="button" onclick="submitAddSubGroup()" class="btn btn-primary" >Add</button>
-              </div>
-
             </div>
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHideSubGroup()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddSubGroup()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END ADD SUBGROUP -->
 
     <!-- EDIT SUBGROUP -->
 
     <div id="editSubGroup" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Subgroup</h4>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Edit Sub Group</div>
+          <div class="bs-form bs-form-lebar">
+            <label for="input_subgroup_edit_kodesubgroup">Kode Subgroup</label>
+            <input id="input_subgroup_edit_kodesubgroup" type="text" class="form-control" disabled>
+            <label for="input_edit_perkPers">Perk. Persiapan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_edit_perkPers">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('3')">+</button>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Kode Subgroup</label>
+            <label for="input_subgroup_edit_namasubgroup">Nama Subgroup</label>
+            <input id="input_subgroup_edit_namasubgroup" type="text" class="form-control">
+            <label for="input_edit_perkJual">Perk. Jual</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_edit_perkJual">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('4')">+</button>
               </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subgroup_edit_kodesubgroup" type="text" class="form-control" disabled>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-4">
-                  <div class="input-group">
-                      <input type="text" class="form-control" id="input_edit_perkPers">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('3')">+</button>
-                      </div>
-                  </div>
-              </div>
-
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Nama Subgroup</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subgroup_edit_namasubgroup" type="text" class="form-control">
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <label>Perkiraan Jual</label>
-                </div>
-              </div>
-              <div class="col-4">
-                  <div class="input-group">
-                      <input type="text" class="form-control" id="input_edit_perkJual">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanSubGroup('4')">+</button>
-                      </div>
-                  </div>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHideSubGroup()" >Batal</button>
-                <button type="button" onclick="submitEditSubGroup()" class="btn btn-primary" >Edit</button>
-              </div>
-
             </div>
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHideSubGroup()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditSubGroup()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END EDIT SUBGROUP -->
 
@@ -415,7 +298,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Sub Kategori</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -435,7 +320,7 @@
             </div>
             
             <div class="col-md-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddSubKategori()" class="btn btn-secondary"  >Add Item</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddSubKategori()">Tambah</button>
             </div>
           </div>
     </div>
@@ -443,117 +328,42 @@
     <!-- ADD SUBGROUP -->
 
     <div id="addSubKategori" class="container-fluid showhidekategori">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Subkategori</h4>
-              </div>
-            </div>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Tambah Sub Kategori</div>
+          <div class="bs-form bs-form-lebar">
+            <label for="input_subkategori_add_kodesubkategori">Kode SubKategori</label>
+            <input id="input_subkategori_add_kodesubkategori" type="text" class="form-control bs-full">
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Kode SubKategori</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subkategori_add_kodesubkategori" type="text" class="form-control">
-              </div>
-
-            </div>
-            <div class="row">
-
-              <div class="col-2">
-                <div class="form-group">
-                <label>Nama SubKategori</label>
-              </div>
-
-              </div>
-              <div class="col-4">
-                <input id="input_subkategori_add_namasubkategori" type="text" class="form-control">
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHideSubKategori()" >Batal</button>
-                <button type="button" onclick="submitAddSubKategori()" class="btn btn-primary" >Add</button>
-              </div>
-
-            </div>
+            <label for="input_subkategori_add_namasubkategori">Nama SubKategori</label>
+            <input id="input_subkategori_add_namasubkategori" type="text" class="form-control bs-full">
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHideSubKategori()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddSubKategori()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END ADD SUBGROUP -->
 
     <!-- EDIT SUBGROUP -->
 
     <div id="editSubKategori" class="container-fluid showhidekategori">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Kategori</h4>
-              </div>
-            </div>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Edit Sub Kategori</div>
+          <div class="bs-form bs-form-lebar">
+            <label for="input_subkategori_edit_kodesubkategori">Kode Kategori</label>
+            <input id="input_subkategori_edit_kodesubkategori" type="text" class="form-control bs-full" disabled>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Kode Kategori</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subkategori_edit_kodesubkategori" type="text" class="form-control" disabled>
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_subkategori_edit_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-
-            </div>
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Nama Kategori</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_subkategori_edit_namasubkategori" type="text" class="form-control">
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_subkategori_edit_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHideSubKategori()" >Batal</button>
-                <button type="button" onclick="submitEditSubKategori()" class="btn btn-primary" >Edit</button>
-              </div>
-
-            </div>
+            <label for="input_subkategori_edit_namasubkategori">Nama Kategori</label>
+            <input id="input_subkategori_edit_namasubkategori" type="text" class="form-control bs-full">
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHideSubKategori()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditSubKategori()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END EDIT SUBGROUP -->
 
@@ -595,7 +405,8 @@
   </div>
   <!-- <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="">Simpan</button>
   </div> -->
 </div>
 </div>
@@ -604,42 +415,38 @@
 
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Biaya Penyusutan</h5>
-        
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Perkiraan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddBiayaPenyusutan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
-            </tr>
-          </thead>
-
-          <tbody id="tabel_dataBiayaPenyusutan" class="text-left" >
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddBiayaPenyusutan">
+                <thead class="text-center">
+                  <tr>
+                    <th scope="col">Actions</th>
+                    <th scope="col">Perkiraan</th>
+                    <th scope="col">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_dataBiayaPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add akumulasi penyusutan-->
 
@@ -648,7 +455,8 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -785,6 +593,13 @@ function submitAddSubGroup () {
 
   if (!kodehdgroup) {
     alertify.warning("Kode  harus diisi");
+    return
+  }
+
+  // Dulu hanya kode head group (selalu terisi) yang dicek; kode subgroup yang diketik user
+  // bisa kosong dan tetap terkirim.
+  if (!kodesubgroup) {
+    alertify.warning("Kode subgroup harus diisi");
     return
   }
 
@@ -1073,7 +888,10 @@ function refreshSubGroup () {
         rowTable =`<tr><td colspan=3 class="text-center" >Belum ada data</td></tr>`
       }
       // document.getElementById("input_subgroup_kodegroup").value = kodegroup
-      document.getElementById("input_subgroup_kodehdgroup").value = res[0].KodeHDGrp
+      // res kosong (subgroup terakhir baru dihapus) dulu membuat res[0] error dan tabel tidak ter-refresh.
+      if (res.length) {
+        document.getElementById("input_subgroup_kodehdgroup").value = res[0].KodeHDGrp
+      }
       document.getElementById("tabel_data_subgroup").innerHTML = rowTable
 
 
@@ -1251,6 +1069,8 @@ function buttonSubKategori (kodesubgroup) {
 
 function buttonAddSubKategori () {
   closeShowHideSubKategori()
+  document.getElementById("input_subkategori_add_kodesubkategori").value = ''
+  document.getElementById("input_subkategori_add_namasubkategori").value = ''
   $('#addSubKategori').show();
 }
 
@@ -1309,7 +1129,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Head Group"
+  // document.getElementById('breadcrumb').innerHTML = "Master Head Group" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();  
 
@@ -1349,9 +1169,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -1474,10 +1295,7 @@ function buttonPerkiraanSubGroup (kodeBiaya) {
   });
   document.getElementById("tabel_dataBiayaPenyusutan").innerHTML = rowTable;
 
-  $("#tabelAddBiayaPenyusutan").DataTable({
-    "lengthChange": true,
-    "paging": true
-  });
+  pickerKasInit('tabelAddBiayaPenyusutan')
 }
 
 function buttonPilihBiayaPenyusutan (perkiraan, keterangan, kodeBiaya) {
