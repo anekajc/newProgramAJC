@@ -1,10 +1,9 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Setup Periode Kerja')
 @section('content')
-
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -27,8 +26,8 @@
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+  <input type="hidden" id="periode_tahun" value="{{ $periode->tahun }}" />
+  <input type="hidden" id="periode_bulan" value="{{ (int) $periode->bulan }}" />
 
   <div class="kp-wrap">
     <div class="kp-card">
@@ -48,25 +47,25 @@
         <div class="kp-periode-row">
           <div class="kp-periode-field">
             <label for="input_periodekerja_bulan">Bulan</label>
-            <select id="input_periodekerja_bulan" class="form-select kp-periode-select">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
+            <select id="input_periodekerja_bulan" class="form-control kp-periode-select">
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
             </select>
           </div>
 
           <div class="kp-periode-field">
             <label for="input_periodekerja_tahun">Tahun</label>
-            <input type="number" class="form-control kp-tahun-input" id="input_periodekerja_tahun" placeholder="Tahun">
+            <input type="text" class="form-control kp-tahun-input" id="input_periodekerja_tahun" placeholder="Tahun" maxlength="4" inputmode="numeric">
           </div>
         </div>
 
@@ -161,13 +160,15 @@
   .kp-periode-select,
   .kp-tahun-input {
     width: 100%;
-    padding: 8px 10px;
+    height: 38px !important;
+    padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #ced4da;
     font-weight: 600;
     color: #0d6efd;
     background: #eef4ff;
     text-align: center;
+    text-align-last: center;
   }
 
   .kp-periode-select:focus,
@@ -182,24 +183,25 @@
     justify-content: flex-end;
   }
 
+  /* Tombol soft seperti tombol utama memorialkoreksi (.btn-dpp-utama). */
   .kp-ok-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    padding: 9px 22px;
+    background: #e8edff;
+    color: #2563eb;
+    border: 1px solid #cfdcff;
+    padding: 7px 18px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
-    box-shadow: 0 3px 8px rgba(37,99,235,0.25);
     transition: background 0.12s ease;
   }
 
   .kp-ok-btn:hover {
-    background: #1d4ed8;
+    background: #dce6ff;
+    color: #1d4ed8;
   }
 
 </style>
@@ -208,6 +210,8 @@
 @section('js')
 <script type="text/javascript">
 
+const namaBulanPeriode = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+
 $(document).ready(function () {
   let tahun = $("#periode_tahun").val();
   let bulan = $("#periode_bulan").val();
@@ -215,13 +219,23 @@ $(document).ready(function () {
   document.getElementById("input_periodekerja_tahun").value = tahun;
   document.getElementById("input_periodekerja_bulan").value = bulan;
 
-  document.getElementById('breadcrumb').innerHTML = "Setup Periode Kerja"
+  // document.getElementById('breadcrumb').innerHTML = "Setup Periode Kerja" // dimatikan: judul sekarang di bar atas (page-title)
 });
 
 function submitPeriodeKerja () {
-  let tahun = Number($("#input_periodekerja_tahun").val());
+  let tahunTeks = String($("#input_periodekerja_tahun").val()).trim();
+  let tahun = Number(tahunTeks);
   let bulan = Number($("#input_periodekerja_bulan").val());
   let _token = $("#_token").val();
+
+  if (!/^\d{4}$/.test(tahunTeks) || tahun < 1900 || tahun > 2999) {
+    alertify.warning('Tahun harus diisi 4 angka, mis. ' + new Date().getFullYear());
+    return
+  }
+  if (!(bulan >= 1 && bulan <= 12)) {
+    alertify.warning('Bulan harus dipilih');
+    return
+  }
 
   $.ajax({
     url: "{!! url('newsetupperiodekerjaupdate') !!}",
@@ -233,9 +247,19 @@ function submitPeriodeKerja () {
       tahun
     },
     success: function (res) {
-      let el = document.getElementById("period-badge");
+      if (!res || typeof res !== 'object') {
+        alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+        return
+      }
+      if (!Number(res.status)) {
+        alertify.warning(res.pesan || 'Periode kerja gagal disimpan')
+        return
+      }
+
+      // Badge periode di bar atas layout newmasterTest (class .period-badge, tanpa id).
+      let el = document.querySelector(".period-badge");
       if (el) {
-        el.innerHTML = `Username: {{ Auth::user()->username }} &nbsp;–&nbsp; Periode: ${bulan} / ${tahun}`;
+        el.innerHTML = `Username: {{ Auth::user()->username }} &nbsp;–&nbsp; Periode: ${namaBulanPeriode[bulan]} ${tahun}`;
       }
 
       // Also keep the hidden periode_bulan/periode_tahun inputs on THIS page
