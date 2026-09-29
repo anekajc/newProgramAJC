@@ -79,7 +79,7 @@
             <div class="col-md-8">
               <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraandetail">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@
             <div class="col-md-3">
               <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraandetail">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()">+</button>
+                <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -160,7 +160,6 @@
         <table id="tabelDetailAkunAddPerkiraan" class="table table-bordered table-striped"  >
           <thead class="text-center bg-primary text-white">
             <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 

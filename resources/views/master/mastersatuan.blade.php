@@ -69,7 +69,7 @@
           <input type="text" class="form-control" id="input_add_kodeSatuan">
 
           <label for="input_add_satuanTax">Kode Satuan Tax</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_satuanTax"> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAmbilSatTax()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_satuanTax"> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAmbilSatTax()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -105,7 +105,7 @@
           <input type="text" class="form-control" id="input_edit_kodeSatuan" disabled>
 
           <label for="input_edit_satuanTax">Kode Satuan Tax</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_satuanTax"> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAmbilSatTax()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_satuanTax"> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAmbilSatTax()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -352,10 +352,7 @@ function buttonAmbilSatTax () {
   let rowTable = "";
   dataRefresh.forEach((item, i) => {
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectSatTax('${item.KODETAX}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectSatTax('${item.KODETAX}')">
       <td>${item.KODETAX}</td>
       <td>${item.NAMATAX}</td>
     </tr>`;
@@ -365,7 +362,6 @@ function buttonAmbilSatTax () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Kode</th>
     <th scope="col">Nama</th>
   </tr>

@@ -158,15 +158,15 @@
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid" style='height:32px;'>
-          <div class="row">
+          <div class="row align-items-center">
             <input type="hidden" id="input_subgroup_kodegroup" value="" />
             <div class="col-2">
-              <div class="form-group">
-                <label>Kode Head Group</label>
+              <div class="form-group mb-0">
+                <label class="mb-0">Kode Head Group</label>
               </div>
             </div>
             <div class="col-2">
-              <div class="form-group">
+              <div class="form-group mb-0">
                 <input type="text" class="form-control" id="input_subgroup_kodehdgroup" placeholder="Kode Headgroup" disabled>
               </div>
             </div>
@@ -189,7 +189,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_add_perkPers">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('1')">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('1')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
@@ -199,7 +199,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_add_perkJual">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('2')">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('2')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_edit_perkPers">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('3')">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('3')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
@@ -234,7 +234,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_edit_perkJual">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('4')">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('4')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -305,16 +305,16 @@
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
+          <div class="row align-items-center">
 
             <!-- <input type="hidden" id="input_subkategori_kodegroup" value="" /> -->
             <div class="col-2">
-              <div class="form-group">
-                <label>Kode SubGroup</label>
+              <div class="form-group mb-0">
+                <label class="mb-0">Kode SubGroup</label>
               </div>
             </div>
             <div class="col-2">
-              <div class="form-group">
+              <div class="form-group mb-0">
                 <input type="text" class="form-control" id="input_subkategori_kodesubgroup" placeholder="Kode Subgroup" disabled>
               </div>
             </div>
@@ -431,7 +431,6 @@
               <table id="tabelAddBiayaPenyusutan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>
@@ -1285,10 +1284,7 @@ function buttonPerkiraanSubGroup (kodeBiaya) {
 
   let rowTable = "";
   dataRefresh.forEach((item, i) => {
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '${kodeBiaya}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '${kodeBiaya}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;

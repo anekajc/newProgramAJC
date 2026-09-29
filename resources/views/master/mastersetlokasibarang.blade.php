@@ -128,7 +128,7 @@
                   <div class="input-group">
                       <input type="text" class="form-control" id="input_edit_lokasiBarang" placeholder="Lokasi Barang">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-primary btn-select" onclick="buttonLokasiBarang()">+</button>
+                          <button type="button" class="btn btn-primary btn-select" onclick="buttonLokasiBarang()" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
               </div>
@@ -419,10 +419,7 @@ function buttonLokasiBarang () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectLokasi('${item.KODELOKASI}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectLokasi('${item.KODELOKASI}')">
       <td>${item.KODELOKASI}</td>
     </tr>`;
   });
@@ -431,7 +428,6 @@ function buttonLokasiBarang () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Action</th>
     <th scope="col">LOkasi</th>
   </tr>
   `

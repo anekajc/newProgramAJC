@@ -389,5 +389,67 @@
     return hasil;
   };
 
+  /* ---------- Tombol Filter toolbar (#modalFilterMaster, toolbarMaster.blade.php) ----------
+     Pola sama dengan #modalFilterPO di purchasing/purchaseOrder.blade.php: pilihan di modal
+     baru berlaku setelah Terapkan, Batal mengembalikan pilihan terakhir yang diterapkan.
+     Dropdown di dalam modal memakai id lama halaman (mis. #perkiraanCustomer), jadi loadAll()
+     halaman tetap membaca nilainya seperti dulu. "Aktif" = nilai berbeda dari opsi pertama. */
+  var filter = { nilai: {} };
+
+  function filterSelect() {
+    return $('#modalFilterMaster select');
+  }
+
+  function filterTampil() {
+    var jml = 0;
+    var teks = [];
+    filterSelect().each(function () {
+      var pertama = $(this).find('option').first().val();
+      if ($(this).val() !== pertama) { jml++; }
+      var label = $('label[for="' + this.id + '"]').first().text();
+      teks.push((label ? label + ': ' : '') + $(this).find('option:selected').text());
+    });
+    $('#masterFilterBadge').text(jml + ' aktif');
+    $('#masterFilterAktif').text(teks.join(' · '));
+  }
+
+  function filterSimpan() {
+    filter.nilai = {};
+    filterSelect().each(function () { filter.nilai[this.id] = $(this).val(); });
+  }
+
+  function filterKembalikan() {
+    filterSelect().each(function () {
+      if (filter.nilai.hasOwnProperty(this.id)) { $(this).val(filter.nilai[this.id]); }
+    });
+  }
+
+  filter.terapkan = function () {
+    filterSimpan();
+    filterTampil();
+    $('#modalFilterMaster').modal('hide');
+    if (typeof window.loadAll === 'function') { window.loadAll(); }
+  };
+
+  filter.reset = function () {
+    filterSelect().each(function () {
+      $(this).val($(this).find('option').first().val());
+    });
+    filter.terapkan();
+  };
+
+  $(function () {
+    var modal = $('#modalFilterMaster');
+    if (!modal.length) { return; }
+    // Modal dipindah ke <body> supaya tidak terkurung stacking context .card.
+    modal.appendTo('body');
+    filterSimpan();
+    filterTampil();
+    modal.on('show.bs.modal', filterKembalikan);
+    modal.on('hidden.bs.modal', filterKembalikan);
+  });
+
+  ML.filter = filter;
+
   window.MasterList = ML;
 })();

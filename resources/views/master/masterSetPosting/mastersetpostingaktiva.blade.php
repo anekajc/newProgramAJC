@@ -96,14 +96,14 @@
           <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraan">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_add_biayaPenyusutan1">Biaya Penyusutan 1</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_add_biayaPenyusutan1">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             <div class="input-group">
@@ -116,14 +116,14 @@
           <div class="input-group">
                 <input type="text" class="form-control" id="input_add_akm">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_add_biayaPenyusutan2">Biaya Penyusutan 2</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_add_biayaPenyusutan2">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             <div class="input-group">
@@ -177,14 +177,14 @@
           <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraan">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_edit_biayaPenyusutan1">Biaya Penyusutan 1</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_edit_biayaPenyusutan1">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             <div class="input-group">
@@ -197,14 +197,14 @@
           <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_akm">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_edit_biayaPenyusutan2">Biaya Penyusutan 2</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_edit_biayaPenyusutan2">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
             <div class="input-group">
@@ -524,10 +524,7 @@ function buttonPerkiraan () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -537,7 +534,6 @@ function buttonPerkiraan () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>
@@ -584,10 +580,7 @@ function buttonAkumulasi () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectAkumulasi('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectAkumulasi('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -597,7 +590,6 @@ function buttonAkumulasi () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>
@@ -643,10 +635,7 @@ function buttonPerkiraanBP1 () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectBP1('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectBP1('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -656,7 +645,6 @@ function buttonPerkiraanBP1 () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>
@@ -702,10 +690,7 @@ function buttonPerkiraanBP2 () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectBP2('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectBP2('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -715,7 +700,6 @@ function buttonPerkiraanBP2 () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>

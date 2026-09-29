@@ -398,7 +398,7 @@
           <label for="input_add_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
         </div>
@@ -436,7 +436,7 @@
           <label for="input_edit_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
         </div>
@@ -466,7 +466,6 @@
               <table id="tabelDetailAkunAddPerkiraan">
                 <thead class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
@@ -989,10 +988,7 @@ function loadPerkiraanDetail () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetailAkunSelectAdd('${item.Perkiraan}')"> + </i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonDetailAkunSelectAdd('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;

@@ -144,7 +144,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_perkiraan">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -160,7 +160,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_perkiraanEdit">
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -676,10 +676,7 @@ function buttonPerkiraan () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -689,7 +686,6 @@ function buttonPerkiraan () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>
