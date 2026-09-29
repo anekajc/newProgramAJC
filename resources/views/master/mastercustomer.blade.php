@@ -136,7 +136,7 @@
                     <option value=0>Tidak Aktif</option>
                   </select>
           <label for="input_add_plafon">Plafon</label>
-          <input type="number" class="form-control text-right" id="input_add_plafon" value=0 >
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_plafon" value=0 >
           <label for="input_add_haripiutang">TOP INT</label>
           <div class="bs-full"><input type="number" class="form-control text-right" id="input_add_haripiutang" value=0 ></div>
         </div>
@@ -344,7 +344,7 @@
                     <option value=0>Tidak Aktif</option>
                   </select>
           <label for="input_edit_plafon">Plafon</label>
-          <input type="number" class="form-control text-right" id="input_edit_plafon">
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_plafon">
           <label for="input_edit_haripiutang">TOP INT</label>
           <div class="bs-full"><input type="number" class="form-control text-right" id="input_edit_haripiutang" value=0 ></div>
         </div>
@@ -725,7 +725,7 @@ function buttonAdd () {
   document.getElementById("input_add_pph21").value = 0.00
   document.getElementById("input_add_pph23").value = 0.00
   document.getElementById("input_add_top").value = 0
-  document.getElementById("input_add_plafon").value = 0
+  setNum("input_add_plafon", 0)
   document.getElementById("input_add_haripiutang").value = 0
 
   document.getElementById("input_add_isppn").checked = false
@@ -844,7 +844,7 @@ function submitEdit () {
 
   let top = $("#input_edit_top").val();
   console.log('top' , top)
-  let plafon = $("#input_edit_plafon").val();
+  let plafon = $("#input_edit_plafon").val().replace(/,/g, '');
   console.log('plafon' , plafon)
   let jeniscustomer = $("#input_edit_jeniscustomer").val();
   console.log('jeniscustomer' , jeniscustomer)
@@ -980,7 +980,7 @@ function submitAdd () {
 
   let top = $("#input_add_top").val();
   console.log('top' , top)
-  let plafon = $("#input_add_plafon").val();
+  let plafon = $("#input_add_plafon").val().replace(/,/g, '');
   console.log('plafon' , plafon)
   let jeniscustomer = $("#input_add_jeniscustomer").val();
   console.log('jeniscustomer' , jeniscustomer)
@@ -1186,7 +1186,7 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_namapkp").value = res[0].NAMAPKP
       document.getElementById("input_edit_alamatpkp").value = res[0].ALAMATPKP1
       document.getElementById("input_edit_kotapkp").value = res[0].KOTAPKP
-      document.getElementById("input_edit_plafon").value = res[0].PLAFON
+      setNum("input_edit_plafon", res[0].PLAFON)
 
       document.getElementById("input_edit_compcode").value = res[0].CompCode
       document.getElementById("input_edit_custcode").value = res[0].CustCode
@@ -1399,6 +1399,29 @@ function loadDetailAkun (kodeDetail) {
     "paging": false,
   });
 }
+
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
 
 window.onload = function(){
   MasterList.kolom({ href: 'mastercustomer', kolom: MC_KOLOM, onChange: loadAll })

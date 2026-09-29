@@ -131,8 +131,8 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi" >
-            <input type="number" value=1000 min=0 class="form-control text-right" id="input_add_harga" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi" >
+            <input type="text" inputmode="decimal" value=1000 min=0 class="form-control text-right format-number" id="input_add_harga" ></div></div>
 
 
             
@@ -151,8 +151,8 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi2" >
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_add_harga2" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi2" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_harga2" ></div></div>
 
 
    
@@ -171,8 +171,8 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi3" >
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_add_harga3" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi3" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_harga3" ></div></div>
         </div>
 
 
@@ -188,9 +188,9 @@
 
             <div class="bs-form">
           <label for="input_add_qtymin">Qty Min</label>
-          <input type="number" value=0 min=0 class="form-control text-right" id="input_add_qtymin" >
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymin" >
           <label for="input_add_qtymax">Qty Max</label>
-          <input type="number" value=0 min=0 class="form-control text-right" id="input_add_qtymax" >
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymax" >
 
             
           <label for="input_add_toleransi">Toleransi</label>
@@ -320,8 +320,8 @@
                     <option value="3">Three</option>
                   </select>
               </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi" >
-            <input type="number" value=1000 min=0 class="form-control text-right" id="input_edit_harga" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi" >
+            <input type="text" inputmode="decimal" value=1000 min=0 class="form-control text-right format-number" id="input_edit_harga" ></div></div>
 
 
             
@@ -340,8 +340,8 @@
                   </select>
               
                 </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi2" >
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_harga2" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi2" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_harga2" ></div></div>
 
 
               
@@ -360,17 +360,17 @@
                   </select>
               
                 </div>
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi3" >
-            <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_harga3" ></div></div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi3" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_harga3" ></div></div>
         </div>
 
             <br/>
 
             <div class="bs-form">
           <label for="input_edit_qtymin">Qty Min</label>
-          <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_qtymin" >
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymin" >
           <label for="input_edit_qtymax">Qty Max</label>
-          <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_qtymax" >
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymax" >
 
             
           <label for="input_edit_toleransi">Toleransi</label>
@@ -452,10 +452,10 @@
             </select>
 
             <label for="input_harga_add_harga">Harga1</label>
-            <input id="input_harga_add_harga" value=0.00 min=0 type="number" class="form-control text-right">
+            <input id="input_harga_add_harga" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
 
             <label for="input_harga_add_harga2">Harga2</label>
-            <input id="input_harga_add_harga2" value=0.00 min=0 type="number" class="form-control text-right">
+            <input id="input_harga_add_harga2" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
           </div>
           <div class="text-right mt-3">
             <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHarga()">Batal</button>
@@ -477,10 +477,10 @@
             </select>
 
             <label for="input_harga_edit_harga">Harga1</label>
-            <input id="input_harga_edit_harga" value=0.00 min=0 type="number" class="form-control text-right">
+            <input id="input_harga_edit_harga" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
 
             <label for="input_harga_edit_harga2">Harga2</label>
-            <input id="input_harga_edit_harga2" value=0.00 min=0 type="number" class="form-control text-right">
+            <input id="input_harga_edit_harga2" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
           </div>
           <div class="text-right mt-3">
             <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHarga()">Batal</button>
@@ -635,13 +635,13 @@ function buttonAdd () {
   document.getElementById("input_add_satuan").value = ''
   document.getElementById("input_add_satuan2").value= ''
   // let satuan3 document.getElementById("input_add_satuan3").value=
-  document.getElementById("input_add_isi").value= '1.00'
-  document.getElementById("input_add_isi2").value= '1.00'
-  document.getElementById("input_add_harga").value= '0.00'
-  document.getElementById("input_add_harga2").value= '0.00'
+  setNum("input_add_isi", '1.00')
+  setNum("input_add_isi2", '1.00')
+  setNum("input_add_harga", '0.00')
+  setNum("input_add_harga2", '0.00')
   // let isi3 document.getElementById("input_add_isi3").value=
-  document.getElementById("input_add_qtymax").value= '0.00'
-  document.getElementById("input_add_qtymin").value= '0.00'
+  setNum("input_add_qtymax", '0.00')
+  setNum("input_add_qtymin", '0.00')
   document.getElementById("input_add_toleransi").value= '0.00'
   document.getElementById("input_add_isberat").value= '0.00'
   document.getElementById("input_add_isaktif").value= 1
@@ -933,14 +933,14 @@ function buttonEdit (kodebarang) {
     document.getElementById("input_edit_satuan3").value = res[0].SAT3
     tempsat3 = res[0].SAT3
 
-    document.getElementById("input_edit_isi").value = res[0].ISI1
-    document.getElementById("input_edit_isi2").value = res[0].ISI2
-    document.getElementById("input_edit_isi3").value = res[0].ISI3
-    document.getElementById("input_edit_harga").value = res[0].Hrg1_1
-    document.getElementById("input_edit_harga2").value = res[0].Hrg2_1
-    document.getElementById("input_edit_harga3").value = res[0].Hrg3_1
-    document.getElementById("input_edit_qtymin").value = res[0].QntMin
-    document.getElementById("input_edit_qtymax").value = res[0].QntMax
+    setNum("input_edit_isi", res[0].ISI1)
+    setNum("input_edit_isi2", res[0].ISI2)
+    setNum("input_edit_isi3", res[0].ISI3)
+    setNum("input_edit_harga", res[0].Hrg1_1)
+    setNum("input_edit_harga2", res[0].Hrg2_1)
+    setNum("input_edit_harga3", res[0].Hrg3_1)
+    setNum("input_edit_qtymin", res[0].QntMin)
+    setNum("input_edit_qtymax", res[0].QntMax)
     document.getElementById("input_edit_toleransi").value = res[0].Tolerate
     document.getElementById("input_edit_isberat").value = res[0].pBerat
     document.getElementById("input_edit_beratvolume").value = res[0].Berat
@@ -1057,8 +1057,8 @@ function buttonEditHarga (kodebarang , kodesupplier) {
     success: function(res) {
       console.log(res)
       document.getElementById("input_harga_edit_kodesupplier").value = res[0].KODEJENISCUSTSUPP
-      document.getElementById("input_harga_edit_harga").value = res[0].HARGA1
-      document.getElementById("input_harga_edit_harga2").value = res[0].HARGA2
+      setNum("input_harga_edit_harga", res[0].HARGA1)
+      setNum("input_harga_edit_harga2", res[0].HARGA2)
 
     }})
 
@@ -1074,8 +1074,8 @@ function submitEditHarga () {
 console.log('submitEditHarga')
 let kodebarang = $("#input_harga_kodebarang").val();
 let kodesupplier = $("#input_harga_edit_kodesupplier").val();
-let harga = $("#input_harga_edit_harga").val();
-let harga2 = $("#input_harga_edit_harga2").val();
+let harga = $("#input_harga_edit_harga").val().replace(/,/g, '');
+let harga2 = $("#input_harga_edit_harga2").val().replace(/,/g, '');
 
 console.log('kodebarang' , kodebarang)
 console.log('kodesupplier' , kodesupplier)
@@ -1109,8 +1109,8 @@ function submitAddHarga () {
   console.log('submitAddHarga')
   let kodebarang = $("#input_harga_kodebarang").val();
   let kodesupplier = $("#input_harga_add_kodesupplier").val();
-  let harga = $("#input_harga_add_harga").val();
-  let harga2 = $("#input_harga_add_harga2").val();
+  let harga = $("#input_harga_add_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_harga_add_harga2").val().replace(/,/g, '');
 
   console.log('kodebarang' , kodebarang)
   console.log('kodesupplier' , kodesupplier)
@@ -1375,14 +1375,14 @@ function submitAdd () {
   let satuan = $("#input_add_satuan").val();
   let satuan2 = $("#input_add_satuan2").val();
   let satuan3 = $("#input_add_satuan3").val();
-  let isi = $("#input_add_isi").val();
-  let isi2 = $("#input_add_isi2").val();
-  let isi3 = $("#input_add_isi3").val();
-  let harga = $("#input_add_harga").val();
-  let harga2 = $("#input_add_harga2").val();
-  let harga3 = $("#input_add_harga3").val();
-  let qtymax = $("#input_add_qtymax").val();
-  let qtymin = $("#input_add_qtymin").val();
+  let isi = $("#input_add_isi").val().replace(/,/g, '');
+  let isi2 = $("#input_add_isi2").val().replace(/,/g, '');
+  let isi3 = $("#input_add_isi3").val().replace(/,/g, '');
+  let harga = $("#input_add_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_add_harga2").val().replace(/,/g, '');
+  let harga3 = $("#input_add_harga3").val().replace(/,/g, '');
+  let qtymax = $("#input_add_qtymax").val().replace(/,/g, '');
+  let qtymin = $("#input_add_qtymin").val().replace(/,/g, '');
   let toleransi = $("#input_add_toleransi").val();
   let isberat = $("#input_add_isberat").val();
   let isaktif = $("#input_add_isaktif").val();
@@ -1541,15 +1541,15 @@ function submitEdit () {
   let satuan = $("#input_edit_satuan").val();
   let satuan2 = $("#input_edit_satuan2").val();
   let satuan3 = $("#input_edit_satuan3").val();
-  let isi = $("#input_edit_isi").val();
-  let isi2 = $("#input_edit_isi2").val();
-  let isi3 = $("#input_edit_isi3").val();
-  let harga = $("#input_edit_harga").val();
-  let harga2 = $("#input_edit_harga2").val();
-  let harga3 = $("#input_edit_harga3").val();
+  let isi = $("#input_edit_isi").val().replace(/,/g, '');
+  let isi2 = $("#input_edit_isi2").val().replace(/,/g, '');
+  let isi3 = $("#input_edit_isi3").val().replace(/,/g, '');
+  let harga = $("#input_edit_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_edit_harga2").val().replace(/,/g, '');
+  let harga3 = $("#input_edit_harga3").val().replace(/,/g, '');
   
-  let qtymax = $("#input_edit_qtymax").val();
-  let qtymin = $("#input_edit_qtymin").val();
+  let qtymax = $("#input_edit_qtymax").val().replace(/,/g, '');
+  let qtymin = $("#input_edit_qtymin").val().replace(/,/g, '');
   let toleransi = $("#input_edit_toleransi").val();
   let isberat = $("#input_edit_isberat").val();
   let isaktif = $("#input_edit_isaktif").val();
@@ -1678,6 +1678,29 @@ function submitEdit () {
 
 
 }
+
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
 
 window.onload = function(){
     MasterList.kolom({ href: 'masterbarang', kolom: MB_KOLOM, onChange: loadAll })

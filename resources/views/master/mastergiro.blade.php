@@ -810,7 +810,7 @@ function buttonEditBuka (kode) {
       
       document.getElementById("input_edit2_nilaiGiro").value = res[0].Kredit
       document.getElementById("input_edit2_valas").value = res[0].Kodevls
-      document.getElementById("input_edit2_kurs").value = res[0].Kurs
+      document.getElementById("input_edit2_kurs").value = formatWithCommas(parseFloat(res[0].Kurs) || 0)
       document.getElementById("input_edit2_keterangan").value = res[0].Keterangan
       document.getElementById("input_edit2_tglBuka").value = new Date(res[0].TglBuka).toLocaleDateString('en-CA');
       document.getElementById("input_edit2_buktiBuka").value = res[0].BuktiBuka
@@ -846,7 +846,7 @@ function buttonEditTerima (kode) {
       document.getElementById("input_edit_nilaiGiro").value = res[0].Debet
       document.getElementById("input_edit_nilaiGiroRp").value = res[0].DebetRp
       document.getElementById("input_edit_valas").value = res[0].Kodevls
-      document.getElementById("input_edit_kurs").value = res[0].Kurs
+      document.getElementById("input_edit_kurs").value = formatWithCommas(parseFloat(res[0].Kurs) || 0)
       document.getElementById("input_edit_keterangan").value = res[0].Keterangan
       document.getElementById("input_edit_tglTerima").value = new Date(res[0].TglBuka).toLocaleDateString('en-CA');
       document.getElementById("input_edit_buktiTerima").value = res[0].BuktiBuka
@@ -947,7 +947,7 @@ function submitEditBuka () {
   let nilaiGiro = parseFloat(($("#input_edit2_nilaiGiro").val() || 0).toString().replace(/,/g, '')) || 0;
   let nilaiGiroRp = parseFloat(($("#input_edit2_nilaiGiroRp").val() || 0).toString().replace(/,/g, '')) || 0;
   let valas = $("#input_edit2_valas").val();
-  let kurs = $("#input_edit2_kurs").val();
+  let kurs = $("#input_edit2_kurs").val().replace(/,/g, '');
   let tanggalBuka = $("#input_edit2_tglBuka").val();
   let buktiBuka = $("#input_edit2_buktiBuka").val();
   let keterangan = $("#input_edit2_keterangan").val();
@@ -1020,7 +1020,7 @@ function submitEditTerima () {
   let nilaiGiro = parseFloat(($("#input_edit_nilaiGiro").val() || 0).toString().replace(/,/g, '')) || 0;
   let nilaiGiroRp = parseFloat(($("#input_edit_nilaiGiroRp").val() || 0).toString().replace(/,/g, '')) || 0;
   let valas = $("#input_edit_valas").val();
-  let kurs = $("#input_edit_kurs").val();
+  let kurs = $("#input_edit_kurs").val().replace(/,/g, '');
   let tanggalTerima = $("#input_edit_tglTerima").val();
   let buktiTerima = $("#input_edit_buktiTerima").val();
   let keterangan = $("#input_edit_keterangan").val();
@@ -1095,7 +1095,7 @@ function submitAddTerima () {
   let nilaiGiro = parseFloat(($("#input_add_nilaiGiro").val() || 0).toString().replace(/,/g, '')) || 0;
   let nilaiGiroRp = parseFloat(($("#input_add_nilaiGiroRp").val() || 0).toString().replace(/,/g, '')) || 0;
   let valas = $("#input_add_valas").val();
-  let kurs = $("#input_add_kurs").val();
+  let kurs = $("#input_add_kurs").val().replace(/,/g, '');
   let tglTerima = $("#input_add_tglTerima").val();
   let buktiTerima = $("#input_add_buktiTerima").val();
   let keterangan = $("#input_add_keterangan").val();
@@ -1168,7 +1168,7 @@ function submitAddBuka () {
   let nilaiGiro = parseFloat(($("#input_add2_nilaiGiro").val() || 0).toString().replace(/,/g, '')) || 0;
   let nilaiGiroRp = parseFloat(($("#input_add2_nilaiGiroRp").val() || 0).toString().replace(/,/g, '')) || 0;
   let valas = $("#input_add2_valas").val();
-  let kurs = $("#input_add2_kurs").val();
+  let kurs = $("#input_add2_kurs").val().replace(/,/g, '');
   let tglBuka = $("#input_add2_tglBuka").val();
   let buktiBuka = $("#input_add2_buktiBuka").val();
   let keterangan = $("#input_add2_keterangan").val();
@@ -1233,7 +1233,7 @@ function updateKurs2() {
     var selectElement = document.getElementById('input_add_valas');
     var selectedOption = selectElement.options[selectElement.selectedIndex];
     var kurs = selectedOption.getAttribute('data-kurs');
-    document.getElementById('input_add_kurs').value = kurs;
+    document.getElementById('input_add_kurs').value = formatWithCommas(parseFloat(kurs) || 0);
 }
 
 // Set up the change event listener
@@ -1246,7 +1246,7 @@ function updateKurs() {
     var selectElement = document.getElementById('input_add2_valas');
     var selectedOption = selectElement.options[selectElement.selectedIndex];
     var kurs = selectedOption.getAttribute('data-kurs');
-    document.getElementById('input_add2_kurs').value = kurs;
+    document.getElementById('input_add2_kurs').value = formatWithCommas(parseFloat(kurs) || 0);
 }
 
 // Set up the change event listener
@@ -1258,13 +1258,13 @@ document.addEventListener('DOMContentLoaded', updateKurs);
 document.getElementById('input_edit_valas').addEventListener('change', function() {
     var selectedOption = this.options[this.selectedIndex];
     var kurs = selectedOption.getAttribute('data-kurs');
-    document.getElementById('input_edit_kurs').value = kurs;
+    document.getElementById('input_edit_kurs').value = formatWithCommas(parseFloat(kurs) || 0);
 });
 
 document.getElementById('input_edit2_valas').addEventListener('change', function() {
     var selectedOption = this.options[this.selectedIndex];
     var kurs = selectedOption.getAttribute('data-kurs');
-    document.getElementById('input_edit2_kurs').value = kurs;
+    document.getElementById('input_edit2_kurs').value = formatWithCommas(parseFloat(kurs) || 0);
 });
 
 function buttonSelectPerkiraanKas () {

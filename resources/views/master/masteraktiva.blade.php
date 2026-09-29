@@ -560,7 +560,7 @@
           <label for="input_add_SaldoValas">Valas</label>
           <select class="form-control" id="input_add_SaldoValas" onchange="onChangeSaldoValas()"></select>
           <label for="input_add_SaldoKurs">Kurs</label>
-          <input type="number" class="form-control text-right" id="input_add_SaldoKurs" value="1.00">
+          <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_SaldoKurs" value="1.00">
           <input type="text" class="form-control text-right" id="input_saldoAwal_devisi" placeholder="devisi" hidden>
         </div>
 
@@ -940,7 +940,7 @@ function pilihSaldoValas (kode) {
 function onChangeSaldoValas () {
   let kode = $("#input_add_SaldoValas").val()
   let itemX = listValas.find(item => item.KODEVLS === kode)
-  $("#input_add_SaldoKurs").val(itemX ? itemX.KURS : '')
+  setNum("input_add_SaldoKurs", itemX ? itemX.KURS : '')
 }
 
 function loadDevisi () {
@@ -1335,7 +1335,7 @@ function submitSaldoAwal () {
   // let Bulan = $("#input_add_DaftarDevisi").val();
   // let Tahun = $("#input_add_DaftarDevisi").val();
   let Valas = $("#input_add_SaldoValas").val();
-  let kurs = $("#input_add_SaldoKurs").val();
+  let kurs = $("#input_add_SaldoKurs").val().replace(/,/g, '');
   let Awal = parseFloat(($("#input_add_SaldoNilaiAwal").val() || 0).toString().replace(/,/g, '')) || 0;
   // let Awal = $("#input_add_SaldoNilaiAwal").val() || 0;
   let AwalSusut = parseFloat(($("#input_add_SaldoNilaiPenyusutan").val() || 0).toString().replace(/,/g, '')) || 0;
@@ -1548,7 +1548,7 @@ $.ajax({
       document.getElementById("input_add_SaldoNilaiAwal").value = res[0].Awal
       document.getElementById("input_add_SaldoNilaiPenyusutan").value = res[0].AwalSusut
       pilihSaldoValas(res[0].Valas)
-      document.getElementById("input_add_SaldoKurs").value = res[0].Kurs
+      setNum("input_add_SaldoKurs", res[0].Kurs)
 
   formatNumber(document.getElementById("input_add_SaldoNilaiAwal"))
   formatNumber(document.getElementById("input_add_SaldoNilaiPenyusutan"))
@@ -1556,6 +1556,29 @@ $.ajax({
 
     $("#formSaldoAwal").modal('toggle')
 }
+
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
 
 window.onload = function(){
   MasterList.kolom({ href: 'masteraktiva', kolom: MAK_KOLOM, onChange: renderTabel })

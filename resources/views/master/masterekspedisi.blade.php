@@ -100,7 +100,7 @@
           <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select" title="Cari"><i class="bi bi-search"></i></button>
+                          <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
         </div>
@@ -259,7 +259,7 @@
           <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select" title="Cari"><i class="bi bi-search"></i></button>
+                          <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
         </div>
@@ -1559,11 +1559,12 @@ function handleSearchAndAutoSelect(searchValue) {
     if (filteredData.length === 1) {
         // Get the matched row data
         const rowData = currentDataTable.row({ search: 'applied' }).data();
-        if (rowData && rowData.length >= 4) {
-            // Extract data from the row (skip the first column which is the button)
-            const kodeKota = $(rowData[1]).text() || rowData[1];
-            const namaKota = $(rowData[2]).text() || rowData[2];
-            const kodeArea = $(rowData[3]).text() || rowData[3];
+        if (rowData && rowData.length >= 3) {
+            // Baris pemilih tidak punya kolom tombol lagi (dipilih dengan klik baris),
+            // jadi kolom data mulai dari indeks 0.
+            const kodeKota = $(rowData[0]).text() || rowData[0];
+            const namaKota = $(rowData[1]).text() || rowData[1];
+            const kodeArea = $(rowData[2]).text() || rowData[2];
             
             // Auto-select the matched item
             buttonSelectKota(kodeKota, namaKota, kodeArea);
