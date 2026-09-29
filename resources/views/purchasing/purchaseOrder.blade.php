@@ -8375,8 +8375,8 @@ if (baris2) {
   renderKpiPO()
 }
 
-// Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR / Outstanding SO) di atas
-// tab-content. Jumlah PO & Total DPP dihitung dari dataTampil2 (baris yang sedang
+// Kartu ringkasan (Jumlah Supplier / Total DPP / Outstanding PR / Outstanding SO) di atas
+// tab-content. Jumlah Supplier & Total DPP dihitung dari dataTampil2 (baris yang sedang
 // tampil di tab Purchase Order, sudah kena filter periode + status/otorisasi).
 // Outstanding PR/SO diambil dari recordsTotal endpoint podataoutstandingpr/so - satu
 // baris di sana = satu kode barang, jadi 1 nobukti dengan 3 barang terhitung 3.
@@ -8385,14 +8385,17 @@ let poKpiOut = { 1 : null, 3 : null }
 
 function renderKpiPO () {
   let totalDPP = 0
-  let poSet = new Set()
+  let suppSet = new Set()
   ;(poKpiDPP || []).forEach((r) => {
     totalDPP += Number(r.TotDPPRp) || 0
-    if (r.NoBukti) { poSet.add(r.NoBukti) }
+    // 1 supplier = 1 hitungan walau punya banyak PO. KodeSupp di-trim + upper supaya
+    // kode yang sama tidak terhitung dobel hanya karena beda spasi/huruf.
+    let kodeSupp = String(r.KodeSupp || '').trim().toUpperCase()
+    if (kodeSupp) { suppSet.add(kodeSupp) }
   })
 
   let cards = [
-    ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Jumlah Supplier', suppSet.size, '#dc2626', '#fee2e2', 'bi bi-people', false],
     ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
     ['Outstanding PR', poKpiOut[1] === null ? '-' : poKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false],
     ['Outstanding SO', poKpiOut[3] === null ? '-' : poKpiOut[3], '#ca8a04', '#fef9c3', 'bi bi-cart-check', false]

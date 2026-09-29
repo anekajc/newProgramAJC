@@ -584,7 +584,7 @@
   </style>
 {{-- end tampilan search modal barang all --}}
 
-{{-- Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) - gaya sama dengan
+{{-- Kartu ringkasan (Jumlah Supplier / Total DPP / Outstanding PR) - gaya sama dengan
      purchaseOrder.blade.php, tapi 3 kolom (tanpa Outstanding SO, menu ini tidak
      punya SO). --}}
 <style>
@@ -2770,8 +2770,8 @@ let dataAddAddListItem = []
 let dataRefreshOutstanding = []
 let dataRefreshOutstanding2 = []
 
-// Kartu ringkasan (Jumlah PO / Total DPP / Outstanding PR) di atas tab-content.
-// Jumlah PO & Total DPP dihitung dari dataTampil2 (baris yang sedang tampil di tab
+// Kartu ringkasan (Jumlah Supplier / Total DPP / Outstanding PR) di atas tab-content.
+// Jumlah Supplier & Total DPP dihitung dari dataTampil2 (baris yang sedang tampil di tab
 // Purchase Order, sudah kena filter periode + status/otorisasi). Outstanding PR
 // diambil dari recordsTotal endpoint ponsdataoutstandingpr - satu baris di sana =
 // satu kode barang, jadi 1 nobukti dengan 3 barang terhitung 3. Tidak ada
@@ -2781,14 +2781,17 @@ let ponsKpiOut = { 1 : null }
 
 function renderKpiPONS () {
   let totalDPP = 0
-  let poSet = new Set()
+  let suppSet = new Set()
   ;(ponsKpiDPP || []).forEach((r) => {
     totalDPP += Number(r.TotDPPRp) || 0
-    if (r.NoBukti) { poSet.add(r.NoBukti) }
+    // 1 supplier = 1 hitungan walau punya banyak PO. KodeSupp di-trim + upper supaya
+    // kode yang sama tidak terhitung dobel hanya karena beda spasi/huruf.
+    let kodeSupp = String(r.KodeSupp || '').trim().toUpperCase()
+    if (kodeSupp) { suppSet.add(kodeSupp) }
   })
 
   let cards = [
-    ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+    ['Jumlah Supplier', suppSet.size, '#dc2626', '#fee2e2', 'bi bi-people', false],
     ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
     ['Outstanding PR', ponsKpiOut[1] === null ? '-' : ponsKpiOut[1], '#0891b2', '#cffafe', 'bi bi-clipboard-data', false]
   ]

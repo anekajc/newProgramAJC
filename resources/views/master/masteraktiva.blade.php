@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Aktiva')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,39 +22,41 @@
     <button class="btn btn-action-primary" onclick="cleanFormAdd()">+ Add Aktiva</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
         <thead>
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Aktiva</th>
-            <th scope="col">Keterangan</th>
-            <th scope="col">Tanggal</th>
-            <th scope="col">Devisi</th>
-            <th scope="col">Tipe Aktiva</th>
-            <th scope="col">Kelompok</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Susut</th>
-            <th scope="col">Metode</th>
-            <th scope="col">Akumulasi</th>
-            <th scope="col">Biaya Penyusutan 1</th>
-            <th scope="col">Persen Biaya 1</th>
-            <th scope="col">Biaya Penyusutan 2</th>
-            <th scope="col">Persen Biaya 2</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Aktiva</th>
+            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+            <th style="padding: 4px 12px;" scope="col">Devisi</th>
+            <th style="padding: 4px 12px;" scope="col">Tipe Aktiva</th>
+            <th style="padding: 4px 12px;" scope="col">Kelompok</th>
+            <th style="padding: 4px 12px;" scope="col">Quantity</th>
+            <th style="padding: 4px 12px;" scope="col">Susut</th>
+            <th style="padding: 4px 12px;" scope="col">Metode</th>
+            <th style="padding: 4px 12px;" scope="col">Akumulasi</th>
+            <th style="padding: 4px 12px;" scope="col">Biaya Penyusutan 1</th>
+            <th style="padding: 4px 12px;" scope="col">Persen Biaya 1</th>
+            <th style="padding: 4px 12px;" scope="col">Biaya Penyusutan 2</th>
+            <th style="padding: 4px 12px;" scope="col">Persen Biaya 2</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
+        <tbody id="tabel_data" class="text-left">
       </tbody>
       </table>
+
     </div>
-</div>
+  </div>
 
 </div>
 <!-- start modal add -->
@@ -63,191 +65,93 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">Form Add Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <form>
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="">
 
           <!-- Group Aktiva -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Group Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonGroupAktiva()">+</button>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Devisi</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDaftarDevisi()">+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- No. Aktiva / No. Urut -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">No. Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">No. Urut</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_add_NoUrut" placeholder="No. Urut" disabled>
-            </div>
-          </div>
-
-          <!-- Tipe Aktiva / Tgl. Perolehan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Tipe Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-control" id="input_add_TipeAktiva" disabled>
+          <div class="bs-form">
+          <label for="input_add_GroupAktiva">Group Aktiva</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <label for="input_add_DaftarDevisi">Devisi</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <label for="input_add_NoAktiva">No. Aktiva</label>
+          <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
+          <label for="input_add_NoUrut">No. Urut</label>
+          <input type="text" class="form-control" id="input_add_NoUrut" placeholder="No. Urut" disabled>
+          <label for="input_add_TipeAktiva">Tipe Aktiva</label>
+          <select class="form-control" id="input_add_TipeAktiva" disabled>
                 <option value="0">Aktiva Tetap</option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Perolehan</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_add_TglPerolehan">
-            </div>
-          </div>
-
-          <!-- Tgl. Pemakaian -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-6"></div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Pemakaian</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_add_TglPemakaian">
-            </div>
-          </div>
+          <label for="input_add_TglPerolehan">Tgl. Perolehan</label>
+          <input type="date" class="form-control" id="input_add_TglPerolehan">
+          <label for="input_add_TglPemakaian">Tgl. Pemakaian</label>
+          <div class="bs-full"><input type="date" class="form-control" id="input_add_TglPemakaian"></div>
+        </div>
 
           <!-- Kuantum / Susut / Metode -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label date-label">Kuantum</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_add_Kuantum" value="1">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Susut (%)</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Metode Susut</label>
-            </div>
-            <div class="col-md-2">
-              <select class="form-control" id="input_add_MetodePenyusutan">
+          <div class="bs-form">
+          <label for="input_add_Kuantum">Kuantum</label>
+          <input type="number" class="form-control text-right" id="input_add_Kuantum" value="1">
+          <label for="input_add_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
+          <label for="input_add_MetodePenyusutan">Metode Susut</label>
+          <div class="bs-full"><select class="form-control" id="input_add_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select>
-            </div>
-          </div>
+              </select></div>
+        </div>
 
           <!-- Keterangan -->
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <label class="form-label">Keterangan</label>
-            </div>
-            <div class="col-md-10">
-              <textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add_Keterangan">Keterangan</label>
+          <textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea>
+        </div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
             </div>
           </div>
+        </div>
 
           <!-- Biaya Penyusutan 1 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('1')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_BiayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 2 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('2')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_add_BiayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 3 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 3</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('3')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_add_BiayaPenyusutan3">Biaya Penyusutan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
+              </div></div></div>
+        </div>
         </form>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
   </div>
@@ -260,191 +164,93 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalLabel">Form Edit Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <form>
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="">
 
           <!-- Group Aktiva -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Group Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonGroupAktiva()">+</button>
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Devisi</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonDaftarDevisi()">+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- No. Aktiva / No. Urut -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">No. Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">No. Urut</label>
-            </div>
-            <div class="col-md-4">
-              <input type="text" class="form-control" id="input_edit_NoUrut" placeholder="No. Urut" disabled>
-            </div>
-          </div>
-
-          <!-- Tipe Aktiva / Tgl. Perolehan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Tipe Aktiva</label>
-            </div>
-            <div class="col-md-4">
-              <select class="form-control" id="input_edit_TipeAktiva" disabled>
+          <div class="bs-form">
+          <label for="input_edit_GroupAktiva">Group Aktiva</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <label for="input_edit_DaftarDevisi">Devisi</label>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <label for="input_edit_NoAktiva">No. Aktiva</label>
+          <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
+          <label for="input_edit_NoUrut">No. Urut</label>
+          <input type="text" class="form-control" id="input_edit_NoUrut" placeholder="No. Urut" disabled>
+          <label for="input_edit_TipeAktiva">Tipe Aktiva</label>
+          <select class="form-control" id="input_edit_TipeAktiva" disabled>
                 <option value="0">Aktiva Tetap</option>
               </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Perolehan</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_edit_TglPerolehan">
-            </div>
-          </div>
-
-          <!-- Tgl. Pemakaian -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-6"></div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Tgl. Pemakaian</label>
-            </div>
-            <div class="col-md-4">
-              <input type="date" class="form-control" id="input_edit_TglPemakaian">
-            </div>
-          </div>
+          <label for="input_edit_TglPerolehan">Tgl. Perolehan</label>
+          <input type="date" class="form-control" id="input_edit_TglPerolehan">
+          <label for="input_edit_TglPemakaian">Tgl. Pemakaian</label>
+          <div class="bs-full"><input type="date" class="form-control" id="input_edit_TglPemakaian"></div>
+        </div>
 
           <!-- Kuantum / Susut / Metode -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label date-label">Kuantum</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_edit_Kuantum" value="1">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Susut (%)</label>
-            </div>
-            <div class="col-md-2">
-              <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label date-label">Metode Susut</label>
-            </div>
-            <div class="col-md-2">
-              <select class="form-control" id="input_edit_MetodePenyusutan">
+          <div class="bs-form">
+          <label for="input_edit_Kuantum">Kuantum</label>
+          <input type="number" class="form-control text-right" id="input_edit_Kuantum" value="1">
+          <label for="input_edit_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
+          <label for="input_edit_MetodePenyusutan">Metode Susut</label>
+          <div class="bs-full"><select class="form-control" id="input_edit_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select>
-            </div>
-          </div>
+              </select></div>
+        </div>
 
           <!-- Keterangan -->
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <label class="form-label">Keterangan</label>
-            </div>
-            <div class="col-md-10">
-              <textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_Keterangan">Keterangan</label>
+          <textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea>
+        </div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
             </div>
           </div>
+        </div>
 
           <!-- Biaya Penyusutan 1 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('1')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_BiayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 2 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('2')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_edit_BiayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biaya Penyusutan 3 -->
-          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
-              <label class="form-label">Biaya Penyusutan 3</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonBiayaPenyusutan('3')">+</button>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+              </div></div></div>
+          <label for="input_edit_BiayaPenyusutan3">Biaya Penyusutan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+            <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-          </div>
+              </div></div></div>
+        </div>
         </form>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
     </div>
   </div>
@@ -458,7 +264,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
@@ -504,7 +312,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAddAkumulasiPenyusutan" class="table table-bordered table-striped"  >
@@ -549,7 +359,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Biaya Penyusutan</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAddBiayaPenyusutan" class="table table-bordered table-striped"  >
@@ -589,7 +401,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAddDevisi" class="table table-bordered table-striped"  >
@@ -636,7 +450,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
@@ -682,7 +498,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelEditGroupAktiva" class="table table-bordered table-striped"  >
@@ -728,7 +546,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelEditDevisi" class="table table-bordered table-striped"  >
@@ -774,7 +594,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelEditAkumulasiPenyusutan" class="table table-bordered table-striped"  >
@@ -820,40 +642,29 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Saldo Awal</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-          <div class="row">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Kode Aktiva</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="nomorPerkiraan" disabled>
-              </div>
-            </div>
-          </div>
+          <div class="bs-form bs-form-1">
+          <label for="nomorPerkiraan">Kode Aktiva</label>
+          <input type="text" class="form-control text-left" id="nomorPerkiraan" disabled>
+        </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="row">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_SaldoValas">Valas</label>
+          <div class="bs-full"><div class="row">
                 <div class="col-5">
                   <div class="form-group">
                       <div class="input-group">
                         <input type="text" class="form-control" id="input_add_SaldoValas" value="IDR">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonAddListValas()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAddListValas()">+</button>
                       </div>
                   </div>
                 </div>
@@ -868,47 +679,28 @@
                     <input type="text" class="form-control text-right" id="input_saldoAwal_devisi" placeholder="devisi" hidden>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+              </div></div>
+        </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Nilai Awal</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add_SaldoNilaiAwal" 
+          <div class="bs-form bs-form-1">
+          <label for="input_add_SaldoNilaiAwal">Nilai Awal</label>
+          <input type="text" class="form-control text-right" id="input_add_SaldoNilaiAwal" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-              </div>
-            </div>
-          </div>
 
-          <div class="row mt-2">
-            <div class="col-4">
-              <div class="form-group">
-                <label>Nilai Penyusutan</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                
-                <input type="text" class="form-control text-right" id="input_add_SaldoNilaiPenyusutan" 
+          <label for="input_add_SaldoNilaiPenyusutan">Nilai Penyusutan</label>
+          <input type="text" class="form-control text-right" id="input_add_SaldoNilaiPenyusutan" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-              </div>
-            </div>
-          </div>
+        </div>
         </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitSaldoAwal()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitSaldoAwal()">Simpan</button>
   </div>
 </div>
 </div>
@@ -921,7 +713,9 @@
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
         
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelSelectValas" class="table table-bordered table-striped"  >
@@ -965,7 +759,7 @@
 
 @section('js')
 
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
@@ -974,7 +768,7 @@ let dataRefresh = []
 function loadAll () {
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Aktiva"
+  // document.getElementById('breadcrumb').innerHTML = "Master Aktiva" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -1035,9 +829,10 @@ dataRefresh.forEach((item, i) => {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 

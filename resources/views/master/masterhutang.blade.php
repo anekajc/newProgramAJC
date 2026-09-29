@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Hutang')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,110 +22,45 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Hutang</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
 
-    <style>
-    .sp-length-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }    
-    
-    .sp-filter-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
+  {{-- Filter perkiraan (mis. Hutang Usaha / Piutang Usaha) dipasang di toolbar bersama, bergaya
+       seperti filter periode purchasing. Nilai option sama seperti sebelumnya. --}}
+  @php
+    $filterPerkiraan = '<div class="po-filter-wrap"><label for="perkiraanCustomer">Perkiraan</label>'
+      . '<select id="perkiraanCustomer" class="po-filter-inp" onchange="loadAll()">';
+    foreach ($listDataCustomer as $customer) {
+      $nilai = e(trim($customer->keterangan) . ' (' . trim($customer->Perkiraan) . ')');
+      $filterPerkiraan .= '<option value="' . $nilai . '">' . $nilai . '</option>';
     }
+    $filterPerkiraan .= '</select></div>';
+  @endphp
 
-    .sp-length-wrap label {
-      margin: 0; /* stops default label margin from pushing the select down/over */
-    }
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
-    }
+      {{-- Tambah Hutang dilakukan per baris (tombol di kolom Actions), jadi toolbar tanpa tombol Tambah. --}}
+      @include('master.partials.toolbarMaster', ['tanpaTambah' => true, 'slotFilter' => $filterPerkiraan])
 
-    .sp-toolbar {
-      display: flex;
-      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
-      align-items: center;
-      row-gap: 10px;
-      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
-    }
-
-    .sp-filter-wrap select {
-      width: auto;
-      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
-    }
-
-    .sp-length-wrap {
-      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
-    }
-  </style>
-
-  <div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
-
-    <div class="sp-filter-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
-
-    <div class="sp-filter-wrap">
-      <select id="perkiraanCustomer" class="form-select" onchange="loadAll()">
-        @foreach ($listDataCustomer as $customer)
-          <option value="{{ $customer->keterangan }} ({{ $customer->Perkiraan }})">
-            {{ $customer->keterangan }} ({{ $customer->Perkiraan }})
-          </option>
-        @endforeach
-      </select>
-    </div>
-
-    <div class="sp-length-wrap">
-      <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
-    </div>
-  </div>
-
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Supplier</th>
-            <th scope="col">Nama Supplier</th>
-            <th scope="col">No Faktur</th>
-            <th scope="col">Tanggal</th>
-            <th scope="col">Jatuh Tempo</th>
-            <th scope="col">Valas</th>
-            <th scope="col">Kurs</th>
-            <th scope="col">Debet(Rp)</th>
-            <th scope="col">Debet Valas</th>
-            <th scope="col">Kredit(Rp)</th>
-            <th scope="col">Kredit Valas</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
-</div>
+  </div>
 
 </div>
 
@@ -135,108 +70,59 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <input type="hidden" name="noUrut" id="input_add_noUrut">
 
         <div class="container-fluid">
           <!-- Supplier -->
-          <div class="form-group row">
-            <label class="col-sm-3 form-label">Supplier</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control" id="kodeSupplier" placeholder="Supplier" disabled>
-            </div>
-            <div class="col-sm-6">
-              <input type="text" class="form-control" id="namaSupplier" placeholder="Nama Supplier" disabled>
-            </div>
-          </div>
+          <div class="bs-form">
+          <label for="kodeSupplier">Supplier</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control" id="kodeSupplier" placeholder="Supplier" disabled>
+            <input type="text" class="form-control" id="namaSupplier" placeholder="Nama Supplier" disabled></div></div>
+          <label for="namaPerkiraan">Perkiraan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="namaPerkiraan" placeholder="Perkiraan" disabled></div>
+          <label for="input_add_noFaktur">No. Faktur</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_noFaktur" placeholder="No. Faktur"></div>
+          <label for="input_add_tanggalFaktur">Tanggal Faktur</label>
+          <input type="date" class="form-control" id="input_add_tanggalFaktur">
+          <label for="input_add_jatuhTempo">Jatuh Tempo</label>
+          <input type="date" class="form-control" id="input_add_jatuhTempo">
 
-          <!-- Perkiraan -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Perkiraan</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="namaPerkiraan" placeholder="Perkiraan" disabled>
-            </div>
-          </div>
 
-          <!-- No Faktur -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">No. Faktur</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="input_add_noFaktur" placeholder="No. Faktur">
-            </div>
-          </div>
-
-          <!-- Tanggal Faktur -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Tanggal Faktur</label>
-            <div class="col-sm-4">
-              <input type="date" class="form-control" id="input_add_tanggalFaktur">
-            </div>
-            <label class="col-sm-2 form-label">Jatuh Tempo</label>
-            <div class="col-sm-3">
-              <input type="date" class="form-control" id="input_add_jatuhTempo">
-            </div>
-          </div>
-
-          <div class="form-group row mt-2">
-
-            <div class="col-sm-3">
-                <label class="form-label">Valas</label>
-            </div>
-            <div class="col-sm-4">
-                <div class="input-group">
+          
+          <label for="input_add_valas">Valas</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_add_valas" value='IDR' disabled>
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonValasAdd()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonValasAdd()">+</button>
                     </div>
                 </div>
-            </div>
-
-            <label class="col-sm-2 form-label">Kurs</label>
-            <div class="col-sm-3">
-              <input type="number" class="form-control text-right" id="input_add_kurs" value=1.00 disabled>
-            </div>
+          <label for="input_add_kurs">Kurs</label>
+          <input type="number" class="form-control text-right" id="input_add_kurs" value=1.00 disabled>
+          <div hidden>
+          <label for="input_add_debet">Debet</label>
+          <input type="number" class="form-control text-right" id="input_add_debet" value="0" disabled>
+          <label for="input_add_debetRp">Debet (Rp)</label>
+          <input type="number" class="form-control text-right" id="input_add_debetRp" value="0" disabled>
           </div>
-
-          <!-- Debet -->
-          <div class="form-group row" hidden>
-            <label class="col-sm-3 form-label">Debet</label>
-            <div class="col-sm-3">
-              <input type="number" class="form-control text-right" id="input_add_debet" value="0" disabled>
-            </div>
-            <label class="col-sm-3 form-label">Debet (Rp)</label>
-            <div class="col-sm-3">
-              <input type="number" class="form-control text-right" id="input_add_debetRp" value="0" disabled>
-            </div>
-          </div>
-
-          <!-- Kredit -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Kredit</label>
-            <div class="col-sm-4">
-              <input type="number" class="form-control text-right" id="input_add_kredit">
-            </div>
-            <label class="col-sm-2 form-label">Kredit (Rp)</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control text-right" id="input_add_kreditRp" disabled>
-            </div>
-          </div>
-
-          <!-- No PO -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">No. PO</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="input_add_noPO" placeholder="No. PO">
-            </div>
-          </div>
+          <label for="input_add_kredit">Kredit</label>
+          <input type="number" class="form-control text-right" id="input_add_kredit">
+          <label for="input_add_kreditRp">Kredit (Rp)</label>
+          <input type="text" class="form-control text-right" id="input_add_kreditRp" disabled>
+          <label for="input_add_noPO">No. PO</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_noPO" placeholder="No. PO"></div>
+        </div>
 
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
   </div>
@@ -249,109 +135,60 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Hutang Awal</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <input type="hidden" name="noUrut" id="input_edit_noUrut">
 
         <div class="container-fluid">
           <!-- Supplier -->
           
-          <div class="form-group row">
-            <label class="col-sm-3 form-label">Supplier</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control" id="kodeSupplierEdit" placeholder="Supplier" disabled>
-            </div>
-            <div class="col-sm-6">
-              <input type="text" class="form-control" id="namaSupplierEdit" placeholder="Nama Supplier" disabled>
-            </div>
-          </div>
+          <div class="bs-form">
+          <label for="kodeSupplierEdit">Supplier</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control" id="kodeSupplierEdit" placeholder="Supplier" disabled>
+            <input type="text" class="form-control" id="namaSupplierEdit" placeholder="Nama Supplier" disabled></div></div>
+          <label for="namaPerkiraanEdit">Perkiraan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="namaPerkiraanEdit" placeholder="Perkiraan" disabled></div>
+          <label for="input_edit_noFaktur">No. Faktur</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_noFaktur" placeholder="No. Faktur" disabled></div>
+          <label for="input_edit_tanggalFaktur">Tanggal Faktur</label>
+          <input type="date" class="form-control" id="input_edit_tanggalFaktur">
+          <label for="input_edit_jatuhTempo">Jatuh Tempo</label>
+          <input type="date" class="form-control" id="input_edit_jatuhTempo">
 
-          <!-- Perkiraan -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Perkiraan</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="namaPerkiraanEdit" placeholder="Perkiraan" disabled>
-            </div>
-          </div>
 
-          <!-- No Faktur -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">No. Faktur</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="input_edit_noFaktur" placeholder="No. Faktur" disabled>
-            </div>
-          </div>
-
-          <!-- Tanggal Faktur -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Tanggal Faktur</label>
-            <div class="col-sm-4">
-              <input type="date" class="form-control" id="input_edit_tanggalFaktur">
-            </div>
-            <label class="col-sm-2 form-label">Jatuh Tempo</label>
-            <div class="col-sm-3">
-              <input type="date" class="form-control" id="input_edit_jatuhTempo">
-            </div>
-          </div>
-
-          <div class="form-group row mt-2">
-
-            <div class="col-sm-3">
-                <label class="form-label">Valas</label>
-            </div>
-            <div class="col-sm-4">
-                <div class="input-group">
+          
+          <label for="input_edit_valas">Valas</label>
+          <div class="input-group">
                     <input type="text" class="form-control" id="input_edit_valas" placeholder="Valas" disabled>
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonValasAdd()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonValasAdd()">+</button>
                     </div>
                 </div>
-            </div>
-
-            <label class="col-sm-2 form-label">Kurs</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
-            </div>
+          <label for="input_edit_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
+          <div hidden>
+          <label for="input_edit_debet">Debet</label>
+          <input type="text" class="form-control" id="input_edit_debet" value="0" disabled>
+          <label for="input_edit_debetRp">Debet (Rp)</label>
+          <input type="text" class="form-control" id="input_edit_debetRp" value="0" disabled>
           </div>
-
-          <!-- Debet -->
-          <div class="form-group row" hidden>
-            <label class="col-sm-3 form-label">Debet</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control" id="input_edit_debet" value="0" disabled>
-            </div>
-            <label class="col-sm-3 form-label">Debet (Rp)</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control" id="input_edit_debetRp" value="0" disabled>
-            </div>
-          </div>
-
-          <!-- Kredit -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">Kredit</label>
-            <div class="col-sm-4">
-              <input type="number" class="form-control text-right" id="input_edit_kredit">
-            </div>
-            <label class="col-sm-2 form-label">Kredit (Rp)</label>
-            <div class="col-sm-3">
-              <input type="text" class="form-control text-right" id="input_edit_kreditRp" disabled>
-            </div>
-          </div>
-
-          <!-- No PO -->
-          <div class="form-group row mt-2">
-            <label class="col-sm-3 form-label">No. PO</label>
-            <div class="col-sm-9">
-              <input type="text" class="form-control" id="input_edit_noPO" placeholder="No. PO">
-            </div>
-          </div>
+          <label for="input_edit_kredit">Kredit</label>
+          <input type="number" class="form-control text-right" id="input_edit_kredit">
+          <label for="input_edit_kreditRp">Kredit (Rp)</label>
+          <input type="text" class="form-control text-right" id="input_edit_kreditRp" disabled>
+          <label for="input_edit_noPO">No. PO</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_noPO" placeholder="No. PO"></div>
+        </div>
 
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
     </div>
   </div>
@@ -364,7 +201,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Valas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelSelectValas" class="table table-bordered table-striped"  >
@@ -409,21 +248,75 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MHT_KOLOM = [
+  ['KodeCustSupp', 'Kode Supplier',  1, 'varchar', 0, 0],
+  ['NAMACUST',     'Nama Supplier',  1, 'varchar', 0, 0],
+  ['NoFaktur',     'No Faktur',     1, 'varchar', 0, 0],
+  ['Tanggal',      'Tanggal',       1, 'varchar', 0, 0],
+  ['JatuhTempo',   'Jatuh Tempo',   1, 'varchar', 0, 0],
+  ['Valas',        'Valas',         1, 'varchar', 0, 0],
+  ['Kurs',         'Kurs',          1, 'varchar', 0, 0],
+  ['Debet',        'Debet(Rp)',     1, 'varchar', 0, 0],
+  ['DebetD',       'Debet Valas',   1, 'varchar', 0, 0],
+  ['Kredit',       'Kredit(Rp)',    1, 'varchar', 0, 0],
+  ['KreditD',      'Kredit Valas',  1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (valas, gudang, dsb) memakai
+// dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  // Tampilan sel sama seperti sebelumnya: tanggal yyyy-mm-dd, angka lewat formatNumberDisplay().
+  let formatTanggal = function (date) {
+    return date == null ? '' : (new Date(date)).toLocaleDateString('en-CA');
+  }
+  let angka = function (field) { return function (item) { return '<td class="text-right">' + formatNumberDisplay(item[field]) + '</td>' } }
+  let khusus = {
+    NoFaktur: function (item) { return '<td>' + (item.NoFaktur == null ? '' : item.NoFaktur) + '</td>' },
+    Tanggal: function (item) { return '<td>' + formatTanggal(item.Tanggal) + '</td>' },
+    JatuhTempo: function (item) { return '<td>' + formatTanggal(item.JatuhTempo) + '</td>' },
+    Valas: function (item) { return '<td>' + (item.Valas == null ? '' : item.Valas) + '</td>' },
+    Kurs: angka('Kurs'), Debet: angka('Debet'), DebetD: angka('DebetD'), Kredit: angka('Kredit'), KreditD: angka('KreditD')
+  }
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+      <button title="Add Hutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
+      ${item.NoFaktur != null ? `
+        <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
+        <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+      ` : ''}
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  // Urutan data dari server dipertahankan (dulu juga ordering: false).
+  $("#tabel").DataTable(MasterList.opsi({ ordering: false }))
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
-  console.log('asd')
   let _token = $("#_token").val();
   let filter = $("#perkiraanCustomer").val();
-
-  
-  document.getElementById('breadcrumb').innerHTML = "Master Hutang"
-  document.getElementById('AddVisibility').hidden = true;
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('masterhutangloadall') !!}",
@@ -434,53 +327,10 @@ function loadAll () {
       filter
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-  function formatTanggal(date) {
-    return date == null ? '' : (new Date(date)).toLocaleDateString('en-CA');
-  }
-
-    rowTable += `<tr>
-    <td class="text-center">
-      <div class="action-buttons-wrap">
-      <button data-toggle="tooltip" data-placement="top" title="Add Hutang" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${item.KodeCustSupp}', '${item.Perkiraan}', '${item.NAMACUST}')"><i class="bi bi-file-earmark-plus"></i></button>
-      ${item.NoFaktur != null ? `
-        <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoFaktur}', '${item.KodeCustSupp}', '${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
-        <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NoFaktur}')"><i class="bi bi-trash"></i></button>
-      ` : ''}
-      </div>
-    </td>
-    <td>${item.KodeCustSupp}</td>
-    <td>${item.NAMACUST}</td>
-    <td>${item.NoFaktur == null ? '' : item.NoFaktur}</td>
-    <td>${formatTanggal(item.Tanggal)}</td>
-    <td>${formatTanggal(item.JatuhTempo)}</td>
-    <td>${item.Valas == null ? '' : item.Valas}</td>
-    <td>${formatNumberDisplay(item.Kurs)}</td>
-    <td>${formatNumberDisplay(item.Debet)}</td>
-    <td>${formatNumberDisplay(item.DebetD)}</td>
-    <td>${formatNumberDisplay(item.Kredit)}</td>
-    <td>${formatNumberDisplay(item.KreditD)}</td>
-    </tr>`
-  });
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength,
-        "ordering": false
-      });
-
+  renderTabel()
 }
 
 function buttonAdd (kodeSupplier, Perkiraan, namaSupplier) {
@@ -507,7 +357,9 @@ function buttonEdit (kode, perkiraanCust) {
     async: false,
     data: {
       _token : _token,
-      kode
+      kode,
+      // argumen kedua dari tombol baris adalah KodeCustSupp
+      kodeCustSupp: perkiraanCust
     },
     success: function(res) {
 
@@ -531,7 +383,7 @@ function buttonEdit (kode, perkiraanCust) {
     $("#formEdit").modal('toggle')
 }
 
-function buttonDelete (noFaktur) {
+function buttonDelete (noFaktur, kodeCustSupp) {
   console.log(noFaktur)
   let _token = $("#_token").val();
 
@@ -546,7 +398,8 @@ function buttonDelete (noFaktur) {
           async: false,
           data: {
             _token : _token,
-            noFaktur
+            noFaktur,
+            kodeCustSupp
           },
           success: function(res) {
             if (res != 1) {
@@ -585,6 +438,7 @@ function submitEdit () {
     data: {
       _token : _token,
       noFaktur,
+      kodeCustSupp: $("#kodeSupplierEdit").val(),
       tanggalFaktur,
       jatuhTempo,
       valas,
@@ -748,7 +602,7 @@ function loadValas() {
     "lengthChange": true,
     "paging": true,
     "searching": true,
-    "dom": 'tip'
+    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
   });
   
 }
@@ -827,7 +681,8 @@ function formatAngka (angkaString) {
   return temp1
 };
 
-window.onload = function() {
+window.onload = function(){
+    MasterList.kolom({ href: 'masterhutang', kolom: MHT_KOLOM, onChange: renderTabel })
     loadAll();
 };
 

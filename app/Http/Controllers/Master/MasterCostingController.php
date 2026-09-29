@@ -45,7 +45,7 @@ class MasterCostingController extends Controller
     $check = DB::connection('SML')->select('SELECT * FROM DBCOST where KodeCost = :kode' , ['kode' => $req->kode]);
 
     if ($check) {
-      return 'Kode jenis sudah ada di database';
+      return 'Kode costing sudah ada di database';
     }
     $listData = DB::connection('SML')->update('insert into DBCOST (KodeCost, NamaCost) values (:kode, :nama)' , ['kode' => $req->kode , 'nama' => $req->nama]);
     return 1;
@@ -63,6 +63,19 @@ class MasterCostingController extends Controller
     //if ($check) {
       //return 'ga bisa hapus';
     //}
+    // Costing yang masih dipakai tidak boleh dihapus (dulu tidak dicek sama sekali).
+    $pemakai = [
+      ['dbPerkCost',   'KodeCost', 'Detail Akun costing ini'],
+      ['DBKENDARAAN',  'KodeCost', 'Master No. Pol'],
+      ['DBSOPIR',      'KODESG',   'Master Sopir'],
+    ];
+    foreach ($pemakai as $p) {
+      $check = DB::connection('SML')->select("SELECT top 1 1 as ada FROM {$p[0]} where {$p[1]} = :kode" , ['kode' => $req->kode]);
+      if ($check) {
+        return 'Costing digunakan di ' . $p[2];
+      }
+    }
+
     $delete = DB::connection('SML')->update('delete from DBCOST where KodeCost = :kode' , ['kode' => $req->kode ]);
     return $delete;
   }

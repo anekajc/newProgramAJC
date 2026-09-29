@@ -77,7 +77,9 @@ class MasterDaftarBiayaController extends Controller
   }
 
   public function selectPerkiraan(Request $req) {
-      $detail = DB::connection('SML')->select('SELECT Perkiraan, Keterangan AS perkiraan, keterangan from DBPERKIRAAN');
+      // Dulu "SELECT Perkiraan, Keterangan AS perkiraan, keterangan": blade membaca item.perkiraan,
+      // jadi yang terisi ke field Perkiraan adalah nama akunnya (mis. "ASET"), bukan kodenya.
+      $detail = DB::connection('SML')->select('SELECT Perkiraan AS perkiraan, Keterangan AS keterangan from DBPERKIRAAN');
       return response()->json($detail);
   }
 

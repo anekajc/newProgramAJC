@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Karyawan')
 @section('content')
 
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,36 +23,31 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Karyawan</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Kelamin</th>
-                    <th scope="col">Tmp Lahir</th>
-                    <th scope="col">Tgl Lahir</th>
-                    <th scope="col">Agama</th>
-                    <th scope="col">Tinggi</th>
-                    <th scope="col">Berat</th>
-                    <th scope="col">Nomor KTP</th>
-                    <th scope="col">Tgl Masuk</th>
-                    <th scope="col">Telepon HP</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
-        </div>
+  @include('master.partials.toolbarMaster')
+
+          <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
+    </div>
+  </div>
 
 </div>
 
@@ -62,278 +57,108 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Lengkap</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_NamaLengkap">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_NamaLengkap">Nama Lengkap</label>
+          <input type="text" class="form-control" id="input_add_NamaLengkap">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_Alamat">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_Alamat">Alamat</label>
+          <input type="text" class="form-control" id="input_add_Alamat">
+        </div>
 
-            <div class="row mt-2">
+            <div class="bs-form">
+          <label for="input_add_Nik">NIK</label>
+          <input type="text" class="form-control" id="input_add_Nik">
+          <label for="input_add_HP">Telepon HP</label>
+          <input type="text" class="form-control" id="input_add_HP">
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">NIK</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_Nik">
-                </div>
-              </div>
- 
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Telepon HP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_HP">
-                </div>
-              </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Pos</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_KodePos">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kelamin</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class='form-group'>
+            
+          <label for="input_add_KodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_add_KodePos">
+          <label for="input_add_Kelamin">Kelamin</label>
+          <div class='form-group'>
                   <select name="formkelamin" class='form-control' id="input_add_Kelamin">
                       <option value="L">Laki-Laki</option>
                       <option value="P">Perempuan</option>
                     </select>
                 </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor KTP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_KTP">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">E-mail</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_Email">
-                </div>
-              </div>
 
-            </div>
+            
+          <label for="input_add_KTP">Nomor KTP</label>
+          <input type="text" class="form-control" id="input_add_KTP">
+          <label for="input_add_Email">E-mail</label>
+          <input type="text" class="form-control" id="input_add_Email">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tempat Lahir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_TempatLahir">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Lahir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_TanggalLahir">
-                </div>
-              </div>
 
-            </div>
+            
+          <label for="input_add_TempatLahir">Tempat Lahir</label>
+          <input type="text" class="form-control" id="input_add_TempatLahir">
+          <label for="input_add_TanggalLahir">Tanggal Lahir</label>
+          <input type="date" class="form-control" id="input_add_TanggalLahir">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Agama</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_Agama">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Pendidikan Akhir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_PendidikanAkhir">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tinggi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_add_Tinggi">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_add_Berat">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_add_Agama">Agama</label>
+          <input type="text" class="form-control" id="input_add_Agama">
+          <label for="input_add_PendidikanAkhir">Pendidikan Akhir</label>
+          <input type="text" class="form-control" id="input_add_PendidikanAkhir">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tgl Masuk</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_TglMasuk">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">NPWP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_NPWP">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formstatus" class='form-control' id="input_add_Status">
+            
+          <label for="input_add_Tinggi">Tinggi</label>
+          <input type="number" class="form-control" id="input_add_Tinggi">
+          <label for="input_add_Berat">Berat</label>
+          <input type="number" class="form-control" id="input_add_Berat">
+        </div>
+
+            <div class="bs-form bs-form-1">
+          <label for="input_add_TglMasuk">Tgl Masuk</label>
+          <input type="date" class="form-control" id="input_add_TglMasuk">
+        </div>
+
+            <div class="bs-form">
+          <label for="input_add_NPWP">NPWP</label>
+          <input type="text" class="form-control" id="input_add_NPWP">
+          <label for="input_add_Status">Status</label>
+          <select name="formstatus" class='form-control' id="input_add_Status">
                     <option value=1>Sales</option>
                     <option value=0>Non-Sales</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Aktif</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formaktif" class='form-control' id="input_add_Aktif">
+            
+          <label for="input_add_Aktif">Aktif</label>
+          <select name="formaktif" class='form-control' id="input_add_Aktif">
                     <option value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Produksi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formproduksi" class='form-control' id="input_add_Produksi">
+          <label for="input_add_Produksi">Produksi</label>
+          <select name="formproduksi" class='form-control' id="input_add_Produksi">
                     <option value="0">Produksi</option>
                     <option value="1">Non Produksi</option>
                     <option value="2">Finishing</option>
                   </select>
-                </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Penagih</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_Penagih">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_Penagih">Penagih</label>
+          <input type="text" class="form-control" id="input_add_Penagih">
+        </div>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -347,278 +172,108 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Lengkap</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_NamaLengkap">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_NamaLengkap">Nama Lengkap</label>
+          <input type="text" class="form-control" id="input_edit_NamaLengkap">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Alamat</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Alamat">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_Alamat">Alamat</label>
+          <input type="text" class="form-control" id="input_edit_Alamat">
+        </div>
 
-            <div class="row mt-2">
+            <div class="bs-form">
+          <label for="input_edit_Nik">NIK</label>
+          <input type="text" class="form-control" id="input_edit_Nik" disabled>
+          <label for="input_edit_HP">Telepon HP</label>
+          <input type="text" class="form-control" id="input_edit_HP">
 
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">NIK</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Nik" disabled>
-                </div>
-              </div>
- 
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Telepon HP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_HP">
-                </div>
-              </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Pos</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_KodePos">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kelamin</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class='form-group'>
+            
+          <label for="input_edit_KodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_edit_KodePos">
+          <label for="input_edit_Kelamin">Kelamin</label>
+          <div class='form-group'>
                   <select name="formkelamin" class='form-control' id="input_edit_Kelamin">
                       <option value="L">Laki-Laki</option>
                       <option value="P">Perempuan</option>
                     </select>
                 </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor KTP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_KTP">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">E-mail</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Email">
-                </div>
-              </div>
 
-            </div>
+            
+          <label for="input_edit_KTP">Nomor KTP</label>
+          <input type="text" class="form-control" id="input_edit_KTP">
+          <label for="input_edit_Email">E-mail</label>
+          <input type="text" class="form-control" id="input_edit_Email">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tempat Lahir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_TempatLahir">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Lahir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_TanggalLahir">
-                </div>
-              </div>
 
-            </div>
+            
+          <label for="input_edit_TempatLahir">Tempat Lahir</label>
+          <input type="text" class="form-control" id="input_edit_TempatLahir">
+          <label for="input_edit_TanggalLahir">Tanggal Lahir</label>
+          <input type="date" class="form-control" id="input_edit_TanggalLahir">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Agama</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Agama">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Pendidikan Akhir</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_PendidikanAkhir">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tinggi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_edit_Tinggi">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_edit_Berat">
-                </div>
-              </div>
-            </div>
+            
+          <label for="input_edit_Agama">Agama</label>
+          <input type="text" class="form-control" id="input_edit_Agama">
+          <label for="input_edit_PendidikanAkhir">Pendidikan Akhir</label>
+          <input type="text" class="form-control" id="input_edit_PendidikanAkhir">
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tgl Masuk</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_TglMasuk">
-                </div>
-              </div>
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">NPWP</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_NPWP">
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formstatus" class='form-control' id="input_edit_Status">
+            
+          <label for="input_edit_Tinggi">Tinggi</label>
+          <input type="number" class="form-control" id="input_edit_Tinggi">
+          <label for="input_edit_Berat">Berat</label>
+          <input type="number" class="form-control" id="input_edit_Berat">
+        </div>
+
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_TglMasuk">Tgl Masuk</label>
+          <input type="date" class="form-control" id="input_edit_TglMasuk">
+        </div>
+
+            <div class="bs-form">
+          <label for="input_edit_NPWP">NPWP</label>
+          <input type="text" class="form-control" id="input_edit_NPWP">
+          <label for="input_edit_Status">Status</label>
+          <select name="formstatus" class='form-control' id="input_edit_Status">
                     <option value=1>Sales</option>
                     <option value=0>Non-Sales</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Aktif</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formaktif" class='form-control' id="input_edit_Aktif">
+            
+          <label for="input_edit_Aktif">Aktif</label>
+          <select name="formaktif" class='form-control' id="input_edit_Aktif">
                     <option value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
-                </div>
-              </div>
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Produksi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select name="formproduksi" class='form-control' id="input_edit_Produksi">
+          <label for="input_edit_Produksi">Produksi</label>
+          <select name="formproduksi" class='form-control' id="input_edit_Produksi">
                     <option value="0">Produksi</option>
                     <option value="1">Non Produksi</option>
                     <option value="2">Finishing</option>
                   </select>
-                </div>
-              </div>
-            </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Penagih</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Penagih">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_Penagih">Penagih</label>
+          <input type="text" class="form-control" id="input_edit_Penagih">
+        </div>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -628,18 +283,70 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MDK_KOLOM = [
+  ['NIK',       'ID',         1, 'varchar', 0, 0],
+  ['Nama',      'Nama',       1, 'varchar', 0, 0],
+  ['Kelamin',   'Kelamin',    1, 'varchar', 0, 0],
+  ['TmpLahir',  'Tmp Lahir',  1, 'varchar', 0, 0],
+  ['TglLahir',  'Tgl Lahir',  1, 'varchar', 0, 0],
+  ['Agama',     'Agama',      1, 'varchar', 0, 0],
+  ['Tinggi',    'Tinggi',     1, 'varchar', 0, 0],
+  ['Berat',     'Berat',      1, 'varchar', 0, 0],
+  ['NomorKTP',  'Nomor KTP',  1, 'varchar', 0, 0],
+  ['TglMasuk',  'Tgl Masuk',  1, 'varchar', 0, 0],
+  ['TeleponHP', 'Telepon HP', 1, 'varchar', 0, 0],
+]
+
+// Tanggal ditampilkan DD-MM-YYYY seperti sebelumnya; kosong kalau datanya kosong (dulu tampil NaN-NaN-NaN).
+function mdkTanggal (v) {
+  if (!v) { return '' }
+  let d = new Date(v)
+  if (isNaN(d.getTime())) { return '' }
+  return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear()
+}
+
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (valas, gudang, dsb) memakai
+// dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  let khusus = {
+    TglLahir: function (item) { return '<td>' + mdkTanggal(item.TglLahir) + '</td>' },
+    TglMasuk: function (item) { return '<td>' + mdkTanggal(item.TglMasuk) + '</td>' }
+  }
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NIK}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NIK}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
-  console.log('asd')
   let _token = $("#_token").val();
-
-  document.getElementById('breadcrumb').innerHTML = "Master Karyawan"
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('masterdaftarkaryawanloadall') !!}",
@@ -649,71 +356,12 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-
-    let temp = ""
-    let dbDateString = item.TglLahir;
-    let dbDateString2 = item.TglMasuk;
-
-    // Convert the database date string to a JavaScript Date object
-    let dateObject = new Date(dbDateString);
-    let dateObject2 = new Date(dbDateString2);
-
-    // Extract day, month, and year components
-    let day = dateObject.getDate();
-    let month = dateObject.getMonth() + 1; // Months are 0-based, so add 1
-    let year = dateObject.getFullYear();
-    let day2 = dateObject2.getDate();
-    let month2 = dateObject2.getMonth() + 1; // Months are 0-based, so add 1
-    let year2 = dateObject2.getFullYear();
-
-    // Format the components
-    let formattedDay = (day < 10) ? `0${day}` : day;
-    let formattedMonth = (month < 10) ? `0${month}` : month;
-    let formattedYear = (year < 10) ? `0${year}` : year;
-
-    let formattedDay2 = (day2 < 10) ? `0${day2}` : day2;
-    let formattedMonth2 = (month2 < 10) ? `0${month2}` : month2;
-    let formattedYear2 = (year2 < 10) ? `0${year2}` : year2;
-    // Assemble the formatted components into the desired format 'DD-MM-YY'
-    let formattedDate = `${formattedDay}-${formattedMonth}-${formattedYear}`;
-    let formattedDate2 = `${formattedDay2}-${formattedMonth2}-${formattedYear2}`;
-
-    rowTable += `<tr>
-    <td class="text-center">
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NIK}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.NIK}')"><i class="bi bi-trash"></i></button>
-      </div> 
-    </td>
-    <td>${item.NIK}</td>
-    <td>${item.Nama}</td>
-    <td>${item.Kelamin}</td>
-    <td>${item.TmpLahir}</td>
-    <td>${formattedDate}</td>
-    <td>${item.Agama}</td>
-    <td>${item.Tinggi}</td>
-    <td>${item.Berat}</td>
-    <td>${item.NomorKTP}</td>
-    <td>${formattedDate2}</td>
-    <td>${item.TeleponHP}</td>
-    </tr>`
-  });
-
-  document.getElementById("tabel_data").innerHTML = rowTable
-    $("#tabel").DataTable({
-      "lengthChange": false,
-      "paging": true,
-      "searching": true,
-      "dom": 'tip'
-  });
-
+  renderTabel()
 }
+
 
 function buttonAdd () {
 
@@ -749,8 +397,9 @@ function buttonEdit (Nik) {
       document.getElementById("input_edit_Email").value = res[0].Email;
 
       // Format TanggalLahir
+      // Tanggal kosong/tidak valid dulu membuat toISOString() error dan modal edit tidak terbuka.
       const tglLahir = new Date(res[0].TglLahir + 'Z');
-      const formattedTglLahir = tglLahir.toISOString().split('T')[0];
+      const formattedTglLahir = isNaN(tglLahir.getTime()) ? '' : tglLahir.toISOString().split('T')[0];
       document.getElementById("input_edit_TanggalLahir").value = formattedTglLahir;
 
       document.getElementById("input_edit_Agama").value = res[0].Agama;
@@ -760,7 +409,7 @@ function buttonEdit (Nik) {
 
       // Format TglMasuk
       const tglMasuk = new Date(res[0].TglMasuk + 'Z');
-      const formattedTglMasuk = tglMasuk.toISOString().split('T')[0];
+      const formattedTglMasuk = isNaN(tglMasuk.getTime()) ? '' : tglMasuk.toISOString().split('T')[0];
       document.getElementById("input_edit_TglMasuk").value = formattedTglMasuk;
 
       document.getElementById("input_edit_NPWP").value = res[0].NPWP;
@@ -779,7 +428,7 @@ function buttonDelete (Nik) {
   let _token = $("#_token").val();
 
 
-  alertify.confirm('Hapus Area', 'Apakah yakin ingin menghapus Data ' + Nik + ' ?',
+  alertify.confirm('Hapus Karyawan', 'Apakah yakin ingin menghapus Data ' + Nik + ' ?',
       function() {
         console.log('yes')
 
@@ -1137,7 +786,8 @@ function submitAdd () {
   // console.log(kodearea, namaarea)
 }
 
-window.onload = function (){
+window.onload = function(){
+  MasterList.kolom({ href: 'masterdaftarkaryawan', kolom: MDK_KOLOM, onChange: renderTabel })
   loadAll();
 };
 

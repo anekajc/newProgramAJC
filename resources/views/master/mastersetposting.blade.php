@@ -1,7 +1,8 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Set Posting')
 @section('content')
 <div class="container-fluid">
 
@@ -73,7 +74,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <div class="col-12" style="overflow:auto; display:flex; justify-content:space-between; margin-bottom: 10px;">
@@ -114,7 +117,8 @@
     </div>
         <div class="modal-footer">
            
-          <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+          <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
         </div>
   </div>
 </div>
@@ -127,7 +131,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -156,7 +162,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddAkumulasi()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddAkumulasi()">Simpan</button>
   </div>
 </div>
 </div>
@@ -169,7 +176,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAkumulasiSelect" class="table table-bordered table-striped"  >
@@ -216,7 +225,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
       <button class="btn btn-success btn-sm" type="button" onclick="buttonRefreshPostingAkumulasi()"><i class="bi bi-arrow-clockwise"></i></button>
@@ -269,7 +280,8 @@
     </div>
         <div class="modal-footer">
            
-          <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+          <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
         </div>
   </div>
 </div>
@@ -282,7 +294,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Posting Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -386,7 +400,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddAktiva()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddAktiva()">Simpan</button>
   </div>
 </div>
 </div>
@@ -399,7 +414,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
@@ -444,7 +461,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAktivaSelectAkumulasi" class="table table-bordered table-striped"  >
@@ -489,7 +508,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelBiayaPenyusutanAktiva1" class="table table-bordered table-striped"  >
@@ -534,7 +555,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelBiayaPenyusutanAktiva2" class="table table-bordered table-striped"  >
@@ -579,35 +602,29 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Akumulasi" placeholder="Kode Jenis" disabled>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_Akumulasi">Perkiraan</label>
+          <input type="text" class="form-control" id="input_edit_Akumulasi" placeholder="Kode Jenis" disabled>
                   <button type="button" class="btn btn-primary btn-lg " onclick="buttonAkumulasiSelectAkumulasi()">Select Perkiraan</button>
-                </div>
-              </div>
-
-            </div>
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEditPostingAkumulasi()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditPostingAkumulasi()">Simpan</button>
   </div>
 </div>
 </div>
@@ -620,7 +637,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelEditAkumulasi" class="table table-bordered table-striped"  >
@@ -667,7 +686,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Kas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelPostingKas" class="table table-bordered table-striped"  >
@@ -713,7 +734,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Kas Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -742,7 +765,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddAkumulasi()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddAkumulasi()">Simpan</button>
   </div>
 </div>
 </div>
@@ -755,7 +779,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelSelectPostingKas" class="table table-bordered table-striped"  >
@@ -803,7 +829,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Bank</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelPostingBank" class="table table-bordered table-striped"  >
@@ -849,7 +877,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Bank Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
@@ -878,7 +908,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddAkumulasi()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddAkumulasi()">Simpan</button>
   </div>
 </div>
 </div>
@@ -891,7 +922,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Posting Akumulasi Select Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelSelectPostingBank" class="table table-bordered table-striped"  >

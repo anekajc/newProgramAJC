@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Costing')
 @section('content')
 
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -21,26 +21,28 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Costing</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+    <table id="tabel" class="data-table po-aksi-hover">
           <thead>
             <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Kode Costing</th>
-              <th scope="col">Nama Costing</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th style="padding: 4px 12px;" scope="col">Kode Costing</th>
+              <th style="padding: 4px 12px;" scope="col">Nama Costing</th>
             </tr>
           </thead>
-          <tbody id="tabel_data" class="text-right">
+          <tbody id="tabel_data" class="text-left">
         </tbody>
         </table>
-      </div>
+
+    </div>
   </div>
 
 </div>
@@ -51,45 +53,29 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Costing</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Costing">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kode">Kode Costing</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Costing">
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Cost</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Costing">
-                </div>
-              </div>
-            </div>
+          <label for="input_add_nama">Nama Cost</label>
+          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Costing">
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -102,47 +88,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Cost</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Cost" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kode">Kode Cost</label>
+          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Cost" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Cost</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Cost">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit_nama">Nama Cost</label>
+          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Cost">
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -155,69 +124,52 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Detail Akun</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
 
-            <div class="row">
-                <div class="col-1 text-left">
-                  <div class="form-group text-left rowPerkiraan">
-                    <label class="text-left">Perkiraan</label>
-                  </div>
-                  <div class="form-group text-left rowPerkiraanEdit">
-                    <label class="text-left">Perkiraan</label>
-                  </div>
-                </div>
-                <div class="col-3 ml-4">
-                    <div class="input-group rowPerkiraan">
-                        <input type="text" class="form-control" id="input_perkiraan">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
-                        </div>
-                    </div>
-                    <div class="input-group rowPerkiraanEdit">
-                        <input type="text" class="form-control" id="input_perkiraanEdit">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-1 text-left">
-                  <div class="form-group text-left rowPerkiraan">
-                      <button type="button" class="btn btn-primary btn-select" onclick="spAddPerkiraan()">Submit</button>
-                  </div><div class="form-group text-left rowPerkiraanEdit">
-                      <button type="button" class="btn btn-primary btn-select" onclick="spEditPerkiraan()">Submit</button>
-                  </div>
-                </div>
-                <div class="col-1 text-left ms-2">
-                  <div class="form-group text-left rowPerkiraan">
-                      <button type="button" class="btn btn-danger btn-select" onclick="buttonTutupAddPerkiraan()">Batal</button>
-                  </div>
-                  <div class="form-group text-left rowPerkiraanEdit">
-                      <button type="button" class="btn btn-danger btn-select" onclick="buttonTutupAddPerkiraan()">Batal</button>
-                  </div>
-                </div>
-                
+            <div class="text-right mb-2">
+          <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddPerkiraan()">Tambah</button>
+        </div>
 
-              <div class="col-5 d-flex justify-content-end">
-                <div class="form-group">
-                  <button type="button" class="btn btn-primary btn-lg" style="
-                      height: 30px; 
-                      padding: 4px 12px; 
-                      border-radius: 20px; 
-                      font-size: 0.75rem; 
-                      font-weight: 600; 
-                      text-transform: uppercase; 
-                      transition: background-color 0.3s, box-shadow 0.3s;
-                      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-                      onclick="buttonAddPerkiraan()">
-                    Add
-                  </button>
-                </div>
+        <div id="formBsGrid">
+        <div class="form-card rowPerkiraan">
+          <div class="form-card-title">Tambah Perkiraan</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_perkiraan">Perkiraan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_perkiraan">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
               </div>
             </div>
+          </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="buttonTutupAddPerkiraan()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="spAddPerkiraan()">Simpan</button>
+          </div>
+        </div>
+        <div class="form-card rowPerkiraanEdit">
+          <div class="form-card-title">Edit Perkiraan</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_perkiraanEdit">Perkiraan</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_perkiraanEdit">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="buttonTutupAddPerkiraan()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="spEditPerkiraan()">Simpan</button>
+          </div>
+        </div>
+        </div>
 
                 <div class="col-12" style="overflow:auto;">
                   <div class="">
@@ -245,17 +197,19 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
   </div>
 </div>
 </div>
 </div>
 <!-- End modal sub costing-->
 
+@include('master.partials.modalOpenMaster')
+
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -266,7 +220,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Costing"
+  // document.getElementById('breadcrumb').innerHTML = "Master Costing" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -305,9 +259,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -321,6 +276,13 @@ function buttonAdd () {
 }
 
 function buttonAddPerkiraan () {
+
+  // Form edit ditutup dulu - dulu kedua form bisa tampil bersamaan.
+  let elementsEdit = document.getElementsByClassName('rowPerkiraanEdit');
+    for (let i = 0; i < elementsEdit.length; i++) {
+      elementsEdit[i].hidden = true;
+    }
+  document.getElementById('input_perkiraan').value = ''
 
   let elements = document.getElementsByClassName('rowPerkiraan');
     for (let i = 0; i < elements.length; i++) {
@@ -366,6 +328,10 @@ function buttonEditPerkiraan (kodeCost, urut) {
 function spAddPerkiraan () {
 
   let perkiraanTemp = document.getElementById('input_perkiraan').value
+  if (!perkiraanTemp) {
+    alertify.warning('Perkiraan harus diisi')
+    return
+  }
 
   console.log(perkiraanTemp, kodeCostTemp)
 
@@ -381,7 +347,9 @@ function spAddPerkiraan () {
     },
     success: function(res){
       console.log(res)
-      document.getElementById('input_perkiraan').value = res[0].Perkiraan
+      // mastercostingspperkiraan mengembalikan jumlah baris (angka), bukan array - dulu
+      // res[0].Perkiraan membuat error sehingga tabel tidak ter-refresh setelah simpan.
+      alertify.success('Perkiraan berhasil disimpan')
       refreshTabelPerkiraan(kodeCostTemp)
 
     }
@@ -393,6 +361,10 @@ function spAddPerkiraan () {
 function spEditPerkiraan () {
 
   let perkiraanTemp = document.getElementById('input_perkiraanEdit').value
+  if (!perkiraanTemp) {
+    alertify.warning('Perkiraan harus diisi')
+    return
+  }
 
   console.log(perkiraanTemp, kodeCostTemp, urutTemp)
 
@@ -408,7 +380,9 @@ function spEditPerkiraan () {
     },
     success: function(res){
       console.log(res)
-      document.getElementById('input_perkiraan').value = res[0].Perkiraan
+      // mastercostingspperkiraan mengembalikan jumlah baris (angka), bukan array - dulu
+      // res[0].Perkiraan membuat error sehingga tabel tidak ter-refresh setelah simpan.
+      alertify.success('Perkiraan berhasil disimpan')
       refreshTabelPerkiraan(kodeCostTemp)
 
     }
@@ -419,24 +393,25 @@ function spEditPerkiraan () {
 
 function buttonDeletePerkiraan (KodeCost, Urut) {
 
-  $.ajax({
-    url: "{!! url('mastercostingspperkiraan') !!}",
-    type: "get",
-    async: false,
-    data:{
-      Choice : 'D',
-      KodeCost,
-      Urut,
-      Perkiraan : ''
+  alertify.confirm('Hapus Perkiraan', 'Apakah yakin ingin menghapus perkiraan ini ?',
+    function () {
+      $.ajax({
+        url: "{!! url('mastercostingspperkiraan') !!}",
+        type: "get",
+        async: false,
+        data:{
+          Choice : 'D',
+          KodeCost,
+          Urut,
+          Perkiraan : ''
+        },
+        success: function(res){
+          alertify.success('Perkiraan berhasil dihapus')
+          refreshTabelPerkiraan(KodeCost);
+        }
+      })
     },
-    success: function(res){
-      console.log(res)
-      alertify.success('Perkiraan berhasil dihapus')
-      refreshTabelPerkiraan(KodeCost);
-
-    }
-
-  })
+    function () {});
 
 }
 
@@ -523,7 +498,7 @@ function refreshTabelPerkiraan(kodeCost){
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip'
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
       });
 
 

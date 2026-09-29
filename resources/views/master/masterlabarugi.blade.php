@@ -1,12 +1,12 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Laba Rugi')
 @section('content')
 <div class="container-fluid">
 
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -24,7 +24,7 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Laba Rugi</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
@@ -50,7 +50,7 @@
     }
 
     .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+      width: auto; /* stops form-control from stretching full-width and forcing a wrap */
     }
 
     .sp-toolbar {
@@ -79,7 +79,7 @@
 
     <div class="sp-filter-wrap">
       <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm" style='width:40px;'>
+      <select id="tabel_length_visual" class="form-control form-control" style='width:40px;'>
         <option value="10">10</option>
         <option value="25">25</option>
         <option value="50">50</option>
@@ -140,68 +140,36 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nomor" placeholder="Nomor">
-                </div>
-              </div>
-
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form">
+          <label for="input_add_nomor">Nomor</label>
+          <input type="text" class="form-control" id="input_add_nomor" placeholder="Nomor">
+          <label for="input_add_perkiraan">Perkiraan</label>
+          <div class="input-group">
                   <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan">
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
                   </div>
                 </div>
-              </div>
+        </div>
 
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan">
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tipe</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tipe'>
+            <div class="bs-form">
+          <label>Tipe</label>
+          <select class='form-control' id='input_add_tipe'>
                     <option value='' selected disabled></option>
                     <option value=1>1 - Mutasi Debet</option>
                     <option value=2>2 - Mutasi Kredit</option>
@@ -213,87 +181,39 @@
                     <option value='M'>M -Mutasi</option>
                     <option value='H'>H - HPP</option>
                   </select>
-                </div>
-              </div>
-
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanda</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tanda'>
+          <label>Tanda</label>
+          <select class='form-control' id='input_add_tanda'>
                     <option value='' selected disabled></option>
                     <option value='+'>+</option>
                     <option value='-'>-</option>
                   </select>
-                </div>
-              </div>
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Jumlah</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_jumlah'>
+          <label>Jumlah</label>
+          <div class="bs-full"><select class='form-control' id='input_add_jumlah'>
                     <option value='' selected disabled></option>
                     <option value='T'>T - Total</option>
                     <option value='G'>G - Group</option>
                     <option value='S'>S - Sub Group</option>
-                  </select>
-                </div>
-              </div>
+                  </select></div>
 
-            </div>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Persentasi</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_persentasi" placeholder="Persentasi">
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tampil</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tampil'>
+            
+          <label for="input_add_persentasi">Persentasi</label>
+          <input type="text" class="form-control" id="input_add_persentasi" placeholder="Persentasi">
+          <label>Tampil</label>
+          <select class='form-control' id='input_add_tampil'>
                     <option value='Y'>Y - Ya</option>
                     <option value='T'>T - Tidak</option>
                   </select>
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_group" placeholder="Group">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_group">Group</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_group" placeholder="Group"></div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -306,68 +226,36 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nomor" placeholder="Nomor" disabled>
-                </div>
-              </div>
-
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
+            <div class="bs-form">
+          <label for="input_edit_nomor">Nomor</label>
+          <input type="text" class="form-control" id="input_edit_nomor" placeholder="Nomor" disabled>
+          <label for="input_edit_perkiraan">Perkiraan</label>
+          <div class="input-group">
                   <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan">
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
                   </div>
                 </div>
-              </div>
+        </div>
 
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan">
+        </div>
 
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tipe</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tipe'>
+            <div class="bs-form">
+          <label>Tipe</label>
+          <select class='form-control' id='input_edit_tipe'>
                     <option value='' selected disabled></option>
                     <option value=1>1 - Mutasi Debet</option>
                     <option value=2>2 - Mutasi Kredit</option>
@@ -379,87 +267,39 @@
                     <option value='M'>M -Mutasi</option>
                     <option value='H'>H - HPP</option>
                   </select>
-                </div>
-              </div>
-
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanda</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tanda'>
+          <label>Tanda</label>
+          <select class='form-control' id='input_edit_tanda'>
                     <option value='' selected disabled></option>
                     <option value='+'>+</option>
                     <option value='-'>-</option>
                   </select>
-                </div>
-              </div>
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Jumlah</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_jumlah'>
+          <label>Jumlah</label>
+          <div class="bs-full"><select class='form-control' id='input_edit_jumlah'>
                     <option value='' selected disabled></option>
                     <option value='T'>T - Total</option>
                     <option value='G'>G - Group</option>
                     <option value='S'>S - Sub Group</option>
-                  </select>
-                </div>
-              </div>
+                  </select></div>
 
-            </div>
 
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Persentasi</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_persentasi" placeholder="Persentasi">
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tampil</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tampil'>
+            
+          <label for="input_edit_persentasi">Persentasi</label>
+          <input type="text" class="form-control" id="input_edit_persentasi" placeholder="Persentasi">
+          <label>Tampil</label>
+          <select class='form-control' id='input_edit_tampil'>
                     <option value='Y'>Y - Ya</option>
                     <option value='T'>T - Tidak</option>
                   </select>
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_group" placeholder="Group">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit_group">Group</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_group" placeholder="Group"></div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -468,7 +308,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -477,7 +317,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Laba Rugi"
+  // document.getElementById('breadcrumb').innerHTML = "Master Laba Rugi" // dimatikan: judul sekarang di bar atas (page-title)
   
   let filterDevisi = $("#jenisDevisi").val();
   let filterLaporan = $("#jenisLaporan").val();
@@ -525,9 +365,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -887,7 +728,9 @@ function buttonSelectPerkiraan (perkiraan, keterangan){
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="namaModalOpen"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelModalOpen" class="table table-bordered table-striped">

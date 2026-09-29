@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Barang Jasa')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,30 +22,32 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Barang Jasa</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
         <thead>
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Brg</th>
-            <th scope="col">Nama Brg</th>
-            <th scope="col">Group</th>
-            <th scope="col">Header Group</th>
-            <th scope="col">Sub Group</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Group</th>
+            <th style="padding: 4px 12px;" scope="col">Header Group</th>
+            <th style="padding: 4px 12px;" scope="col">Sub Group</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
+        <tbody id="tabel_data" class="text-left">
       </tbody>
       </table>
+
     </div>
-</div>
+  </div>
 
 </div>
 
@@ -55,174 +57,74 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodegroup" value='JS' disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <span>Jasa</span>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:10px">
+            <input type="text" class="form-control" id="input_add_kodegroup" value='JS' disabled>
+            <span>Jasa</span>
+          </div>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">HeadGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kodeheadgroup">HeadGroup</label>
+          <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+          <label for="input_add_kodesubgroup">SubGroup</label>
+          <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih SubGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
+          <label for="input_add_kodebarang">Kode Barang</label>
+          <input type="text" class="form-control" id="input_add_kodebarang" disabled >
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodebarang" disabled >
-                </div>
-              </div>
+          <label for="input_add_namabarang">Nama Barang</label>
+          <input type="text" class="form-control" id="input_add_namabarang" >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namabarang" >
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang 2</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namabarang2" >
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_namabarang2">Nama Barang 2</label>
+          <input type="text" class="form-control" id="input_add_namabarang2" >
+        </div>
 
             <!-- <br/> -->
 
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_satuan" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_satuan">Satuan</label>
+          <input type="text" class="form-control" id="input_add_satuan" >
 
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Isi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" value=1 disabled class="form-control" id="input_add_isi" >
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_isi">Isi</label>
+          <input type="text" value=1 disabled class="form-control" id="input_add_isi" >
+        </div>
 
             <!-- <br/> -->
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
+            <div class="bs-form bs-form-1">
+          <label for="input_add_isaktif">Status</label>
+          <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
-                </div>
-              </div>
-
-
-            </div>
+        </div>
 
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_add_keterangan" >
-                </div>
-              </div>
-
-
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_keterangan">Keterangan</label>
+          <input type="text" class="form-control text-left" id="input_add_keterangan" >
+        </div>
 
 
 
@@ -232,7 +134,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -246,177 +149,76 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodegroup" value='JS' disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <span>Jasa</span>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:10px">
+            <input type="text" class="form-control" id="input_edit_kodegroup" value='JS' disabled>
+            <span>Jasa</span>
+          </div>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">HeadGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kodeheadgroup">HeadGroup</label>
+          <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+          <label for="input_edit_kodesubgroup">SubGroup</label>
+          <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih SubGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
+          <label for="input_edit_kodebarang">Kode Barang</label>
+          <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
-                </div>
-              </div>
+          <label for="input_edit_namabarang">Nama Barang</label>
+          <input type="text" class="form-control" id="input_edit_namabarang" >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namabarang" >
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang 2</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namabarang2" >
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit_namabarang2">Nama Barang 2</label>
+          <input type="text" class="form-control" id="input_edit_namabarang2" >
+        </div>
 
             <!-- <br/> -->
 
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_satuan" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_satuan">Satuan</label>
+          <input type="text" class="form-control" id="input_edit_satuan" >
 
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Isi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" value=1 disabled class="form-control" id="input_edit_isi" >
-                </div>
-              </div>
-
-
-            </div>
+          <label for="input_edit_isi">Isi</label>
+          <input type="text" value=1 disabled class="form-control" id="input_edit_isi" >
+        </div>
 
 
 
             <!-- <br/> -->
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_isaktif">Status</label>
+          <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
-                </div>
-              </div>
-
-
-            </div>
+        </div>
 
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_edit_keterangan" >
-                </div>
-              </div>
-
-
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_keterangan">Keterangan</label>
+          <input type="text" class="form-control text-left" id="input_edit_keterangan" >
+        </div>
 
 
 
@@ -426,7 +228,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -440,7 +243,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let listSelectHeadGroup = []
@@ -456,7 +259,7 @@ function buttonAdd () {
 function loadAll() {
   $('#tabel').DataTable().destroy();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Barang Jasa"
+  // document.getElementById('breadcrumb').innerHTML = "Master Barang Jasa" // dimatikan: judul sekarang di bar atas (page-title)
 
   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
   $('#tabel').DataTable({
@@ -468,7 +271,7 @@ function loadAll() {
     lengthChange: true,
     pageLength: currentLength,
 
-    dom: 'tip',
+    dom: MasterList.dom, "order": [], "language": MasterList.bahasa,
 
     ajax: {
       url: "{!! url('masterbarangjasaloadall') !!}",
@@ -501,6 +304,7 @@ function loadAll() {
     lengthChange: true,
     paging: true
   });
+      MasterList.selesai('#tabel')
 }
 
 function submitEdit () {
@@ -714,6 +518,13 @@ function buttonAdd () {
       });
       document.getElementById("input_add_kodeheadgroup").innerHTML = rowSelect
       document.getElementById("input_add_kodesubgroup").innerHTML =  `<option selected disabled value="">Pilih SubGroup</option>`
+      // form Add dikosongkan (dulu sisa isian tambah sebelumnya ikut terbawa)
+      document.getElementById("input_add_kodebarang").value = ''
+      document.getElementById("input_add_namabarang").value = ''
+      document.getElementById("input_add_namabarang2").value = ''
+      document.getElementById("input_add_satuan").value = ''
+      document.getElementById("input_add_isaktif").value = 1
+      document.getElementById("input_add_keterangan").value = ''
 
       // let rowSelectSubGroup = `<option selected disabled value="">Pilih SubGroup</option>`
 
@@ -832,7 +643,7 @@ function buttonDelete (kodebarang) {
 
   let _token = $("#_token").val();
 // return
-  alertify.confirm('Hapus Harga', 'Apakah yakin ingin menghapus Barang ' + kodebarang + ' ?',
+  alertify.confirm('Hapus Barang', 'Apakah yakin ingin menghapus Barang ' + kodebarang + ' ?',
       function() {
         console.log('yes')
 

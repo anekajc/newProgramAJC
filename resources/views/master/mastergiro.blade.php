@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Giro')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
 {{-- <div class="sp-breadcrumb">
@@ -25,7 +25,7 @@
   </div>
 </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
@@ -52,7 +52,7 @@
     }
 
     .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
+      width: auto; /* stops form-control from stretching full-width and forcing a wrap */
     }
 
     .sp-toolbar {
@@ -129,7 +129,7 @@
 
     <div class="sp-filter-wrap">
       <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm">
+      <select id="tabel_length_visual" class="form-control form-control">
         <option value="10">10</option>
         <option value="25">25</option>
         <option value="50">50</option>
@@ -141,10 +141,10 @@
   <div class="sp-filter-wrap">
     <ul class="radioChoiceMaster" id="giroTab" role="tablist">
       <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-bs-toggle="tab" data-bs-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
+        <button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-toggle="tab" data-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
       </li>
       <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-bs-toggle="tab" data-bs-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
+        <button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-toggle="tab" data-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
       </li>
     </ul>
   </div>
@@ -233,62 +233,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Giro Terima</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_bank">Bank</label>
+          <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
 
-            </div>
+          <label for="input_add_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_add_noGiro" placeholder="No. Giro">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_noGiro" placeholder="No. Giro">
-                </div>
-              </div>
+          <label for="input_add_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_add_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_add_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add_valas">Valas</label>
+          <select id="input_add_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -297,144 +265,55 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control" id="input_add_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
+          <label for="input_add_kurs">Kurs</label>
+          <input type="text" class="form-control" id="input_add_kurs" placeholder="Kurs" disabled>
 
-              <div class="col-4">
-                <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add_nilaiGiro" 
+            
+            
+          <label for="input_add_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_add_nilaiGiro" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  
-                <input type="text" class="form-control text-right" id="input_add_nilaiGiroRp" 
+            <input type="text" class="form-control text-right" id="input_add_nilaiGiroRp" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
-                  oninput="formatNumber(this)">
-                </div>
-              </div>
+                  oninput="formatNumber(this)"></div></div>
+        </div>
 
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_tglTerima">Tanggal Terima</label>
+          <input type="date" class="form-control" id="input_add_tglTerima" >
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglTerima" >
-                </div>
-              </div>
+          <label for="input_add_buktiTerima">Bukti Terima</label>
+          <input type="text" class="form-control" id="input_add_buktiTerima" disabled>
 
-            </div>
+          <label for="input_add_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_add_keterangan">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_buktiTerima" disabled>
-                </div>
-              </div>
+          <label for="input_add_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_add_tglCair" disabled>
 
-            </div>
+          <label for="input_add_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_add_buktiCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_add_keteranganCair" disabled>
+        </div>
             
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Perkiraan Kas</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_add_perkiraanKas">Perkiraan Kas</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
               </div>
             </div>
-          </div>
-
-    </div>
+        </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddTerima()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddTerima()">Simpan</button>
   </div>
 </div>
 </div>
@@ -447,60 +326,37 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Giro Buka</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
           
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Bank</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
-                <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectBank()">+</button>
-              </div>
+          <div class="bs-form bs-form-1">
+          <label for="input_add2_bank">Bank</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectBank()">+</button>
             </div>
           </div>
+        </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_noGiro" placeholder="No. Giro">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add2_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_add2_noGiro" placeholder="No. Giro">
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglGiro">
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add2_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_add2_tglGiro">
+        </div>
             
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_add2_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add2_valas">Valas</label>
+          <select id="input_add2_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -509,133 +365,49 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_add2_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_add2_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_add2_kurs" placeholder="Kurs" disabled>
 
-            <div class="row mt-2">
 
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                <input type="text" class="form-control text-right" id="input_add2_nilaiGiro" 
+            
+          <label for="input_add2_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_add2_nilaiGiro" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
                   oninput="formatNumber(this)">
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  
-                <input type="text" class="form-control text-right" id="input_add2_nilaiGiroRp" 
+            <input type="text" class="form-control text-right" id="input_add2_nilaiGiroRp" 
                   value="0.00" 
                   style="font-variant-numeric: tabular-nums;" 
-                  oninput="formatNumber(this)">
-                </div>
-              </div>
-
-            </div>
+                  oninput="formatNumber(this)"></div></div>
+        </div>
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglBuka" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add2_tglBuka">Tanggal Buka</label>
+          <input type="date" class="form-control" id="input_add2_tglBuka" >
 
-            </div>
+          <label for="input_add2_buktiBuka">Bukti Buka</label>
+          <input type="text" class="form-control" id="input_add2_buktiBuka" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_buktiBuka" disabled>
-                </div>
-              </div>
+          <label for="input_add2_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_add2_keterangan">
 
-            </div>
+          <label for="input_add2_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_add2_tglCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_keterangan">
-                </div>
-              </div>
+          <label for="input_add2_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_add2_buktiCair" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_add2_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add2_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_add2_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_add2_keteranganCair" disabled>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAddBuka()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddBuka()">Simpan</button>
   </div>
 </div>
 </div>
@@ -648,62 +420,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Giro Terima</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bank</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_bank">Bank</label>
+          <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank" disabled>
 
-            </div>
+          <label for="input_edit_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_edit_noGiro" placeholder="No. Giro" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_noGiro" placeholder="No. Giro" disabled>
-                </div>
-              </div>
+          <label for="input_edit_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_edit_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_edit_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit_valas">Valas</label>
+          <select id="input_edit_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -712,137 +452,50 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_edit_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
+
 
             
-            <div class="row mt-2">
+            
+          <label for="input_edit_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_edit_nilaiGiro">
+            <input type="text" class="form-control text-right" id="input_edit_nilaiGiroRp"></div></div>
+        </div>
 
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_tglTerima">Tanggal Terima</label>
+          <input type="date" class="form-control" id="input_edit_tglTerima" >
 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit_nilaiGiro">
-                </div>
-              </div>
- 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit_nilaiGiroRp">
-                </div>
-              </div>
+          <label for="input_edit_buktiTerima">Bukti Terima</label>
+          <input type="text" class="form-control" id="input_edit_buktiTerima" placeholder="Bukti Terima" disabled>
 
-            </div>
+          <label for="input_edit_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit_keterangan">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglTerima" >
-                </div>
-              </div>
+          <label for="input_edit_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_edit_tglCair" disabled>
 
-            </div>
+          <label for="input_edit_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_edit_buktiCair" placeholder="Bukti Cair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Terima</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_buktiTerima" placeholder="Bukti Terima" disabled>
-                </div>
-              </div>
+          <label for="input_edit_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_edit_keteranganCair" disabled>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_buktiCair" placeholder="Bukti Cair" disabled>
-                </div>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keteranganCair" disabled>
-                </div>
-              </div>
-            </div>
-
-          <div class="row mt-2 align-items-center">
-            <div class="col-4">
-              <label class="form-label">Perkiraan Kas</label>
-            </div>
-            <div class="col-8">
-              <div class="input-group">
+          <div class="bs-form bs-form-1">
+          <label for="input_edit_perkiraanKas">Perkiraan Kas</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-primary btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
               </div>
             </div>
-          </div>
-
-    </div>
+        </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEditTerima()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditTerima()">Simpan</button>
   </div>
 </div>
 </div>
@@ -855,62 +508,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Giro Buka</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-            <div class="col-4 text-left">
-              <div class="form-group text-left">
-                <label class="text-left">Bank</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit2_bank" placeholder="Bank" disabled>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit2_bank">Bank</label>
+          <input type="text" class="form-control" id="input_edit2_bank" placeholder="Bank" disabled>
 
-          </div>
+          <label for="input_edit2_noGiro">No. Giro</label>
+          <input type="text" class="form-control" id="input_edit2_noGiro" placeholder="No. Giro" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_noGiro" placeholder="No. Giro" disabled>
-                </div>
-              </div>
+          <label for="input_edit2_tglGiro">Tanggal Giro</label>
+          <input type="date" class="form-control" id="input_edit2_tglGiro">
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Giro</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglGiro">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4">
-                <label class="form-label">Valas</label>
-              </div>
-              <div class="col-3">
-                <select id="input_edit2_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit2_valas">Valas</label>
+          <select id="input_edit2_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   @foreach ($listDataValas as $valas)
                       <option value="{{ $valas->KODEVLS }}" 
                               data-kurs="{{ $valas->KURS }}"
@@ -919,128 +540,44 @@
                       </option>
                   @endforeach
                 </select>
-              </div>
-              <div class="col-2">
-                <label class="form-label">Kurs</label>
-              </div>
-              <div class="col-3">
-                <input type="text" class="form-control text-right" id="input_edit2_kurs" placeholder="Kurs" disabled>
-              </div>
-            </div>
+          <label for="input_edit2_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit2_kurs" placeholder="Kurs" disabled>
+
 
             
-            <div class="row mt-2">
-
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nilai Giro</label>
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit2_nilaiGiro" placeholder="Nilai Giro">
-                </div>
-              </div>
- 
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-right" id="input_edit2_nilaiGiroRp">
-                </div>
-              </div>
-
-            </div>
+            
+          <label for="input_edit2_nilaiGiro">Nilai Giro</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-right" id="input_edit2_nilaiGiro" placeholder="Nilai Giro">
+            <input type="text" class="form-control text-right" id="input_edit2_nilaiGiroRp"></div></div>
+        </div>
 
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglBuka" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit2_tglBuka">Tanggal Buka</label>
+          <input type="date" class="form-control" id="input_edit2_tglBuka" >
 
-            </div>
+          <label for="input_edit2_buktiBuka">Bukti Buka</label>
+          <input type="text" class="form-control" id="input_edit2_buktiBuka" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Buka</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_buktiBuka" disabled>
-                </div>
-              </div>
+          <label for="input_edit2_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit2_keterangan">
 
-            </div>
+          <label for="input_edit2_tglCair">Tanggal Cair</label>
+          <input type="date" class="form-control" id="input_edit2_tglCair" disabled>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_keterangan">
-                </div>
-              </div>
+          <label for="input_edit2_buktiCair">Bukti Cair</label>
+          <input type="text" class="form-control" id="input_edit2_buktiCair" disabled>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanggal Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="date" class="form-control" id="input_edit2_tglCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Bukti Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_buktiCair" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan Cair</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit2_keteranganCair" disabled>
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit2_keteranganCair">Keterangan Cair</label>
+          <input type="text" class="form-control" id="input_edit2_keteranganCair" disabled>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEditBuka()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditBuka()">Simpan</button>
   </div>
 </div>
 </div>
@@ -1053,7 +590,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Select Kas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
@@ -1097,7 +636,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Select Bank</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <table id="tabelBukaSelectBank" class="table table-bordered table-striped"  >
@@ -1138,7 +679,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -1157,7 +698,7 @@ function loadAllBuka () {
 
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Giro"
+  // document.getElementById('breadcrumb').innerHTML = "Master Giro" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel_dibuka').DataTable().destroy();
 
@@ -1212,7 +753,7 @@ function loadAllBuka () {
     "paging": true,
     "searching": true,
     "pageLength": currentLength,
-    "dom": 'tip'
+    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
   });
 
 }
@@ -1273,7 +814,7 @@ function loadAllTerima () {
     "paging": true,
     "searching": true,
     "pageLength": currentLength,
-    "dom": 'tip'
+    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
   });
 
 }

@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Perkiraan')
 
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,15 +23,16 @@
     <button class="btn btn-primary" onclick="buttonAdd()">+ Add Perkiraan</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-@include('master.partials.headerTableMaster')
+<div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
         <thead>
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
@@ -46,9 +47,10 @@
             <th style="padding: 4px 12px;" scope="col">Status</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
+        <tbody id="tabel_data" class="text-left">
         </tbody>
       </table>
+
     </div>
   </div>
 
@@ -60,162 +62,72 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-3 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" onblur="onChangePerkiraan()">
-                </div>
-              </div>
-              <div class="col-2 ">
-                <div class="form-group text-center">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_isppn" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_add_perkiraan">Perkiraan</label>
+          <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" onblur="onChangePerkiraan()">
+          <label for="input_add_isppn">PPN</label>
+          <select id="input_add_isppn" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     <option value=0>False</option>
                     <option value=1>True</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
 
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-9">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan">
-              </div>
-            </div>
+          
+          <label for="input_add_keterangan">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan"></div>
 
-            <!-- <div class="col-2 text-right">
-              <div class="form-group">
-            <button onclick="resetScannerKode2()" class="btn btn-success btn-sm text-right"><i class="bi bi-arrow-clockwise"></i></button>
-            </div>
-            </div> -->
-          </div>
 
-          <div class="row mt-3">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Kelompok</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_kelompok" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_add_kelompok">Kelompok</label>
+          <select id="input_add_kelompok" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 selected >Aktiva</option>
                   <option value=1 >Kewajiban</option>
                   <option value=2 >Modal</option>
                   <option value=3 >Pendapatan</option>
                   <option value=4 >Biaya</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <select id="input_add_tipe" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_add_tipe">Tipe</label>
+          <select id="input_add_tipe" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >General</option>
                   <option value=1 >Detail</option>
                 </select>
-              </div>
-            </div>
-
-          </div>
-          <!-- <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
-              </div>
-            </div>
-
-          </div> -->
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Debet/Kredit</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_debetkredit" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+        </div>
+          <!-- <div class="bs-form bs-form-1">
+          <label for="input_add_kode2">Tipe</label>
+          <input type="text" class="form-control" id="input_add_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
+        </div> -->
+          <div class="bs-form">
+          <label for="input_add_debetkredit">Debet/Kredit</label>
+          <select id="input_add_debetkredit" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Debet</option>
                   <option value=1 >Kredit</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_add_valas">Valas</label>
+          <select id="input_add_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     @foreach ($listDataValas as $valas)
                         <option value="{{ $valas->KODEVLS }}" data-kurs="{{ $valas->Simbol }}">{{ $valas->KODEVLS }}</option>
                      @endforeach
                     </select>
-                </div>
-            </div>
 
-          </div>
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Status</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_add_status" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_add_status">Status</label>
+          <select id="input_add_status" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Active</option>
                   <option value=1 >Inactive</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Simbol</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol">
-              </div>
-            </div>
-
-          </div>
+          <label for="input_add_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol">
+        </div>
 
 
 
@@ -235,7 +147,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -249,164 +162,72 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Perkiraan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-3 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
-                </div>
-              </div>
-              <div class="col-2 ">
-                <div class="form-group text-center">
-                  <label class="text-left">PPN</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_edit_isppn" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            <div class="bs-form">
+          <label for="input_edit_perkiraan">Perkiraan</label>
+          <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
+          <label for="input_edit_isppn">PPN</label>
+          <select id="input_edit_isppn" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     <option value=0>False</option>
                     <option value=1>True</option>
                   </select>
-                </div>
-              </div>
 
 
+          
+          <label for="input_edit_keterangan">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan"></div>
 
-            </div>
 
-          <div class="row ">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-9">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan">
-              </div>
-            </div>
-
-            <!-- <div class="col-2 text-right">
-              <div class="form-group">
-            <button onclick="resetScannerKode2()" class="btn btn-success btn-sm text-right"><i class="bi bi-arrow-clockwise"></i></button>
-            </div>
-            </div> -->
-          </div>
-
-          <div class="row mt-3">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Kelompok</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_kelompok" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_edit_kelompok">Kelompok</label>
+          <select id="input_edit_kelompok" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 selected >Aktiva</option>
                   <option value=1 >Kewajiban</option>
                   <option value=2 >Modal</option>
                   <option value=3 >Pendapatan</option>
                   <option value=4 >Biaya</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <select id="input_edit_tipe" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_edit_tipe">Tipe</label>
+          <select id="input_edit_tipe" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >General</option>
                   <option value=1 >Detail</option>
                 </select>
-              </div>
-            </div>
-
-          </div>
-          <!-- <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Tipe</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
-              </div>
-            </div>
-
-          </div> -->
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Debet/Kredit</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_debetkredit" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+        </div>
+          <!-- <div class="bs-form bs-form-1">
+          <label for="input_edit_kode2">Tipe</label>
+          <input type="text" class="form-control" id="input_edit_kode2" placeholder="Barcode Lokasi" onkeypress="enterScannerKode2(event)">
+        </div> -->
+          <div class="bs-form">
+          <label for="input_edit_debetkredit">Debet/Kredit</label>
+          <select id="input_edit_debetkredit" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Debet</option>
                   <option value=1 >Kredit</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Valas</label>
-              </div>
-            </div>
-            <div class="col-4">
-                <div class="form-group">
-                    <select id="input_edit_valas" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          <label for="input_edit_valas">Valas</label>
+          <select id="input_edit_valas" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                     @foreach ($listDataValas as $valas)
                         <option value="{{ $valas->KODEVLS }}" data-kurs="{{ $valas->Simbol }}">{{ $valas->KODEVLS }}</option>
                      @endforeach
                     </select>
-                </div>
-            </div>
 
-          </div>
-          <div class="row">
-            <div class="col-3">
-              <div class="form-group">
-                <label>Status</label>
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <select id="input_edit_status" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+          
+          <label for="input_edit_status">Status</label>
+          <select id="input_edit_status" class="form-control form-control-lg mb-3" aria-label=".form-control-lg example">
                   <option value=0 >Active</option>
                   <option value=1 >Inactive</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group text-center">
-                <label>Simbol</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol">
-              </div>
-            </div>
-
-          </div>
+          <label for="input_edit_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol">
+        </div>
 
 
 
@@ -426,7 +247,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -595,7 +417,7 @@ function onChangePerkiraan () {
     console.log('asd')
     let _token = $("#_token").val();
 
-     document.getElementById('breadcrumb').innerHTML = "Master Perkiraan"
+     // document.getElementById('breadcrumb').innerHTML = "Master Perkiraan" // dimatikan: judul sekarang di bar atas (page-title)
 
     $('#tabel').DataTable().destroy();
 
@@ -651,9 +473,10 @@ function onChangePerkiraan () {
       "lengthChange": true,
       "paging": true,
       "searching": true,
-      "dom": 'tip',
+      "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
       "pageLength": currentLength
     });
+      MasterList.selesai('#tabel')
 
   }
   

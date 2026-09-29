@@ -131,6 +131,19 @@ class MasterDaftarKaryawanController extends Controller
     //   return 'Area digunakkan di Master Kota';
     // }
 
+    // Karyawan yang masih punya data Sales Cust / Target Sales (master Sales) tidak boleh dihapus -
+    // keduanya terikat lewat KeyNIK, dulu tidak dicek.
+    $karyawan = DB::connection('SML')->select('select KeyNIK from dbKaryawan where NIK = :Nik', ['Nik' => $req->Nik]);
+    if ($karyawan) {
+      $keynik = $karyawan[0]->KeyNIK;
+      if (DB::connection('SML')->select('select top 1 1 as ada from DBSalesCustomer where KeyNik = :keynik', ['keynik' => $keynik])) {
+        return 'Karyawan masih punya data Sales Customer';
+      }
+      if (DB::connection('SML')->select('select top 1 1 as ada from DbTargetsales where KeyNik = :keynik', ['keynik' => $keynik])) {
+        return 'Karyawan masih punya data Target Sales';
+      }
+    }
+
     $delete = DB::connection('SML')->update('delete from dbKaryawan where NIK = :Nik', ['Nik'=>$req->Nik]);
     return $delete;
   }

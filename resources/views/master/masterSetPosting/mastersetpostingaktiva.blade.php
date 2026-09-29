@@ -1,13 +1,13 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
 
 
+@section('page-title', 'Master Posting Aktiva')
 @section('content')
 @include('master/partials/sidebarPosting')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
 <style>
@@ -39,41 +39,39 @@
     <span class="sp-crumb-active">Satuan</span>
   </div> --}}
 
+  {{-- DINONAKTIFKAN - judul sudah di bar atas (page-title) dan tombol Tambah ada di toolbar.
   <div class="sp-page-head">
     <div>
       <h1>Master Posting Aktiva</h1>
     </div>
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Aktiva</button>
-  </div>
+  </div> --}}
 
-  <div id="contentContainer" class="container-fluid">
+  <div id="contentContainer" class="container-fluid po-list-page">
 
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    @include('master.partials.headerTableMaster')
+    <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table class="tb" id="tabel">
-          <thead>
-            <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Perkiraan</th>
-            <th scope="col">Keterangan</th>
-            <th scope="col">Persen</th>
-            <th scope="col">Metode</th>
-            <th scope="col">Perkiraan Akumulasi</th>
-            <th scope="col">Perkiraan Biaya 1</th>
-            <th scope="col">Persen Biaya 1</th>
-            <th scope="col">Perkiraan Biaya 2</th>
-            <th scope="col">Persen Biaya 2</th>
-            </tr>
-          </thead>
-          <tbody id="tabel_data" class="text-right">
-          </tbody>
-        </table>
+  @include('master.partials.toolbarMaster')
+
+    <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
       </div>
+
     </div>
+  </div>
 
   </div>
 
@@ -85,98 +83,68 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Posting Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-          <div class="row g-3 align-items-end">
-            <div class="col-md-2">
-              <label class="form-label">Perkiraan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+          <div class="bs-form">
+          <label for="input_add_perkiraan">Perkiraan</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraan">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
                 </div>
               </div>
-            </div>
-
-            <div class="col-md-2">
-              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <label for="input_add_biayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_add_biayaPenyusutan1">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-1">
-              <div class="input-group">
+            <div class="input-group">
                 <input type="text" class="form-control" id="input_add_persenBiaya1" placeholder='(%)'>
-              </div>
-            </div>
-          </div>
+              </div></div>
 
-          <div class="row g-3 align-items-end mt-2">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+
+          
+          <label for="input_add_akm">Akumulasi Penyusutan</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_add_akm">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <label for="input_add_biayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_add_biayaPenyusutan2">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-1">
-              <div class="input-group">
+            <div class="input-group">
                 <input type="text" class="form-control" id="input_add_persenBiaya2" placeholder='(%)'>
-              </div>
-            </div>
-          </div>
+              </div></div>
 
-          <div class="row g-3 align-items-end mt-2">
-            <div class="col-md-2">
-              <label class="form-label">Persen Susut</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+
+          
+          <label for="input_add_persenSusut">Persen Susut</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_add_persenSusut" placeholder='(%)'>
               </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Metode Penyusutan</label>
-            </div>
-            <div class="col-md-2">
-              <select name="MedPenyu" class='form-control' id="input_add_metodePenyusutan">
+          <label for="input_add_metodePenyusutan">Metode Penyusutan</label>
+          <div class="d-flex align-items-center" style="gap:8px"><select name="MedPenyu" class='form-control' id="input_add_metodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
               </select>
-            </div>
-
-            <div class="col-md-2 d-flex align-items-center gap-2">
-              <input type="checkbox" id="input_add_uangMuka" value="">
-              <label for="input_add_uangMuka" class="form-label mb-0">Uang Muka</label>
-            </div>
-          </div>
+            <input type="checkbox" id="input_add_uangMuka" value="">
+              <label for="input_add_uangMuka" class="form-label mb-0">Uang Muka</label></div>
+        </div>
 
         </div>
       </div>
@@ -195,98 +163,68 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit Posting Aktiva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-          <div class="row g-3 align-items-end">
-            <div class="col-md-2">
-              <label class="form-label">Perkiraan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+          <div class="bs-form">
+          <label for="input_edit_perkiraan">Perkiraan</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraan">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
                 </div>
               </div>
-            </div>
-
-            <div class="col-md-2">
-              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 1'>Biaya Penyusutan 1</label>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <label for="input_edit_biayaPenyusutan1">Biaya Penyusutan 1</label>
+          <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_edit_biayaPenyusutan1">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP1()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-1">
-              <div class="input-group">
+            <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_persenBiaya1" placeholder='(%)'>
-              </div>
-            </div>
-          </div>
+              </div></div>
 
-          <div class="row g-3 align-items-end mt-2">
-            <div class="col-md-2">
-              <label class="form-label">Akumulasi Penyusutan</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+
+          
+          <label for="input_edit_akm">Akumulasi Penyusutan</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_akm">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonAkumulasi()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label hover-tooltip" data-tooltip='Biaya Penyusutan 2'>Biaya Penyusutan 2</label>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
+          <label for="input_edit_biayaPenyusutan2">Biaya Penyusutan 2</label>
+          <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
                 <input type="text" class="form-control" id="input_edit_biayaPenyusutan2">
                 <div class="input-group-append">
-                  <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraanBP2()">+</button>
+                  <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()">+</button>
                 </div>
               </div>
-            </div>
-            <div class="col-md-1">
-              <div class="input-group">
+            <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_persenBiaya2" placeholder='(%)'>
-              </div>
-            </div>
-          </div>
+              </div></div>
 
-          <div class="row g-3 align-items-end mt-2">
-            <div class="col-md-2">
-              <label class="form-label">Persen Susut</label>
-            </div>
-            <div class="col-md-4">
-              <div class="input-group">
+
+          
+          <label for="input_edit_persenSusut">Persen Susut</label>
+          <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_persenSusut" placeholder='(%)'>
               </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Metode Penyusutan</label>
-            </div>
-            <div class="col-md-2">
-              <select name="MedPenyu" class='form-control' id="input_edit_metodePenyusutan">
+          <label for="input_edit_metodePenyusutan">Metode Penyusutan</label>
+          <div class="d-flex align-items-center" style="gap:8px"><select name="MedPenyu" class='form-control' id="input_edit_metodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
               </select>
-            </div>
-
-            <div class="col-md-2 d-flex align-items-center gap-2">
-              <input type="checkbox" id="input_edit_uangMuka" value="">
-              <label for="input_edit_uangMuka" class="form-label mb-0">Uang Muka</label>
-            </div>
-          </div>
+            <input type="checkbox" id="input_edit_uangMuka" value="">
+              <label for="input_edit_uangMuka" class="form-label mb-0">Uang Muka</label></div>
+        </div>
 
         </div>
       </div>
@@ -299,21 +237,62 @@
 </div>
 <!-- End modal add posting aktiva-->
 
+@include('master.partials.modalOpenMaster')
+
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MSPA_KOLOM = [
+  ['Perkiraan',    'Perkiraan',           1, 'varchar', 0, 0],
+  ['Keterangan',   'Keterangan',          1, 'varchar', 0, 0],
+  ['Persen',       'Persen',              1, 'varchar', 0, 0],
+  ['Tipe',         'Metode',              1, 'varchar', 0, 0],
+  ['Akumulasi',    'Perkiraan Akumulasi', 1, 'varchar', 0, 0],
+  ['Biaya1',       'Perkiraan Biaya 1',   1, 'varchar', 0, 0],
+  ['PersenBiaya1', 'Persen Biaya 1',      1, 'varchar', 0, 0],
+  ['Biaya2',       'Perkiraan Biaya 2',   1, 'varchar', 0, 0],
+  ['PersenBiaya2', 'Persen Biaya 2',      1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (valas, gudang, dsb) memakai
+// dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
-  console.log('asd')
   let _token = $("#_token").val();
 
   document.getElementById('judulPosting').innerHTML = 'Master Posting Aktiva'
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastersetpostingaktivaloadall') !!}",
@@ -323,45 +302,17 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr>
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-    <td>${item.Perkiraan}</td>
-    <td>${item.Keterangan}</td>
-    <td>${item.Persen}</td>
-    <td>${item.Tipe}</td>
-    <td>${item.Akumulasi}</td>
-    <td>${item.Biaya1}</td>
-    <td>${item.PersenBiaya1}</td>
-    <td>${item.Biaya2}</td>
-    <td>${item.PersenBiaya2}</td>
-    </tr>`
-  });
- 
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
+  renderTabel()
 }
 
+
 function buttonAdd () {
+  // Form Add dikosongkan - dulu sisa isian tambah sebelumnya ikut terbawa.
+  $('#form .modal-body input[type="text"], #form .modal-body input[type="number"]').each(function () { this.value = this.defaultValue })
+  $('#form .modal-body input[type="checkbox"]').prop('checked', false)
   $("#form").modal('toggle')
 }
 
@@ -455,6 +406,10 @@ function submitEdit () {
   if (document.getElementById("input_edit_uangMuka").checked) {
     uangMuka = 1
   }
+  if (!perkiraan){
+    alertify.warning('Perkiraan harus diisi.')
+    return;
+  }
 
   $.ajax({
     url: "{!! url('mastersetpostingaktivaspedit') !!}",
@@ -472,7 +427,7 @@ function submitEdit () {
       else 
       {
         console.log(res ,'!')
-        alertify.success("Data Posting Kas telah diedit");
+        alertify.success("Data Posting Aktiva telah diedit");
         loadAll()
         $("#formEdit").modal('toggle')
       }
@@ -496,6 +451,10 @@ function submitAdd () {
     uangMuka = 1
   }
 
+  if (!perkiraan){
+    alertify.warning('Perkiraan harus diisi.')
+    return;
+  }
   if (!persenSusut){
     alertify.warning('Persen Susut tidak boleh kosong.')
     return;
@@ -532,7 +491,8 @@ function submitAdd () {
 
 }
 
-window.onload = function() {
+window.onload = function(){
+MasterList.kolom({ href: 'mastersetpostingaktiva', kolom: MSPA_KOLOM, onChange: renderTabel })
 loadAll();
 }
 

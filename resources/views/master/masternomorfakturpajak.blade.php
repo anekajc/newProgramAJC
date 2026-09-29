@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Nomor Faktur Pajak')
 @section('content')
 
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,130 +23,72 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Nomor Faktur Pajak</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+          <table id="tabel" class="data-table po-aksi-hover">
                 <thead>
                   <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode</th>
-                    <th scope="col">No Seri</th>
-                    <th scope="col">No Awal</th>
-                    <th scope="col">No Akhir</th>
-                    <th scope="col">Is Penuh?</th>
+                    <th style="padding: 4px 12px;" scope="col">Actions</th>
+                    <th style="padding: 4px 12px;" scope="col">Kode</th>
+                    <th style="padding: 4px 12px;" scope="col">No Seri</th>
+                    <th style="padding: 4px 12px;" scope="col">No Awal</th>
+                    <th style="padding: 4px 12px;" scope="col">No Akhir</th>
+                    <th style="padding: 4px 12px;" scope="col">Is Penuh?</th>
                   </tr>
                 </thead>
-                <tbody id="tabel_data" class="text-right">
+                <tbody id="tabel_data" class="text-left">
               </tbody>
               </table>
-            </div>
-        </div>
+
+    </div>
+  </div>
 
 </div>
 
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 800px">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 550px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
+        <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value= />
+        <div class="bs-form bs-form-1">
+          <label for="input_add_kode">Kode Faktur Pajak</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Faktur Pajak" disabled>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Faktur Pajak</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Faktur Pajak"disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-            <div class="col-4 text-left">
-              <div class="form-group text-left">
-                <label class="text-left">No. Seri</label>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <input type="text" class="form-control" id="seri1" maxlength="3" placeholder="Seri 1">
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <input type="text" class="form-control" id="seri2" maxlength="2" placeholder="Seri 2">
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nama" placeholder="No. Seri" disabled>
-              </div>
-            </div>
+          <label for="seri1">No. Seri</label>
+          <div class="d-flex" style="gap:8px">
+            <input type="text" class="form-control" id="seri1" maxlength="3" placeholder="Seri 1" style="flex:0 0 90px">
+            <input type="text" class="form-control" id="seri2" maxlength="2" placeholder="Seri 2" style="flex:0 0 80px">
+            <input type="text" class="form-control" id="input_add_nama" placeholder="No. Seri" disabled>
           </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No Awal</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_add_noawal" placeholder="No Awal">
-                </div>
-              </div>
+          <label for="input_add_noawal">No. Awal</label>
+          <input type="number" class="form-control" id="input_add_noawal" placeholder="No Awal">
 
-            </div>
+          <label for="input_add_noakhir">No. Akhir</label>
+          <input type="number" class="form-control" id="input_add_noakhir" placeholder="No Akhir">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No Akhir</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_add_noakhir" placeholder="No Akhir">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-            <div class="col-4 text-left">
-                <div class="form-group text-left">
-                    <label class="text-left">Is Penuh?</label>
-                </div>
-            </div>
-            <div class="col-8">
-                <div class="form-group">
-                    <input type="checkbox" class="form-check-input" id="input_add_penuh">
-                </div>
-            </div>
+          <label for="input_add_penuh">Is Penuh?</label>
+          <div class="bs-check"><input type="checkbox" id="input_add_penuh"></div>
         </div>
-
-
-    </div>
-  </div>
+      </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -159,98 +101,39 @@
 
 <!-- start modal edit -->
 <div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 550px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+      <div class="modal-body" id="formBsGrid">
+        <div class="bs-form bs-form-1">
+          <label for="input_edit_kode">Kode Faktur Pajak</label>
+          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Faktur Pajak" disabled>
 
-        <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Faktur Pajak</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Jenis" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-            <div class="col-4 text-left">
-              <div class="form-group text-left">
-                <label class="text-left">No. Seri</label>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <input type="text" class="form-control" id="seri1edit" maxlength="3" placeholder="Seri 1">
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <input type="text" class="form-control" id="seri2edit" maxlength="2" placeholder="Seri 2">
-              </div>
-            </div>
-            <div class="col-3">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_edit_nama" placeholder="No. Seri" disabled>
-              </div>
-            </div>
+          <label for="seri1edit">No. Seri</label>
+          <div class="d-flex" style="gap:8px">
+            <input type="text" class="form-control" id="seri1edit" maxlength="3" placeholder="Seri 1" style="flex:0 0 90px">
+            <input type="text" class="form-control" id="seri2edit" maxlength="2" placeholder="Seri 2" style="flex:0 0 80px">
+            <input type="text" class="form-control" id="input_edit_nama" placeholder="No. Seri" disabled>
           </div>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Awal</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_edit_noawal" placeholder="No Awal">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_noawal">No. Awal</label>
+          <input type="number" class="form-control" id="input_edit_noawal" placeholder="No Awal">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">No. Akhir</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="number" class="form-control" id="input_edit_noakhir" placeholder="No Akhir">
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_noakhir">No. Akhir</label>
+          <input type="number" class="form-control" id="input_edit_noakhir" placeholder="No Akhir">
 
-            <div class="row mt-2">
-            <div class="col-4 text-left">
-                <div class="form-group text-left">
-                    <label class="text-left">Is Penuh?</label>
-                </div>
-            </div>
-            <div class="col-8">
-                <div class="form-group">
-                    <input type="checkbox" class="form-check-input" id="input_edit_penuh">
-                </div>
-            </div>
-          </div>
-
-    </div>
-  </div>
+          <label for="input_edit_penuh">Is Penuh?</label>
+          <div class="bs-check"><input type="checkbox" id="input_edit_penuh"></div>
+        </div>
+      </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -261,7 +144,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -270,7 +153,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Nomor Faktur Pajak"
+  // document.getElementById('breadcrumb').innerHTML = "Master Nomor Faktur Pajak" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -314,9 +197,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -369,9 +253,9 @@ function buttonEdit(kode) {
       document.getElementById("input_edit_kode").value = res[0].Kode;
 
       // Split the NoSeri into seri1 and seri2
-      const noSeriParts = res[0].NoSeri.split('.');
-      const seri1Value = noSeriParts[0].substring(0, 3);
-      const seri2Value = noSeriParts[1].substring(0, 2);
+      const noSeriParts = String(res[0].NoSeri || '').split('.');
+      const seri1Value = (noSeriParts[0] || '').substring(0, 3);
+      const seri2Value = (noSeriParts[1] || '').substring(0, 2);
 
       console.log(seri1Value);
       console.log(seri2Value);
@@ -381,6 +265,9 @@ function buttonEdit(kode) {
       document.getElementById("input_edit_noawal").value = res[0].NoAwal;
       document.getElementById("input_edit_noakhir").value = res[0].NoAkhir;
       document.getElementById("input_edit_penuh").checked = res[0].IsPenuh == 1;
+      // Dulu No. Seri gabungan hanya diperbarui saat Seri 1/2 diketik - kalau langsung Simpan,
+      // yang terkirim nilai lama/".." dan menimpa NoSeri di database.
+      updateConcatenatedSeriEdit();
     }
   });
   $("#formEdit").modal('toggle');
@@ -437,18 +324,18 @@ function submitEdit () {
     return
   }
 
-  if (!nama) {
-    alertify.warning("Nama  harus diisi");
+  if (!nama || !nama.replace(/\./g, '')) {
+    alertify.warning("No. Seri harus diisi");
     return
   }
 
   if (!noawal) {
-    alertify.warning("Nama  harus diisi");
+    alertify.warning("No. Awal harus diisi");
     return
   }
 
   if (!noakhir) {
-    alertify.warning("Nama  harus diisi");
+    alertify.warning("No. Akhir harus diisi");
     return
   }
 
@@ -495,18 +382,18 @@ function submitAdd () {
     return
   }
 
-  if (!nama) {
-    alertify.warning("Nama harus diisi");
+  if (!nama || !nama.replace(/\./g, '')) {
+    alertify.warning("No. Seri harus diisi");
     return
   }
 
   if (!noawal) {
-    alertify.warning("Nama harus diisi");
+    alertify.warning("No. Awal harus diisi");
     return
   }
 
   if (!noakhir) {
-    alertify.warning("Nama harus diisi");
+    alertify.warning("No. Akhir harus diisi");
     return
   }
 

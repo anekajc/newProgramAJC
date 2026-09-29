@@ -45,7 +45,7 @@ class MasterDaftarDevisiController extends Controller
     $check = DB::connection('SML')->select('SELECT * FROM dbDEVISI where Devisi = :kode' , ['kode' => $req->kode]);
 
     if ($check) {
-      return 'Kode jenis sudah ada di database';
+      return 'Kode devisi sudah ada di database';
     }
     $listData = DB::connection('SML')->update('insert into dbDEVISI (Devisi, NamaDevisi) values (:kode, :nama)' , ['kode' => $req->kode , 'nama' => $req->nama]);
     return 1;
@@ -53,10 +53,18 @@ class MasterDaftarDevisiController extends Controller
   }
 
   public function spDelete (Request $req) {
-    $check = DB::connection('SML')->select('SELECT * FROM DBPPL where KDDep = :kode' , ['kode' => $req->kode]);
+    // Dulu mengecek DBPPL.KDDep (kode departemen, salinan dari master departemen). Devisi
+    // dipakai di transaksi accounting dan master aktiva.
+    $check = DB::connection('SML')->select('SELECT top 1 1 as ada FROM dbTransaksi where Devisi = :kode' , ['kode' => $req->kode]);
 
     if ($check) {
-      return 'Dept digunakkan di Pembelian';
+      return 'Devisi digunakan di Transaksi Accounting';
+    }
+
+    $check = DB::connection('SML')->select('SELECT top 1 1 as ada FROM DBAKTIVA where Devisi = :kode' , ['kode' => $req->kode]);
+
+    if ($check) {
+      return 'Devisi digunakan di Master Aktiva';
     }
 
     //$check = DB::connection('SML')->select('SELECT * FROM DBDEPARTEMEN where KodeDepartemen = :kode' , ['kode' => $req->kode]);

@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Neraca')
 @section('content')
 
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -23,25 +23,26 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Neraca</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+    <table id="tabel" class="data-table po-aksi-hover">
           <thead>
             <tr>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
-              <th scope="col">Kelompok</th>
-              <th scope="col">Tipe</th>
-              <th scope="col">Neraca</th>
+              <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+              <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+              <th style="padding: 4px 12px;" scope="col">Kelompok</th>
+              <th style="padding: 4px 12px;" scope="col">Tipe</th>
+              <th style="padding: 4px 12px;" scope="col">Neraca</th>
             </tr>
           </thead>
-          <tbody id="tabel_data" class="text-right">
+          <tbody id="tabel_data" class="text-left">
             @for ($i = 0; $i < count($listData); $i++)
             <tr>
                 <td>{{ $listData[$i]->Perkiraan }}</td>
@@ -56,7 +57,8 @@
                     </td>
                 <td class='text-left'>
                   <input class='form-control' 
-                          onblur="onChangeNeraca('{{ $listData[$i]->Perkiraan }}')" 
+                          onblur="onChangeNeraca('{{ $listData[$i]->Perkiraan }}', this)"
+                          data-awal="{{ $listData[$i]->Neraca }}" 
                           oninput="formatNeracaInput(this)"
                           type='text'
                           maxlength="10"
@@ -66,7 +68,8 @@
             @endfor
         </tbody>
         </table>
-      </div>
+
+    </div>
   </div>
 
 </div>
@@ -77,74 +80,35 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_perkiraan">Perkiraan</label>
+          <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
 
-            </div>
+          <label for="input_edit_keterangan">Keterangan</label>
+          <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan"disabled>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan"disabled>
-                </div>
-              </div>
+          <label for="input_edit_tipe">Tipe</label>
+          <input type="text" class="form-control" id="input_edit_tipe" placeholder="Tipe" disabled>
 
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tipe</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_tipe" placeholder="Tipe" disabled>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Neraca</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_neraca" >
-                </div>
-              </div>
-
-            </div>
+          <label for="input_edit_neraca">Neraca</label>
+          <input type="text" class="form-control" id="input_edit_neraca" >
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -154,12 +118,12 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 $(document).ready(function () {
   
-  document.getElementById('breadcrumb').innerHTML = "Master Neraca"
+  // document.getElementById('breadcrumb').innerHTML = "Master Neraca" // dimatikan: judul sekarang di bar atas (page-title)
   document.getElementById('AddVisibility').hidden = true;
 
   $("#tabel").DataTable({
@@ -167,8 +131,9 @@ $(document).ready(function () {
     "paging": true,
     "searching": true,
     "ordering": false,
-    "dom": 'tip'
+    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
   });
+      MasterList.selesai('#tabel')
 });
 
   $("#tabel_filter_visual").on("keyup", function () {
@@ -215,6 +180,7 @@ function loadAll () {
     "lengthChange": false,
       "paging": false ,
     });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -242,11 +208,37 @@ function buttonEdit (kode) {
 }
 
 
-function onChangeNeraca (Perkiraan) {
-  
-// Or more explicitly:
-if (!tempNeraca) {
-    tempNeraca = '-';
+function onChangeNeraca (Perkiraan, el) {
+  // Dulu setiap input kehilangan fokus langsung menyimpan tempNeraca, dan tempNeraca kosong
+  // diganti '-' - cukup klik lalu tinggalkan input, nilai Neraca di database tertimpa '-'.
+  // Sekarang hanya disimpan kalau isinya memang berubah dari nilai awal.
+  let nilai = el ? el.value : tempNeraca
+  let awal = el ? (el.dataset.awal || '') : ''
+  tempNeraca = ''
+  if (el && nilai === awal) { return }
+  if (!nilai) {
+    nilai = '-';
+  }
+
+  let _token = $("#_token").val();
+
+  $.ajax({
+    url: "{!! url('masterneracaonChangeNeraca') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token : _token,
+      Perkiraan,
+      tempNeraca: nilai
+    },
+    success: function(res) {
+        if (el) { el.dataset.awal = nilai; el.value = nilai }
+        alertify.success("Neraca Perkiraan : " + Perkiraan + " Berhasil Di-Update");
+    },
+    error: function (err) {
+        console.log(err)
+        alertify.warning("Neraca Perkiraan : " + Perkiraan + " gagal disimpan");
+    }})
 }
 
   let _token = $("#_token").val();
