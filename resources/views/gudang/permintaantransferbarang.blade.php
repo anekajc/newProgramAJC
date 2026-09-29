@@ -28,12 +28,12 @@
 
     <style>
         /* Tabel item form Add/Edit/Detail (#tabel_add) — tampilannya disamakan dengan tabel daftar
-           #tabel di #page1: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
-           kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
-           hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
-           po-table-header.css; blok itu sendiri tidak dipakai di sini karena #page2 bukan
-           .po-list-page. Padding sel isi sengaja tidak ditulis: `table tbody td { padding: 0 10px
-           !important }` di newmaster.css berlaku sama seperti di #tabel (baris rapat). */
+               #tabel di #page1: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
+               kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
+               hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
+               po-table-header.css; blok itu sendiri tidak dipakai di sini karena #page2 bukan
+               .po-list-page. Padding sel isi sengaja tidak ditulis: `table tbody td { padding: 0 10px
+               !important }` di newmaster.css berlaku sama seperti di #tabel (baris rapat). */
         #page2 .po-item-card {
             background: var(--white, #fff);
             border: 1.5px solid var(--border, #e5e7eb);
@@ -732,7 +732,7 @@
                 </div>
             </div>
 
-            <!-- ADD add -->
+            <!-- Form add / edit -->
             <div id="addAddItem" class="container-fluid showhide">
                 <div class="row">
                     <div class="col-4">
@@ -746,7 +746,6 @@
                         <div class="row">
 
                             <div class="col-md-6">
-
                                 <div class="row">
                                     <div class="col-3" style="margin-top:-10px;">
                                         <div class="form-group">
@@ -764,7 +763,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Nama Produk -->
                                 <div class="row">
                                     <div class="col-3" style="margin-top:-10px;">
                                         <div class="form-group">
@@ -778,42 +776,38 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
-                            {{-- <div class="col-md-6" style="margin-left:-50px;"> --}}
-
-                            <div class="row" style="margin-top:-15px;">
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Quantity</label>
+                            <div class="col-md-6" style="margin-top:-15px;">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Quantity</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control text-right" id="input_add_add_qty"
+                                                value="0.00" tabindex="6">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <input type="number" class="form-control text-right" id="input_add_add_qty"
-                                            value="0.00" tabindex="6">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Satuan</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Satuan</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <select id="input_add_add_nosat"
-                                            class="form-control text-center form-select-lg mb-3" tabindex="9">
-                                            <option value=0 selected>Tidak</option>
-                                        </select>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <select id="input_add_add_nosat"
+                                                class="form-control text-center form-select-lg mb-3" tabindex="9">
+                                                <option value=0 selected>Tidak</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            {{-- onchange="onChangeInputAddAddHarga()" --}}
-
-
-                            {{-- </div> --}}
-
                         </div>
                     </div>
                 </div>
@@ -1482,16 +1476,16 @@
                 <!-- </div> -->
                 <!-- <hr/> -->
                 <!-- <div class="row ">
-        <div class="col-md-12 text-left">
-          <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 text-left">
+              <div class="row">
+                <div class="col-md-12">
 
-            </div>
-          </div>
-        <button type="button" class="btn btn-primary" onclick="buttonAddMainHeader()" class="btn btn-secondary"  >Header</button>
-        <button type="button" class="btn btn-primary" onclick="buttonAddMainItems()" class="btn btn-secondary"  >Items</button>
-    </div>
-    </div> -->
+                </div>
+              </div>
+            <button type="button" class="btn btn-primary" onclick="buttonAddMainHeader()" class="btn btn-secondary"  >Header</button>
+            <button type="button" class="btn btn-primary" onclick="buttonAddMainItems()" class="btn btn-secondary"  >Items</button>
+        </div>
+        </div> -->
                 <hr />
                 <div class="row ">
                     <div class="col-md-12 mt-2 text-left">
@@ -1550,10 +1544,10 @@
                                 </div>
 
                                 <!-- <div class="col-md-12">
-            <div class="form-group">
+                <div class="form-group">
 
-            </div>
-          </div> -->
+                </div>
+              </div> -->
                                 <div class="col-md-12" style="margin-top:-15px;">
                                     <div class="form-group">
                                         <input type="hidden" class="form-control" id="input_detail_kodelokasipenerima">
@@ -1565,25 +1559,25 @@
                             </div>
 
                             <!-- <div class="row">
-            <div class="col-9">
-              <div class="form-group">
-                <label>PIC</label>
-              </div>
-            </div>
-            <div class="col-3 text-right">
-              <div class="form-group">
-            <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-            </div>
+                <div class="col-9">
+                  <div class="form-group">
+                    <label>PIC</label>
+                  </div>
+                </div>
+                <div class="col-3 text-right">
+                  <div class="form-group">
+                <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                </div>
 
-          </div>
-          </div> -->
+              </div>
+              </div> -->
                             <div class="row">
 
                                 <!-- <div class="col-md-12">
-            <div class="form-group">
+                <div class="form-group">
 
-            </div>
-          </div> -->
+                </div>
+              </div> -->
 
                             </div>
 
@@ -1607,7 +1601,7 @@
 
                                 <!-- <div class="col-md-12">
 
-          </div> -->
+              </div> -->
 
                             </div>
 
@@ -1680,14 +1674,14 @@
 
                                 <!-- <div class="col-md-12">
 
-          </div> -->
+              </div> -->
 
                             </div>
 
                         </div>
                         <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
-        <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
-    </div> -->
+            <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
+        </div> -->
 
                         <div class="col-md-3">
                             <div class="row">
@@ -1751,11 +1745,11 @@
 
                                                 <!-- <div class="col-4">
 
-              <div class="form-group">
+                  <div class="form-group">
 
-              </div>
+                  </div>
 
-              </div> -->
+                  </div> -->
                                                 <div class="col-md-12" style="margin-top:-10px;">
                                                     <div class="input-group form-group">
                                                         <input type="hidden" class="form-control"
@@ -1818,11 +1812,11 @@
 
                                 </div>
                                 <!-- <div class="col-md-12">
-        <div class="form-group">
-          <input type="hidden" class="form-control" id="input_detail_kodesales" >
-          <input type="text" class="form-control" id="input_detail_namasales"  disabled>
-        </div>
-      </div> -->
+            <div class="form-group">
+              <input type="hidden" class="form-control" id="input_detail_kodesales" >
+              <input type="text" class="form-control" id="input_detail_namasales"  disabled>
+            </div>
+          </div> -->
                             </div>
 
                         </div>
@@ -2529,7 +2523,7 @@
                             if ($.fn.DataTable.isDataTable("#tabel_add_list_barangall")) {
                                 table = $("#tabel_add_list_barangall").DataTable();
                                 table.clear().rows.add($("#tabel_data_add_list_barangall tr"))
-                                .draw();
+                                    .draw();
                             } else {
                                 $("#tabel_add_list_barangall").DataTable({
                                     lengthChange: false,
@@ -5125,9 +5119,9 @@
               <td class="text-center tdAction">
                 ${tipeform == 'edit' ?
                 `<div class="">
-                      <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                      <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
-                    </div>`
+                          <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                          <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+                        </div>`
                 : `-`
                 }
               </td>

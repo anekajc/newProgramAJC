@@ -103,7 +103,7 @@ public function loadValas()
 
   public function loadSuppAwal(Request $request)
   {
-      $perkiraan = $request->input('perkiraan');
+    //   $perkiraan = $request->input('perkiraan');
 
       $listData = DB::connection('SML')->select("
           select a.KodeCustsupp,
@@ -112,9 +112,10 @@ public function loadValas()
                 a.Telpon
           from vwBrowsSupp a
           where a.isaktif = 1
-            --and a.PERKIRAAN = ?
           order by a.KodeCustsupp
-      ", [$perkiraan]);
+      "
+    //   , [$perkiraan]
+      );
 
       return $listData;
   }
