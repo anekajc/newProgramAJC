@@ -35,6 +35,7 @@ class TransferBarangController extends Controller
     $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
 
     $listTransfer = $this->fetchHeaderList($date1, $date2);
+    $listPermintaan = $this->fetchPermintaanList();
 
     return view('gudang.transferbarang' , [
       "menul0" => $menul0,
@@ -42,9 +43,50 @@ class TransferBarangController extends Controller
       "date1" => $date1,
       "date2" => $date2,
       "listTransfer" => $listTransfer,
+      "listPermintaan" => $listPermintaan,
       "listBarangAll" => [] ,
       "akses" => $akses
     ]);
+  }
+
+  // Tab "Permintaan Transfer Barang": permintaan (dbPRTransfer) yang sudah diotorisasi
+  // (NeedOtorisasi=0) tapi qty-nya belum sepenuhnya dibuatkan transfer (DBTRANSFERDET
+  // yang menunjuk balik ke NOPRTRANSFER/URUTPRTRANSFER-nya belum menutup seluruh QNT).
+  // Query asli sebelum konsolidasi ke fetchHeaderList() -- domainnya beda dari
+  // dbTransferDet/DBTRANSFER punya fetchHeaderList(), jadi tidak bisa disatukan ke sana.
+  private function fetchPermintaanList() {
+    return DB::connection("SML")->select("Select A.nobukti, a.NoUrut, a.Tanggal,  A.Note Keterangan, A.NoPenyerahan,
+            A.IsOtorisasi1, A.OtoUser1, A.TglOto1, A.IsOtorisasi2, A.OtoUser2, A.TglOto2,
+      A.IsOtorisasi3, A.OtoUser3, A.TglOto3, A.IsOtorisasi4, A.OtoUser4, A.TglOto4,
+      A.IsOtorisasi5, A.OtoUser5, A.TglOto5,
+            Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                      else 1
+                end As Bit) NeedOtorisasi,
+                B.GDGASAL
+    from dbPRTransfer a
+    Left Outer Join (SELECT A.NOBUKTI, A.GDGASAL
+            FROM DBPRtransferDET A
+            LEFT OUTER JOIN (select NOPRTRANSFER,URUTPRTRANSFER ,sum(QNT)Qnt1,SUM(QNT2) Qnt2
+                      from DBTRANSFERDET  group by NOPRTRANSFER,URUTPRTRANSFER
+                    ) B on A.NoBukti=B.NOPRTRANSFER AND A.Urut=B.URUTPRTRANSFER
+            WHERE ISNULL(A.QNT,0)-ISNULL(B.Qnt1,0) >0
+            GROUP BY A.NoBukti, A.GDGASAL
+            )B ON A.NoBukti=B.NoBukti
+    left outer join DBGUDANG C on C.KODEGDG = B.GDGASAL
+    where
+    Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi2=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi3=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
+                          Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
+                      else 1
+                end As Bit)=0
+    AND B.NoBukti IS not NULL
+    and C.pSampit = 0");
   }
 
   // Query header gabungan: Non-Otorisasi + Otorisasi + Belum/Sudah Diterima.
@@ -103,7 +145,8 @@ class TransferBarangController extends Controller
     }
 
     return response()->json([
-      "listTransfer" => $this->fetchHeaderList($date1, $date2)
+      "listTransfer" => $this->fetchHeaderList($date1, $date2),
+      "listPermintaan" => $this->fetchPermintaanList()
     ]);
   }
 
