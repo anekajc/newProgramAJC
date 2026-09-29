@@ -320,10 +320,7 @@ function loadSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -367,10 +364,7 @@ function loadEditSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;

@@ -94,7 +94,7 @@
           <div class="input-group">
             <input type="text" class="form-control" id="input_add_kode" readonly>
             <div class="input-group-append">
-              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button>
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
 
@@ -133,7 +133,7 @@
           <div class="input-group">
             <input type="text" class="form-control" id="input_edit_kode" readonly>
             <div class="input-group-append">
-              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonEditSelectPerkiraan()">+</button>
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonEditSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
 
@@ -171,7 +171,6 @@
               <table id="tabelAktivaSelectPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>
@@ -207,7 +206,6 @@
               <table id="tabelEditAktivaSelectPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>
@@ -503,10 +501,7 @@ function loadSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-primary hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -550,12 +545,7 @@ function loadEditSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        
-        <button class="btn-action-sm btn-action-primary hover-tooltip" data-tooltip='Pilih Perkiraan' type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class='bi bi-plus'></i></button>
-      
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;

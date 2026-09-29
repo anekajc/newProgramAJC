@@ -74,7 +74,7 @@
           <input type="text" class="form-control" id="input_add_nama" placeholder="Keterangan">
 
           <label for="input_add_perkiraan">Perkiraan</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -112,7 +112,7 @@
           <input type="text" class="form-control" id="input_edit_nama" placeholder="Keterangan">
 
           <label for="input_edit_perkiraan">Perkiraan</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
 
@@ -146,7 +146,6 @@
               <table id="tabelPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>
@@ -407,10 +406,7 @@ function buttonSelectPerkiraan (kode) {
       let rowTable = "";
 
       dataRefresh.forEach((item, i) => {
-        rowTable += `<tr>
-          <td class="text-center">
-            <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelect('${item.perkiraan}')"><i class="bi bi-plus-square"></i></button>
-          </td>
+        rowTable += `<tr class="pick-row" onclick="buttonSelect('${item.perkiraan}')">
           <td>${item.perkiraan}</td>
           <td>${item.keterangan}</td>
         </tr>`;

@@ -215,7 +215,7 @@
           <label for="input_add_perkiraanKas">Perkiraan Kas</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
         </div>
@@ -251,7 +251,7 @@
           <div class="input-group">
             <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
             <div class="input-group-append">
-              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectBank()">+</button>
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectBank()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
         </div>
@@ -397,7 +397,7 @@
           <label for="input_edit_perkiraanKas">Perkiraan Kas</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
         </div>
@@ -511,7 +511,6 @@
               <table id="tabelAktivaSelectPerkiraan">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
@@ -547,7 +546,6 @@
               <table id="tabelBukaSelectBank">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
@@ -1301,10 +1299,7 @@ function loadSelectKas() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihPerkiraanKas('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPerkiraanKas('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -1336,10 +1331,7 @@ function loadSelectBank() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihPerkiraanBank('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPerkiraanBank('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;

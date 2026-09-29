@@ -20,7 +20,7 @@
             <div class="input-group">
               <input type="text" class="form-control" id="input_kode" readonly>
               <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button>
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
@@ -50,7 +50,6 @@
               <table id="tabelAktivaSelectPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>
@@ -86,7 +85,6 @@
               <table id="tabelEditAktivaSelectPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Perkiraan</th>
                     <th scope="col">Keterangan</th>
                   </tr>

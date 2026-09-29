@@ -470,3 +470,31 @@
 /* DataTables menulis lebar hasil ukurnya di <table>; min-width supaya tabel daftar lain
    (selain #tabel) juga selebar kotaknya. */
 :where(.po-list-page) table.data-table { min-width: 100%; }
+
+/* ---------- Tombol Filter toolbar (#btnFilterMaster, toolbarMaster.blade.php) ----------
+   Tombol & modal memakai .po-btn-filter / .rt-filter dari po-table-header.css. Di sampingnya
+   ditampilkan pilihan filter yang sedang berlaku (#masterFilterAktif). */
+.po-filter-aktif {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rt-indigo, #4f46e5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* ---------- Label & input form Add/Edit selalu sejajar ----------
+   Grid .bs-form memusatkan label terhadap selnya (align-items: center). Sisa kelas tata letak
+   lama di sel input - mb-3 pada select, pembungkus .form-group (margin-bottom 1rem),
+   .input-group mb-1, dsb - membuat sel lebih tinggi dari inputnya sehingga label tampak
+   "tinggi sebelah". Margin vertikal di dalam sel dinolkan; jarak antarbaris cukup dari gap
+   grid. !important karena utilitas mb-* Bootstrap juga !important. Label dikecualikan supaya
+   aturan layar sempit (label di atas input, margin-top 8px) tetap berlaku. */
+#formBsGrid .bs-form > :not(label),
+#formBsGrid .bs-form > :not(label) :is(.form-group, .input-group, .form-control, .row, select, input, textarea) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+/* Label yang terselip di dalam sel (mis. "Kurs" di samping input) ikut sejajar tengah. */
+#formBsGrid .bs-form > :not(label) label { margin-bottom: 0; }

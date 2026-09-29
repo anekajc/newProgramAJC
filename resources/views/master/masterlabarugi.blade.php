@@ -27,25 +27,25 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  {{-- Filter Devisi & jenis Laporan dipasang di toolbar bersama, bergaya seperti filter periode
-       purchasing. Id & nilai option sama seperti sebelumnya. --}}
+  {{-- Filter Devisi & jenis Laporan ada di dalam tombol Filter toolbar, seperti modal filter
+       purchasing/purchaseOrder. Id & nilai option sama seperti sebelumnya. --}}
   @php
-    $filterLabaRugi = '<div class="po-filter-wrap"><label for="jenisDevisi">Devisi</label>'
-      . '<select name="devisi" id="jenisDevisi" class="po-filter-inp" onChange="loadAll()">';
+    $filterLabaRugi = '<div class="rt-grid-2"><div><label class="rt-field-label" for="jenisDevisi">Devisi</label>'
+      . '<select name="devisi" id="jenisDevisi" class="rt-native">';
     foreach ($listDataDevisi as $Devisi) {
       $filterLabaRugi .= '<option value="' . e($Devisi->Devisi) . '">' . e($Devisi->Devisi) . ' - ' . e($Devisi->NamaDevisi) . '</option>';
     }
     $filterLabaRugi .= '</select></div>'
-      . '<div class="po-filter-wrap"><label for="jenisLaporan">Laporan</label>'
-      . '<select name="perkiraanCustomer" id="jenisLaporan" class="po-filter-inp" onChange="loadAll()">'
+      . '<div><label class="rt-field-label" for="jenisLaporan">Laporan</label>'
+      . '<select name="perkiraanCustomer" id="jenisLaporan" class="rt-native">'
       . '<option value="0">Laba Rugi</option><option value="1">HPP</option>'
-      . '</select></div>';
+      . '</select></div></div>';
   @endphp
 
   <div class="card">
     <div class="card-body" style="padding:0;">
 
-      @include('master.partials.toolbarMaster', ['slotFilter' => $filterLabaRugi])
+      @include('master.partials.toolbarMaster', ['filterIsi' => $filterLabaRugi, 'filterJudul' => 'Filter Laba Rugi'])
 
       <table id="tabel" class="data-table po-aksi-hover">
         <thead id="tabel_header" class="text-center">
@@ -90,7 +90,7 @@
           <div class="input-group">
                   <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan">
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
         </div>
@@ -176,7 +176,7 @@
           <div class="input-group">
                   <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan">
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
         </div>
@@ -619,10 +619,7 @@ function buttonPerkiraan () {
           tipePerkiraan = `<td>Detail</td>`;
         }
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
       ${tipePerkiraan}
@@ -633,7 +630,6 @@ function buttonPerkiraan () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
     <th scope="col">Tipe</th>

@@ -67,9 +67,9 @@
           <!-- Group Aktiva -->
           <div class="bs-form">
           <label for="input_add_GroupAktiva">Group Aktiva</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_add_DaftarDevisi">Devisi</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_add_NoAktiva">No. Aktiva</label>
           <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
           <label for="input_add_NoUrut">No. Urut</label>
@@ -110,7 +110,7 @@
           <div class="input-group">
             <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
             <div class="input-group-append">
-              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
         </div>
@@ -118,19 +118,19 @@
           <!-- Biaya Penyusutan 1 -->
           <div class="bs-form bs-form-1">
           <label for="input_add_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
               </div></div></div>
           <label for="input_add_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
               </div></div></div>
           <label for="input_add_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
@@ -166,9 +166,9 @@
           <!-- Group Aktiva -->
           <div class="bs-form">
           <label for="input_edit_GroupAktiva">Group Aktiva</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()">+</button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_edit_DaftarDevisi">Devisi</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()">+</button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_edit_NoAktiva">No. Aktiva</label>
           <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
           <label for="input_edit_NoUrut">No. Urut</label>
@@ -209,7 +209,7 @@
           <div class="input-group">
             <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
             <div class="input-group-append">
-              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()">+</button>
+              <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
         </div>
@@ -217,19 +217,19 @@
           <!-- Biaya Penyusutan 1 -->
           <div class="bs-form bs-form-1">
           <label for="input_edit_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
               </div></div></div>
           <label for="input_edit_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
               </div></div></div>
           <label for="input_edit_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')">+</button></div></div>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
             <div class="input-group">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
@@ -264,7 +264,6 @@
               <table id="tabelAddGroupAktiva">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
@@ -301,7 +300,6 @@
               <table id="tabelAddAkumulasiPenyusutan">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
@@ -337,7 +335,6 @@
               <table id="tabelAddBiayaPenyusutan">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
@@ -375,7 +372,6 @@
                   <tr>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
-              <th scope="col">Actions</th>
 
             </tr>
                 </thead>
@@ -411,7 +407,6 @@
               <table id="tabelAddGroupAktiva">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
@@ -450,7 +445,6 @@
                   <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
                 </thead>
@@ -485,7 +479,6 @@
               <table id="tabelEditDevisi">
                 <thead id='theadCustom' class="text-center">
                   <tr>
-              <th scope="col">Actions</th>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
 
@@ -524,7 +517,6 @@
                   <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
                 </thead>
@@ -566,27 +558,10 @@
 
           <div class="bs-form bs-form-1">
           <label for="input_add_SaldoValas">Valas</label>
-          <div class="bs-full"><div class="row">
-                <div class="col-5">
-                  <div class="form-group">
-                      <div class="input-group">
-                        <input type="text" class="form-control" id="input_add_SaldoValas" value="IDR">
-                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAddListValas()">+</button>
-                      </div>
-                  </div>
-                </div>
-                <div class="col-3">
-                  <div class="form-group">
-                    <label>Kurs</label>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="form-group">
-                    <input type="number" class="form-control text-right" id="input_add_SaldoKurs" value="1.00">
-                    <input type="text" class="form-control text-right" id="input_saldoAwal_devisi" placeholder="devisi" hidden>
-                  </div>
-                </div>
-              </div></div>
+          <select class="form-control" id="input_add_SaldoValas" onchange="onChangeSaldoValas()"></select>
+          <label for="input_add_SaldoKurs">Kurs</label>
+          <input type="number" class="form-control text-right" id="input_add_SaldoKurs" value="1.00">
+          <input type="text" class="form-control text-right" id="input_saldoAwal_devisi" placeholder="devisi" hidden>
         </div>
 
           <div class="bs-form bs-form-1">
@@ -613,42 +588,6 @@
 </div>
 </div>
 
-<!-- start modal select valas -->
-<div class="modal fade picker-kas" id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Devisi</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid mt-4">
-          <div class="row">
-            <div class="col-12" style="overflow:auto;">
-              <table id="tabelSelectValas">
-                <thead id='theadCustom' class="text-center">
-                  <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Kode Valas</th>
-              <th scope="col">Nama Valas</th>
-
-            </tr>
-                </thead>
-                <tbody id="tabel_dataSelectValas" class="text-left"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- End modal select valas-->
 <!-- End modal saldo awal-->
 
 @endsection
@@ -797,10 +736,7 @@ function buttonGroupAktiva () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -849,10 +785,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '1')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -864,10 +797,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '2')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -880,10 +810,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '3')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
@@ -944,10 +871,7 @@ function loadAkumulasiPenyusutan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -972,54 +896,51 @@ function buttonDaftarDevisi () {
   loadDevisi()
 }
 
-function buttonAddListValas () {
-  $("#formSelectValas").modal('toggle')
-  
-  console.log('asd');
-  let _token = $("#_token").val();
+// Valas Saldo Awal dipilih lewat dropdown seperti purchasing/purchaseOrder (muatDropdownValas /
+// onChangeValas). Isinya dari masteraktivaloadvalas, sumber yang dulu dipakai modal browse.
+let listValas = []
 
-  $('#tabelSelectValas').DataTable().destroy();
-
+function muatDropdownValas () {
   $.ajax({
     url: "{!! url('masteraktivaloadvalas') !!}",
     type: "get",
     async: false,
     data: {
-      _token: _token,
+      _token: $("#_token").val(),
     },
     success: function (res) {
-      console.log(res);
-      dataRefresh = res;
+      listValas = res
     },
   });
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
-
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonAddPickValas('${item.KODEVLS}', '${item.KURS}')"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${item.KODEVLS}</td>
-      <td>${item.KURS}</td>
-    </tr>`;
+  let selectEl = document.getElementById("input_add_SaldoValas")
+  selectEl.innerHTML = ''
+  listValas.forEach((item) => {
+    let opt = document.createElement('option')
+    opt.value = item.KODEVLS
+    opt.textContent = item.KODEVLS
+    selectEl.appendChild(opt)
   });
 
-  document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
-  pickerKasInit('tabelSelectValas')
-  
+  selectEl.value = 'IDR'
 }
 
-function buttonAddPickValas (selectedValas, selectedKurs) {
-  // Set the selected values in the second modal
-  $("#input_add_SaldoValas").val(selectedValas);
-  $("#input_add_SaldoKurs").val(selectedKurs);
-  // You can set other fields here if needed
+// Valas tersimpan yang tidak ada di daftar tetap ditampilkan apa adanya.
+function pilihSaldoValas (kode) {
+  let selectEl = document.getElementById("input_add_SaldoValas")
+  if (kode && !listValas.some(item => item.KODEVLS === kode)) {
+    let opt = document.createElement('option')
+    opt.value = kode
+    opt.textContent = kode
+    selectEl.appendChild(opt)
+  }
+  selectEl.value = kode
+}
 
-  // Close the first modal
-  $("#formSelectValas").modal("hide");
-
+function onChangeSaldoValas () {
+  let kode = $("#input_add_SaldoValas").val()
+  let itemX = listValas.find(item => item.KODEVLS === kode)
+  $("#input_add_SaldoKurs").val(itemX ? itemX.KURS : '')
 }
 
 function loadDevisi () {
@@ -1045,10 +966,7 @@ function loadDevisi () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')">
       <td>${item.Devisi}</td>
       <td>${item.NamaDevisi}</td>
     </tr>`;
@@ -1491,12 +1409,9 @@ function loadEditGroupAktiva() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihEditGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihEditGroupAktiva('${item.Perkiraan}', '${item.keterangan}', '${item.Persen}', '${item.Akumulasi}', '${item.Biaya1}', '${item.Biaya2}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1542,12 +1457,9 @@ function loadEditDevisi() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonEditPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')">
       <td>${item.Devisi}</td>
       <td>${item.NamaDevisi}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonEditPilihDevisi('${item.Devisi}', '${item.NamaDevisi}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1589,12 +1501,9 @@ function loadEditAkumulasiPenyusutan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonEditPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonEditPilihAkumulasiPenyusutan('${item.Perkiraan}', '${item.keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1638,7 +1547,7 @@ $.ajax({
       console.log(res)
       document.getElementById("input_add_SaldoNilaiAwal").value = res[0].Awal
       document.getElementById("input_add_SaldoNilaiPenyusutan").value = res[0].AwalSusut
-      document.getElementById("input_add_SaldoValas").value = res[0].Valas
+      pilihSaldoValas(res[0].Valas)
       document.getElementById("input_add_SaldoKurs").value = res[0].Kurs
 
   formatNumber(document.getElementById("input_add_SaldoNilaiAwal"))
@@ -1650,6 +1559,7 @@ $.ajax({
 
 window.onload = function(){
   MasterList.kolom({ href: 'masteraktiva', kolom: MAK_KOLOM, onChange: renderTabel })
+  muatDropdownValas()
   loadAll();
 };
 

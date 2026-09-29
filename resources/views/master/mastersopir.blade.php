@@ -84,7 +84,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_add_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -125,7 +125,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_edit_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()">+</button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
 
@@ -159,7 +159,6 @@ function getStatus($data) {
               <table id="tabelPerkiraan">
                 <thead class="text-center">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Kode Cost</th>
                     <th scope="col">Nama Cost</th>
                   </tr>
@@ -401,10 +400,7 @@ function buttonSelectPerkiraan(kode) {
       let rowTable = "";
 
       dataRefresh.forEach((item, i) => {
-        rowTable += `<tr>
-          <td class="text-center">
-            <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelect('${item.kodecost}')"><i class="bi bi-plus-square"></i></button>
-          </td>
+        rowTable += `<tr class="pick-row" onclick="buttonSelect('${item.kodecost}')">
           <td>${item.kodecost}</td>
           <td>${item.namacost}</td>
         </tr>`;

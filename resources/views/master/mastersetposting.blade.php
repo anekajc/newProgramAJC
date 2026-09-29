@@ -186,7 +186,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -424,7 +423,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -471,7 +469,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -518,7 +515,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -565,7 +561,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -647,7 +642,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -789,7 +783,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -932,7 +925,6 @@
             <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
-              <th scope="col">Actions</th>
 
             </tr>
           </thead>
@@ -1098,12 +1090,9 @@ function loadPostingKasSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPostingKas('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihPostingKas('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1137,12 +1126,9 @@ function loadPostingBankSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPostingBank('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihPostingBank('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1218,12 +1204,9 @@ function loadPerkiraanAkumulasiSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAkumulasiPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAkumulasiPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1257,12 +1240,9 @@ function loadPerkiraanAkumulasiEditSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAkumulasiEditPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAkumulasiEditPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1296,12 +1276,9 @@ function loadPerkiraanAkumulasiSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAkumulasiPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAkumulasiPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1335,12 +1312,9 @@ function loadPerkiraanAktivaSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAktivaPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAktivaPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1374,12 +1348,9 @@ function loaAkumulasiAktivaSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAktivaPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAktivaPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1413,12 +1384,9 @@ function loadBiayaPenyusutanAktivaSelect1() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAktivaBiayaPenyusutan1('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAktivaBiayaPenyusutan1('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1452,12 +1420,9 @@ function loadBiayaPenyusutanAktivaSelect2() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAktivaBiayaPenyusutan2('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAktivaBiayaPenyusutan2('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 
@@ -1491,12 +1456,9 @@ function loadAkumulasiAktivaSelect() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihAktivaAkumulasi('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center">
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonPilihAktivaAkumulasi('${item.Perkiraan}', '${item.Keterangan}')">Select</button>
-      </td>
     </tr>`;
   });
 

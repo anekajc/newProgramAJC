@@ -27,11 +27,11 @@
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
 
-  {{-- Filter perkiraan (mis. Hutang Usaha / Piutang Usaha) dipasang di toolbar bersama, bergaya
-       seperti filter periode purchasing. Nilai option sama seperti sebelumnya. --}}
+  {{-- Filter perkiraan (mis. Hutang Usaha / Piutang Usaha) ada di dalam tombol Filter toolbar,
+       seperti modal filter purchasing/purchaseOrder. Id & nilai option sama seperti sebelumnya. --}}
   @php
-    $filterPerkiraan = '<div class="po-filter-wrap"><label for="perkiraanCustomer">Perkiraan</label>'
-      . '<select id="perkiraanCustomer" class="po-filter-inp" onchange="loadAll()">';
+    $filterPerkiraan = '<div><label class="rt-field-label" for="perkiraanCustomer">Perkiraan</label>'
+      . '<select id="perkiraanCustomer" class="rt-native">';
     foreach ($listDataCustomer as $customer) {
       $nilai = e($customer->keterangan . ' (' . $customer->Perkiraan . ')');
       $filterPerkiraan .= '<option value="' . $nilai . '">' . $nilai . '</option>';
@@ -43,7 +43,7 @@
     <div class="card-body" style="padding:0;">
 
       {{-- Tambah Hutang dilakukan per baris (tombol di kolom Actions), jadi toolbar tanpa tombol Tambah. --}}
-      @include('master.partials.toolbarMaster', ['tanpaTambah' => true, 'slotFilter' => $filterPerkiraan])
+      @include('master.partials.toolbarMaster', ['tanpaTambah' => true, 'filterIsi' => $filterPerkiraan, 'filterJudul' => 'Filter Hutang'])
 
       <table id="tabel" class="data-table po-aksi-hover">
         <thead id="tabel_header" class="text-center">
@@ -95,12 +95,7 @@
 
           
           <label for="input_add_valas">Valas</label>
-          <div class="input-group">
-                    <input type="text" class="form-control" id="input_add_valas" value='IDR' disabled>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonValasAdd()">+</button>
-                    </div>
-                </div>
+          <select class="form-control" id="input_add_valas" onchange="onChangeValas('add')"></select>
           <label for="input_add_kurs">Kurs</label>
           <input type="number" class="form-control text-right" id="input_add_kurs" value=1.00 disabled>
           <div hidden>
@@ -161,12 +156,7 @@
 
           
           <label for="input_edit_valas">Valas</label>
-          <div class="input-group">
-                    <input type="text" class="form-control" id="input_edit_valas" placeholder="Valas" disabled>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonValasAdd()">+</button>
-                    </div>
-                </div>
+          <select class="form-control" id="input_edit_valas" onchange="onChangeValas('edit')"></select>
           <label for="input_edit_kurs">Kurs</label>
           <input type="text" class="form-control text-right" id="input_edit_kurs" placeholder="Kurs" disabled>
           <div hidden>
@@ -195,43 +185,6 @@
 </div>
 <!-- End modal add-->
 
-<!-- start modal valas select -->
-<div class="modal fade picker-kas"  id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Valas</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid mt-4">
-          <div class="row">
-            <div class="col-12" style="overflow:auto;">
-              <table id="tabelSelectValas">
-                <thead id='theadCustom' class="text-center">
-                  <tr>
-              <th scope="col">Actions</th>1
-              <th scope="col">Valas</th>
-              <th scope="col">Keterangan</th>
-              <th scope="col">Kurs</th>
-
-            </tr>
-                </thead>
-                <tbody id="tabel_dataSelectValas" class="text-left"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- End modal select valas-->
 
 
 @endsection
@@ -363,7 +316,7 @@ function buttonEdit (kode, perkiraanCust) {
       document.getElementById("input_edit_noFaktur").value = res[0].NoFaktur
       document.getElementById("input_edit_tanggalFaktur").value = new Date(res[0].Tanggal).toLocaleDateString('en-CA');
       document.getElementById("input_edit_jatuhTempo").value = new Date(res[0].JatuhTempo).toLocaleDateString('en-CA');
-      document.getElementById("input_edit_valas").value = res[0].Valas
+      pilihValas("input_edit_valas", res[0].Valas)
       document.getElementById("input_edit_kurs").value = formatAngka(parseFloat(res[0].Kurs).toFixed(2))
       document.getElementById("input_edit_debet").value = res[0].Debet
       document.getElementById("input_edit_debetRp").value = res[0].DebetD
@@ -543,56 +496,53 @@ function submitAdd () {
   // console.log(kodearea, namaarea)
 }
 
-function buttonValasAdd () {
-  loadValas()
-  $("#formSelectValas").modal('toggle')
-}
+// Valas dipilih lewat dropdown seperti purchasing/purchaseOrder (muatDropdownValas /
+// onChangeValas). Isinya dari masterhutangloadvalas, sumber yang dulu dipakai modal browse.
+let listValas = []
 
-function buttonPilihValas(selectedPerkiraan, selectedKurs) {
-  $("#input_add_valas").val(selectedPerkiraan);
-  $("#input_add_kurs").val(selectedKurs);
-  $("#input_edit_valas").val(selectedPerkiraan);
-  $("#input_edit_kurs").val(selectedKurs);
-  $("#formSelectValas").modal("hide");
-
-}
-
-function loadValas() {
-  console.log('asd');
-  let _token = $("#_token").val();
-
-  $('#tabelSelectValas').DataTable().destroy();
-
+function muatDropdownValas () {
   $.ajax({
     url: "{!! url('masterhutangloadvalas') !!}",
     type: "get",
     async: false,
     data: {
-      _token: _token,
+      _token: $("#_token").val(),
     },
     success: function (res) {
-      console.log(res);
-      dataRefresh = res;
+      listValas = res
     },
   });
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
-
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihValas('${item.KODEVLS}', '${item.KURS}')"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${item.KODEVLS}</td>
-      <td>${item.NAMAVLS}</td>
-      <td class='text-right'>${item.KURS}</td>
-    </tr>`;
+  ['input_add_valas', 'input_edit_valas'].forEach((id) => {
+    let selectEl = document.getElementById(id)
+    selectEl.innerHTML = ''
+    listValas.forEach((item) => {
+      let opt = document.createElement('option')
+      opt.value = item.KODEVLS
+      opt.textContent = `${item.KODEVLS} - ${item.NAMAVLS}`
+      selectEl.appendChild(opt)
+    });
   });
 
-  document.getElementById("tabel_dataSelectValas").innerHTML = rowTable
-  pickerKasInit('tabelSelectValas')
-  
+  $("#input_add_valas").val('IDR')
+}
+
+// Valas tersimpan yang tidak ada di daftar tetap ditampilkan apa adanya.
+function pilihValas (id, kode) {
+  let selectEl = document.getElementById(id)
+  if (kode && !listValas.some(item => item.KODEVLS === kode)) {
+    let opt = document.createElement('option')
+    opt.value = kode
+    opt.textContent = kode
+    selectEl.appendChild(opt)
+  }
+  selectEl.value = kode
+}
+
+function onChangeValas (mode) {
+  let kode = $("#input_" + mode + "_valas").val()
+  let itemX = listValas.find(item => item.KODEVLS === kode)
+  $("#input_" + mode + "_kurs").val(itemX ? itemX.KURS : '')
 }
 
 function loadCustomer() {
@@ -671,6 +621,7 @@ function formatAngka (angkaString) {
 
 window.onload = function(){
     MasterList.kolom({ href: 'masterhutang', kolom: MHT_KOLOM, onChange: renderTabel })
+    muatDropdownValas();
     loadAll();
 };
 

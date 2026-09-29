@@ -90,25 +90,17 @@
           <input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1">
         </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_alamat2" placeholder="Alamat 2">
-                </div>
-              </div>
-
-            </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <input type="text" class="form-control" id="input_add_alamat2" placeholder="Alamat 2">
+        </div>
 
             <div class="bs-form bs-form-1">
           <label for="input_add_kota">Kota</label>
           <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select">+</button>
+                          <button type="button" class="btn btn-chip-biru btn-select" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
         </div>
@@ -195,17 +187,10 @@
           <input type="text" class="form-control" id="input_add_alamatPajak" placeholder="Alamat Pajak 1">
         </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_alamatPajak2" placeholder="Alamat Pajak 2">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <input type="text" class="form-control" id="input_add_alamatPajak2" placeholder="Alamat Pajak 2">
+        </div>
 
             
             <div class="bs-form bs-form-1">
@@ -264,25 +249,17 @@
           <input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1">
         </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_alamat2" placeholder="Alamat 2">
-                </div>
-              </div>
-
-            </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <input type="text" class="form-control" id="input_edit_alamat2" placeholder="Alamat 2">
+        </div>
 
             <div class="bs-form bs-form-1">
           <label for="input_edit_kota">Kota</label>
           <div class="input-group mb-1">
                       <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select">+</button>
+                          <button type="button" class="btn btn-chip-biru btn-select" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
         </div>
@@ -369,17 +346,10 @@
           <input type="text" class="form-control" id="input_edit_alamatPajak" placeholder="Alamat Pajak 1">
         </div>
 
-            <div class="row mb-1">
-              <div class="col-2 text-left">
-                <div class="form-group text-left mb-1">
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_alamatPajak2" placeholder="Alamat Pajak 2">
-                </div>
-              </div>
-            </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <input type="text" class="form-control" id="input_edit_alamatPajak2" placeholder="Alamat Pajak 2">
+        </div>
 
             
             <div class="bs-form bs-form-1">
@@ -430,7 +400,7 @@
           <div class="input-group">
                     <input type="text" class="form-control" id="input_detailAkun_add_hutPiut" placeholder="Hutang Piutang">
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()" title="Cari"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
         </div>
@@ -454,7 +424,7 @@
           <div class="input-group">
                     <input type="text" class="form-control" id="input_detailAkun_edit_hutPiut" placeholder="Hutang Piutang">
                     <div class="input-group-append">
-                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()">+</button>
+                        <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()" title="Cari"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
         </div>
@@ -1479,10 +1449,7 @@ function buttonHutangPiutang () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectHutangPiutang('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectHutangPiutang('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.keterangan}</td>
     </tr>`;
@@ -1492,7 +1459,6 @@ function buttonHutangPiutang () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
   </tr>
@@ -1533,12 +1499,7 @@ function buttonKota(searchValue = '') {
 
     let rowTable = "";
     dataRefresh.forEach((item, i) => {
-        rowTable += `<tr>
-            <td class="text-center">
-                <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectKota('${item.KodeKota}', '${item.NamaKota}', '${item.KodeArea}')">
-                    <i class="bi bi-plus-square"></i>
-                </button>
-            </td>
+        rowTable += `<tr class="pick-row" onclick="buttonSelectKota('${item.KodeKota}', '${item.NamaKota}', '${item.KodeArea}')">
             <td>${item.KodeKota}</td>
             <td>${item.NamaKota}</td>
             <td>${item.KodeArea}</td>
@@ -1549,7 +1510,6 @@ function buttonKota(searchValue = '') {
 
     let headerTable = `
         <tr>
-            <th scope="col">Actions</th>
             <th scope="col">Kode Kota</th>
             <th scope="col">Nama Kota</th>
             <th scope="col">Kode Area</th>
