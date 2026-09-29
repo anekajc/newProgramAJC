@@ -407,7 +407,7 @@
                     <div class="col-md-3">
                         <div class="row">
 
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label>Gudang Asal</label>
                                 </div>
@@ -439,7 +439,7 @@
                     <div class="col-md-3">
                         <div class="row">
 
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label>Gudang Tujuan</label>
                                 </div>
@@ -2201,7 +2201,7 @@
                 // Sudah otorisasi (Detail + Batal Otorisasi + Print)
                 tombolAksi +=
                     '<button type="button" class="btn btn-danger btn-sm" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
                     '<button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {

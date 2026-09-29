@@ -12,6 +12,7 @@
          (.tb-report) dan modal filter (.rt-filter). --}}
     <link rel="stylesheet"
         href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+
     {{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
          saat spesifisitas seri. --}}
     <link rel="stylesheet"
@@ -853,7 +854,7 @@
                                     </div>
 
                                     <div class="row mt-2">
-                                        <div class="col-md-12 text-right">
+                                        <div class="col-md-12 text-right" id="contentContainer">
                                             <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary"
                                                 onclick="buttonBatalShowHide()">Batal</button>
                                             <button id="" type="button" onclick="submitEditKoreksi()"
@@ -1779,7 +1780,7 @@
     <td class="text-center">
       <div class="po-aksi-wrap">
         <button type="button" class="btn btn-warning btn-sm" title="Detail" onclick="buttonDetailKoreksi('${p.NOBUKTI}')"><i class="bi bi-info"></i></button>
-        <button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonKoreksi('${p.NOBUKTI}')"><i class="bi bi-pencil-fill"></i></button>
+        <button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonKoreksi('${p.NOBUKTI}')"><i class="bi bi-pen"></i></button>
         <button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint('${p.NOBUKTI}')"><i class="bi bi-printer"></i></button>
       </div>
     </td>

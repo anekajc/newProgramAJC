@@ -248,6 +248,9 @@ function bankInitPicker(idTabel, opsi) {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
         paging: true,
         pageLength: 10,
+        // Hanya tabel yang di-scroll; info + tombol halaman terkunci di bawahnya
+        // (.rt-picker-scroll / .rt-picker-bawah di public/css/report-table.css).
+        dom: 'lfr<"rt-picker-scroll"t><"rt-picker-bawah"ip>',
         language: {
             lengthMenu: 'Tampilkan _MENU_',
             emptyTable: 'Tidak ada data',

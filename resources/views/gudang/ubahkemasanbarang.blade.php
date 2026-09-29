@@ -11,8 +11,7 @@
          report-table.css dimuat di sini (dulu dari layout gudang) untuk modal picker Barang
          (.rt-picker-v2) dan modal filter (.rt-filter). Tabel item #tabelitem tidak lagi memakai
          .tb-report — tampilannya ditulis di blok CSS #tabelitem di bawah. --}}
-    <link rel="stylesheet"
-        href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
     {{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
          saat spesifisitas seri. --}}
     <link rel="stylesheet"
@@ -22,8 +21,8 @@
 
     <style>
         /* Kotak cari di modal picker Barang: pencarian jalan lewat AJAX (bukan search bawaan
-                   DataTables, lihat searchBarangModal()), jadi dirapikan di sini. Skin modalnya sendiri
-                   (.rt-picker-v2) ada di report-table.css. */
+                       DataTables, lihat searchBarangModal()), jadi dirapikan di sini. Skin modalnya sendiri
+                       (.rt-picker-v2) ada di report-table.css. */
         #modalPickBarang .barang-search {
             width: 260px;
             max-width: 100%;
@@ -31,13 +30,13 @@
         }
 
         /* Tabel item form Add/Edit/Detail (#tabelitem) — tampilannya disamakan dengan tabel daftar
-           #tabel di #pageHome: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
-           kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
-           hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
-           po-table-header.css (sama seperti #tabel_add di permintaantransferbarang.blade.php); blok
-           itu sendiri tidak dipakai di sini karena #pageForm bukan .po-list-page. Padding sel isi
-           sengaja tidak ditulis: `table tbody td { padding: 0 10px !important }` di newmaster.css
-           berlaku sama seperti di #tabel (baris rapat). */
+               #tabel di #pageHome: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
+               kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
+               hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
+               po-table-header.css (sama seperti #tabel_add di permintaantransferbarang.blade.php); blok
+               itu sendiri tidak dipakai di sini karena #pageForm bukan .po-list-page. Padding sel isi
+               sengaja tidak ditulis: `table tbody td { padding: 0 10px !important }` di newmaster.css
+               berlaku sama seperti di #tabel (baris rapat). */
         #pageForm .po-item-card {
             background: var(--white, #fff);
             border: 1.5px solid var(--border, #e5e7eb);
@@ -270,12 +269,12 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-1" >
+                            <div class="col-md-1">
                                 <div class="form-group">
                                     <label>Tanggal</label>
                                 </div>
                             </div>
-                            <div class="col-md-2" >
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <input type="date" class="form-control text-center" id="input_tanggal"
                                         value="{!! date('Y-m-d') !!}" disabled>
@@ -316,8 +315,8 @@
                         <table id="tabelitem" class="data-table">
                             <thead id="tabelitem_header">
                                 <tr>
-                                    <th>Kode</th>
-                                    <th>Deskripsi</th>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
                                     <th class="text-center">Sat</th>
                                     <th class="num">Qty Asal</th>
                                     <th class="num">Qty Jadi</th>
@@ -376,8 +375,7 @@
                                                         id="inputitem_kodebrg" placeholder="Kode Barang"
                                                         onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveBarang($('#inputitem_kodebrg').val()); }">
                                                     <button type="button" id="btnitem_kodebrg"
-                                                        class="btn btn-chip-biru "
-                                                        onclick="browseBarang()">
+                                                        class="btn btn-chip-biru " onclick="browseBarang()">
                                                         <i class="bi bi-search"></i>
                                                     </button>
                                                 </div>
@@ -1056,15 +1054,16 @@
                 // Sudah otorisasi — Batal Otorisasi + Print
                 tombolAksi +=
                     '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
                     '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {
                 // Belum otorisasi — Edit + Otorisasi
-                tombolAksi += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' +
-                    nobukti + '\')"><i class="bi bi-pen"></i></button>' +
+                tombolAksi +=
                     '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key"></i></button>';
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
+                    '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' +
+                    nobukti + '\')"><i class="bi bi-pen"></i></button>';
             }
 
             return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
@@ -2083,11 +2082,11 @@
                 <td class="text-right">${item.HrgAdi ? formatCurrency(item.HrgAdi) : '0.00'}</td>
                 ${gtipeform == g_tipeformDetail ? `` :
                 `<td>
-                              <div class="action-buttons">
-                                <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonItemEdit(${i})"><i class="bi bi-pen"></i></button>
-                                <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonItemDelete(${i})"><i class="bi bi-trash"></i></button>
-                              </div>
-                            </td>`}
+                                  <div class="action-buttons">
+                                    <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonItemEdit(${i})"><i class="bi bi-pen"></i></button>
+                                    <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonItemDelete(${i})"><i class="bi bi-trash"></i></button>
+                                  </div>
+                                </td>`}
               </tr>`;
                             });
 
@@ -2113,8 +2112,8 @@
 
             let rowHeader = `
     <tr>
-      <th>Kode</th>
-      <th>Deskripsi</th>
+      <th>Kode Barang</th>
+      <th>Nama Barang</th>
       <th class="text-center">Sat</th>
       <th class="num">Qty Asal</th>
       <th class="num">Qty Jadi</th>
