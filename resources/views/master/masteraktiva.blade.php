@@ -32,28 +32,18 @@
   @include('master.partials.toolbarMaster')
 
   <table id="tabel" class="data-table po-aksi-hover">
-        <thead>
+        <thead id="tabel_header" class="text-center">
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
-            <th style="padding: 4px 12px;" scope="col">Kode Aktiva</th>
-            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-            <th style="padding: 4px 12px;" scope="col">Devisi</th>
-            <th style="padding: 4px 12px;" scope="col">Tipe Aktiva</th>
-            <th style="padding: 4px 12px;" scope="col">Kelompok</th>
-            <th style="padding: 4px 12px;" scope="col">Quantity</th>
-            <th style="padding: 4px 12px;" scope="col">Susut</th>
-            <th style="padding: 4px 12px;" scope="col">Metode</th>
-            <th style="padding: 4px 12px;" scope="col">Akumulasi</th>
-            <th style="padding: 4px 12px;" scope="col">Biaya Penyusutan 1</th>
-            <th style="padding: 4px 12px;" scope="col">Persen Biaya 1</th>
-            <th style="padding: 4px 12px;" scope="col">Biaya Penyusutan 2</th>
-            <th style="padding: 4px 12px;" scope="col">Persen Biaya 2</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-left">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
 
     </div>
   </div>
@@ -150,7 +140,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
@@ -249,7 +239,7 @@
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
         <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
     </div>
@@ -258,378 +248,295 @@
 <!-- End modal add-->
 
 <!-- start modal select add group aktiva -->
-<div class="modal fade"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
+        <h5 class="modal-title">Group Aktiva</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddGroupAktiva">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddGroupAktiva" class="text-left" >
-            <tr>
-
-              <td class="text-center">
-                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-plus">Select</i></button>
-              </td>
-              <td></td>
-              <td></td>
-
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add group aktiva-->
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade"  id="formAddAkumulasiPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddAkumulasiPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
-        
+        <h5 class="modal-title">Akumulasi Penyusutan</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddAkumulasiPenyusutan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddAkumulasiPenyusutan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddAkumulasiPenyusutan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPenyusutan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddAkumulasiPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add akumulasi penyusutan-->
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddBiayaPenyusutan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Biaya Penyusutan</h5>
-        
+        <h5 class="modal-title">Biaya Penyusutan</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddBiayaPenyusutan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddBiayaPenyusutan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataBiayaPenyusutan" class="text-left" >
-            <tr>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataBiayaPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add akumulasi penyusutan-->
 
 <!-- start modal select add devisi -->
-<div class="modal fade"  id="formAddDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
+        <h5 class="modal-title">Devisi</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddDevisi" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddDevisi">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddDevisi" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihDevisi()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddDevisi" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select add devisi-->
 
 
 <!-- start modal select add group aktiva -->
-<div class="modal fade"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formAddGroupAktiva" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
+        <h5 class="modal-title">Group Aktiva</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAddGroupAktiva" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAddGroupAktiva">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAddGroupAktiva" class="text-left" >
-            <tr>
-
-              <td class="text-center">
-                <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-plus">Select</i></button>
-              </td>
-              <td></td>
-              <td></td>
-
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAddGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal edit-->
 
 <!-- start modal select  edit group aktiva -->
-<div class="modal fade"  id="formEditGroupAktiva" style='z-index:1060;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditGroupAktiva" style='z-index:1060;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Group Aktiva</h5>
-        
+        <h5 class="modal-title">Group Aktiva</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditGroupAktiva" class="table table-bordered table-striped"  >
-          <thead class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditGroupAktiva">
+                <thead class="text-center">
+                  <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditGroupAktiva" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditGroupAktiva" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select edit group aktiva-->
 
 <!-- start modal select edit devisi -->
-<div class="modal fade"  id="formEditDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditDevisi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
+        <h5 class="modal-title">Devisi</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditDevisi" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditDevisi">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Kode Devisi</th>
               <th scope="col">Nama Devisi</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditDevisi" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihDevisi()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditDevisi" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select edit devisi-->
 
 <!-- start modal select edit akumulasi penyusutan -->
-<div class="modal fade"  id="formEditAkumulasiPenyusutan" style='z-index:1200;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formEditAkumulasiPenyusutan" style='z-index:1200;' tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akumulasi Penyusutan</h5>
-        
+        <h5 class="modal-title">Akumulasi Penyusutan</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelEditAkumulasiPenyusutan" class="table table-bordered table-striped"  >
-          <thead class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelEditAkumulasiPenyusutan">
+                <thead class="text-center">
+                  <tr>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
               <th scope="col">Actions</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataEditAkumulasiPenyusutan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihAkumulasiPenyusutan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataEditAkumulasiPenyusutan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
     </div>
   </div>
 </div>
@@ -707,70 +614,116 @@
 </div>
 
 <!-- start modal select valas -->
-<div class="modal fade" id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Devisi</h5>
-        
+        <h5 class="modal-title">Devisi</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelSelectValas" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelSelectValas">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Kode Valas</th>
               <th scope="col">Nama Valas</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataSelectValas" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihValas()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-      <div class="modal-footer">
-         
+                </thead>
+                <tbody id="tabel_dataSelectValas" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select valas-->
 <!-- End modal saldo awal-->
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
 
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MAK_KOLOM = [
+  ['KodeAktiva',    'Kode Aktiva',        1, 'varchar', 0, 0],
+  ['Keterangan',    'Keterangan',         1, 'varchar', 0, 0],
+  ['Tanggal',       'Tanggal',            1, 'varchar', 0, 0],
+  ['NamaDevisi',    'Devisi',             1, 'varchar', 0, 0],
+  ['MyTipe',        'Tipe Aktiva',        1, 'varchar', 0, 0],
+  ['NamaPerkiraan', 'Kelompok',           1, 'varchar', 0, 0],
+  ['Quantity',      'Quantity',           1, 'varchar', 0, 0],
+  ['Susut',         'Susut',              1, 'varchar', 0, 0],
+  ['Metode',        'Metode',             1, 'varchar', 0, 0],
+  ['akumulasi',     'Akumulasi',          1, 'varchar', 0, 0],
+  ['Biaya',         'Biaya Penyusutan 1', 1, 'varchar', 0, 0],
+  ['PersenBiaya1',  'Persen Biaya 1',     1, 'varchar', 0, 0],
+  ['Biaya2',        'Biaya Penyusutan 2', 1, 'varchar', 0, 0],
+  ['PersenBiaya2',  'Persen Biaya 2',     1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (group, akumulasi, devisi, dsb)
+// memakai dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  // Tampilan sel sama seperti sebelumnya: tanggal DD-MM-YYYY, angka rata kanan.
+  let tanggal = function (item) {
+    if (!item.Tanggal) { return '<td></td>' }
+    const date = new Date(item.Tanggal);
+    return '<td>' + String(date.getDate()).padStart(2, '0') + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear() + '</td>'
+  }
+  let kanan = function (field) { return function (item) { return "<td class='text-right'>" + (item[field] ?? '') + '</td>' } }
+  let khusus = { Tanggal: tanggal, Quantity: kanan('Quantity'), Susut: kanan('Susut'), PersenBiaya1: kanan('PersenBiaya1'), PersenBiaya2: kanan('PersenBiaya2') }
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Saldo Awal" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
   let _token = $("#_token").val();
-
-  // document.getElementById('breadcrumb').innerHTML = "Master Aktiva" // dimatikan: judul sekarang di bar atas (page-title)
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('masteraktivaloadall') !!}",
@@ -780,61 +733,12 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-let rowTable = ""
-dataRefresh.forEach((item, i) => {
-  let temp = ""
-  
-  // Format date to DD-MM-YYYY
-  let formattedDate = '';
-  if (item.Tanggal) {
-    const date = new Date(item.Tanggal);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    formattedDate = `${day}-${month}-${year}`;
-  }
-
-  rowTable += `<tr>
-    <td class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Saldo Awal" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSaldoAwal('${item.KodeAktiva}')"><i class="bi bi-currency-dollar"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KodeAktiva}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KodeAktiva}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-  <td>${item.KodeAktiva ?? ''}</td>
-  <td>${item.Keterangan ?? ''}</td>
-  <td>${formattedDate}</td>
-  <td>${item.NamaDevisi ?? ''}</td>
-  <td>${item.MyTipe ?? ''}</td>
-  <td>${item.NamaPerkiraan ?? ''}</td>
-  <td class='text-right'>${item.Quantity ?? ''}</td>
-  <td class='text-right'>${item.Susut ?? ''}</td>
-  <td>${item.Metode ?? ''}</td>
-  <td>${item.akumulasi ?? ''}</td>
-  <td>${item.Biaya ?? ''}</td>
-  <td class='text-right'>${item.PersenBiaya1 ?? ''}</td>
-  <td>${item.Biaya2 ?? ''}</td>
-  <td class='text-right'>${item.PersenBiaya2 ?? ''}</td>
-  </tr>`
-});
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
-        "pageLength": currentLength
-      });
-      MasterList.selesai('#tabel')
-
+  renderTabel()
 }
+
 
 function buttonPilihGroupAktiva(selectedPerkiraan, selectedKeterangan, selectedPersen, selectedAkumulasi, selectedBiaya1, selectedBiaya2) {
   $("#input_add_GroupAktiva").val(selectedPerkiraan);
@@ -903,10 +807,7 @@ function buttonGroupAktiva () {
   });
 
   document.getElementById("tabel_dataAddGroupAktiva").innerHTML = rowTable;
-  $("#tabelAddGroupAktiva").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddGroupAktiva')
 }
 
 function buttonPilihAkumulasiPenyusutan (selectedPerkiraan, selectedKeterangan) {
@@ -991,10 +892,7 @@ function buttonBiayaPenyusutan (kodeBiaya) {
   document.getElementById("tabel_dataBiayaPenyusutan").innerHTML = rowTable;
 }
 
-  $("#tabelAddBiayaPenyusutan").DataTable({
-    "lengthChange": true,
-    "paging": true
-  });
+  pickerKasInit('tabelAddBiayaPenyusutan')
 }
 
 function buttonPilihBiayaPenyusutan (selectedPerkiraan, selectedKeterangan, selectorBiaya) {
@@ -1056,10 +954,7 @@ function loadAkumulasiPenyusutan() {
   });
 
   document.getElementById("tabel_dataAddAkumulasiPenyusutan").innerHTML = rowTable;
-  $("#tabelAddAkumulasiPenyusutan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddAkumulasiPenyusutan')
 }
 
 function buttonPilihDevisi(selectedPerkiraan, selectedKeterangan) {
@@ -1112,10 +1007,7 @@ function buttonAddListValas () {
   });
 
   document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
-  $("#tabelSelectValas").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelSelectValas')
   
 }
 
@@ -1163,10 +1055,7 @@ function loadDevisi () {
   });
 
   document.getElementById("tabel_dataAddDevisi").innerHTML = rowTable;
-  $("#tabelAddDevisi").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAddDevisi')
 }
 
 function buttonEdit (kode) {
@@ -1232,7 +1121,7 @@ function buttonDelete (kode) {
   console.log(kode)
   let _token = $("#_token").val();
 
-  alertify.confirm('Hapus Area', 'Apakah yakin ingin menghapus Aktiva ' + kode + ' ?',
+  alertify.confirm('Hapus Aktiva', 'Apakah yakin ingin menghapus Aktiva ' + kode + ' ?',
       function() {
         console.log('yes')
 
@@ -1550,9 +1439,8 @@ function submitSaldoAwal () {
     success: function(res) {
 
       if (res != 1) {
-        alertify.warning("Data Saldo Awal Perkiraan " + Perkiraan + " telah ditambah");
-        loadAll()
-        $("#formSaldoAwal").modal("hide");
+        // Dulu cabang gagal pun menampilkan "telah ditambah" lalu menutup modal.
+        alertify.warning(res);
       }  else {
         console.log(res ,'!')
         alertify.success("Data Saldo Awal Perkiraan " + Perkiraan + " telah ditambah");
@@ -1613,10 +1501,7 @@ function loadEditGroupAktiva() {
   });
 
   document.getElementById("tabel_dataEditGroupAktiva").innerHTML = rowTable;
-  $("#tabelEditGroupAktiva").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditGroupAktiva')
 }
 
 function buttonEditPilihDevisi(selectedPerkiraan, selectedKeterangan) {
@@ -1667,10 +1552,7 @@ function loadEditDevisi() {
   });
 
   document.getElementById("tabel_dataEditDevisi").innerHTML = rowTable;
-  $("#tabelEditDevisi").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditDevisi')
 }
 
 function buttonEditPilihAkumulasiPenyusutan(selectedPerkiraan, selectedKeterangan) {
@@ -1717,10 +1599,7 @@ function loadEditAkumulasiPenyusutan() {
   });
 
   document.getElementById("tabel_dataEditAkumulasiPenyusutan").innerHTML = rowTable;
-  $("#tabelEditAkumulasiPenyusutan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelEditAkumulasiPenyusutan')
 }
 
 function buttonSaldoAwal (kode) {
@@ -1770,6 +1649,7 @@ $.ajax({
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'masteraktiva', kolom: MAK_KOLOM, onChange: renderTabel })
   loadAll();
 };
 

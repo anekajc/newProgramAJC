@@ -4,7 +4,6 @@
 @endsection
 @section('page-title', 'Master Head Group')
 @section('content')
-<div class="container-fluid">
 
 
 

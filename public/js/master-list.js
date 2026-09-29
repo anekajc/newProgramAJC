@@ -154,19 +154,25 @@
    * opt = {
    *   href     : 'masterbarang'  (kunci simpan per menu),
    *   kolom    : [[field, label, tampil(1/0), 'varchar'|'float'|'date', 0, desimal], ...],
-   *   onChange : fungsi render ulang tabel halaman
+   *   onChange : fungsi render ulang tabel halaman,
+   *   table    : selektor tabel (bawaan '#tabel'),
+   *   mode     : nomor susunan di DBSIMPANHEADER (bawaan '1'; halaman dua tabel memakai 1 & 2)
    * }
+   * Bisa dipanggil sekali per tabel (mis. mastergiro: Giro Dibuka & Giro Diterima). Tabel yang
+   * sedang dipakai ReportTable diaktifkan lewat onActivate (window.gcart_header / g_href /
+   * g_modeReport / doSimpanHeader / doSetHeader ditukar ke milik tabel itu).
    * Susunan tersimpan yang field-nya sudah tidak ada di bawaan dibuang, dan kolom bawaan
    * yang belum ada di susunan tersimpan ditambahkan di ujung - supaya perubahan daftar
    * kolom di kemudian hari tidak membuat tabel rusak. Label selalu diambil dari bawaan. */
-  var kolomOpt = null;
+  var kolomInst = {};
+  var kolomTerakhir = null;
 
-  function salinBawaan() {
-    return kolomOpt.kolom.map(function (c) { return c.slice(); });
+  function salinBawaan(inst) {
+    return inst.opt.kolom.map(function (c) { return c.slice(); });
   }
 
-  function gabungTersimpan(teks) {
-    var bawaan = salinBawaan();
+  function gabungTersimpan(inst, teks) {
+    var bawaan = salinBawaan(inst);
     var peta = {};
     bawaan.forEach(function (c) { peta[c[0]] = c; });
 
@@ -186,8 +192,8 @@
     return hasil;
   }
 
-  function simpanHeader() {
-    var teks = (window.gcart_header || []).map(function (c) {
+  function simpanHeader(inst) {
+    var teks = (inst.cart || []).map(function (c) {
       // Label tidak disimpan (selalu diambil dari bawaan) supaya muat di DBSIMPANHEADER.header varchar(1000).
       return [c[0], '', c[2], c[3], c[4], c[5]].join(';;');
     }).join('||');
@@ -197,8 +203,8 @@
       type: 'get',
       async: false,
       data: {
-        href: window.g_href,
-        mode: window.g_modeReport,
+        href: inst.opt.href,
+        mode: inst.mode,
         header: teks,
         issubtotal: 0,
         isgrandtotal: 0
@@ -210,13 +216,13 @@
     });
   }
 
-  function muatHeader() {
+  function muatHeader(inst) {
     var teks = '';
     $.ajax({
       url: ML.urlLoadHeader,
       type: 'get',
       async: false,
-      data: { href: window.g_href, mode: window.g_modeReport },
+      data: { href: inst.opt.href, mode: inst.mode },
       success: function (res) {
         teks = (res && res.length > 0) ? (res[0].header || '') : '';
       }
@@ -224,37 +230,54 @@
     return teks;
   }
 
+  // Jadikan tabel `inst` yang dilayani report-table.js (variabel global miliknya).
+  function aktifkan(inst) {
+    kolomTerakhir = inst;
+    window.g_href = inst.opt.href;
+    window.g_modeReport = inst.mode;
+    window.gsum_issubtotal = 0;
+    window.gsum_isgrandtotal = 0;
+    window.gcart_header = inst.cart;
+    window.doSimpanHeader = function () {
+      // report-table.js memutasi window.gcart_header; array yang sama dengan inst.cart.
+      inst.cart = window.gcart_header;
+      simpanHeader(inst);
+    };
+    // Dipanggil tombol "Reset kolom" di bar (reset = true).
+    window.doSetHeader = function (mode, reset) {
+      var teks = reset ? '' : muatHeader(inst);
+      if (teks) {
+        inst.cart = gabungTersimpan(inst, teks);
+      } else {
+        inst.cart = salinBawaan(inst);
+        simpanHeader(inst);
+      }
+      window.gcart_header = inst.cart;
+    };
+  }
+
   ML.kolom = function (opt) {
-    kolomOpt = opt;
     var cfgEl = document.getElementById('masterListCfg');
     if (cfgEl) {
       ML.urlLoadHeader = ML.urlLoadHeader || cfgEl.getAttribute('data-load-header');
       ML.urlSimpanHeader = ML.urlSimpanHeader || cfgEl.getAttribute('data-simpan-header');
     }
-    window.g_href = opt.href;
-    window.g_modeReport = '1';
-    window.gsum_issubtotal = 0;
-    window.gsum_isgrandtotal = 0;
 
-    window.doSimpanHeader = function () { simpanHeader(); };
+    var sel = opt.table || '#tabel';
+    var inst = { opt: opt, sel: sel, mode: String(opt.mode || '1'), cart: [] };
+    kolomInst[sel] = inst;
 
-    // Dipanggil tombol "Reset kolom" di bar (reset = true).
-    window.doSetHeader = function (mode, reset) {
-      var teks = reset ? '' : muatHeader();
-      if (teks) {
-        window.gcart_header = gabungTersimpan(teks);
-      } else {
-        window.gcart_header = salinBawaan();
-        simpanHeader();
-      }
-    };
-
-    window.doSetHeader(window.g_modeReport, false);
+    aktifkan(inst);
+    window.doSetHeader(inst.mode, false);
 
     if (typeof ReportTable === 'undefined') { return; }
 
-    var sel = opt.table || '#tabel';
-    ReportTable.init({ table: sel, bar: '#rtBar', onChange: opt.onChange });
+    ReportTable.init({
+      table: sel,
+      bar: opt.bar || '#rtBar',
+      onChange: opt.onChange,
+      onActivate: function () { aktifkan(inst); }
+    });
 
     // DataTables memasang sort di tiap <th>, sedangkan roda gigi/pegangan geser milik
     // ReportTable didelegasikan di <thead>. Klik pada keduanya dihentikan di fase capture
@@ -278,14 +301,26 @@
     }
   };
 
-  // Kolom yang tampil - WAJIB hasil filter() dari gcart_header (referensi yang sama),
-  // karena ReportTable.headHtml() mencari index global lewat indexOf().
-  ML.kolomTampil = function () {
-    return (window.gcart_header || []).filter(function (c) { return Number(c[2]) === 1; });
+  // Aktifkan tabel `sel` untuk ReportTable (halaman dengan lebih dari satu tabel).
+  function pakaiKolom(sel) {
+    var inst = sel ? kolomInst[sel] : kolomTerakhir;
+    if (!inst) { return null; }
+    aktifkan(inst);
+    if (typeof ReportTable !== 'undefined' && ReportTable.use) { ReportTable.use(inst.sel); }
+    return inst;
+  }
+
+  // Kolom yang tampil - WAJIB hasil filter() dari cart (referensi yang sama), karena
+  // ReportTable.headHtml() mencari index global lewat indexOf().
+  ML.kolomTampil = function (sel) {
+    var inst = pakaiKolom(sel);
+    var cart = inst ? inst.cart : (window.gcart_header || []);
+    return cart.filter(function (c) { return Number(c[2]) === 1; });
   };
 
   // <tr> header: kolom Actions (tetap, tidak bisa digeser) + kolom dari cart.
-  ML.headHtml = function (cols) {
+  ML.headHtml = function (cols, sel) {
+    if (sel) { pakaiKolom(sel); }
     var html;
     if (typeof ReportTable !== 'undefined' && ReportTable.headHtml) {
       html = ReportTable.headHtml(cols);
@@ -294,6 +329,11 @@
       html = '<tr>' + cols.map(function (c) { return '<th scope="col">' + c[1] + '</th>'; }).join('') + '</tr>';
     }
     return html.replace('<tr>', '<tr><th style="padding: 4px 12px;" scope="col">Actions</th>');
+  };
+
+  // Tab berganti: bar kolom tersembunyi ikut menampilkan milik tabel yang aktif.
+  ML.pakaiKolom = function (sel) {
+    if (pakaiKolom(sel) && typeof ReportTable !== 'undefined' && ReportTable.refresh) { ReportTable.refresh(); }
   };
 
   /* ---------- Render sel untuk tabel berkolom dinamis ---------- */

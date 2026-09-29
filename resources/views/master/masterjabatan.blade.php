@@ -5,7 +5,6 @@
 @section('page-title', 'Master Jabatan')
 @section('content')
 
-<div class="container-fluid">
 
 
 

@@ -33,7 +33,7 @@
     $filterPerkiraan = '<div class="po-filter-wrap"><label for="perkiraanCustomer">Perkiraan</label>'
       . '<select id="perkiraanCustomer" class="po-filter-inp" onchange="loadAll()">';
     foreach ($listDataCustomer as $customer) {
-      $nilai = e(trim($customer->keterangan) . ' (' . trim($customer->Perkiraan) . ')');
+      $nilai = e($customer->keterangan . ' (' . $customer->Perkiraan . ')');
       $filterPerkiraan .= '<option value="' . $nilai . '">' . $nilai . '</option>';
     }
     $filterPerkiraan .= '</select></div>';
@@ -219,51 +219,40 @@
 <!-- End Modal Edit -->
 
 <!-- start modal valas select -->
-<div class="modal fade"  id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formSelectValas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Valas</h5>
+        <h5 class="modal-title">Valas</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelSelectValas" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelSelectValas">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Valas</th>
               <th scope="col">Keterangan</th>
               <th scope="col">Kurs</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataSelectValas" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihValas()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataSelectValas" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal select valas-->
 
@@ -274,9 +263,13 @@
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -664,10 +657,7 @@ function loadValas() {
   });
 
   document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
-  $("#tabelSelectValas").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelSelectValas')
 }
 
 const inputKredit = document.getElementById('input_add_jumlah');
@@ -756,10 +746,7 @@ function buttonLokasiPenerima () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Merk'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }

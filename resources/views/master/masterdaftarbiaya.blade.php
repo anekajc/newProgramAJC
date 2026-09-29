@@ -5,7 +5,6 @@
 @section('page-title', 'Master Biaya')
 @section('content')
 
-<div class="container-fluid">
 
 
 

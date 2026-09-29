@@ -5,7 +5,8 @@
 
      Parameter opsional:
        $tanpaTambah = true   -> tombol Tambah tidak ditampilkan
-       $slotFilter           -> HTML tambahan (filter) yang diletakkan sebelum kotak cari --}}
+       $slotFilter           -> HTML tambahan (filter) yang diletakkan sebelum kotak cari
+       $slotAksi             -> HTML tombol aksi pengganti tombol Tambah bawaan (mis. mastergiro) --}}
 <link rel="stylesheet" href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
 
 <div id="masterListCfg" class="d-none"
@@ -28,7 +29,11 @@
     </select>
   </div>
 
-  @if (empty($tanpaTambah))
+  @if (!empty($slotAksi))
+    <div class="po-toolbar-act">
+      {!! $slotAksi !!}
+    </div>
+  @elseif (empty($tanpaTambah))
     <div class="po-toolbar-act">
       <button id="AddVisibility" class="btn btn-dpp-utama" type="button" onclick="buttonAdd()">Tambah</button>
     </div>

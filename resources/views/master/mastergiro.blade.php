@@ -31,47 +31,6 @@
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
   <style>
-    .sp-length-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }    
-    
-    .sp-filter-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .sp-length-wrap label {
-      margin: 0; /* stops default label margin from pushing the select down/over */
-    }
-
-    .sp-length-wrap select {
-      width: auto; /* stops form-control from stretching full-width and forcing a wrap */
-    }
-
-    .sp-toolbar {
-      display: flex;
-      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
-      align-items: center;
-      row-gap: 10px;
-      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
-    }
-
-    .sp-filter-wrap select {
-      width: auto;
-      min-width: 220px; /* keeps "Hutang Usaha (21201)" from getting clipped */
-    }
-
-    .sp-length-wrap {
-      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
-    }
-    
   .radioChoiceMaster {
     display: inline-flex;
     list-style: none;
@@ -121,105 +80,56 @@
 
   </style>
 
-  <div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
+  {{-- Tab Giro Dibuka / Diterima dan dua tombol Tambah dipasang di toolbar bersama. Kelas "nav"
+       ditambahkan pada <ul>: tab Bootstrap 4 membutuhkannya untuk menonaktifkan tab sebelumnya. --}}
+  @php
+    $slotTabGiro = '<ul class="nav radioChoiceMaster" id="giroTab" role="tablist">'
+      . '<li class="radioChoiceMaster-item" role="presentation"><button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-toggle="tab" data-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button></li>'
+      . '<li class="radioChoiceMaster-item" role="presentation"><button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-toggle="tab" data-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button></li>'
+      . '</ul>';
+    $slotAksiGiro = '<button id="divAddBuka" class="btn btn-dpp-utama" type="button" onclick="buttonAddBuka()">Tambah Giro Buka</button>'
+      . '<button id="divAddTerima" class="btn btn-dpp-utama" type="button" onclick="buttonAddTerima()" hidden>Tambah Giro Terima</button>';
+  @endphp
 
-    <div class="sp-filter-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-control form-control">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
-    
-  <div class="sp-filter-wrap">
-    <ul class="radioChoiceMaster" id="giroTab" role="tablist">
-      <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonTerima()" class="radioChoiceMaster-btn active" id="tab-dibuka-btn" data-toggle="tab" data-target="#tab-dibuka" type="button" role="tab">Daftar Giro Dibuka</button>
-      </li>
-      <li class="radioChoiceMaster-item" role="presentation">
-        <button onclick="hideButtonBuka()" class="radioChoiceMaster-btn" id="tab-diterima-btn" data-toggle="tab" data-target="#tab-diterima" type="button" role="tab">Daftar Giro Diterima</button>
-      </li>
-    </ul>
-  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="sp-length-wrap">
-    <button id='divAddBuka' class="btn btn-action-primary" onclick="buttonAddBuka()">+ Add Giro Buka</button>
-    <button id='divAddTerima' class="btn btn-action-primary" onclick="buttonAddTerima()" hidden>+ Add Giro Terima</button>
-    </div>
-  </div>
+      @include('master.partials.toolbarMaster', ['slotFilter' => $slotTabGiro, 'slotAksi' => $slotAksiGiro])
 
-  <div class="tab-content">
+      <div class="tab-content">
 
-    <!-- ---------- DAFTAR GIRO DIBUKA ---------- -->
-    <div class="tab-pane fade show active" id="tab-dibuka" role="tabpanel">
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table class="tb" id="tabel_dibuka">
-            <thead style="white-space:nowrap;">
+        <!-- ---------- DAFTAR GIRO DIBUKA ---------- -->
+        <div class="tab-pane fade show active" id="tab-dibuka" role="tabpanel">
+          <table id="tabel_dibuka" class="data-table po-aksi-hover">
+            <thead id="tabel_dibuka_header" class="text-center">
               <tr>
-                <th scope="col">Actions</th>
-                <th scope="col">Bank</th>
-                <th scope="col">No. Giro</th>
-                <th scope="col">Tanggal Giro Jatuh Tempo</th>
-                <th scope="col">Valas</th>
-                <th scope="col">Kurs</th>
-                <th scope="col">Debet Rupiah</th>
-                <th scope="col">Kredit Rupiah</th>
-                <th scope="col">Debet Valas</th>
-                <th scope="col">Kredit Valas</th>
-                <th scope="col">Tanggal Buka Giro</th>
-                <th scope="col">Bukti Buka Giro</th>
-                <th scope="col">Keterangan Buka Giro</th>
-                <th scope="col">Tanggal Pencairan Giro</th>
-                <th scope="col">Bukti Pencairan Giro</th>
-                <th scope="col">Keterangan Pencairan Giro</th>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_dataDibuka" class="text-left"></tbody>
           </table>
         </div>
-      </div>
-    </div>
 
-    <!-- ---------- DAFTAR GIRO DITERIMA ---------- -->
-    <div class="tab-pane fade" id="tab-diterima" role="tabpanel">
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table class="tb" id="tabel_diterima">
-            <thead style="white-space:nowrap;">
+        <!-- ---------- DAFTAR GIRO DITERIMA ---------- -->
+        <div class="tab-pane fade" id="tab-diterima" role="tabpanel">
+          <table id="tabel_diterima" class="data-table po-aksi-hover">
+            <thead id="tabel_diterima_header" class="text-center">
               <tr>
-                <th scope="col">Actions</th>
-                <th scope="col">Bank</th>
-                <th scope="col">No. Giro</th>
-                <th scope="col">Perkiraan Kas</th>
-                <th scope="col">Tanggal Giro Jatuh Tempo</th>
-                <th scope="col">Valas</th>
-                <th scope="col">Kurs</th>
-                <th scope="col">Debet Rupiah</th>
-                <th scope="col">Kredit Rupiah</th>
-                <th scope="col">Debet Valas</th>
-                <th scope="col">Kredit Valas</th>
-                <th scope="col">Tanggal Terima Giro</th>
-                <th scope="col">Bukti Terima Giro</th>
-                <th scope="col">Keterangan Terima Giro</th>
-                <th scope="col">Tanggal Pencairan Giro</th>
-                <th scope="col">Bukti Pencairan Giro</th>
-                <th scope="col">Keterangan Pencairan Giro</th>
+                <th style="padding: 4px 12px;" scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tabel_dataDiterima" class="text-left"></tbody>
           </table>
         </div>
-      </div>
-    </div>
 
+      </div>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
+    </div>
   </div>
 
 </div>
@@ -585,122 +495,232 @@
 <!-- End modal edit buka giro-->
 
 <!-- start modal pilih Kas -->
-<div class="modal fade"  id="formSelectKas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formSelectKas" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Kas</h5>
+        <h5 class="modal-title">Select Kas</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelAktivaSelectPerkiraan" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelAktivaSelectPerkiraan">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataAktivaSelectPerkiraan" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal pilih Kas-->
 
 <!-- start modal pilih Bank -->
-<div class="modal fade"  id="formSelectBank" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas"  id="formSelectBank" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Select Bank</h5>
+        <h5 class="modal-title">Select Bank</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <table id="tabelBukaSelectBank" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelBukaSelectBank">
+                <thead id='theadCustom' class="text-center">
+                  <tr>
               <th scope="col">Actions</th>
               <th scope="col">Perkiraan</th>
               <th scope="col">Keterangan</th>
 
             </tr>
-          </thead>
-
-          <tbody id="tabel_dataBukaSelectBank" class="text-left" >
-            <tr>
-
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonPilihPerkiraan()"><i class="bi bi-pen">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-    </div>
-        <div class="modal-footer">
-           
+                </thead>
+                <tbody id="tabel_dataBukaSelectBank" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <!-- End modal pilih Bank-->
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Toolbar (cari & Tampilkan) mengendalikan tabel di tab yang aktif - MasterList.pakai().
 function hideButtonBuka(){
   document.getElementById('divAddBuka').hidden = true;
   document.getElementById('divAddTerima').hidden = false;
+  MasterList.pakai('#tabel_diterima')
+  MasterList.pakaiKolom('#tabel_diterima')
 }
 
 function hideButtonTerima(){
   document.getElementById('divAddBuka').hidden = false;
   document.getElementById('divAddTerima').hidden = true;
+  MasterList.pakai('#tabel_dibuka')
+  MasterList.pakaiKolom('#tabel_dibuka')
+}
+
+// Tinggi kotak scroll dihitung ulang setelah animasi tab selesai (pane sebelumnya tersembunyi).
+$(document).on('shown.bs.tab', '#giroTab [data-toggle="tab"]', function () { MasterList.aturTinggi() })
+
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MGB_KOLOM = [
+  ['Bank',           'Bank',                      1, 'varchar', 0, 0],
+  ['NoGiro',         'No. Giro',                  1, 'varchar', 0, 0],
+  ['TglGiro',        'Tanggal Giro Jatuh Tempo',  1, 'varchar', 0, 0],
+  ['Kodevls',        'Valas',                     1, 'varchar', 0, 0],
+  ['Kurs',           'Kurs',                      1, 'varchar', 0, 0],
+  ['DebetRp',        'Debet Rupiah',              1, 'varchar', 0, 0],
+  ['KreditRp',       'Kredit Rupiah',             1, 'varchar', 0, 0],
+  ['Debet',          'Debet Valas',               1, 'varchar', 0, 0],
+  ['Kredit',         'Kredit Valas',              1, 'varchar', 0, 0],
+  ['TglBuka',        'Tanggal Buka Giro',         1, 'varchar', 0, 0],
+  ['BuktiBuka',      'Bukti Buka Giro',           1, 'varchar', 0, 0],
+  ['Keterangan',     'Keterangan Buka Giro',      1, 'varchar', 0, 0],
+  ['TglCair',        'Tanggal Pencairan Giro',    1, 'varchar', 0, 0],
+  ['BuktiCair',      'Bukti Pencairan Giro',      1, 'varchar', 0, 0],
+  ['KeteranganCair', 'Keterangan Pencairan Giro', 1, 'varchar', 0, 0],
+]
+
+const MGT_KOLOM = [
+  ['Bank',           'Bank',                      1, 'varchar', 0, 0],
+  ['NoGiro',         'No. Giro',                  1, 'varchar', 0, 0],
+  ['Kas',            'Perkiraan Kas',             1, 'varchar', 0, 0],
+  ['TglGiro',        'Tanggal Giro Jatuh Tempo',  1, 'varchar', 0, 0],
+  ['Kodevls',        'Valas',                     1, 'varchar', 0, 0],
+  ['Kurs',           'Kurs',                      1, 'varchar', 0, 0],
+  ['DebetRp',        'Debet Rupiah',              1, 'varchar', 0, 0],
+  ['KreditRp',       'Kredit Rupiah',             1, 'varchar', 0, 0],
+  ['Debet',          'Debet Valas',               1, 'varchar', 0, 0],
+  ['Kredit',         'Kredit Valas',              1, 'varchar', 0, 0],
+  ['TglBuka',        'Tanggal Terima Giro',       1, 'varchar', 0, 0],
+  ['BuktiBuka',      'Bukti Terima Giro',         1, 'varchar', 0, 0],
+  ['Keterangan',     'Keterangan Terima Giro',    1, 'varchar', 0, 0],
+  ['TglCair',        'Tanggal Pencairan Giro',    1, 'varchar', 0, 0],
+  ['BuktiCair',      'Bukti Pencairan Giro',      1, 'varchar', 0, 0],
+  ['KeteranganCair', 'Keterangan Pencairan Giro', 1, 'varchar', 0, 0],
+]
+
+// Tampilan sel sama seperti sebelumnya: tanggal yyyy-mm-dd, nilai rupiah/valas id-ID 2 desimal.
+function mgTanggal (v) {
+  return v ? (new Date(v)).toLocaleDateString('en-CA') : ''
+}
+function mgAngka (field) {
+  return function (item) {
+    return "<td class='text-right'>" + parseFloat(item[field]).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>'
+  }
+}
+function mgTeks (field) {
+  return function (item) { return '<td>' + item[field] + '</td>' }
+}
+let mgKhusus = {
+  TglGiro: function (item) { return '<td>' + mgTanggal(item.TglGiro) + '</td>' },
+  TglBuka: function (item) { return '<td>' + mgTanggal(item.TglBuka) + '</td>' },
+  TglCair: function (item) { return '<td>' + mgTanggal(item.TglCair) + '</td>' },
+  DebetRp: mgAngka('DebetRp'), KreditRp: mgAngka('KreditRp'), Debet: mgAngka('Debet'), Kredit: mgAngka('Kredit'),
+  Bank: mgTeks('Bank'), NoGiro: mgTeks('NoGiro'), Kas: mgTeks('Kas'), Kodevls: mgTeks('Kodevls'),
+  BuktiBuka: mgTeks('BuktiBuka'), Keterangan: mgTeks('Keterangan'), BuktiCair: mgTeks('BuktiCair'), KeteranganCair: mgTeks('KeteranganCair')
+}
+
+let dataBuka = []
+let dataTerima = []
+
+function renderTabelBuka () {
+  if ($.fn.DataTable.isDataTable('#tabel_dibuka')) {
+    $('#tabel_dibuka').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil('#tabel_dibuka')
+  document.getElementById('tabel_dibuka_header').innerHTML = MasterList.headHtml(cols, '#tabel_dibuka')
+
+  // Kurs giro dibuka ditampilkan apa adanya (seperti sebelumnya).
+  let khusus = $.extend({}, mgKhusus, { Kurs: function (item) { return "<td class='text-right'>" + item.Kurs + '</td>' } })
+
+  let rowTable = ""
+  dataBuka.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_dataDibuka").innerHTML = rowTable
+  $("#tabel_dibuka").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel_dibuka')
+}
+
+function renderTabelTerima () {
+  if ($.fn.DataTable.isDataTable('#tabel_diterima')) {
+    $('#tabel_diterima').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil('#tabel_diterima')
+  document.getElementById('tabel_diterima_header').innerHTML = MasterList.headHtml(cols, '#tabel_diterima')
+
+  let khusus = $.extend({}, mgKhusus, { Kurs: mgAngka('Kurs') })
+
+  let rowTable = ""
+  dataTerima.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi, khusus)
+  });
+
+  document.getElementById("tabel_dataDiterima").innerHTML = rowTable
+  $("#tabel_diterima").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel_diterima')
+}
+
+// Setelah tabel digambar ulang, ReportTable & toolbar dikembalikan ke tab yang sedang tampil.
+function mgKembaliKeTabAktif () {
+  let sel = document.getElementById('divAddTerima').hidden ? '#tabel_dibuka' : '#tabel_diterima'
+  MasterList.pakai(sel)
+  MasterList.pakaiKolom(sel)
 }
 
 function loadAllBuka () {
-
   let _token = $("#_token").val();
-
-  // document.getElementById('breadcrumb').innerHTML = "Master Giro" // dimatikan: judul sekarang di bar atas (page-title)
-
-  $('#tabel_dibuka').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastergiroloadallbuka') !!}",
@@ -710,59 +730,15 @@ function loadAllBuka () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataBuka = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr>
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditBuka('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteBuka('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-    <td>${ item.Bank }</td>
-    <td>${ item.NoGiro }</td>
-    <td>${(new Date(item.TglGiro)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.Kodevls }</td>
-    <td class='text-right'>${ item.Kurs }</td>
-    <td class='text-right'>${ parseFloat(item.DebetRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.KreditRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Debet).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Kredit).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td>${(new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiBuka }</td>
-    <td>${ item.Keterangan }</td>
-    <td>${item.TglCair ? (new Date(item.TglCair)).toLocaleDateString('en-CA') : ''}</td>
-    <td>${ item.BuktiCair }</td>
-    <td>${ item.KeteranganCair }</td>
-
-    </tr>`
-  });
-
- let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-
-  document.getElementById("tabel_dataDibuka").innerHTML = rowTable
-  $("#tabel_dibuka").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "paging": true,
-    "searching": true,
-    "pageLength": currentLength,
-    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
-  });
-
+  renderTabelBuka()
+  mgKembaliKeTabAktif()
 }
 
 function loadAllTerima () {
-
   let _token = $("#_token").val();
-
-  $('#tabel_diterima').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('mastergiroloadallterima') !!}",
@@ -772,64 +748,12 @@ function loadAllTerima () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTerima = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `
-    <tr>
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditTerima('${item.NoGiro}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteTerima('${item.NoGiro}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-    <td>${ item.Bank }</td>
-    <td>${ item.NoGiro }</td>
-    <td>${ item.Kas }</td>
-    <td>${(new Date(item.TglGiro)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.Kodevls }</td>
-    <td class='text-right'>${ parseFloat(item.Kurs).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.DebetRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.KreditRp).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Debet).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td class='text-right'>${ parseFloat(item.Kredit).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }</td>
-    <td>${ (new Date(item.TglBuka)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiBuka }</td>
-    <td>${ item.Keterangan }</td>
-    <td>${ (new Date(item.TglCair)).toLocaleDateString('en-CA')}</td>
-    <td>${ item.BuktiCair }</td>
-    <td>${ item.KeteranganCair }</td>
-    </tr>`
-  });
-
-  let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-  document.getElementById("tabel_dataDiterima").innerHTML = rowTable
-  $("#tabel_diterima").DataTable({
-    "lengthChange": true,
-    "paging": true,
-    "searching": true,
-    "pageLength": currentLength,
-    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa
-  });
-
+  renderTabelTerima()
+  mgKembaliKeTabAktif()
 }
-
-
-$("#tabel_filter_visual").on("keyup", function () {
-  $("#tabel_dibuka").DataTable().search(this.value).draw();
-  $("#tabel_diterima").DataTable().search(this.value).draw();
-});
-
-$("#tabel_length_visual").on("change", function () {
-  $("#tabel_dibuka").DataTable().page.len(Number(this.value)).draw();
-  $("#tabel_diterima").DataTable().page.len(Number(this.value)).draw();
-});
-
 
 function buttonAddBuka () {
   document.getElementById('input_add2_bank').value = ''
@@ -1029,9 +953,27 @@ function submitEditBuka () {
   let tanggalBuka = $("#input_edit2_tglBuka").val();
   let buktiBuka = $("#input_edit2_buktiBuka").val();
   let keterangan = $("#input_edit2_keterangan").val();
-  let tanggalCair = $("#input_edit2_tanggalCair").val();
+  let tanggalCair = $("#input_edit2_tglCair").val();
   let buktiCair = $("#input_edit2_buktiCair").val();
   let keteranganCair = $("#input_edit2_keteranganCair").val();
+
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tanggalGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('mastergirospeditbuka') !!}",
@@ -1084,7 +1026,7 @@ function submitEditTerima () {
   let tanggalTerima = $("#input_edit_tglTerima").val();
   let buktiTerima = $("#input_edit_buktiTerima").val();
   let keterangan = $("#input_edit_keterangan").val();
-  let tanggalCair = $("#input_edit_tanggalCair").val();
+  let tanggalCair = $("#input_edit_tglCair").val();
   let buktiCair = $("#input_edit_buktiCair").val();
   let keteranganCair = $("#input_edit_keteranganCair").val();
   let perkiraanKas = $("#input_edit_perkiraanKas").val();
@@ -1164,6 +1106,24 @@ function submitAddTerima () {
   let keteranganCair = $("#input_add_keteranganCair").val();
   let perkiraanKas = $("#input_add_perkiraanKas").val();
 
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tglGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
+
   $.ajax({
     url: "{!! url('mastergirospaddterima') !!}",
     type: "post",
@@ -1218,6 +1178,24 @@ function submitAddBuka () {
   let buktiCair = $("#input_add2_buktiCair").val();
   let keteranganCair = $("#input_add2_keteranganCair").val();
 
+  // Dulu tanpa validasi - No. Giro/Bank kosong tetap terkirim.
+  if (!bank) {
+    alertify.warning("Bank harus diisi");
+    return
+  }
+  if (!noGiro) {
+    alertify.warning("No. Giro harus diisi");
+    return
+  }
+  if (!tglGiro) {
+    alertify.warning("Tanggal Giro harus diisi");
+    return
+  }
+  if (!nilaiGiro) {
+    alertify.warning("Nilai Giro harus diisi");
+    return
+  }
+
   $.ajax({
     url: "{!! url('mastergirospaddbuka') !!}",
     type: "post",
@@ -1244,7 +1222,7 @@ function submitAddBuka () {
         alertify.warning(res);
       }  else {
         console.log(res ,'!')
-        alertify.success("Data Giro Terima telah ditambah");
+        alertify.success("Data Giro Buka telah ditambah");
         loadAllBuka()
         loadAllTerima()
         $("#formBuka").modal("hide")
@@ -1333,10 +1311,7 @@ function loadSelectKas() {
   });
 
   document.getElementById("tabel_dataAktivaSelectPerkiraan").innerHTML = rowTable;
-  $("#tabelAktivaSelectPerkiraan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAktivaSelectPerkiraan')
 }
 
 function loadSelectBank() {
@@ -1371,10 +1346,7 @@ function loadSelectBank() {
   });
 
   document.getElementById("tabel_dataBukaSelectBank").innerHTML = rowTable;
-  $("#tabelBukaSelectBank").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelBukaSelectBank')
 }
 
 function buttonPilihPerkiraanKas(selectedPerkiraan) {
@@ -1390,6 +1362,8 @@ function buttonPilihPerkiraanBank(selectedPerkiraan) {
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'mastergiro', mode: 1, table: '#tabel_dibuka', kolom: MGB_KOLOM, onChange: function () { renderTabelBuka(); mgKembaliKeTabAktif() } })
+  MasterList.kolom({ href: 'mastergiro', mode: 2, table: '#tabel_diterima', kolom: MGT_KOLOM, onChange: function () { renderTabelTerima(); mgKembaliKeTabAktif() } })
   loadAllBuka();
   loadAllTerima();
   hideButtonTerima();

@@ -33,23 +33,18 @@
   @include('master.partials.toolbarMaster')
 
   <table id="tabel" class="data-table po-aksi-hover">
-        <thead>
+        <thead id="tabel_header" class="text-center">
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
-            <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
-            <th style="padding: 4px 12px;" scope="col">Keterangan</th>
-            <th style="padding: 4px 12px;" scope="col">Kelompok</th>
-            <th style="padding: 4px 12px;" scope="col">Tipe</th>
-            <th style="padding: 4px 12px;" scope="col">Transaksi</th>
-            <th style="padding: 4px 12px;" scope="col">Valas</th>
-            <th style="padding: 4px 12px;" scope="col">Simbol</th>
-            <th style="padding: 4px 12px;" scope="col">PPN</th>
-            <th style="padding: 4px 12px;" scope="col">Status</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-left">
-        </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
 
     </div>
   </div>
@@ -267,6 +262,8 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -413,13 +410,62 @@ function onChangePerkiraan () {
   // //     $('#input_edit_valas').html(valasOptions);
   // // }
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MPK_KOLOM = [
+  ['Perkiraan',  'Perkiraan',  1, 'varchar', 0, 0],
+  ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+  ['mKelompok',  'Kelompok',   1, 'varchar', 0, 0],
+  ['mtipe',      'Tipe',       1, 'varchar', 0, 0],
+  ['mDK',        'Transaksi',  1, 'varchar', 0, 0],
+  ['Valas',      'Valas',      1, 'varchar', 0, 0],
+  ['Simbol',     'Simbol',     1, 'varchar', 0, 0],
+  ['IsPPN',      'PPN',        1, 'varchar', 0, 0],
+  ['Status',     'Status',     1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh (dipakai juga oleh fungsi lain di halaman ini).
+let dataTabel = []
+
+  function renderTabel () {
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+      $('#tabel').DataTable().destroy();
+    }
+
+    let cols = MasterList.kolomTampil()
+    document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+    // Tampilan sel sama seperti sebelumnya: PPN berupa ikon, Status berupa badge.
+    let khusus = {
+      IsPPN: function (item) {
+        return item.IsPPN == 0
+          ? '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
+          : '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      },
+      Status: function (item) {
+        return item.Status == 'Tidak Aktif'
+          ? '<td><span class="sp-badge is-user">Tidak Aktif</span></td>'
+          : '<td><span class="sp-badge is-supervisor">Aktif</span></td>'
+      }
+    }
+
+    let rowTable = ""
+    dataTabel.forEach((item, i) => {
+      let aksi = `
+        <div class="action-buttons-wrap">
+            <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
+            <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
+        </div>`
+      rowTable += MasterList.baris(item, cols, aksi, khusus)
+    });
+
+    document.getElementById("tabel_data").innerHTML = rowTable
+    $("#tabel").DataTable(MasterList.opsi())
+    MasterList.selesai('#tabel')
+  }
+
   function loadAll () {
-    console.log('asd')
     let _token = $("#_token").val();
-
-     // document.getElementById('breadcrumb').innerHTML = "Master Perkiraan" // dimatikan: judul sekarang di bar atas (page-title)
-
-    $('#tabel').DataTable().destroy();
 
     $.ajax({
       url: "{!! url('newperkiraanloadall') !!}",
@@ -429,65 +475,11 @@ function onChangePerkiraan () {
         _token : _token,
       },
       success: function(res) {
-        console.log(res)
-        dataRefresh = res
+        dataTabel = res
     }})
 
-    let rowTable = ""
-    dataRefresh.forEach((item, i) => {
-      let temp = ""
-      if (item.IsPPN == 0) {
-        temp = '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>'
-      } else {
-        temp = '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
-      }
-      rowTable += `<tr>
-        
-    <td style="white-space:nowrap;" class='text-center'>
-      <div class="action-buttons-wrap">
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Perkiraan}')"><i class="bi bi-pen"></i></button>
-          <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Perkiraan}')"><i class="bi bi-trash"></i></button>
-      </div>
-    </td>
-      <td>${item.Perkiraan}</td>
-      <td>${item.Keterangan}</td>
-      <td>${item.mKelompok}</td>
-      <td>${item.mtipe}</td>
-      <td>${item.mDK}</td>
-      <td>${item.Valas}</td>
-      <td>${item.Simbol}</td>
-      `+ temp +`
-      ${
-          item.Status == 'Tidak Aktif'
-              ? '<td><span class="sp-badge is-user">Tidak Aktif</span></td>'
-              : '<td><span class="sp-badge is-supervisor">Aktif</span></td>'
-      }
-      </tr>`
-    });
-
-
-    document.getElementById("tabel_data").innerHTML = rowTable
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-    $("#tabel").DataTable({
-      "lengthChange": true,
-      "paging": true,
-      "searching": true,
-      "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
-      "pageLength": currentLength
-    });
-      MasterList.selesai('#tabel')
-
+    renderTabel()
   }
-  
-$("#tabel_filter_visual").on("keyup", function () {
-  $("#tabel").DataTable().search(this.value).draw();
-});
-
-$("#tabel_length_visual").on("change", function () {
-  $("#tabel").DataTable().page.len(Number(this.value)).draw();
-});
-
 
   function buttonEdit (perkiraan) {
 
@@ -730,6 +722,7 @@ $("#tabel_length_visual").on("change", function () {
   }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'newperkiraan', kolom: MPK_KOLOM, onChange: renderTabel })
   loadAll();
 }
 

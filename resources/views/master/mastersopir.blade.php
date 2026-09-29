@@ -55,7 +55,6 @@ function getStatus($data) {
     return $data == 1 ? "Aktif" : "Non-Aktif";
 }
 ?>
-<div class="container-fluid">
 
 
 <!-- start modal add -->

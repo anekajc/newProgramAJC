@@ -259,6 +259,18 @@ class MasterAktivaController extends Controller
     //if ($check) {
       //return 'ga bisa hapus';
     //}
+    // Aktiva yang sudah dipakai transaksi atau sudah punya mutasi (penambahan/penyusutan) tidak boleh
+    // dihapus - dulu tidak dicek sama sekali.
+    $check = DB::connection('SML')->select('select top 1 1 as ada from dbTransaksi where NoAktivaP = :kode or NoAktivaL = :kode2', ['kode' => $req->kode, 'kode2' => $req->kode]);
+    if ($check) {
+      return 'Aktiva sudah dipakai di transaksi accounting';
+    }
+    $check = DB::connection('SML')->select('select top 1 1 as ada from DBAKTIVADET where Perkiraan = :kode
+      and (isnull(MD,0) <> 0 or isnull(MK,0) <> 0 or isnull(SD,0) <> 0 or isnull(SK,0) <> 0)', ['kode' => $req->kode]);
+    if ($check) {
+      return 'Aktiva sudah punya mutasi/penyusutan';
+    }
+
     $delete = DB::connection('SML')->update('delete from DBAKTIVA where Perkiraan = :kode' , ['kode' => $req->kode ]);
     return $delete;
   }

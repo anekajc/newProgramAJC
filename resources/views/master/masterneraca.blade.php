@@ -241,23 +241,6 @@ function onChangeNeraca (Perkiraan, el) {
     }})
 }
 
-  let _token = $("#_token").val();
-  $.ajax({
-    url: "{!! url('masterneracaonChangeNeraca') !!}",
-    type: "get",
-    async: false,
-    data: {
-      _token : _token,
-      Perkiraan,
-      tempNeraca
-    },
-    success: function(res) {
-        tempNeraca = ''
-        alertify.success("Neraca Perkiraan : " + Perkiraan + " Berhasil Di-Update");
-
-    }})
-}
-
 function submitEdit () {
 
   let _token = $("#_token").val();
