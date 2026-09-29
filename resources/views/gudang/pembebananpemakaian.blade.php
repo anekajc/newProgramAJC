@@ -715,7 +715,7 @@ function aksiButtonsHtml(r) {
     // Sudah otorisasi — Batal Otorisasi + Print
     tombolAksi +=
       '<button type="button" class="btn btn-danger btn-sm" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-      nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key-fill"></i></button>' +
+      nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key"></i></button>' +
       '<button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint(\'' +
       nobukti + '\')"><i class="bi bi-printer"></i></button>';
   } else {

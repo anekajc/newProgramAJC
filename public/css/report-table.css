@@ -1968,6 +1968,47 @@
   box-shadow: 0 0 0 3px var(--rt-blue-soft);
 }
 
+/* Pager terkunci di bawah: hanya <table> yang di-scroll (.rt-picker-scroll), baris info
+   + tombol halaman (.rt-picker-bawah) berada DI LUAR area scroll, jadi selalu terlihat
+   berapa pun baris yang ditampilkan (termasuk "Semua"). Keduanya dibuat lewat opsi `dom`
+   DataTables: 'lfr<"rt-picker-scroll"t><"rt-picker-bawah"ip>' — dipakai kasInitPicker()/
+   bankInitPicker() (public/js/kas.js & bank.js) dan picker Barang di
+   gudang/permintaanpemakaian.blade.php. Picker yang tidak memakai dom itu tidak terpengaruh.
+   Sengaja bukan position:sticky: tabel picker Kas/Bank dibungkus <div style="overflow:auto">
+   tanpa tinggi, sehingga sticky menempel ke div itu dan tidak pernah benar-benar menempel.
+   thead tetap menempel di atas area scroll ini (.rt-picker-v2 table thead th sticky top:0). */
+/* clear:both WAJIB: overflow-y:auto membuat div ini jadi block formatting context, yang
+   (berbeda dengan <table> biasa) tidak turun ke bawah float .dataTables_length (kiri) dan
+   .dataTables_filter (kanan) melainkan terjepit di SAMPING keduanya - baris Tampilkan/Search
+   jadi berantakan. clear:both menurunkannya ke bawah kedua float itu. */
+.rt-picker-v2 .rt-picker-scroll {
+  clear: both;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+/* DataTables (autoWidth) bisa menulis style="width:NNNpx" ke <table> saat init - kalau
+   init terjadi selagi area ini masih sempit, tabel terkunci sempit di tengah. Paksa penuh. */
+.rt-picker-v2 .rt-picker-scroll > table {
+  width: 100% !important;
+}
+
+/* Baris atas: Tampilkan (kiri) & Search (kanan) sejajar tengah dan diberi jarak ke tabel.
+   Tingginya disamakan supaya dua float itu tidak berbeda posisi vertikal. */
+.rt-picker-v2 .dataTables_length,
+.rt-picker-v2 .dataTables_filter {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin-bottom: 8px;
+}
+
+.rt-picker-v2 .rt-picker-bawah {
+  display: flow-root;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
 .rt-picker-v2 .dataTables_paginate .paginate_button {
   /* border: 1px solid var(--rt-border) !important;
   border-radius: var(--rt-radius-sm) !important; */

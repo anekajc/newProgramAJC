@@ -8,7 +8,7 @@
 
               <div id= "" class="">
                   <div class="modal-header">
-                      <h5 class="modal-title" id="">Pelunasan Hutang</h5>
+                      <h5 class="modal-title" id="">Pelunasan</h5>
                       <button type="button" class="close" onclick="selesaiTunai()" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                       </button>

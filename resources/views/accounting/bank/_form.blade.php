@@ -484,9 +484,10 @@
                                         class="form-control">
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-2" style="margin-top: 0" id="contentContainer">
-                            <div class="col-md-12 text-right mt-4">
+                            {{-- Batal/Simpan sebaris dengan Ket. Det, rata kanan. id="contentContainer"
+                                 wajib dipertahankan: gaya .btn-pill-* di tableMaster2.css hanya berlaku
+                                 di dalam #contentContainer. --}}
+                            <div class="col-md-5 text-right form-group" id="contentContainer">
                                 <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                                     onclick="buttonAddBatal()">Batal</button>
 
@@ -494,12 +495,8 @@
                                     class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
 
                                 <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                    class="btn btn-primary btn-action-primary btn-pill-primary">Submit Edit</button>
-
-
-                                <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
+                                    class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                             </div>
-
                         </div>
 
                     </div>

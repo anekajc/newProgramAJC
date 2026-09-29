@@ -808,35 +808,40 @@ where b.Perkiraan = :lawan
         //
         //
         // }
-        if ($req->transaksi == 'BBK') {
-          $listData = DB::connection('SML')->select("
+        // if ($req->transaksi == 'BBK') {
+        //   $listData = DB::connection('SML')->select("
+        //   select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim ,  isnull(d.iscost , 0) iscost from dbPerkiraan a
+        //               left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
+        //                Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
+
+        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
+        //               where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
+        //               and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
+
+        //               order by a.Perkiraan" , ["perkiraan" => $req->perkiraan , "username" => $username ]);
+
+        // } else {
+        //   $listData = DB::connection('SML')->select("
+        //   select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
+        //         left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
+        //          Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
+
+        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
+        //         where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
+        //         and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' and Perkiraan not in ('116100','21203') )
+
+        //         order by a.Perkiraan     " , ["perkiraan" => $req->perkiraan , "username" => $username ]);
+        // }
+
+        $listData = DB::connection('SML')->select("
           select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim ,  isnull(d.iscost , 0) iscost from dbPerkiraan a
                       left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
                        Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
 
                        left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
                       where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-                      and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
 
                       order by a.Perkiraan" , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-        } else {
-          $listData = DB::connection('SML')->select("
-          select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
-                left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-                 Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-
-                       left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
-                where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-                and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' and Perkiraan not in ('116100','21203') )
-
-                order by a.Perkiraan     " , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-
-
-
-
-        }
 
 
     return $listData;

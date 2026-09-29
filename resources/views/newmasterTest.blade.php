@@ -41,6 +41,7 @@
             box-sizing: border-box;
         }
 
+
         :root {
             --sidebar-col: 64px;
             --sidebar-exp: 240px;
@@ -726,6 +727,12 @@
         opacity: 1;
         visibility: visible;
       }
+
+      .bi-plus {
+        font-size: 1.5rem;
+        line-height: 0;
+        vertical-align: middle;
+        }
       </style>
 
     <style>

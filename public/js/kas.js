@@ -248,6 +248,9 @@ function kasInitPicker(idTabel, opsi) {
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
         paging: true,
         pageLength: 10,
+        // Hanya tabel yang di-scroll; info + tombol halaman terkunci di bawahnya
+        // (.rt-picker-scroll / .rt-picker-bawah di public/css/report-table.css).
+        dom: 'lfr<"rt-picker-scroll"t><"rt-picker-bawah"ip>',
         language: {
             lengthMenu: 'Tampilkan _MENU_',
             emptyTable: 'Tidak ada data',
@@ -672,15 +675,15 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
       let rowTable = ``
       res.forEach((item, i) => {
         if (item.NoBukti == nobukti && item.StatusUID == 'I') {
-          xdebet += Number(item.Debet)
+          xdebet += nominalLunasTunai(item)
         }
-        if (Number(item.Debet) <= 0) {
+        if (nominalLunasTunai(item) <= 0) {
           console.log("saldo")
-          xsaldo = Number(item.Saldo)
+          xsaldo = saldoBarisTunai(item)
 
         } else {
           console.log("minus")
-          xsaldo += Number(item.Saldo)
+          xsaldo += saldoBarisTunai(item)
         }
         rowTable += tunaiRowHtml(item, i, xsaldo, nobukti)
       });
@@ -1435,9 +1438,6 @@ function submitAddAdd () {
       nodph = tempDPPDPH.Nobukti
 
     }
-
-
-
   }
 
 
@@ -1448,19 +1448,7 @@ function submitAddAdd () {
     custsupp = $("#input_dphuhtbkm_kodecustsupp").val();
     statusAktivaL = 'UHT-'
     kodeL = kodeFlag
-
-
-
-
-
-
-
   }
-
-
-
-
-
 
   if (lawan == '113400') {
 
@@ -1471,9 +1459,6 @@ function submitAddAdd () {
     }
     custsuppP = custsupp
     custsuppL = custsupp
-
-
-
 
   }
 
@@ -1625,7 +1610,7 @@ function submitAddAdd () {
 
 
 
-  if (transaksi == 'BKK' && xislocalorexim == 1) {
+  if ((transaksi == 'BKK' || transaksi == 'BKM') && xislocalorexim == 1) {
     console.log("tunai add")
     $.ajax({
         url: KAS_ROUTES.kasspadd,
@@ -4126,18 +4111,18 @@ function refreshDataTableTunai (diam) {
       res.forEach((item, i) => {
 
         if (item.NoBukti == nobukti && item.StatusUID == 'I') {
-          xdebet += Number(item.Debet)
+          xdebet += nominalLunasTunai(item)
 
         }
 
         console.log(xsaldo)
-        if (Number(item.Debet) <= 0) {
+        if (nominalLunasTunai(item) <= 0) {
           console.log("saldo")
-          xsaldo = Number(item.Saldo)
+          xsaldo = saldoBarisTunai(item)
 
         } else {
           console.log("minus")
-          xsaldo += Number(item.Saldo)
+          xsaldo += saldoBarisTunai(item)
         }
         console.log(item.Saldo)
         console.log(Number(item.Saldo))
@@ -4180,7 +4165,7 @@ function tunaiRowHtml (item, i, xsaldo, nobukti) {
   let aksi = ``
   let kelas = ``
 
-  if (Number(item.Debet) > 0) {
+  if (nominalLunasTunai(item) > 0) {
     if (item.NoBukti == nobukti) {
       aksi = `<button class="btn btn-danger btn-tunai-hapus" type="button" onclick="buttonHapusTunai(${i})" ondblclick="event.stopPropagation()" title="Hapus"><i class="bi bi-trash"></i></button>`
       kelas = ` class="tunai-baris-lunas tunai-bisa-dobel" ondblclick="buttonHapusTunai(${i})"`
@@ -4213,7 +4198,7 @@ function sisaSaldoFakturTunai (nofaktur) {
   let sisasaldo = 0
   listTunai.forEach((item) => {
     if (item.NoFaktur == nofaktur) {
-      sisasaldo += Number(item.Saldo)
+      sisasaldo += saldoBarisTunai(item)
     }
   })
   return Number(sisasaldo.toFixed(2))
@@ -4250,7 +4235,7 @@ function buttonHapusTunai (index) {
   lepasFokusModalTunai()
   let dlgHapus = alertify.confirm('Hapus Pelunasan',
     'Hapus pelunasan faktur ' + data.NoFaktur + ' sebesar ' +
-      formatAngka(parseFloat(data.Debet).toFixed(2)) + '?',
+      formatAngka(nominalLunasTunai(data).toFixed(2)) + '?',
     function () {
       buttonDeleteTunai(index)
     },
@@ -4294,16 +4279,16 @@ function buttonTambahTunai (index) {
     'Nominal dibayar (sisa saldo ' + formatAngka(sisasaldo.toFixed(2)) + ')',
     formatAngka(sisasaldo.toFixed(2)),
     function (evt, value) {
-      let debet = Number(unformatAngka(value).toFixed(2))
-      if (!(debet > 0)) {
+      let nominal = Number(unformatAngka(value).toFixed(2))
+      if (!(nominal > 0)) {
         alertify.warning('Nominal harus lebih dari 0')
         return false
       }
-      if (debet > sisasaldo) {
+      if (nominal > sisasaldo) {
         alertify.warning('Nominal melebihi sisa saldo')
         return false
       }
-      simpanTambahTunai(data, debet)
+      simpanTambahTunai(data, nominal)
     },
     function () {})
   dlgNominal.elements.root.classList.add('ajs-app-buttons')
@@ -4317,7 +4302,7 @@ function buttonTambahTunai (index) {
   }
 }
 
-function simpanTambahTunai (data, debet) {
+function simpanTambahTunai (data, nominal) {
   let _token = $("#_token").val()
 
   let choice = 'I'
@@ -4325,7 +4310,9 @@ function simpanTambahTunai (data, debet) {
   let nobukti = $("#input_add_nobukti").val()
   let urut = 0
 
-  let kredit = 0
+  // Pelunasan hutang (BKK) di Debet, pelunasan piutang (BKM) di Kredit.
+  let debet = isTunaiPiutang() ? 0 : nominal
+  let kredit = isTunaiPiutang() ? nominal : 0
 
   let noinvoice = 'LNS'
 
@@ -4430,12 +4417,30 @@ function buttonDeleteTunai (index) {
 
 }
 
-/* Pelunasan Hutang — BKK dengan Lawan IsLokalOrExim = 1, saat menambah item. Alurnya:
-   pilih Lawan -> daftar supplier (pane Customer di modal #form yang sama) -> #formTunai.
+/* Pelunasan Hutang (BKK) / Piutang (BKM) — Lawan IsLokalOrExim = 1, saat menambah item. Alurnya:
+   pilih Lawan -> daftar supplier/customer (pane Customer di modal #form yang sama) -> #formTunai.
    Jumlah tidak perlu diketik lebih dulu (dulu onblur Jumlah yang membuka alur ini);
    tombol #buttonBukaTunai di samping Jumlah membuka ulang alurnya setelah ditutup. */
 function isModeTunai () {
-  return $("#input_add_transaksi").val() == 'BKK' && xislocalorexim == 1 && tipeformdet == 'add'
+  let trans = $("#input_add_transaksi").val()
+  return (trans == 'BKK' || trans == 'BKM') && xislocalorexim == 1 && tipeformdet == 'add'
+}
+
+// BKM = pelunasan piutang: faktur ada di Debet, pelunasan di Kredit (kebalikan BKK/hutang,
+// lihat penandaBaris() di MemorialKoreksiController).
+function isTunaiPiutang () {
+  return $("#input_add_transaksi").val() == 'BKM'
+}
+
+// Nominal pelunasan satu baris sesuai arah hutang/piutang (> 0 = baris pelunasan).
+function nominalLunasTunai (item) {
+  return Number(isTunaiPiutang() ? item.Kredit : item.Debet)
+}
+
+// Saldo satu baris. Kolom Saldo di dbTempHutPiut berarah hutang, jadi untuk piutang dihitung
+// sendiri (Debet - Kredit), sama seperti mkSaldoFaktur() di Memorial Koreksi.
+function saldoBarisTunai (item) {
+  return isTunaiPiutang() ? Number(item.Debet) - Number(item.Kredit) : Number(item.Saldo)
 }
 
 function aturTombolBukaTunai () {
@@ -5001,7 +5006,7 @@ function kasMuatDevisiValas () {
         let kurs = Number(item.KURS) || 0
         let opsi = document.createElement('option')
         opsi.value = item.KODEVLS
-        opsi.textContent = item.KODEVLS + ' - ' + item.NAMAVLS 
+        opsi.textContent = item.KODEVLS + ' - ' + item.NAMAVLS
         opsi.dataset.kurs = kurs
         sel.appendChild(opsi)
       });
@@ -5148,8 +5153,10 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   document.getElementById("AddAddKodeSubCosting").value = ''
 
 
-  if (trans == 'BKK' && islocalorexim == 1) {
+  if ((trans == 'BKK' || trans == 'BKM') && islocalorexim == 1) {
 
+    // Cabang UHT BKM di bawah mematikan Jumlah; hidupkan lagi kalau Lawan diganti ke sini.
+    document.getElementById("AddAddJumlah").disabled = false
     flagtunai = 0
     listtunai = []
     tunaiKodeCustsupp = ''
@@ -5165,14 +5172,13 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
       buttonAddListBatal()
     }
     return
+
   }
 
 
   if (kode == 'UHT' && trans == 'BKM') {
 
     modalDPHUHTBKM(listLawan[index])
-
-
 
     document.getElementById("AddAddJumlah").disabled = true
     document.getElementById("AddAddJumlah").value = '0.00'
@@ -5212,10 +5218,6 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
 
     return
   }
-
-
-
-
 
   if (perkiraan == '113400') {
 

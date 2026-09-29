@@ -1477,7 +1477,7 @@
                 <div class="modal-header">
 
 
-                    <h5 class="modal-title" id="">Customer</h5>
+                    <h5 class="modal-title" id="">Supplier</h5>
                     <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                         onclick="buttonAddListTutup()">Close</button>
                 </div>
