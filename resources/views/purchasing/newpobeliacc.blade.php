@@ -1848,22 +1848,25 @@ td input[type="checkbox"] {
         pbaAturTinggiTabel()
       }
 
-      // Kartu ringkasan (Jumlah PO / Total DPP / Total PPN) - dihitung dari baris yang
+      // Kartu ringkasan (Jumlah Supplier / Total DPP / Total PPN) - dihitung dari baris yang
       // sedang tampil di tabel (dataTampil, sudah kena filter Jenis/Otorisasi & periode),
-      // sama seperti pola KPI di laporanregisterpembelian.
+      // sama seperti pola KPI di purchaseOrder.
       function renderKpiPBA (rows) {
         let totalDPP = 0
         let totalPPN = 0
-        let poSet = new Set()
+        let suppSet = new Set()
 
         ;(rows || []).forEach((r) => {
           totalDPP += Number(r.TotDPP) || 0
           totalPPN += Number(r.TotPPN) || 0
-          if (r.NoBukti) { poSet.add(r.NoBukti) }
+          // 1 supplier = 1 hitungan walau punya banyak transaksi. KodeSupp di-trim + upper
+          // supaya kode yang sama tidak terhitung dobel hanya karena beda spasi/huruf.
+          let kodeSupp = String(r.KodeSupp || '').trim().toUpperCase()
+          if (kodeSupp) { suppSet.add(kodeSupp) }
         })
 
         let cards = [
-          ['Jumlah PO', poSet.size, '#dc2626', '#fee2e2', 'bi bi-file-earmark-text', false],
+          ['Jumlah Supplier', suppSet.size, '#dc2626', '#fee2e2', 'bi bi-people', false],
           ['Total DPP', totalDPP, '#4f46e5', '#ede9fe', 'bi bi-receipt', true],
           ['Total PPN', totalPPN, '#16a34a', '#dcfce7', 'bi bi-percent', true]
         ]

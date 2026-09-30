@@ -26,20 +26,16 @@
         </div>
       </div>
 
-      <div class="kp-body">
+      <div class="kp-body" id="formBsGrid">
 
-        <div class="kp-field">
+        <div class="bs-form bs-form-1">
           <label for="input_gantipassword_lama">Password Lama</label>
           <input type="password" class="form-control" id="input_gantipassword_lama" placeholder="Password lama" autocomplete="current-password">
-        </div>
 
-        <div class="kp-field">
           <label for="input_gantipassword_password">Password Baru</label>
           <input type="password" class="form-control" id="input_gantipassword_password" placeholder="Password baru" maxlength="12" autocomplete="new-password">
-        </div>
 
-        <div class="kp-field">
-          <label for="input_gantipassword_password2">Ulangi Password Baru</label>
+          <label for="input_gantipassword_password2" class="bs-wrap">Ulangi Password Baru</label>
           <input type="password" class="form-control" id="input_gantipassword_password2" placeholder="Ulangi password baru" maxlength="12" autocomplete="new-password">
         </div>
 
@@ -59,6 +55,8 @@
 @endsection
 
 @section('css')
+{{-- Isian memakai #formBsGrid .bs-form seperti form menu master/purchasing (bs-form-1 & bs-wrap ada di master-list.css). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
 <style>
 
   .kp-wrap {
@@ -111,23 +109,6 @@
 
   .kp-body {
     padding: 24px 22px 22px;
-  }
-
-  .kp-field {
-    margin-bottom: 14px;
-  }
-
-  .kp-field label {
-    display: block;
-    font-weight: 600;
-    font-size: 13.5px;
-    color: #333;
-    margin-bottom: 6px;
-  }
-
-  .kp-field .form-control {
-    height: 38px !important;
-    border-radius: 6px;
   }
 
   .kp-footer {

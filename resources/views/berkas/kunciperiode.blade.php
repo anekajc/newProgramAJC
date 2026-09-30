@@ -39,13 +39,19 @@
         </div>
       </div>
 
-      <div class="kp-body">
+      <div class="kp-body" id="formBsGrid">
 
-        <div class="kp-tahun-row">
+        <div class="bs-form bs-form-1 kp-tahun-row">
           <label for="input_tahun">Tahun</label>
-          <button type="button" class="kp-tahun-geser" title="Tahun sebelumnya" onclick="geserTahun(-1)"><i class="bi bi-chevron-left"></i></button>
-          <input type="text" id="input_tahun" class="kp-tahun-input" value="{{ date('Y') }}" maxlength="4" inputmode="numeric" onchange="loadKunciPeriode()">
-          <button type="button" class="kp-tahun-geser" title="Tahun berikutnya" onclick="geserTahun(1)"><i class="bi bi-chevron-right"></i></button>
+          <div class="input-group kp-tahun-group">
+            <div class="input-group-prepend">
+              <button type="button" class="btn btn-chip-biru" title="Tahun sebelumnya" onclick="geserTahun(-1)"><i class="bi bi-chevron-left"></i></button>
+            </div>
+            <input type="text" id="input_tahun" class="form-control text-center" value="{{ date('Y') }}" maxlength="4" inputmode="numeric" onchange="loadKunciPeriode()">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-chip-biru" title="Tahun berikutnya" onclick="geserTahun(1)"><i class="bi bi-chevron-right"></i></button>
+            </div>
+          </div>
         </div>
 
         <div class="kp-month-list kp-month-list-cols">
@@ -120,6 +126,8 @@
 @endsection
 
 @section('css')
+{{-- Isian memakai #formBsGrid .bs-form seperti form menu master/purchasing (bs-form-1 ada di master-list.css). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
 <style>
   .kp-wrap {
     display: flex;
@@ -173,52 +181,14 @@
     padding: 20px 22px 22px;
   }
 
+  /* Baris Tahun memakai #formBsGrid .bs-form (master-list.css); tombol geser tahun
+     menempel di kiri-kanan input seperti tombol browse di form master. */
   .kp-tahun-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     margin-bottom: 16px;
   }
 
-  .kp-tahun-row label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-  }
-
-  .kp-tahun-input {
-    width: 90px;
-    text-align: center;
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    font-weight: 600;
-    color: #0d6efd;
-    background: #eef4ff;
-  }
-
-  .kp-tahun-input:focus {
-    outline: none;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
-  }
-
-  .kp-tahun-geser {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border-radius: 6px;
-    border: 1px solid #cfdcff;
-    background: #e8edff;
-    color: #2563eb;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  .kp-tahun-geser:hover {
-    background: #dce6ff;
+  .kp-tahun-group {
+    max-width: 200px;
   }
 
   .kp-month-list.is-memuat {

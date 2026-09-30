@@ -82,16 +82,26 @@ class NewSetPemakaiController extends Controller
   }
 
   public function listAksesReport (Request $req) {
-    //   select * from DBMENUREPORT
-    //
-    // select * from DBFLMENUREPORT
-    $values = [
-        $req->userid,
-      ];
-    DB::connection('SML')->update('exec sp_updateMenuReportWeb1 ?',$values);
+    if (!$req->userid || !DB::connection('SML')->select('select top 1 USERID from DBFLPASS where USERID = :u', ['u' => $req->userid])) {
+      return [];
+    }
 
+    // Hak akses report web disimpan di DBFLMENUREPORTWEB, bukan DBFLMENUREPORT (desktop).
+    // DBFLMENUREPORT punya FK ke DBMENUREPORT, jadi 40 report yang hanya ada di DBMENUREPORTWEB
+    // (SO, SPB, Stock, dst.) tidak bisa disimpan di sana, dan 27 kode dipakai untuk report yang
+    // berbeda di desktop (mis. 020502 = HPP di web, Laba Rugi di desktop). SP lama
+    // sp_updateMenuReportWeb1 / SP_Flmenureportweb1 tidak dipanggil lagi dari sini.
+    // Baris yang kurang dibuatkan dengan semua hak 0 (= belum ada akses), sama seperti DBFLMENUWEB.
+    // DBSMLNEW..DBFLMENUREPORTWEB: UserID, L1, Access, IsDesign, Isexport (PK UserID + L1).
+    DB::connection('SML')->insert(
+      "insert into DBFLMENUREPORTWEB (UserID, L1, Access, IsDesign, Isexport)
+       select :userid, m.KODEMENU, 0, 0, 0
+       from DBMENUREPORTWEB m
+       where not exists (select 1 from DBFLMENUREPORTWEB w where w.UserID = :cek and w.L1 = m.KODEMENU)",
+      ['userid' => $req->userid, 'cek' => $req->userid]
+    );
 
-    $listAksesReport = DB::connection("SML")->select('select a.* , b.* from DBMENUREPORTWEB a join DBFLMENUREPORT b on a.KODEMENU = b.L1 where b.UserID = :username order by a.KODEMENU', ['username' => $req->userid]);
+    $listAksesReport = DB::connection("SML")->select('select a.KODEMENU, a.Keterangan, a.L0, b.Access, b.IsDesign, b.Isexport from DBMENUREPORTWEB a join DBFLMENUREPORTWEB b on a.KODEMENU = b.L1 where b.UserID = :username order by a.KODEMENU', ['username' => $req->userid]);
     return $listAksesReport;
 
 
@@ -165,6 +175,7 @@ class NewSetPemakaiController extends Controller
     // Hak akses menu web & akses COA milik user yang dihapus ikut dibuang - kalau tertinggal,
     // user baru yang kelak dibuat dengan nama sama langsung mewarisi semua akses lamanya.
     DB::connection("SML")->update('delete from DBFLMENUWEB where USERID = :username', ['username' => $req->username]);
+    DB::connection("SML")->update('delete from DBFLMENUREPORTWEB where UserID = :username', ['username' => $req->username]);
     DB::connection("SML")->update('delete from DBAKSESPERKIRAAN where UserID = :username', ['username' => $req->username]);
 
     return 1;
@@ -194,18 +205,39 @@ class NewSetPemakaiController extends Controller
 
     $data = $req->input('tempData');
 
+    if (!$username || !is_array($data) || empty($data['KODEMENU'])) {
+      return 'Data akses report tidak lengkap';
+    }
+
     // DB::connection('SML')->statement('delete	DBFLMENUREPORT where UserID = :USERID',['USERID' => $username ]);
 
     // foreach ($data as $d) {
-      $values = [
-         $username,
-         $data['KODEMENU'],
-         $data['HASACCESS'],
-         $data['ISDESIGN'],
-         $data['ISEXPORT']
-        ];
-      DB::connection('SML')->update('exec SP_Flmenureportweb1 ?,?,?,?,?',$values);
+      // $values = [
+      //    $username,
+      //    $data['KODEMENU'],
+      //    $data['HASACCESS'],
+      //    $data['ISDESIGN'],
+      //    $data['ISEXPORT']
+      //   ];
+      // DB::connection('SML')->update('exec SP_Flmenureportweb1 ?,?,?,?,?',$values);
     // }
+
+    // Disimpan ke DBFLMENUREPORTWEB (lihat listAksesReport), bukan lewat SP_Flmenureportweb1
+    // yang meng-update DBFLMENUREPORT milik desktop.
+    $tes = DB::connection('SML')->update(
+      'update DBFLMENUREPORTWEB set Access = :akses, IsDesign = :design, Isexport = :export where UserID = :userid and L1 = :l1',
+      [
+        'akses' => !empty($data['HASACCESS']) ? 1 : 0,
+        'design' => !empty($data['ISDESIGN']) ? 1 : 0,
+        'export' => !empty($data['ISEXPORT']) ? 1 : 0,
+        'userid' => $username,
+        'l1' => $data['KODEMENU'],
+      ]
+    );
+
+    if (!$tes) {
+      return 'Akses report ' . $data['KODEMENU'] . ' tidak ditemukan';
+    }
 
     return 1;
   }
