@@ -51,8 +51,18 @@
 </div>
 
 
+<style>
+  /* Tiga pasang label + input per baris (Qty Min | Qty Max | Toleransi, dst). */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 100px minmax(0, 1fr) 100px minmax(0, 1fr); }
+  #formBsGrid .bs-form.bs-form-3 .bs-full-3 { grid-column: 4 / -1; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+    #formBsGrid .bs-form.bs-form-3 .bs-full-3 { grid-column: 1 / -1; }
+  }
+</style>
+
 <!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade"  id="form"tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -66,32 +76,28 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-          <div class="bs-form bs-form-1">
+          <div class="bs-form">
           <label for="input_add_isagen">Keagenan</label>
           <div class="bs-check"><input type="checkbox" id="input_add_isagen" name="" value=""></div>
-        </div>
-            <div class="bs-form bs-form-1">
           <label for="input_add_kodegroup">Group</label>
           <div class="d-flex align-items-center" style="gap:10px">
             <input type="text" class="form-control" id="input_add_kodegroup" value='BJ' disabled>
             <span>Barang Jadi</span>
           </div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_kodeheadgroup">HeadGroup</label>
           <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
 
-          <label for="input_add_kodesubgroup">SubGroup</label>
-          <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
-                    <option selected disabled value="">Pilih SubGroup</option>
-                  </select>
-
           <label for="input_add_kodesubkategori">SubKategori</label>
           <select id="input_add_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih Subkategori</option>
+                  </select>
+
+          <label for="input_add_kodesubgroup">SubGroup</label>
+          <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+                    <option selected disabled value="">Pilih SubGroup</option>
                   </select>
 
           <label for="input_add_kodemerk">Merk</label>
@@ -102,11 +108,16 @@
           <label for="input_add_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_add_kodebarang" disabled >
 
+          <label for="input_add_kodesku">Kode SKU</label>
+          <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-leftt" id="input_add_kodesku" >
+            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="">
+                <span class="text-left">Kontrak</span></div></div>
+
           <label for="input_add_namabarang">Nama Barang</label>
-          <input type="text" class="form-control" id="input_add_namabarang" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang" ></div>
 
           <label for="input_add_namabarang2">Nama Barang 2</label>
-          <input type="text" class="form-control" id="input_add_namabarang2" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang2" ></div>
         </div>
 
             <br/>
@@ -186,44 +197,31 @@
 
             <br/>
 
-            <div class="bs-form">
+            <div class="bs-form bs-form-3">
           <label for="input_add_qtymin">Qty Min</label>
           <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymin" >
           <label for="input_add_qtymax">Qty Max</label>
           <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymax" >
-
-            
           <label for="input_add_toleransi">Toleransi</label>
           <input type="number" value=0 min=0 class="form-control text-right" id="input_add_toleransi" >
-          <label for="input_add_isberat">Berat/Volume</label>
-          <select id="input_add_isberat" class="form-control" aria-label="Default select example">
-                    <option value=0>Volume</option>
-                    <option value=1>Berat</option>
-                  </select>
 
-
-            
           <label for="input_add_isaktif">Status</label>
           <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
+          <label for="input_add_isberat">Berat/Volume</label>
+          <select id="input_add_isberat" class="form-control" aria-label="Default select example">
+                    <option value=0>Volume</option>
+                    <option value=1>Berat</option>
+                  </select>
           <label for="input_add_beratvolume">Berat/Volume</label>
           <input type="number" class="form-control text-right" id="input_add_beratvolume" value=0.00>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_partnumber">Part Number</label>
           <input type="text" class="form-control text-left" id="input_add_partnumber" >
-
           <label for="input_add_lokasi">Lokasi</label>
-          <input type="text" class="form-control text-left" id="input_add_lokasi" >
-        </div>
-            <div class="bs-form bs-form-1">
-          <label for="input_add_kodesku">Kode SKU</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-leftt" id="input_add_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div></div>
+          <div class="bs-full-3"><input type="text" class="form-control text-left" id="input_add_lokasi" ></div>
         </div>
 
 
@@ -255,32 +253,28 @@
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
-          <div class="bs-form bs-form-1">
+          <div class="bs-form">
           <label for="input_edit_isagen">Keagenan</label>
           <div class="bs-check"><input type="checkbox" id="input_edit_isagen" name="" value=""></div>
-        </div>
-            <div class="bs-form bs-form-1">
           <label for="input_edit_kodegroup">Group</label>
           <div class="d-flex align-items-center" style="gap:10px">
             <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled>
             <span>Barang Jadi</span>
           </div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_kodeheadgroup">HeadGroup</label>
           <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
 
-          <label for="input_edit_kodesubgroup">SubGroup</label>
-          <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
-                    <option selected disabled value="">Pilih SubGroup</option>
-                  </select>
-
           <label for="input_edit_kodesubkategori">SubKategori</label>
           <select disabled id="input_edit_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih Subkategori</option>
+                  </select>
+
+          <label for="input_edit_kodesubgroup">SubGroup</label>
+          <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+                    <option selected disabled value="">Pilih SubGroup</option>
                   </select>
 
           <label for="input_edit_kodemerk">Merk</label>
@@ -291,11 +285,16 @@
           <label for="input_edit_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
 
+          <label for="input_edit_kodesku">Kode SKU</label>
+          <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-left" id="input_edit_kodesku" >
+            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="">
+                <span class="text-left">Kontrak</span></div></div>
+
           <label for="input_edit_namabarang">Nama Barang</label>
-          <input type="text" class="form-control" id="input_edit_namabarang" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang" ></div>
 
           <label for="input_edit_namabarang2">Nama Barang 2</label>
-          <input type="text" class="form-control" id="input_edit_namabarang2" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang2" ></div>
         </div>
 
             <br/>
@@ -366,44 +365,31 @@
 
             <br/>
 
-            <div class="bs-form">
+            <div class="bs-form bs-form-3">
           <label for="input_edit_qtymin">Qty Min</label>
           <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymin" >
           <label for="input_edit_qtymax">Qty Max</label>
           <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymax" >
-
-            
           <label for="input_edit_toleransi">Toleransi</label>
           <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_toleransi" >
-          <label for="input_edit_isberat">Berat/Volume</label>
-          <select id="input_edit_isberat" class="form-control" aria-label="Default select example">
-                    <option value=0>Volume</option>
-                    <option value=1>Berat</option>
-                  </select>
 
-
-            
           <label for="input_edit_isaktif">Status</label>
           <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
+          <label for="input_edit_isberat">Berat/Volume</label>
+          <select id="input_edit_isberat" class="form-control" aria-label="Default select example">
+                    <option value=0>Volume</option>
+                    <option value=1>Berat</option>
+                  </select>
           <label for="input_edit_beratvolume">Berat/Volume</label>
           <input type="number" class="form-control text-right" id="input_edit_beratvolume" value=0.00>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_partnumber">Part Number</label>
           <input type="text" class="form-control text-left" id="input_edit_partnumber" >
-
           <label for="input_edit_lokasi">Lokasi</label>
-          <input type="text" class="form-control text-left" id="input_edit_lokasi" >
-        </div>
-            <div class="bs-form bs-form-1">
-          <label for="input_edit_kodesku">Kode SKU</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-left" id="input_edit_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div></div>
+          <div class="bs-full-3"><input type="text" class="form-control text-left" id="input_edit_lokasi" ></div>
         </div>
 
     </div>
@@ -941,9 +927,9 @@ function buttonEdit (kodebarang) {
     setNum("input_edit_harga3", res[0].Hrg3_1)
     setNum("input_edit_qtymin", res[0].QntMin)
     setNum("input_edit_qtymax", res[0].QntMax)
-    document.getElementById("input_edit_toleransi").value = res[0].Tolerate
+    document.getElementById("input_edit_toleransi").value = (parseFloat(res[0].Tolerate) || 0).toFixed(2)
     document.getElementById("input_edit_isberat").value = res[0].pBerat
-    document.getElementById("input_edit_beratvolume").value = res[0].Berat
+    document.getElementById("input_edit_beratvolume").value = (parseFloat(res[0].Berat) || 0).toFixed(2)
     document.getElementById("input_edit_isaktif").value = res[0].ISAKTIF
     document.getElementById("input_edit_partnumber").value = res[0].PartNumber
     document.getElementById("input_edit_lokasi").value = res[0].Mlokasi

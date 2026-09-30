@@ -50,6 +50,18 @@
 
 </div>
 
+<style>
+  /* Tiga pasang label + input per baris (TOP | TOP INT | Plafon, Pph21 | Pph23). */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 80px minmax(0, 1fr) 70px minmax(0, 1fr); margin-top: 14px; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+  }
+  /* Tumpukan modal (disalin dari accounting/penerimaandpp): modal induk & backdrop-nya
+     disembunyikan selama modal anak terbuka, jadi hanya satu modal yang terlihat. */
+  .modal.pld-modal-tertimbun { display: none !important; }
+  .modal-backdrop.pld-backdrop-tertimbun { display: none !important; }
+</style>
+
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 800px">
@@ -68,12 +80,9 @@
 
             <div class="bs-form">
           <label for="input_add_kode">Kode</label>
-          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode">
+          <input type="text" class="form-control"  id="input_add_kode" placeholder="Kode">
           <label for="input_add_bentukusaha">Bentuk Usaha</label>
-          <div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_bentukusaha" placeholder="Bentuk Usaha">
-                </div> -->
-
+          <div class="d-flex align-items-center" style="gap:8px">
                 <div class="form-group">
                   <select id="input_add_bentukusaha" class="form-control" aria-label="Default select example">
                     <option selected value="PT">PT</option>
@@ -89,14 +98,12 @@
                 </div>
             <input type="checkbox" id="input_add_isppn" name="" value="">
                 <label class="text-left">PPN</label></div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_nama">Nama</label>
-          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
 
           <label for="input_add_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_add_alamat"  placeholder="Alamat">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat"  placeholder="Alamat"></div>
 
           <label for="input_add_kota">Kota</label>
           <select id="input_add_kota" class="form-control" aria-label="Default select example">
@@ -105,51 +112,47 @@
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-        </div>
-            <div class="bs-form">
           <label for="input_add_kodepos">KodePos</label>
           <input type="text" class="form-control" id="input_add_kodepos" placeholder="Kode Pos">
+
           <label for="input_add_negara">Negara</label>
           <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
-        </div>
-            <div class="bs-form bs-form-1">
           <label for="input_add_telp">Telp</label>
           <input type="text" class="form-control" id="input_add_telp" placeholder="No Telp">
-        </div>
-            <input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax">
-            <div class="bs-form">
-          <label for="input_add_pph21">Pph21</label>
-          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
-          <label for="input_add_pph23">Pph23</label>
-          <input type="number" class="form-control text-right" id="input_add_pph23" value=0.00>
-        </div>
-            <div class="bs-form">
+
           <label for="input_add_email">Email</label>
           <input type="text" class="form-control" id="input_add_email" placeholder="Email">
-          <label for="input_add_top">TOP</label>
-          <input type="number" class="form-control text-right" id="input_add_top" value=0>
-        </div>
-            <div class="bs-form">
           <label for="input_add_isaktif">Status</label>
           <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
                     <option selected value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
+        </div>
+            <input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax">
+
+            <div class="bs-form bs-form-3">
+          <label for="input_add_top">TOP</label>
+          <input type="number" class="form-control text-right" id="input_add_top" value=0>
+          <label for="input_add_haripiutang">TOP INT</label>
+          <input type="number" class="form-control text-right" id="input_add_haripiutang" value=0 >
           <label for="input_add_plafon">Plafon</label>
           <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_add_plafon" value=0 >
-          <label for="input_add_haripiutang">TOP INT</label>
-          <div class="bs-full"><input type="number" class="form-control text-right" id="input_add_haripiutang" value=0 ></div>
+
+          <label for="input_add_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
+          <label for="input_add_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_add_pph23" value=0.00>
+          <div style="grid-column: 5 / -1"></div>
         </div>
-            <div class="bs-form bs-form-1">
-          <label for="input_add_att">Att</label>
-          <input type="text" class="form-control" id="input_add_att" placeholder="Att">
-        </div>
+
             <div class="bs-form">
+          <label for="input_add_att">Att</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+
           <label for="input_add_attphone">Att Phone</label>
           <input type="text" class="form-control" id="input_add_attphone" placeholder="Att Phone">
           <label for="input_add_attdepart">Att Depart</label>
           <input type="text" class="form-control" id="input_add_attdepart" placeholder="Att Depart">
-        </div>
             <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -185,27 +188,26 @@
                 </div>
               </div>
             </div> -->
-            <div class="bs-form bs-form-1">
+
           <label for="input_add_jeniscustomer">Jenis</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><select id="input_add_jeniscustomer" class="form-control" aria-label="Default select example">
+          <select id="input_add_jeniscustomer" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Jenis Customer</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
+          <div class="d-flex align-items-center" style="grid-column: 3 / -1; gap:8px">
             <span class="bs-cek"><input type="checkbox" id="input_add_berikat" name="" value=""> <span>Berikat</span></span>
-            <span class="bs-cek"><input type="checkbox" id="input_add_blacklist" name="" value=""> <span>Blacklist</span></span></div></div>
-        </div>
+            <span class="bs-cek"><input type="checkbox" id="input_add_blacklist" name="" value=""> <span>Blacklist</span></span>
+          </div>
 
-            <div class="bs-form">
           <label for="input_add_intcomp">Int.Comp</label>
           <input type="text" class="form-control" id="input_add_intcomp" placeholder="">
           <label for="input_add_compcode">Comp Code</label>
           <input type="text" class="form-control" id="input_add_compcode" placeholder="">
+
           <label for="input_add_custcode">CustCode</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_custcode" placeholder=""></div>
-        </div>
-            <div class="bs-form bs-form-1">
+          <input type="text" class="form-control" id="input_add_custcode" placeholder="">
           <label for="input_add_groupcustomer">Group</label>
           <select id="input_add_groupcustomer" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Group</option>
@@ -278,10 +280,7 @@
           <label for="input_edit_kode">Kode</label>
           <input type="text" class="form-control" disabled id="input_edit_kode" placeholder="Kode">
           <label for="input_edit_bentukusaha">Bentuk Usaha</label>
-          <div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_bentukusaha" placeholder="Bentuk Usaha">
-                </div> -->
-
+          <div class="d-flex align-items-center" style="gap:8px">
                 <div class="form-group">
                   <select id="input_edit_bentukusaha" class="form-control" aria-label="Default select example">
                     <option selected value="PT">PT</option>
@@ -297,14 +296,12 @@
                 </div>
             <input type="checkbox" id="input_edit_isppn" name="" value="">
                 <label class="text-left">PPN</label></div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_nama">Nama</label>
-          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
 
           <label for="input_edit_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_edit_alamat"  placeholder="Alamat">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat"  placeholder="Alamat"></div>
 
           <label for="input_edit_kota">Kota</label>
           <select id="input_edit_kota" class="form-control" aria-label="Default select example">
@@ -313,51 +310,47 @@
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-        </div>
-            <div class="bs-form">
           <label for="input_edit_kodepos">KodePos</label>
           <input type="text" class="form-control" id="input_edit_kodepos" placeholder="Kode Pos">
+
           <label for="input_edit_negara">Negara</label>
           <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
-        </div>
-            <div class="bs-form bs-form-1">
           <label for="input_edit_telp">Telp</label>
           <input type="text" class="form-control" id="input_edit_telp" placeholder="No Telp">
-        </div>
-            <input type="hidden" class="form-control" id="input_edit_fax" placeholder="No Fax">
-            <div class="bs-form">
-          <label for="input_edit_pph21">Pph21</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph21" value=0.00>
-          <label for="input_edit_pph23">Pph23</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph23" value=0.00>
-        </div>
-            <div class="bs-form">
+
           <label for="input_edit_email">Email</label>
           <input type="text" class="form-control" id="input_edit_email" placeholder="Email">
-          <label for="input_edit_top">TOP</label>
-          <input type="number" class="form-control text-right" id="input_edit_top" value=0>
-        </div>
-            <div class="bs-form">
           <label for="input_edit_isaktif">Status</label>
           <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
                     <option selected value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
+        </div>
+            <input type="hidden" class="form-control" id="input_edit_fax" placeholder="No Fax">
+
+            <div class="bs-form bs-form-3">
+          <label for="input_edit_top">TOP</label>
+          <input type="number" class="form-control text-right" id="input_edit_top" value=0>
+          <label for="input_edit_haripiutang">TOP INT</label>
+          <input type="number" class="form-control text-right" id="input_edit_haripiutang" value=0 >
           <label for="input_edit_plafon">Plafon</label>
           <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_edit_plafon">
-          <label for="input_edit_haripiutang">TOP INT</label>
-          <div class="bs-full"><input type="number" class="form-control text-right" id="input_edit_haripiutang" value=0 ></div>
+
+          <label for="input_edit_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph21" value=0.00>
+          <label for="input_edit_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph23" value=0.00>
+          <div style="grid-column: 5 / -1"></div>
         </div>
-            <div class="bs-form bs-form-1">
-          <label for="input_edit_att">Att</label>
-          <input type="text" class="form-control" id="input_edit_att" placeholder="Att">
-        </div>
+
             <div class="bs-form">
+          <label for="input_edit_att">Att</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+
           <label for="input_edit_attphone">Att Phone</label>
           <input type="text" class="form-control" id="input_edit_attphone" placeholder="Att Phone">
           <label for="input_edit_attdepart">Att Depart</label>
           <input type="text" class="form-control" id="input_edit_attdepart" placeholder="Att Depart">
-        </div>
             <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -393,27 +386,26 @@
                 </div>
               </div>
             </div> -->
-            <div class="bs-form bs-form-1">
+
           <label for="input_edit_jeniscustomer">Jenis</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><select id="input_edit_jeniscustomer" class="form-control" aria-label="Default select example">
+          <select id="input_edit_jeniscustomer" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Jenis Customer</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
+          <div class="d-flex align-items-center" style="grid-column: 3 / -1; gap:8px">
             <span class="bs-cek"><input type="checkbox" id="input_edit_berikat" name="" value=""> <span>Berikat</span></span>
-            <span class="bs-cek"><input type="checkbox" id="input_edit_blacklist" name="" value=""> <span>Blacklist</span></span></div></div>
-        </div>
+            <span class="bs-cek"><input type="checkbox" id="input_edit_blacklist" name="" value=""> <span>Blacklist</span></span>
+          </div>
 
-            <div class="bs-form">
           <label for="input_edit_intcomp">Int.Comp</label>
           <input type="text" class="form-control" id="input_edit_intcomp" placeholder="">
           <label for="input_edit_compcode">Comp Code</label>
           <input type="text" class="form-control" id="input_edit_compcode" placeholder="">
+
           <label for="input_edit_custcode">CustCode</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_custcode" placeholder=""></div>
-        </div>
-            <div class="bs-form bs-form-1">
+          <input type="text" class="form-control" id="input_edit_custcode" placeholder="">
           <label for="input_edit_groupcustomer">Group</label>
           <select id="input_edit_groupcustomer" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Group</option>
@@ -469,36 +461,33 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-      <button class="btn btn-sm btn-chip-biru" type="button" onclick="buttonDetailAkunAdd()">Tambah</button>
-        <table id="tabelDetailAkun" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Kode</th>
-              <th scope="col">Perkiraan</th>
+      <div class="modal-body po-list-page">
+        {{-- Modal ini disembunyikan selama modal Add/Edit Detail Akun atau pemilih perkiraan
+             terbuka, lalu tampil lagi saat modal itu ditutup (tumpukan modal, pola penerimaandpp). --}}
+        <div class="card">
+          <div class="card-body" style="padding:0;">
 
-            </tr>
-          </thead>
+            {{-- Toolbar & tabel mengikuti gaya daftar utama (toolbarMaster + data-table). --}}
+            <div class="po-toolbar">
+              <input type="search" id="detailAkunSearch" class="po-search-inp" placeholder="Cari data" autocomplete="off">
+              <div class="po-toolbar-act">
+                <button class="btn btn-dpp-utama" type="button" onclick="buttonDetailAkunAdd()">Tambah</button>
+              </div>
+            </div>
 
-          <tbody id="tabel_dataDetailAkun" class="text-left" >
-            <tr>
+            <table id="tabelDetailAkun" class="data-table po-aksi-hover">
+              <thead class="text-center">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th style="padding: 4px 12px;" scope="col">Kode</th>
+                  <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+                </tr>
+              </thead>
+              <tbody id="tabel_dataDetailAkun" class="text-left"></tbody>
+            </table>
 
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonDetailAkunEdit()"><i class="bi bi-pen">Select</i></button>
-                  <button type="button" onclick="buttonDetailAkunDelete()"><i class="bi bi-trash">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
-
+          </div>
+        </div>
     </div>
         <div class="modal-footer">
            
@@ -533,7 +522,7 @@
           <label for="input_add_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_add_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
+                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
               </div>
             </div>
         </div>
@@ -573,7 +562,7 @@
           <label for="input_edit_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
                 <input type="text" class="form-control" id="input_edit_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
+                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
               </div>
             </div>
         </div>
@@ -637,6 +626,40 @@
 <script type="text/javascript">
 
 let dataRefresh = []
+
+// ---------- Tumpukan modal (disalin dari accounting/penerimaandpp) ----------
+// Hanya satu modal yang terlihat pada satu waktu. Saat modal anak dibuka (Add/Edit Detail Akun,
+// pemilih perkiraan), modal induk disembunyikan lewat class (bukan .modal('hide'), supaya isian
+// dan handler hidden.bs.modal milik induk tidak ikut terpicu). Saat anak ditutup - lewat Batal,
+// tombol x, Esc, maupun klik backdrop - induk muncul lagi.
+var pldTumpukanModal = []
+
+function pldSisakanSatuBackdrop () {
+  var backdrop = $('.modal-backdrop')
+  backdrop.addClass('pld-backdrop-tertimbun')
+  backdrop.last().removeClass('pld-backdrop-tertimbun')
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+  var induk = $('.modal.show').not(this).not('.pld-modal-tertimbun').last()
+  if (induk.length) {
+    pldTumpukanModal.push(induk)
+    induk.addClass('pld-modal-tertimbun')
+  }
+})
+
+$(document).on('shown.bs.modal', '.modal', function () {
+  pldSisakanSatuBackdrop()
+})
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+  var induk = pldTumpukanModal.pop()
+  if (induk) induk.removeClass('pld-modal-tertimbun')
+  // BS4 melepas .modal-open dari <body> begitu satu modal tertutup, padahal masih
+  // ada modal lain yang terbuka - pasang lagi supaya scroll body tetap terkunci.
+  if ($('.modal.show').length) $('body').addClass('modal-open')
+  pldSisakanSatuBackdrop()
+})
 let kodeDetailPerkiraan = []
 
 // Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
@@ -1172,9 +1195,9 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_negara").value = res[0].NEGARA
       document.getElementById("input_edit_fax").value = res[0].FAX
       document.getElementById("input_edit_email").value = res[0].EMAIL
-      document.getElementById("input_edit_pph23").value = res[0].NPPH23
-      document.getElementById("input_edit_pph21").value = res[0].NPPH22
-      document.getElementById("input_edit_haripiutang").value = res[0].HARIHUTPIUT
+      document.getElementById("input_edit_pph23").value = (parseFloat(res[0].NPPH23) || 0).toFixed(2)
+      document.getElementById("input_edit_pph21").value = (parseFloat(res[0].NPPH22) || 0).toFixed(2)
+      document.getElementById("input_edit_haripiutang").value = String(res[0].HARIHUTPIUT ?? '').replace(/^(-?)\./, (m, minus) => minus + '0.')
       document.getElementById("input_edit_isaktif").value = res[0].IsAktif
       document.getElementById("input_edit_att").value = res[0].Att
       document.getElementById("input_edit_attphone").value = res[0].AttPhone
@@ -1351,6 +1374,7 @@ let noBuktiDetailTemp = ''
 
 function buttonDetailAkun (kodeDetail){
   noBuktiDetailTemp = kodeDetail
+  $('#detailAkunSearch').val('')
   loadDetailAkun(kodeDetail)
   $("#formDetailAkun").modal('toggle')
 }
@@ -1384,9 +1408,11 @@ function loadDetailAkun (kodeDetail) {
     let temp = "";
 
     rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
-        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+      <td>
+        <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+        </div>
       </td>
       <td>${item.KodeCustSupp}</td>
       <td>${item.Perkiraan}</td>
@@ -1394,11 +1420,17 @@ function loadDetailAkun (kodeDetail) {
   });
 
   document.getElementById("tabel_dataDetailAkun").innerHTML = rowTable;
-  $("#tabelDetailAkun").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  // Opsi DataTables sama dengan tabel daftar utama; tanpa paging seperti sebelumnya.
+  $("#tabelDetailAkun").DataTable(MasterList.opsi({ paging: false }))
+    .search($('#detailAkunSearch').val() || '').draw();
 }
+
+// Kotak cari modal Detail Akun (pengganti kotak "Search" bawaan DataTables).
+$(document).on('input', '#detailAkunSearch', function () {
+  if ($.fn.DataTable.isDataTable('#tabelDetailAkun')) {
+    $('#tabelDetailAkun').DataTable().search(this.value).draw();
+  }
+});
 
 // Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
 // autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
