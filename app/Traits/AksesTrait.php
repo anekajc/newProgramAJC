@@ -28,13 +28,10 @@ trait AksesTrait {
 		)->first();
 
 		// dbmenureportweb is the live report-menu table now; DBMENUREPORT and its
-		// per-user permission table DBFLMENUREPORT are retired. No permission
-		// table exists yet that maps to dbmenureportweb's KODEMENU scheme --
-		// DBFLMENUREPORT.L1 still uses DBMENUREPORT's old numbering, and the only
-		// other candidate (new_aksesmenureport/new_menureport) is a separate,
-		// unrelated 14-row stock-report menu keyed by numeric user id, not a
-		// match. So every authenticated user gets Access = true for now; revisit
-		// if a real per-user permission table for this scheme is ever built.
+		// per-user permission table DBFLMENUREPORT are retired (DBFLMENUREPORT.L1
+		// still uses DBMENUREPORT's old numbering). Hak akses report web per user
+		// sekarang dibaca dari DBFLMENUREPORTWEB (diisi lewat Berkas > Set Pemakai >
+		// Akses Report) - lihat blok $href != "Home" di bawah.
 		$menul0 = $this->toFluentMenuTree(
 			app('App\Http\Controllers\HomeController')->getReportMenuTreeArray()
 		);
@@ -49,7 +46,26 @@ trait AksesTrait {
 				'select KODEMENU, Keterangan from dbmenureportweb where href = ?',
 				[$href]
 			);
-			$akses = Arr::add($akses, 'akses', new Fluent(['Access' => true, 'IsDesign' => true, 'Isexport' => true]));
+			// $akses = Arr::add($akses, 'akses', new Fluent(['Access' => true, 'IsDesign' => true, 'Isexport' => true]));
+
+			// Report yang terdaftar di dbmenureportweb: hak akses diambil dari
+			// DBFLMENUREPORTWEB milik user. Belum ada baris = belum diberi akses.
+			// Report yang href-nya belum terdaftar di dbmenureportweb tidak punya kode
+			// menu, jadi tidak bisa dicentang di Set Pemakai - tetap dibuka untuk semua
+			// user seperti sebelumnya, supaya halamannya tidak tertutup untuk siapa pun.
+			$hak = ['Access' => true, 'IsDesign' => true, 'Isexport' => true];
+			if ($menu) {
+				$fl = DB::connection('SML')->selectOne(
+					'select Access, IsDesign, Isexport from DBFLMENUREPORTWEB where UserID = ? and L1 = ?',
+					[\Auth::user()->username, $menu->KODEMENU]
+				);
+				$hak = [
+					'Access' => $fl ? (bool) $fl->Access : false,
+					'IsDesign' => $fl ? (bool) $fl->IsDesign : false,
+					'Isexport' => $fl ? (bool) $fl->Isexport : false,
+				];
+			}
+			$akses = Arr::add($akses, 'akses', new Fluent($hak));
 			// Falls back to the raw href when it's not in dbmenureportweb yet
 			// (some older report hrefs still aren't) instead of fataling on
 			// $menu->Keterangan against a null row.

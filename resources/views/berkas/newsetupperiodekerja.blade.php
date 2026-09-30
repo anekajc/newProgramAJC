@@ -42,31 +42,27 @@
         </div>
       </div>
 
-      <div class="kp-body">
+      <div class="kp-body" id="formBsGrid">
 
-        <div class="kp-periode-row">
-          <div class="kp-periode-field">
-            <label for="input_periodekerja_bulan">Bulan</label>
-            <select id="input_periodekerja_bulan" class="form-control kp-periode-select">
-              <option value="1">Januari</option>
-              <option value="2">Februari</option>
-              <option value="3">Maret</option>
-              <option value="4">April</option>
-              <option value="5">Mei</option>
-              <option value="6">Juni</option>
-              <option value="7">Juli</option>
-              <option value="8">Agustus</option>
-              <option value="9">September</option>
-              <option value="10">Oktober</option>
-              <option value="11">November</option>
-              <option value="12">Desember</option>
-            </select>
-          </div>
+        <div class="bs-form bs-form-1">
+          <label for="input_periodekerja_bulan">Bulan</label>
+          <select id="input_periodekerja_bulan" class="form-control">
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
 
-          <div class="kp-periode-field">
-            <label for="input_periodekerja_tahun">Tahun</label>
-            <input type="text" class="form-control kp-tahun-input" id="input_periodekerja_tahun" placeholder="Tahun" maxlength="4" inputmode="numeric">
-          </div>
+          <label for="input_periodekerja_tahun">Tahun</label>
+          <input type="text" class="form-control" id="input_periodekerja_tahun" placeholder="Tahun" maxlength="4" inputmode="numeric">
         </div>
 
         <div class="kp-footer">
@@ -85,6 +81,8 @@
 @endsection
 
 @section('css')
+{{-- Isian memakai #formBsGrid .bs-form seperti form menu master/purchasing (bs-form-1 ada di master-list.css). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
 <style>
 
   .kp-wrap {
@@ -139,48 +137,10 @@
     padding: 24px 22px 22px;
   }
 
-  .kp-periode-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .kp-periode-field {
-    flex: 1;
-  }
-
-  .kp-periode-field label {
-    display: block;
-    font-weight: 600;
-    font-size: 13.5px;
-    color: #333;
-    margin-bottom: 6px;
-  }
-
-  .kp-periode-select,
-  .kp-tahun-input {
-    width: 100%;
-    height: 38px !important;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    font-weight: 600;
-    color: #0d6efd;
-    background: #eef4ff;
-    text-align: center;
-    text-align-last: center;
-  }
-
-  .kp-periode-select:focus,
-  .kp-tahun-input:focus {
-    outline: none;
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
-  }
-
   .kp-footer {
     display: flex;
     justify-content: flex-end;
+    margin-top: 22px;
   }
 
   /* Tombol soft seperti tombol utama memorialkoreksi (.btn-dpp-utama). */
