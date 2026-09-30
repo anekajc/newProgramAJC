@@ -414,8 +414,9 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="input-group form-group">
-                                                    <input type="number" class="form-control text-right"
-                                                        id="inputitem_qtyasal" onblur="onChangeQtyAsal()">
+                                                    <input type="text" class="form-control text-right"
+                                                        id="inputitem_qtyasal" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this); onChangeQtyAsal()">
                                                     <input type="number" class="form-control" id="inputitem_qtylama"
                                                         hidden>
                                                 </div>
@@ -444,8 +445,9 @@
                                             </div>
                                             <div class="col-md-3" style="margin-top:-10px">
                                                 <div class="input-group form-group">
-                                                    <input type="number" class="form-control text-right"
-                                                        id="inputitem_qtyjadi" onblur="onChangeQtyJadi()">
+                                                    <input type="text" class="form-control text-right"
+                                                        id="inputitem_qtyjadi" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this); onChangeQtyJadi()">
                                                 </div>
                                             </div>
 
@@ -583,6 +585,10 @@
             g_tipeformitemEdit = "edit",
             g_tipeformitemDelete = "delete";
         var gtipeformitem = g_tipeformitemNone;
+
+        // Keterangan terakhir yang tersimpan di DB (diisi refreshForm) — onChangeKeterangan() hanya
+        // menyimpan kalau isi textarea berbeda dari nilai ini.
+        var g_noteTersimpan = "";
 
         const g_modalNone = "";
         var gmodemodal = g_modalNone;
@@ -792,7 +798,7 @@
 
         if (typeof cekNotZero !== 'function') {
             window.cekNotZero = function(inputId) {
-                return Number($('#' + inputId).val()) !== 0;
+                return Number(String($('#' + inputId).val()).replace(/,/g, '')) !== 0;
             };
         }
 
@@ -2094,7 +2100,8 @@
                             $("#input_nourut").val(dataHeader.NOURUT);
                             $("#input_tanggal").val(doSetFormatDate(dataHeader.tanggal, "-"));
                             $("#input_gudang").val(dataHeader.Kodegdg);
-                            $("#input_keterangan").val(dataHeader.note);
+                            g_noteTersimpan = nullToEmpty(dataHeader.note);
+                            $("#input_keterangan").val(g_noteTersimpan);
 
                             dataBrowse['gudang'] = dataHeader.Kodegdg;
                         }
@@ -2164,6 +2171,7 @@
             $("#input_nourut").val("");
             $("#input_gudang").val("");
             $("#input_keterangan").val("");
+            g_noteTersimpan = "";
         }
 
         function buttonEdit(_nb) {
@@ -2260,12 +2268,49 @@
             dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
+        // Mode Add: keterangan ikut terkirim bersama item pertama (cart["note"] di cekValidate), dan
+        // setelah item pertama tersimpan successAdd() memindah form ke mode Edit. Mode Edit: header
+        // sudah ada di DBUBAHKEMASAN, jadi keterangan disimpan langsung saat textarea kehilangan fokus.
         function onChangeKeterangan() {
             if (gtipeform != g_tipeformEdit) return;
 
             let nb = $("#input_nobukti").val();
             let value = $("#input_keterangan").val();
-            doOnChangeHeader(nb, "NOTE", value, "kmbjonchangeheader");
+            if (value === g_noteTersimpan) return;
+
+            doOnChangeHeader(nb, "NOTE", value, "kmbjonchangeheader", function() {
+                g_noteTersimpan = value;
+                alertify.success("Keterangan tersimpan");
+            });
+        }
+
+        // Update satu kolom header lewat endpoint onChangeHeader (controller hanya menerima kolom
+        // yang ada di allow-list-nya). Respon = jumlah baris ter-update.
+        function doOnChangeHeader(_nobukti, _field, _value, _urlName, _onSuccess) {
+            if (!_nobukti) return;
+
+            $.ajax({
+                url: "{!! url('') !!}/" + _urlName,
+                type: "post",
+                data: {
+                    _token: $("#_token").val(),
+                    nobukti: _nobukti,
+                    field: _field,
+                    value: _value
+                },
+                success: function(res) {
+                    if (Number(res) > 0) {
+                        if (_onSuccess) _onSuccess(res);
+                    } else {
+                        console.log(res);
+                        alertify.warning("Gagal menyimpan, No Bukti " + _nobukti + " tidak ditemukan");
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    alertify.warning("Terjadi kesalahan, silahkan refresh browser");
+                }
+            });
         }
 
         function onChangeQtyAsal() {
@@ -2620,8 +2665,8 @@
                 }
             });
 
-            $("#inputitem_qtyasal").val(parseFloat(_qtyasal).toFixed(2));
-            $("#inputitem_qtyjadi").val(parseFloat(_qtyjadi).toFixed(2));
+            $("#inputitem_qtyasal").val(formatAngka((parseFloat(_qtyasal) || 0).toFixed(2)));
+            $("#inputitem_qtyjadi").val(formatAngka((parseFloat(_qtyjadi) || 0).toFixed(2)));
             $("#inputitem_qtylama").val(parseFloat(_qtyasal).toFixed(2));
 
             onChangeQtyAsal();
@@ -2700,7 +2745,7 @@
             let stock = getStockAkhir(cart["nosat"], cart["tanggal"], cart["kodegdg"], cart["kodebrg"]);
 
             let qtylama = Number($("#inputitem_qtylama").val());
-            if (Number($("#inputitem_qtyasal").val()) <= (Number(stock) + qtylama)) {
+            if (unformatAngka($("#inputitem_qtyasal").val()) <= (Number(stock) + qtylama)) {
                 cart["qntdb"] = setEmptyNumberToZero("inputitem_qtyjadi");
                 cart["qntcr"] = setEmptyNumberToZero("inputitem_qtyasal");
             } else {

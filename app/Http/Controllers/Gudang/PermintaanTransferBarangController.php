@@ -158,8 +158,54 @@ class PermintaanTransferBarangController extends Controller
   }
 
   public function onChangeHeader (Request $req) {
+    // Nama kolom masuk ke SQL apa adanya (tidak bisa jadi parameter) — batasi ke kolom yang memang
+    // bisa diubah dari form (Keterangan).
+    $allowedFields = ['NOTE'];
+    if (!in_array($req->field, $allowedFields, true)) {
+      return response("Field tidak valid", 400);
+    }
+
     $query = 'update dbprtransfer set ' . $req->field . ' = :value where nobukti = :nobukti';
-    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
+    $res = DB::connection('SML')->update($query, ["value" => $req->value ?? "", "nobukti" => $req->nobukti]);
+    return $res;
+  }
+
+  // Gudang Asal / Tujuan tidak ada di header dbPRTransfer — disimpan per baris item di
+  // dbPRTransferDet (lewat sp_PRTRANSFER). Ganti gudang dari form = pindahkan SEMUA item dokumen
+  // ke gudang baru. Respon = jumlah baris item yang ter-update.
+  public function onChangeGudang (Request $req) {
+    $kolom = ['asal' => 'GdgAsal', 'tujuan' => 'GdgTujuan'];
+    if (!isset($kolom[$req->jenis])) {
+      return response("Jenis gudang tidak valid", 400);
+    }
+    $field = $kolom[$req->jenis];
+    $lawan = $req->jenis === 'asal' ? 'GdgTujuan' : 'GdgAsal';
+
+    $nobukti = $req->nobukti;
+    $kode = trim((string) $req->kode);
+    if ($kode === '') {
+      return response("Gudang tidak boleh kosong", 400);
+    }
+
+    $gudang = DB::connection('SML')->select('select KodeGdg from dbGudang where KodeGdg = :kode', ["kode" => $kode]);
+    if (!$gudang) {
+      return response("Gudang tidak ditemukan", 400);
+    }
+
+    $header = DB::connection('SML')->select('select isOtorisasi1 from dbprtransfer where nobukti = :nobukti', ["nobukti" => $nobukti]);
+    if (!$header) {
+      return response("No Bukti tidak ditemukan", 400);
+    }
+    if ((int) $header[0]->isOtorisasi1 === 1) {
+      return response("Sudah diotorisasi", 400);
+    }
+
+    $sama = DB::connection('SML')->select("select top 1 1 x from dbPRTransferDet where NoBukti = :nobukti and $lawan = :kode", ["nobukti" => $nobukti, "kode" => $kode]);
+    if ($sama) {
+      return response("Gudang Asal dan Gudang Tujuan tidak boleh sama", 400);
+    }
+
+    $res = DB::connection('SML')->update("update dbPRTransferDet set $field = :kode where NoBukti = :nobukti", ["kode" => $kode, "nobukti" => $nobukti]);
     return $res;
   }
 

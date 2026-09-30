@@ -260,6 +260,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/prtupdateotorisasi', [PermintaanTransferBarangController::class, 'updateOtorisasi']);
     Route::post('/prtupdatebatalotorisasi', [PermintaanTransferBarangController::class, 'updateBatalOtorisasi']);
     Route::post('/prtonchangeheader', [PermintaanTransferBarangController::class, 'onChangeHeader']);
+    Route::post('/prtonchangegudang', [PermintaanTransferBarangController::class, 'onChangeGudang']);
     Route::post('/prtdetailCetak', [PermintaanTransferBarangController::class, 'getDetailCetak']);
 
     // TRANSFER BARANG
