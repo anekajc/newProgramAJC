@@ -787,8 +787,9 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <input type="number" class="form-control text-right" id="input_add_add_qty"
-                                                value="0.00" tabindex="6">
+                                            <input type="text" class="form-control text-right" id="input_add_add_qty"
+                                                value="0.00" tabindex="6" oninput="formatAngkaKetik(this)"
+                                                onblur="formatAngkaInput(this)">
                                         </div>
                                     </div>
                                 </div>
@@ -2824,7 +2825,7 @@
             // let Sat_1 =  $("#input_add_add_nosat").val()
             // let Sat_2 =  $("#input_add_add_nosat").val()
             // let Qnt =  $("#input_add_add_nosat").val()
-            let QNt2 = parseInt($("#input_add_add_qty").val())
+            let QNt2 = unformatAngka($("#input_add_add_qty").val())
             let NoSat = parseInt($("#input_add_add_nosat").val())
             //IDUSER dari controller
             //noPenyerahan kosong
@@ -2946,7 +2947,7 @@
             // let Sat_1 =  $("#input_add_add_nosat").val()
             // let Sat_2 =  $("#input_add_add_nosat").val()
             // let Qnt =  $("#input_add_add_nosat").val()
-            let QNt2 = parseInt($("#input_add_add_qty").val())
+            let QNt2 = unformatAngka($("#input_add_add_qty").val())
             let NoSat = parseInt($("#input_add_add_nosat").val())
             //IDUSER dari controller
             //noPenyerahan kosong
@@ -3211,7 +3212,7 @@
             // Use tempAddEdit instead of dataTableAdd:
             document.getElementById("input_add_add_kodebarang").value = tempAddEdit.KODEBRG
             document.getElementById("input_add_add_namabarang").value = tempAddEdit.NamaBrg
-            document.getElementById("input_add_add_qty").value = tempAddEdit.QNT
+            document.getElementById("input_add_add_qty").value = formatAngka((parseFloat(tempAddEdit.QNT) || 0).toFixed(2))
             document.getElementById("input_add_urut").value = tempAddEdit.URUT
             document.getElementById("input_add_add_nosat").innerHTML = selectOption
 
@@ -4680,6 +4681,7 @@
 
             if (refreshLawan !== false) {
                 muatDropdownGudangTujuan();
+                simpanGudang('asal');
             }
         }
 
@@ -4690,7 +4692,65 @@
 
             if (refreshLawan !== false) {
                 muatDropdownGudangAsal();
+                simpanGudang('tujuan');
             }
+        }
+
+        // Simpan Gudang Asal/Tujuan begitu user mengganti pilihan — sama seperti Keterangan
+        // (onChangeKeterangan), hanya di mode Edit. Mode Add sebelum item pertama: header belum ada,
+        // gudang ikut terkirim bersama item pertama (submitAddAdd), lalu form pindah ke mode Edit.
+        // Gudang disimpan per baris item (dbPRTransferDet), jadi semua item dokumen ikut pindah.
+        // Kalau ditolak (kosong / Asal = Tujuan / gagal), pilihan dikembalikan ke nilai tersimpan.
+        function simpanGudang(jenis) {
+            if (tipeform != 'edit') return;
+
+            let header = window.dataHeaderAdd;
+            if (!header) return;
+
+            let isAsal = jenis === 'asal';
+            let selectId = isAsal ? 'input_add_kodeGudangAsal' : 'input_add_kodeGudangTujuan';
+            let label = isAsal ? 'Gudang Asal' : 'Gudang Tujuan';
+            let kode = ($('#' + selectId).val() || '').trim();
+            let kodeLawan = ($(isAsal ? '#input_add_kodeGudangTujuan' : '#input_add_kodeGudangAsal').val() || '').trim();
+            let tersimpan = ((isAsal ? header.gdgAsal : header.gdgTujuan) || '').trim();
+
+            if (kode === tersimpan) return;
+
+            const kembalikan = (pesan) => {
+                alertify.warning(pesan);
+                pilihGudangDropdown(selectId, tersimpan, isAsal ? header.NamaGgdAsal : header.NamaGgdTujuan);
+                if (isAsal) onChangeGudangAsal(false);
+                else onChangeGudangTujuan(false);
+            };
+
+            if (!kode) return kembalikan(label + ' tidak boleh kosong');
+            if (kode === kodeLawan) return kembalikan('Gudang Asal dan Gudang Tujuan tidak boleh sama');
+
+            $.ajax({
+                url: "{!! url('prtonchangegudang') !!}",
+                type: "post",
+                data: {
+                    _token: $("#_token").val(),
+                    nobukti: $("#input_add_nobukti").val(),
+                    jenis,
+                    kode
+                },
+                success: function(res) {
+                    if (Number(res) > 0) {
+                        if (isAsal) header.gdgAsal = kode;
+                        else header.gdgTujuan = kode;
+                        alertify.success(label + ' tersimpan');
+                    } else {
+                        console.log(res);
+                        kembalikan('Gagal menyimpan ' + label);
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    kembalikan(err.status === 400 && err.responseText ? err.responseText :
+                        'Terjadi kesalahan silahkan refresh browser');
+                }
+            });
         }
 
         function buttonAddPickAlamatKirim(index) {
@@ -4997,15 +5057,11 @@
         }
 
 
+        // Detail hanya-baca (field dikunci, kolom Actions disembunyikan), jadi dokumen yang sudah
+        // diotorisasi tetap boleh dilihat — cek "Sudah diotorisasi" hanya ada di buttonEdit().
         function buttonDetail(NOBUKTI) {
             tipeform = 'detail'
-            console.log('buttonEdit', NOBUKTI)
-
-            lockFormAdd()
-
-            $('.showhide').hide();
-            // $('.showhidemodalbodyaddmain').hide();
-            $('#buttonSubmitSaveHeader').show();
+            console.log('buttonDetail', NOBUKTI)
 
             let akses = $("#akses_iskoreksi").val();
 
@@ -5013,33 +5069,18 @@
                 alertify.warning('No access')
                 return
             }
-            let _token = $("#_token").val()
-            let oto = 1
 
-            $.ajax({
-                url: "{!! url('prtcekotorisasi') !!}",
-                type: "post",
-                async: false,
-                data: {
-                    _token,
-                    nobukti: NOBUKTI
-                },
-                success: function(res) {
-                    console.log(res)
-                    oto = res[0].isOtorisasi
-                },
-                error: function(err) {
-                    console.log(err)
-                    console.log(err.status)
-                    console.log(err.statusText)
-                    alertify.warning('Terjadi kesalahan silahkan refresh browser')
-                }
-            })
+            lockFormAdd()
 
-            if (oto == 1) {
-                alertify.warning("Sudah diotorisasi")
-                return
-            }
+            $('.showhide').hide();
+            // $('.showhidemodalbodyaddmain').hide();
+            $('#buttonSubmitSaveHeader').show();
+
+            // Opsi dropdown Gudang Asal/Tujuan harus sudah ada sebelum refreshDataTableAdd() memilih
+            // kode gudang dokumen — tanpa ini <select> masih kosong (belum pernah dimuat kalau user
+            // belum membuka Tambah/Edit) sehingga pilihan gudang tidak tampil. Sama seperti buttonEdit().
+            muatDropdownGudangAsal()
+            muatDropdownGudangTujuan()
 
             $('.showhidemodalbodyadd').hide();
             // $('#modalBodyAddListPelanggan').show();
@@ -5068,6 +5109,22 @@
         }
 
 
+
+        // Pilih kode gudang dokumen di dropdown Gudang Asal/Tujuan. Dicocokkan setelah di-trim
+        // (kolom kode gudang bisa berupa char ber-spasi), dan kalau kodenya tidak ada di daftar opsi
+        // (mis. terfilter oleh exclude Asal<->Tujuan) opsinya ditambahkan supaya tetap tampil —
+        // mengisi .value langsung dengan kode yang tidak punya <option> membuat select jadi kosong.
+        function pilihGudangDropdown(selectId, kode, label) {
+            let selectEl = document.getElementById(selectId);
+            kode = (kode || '').trim();
+
+            let opt = Array.from(selectEl.options).find(o => o.value.trim() === kode);
+            if (!opt && kode) {
+                opt = new Option(label || kode, kode);
+                selectEl.appendChild(opt);
+            }
+            selectEl.value = opt ? opt.value : '';
+        }
 
         function refreshDataTableAdd(NOBUKTI) {
 
@@ -5139,11 +5196,12 @@
                             document.getElementById("input_add_nourut").value = dataHeaderAdd.NOURUT
                             document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd
                                 .TANGGAL)
-                            document.getElementById("input_add_kodeGudangAsal").value = dataHeaderAdd.gdgAsal
+                            pilihGudangDropdown("input_add_kodeGudangAsal", dataHeaderAdd.gdgAsal,
+                                dataHeaderAdd.NamaGgdAsal)
                             document.getElementById("input_add_namaGudangAsal").value = dataHeaderAdd
                                 .AlamatGdgAsal || dataHeaderAdd.NamaGgdAsal
-                            document.getElementById("input_add_kodeGudangTujuan").value = dataHeaderAdd
-                                .gdgTujuan
+                            pilihGudangDropdown("input_add_kodeGudangTujuan", dataHeaderAdd.gdgTujuan,
+                                dataHeaderAdd.NamaGgdTujuan)
                             document.getElementById("input_add_namaGudangTujuan").value = dataHeaderAdd
                                 .AlamatGdgTujuan || dataHeaderAdd.NamaGgdTujuan
                             document.getElementById("input_add_keterangan").value = dataHeaderAdd.Keterangan
@@ -5262,6 +5320,46 @@
             temp1 += '.' + tempAngka[1]
             return temp1
         };
+
+        function unformatAngka(angka) {
+            if (!angka) return 0
+            return parseFloat(String(angka).replace(/,/g, '')) || 0
+        }
+
+        function formatAngkaInput(el) {
+            el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+        }
+
+        // Dipasang di oninput supaya separator ribuan langsung muncul sambil mengetik, tidak
+        // menunggu pindah fokus (onblur formatAngkaInput() tetap menormalkan ke 2 desimal). Sama
+        // seperti formatAngkaKetik() di accounting/memorialkoreksi.blade.php.
+        function formatAngkaKetik(el) {
+            let posDariKanan = el.value.length - el.selectionStart
+            let minus = el.value.trim().startsWith('-') ? '-' : ''
+            let raw = el.value.replace(/[^0-9.]/g, '')
+
+            let titikIndex = raw.indexOf('.')
+            let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+            let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+            bulat = bulat.replace(/^0+(?=\d)/, '')
+            if (bulat === '') {
+                bulat = '0'
+            }
+
+            let bulatFormatted = ''
+            for (let i = 0; i < bulat.length; i++) {
+                if (i != 0 && (bulat.length - i) % 3 == 0) {
+                    bulatFormatted += ','
+                }
+                bulatFormatted += bulat[i]
+            }
+
+            el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+            let posBaru = Math.max(0, el.value.length - posDariKanan)
+            el.setSelectionRange(posBaru, posBaru)
+        }
     </script>
 
 @endsection
