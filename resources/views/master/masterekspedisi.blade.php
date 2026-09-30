@@ -51,6 +51,14 @@
 
 </div>
 
+<style>
+  /* Tiga pasang label + input per baris (PPH 21 | PPH 23 | No. Fax), pola mastercustomer. */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 80px minmax(0, 1fr) 70px minmax(0, 1fr); margin-top: 14px; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+  }
+</style>
+
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 800px">
@@ -71,69 +79,43 @@
           <label for="input_add_kode">Kode</label>
           <input type="text" class="form-control" id="input_add_kode" placeholder="Kode">
           <label for="input_add_bentukUsaha">Tipe Usaha</label>
-          <input type="text" class="form-control" id="input_add_bentukUsaha" placeholder="Bentuk Usaha">
-
-
-            
-          <label>PPN</label>
-          <div class="bs-full"><select id='input_add_ppn' class='form-control'>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_add_bentukUsaha" placeholder="Bentuk Usaha">
+            <label for="input_add_ppn" class="mb-0">PPN</label>
+            <select id='input_add_ppn' class='form-control' style="max-width: 90px">
                     <option value=0>Tidak</option>
                     <option value=1>Iya</option>
-                  </select></div>
-        </div>
+                  </select>
+          </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_nama">Nama</label>
-          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
 
           <label for="input_add_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1">
-        </div>
-
-            <div class="bs-form bs-form-1">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1"></div>
           <label></label>
-          <input type="text" class="form-control" id="input_add_alamat2" placeholder="Alamat 2">
-        </div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat2" placeholder="Alamat 2"></div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_kota">Kota</label>
-          <div class="input-group mb-1">
+          <div class="input-group">
                       <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
                           <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
-        </div>
+          <label for="input_add_kodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_add_kodePos" placeholder="Kode Pos">
 
-            <div class="bs-form">
           <label for="input_add_namaArea">Nama Kota</label>
           <input type="text" class="form-control" id="input_add_namaArea" placeholder="Nama Kota" readonly>
           <label for="input_add_kodeArea">Area</label>
           <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area">
 
-
-            
-          <label for="input_add_kodePos">Kode Pos</label>
-          <input type="text" class="form-control" id="input_add_kodePos" placeholder="Kode Pos">
           <label for="input_add_negara">Negara</label>
           <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
-
-
-            
           <label for="input_add_telepon">Telepon</label>
           <input type="text" class="form-control" id="input_add_telepon" placeholder="Telepon">
-          <label for="input_add_pph23">PPH 23</label>
-          <input type="number" class="form-control text-right" id="input_add_pph23" placeholder="PPH 23">
 
-
-            
-          <label for="input_add_noFax">No. Fax</label>
-          <input type="text" class="form-control" id="input_add_noFax" placeholder="Nomor Fax">
-          <label for="input_add_pph21">PPH 21</label>
-          <input type="number" class="form-control text-right" id="input_add_pph21" placeholder="PPH 21">
-
-
-            
           <label for="input_add_email">E-Mail</label>
           <input type="text" class="form-control" id="input_add_email" placeholder="E-Mail">
           <label for="input_add_aktif">Aktif</label>
@@ -143,34 +125,37 @@
                   </select>
         </div>
 
-            <div class="bs-form bs-form-1">
-          <label for="input_add_att">Att</label>
-          <input type="text" class="form-control" id="input_add_att" placeholder="Att">
+            <div class="bs-form bs-form-3">
+          <label for="input_add_pph21">PPH 21</label>
+          <input type="number" class="form-control text-right" id="input_add_pph21" placeholder="PPH 21">
+          <label for="input_add_pph23">PPH 23</label>
+          <input type="number" class="form-control text-right" id="input_add_pph23" placeholder="PPH 23">
+          <label for="input_add_noFax">No. Fax</label>
+          <input type="text" class="form-control" id="input_add_noFax" placeholder="Nomor Fax">
         </div>
 
             <div class="bs-form">
+          <label for="input_add_att">Att</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+
           <label for="input_add_attPhone">Att Phone</label>
           <input type="text" class="form-control" id="input_add_attPhone" placeholder="Att Phone">
           <label for="input_add_attDepart">Att Depart</label>
           <input type="text" class="form-control" id="input_add_attDepart" placeholder="Att Depart">
 
-
-            
           <label for="input_add_bank">Bank</label>
           <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
           <label for="input_add_accNo">Acc. No</label>
           <input type="text" class="form-control" id="input_add_accNo" placeholder="No. Acc">
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_atasNama">A/N</label>
-          <input type="text" class="form-control" id="input_add_atasNama" placeholder="Atas Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_atasNama" placeholder="Atas Nama"></div>
         </div>
 
-            <div class="row mb-1">
+            <div class="row mb-1 mt-4">
               <div class="col-12 text-left">
                 <div class="form-group text-left mb-1">
-                  <label class="text-left text-primary">Data Pajak</label>
+                  <label class="text-left text-dark">Data Pajak</label>
                   <hr>
                 </div>
               </div>
@@ -230,69 +215,43 @@
           <label for="input_edit_kode">Kode</label>
           <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode" disabled>
           <label for="input_edit_bentukUsaha">Tipe Usaha</label>
-          <input type="text" class="form-control" id="input_edit_bentukUsaha" placeholder="Bentuk Usaha">
-
-
-            
-          <label>PPN</label>
-          <div class="bs-full"><select id='input_edit_isPpn' class='form-control'>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_edit_bentukUsaha" placeholder="Bentuk Usaha">
+            <label for="input_edit_isPpn" class="mb-0">PPN</label>
+            <select id='input_edit_isPpn' class='form-control' style="max-width: 90px">
                     <option value=0>Tidak</option>
                     <option value=1>Iya</option>
-                  </select></div>
-        </div>
+                  </select>
+          </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_nama">Nama</label>
-          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
 
           <label for="input_edit_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1">
-        </div>
-
-            <div class="bs-form bs-form-1">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1"></div>
           <label></label>
-          <input type="text" class="form-control" id="input_edit_alamat2" placeholder="Alamat 2">
-        </div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat2" placeholder="Alamat 2"></div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_kota">Kota</label>
-          <div class="input-group mb-1">
+          <div class="input-group">
                       <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
                       <div class="input-group-append">
                           <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
                       </div>
                   </div>
-        </div>
+          <label for="input_edit_kodePos">Kode Pos</label>
+          <input type="text" class="form-control" id="input_edit_kodePos" placeholder="Kode Pos">
 
-            <div class="bs-form">
           <label for="input_edit_namaArea">Nama Kota</label>
           <input type="text" class="form-control" id="input_edit_namaArea" placeholder="Nama Kota" readonly>
           <label for="input_edit_kodeArea">Area</label>
           <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area">
 
-
-            
-          <label for="input_edit_kodePos">Kode Pos</label>
-          <input type="text" class="form-control" id="input_edit_kodePos" placeholder="Kode Pos">
           <label for="input_edit_negara">Negara</label>
           <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
-
-
-            
           <label for="input_edit_telepon">Telepon</label>
           <input type="text" class="form-control" id="input_edit_telepon" placeholder="Telepon">
-          <label for="input_edit_pph23">PPH 23</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph23" placeholder="PPH 23">
 
-
-            
-          <label for="input_edit_noFax">No. Fax</label>
-          <input type="text" class="form-control" id="input_edit_noFax" placeholder="Nomor Fax">
-          <label for="input_edit_pph21">PPH 21</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph21" placeholder="PPH 21">
-
-
-            
           <label for="input_edit_email">E-Mail</label>
           <input type="text" class="form-control" id="input_edit_email" placeholder="E-Mail">
           <label for="input_edit_aktif">Aktif</label>
@@ -302,34 +261,37 @@
                   </select>
         </div>
 
-            <div class="bs-form bs-form-1">
-          <label for="input_edit_att">Att</label>
-          <input type="text" class="form-control" id="input_edit_att" placeholder="Att">
+            <div class="bs-form bs-form-3">
+          <label for="input_edit_pph21">PPH 21</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph21" placeholder="PPH 21">
+          <label for="input_edit_pph23">PPH 23</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph23" placeholder="PPH 23">
+          <label for="input_edit_noFax">No. Fax</label>
+          <input type="text" class="form-control" id="input_edit_noFax" placeholder="Nomor Fax">
         </div>
 
             <div class="bs-form">
+          <label for="input_edit_att">Att</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+
           <label for="input_edit_attPhone">Att Phone</label>
           <input type="text" class="form-control" id="input_edit_attPhone" placeholder="Att Phone">
           <label for="input_edit_attDepart">Att Depart</label>
           <input type="text" class="form-control" id="input_edit_attDepart" placeholder="Att Depart">
 
-
-            
           <label for="input_edit_bank">Bank</label>
           <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank">
           <label for="input_edit_accNo">Acc. No</label>
           <input type="text" class="form-control" id="input_edit_accNo" placeholder="No. Acc">
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_atasNama">A/N</label>
-          <input type="text" class="form-control" id="input_edit_atasNama" placeholder="Atas Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_atasNama" placeholder="Atas Nama"></div>
         </div>
 
-            <div class="row mb-1">
+            <div class="row mb-1 mt-4">
               <div class="col-12 text-left">
                 <div class="form-group text-left mb-1">
-                  <label class="text-left text-primary">Data Pajak</label>
+                  <label class="text-left text-dark">Data Pajak</label>
                   <hr>
                 </div>
               </div>
@@ -625,7 +587,6 @@ const MEK_KOLOM = [
   ['KODEPOS',      'Kode Pos',     1, 'varchar', 0, 0],
   ['NEGARA',       'Negara',       1, 'varchar', 0, 0],
   ['TELPON',       'Telepon',      1, 'varchar', 0, 0],
-  ['FAX',          'Fax',          1, 'varchar', 0, 0],
   ['EMAIL',        'Email',        1, 'varchar', 0, 0],
   ['NPPH23',       'Pph 23',       1, 'varchar', 0, 0],
   ['NPPH22',       'Pph 21',       1, 'varchar', 0, 0],
@@ -725,9 +686,9 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_kodePos").value = res[0].KODEPOS
       document.getElementById("input_edit_negara").value = res[0].NEGARA
       document.getElementById("input_edit_telepon").value = res[0].TELPON
-      document.getElementById("input_edit_pph23").value = res[0].NPPH23
+      document.getElementById("input_edit_pph23").value = (parseFloat(res[0].NPPH23) || 0).toFixed(2)
       document.getElementById("input_edit_noFax").value = res[0].FAX
-      document.getElementById("input_edit_pph21").value = res[0].NPPH22
+      document.getElementById("input_edit_pph21").value = (parseFloat(res[0].NPPH22) || 0).toFixed(2)
       document.getElementById("input_edit_email").value = res[0].EMAIL
       document.getElementById("input_edit_aktif").value = res[0].IsAktif
       document.getElementById("input_edit_att").value = res[0].Att

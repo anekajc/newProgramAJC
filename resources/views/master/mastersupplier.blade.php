@@ -51,8 +51,20 @@
 
 </div>
 
+<style>
+  /* Tiga pasang label + input per baris (Pph21 | Pph23 | Status). */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 70px minmax(0, 1fr) 70px minmax(0, 1fr); margin-top: 14px; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+  }
+  /* Tumpukan modal (disalin dari accounting/penerimaandpp): modal induk & backdrop-nya
+     disembunyikan selama modal anak terbuka, jadi hanya satu modal yang terlihat. */
+  .modal.pld-modal-tertimbun { display: none !important; }
+  .modal-backdrop.pld-backdrop-tertimbun { display: none !important; }
+</style>
+
 <!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade"  id="form"tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 700px">
     <div class="modal-content">
       <div class="modal-header">
@@ -84,14 +96,12 @@
                   </select>
             <input type="checkbox" id="input_add_isppn" name="" value="">
                 <label class="text-left">PPN</label></div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_nama">Nama</label>
-          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
 
           <label for="input_add_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat"></div>
 
           <label for="input_add_kota">Kota</label>
           <select id="input_add_kota" class="form-control" aria-label="Default select example">
@@ -100,42 +110,36 @@
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-        </div>
-            <div class="bs-form">
           <label for="input_add_kodepos">KodePos</label>
           <input type="text" class="form-control" id="input_add_kodepos" placeholder="Kode Pos">
+
           <label for="input_add_negara">Negara</label>
           <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
-        </div>
-
-            <div class="bs-form bs-form-1">
           <label for="input_add_telp">Telp</label>
           <input type="text" class="form-control" id="input_add_telp" placeholder="No Telp">
-        </div>
-            <!--DUA--><input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax"><div class="bs-form">
-          <label for="input_add_pph21">Pph21</label>
-          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
-          <label for="input_add_pph23">Pph23</label>
-          <input type="number" class="form-control text-right" id="input_add_pph23" value=2>
 
-
-            
           <label for="input_add_email">Email</label>
           <input type="text" class="form-control" id="input_add_email" placeholder="Email">
           <label for="input_add_haripiutang">TOP</label>
           <input type="number" class="form-control text-right" id="input_add_haripiutang" value=0>
         </div>
-            <div class="bs-form bs-form-1">
+
+            <!--DUA--><input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax"><div class="bs-form bs-form-3">
+          <label for="input_add_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
+          <label for="input_add_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_add_pph23" value=2>
           <label for="input_add_isaktif">Status</label>
           <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
                     <option selected value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
-
-          <label for="input_add_att">PIC</label>
-          <input type="text" class="form-control" id="input_add_att" placeholder="Att">
         </div>
+
             <div class="bs-form">
+          <label for="input_add_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+
           <label for="input_add_attphone">PIC Phone</label>
           <input type="text" class="form-control" id="input_add_attphone" placeholder="Att Phone">
           <label for="input_add_attdepart">PIC Depart</label>
@@ -151,10 +155,9 @@
                   </select>
           <label for="input_add_accno">Acc No.</label>
           <input type="text" class="form-control" id="input_add_accno" placeholder="Acc No.">
-        </div>
-            <div class="bs-form bs-form-1">
+
           <label for="input_add_atn">a/n</label>
-          <input type="text" class="form-control" id="input_add_atn" placeholder="Atas Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_atn" placeholder="Atas Nama"></div>
         </div>
             <br/>
 
@@ -226,14 +229,12 @@
                 </div>
             <input type="checkbox" id="input_edit_isppn" name="">
                 <label class="text-left">PPN</label></div>
-        </div>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_nama">Nama</label>
-          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
 
           <label for="input_edit_alamat">Alamat</label>
-          <input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat"></div>
 
           <label for="input_edit_kota">Kota</label>
           <select id="input_edit_kota" class="form-control" aria-label="Default select example">
@@ -242,40 +243,36 @@
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-        </div>
-            <div class="bs-form">
           <label for="input_edit_kodepos">KodePos</label>
           <input type="text" class="form-control" id="input_edit_kodepos" placeholder="Kode Pos">
+
           <label for="input_edit_negara">Negara</label>
           <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
-        </div>
-            <div class="bs-form bs-form-1">
           <label for="input_edit_telp">Telp</label>
           <input type="text" class="form-control" id="input_edit_telp" placeholder="No Telp">
-        </div>
-            <!--DUA--><input type="hidden" class="form-control" id="input_edit_fax" placeholder="No Fax"><div class="bs-form">
-          <label for="input_edit_pph21">Pph21</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph21" value=0.00>
-          <label for="input_edit_pph23">Pph23</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph23" value=0.00>
 
-            
           <label for="input_edit_email">Email</label>
           <input type="text" class="form-control" id="input_edit_email" placeholder="Email">
           <label for="input_edit_haripiutang">TOP</label>
           <input type="number" class="form-control text-right" id="input_edit_haripiutang" value=0>
         </div>
-            <div class="bs-form bs-form-1">
+
+            <!--DUA--><input type="hidden" class="form-control" id="input_edit_fax" placeholder="No Fax"><div class="bs-form bs-form-3">
+          <label for="input_edit_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph21" value=0.00>
+          <label for="input_edit_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph23" value=0.00>
           <label for="input_edit_isaktif">Status</label>
           <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
                     <option selected value=1>Aktif</option>
                     <option value=0>Tidak Aktif</option>
                   </select>
-
-          <label for="input_edit_att">PIC</label>
-          <input type="text" class="form-control" id="input_edit_att" placeholder="Att">
         </div>
+
             <div class="bs-form">
+          <label for="input_edit_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+
           <label for="input_edit_attphone">PIC Phone</label>
           <input type="text" class="form-control" id="input_edit_attphone" placeholder="Att Phone">
           <label for="input_edit_attdepart">PIC Depart</label>
@@ -286,10 +283,9 @@
           <input type="text" class="form-control" id="input_edit_bank" placeholder="Nama Bank">
           <label for="input_edit_accno">Acc No.</label>
           <input type="text" class="form-control" id="input_edit_accno" placeholder="Acc No.">
-        </div>
-            <div class="bs-form bs-form-1">
+
           <label for="input_edit_atn">a/n</label>
-          <input type="text" class="form-control" id="input_edit_atn" placeholder="Atas Nama">
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_atn" placeholder="Atas Nama"></div>
         </div>
             <br/>
 
@@ -321,9 +317,6 @@
 </div>
 <!-- End modal edit-->
 
-@include('master/modalSupplierCustomer')
-
-
 {{-- Modal Detail Akun - disalin dari mastercustomer.blade.php. Dulu tombol Detail Akun di tabel
      supplier sudah aktif dan JS-nya memakai endpoint mastercustomer*detailakun, tetapi modalnya
      tidak pernah ada di halaman ini sehingga tombol selalu error. --}}
@@ -336,35 +329,33 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-      <button class="btn btn-sm btn-chip-biru" type="button" onclick="buttonDetailAkunAdd()">Tambah</button>
-        <table id="tabelDetailAkun" class="table table-bordered table-striped"  >
-          <thead id='theadCustom' class="text-center">
-            <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Kode</th>
-              <th scope="col">Perkiraan</th>
+      <div class="modal-body po-list-page">
+        {{-- Modal ini disembunyikan selama modal Add/Edit Detail Akun atau pemilih perkiraan
+             terbuka, lalu tampil lagi saat modal itu ditutup (tumpukan modal, pola penerimaandpp). --}}
+        <div class="card">
+          <div class="card-body" style="padding:0;">
 
-            </tr>
-          </thead>
+            {{-- Toolbar & tabel mengikuti gaya daftar utama (toolbarMaster + data-table). --}}
+            <div class="po-toolbar">
+              <input type="search" id="detailAkunSearch" class="po-search-inp" placeholder="Cari data" autocomplete="off">
+              <div class="po-toolbar-act">
+                <button class="btn btn-dpp-utama" type="button" onclick="buttonDetailAkunAdd()">Tambah</button>
+              </div>
+            </div>
 
-          <tbody id="tabel_dataDetailAkun" class="text-left" >
-            <tr>
+            <table id="tabelDetailAkun" class="data-table po-aksi-hover">
+              <thead class="text-center">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th style="padding: 4px 12px;" scope="col">Kode</th>
+                  <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+                </tr>
+              </thead>
+              <tbody id="tabel_dataDetailAkun" class="text-left"></tbody>
+            </table>
 
-              <td></td>
-              <td></td>
-
-                <td class="text-center">
-                  <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                  <button type="button" onclick="buttonDetailAkunEdit()"><i class="bi bi-pen">Select</i></button>
-                  <button type="button" onclick="buttonDetailAkunDelete()"><i class="bi bi-trash">Select</i></button>
-                </td>
-          </tr>
-          </tbody>
-
-
-        </table>
-
+          </div>
+        </div>
 
     </div>
         <div class="modal-footer">
@@ -384,32 +375,24 @@
         </button>
       </div>
       <div class="modal-body" id="formBsGrid">
-        <!-- <h1>Tes Modal</h1> -->
-
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="bs-form bs-form-1">
-          <label for="input_add_kodedetail">Kode</label>
-          <input type="text" class="form-control" id="input_add_kodedetail" placeholder="Kode" disabled>
-        </div>
-
           <div class="bs-form bs-form-1">
-          <label for="input_add_perkiraandetail">Hutang/Piutang</label>
-          <div class="input-group">
-                <input type="text" class="form-control" id="input_add_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
+            <label for="input_add_kodedetail">Kode</label>
+            <input type="text" class="form-control" id="input_add_kodedetail" placeholder="Kode" disabled>
+            <label for="input_add_perkiraandetail">Hutang/Piutang</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_add_perkiraandetail">
+              <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
             </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddDetailAkun()">Simpan</button>
+      </div>
+    </div>
   </div>
-  <div class="modal-footer">
-     
-    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
-    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddDetailAkun()">Simpan</button>
-  </div>
-</div>
-</div>
 </div>
 
 <div class="modal fade"  id="formDetailAkunEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -422,32 +405,24 @@
         </button>
       </div>
       <div class="modal-body" id="formBsGrid">
-        <!-- <h1>Tes Modal</h1> -->
-
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="bs-form bs-form-1">
-          <label for="input_edit_kodedetail">Kode</label>
-          <input type="text" class="form-control" id="input_edit_kodedetail" placeholder="Kode" disabled>
-        </div>
-
           <div class="bs-form bs-form-1">
-          <label for="input_edit_perkiraandetail">Hutang/Piutang</label>
-          <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_perkiraandetail">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
+            <label for="input_edit_kodedetail">Kode</label>
+            <input type="text" class="form-control" id="input_edit_kodedetail" placeholder="Kode" disabled>
+            <label for="input_edit_perkiraandetail">Hutang/Piutang</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_edit_perkiraandetail">
+              <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
             </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddDetailAkunEdit()">Simpan</button>
+      </div>
+    </div>
   </div>
-  <div class="modal-footer">
-     
-    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
-    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddDetailAkunEdit()">Simpan</button>
-  </div>
-</div>
-</div>
 </div>
 
 <div class="modal fade picker-kas"  id="formDetailAkunAddPerkiraan" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -484,6 +459,11 @@
   </div>
 </div>
 
+{{-- Partial ini juga punya modal #formDetailAkun / #formDetailAkunAdd / #formDetailAkunEdit (desain
+     lama, dipakai mastercustomer). Di-include SETELAH modal halaman supaya id yang sama mengarah
+     ke modal halaman ini - sebelumnya di-include di atas sehingga modal lama yang selalu tampil. --}}
+@include('master/modalSupplierCustomer')
+
 @endsection
 
 {{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
@@ -497,6 +477,40 @@
 
 let dataRefresh = []
 
+// ---------- Tumpukan modal (disalin dari accounting/penerimaandpp) ----------
+// Hanya satu modal yang terlihat pada satu waktu. Saat modal anak dibuka (Add/Edit Detail Akun,
+// pemilih perkiraan), modal induk disembunyikan lewat class (bukan .modal('hide'), supaya isian
+// dan handler hidden.bs.modal milik induk tidak ikut terpicu). Saat anak ditutup - lewat Batal,
+// tombol x, Esc, maupun klik backdrop - induk muncul lagi.
+var pldTumpukanModal = []
+
+function pldSisakanSatuBackdrop () {
+  var backdrop = $('.modal-backdrop')
+  backdrop.addClass('pld-backdrop-tertimbun')
+  backdrop.last().removeClass('pld-backdrop-tertimbun')
+}
+
+$(document).on('show.bs.modal', '.modal', function () {
+  var induk = $('.modal.show').not(this).not('.pld-modal-tertimbun').last()
+  if (induk.length) {
+    pldTumpukanModal.push(induk)
+    induk.addClass('pld-modal-tertimbun')
+  }
+})
+
+$(document).on('shown.bs.modal', '.modal', function () {
+  pldSisakanSatuBackdrop()
+})
+
+$(document).on('hidden.bs.modal', '.modal', function () {
+  var induk = pldTumpukanModal.pop()
+  if (induk) induk.removeClass('pld-modal-tertimbun')
+  // BS4 melepas .modal-open dari <body> begitu satu modal tertutup, padahal masih
+  // ada modal lain yang terbuka - pasang lagi supaya scroll body tetap terkunci.
+  if ($('.modal.show').length) $('body').addClass('modal-open')
+  pldSisakanSatuBackdrop()
+})
+
 // Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
 // [field, label, tampil, tipe, total, desimal]
 const MSP_KOLOM = [
@@ -508,13 +522,13 @@ const MSP_KOLOM = [
   ['NEGARA',       'Negara',       1, 'varchar', 0, 0],
   ['TELPON',       'Telpon',       1, 'varchar', 0, 0],
   ['EMAIL',        'Email',        1, 'varchar', 0, 0],
-  ['KODEPOS',      'Kode Pos',     0, 'varchar', 0, 0],
-  ['FAX',          'Fax',          0, 'varchar', 0, 0],
+  ['KODEPOS',      'Kode Pos',     1, 'varchar', 0, 0],
+  ['FAX',          'Fax',          1, 'varchar', 0, 0],
 ]
 
 // Data dimuat DataTables lewat ajax (mastersupplierloadall). Kolom disusun ulang dari kolom yang
 // tampil setiap kali kolom digeser/disembunyikan (ReportTable memanggil loadAll lewat onChange).
-// Kode Pos & Fax tersembunyi secara bawaan, sama seperti sebelumnya (visible: false).
+// Semua kolom tampil secara bawaan (Kode Pos & Fax dulu tersembunyi, kini ikut tampil).
 function loadAll () {
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
@@ -639,9 +653,9 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_negara").value = res[0].NEGARA
       document.getElementById("input_edit_fax").value = res[0].FAX
       document.getElementById("input_edit_email").value = res[0].EMAIL
-      document.getElementById("input_edit_pph23").value = res[0].NPPH23
-      document.getElementById("input_edit_pph21").value = res[0].NPPH22
-      document.getElementById("input_edit_haripiutang").value = res[0].HARIHUTPIUT
+      document.getElementById("input_edit_pph23").value = (parseFloat(res[0].NPPH23) || 0).toFixed(2)
+      document.getElementById("input_edit_pph21").value = (parseFloat(res[0].NPPH22) || 0).toFixed(2)
+      document.getElementById("input_edit_haripiutang").value = String(res[0].HARIHUTPIUT ?? '').replace(/^(-?)\./, (m, minus) => minus + '0.')
       document.getElementById("input_edit_isaktif").value = res[0].IsAktif
       document.getElementById("input_edit_att").value = res[0].Att
       document.getElementById("input_edit_attphone").value = res[0].AttPhone
@@ -906,6 +920,7 @@ function submitAdd () {
 function buttonDetailAkun (kodeDetail) {
   noBuktiDetailTemp = kodeDetail
   console.log(kodeDetail)
+  $('#detailAkunSearch').val('')
   loadDetailAkun(kodeDetail)
   $("#formDetailAkun").modal('toggle')
 }
@@ -939,9 +954,11 @@ function loadDetailAkun (kodeDetail) {
     let temp = "";
 
     rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
-        <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+      <td>
+        <div class="action-buttons-wrap">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonDetailAkunEdit('${item.Perkiraan}', '${item.KodeCustSupp}' )"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDetailAkunDelete('${item.Perkiraan}', '${item.KodeCustSupp}')"><i class="bi bi-trash"></i></button>
+        </div>
       </td>
       <td>${item.KodeCustSupp}</td>
       <td>${item.Perkiraan}</td>
@@ -949,11 +966,17 @@ function loadDetailAkun (kodeDetail) {
   });
 
   document.getElementById("tabel_dataDetailAkun").innerHTML = rowTable;
-  $("#tabelDetailAkun").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  // Opsi DataTables sama dengan tabel daftar utama; tanpa paging seperti sebelumnya.
+  $("#tabelDetailAkun").DataTable(MasterList.opsi({ paging: false }))
+    .search($('#detailAkunSearch').val() || '').draw();
 }
+
+// Kotak cari modal Detail Akun (pengganti kotak "Search" bawaan DataTables).
+$(document).on('input', '#detailAkunSearch', function () {
+  if ($.fn.DataTable.isDataTable('#tabelDetailAkun')) {
+    $('#tabelDetailAkun').DataTable().search(this.value).draw();
+  }
+});
 
 function buttonDetailAkunAdd (){
   document.getElementById("input_add_kodedetail").value = noBuktiDetailTemp;

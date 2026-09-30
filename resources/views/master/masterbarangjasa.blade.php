@@ -67,20 +67,22 @@
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="bs-form bs-form-1">
+            <div class="bs-form">
           <label for="input_add_kodegroup">Group</label>
           <div class="d-flex align-items-center" style="gap:10px">
             <input type="text" class="form-control" id="input_add_kodegroup" value='JS' disabled>
             <span>Jasa</span>
           </div>
-        </div>
+          <label for="input_add_isaktif">Status</label>
+          <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
+                    <option value=1>Aktif</option>
+                    <option value=0>NonAktif</option>
+                  </select>
 
-            <div class="bs-form bs-form-1">
           <label for="input_add_kodeheadgroup">HeadGroup</label>
           <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-
           <label for="input_add_kodesubgroup">SubGroup</label>
           <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih SubGroup</option>
@@ -88,42 +90,21 @@
 
           <label for="input_add_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_add_kodebarang" disabled >
+          <div style="grid-column: 3 / -1"></div>
 
           <label for="input_add_namabarang">Nama Barang</label>
-          <input type="text" class="form-control" id="input_add_namabarang" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang" ></div>
 
           <label for="input_add_namabarang2">Nama Barang 2</label>
-          <input type="text" class="form-control" id="input_add_namabarang2" >
-        </div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang2" ></div>
 
-            <!-- <br/> -->
-
-
-
-            <div class="bs-form bs-form-1">
           <label for="input_add_satuan">Satuan</label>
           <input type="text" class="form-control" id="input_add_satuan" >
-
           <label for="input_add_isi">Isi</label>
           <input type="text" value=1 disabled class="form-control" id="input_add_isi" >
-        </div>
 
-            <!-- <br/> -->
-
-
-            <div class="bs-form bs-form-1">
-          <label for="input_add_isaktif">Status</label>
-          <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
-                    <option value=1>Aktif</option>
-                    <option value=0>NonAktif</option>
-                  </select>
-        </div>
-
-
-
-            <div class="bs-form bs-form-1">
           <label for="input_add_keterangan">Keterangan</label>
-          <input type="text" class="form-control text-left" id="input_add_keterangan" >
+          <div class="bs-full"><input type="text" class="form-control text-left" id="input_add_keterangan" ></div>
         </div>
 
 
@@ -159,20 +140,22 @@
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="bs-form bs-form-1">
+            <div class="bs-form">
           <label for="input_edit_kodegroup">Group</label>
           <div class="d-flex align-items-center" style="gap:10px">
             <input type="text" class="form-control" id="input_edit_kodegroup" value='JS' disabled>
             <span>Jasa</span>
           </div>
-        </div>
+          <label for="input_edit_isaktif">Status</label>
+          <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
+                    <option value=1>Aktif</option>
+                    <option value=0>NonAktif</option>
+                  </select>
 
-            <div class="bs-form bs-form-1">
           <label for="input_edit_kodeheadgroup">HeadGroup</label>
           <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-
           <label for="input_edit_kodesubgroup">SubGroup</label>
           <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih SubGroup</option>
@@ -180,44 +163,21 @@
 
           <label for="input_edit_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
+          <div style="grid-column: 3 / -1"></div>
 
           <label for="input_edit_namabarang">Nama Barang</label>
-          <input type="text" class="form-control" id="input_edit_namabarang" >
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang" ></div>
 
           <label for="input_edit_namabarang2">Nama Barang 2</label>
-          <input type="text" class="form-control" id="input_edit_namabarang2" >
-        </div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang2" ></div>
 
-            <!-- <br/> -->
-
-
-
-            <div class="bs-form bs-form-1">
           <label for="input_edit_satuan">Satuan</label>
           <input type="text" class="form-control" id="input_edit_satuan" >
-
           <label for="input_edit_isi">Isi</label>
           <input type="text" value=1 disabled class="form-control" id="input_edit_isi" >
-        </div>
 
-
-
-            <!-- <br/> -->
-
-
-            <div class="bs-form bs-form-1">
-          <label for="input_edit_isaktif">Status</label>
-          <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
-                    <option value=1>Aktif</option>
-                    <option value=0>NonAktif</option>
-                  </select>
-        </div>
-
-
-
-            <div class="bs-form bs-form-1">
           <label for="input_edit_keterangan">Keterangan</label>
-          <input type="text" class="form-control text-left" id="input_edit_keterangan" >
+          <div class="bs-full"><input type="text" class="form-control text-left" id="input_edit_keterangan" ></div>
         </div>
 
 
@@ -623,7 +583,7 @@ function buttonEdit (kodebarang) {
       document.getElementById("input_edit_namabarang").value = res[0].NAMABRG
       document.getElementById("input_edit_namabarang2").value = res[0].NamaBrg2
       document.getElementById("input_edit_satuan").value = res[0].SAT1
-      document.getElementById("input_edit_isi").value = res[0].ISI1
+      document.getElementById("input_edit_isi").value = String(res[0].ISI1 ?? '').replace(/^(-?)\./, (m, minus) => minus + '0.')
       document.getElementById("input_edit_keterangan").value = res[0].Keterangan
       document.getElementById("input_edit_isaktif").value = res[0].ISAKTIF
       let temp1 = `<option selected value='${res[0].KodeHdGrp}' >${res[0].nNAMAHDGROUP}</option>`

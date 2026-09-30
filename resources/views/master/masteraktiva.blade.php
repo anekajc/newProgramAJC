@@ -80,61 +80,52 @@
               </select>
           <label for="input_add_TglPerolehan">Tgl. Perolehan</label>
           <input type="date" class="form-control" id="input_add_TglPerolehan">
-          <label for="input_add_TglPemakaian">Tgl. Pemakaian</label>
-          <div class="bs-full"><input type="date" class="form-control" id="input_add_TglPemakaian"></div>
-        </div>
-
-          <!-- Kuantum / Susut / Metode -->
-          <div class="bs-form">
           <label for="input_add_Kuantum">Kuantum</label>
           <input type="number" class="form-control text-right" id="input_add_Kuantum" value="1">
-          <label for="input_add_Susut">Susut (%)</label>
-          <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
+          <label for="input_add_TglPemakaian">Tgl. Pemakaian</label>
+          <input type="date" class="form-control" id="input_add_TglPemakaian">
           <label for="input_add_MetodePenyusutan">Metode Susut</label>
-          <div class="bs-full"><select class="form-control" id="input_add_MetodePenyusutan">
+          <select class="form-control" id="input_add_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select></div>
-        </div>
+              </select>
+          <label for="input_add_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_add_Susut" placeholder="Susut(%)">
 
           <!-- Keterangan -->
-          <div class="bs-form bs-form-1">
           <label for="input_add_Keterangan">Keterangan</label>
-          <textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-        </div>
+          <div class="bs-full"><textarea class="form-control" id="input_add_Keterangan" rows="2" placeholder="Keterangan"></textarea></div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="bs-form bs-form-1">
-          <label for="input_add_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <label for="input_add_AkumulasiPenyusutan">Akum. Penyusutan</label>
           <div class="input-group">
             <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
-        </div>
+          <div style="grid-column: 3 / -1"></div>
 
-          <!-- Biaya Penyusutan 1 -->
-          <div class="bs-form bs-form-1">
+          <!-- Biaya Penyusutan 1-3 -->
           <label for="input_add_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
           <label for="input_add_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
           <label for="input_add_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
         </div>
         </form>
       </div>
@@ -179,61 +170,52 @@
               </select>
           <label for="input_edit_TglPerolehan">Tgl. Perolehan</label>
           <input type="date" class="form-control" id="input_edit_TglPerolehan">
-          <label for="input_edit_TglPemakaian">Tgl. Pemakaian</label>
-          <div class="bs-full"><input type="date" class="form-control" id="input_edit_TglPemakaian"></div>
-        </div>
-
-          <!-- Kuantum / Susut / Metode -->
-          <div class="bs-form">
           <label for="input_edit_Kuantum">Kuantum</label>
           <input type="number" class="form-control text-right" id="input_edit_Kuantum" value="1">
-          <label for="input_edit_Susut">Susut (%)</label>
-          <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
+          <label for="input_edit_TglPemakaian">Tgl. Pemakaian</label>
+          <input type="date" class="form-control" id="input_edit_TglPemakaian">
           <label for="input_edit_MetodePenyusutan">Metode Susut</label>
-          <div class="bs-full"><select class="form-control" id="input_edit_MetodePenyusutan">
+          <select class="form-control" id="input_edit_MetodePenyusutan">
                 <option value="L">[L]urus</option>
                 <option value="M">[M]enurun</option>
                 <option value="P">[P]ajak</option>
-              </select></div>
-        </div>
+              </select>
+          <label for="input_edit_Susut">Susut (%)</label>
+          <input type="number" class="form-control text-right" id="input_edit_Susut" placeholder="Susut(%)">
 
           <!-- Keterangan -->
-          <div class="bs-form bs-form-1">
           <label for="input_edit_Keterangan">Keterangan</label>
-          <textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea>
-        </div>
+          <div class="bs-full"><textarea class="form-control" id="input_edit_Keterangan" rows="2" placeholder="Keterangan"></textarea></div>
 
           <!-- Akumulasi Penyusutan -->
-          <div class="bs-form bs-form-1">
-          <label for="input_edit_AkumulasiPenyusutan">Akumulasi Penyusutan</label>
+          <label for="input_edit_AkumulasiPenyusutan">Akum. Penyusutan</label>
           <div class="input-group">
             <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
           </div>
-        </div>
+          <div style="grid-column: 3 / -1"></div>
 
-          <!-- Biaya Penyusutan 1 -->
-          <div class="bs-form bs-form-1">
+          <!-- Biaya Penyusutan 1-3 -->
           <label for="input_edit_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
           <label for="input_edit_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
           <label for="input_edit_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
-            <div class="input-group">
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
-              </div></div></div>
+              </div>
         </div>
         </form>
       </div>
@@ -642,7 +624,8 @@ function renderTabel () {
     const date = new Date(item.Tanggal);
     return '<td>' + String(date.getDate()).padStart(2, '0') + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear() + '</td>'
   }
-  let kanan = function (field) { return function (item) { return "<td class='text-right'>" + (item[field] ?? '') + '</td>' } }
+  // Desimal < 1 dari SQL Server datang tanpa nol di depan (".00") - tambahkan jadi "0.00".
+  let kanan = function (field) { return function (item) { return "<td class='text-right'>" + String(item[field] ?? '').replace(/^(-?)\./, (m, minus) => minus + '0.') + '</td>' } }
   let khusus = { Tanggal: tanggal, Quantity: kanan('Quantity'), Susut: kanan('Susut'), PersenBiaya1: kanan('PersenBiaya1'), PersenBiaya2: kanan('PersenBiaya2') }
 
   let rowTable = ""
@@ -999,15 +982,15 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_TipeAktiva").value = res[0].TipeAktiva
       document.getElementById("input_edit_Keterangan").value = res[0].Keterangan
       document.getElementById("input_edit_Kuantum").value = res[0].Quantity
-      document.getElementById("input_edit_Susut").value = res[0].Persen
+      document.getElementById("input_edit_Susut").value = (parseFloat(res[0].Persen) || 0).toFixed(2)
       document.getElementById("input_edit_MetodePenyusutan").value = res[0].Tipe
       document.getElementById("input_edit_AkumulasiPenyusutan").value = res[0].Akumulasi
       document.getElementById("input_edit_BiayaPenyusutan1").value = res[0].Biaya
-      document.getElementById("input_edit_PersenBiayaPenyusutan1").value = res[0].PersenBiaya1
+      document.getElementById("input_edit_PersenBiayaPenyusutan1").value = (parseFloat(res[0].PersenBiaya1) || 0).toFixed(2)
       document.getElementById("input_edit_BiayaPenyusutan2").value = res[0].Biaya2
-      document.getElementById("input_edit_PersenBiayaPenyusutan2").value = res[0].PersenBiaya2
+      document.getElementById("input_edit_PersenBiayaPenyusutan2").value = (parseFloat(res[0].PersenBiaya2) || 0).toFixed(2)
       document.getElementById("input_edit_BiayaPenyusutan3").value = res[0].biaya3
-      document.getElementById("input_edit_PersenBiayaPenyusutan3").value = res[0].persenbiaya3
+      document.getElementById("input_edit_PersenBiayaPenyusutan3").value = (parseFloat(res[0].persenbiaya3) || 0).toFixed(2)
 
     }})
     $("#formEdit").modal('toggle')
