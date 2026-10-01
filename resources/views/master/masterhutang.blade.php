@@ -232,7 +232,7 @@ function renderTabel () {
   let formatTanggal = function (date) {
     return date == null ? '' : (new Date(date)).toLocaleDateString('en-CA');
   }
-  let angka = function (field) { return function (item) { return '<td class="text-right">' + formatNumberDisplay(item[field]) + '</td>' } }
+  let angka = function (field) { return function (item) { return '<td class="text-right">' + formatNumberDisplay(MasterList.nolDepan(item[field])) + '</td>' } }
   let khusus = {
     NoFaktur: function (item) { return '<td>' + (item.NoFaktur == null ? '' : item.NoFaktur) + '</td>' },
     Tanggal: function (item) { return '<td>' + formatTanggal(item.Tanggal) + '</td>' },
@@ -318,8 +318,8 @@ function buttonEdit (kode, perkiraanCust) {
       document.getElementById("input_edit_jatuhTempo").value = new Date(res[0].JatuhTempo).toLocaleDateString('en-CA');
       pilihValas("input_edit_valas", res[0].Valas)
       setNum("input_edit_kurs", formatAngka(parseFloat(res[0].Kurs).toFixed(2)))
-      document.getElementById("input_edit_debet").value = res[0].Debet
-      document.getElementById("input_edit_debetRp").value = res[0].DebetD
+      document.getElementById("input_edit_debet").value = MasterList.nolDepan(res[0].Debet)
+      document.getElementById("input_edit_debetRp").value = MasterList.nolDepan(res[0].DebetD)
       setNum("input_edit_kredit", res[0].KreditD)
       setNum("input_edit_kreditRp", formatAngka(parseFloat(res[0].Kredit).toFixed(2)))
       document.getElementById("input_edit_noPO").value = res[0].POcust

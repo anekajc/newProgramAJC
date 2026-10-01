@@ -147,7 +147,7 @@ function renderTabel () {
   document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
 
   // Rata kanan seperti tabel lama (Sat 1, Isi 2, Isi 3).
-  let kanan = function (field) { return function (item) { return '<td class="text-right">' + (item[field] == null ? '' : item[field]) + '</td>' } }
+  let kanan = function (field) { return function (item) { return '<td class="text-right">' + MasterList.nolDepan(item[field]) + '</td>' } }
   let khusus = { SAT1: kanan('SAT1'), ISI2: kanan('ISI2'), ISI3: kanan('ISI3') }
 
   let rowTable = ""

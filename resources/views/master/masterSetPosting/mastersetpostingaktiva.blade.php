@@ -337,10 +337,10 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_perkiraan").value = res[0].Perkiraan
       document.getElementById("input_edit_akm").value = res[0].Akumulasi
       document.getElementById("input_edit_biayaPenyusutan1").value = res[0].Biaya1
-      document.getElementById("input_edit_persenBiaya1").value = res[0].PersenBiaya1
+      document.getElementById("input_edit_persenBiaya1").value = MasterList.nolDepan(res[0].PersenBiaya1)
       document.getElementById("input_edit_biayaPenyusutan2").value = res[0].Biaya2
-      document.getElementById("input_edit_persenBiaya2").value = res[0].PersenBiaya2
-      document.getElementById("input_edit_persenSusut").value = res[0].Persen
+      document.getElementById("input_edit_persenBiaya2").value = MasterList.nolDepan(res[0].PersenBiaya2)
+      document.getElementById("input_edit_persenSusut").value = MasterList.nolDepan(res[0].Persen)
       document.getElementById("input_edit_metodePenyusutan").value = res[0].Tipe
 
       if (Number(res[0].IsUM)) {

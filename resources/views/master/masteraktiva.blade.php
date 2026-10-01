@@ -981,7 +981,7 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_TglPemakaian").value = new Date(res[0].Tanggal).toLocaleDateString('en-CA');
       document.getElementById("input_edit_TipeAktiva").value = res[0].TipeAktiva
       document.getElementById("input_edit_Keterangan").value = res[0].Keterangan
-      document.getElementById("input_edit_Kuantum").value = res[0].Quantity
+      document.getElementById("input_edit_Kuantum").value = MasterList.nolDepan(res[0].Quantity)
       document.getElementById("input_edit_Susut").value = (parseFloat(res[0].Persen) || 0).toFixed(2)
       document.getElementById("input_edit_MetodePenyusutan").value = res[0].Tipe
       document.getElementById("input_edit_AkumulasiPenyusutan").value = res[0].Akumulasi

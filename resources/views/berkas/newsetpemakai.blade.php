@@ -1169,10 +1169,11 @@
 
   function buttonNIK (mode) {
     pickerTarget = mode === 'edit' ? 'edit' : 'add'
-    bukaPemilih("{!! url('newsetpemakaiLoadKaryawan') !!}", 'NIK Karyawan', ['NIK', 'Nama'], (item, i) => `<tr>
+    bukaPemilih("{!! url('newsetpemakaiLoadKaryawan') !!}", 'NIK Karyawan', ['Key NIK', 'NIK', 'Nama'], (item, i) => `<tr>
       <td class="text-center">
         <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectKaryawan(${i})"><i class="bi bi-plus-square"></i></button>
       </td>
+      <td>${spEsc(item.KeyNIK)}</td>
       <td>${spEsc(item.NIK)}</td>
       <td>${spEsc(item.Nama)}</td>
     </tr>`)
@@ -1180,7 +1181,9 @@
 
   function buttonSelectKaryawan (i) {
     let item = dataRefresh[i]
-    document.getElementById('input_' + pickerTarget + '_NIK').value = item.NIK
+    // Yang disimpan ke DBFLPASS.keynik adalah KeyNIK (int), bukan NIK KTP 16 digit -
+    // NIK KTP melebihi batas int @Keynik dan membuat Sp_FLpassWEB gagal.
+    document.getElementById('input_' + pickerTarget + '_NIK').value = item.KeyNIK
     // Nama Lengkap yang masih kosong diisi nama karyawan yang dipilih.
     let nama = document.getElementById('input_' + pickerTarget + '_namaLengkap')
     if (!nama.value.trim()) { nama.value = item.Nama ?? '' }

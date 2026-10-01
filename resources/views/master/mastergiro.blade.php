@@ -668,7 +668,7 @@ function renderTabelBuka () {
   document.getElementById('tabel_dibuka_header').innerHTML = MasterList.headHtml(cols, '#tabel_dibuka')
 
   // Kurs giro dibuka ditampilkan apa adanya (seperti sebelumnya).
-  let khusus = $.extend({}, mgKhusus, { Kurs: function (item) { return "<td class='text-right'>" + item.Kurs + '</td>' } })
+  let khusus = $.extend({}, mgKhusus, { Kurs: function (item) { return "<td class='text-right'>" + MasterList.nolDepan(item.Kurs) + '</td>' } })
 
   let rowTable = ""
   dataBuka.forEach((item, i) => {
@@ -806,9 +806,9 @@ function buttonEditBuka (kode) {
       document.getElementById("input_edit2_bank").value = res[0].Bank
       document.getElementById("input_edit2_noGiro").value = res[0].NoGiro
       document.getElementById("input_edit2_tglGiro").value = new Date(res[0].TglGiro).toLocaleDateString('en-CA');
-      document.getElementById("input_edit2_nilaiGiroRp").value = res[0].KreditRp
+      document.getElementById("input_edit2_nilaiGiroRp").value = MasterList.nolDepan(res[0].KreditRp)
       
-      document.getElementById("input_edit2_nilaiGiro").value = res[0].Kredit
+      document.getElementById("input_edit2_nilaiGiro").value = MasterList.nolDepan(res[0].Kredit)
       document.getElementById("input_edit2_valas").value = res[0].Kodevls
       document.getElementById("input_edit2_kurs").value = formatWithCommas(parseFloat(res[0].Kurs) || 0)
       document.getElementById("input_edit2_keterangan").value = res[0].Keterangan
@@ -843,8 +843,8 @@ function buttonEditTerima (kode) {
       document.getElementById("input_edit_bank").value = res[0].Bank
       document.getElementById("input_edit_noGiro").value = res[0].NoGiro
       document.getElementById("input_edit_tglGiro").value = new Date(res[0].TglGiro).toLocaleDateString('en-CA');
-      document.getElementById("input_edit_nilaiGiro").value = res[0].Debet
-      document.getElementById("input_edit_nilaiGiroRp").value = res[0].DebetRp
+      document.getElementById("input_edit_nilaiGiro").value = MasterList.nolDepan(res[0].Debet)
+      document.getElementById("input_edit_nilaiGiroRp").value = MasterList.nolDepan(res[0].DebetRp)
       document.getElementById("input_edit_valas").value = res[0].Kodevls
       document.getElementById("input_edit_kurs").value = formatWithCommas(parseFloat(res[0].Kurs) || 0)
       document.getElementById("input_edit_keterangan").value = res[0].Keterangan

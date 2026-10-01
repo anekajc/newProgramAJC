@@ -404,8 +404,8 @@ function buttonEdit (Nik) {
 
       document.getElementById("input_edit_Agama").value = res[0].Agama;
       document.getElementById("input_edit_PendidikanAkhir").value = res[0].KetPendAkhir;
-      document.getElementById("input_edit_Tinggi").value = res[0].Tinggi;
-      document.getElementById("input_edit_Berat").value = res[0].Berat;
+      document.getElementById("input_edit_Tinggi").value = MasterList.nolDepan(res[0].Tinggi);
+      document.getElementById("input_edit_Berat").value = MasterList.nolDepan(res[0].Berat);
 
       // Format TglMasuk
       const tglMasuk = new Date(res[0].TglMasuk + 'Z');

@@ -322,7 +322,8 @@ and a.Jenis=3 and a.KODECUSTSUPP = :kode" , ['kode' => $req->kode]);
     'accNo' => $req->accNo,
     'bank' => $req->bank,
     'atasNama' => $req->atasNama,
-    'isPpn' => 0,
+    // Dulu selalu 0 - centang PKP di form Add tidak pernah tersimpan.
+    'isPpn' => $req->IsPpn ? 1 : 0,
     'jenis' => 3,
     'perkiraan' => 'SEMUA',
     'blacklist' => 0,

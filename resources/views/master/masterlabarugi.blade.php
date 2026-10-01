@@ -351,8 +351,8 @@ function buttonEdit (nomor) {
       document.getElementById("input_edit_keterangan").value = res[0].Keterangan
       document.getElementById("input_edit_tipe").value = res[0].Tipe
       document.getElementById("input_edit_tanda").value = res[0].Tanda
-      document.getElementById("input_edit_jumlah").value = res[0].Jumlah
-      document.getElementById("input_edit_persentasi").value = res[0].Persen
+      document.getElementById("input_edit_jumlah").value = MasterList.nolDepan(res[0].Jumlah)
+      document.getElementById("input_edit_persentasi").value = MasterList.nolDepan(res[0].Persen)
       document.getElementById("input_edit_tampil").value = res[0].Tampil
       document.getElementById("input_edit_group").value = res[0].Grup
 

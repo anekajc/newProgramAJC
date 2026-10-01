@@ -901,7 +901,7 @@ function buttonTarget (keynik) {
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
           <td>${item.namamerk}</td>
-          <td>${formatNumberDisplay(item.TgtSales)}</td>
+          <td>${formatNumberDisplay(MasterList.nolDepan(item.TgtSales))}</td>
           </tr>
           `
         });
@@ -970,7 +970,7 @@ function refreshTableTarget(keynik){
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
           <td>${item.namamerk}</td>
-          <td>${formatNumberDisplay(item.TgtSales)}</td>
+          <td>${formatNumberDisplay(MasterList.nolDepan(item.TgtSales))}</td>
           </tr>
           `
         });
