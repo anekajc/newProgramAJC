@@ -934,8 +934,28 @@
          (see the boot script near the end of this file). --}}
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo" onclick="goHome()" style="cursor:pointer;">
-        <div class="logo-icon">SPL</div>
-        <span class="logo-text">PT. SPL</span>
+        {{-- Ikon sidebar memakai Logo NPWP 1 dari menu Set Nomor Transaksi
+             (resources/views/berkas/img/logoperusahaan/npwp1.*). Belum ada logo = kotak "SPL" lama. --}}
+        @php
+          $fileLogoSidebar = collect(glob(resource_path('views/berkas/img/logoperusahaan/npwp1.*')) ?: [])->first();
+        @endphp
+        @if ($fileLogoSidebar)
+          <div class="logo-icon" style="background:#fff; overflow:hidden;">
+            <img src="{{ url('setnomortransaksilogo') }}?v={{ @filemtime($fileLogoSidebar) }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
+          </div>
+        @else
+          <div class="logo-icon">SPL</div>
+        @endif
+        {{-- Nama di sidebar mengikuti Inisial Perusahaan di menu Set Nomor Transaksi (DBNOMOR.ALIAS),
+             bukan hardcode lagi. Kalau query gagal, tetap tampil teks lama supaya layout tidak error. --}}
+        @php
+          try {
+            $inisialPerusahaan = trim((string) (\DB::connection('SML')->select('select top 1 ALIAS from DBNOMOR')[0]->ALIAS ?? ''));
+          } catch (\Throwable $e) {
+            $inisialPerusahaan = '';
+          }
+        @endphp
+        <span class="logo-text">{{ $inisialPerusahaan !== '' ? $inisialPerusahaan : 'PT. SPL' }}</span>
       </div>
       <nav class="sidebar-nav" id="nav"></nav>
 

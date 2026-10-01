@@ -64,7 +64,55 @@ class SetNomorTransaksiController extends Controller
     email,
     L_Update
         FROM DBPERUSAHAAN");
+
+    // Gambar TTD & Logo per NPWP dikirim sebagai data URI (kosong = belum ada gambar).
+    if (count($detail)) {
+      $gambar = [];
+      foreach (self::SLOT_GAMBAR as $kunci => $slot) {
+        $file = $this->cariFileGambar($slot[0], $slot[1]);
+        $gambar[$kunci] = $file
+          ? 'data:' . (mime_content_type($file) ?: 'image/png') . ';base64,' . base64_encode(file_get_contents($file))
+          : '';
+      }
+      $detail[0]->GAMBAR = $gambar;
+    }
+
     return $detail;
+  }
+
+  // Gambar TTD & Logo disimpan sebagai file di resources/views/berkas/img/{ttd,logoperusahaan},
+  // satu file per NPWP: npwp1.<ext> & npwp2.<ext>. Kunci = nama field upload dari form.
+  const SLOT_GAMBAR = [
+    'ttd_1'  => ['ttd', 'npwp1'],
+    'logo_1' => ['logoperusahaan', 'npwp1'],
+    'ttd_2'  => ['ttd', 'npwp2'],
+    'logo_2' => ['logoperusahaan', 'npwp2'],
+  ];
+  const EKSTENSI_GAMBAR = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'];
+
+  private function folderGambar($folder) {
+    return resource_path('views/berkas/img/' . $folder);
+  }
+
+  private function cariFileGambar($folder, $nama) {
+    foreach (self::EKSTENSI_GAMBAR as $ext) {
+      $file = $this->folderGambar($folder) . DIRECTORY_SEPARATOR . $nama . '.' . $ext;
+      if (is_file($file)) {
+        return $file;
+      }
+    }
+    return null;
+  }
+
+  // Logo NPWP 1 untuk ikon sidebar layout newmasterTest. Folder gambar ada di resources (tidak
+  // bisa diakses langsung dari browser), jadi file dikirim lewat route ini. URL di layout memakai
+  // ?v=<waktu ubah file>, jadi aman di-cache browser lama - ganti logo otomatis ganti URL.
+  public function logo() {
+    $file = $this->cariFileGambar('logoperusahaan', 'npwp1');
+    if (!$file) {
+      abort(404);
+    }
+    return response()->file($file, ['Cache-Control' => 'private, max-age=31536000']);
   }
 
     public function submitEdit(Request $req) {
@@ -89,6 +137,27 @@ class SetNomorTransaksiController extends Controller
       if (strlen($t($nama)) > $maks) {
         return 'Isian ' . $nama . ' maksimal ' . $maks . ' karakter';
       }
+    }
+
+    // Gambar TTD & Logo: dicek dulu semuanya sebelum ada yang disimpan.
+    $labelGambar = ['ttd_1' => 'Ttd NPWP 1', 'logo_1' => 'Logo NPWP 1', 'ttd_2' => 'Ttd NPWP 2', 'logo_2' => 'Logo NPWP 2'];
+    $unggahan = [];
+    foreach (self::SLOT_GAMBAR as $kunci => $slot) {
+      if (!$req->hasFile($kunci)) {
+        continue;
+      }
+      $file = $req->file($kunci);
+      $ext = strtolower($file->getClientOriginalExtension());
+      if (!$file->isValid()) {
+        return 'Gambar ' . $labelGambar[$kunci] . ' gagal diunggah';
+      }
+      if (!in_array($ext, self::EKSTENSI_GAMBAR) || @getimagesize($file->getRealPath()) === false) {
+        return 'Gambar ' . $labelGambar[$kunci] . ' harus berupa file gambar (png, jpg, gif, bmp, webp)';
+      }
+      if ($file->getSize() > 2 * 1024 * 1024) {
+        return 'Gambar ' . $labelGambar[$kunci] . ' maksimal 2 MB';
+      }
+      $unggahan[$kunci] = [$file, $ext];
     }
 
     DB::connection('SML')->update(
@@ -140,6 +209,18 @@ class SetNomorTransaksiController extends Controller
             "jabatan"        => $t('jabatan'),
         ]
     );
+
+    // Simpan gambar baru; file lama di slot yang sama (ekstensi apa pun) dihapus dulu.
+    foreach ($unggahan as $kunci => [$file, $ext]) {
+      [$folder, $nama] = self::SLOT_GAMBAR[$kunci];
+      while ($lama = $this->cariFileGambar($folder, $nama)) {
+        @unlink($lama);
+        if (is_file($lama)) {
+          return 'Data tersimpan, tapi gambar lama ' . $labelGambar[$kunci] . ' tidak bisa diganti';
+        }
+      }
+      $file->move($this->folderGambar($folder), $nama . '.' . $ext);
+    }
 
     return 1;
     }

@@ -47,6 +47,7 @@ Route::post('kunciperiodetoggle', [KunciPeriodeKerjaController::class, 'kunciPer
 Route::get('/setnomortransaksi', [SetNomorTransaksiController::class, 'index']);
 Route::get('/dbnomorspdetail', [SetNomorTransaksiController::class, 'spDetail']);
 Route::post('setnomortransaksispedit', [SetNomorTransaksiController::class, 'submitEdit']);
+Route::get('/setnomortransaksilogo', [SetNomorTransaksiController::class, 'logo']);
 
 // BERKAS MENU ====================================================================================
 Route::get('/berkasmenu', [BerkasMenuController::class, 'index']);
