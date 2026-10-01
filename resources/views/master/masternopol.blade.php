@@ -73,8 +73,17 @@ function getStatus($data) {
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
             <div class="bs-form bs-form-1">
-          <label for="input_add_kode">No. Pol.</label>
-          <input type="text" class="form-control" id="input_add_kode" placeholder="No. Pol.">
+          <label for="input_add_kode">Kode Kendaraan</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Kendaraan" maxlength="30">
+
+          <label for="input_add_nochasis">No. Chasis</label>
+          <input type="text" class="form-control" id="input_add_nochasis" placeholder="No. Chasis" maxlength="50">
+
+          <label for="input_add_nopol">No. Pol.</label>
+          <input type="text" class="form-control" id="input_add_nopol" placeholder="No. Pol." maxlength="50">
+
+          <label for="input_add_merk">Nama Kendaraan</label>
+          <input type="text" class="form-control" id="input_add_merk" placeholder="Nama Kendaraan" maxlength="50">
 
           <label for="input_add_nama">Status Aktif</label>
           <select class="form-control" id="input_add_nama">
@@ -83,7 +92,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_add_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -114,8 +123,17 @@ function getStatus($data) {
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
             <div class="bs-form bs-form-1">
-          <label for="input_edit_kode">No. Pol.</label>
-          <input type="text" class="form-control" id="input_edit_kode" placeholder="No. Pol." disabled>
+          <label for="input_edit_kode">Kode Kendaraan</label>
+          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Kendaraan" disabled>
+
+          <label for="input_edit_nochasis">No. Chasis</label>
+          <input type="text" class="form-control" id="input_edit_nochasis" placeholder="No. Chasis" disabled>
+
+          <label for="input_edit_nopol">No. Pol.</label>
+          <input type="text" class="form-control" id="input_edit_nopol" placeholder="No. Pol." maxlength="50">
+
+          <label for="input_edit_merk">Nama Kendaraan</label>
+          <input type="text" class="form-control" id="input_edit_merk" placeholder="Nama Kendaraan" maxlength="50">
 
           <label for="input_edit_nama">Status Aktif</label>
           <select class="form-control" id="input_edit_nama">
@@ -124,7 +142,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_edit_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
 
@@ -241,6 +259,9 @@ function loadAll () {
 
 function buttonAdd () {
   document.getElementById('input_add_kode').value = ''
+  document.getElementById('input_add_nochasis').value = ''
+  document.getElementById('input_add_nopol').value = ''
+  document.getElementById('input_add_merk').value = ''
   document.getElementById('input_add_nama').value = '1'
   document.getElementById('input_add_perkiraan').value = ''
   $("#form").modal('toggle')
@@ -262,6 +283,9 @@ function buttonEdit (kode) {
 
       console.log(res)
       document.getElementById("input_edit_kode").value = res[0].KODEKEND
+      document.getElementById("input_edit_nochasis").value = res[0].NOCHASIS ? res[0].NOCHASIS : ''
+      document.getElementById("input_edit_nopol").value = res[0].NAMAKEND ? res[0].NAMAKEND : ''
+      document.getElementById("input_edit_merk").value = res[0].MERKKEND ? res[0].MERKKEND : ''
       document.getElementById("input_edit_nama").value = res[0].IsAktif
       document.getElementById("input_edit_perkiraan").value = res[0].KodeCost
 
@@ -308,12 +332,19 @@ function submitEdit () {
 
   let _token = $("#_token").val();
   let kode = $("#input_edit_kode").val();
+  let nopol = $("#input_edit_nopol").val();
+  let merk = $("#input_edit_merk").val();
   let nama = $("#input_edit_nama").val();
   let kodecost = $("#input_edit_perkiraan").val();
 
   console.log(kode,nama,kodecost)
   if (!kode) {
     alertify.warning("Kode harus diisi");
+    return
+  }
+
+  if (!nopol) {
+    alertify.warning("No. Pol. harus diisi");
     return
   }
 
@@ -334,6 +365,8 @@ function submitEdit () {
     data: {
       _token : _token,
       kode,
+      nopol,
+      merk,
       nama,
       kodecost
     },
@@ -357,11 +390,19 @@ function submitAdd () {
 
   let _token = $("#_token").val();
   let kode = $("#input_add_kode").val();
+  let nochasis = $("#input_add_nochasis").val();
+  let nopol = $("#input_add_nopol").val();
+  let merk = $("#input_add_merk").val();
   let nama = $("#input_add_nama").val();
   let kodecost = $("#input_add_perkiraan").val();
 
   if (!kode) {
     alertify.warning("Kode harus diisi");
+    return
+  }
+
+  if (!nopol) {
+    alertify.warning("No. Pol. harus diisi");
     return
   }
 
@@ -382,6 +423,9 @@ function submitAdd () {
     data: {
       _token : _token,
       kode,
+      nochasis,
+      nopol,
+      merk,
       nama,
       kodecost
     },

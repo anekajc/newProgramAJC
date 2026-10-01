@@ -77,13 +77,13 @@
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
           <div class="bs-form">
+          <label for="input_add_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_add_kodegroup" value='BJ' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Barang Jadi' disabled>
+          </div>
           <label for="input_add_isagen">Keagenan</label>
           <div class="bs-check"><input type="checkbox" id="input_add_isagen" name="" value=""></div>
-          <label for="input_add_kodegroup">Group</label>
-          <div class="d-flex align-items-center" style="gap:10px">
-            <input type="text" class="form-control" id="input_add_kodegroup" value='BJ' disabled>
-            <span>Barang Jadi</span>
-          </div>
 
           <label for="input_add_kodeheadgroup">HeadGroup</label>
           <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
@@ -254,13 +254,13 @@
 
         <div class="container-fluid">
           <div class="bs-form">
+          <label for="input_edit_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Barang Jadi' disabled>
+          </div>
           <label for="input_edit_isagen">Keagenan</label>
           <div class="bs-check"><input type="checkbox" id="input_edit_isagen" name="" value=""></div>
-          <label for="input_edit_kodegroup">Group</label>
-          <div class="d-flex align-items-center" style="gap:10px">
-            <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled>
-            <span>Barang Jadi</span>
-          </div>
 
           <label for="input_edit_kodeheadgroup">HeadGroup</label>
           <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">

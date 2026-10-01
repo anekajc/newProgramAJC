@@ -88,7 +88,7 @@
           <input type="text" class="form-control" id="input_add_nomor" placeholder="Nomor">
           <label for="input_add_perkiraan">Perkiraan</label>
           <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan">
+                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" disabled>
                   <div class="input-group-append">
                       <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
@@ -174,7 +174,7 @@
           <input type="text" class="form-control" id="input_edit_nomor" placeholder="Nomor" disabled>
           <label for="input_edit_perkiraan">Perkiraan</label>
           <div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan">
+                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
                   <div class="input-group-append">
                       <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>

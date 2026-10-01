@@ -214,7 +214,7 @@
           <div class="bs-form bs-form-1">
           <label for="input_add_perkiraanKas">Perkiraan Kas</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas">
+                <input type="text" class="form-control" id="input_add_perkiraanKas" placeholder="Perkiraan Kas" disabled>
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
@@ -249,7 +249,7 @@
           <div class="bs-form bs-form-1">
           <label for="input_add2_bank">Bank</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank">
+            <input type="text" class="form-control" id="input_add2_bank" placeholder="Bank" disabled>
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectBank()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
@@ -396,7 +396,7 @@
           <div class="bs-form bs-form-1">
           <label for="input_edit_perkiraanKas">Perkiraan Kas</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas">
+                <input type="text" class="form-control" id="input_edit_perkiraanKas" placeholder="Perkiraan Kas" disabled>
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraanKas()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>

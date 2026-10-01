@@ -521,7 +521,7 @@
           <div class="bs-form bs-form-1">
           <label for="input_add_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_add_perkiraandetail">
+                <input type="text" class="form-control" id="input_add_perkiraandetail" disabled>
                 <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
               </div>
             </div>
@@ -561,7 +561,7 @@
           <div class="bs-form bs-form-1">
           <label for="input_edit_perkiraandetail">Hutang/Piutang</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_perkiraandetail">
+                <input type="text" class="form-control" id="input_edit_perkiraandetail" disabled>
                 <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button></div>
               </div>
             </div>

@@ -67,9 +67,9 @@
           <!-- Group Aktiva -->
           <div class="bs-form">
           <label for="input_add_GroupAktiva">Group Aktiva</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_GroupAktiva" placeholder="Group Aktiva" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_add_DaftarDevisi">Devisi</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_DaftarDevisi" placeholder="Daftar Devisi" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_add_NoAktiva">No. Aktiva</label>
           <input type="text" class="form-control" id="input_add_NoAktiva" placeholder="No. Aktiva" disabled>
           <label for="input_add_NoUrut">No. Urut</label>
@@ -100,7 +100,7 @@
           <!-- Akumulasi Penyusutan -->
           <label for="input_add_AkumulasiPenyusutan">Akum. Penyusutan</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <input type="text" class="form-control" id="input_add_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan" disabled>
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
@@ -109,19 +109,19 @@
 
           <!-- Biaya Penyusutan 1-3 -->
           <label for="input_add_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
               </div>
           <label for="input_add_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
               </div>
           <label for="input_add_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_add_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_add_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>
@@ -157,9 +157,9 @@
           <!-- Group Aktiva -->
           <div class="bs-form">
           <label for="input_edit_GroupAktiva">Group Aktiva</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_GroupAktiva" placeholder="Group Aktiva" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonGroupAktiva()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_edit_DaftarDevisi">Devisi</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_DaftarDevisi" placeholder="Daftar Devisi" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDaftarDevisi()" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <label for="input_edit_NoAktiva">No. Aktiva</label>
           <input type="text" class="form-control" id="input_edit_NoAktiva" placeholder="No. Aktiva" disabled>
           <label for="input_edit_NoUrut">No. Urut</label>
@@ -190,7 +190,7 @@
           <!-- Akumulasi Penyusutan -->
           <label for="input_edit_AkumulasiPenyusutan">Akum. Penyusutan</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan">
+            <input type="text" class="form-control" id="input_edit_AkumulasiPenyusutan" placeholder="Akumulasi Penyusutan" disabled>
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasiPenyusutan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
@@ -199,19 +199,19 @@
 
           <!-- Biaya Penyusutan 1-3 -->
           <label for="input_edit_BiayaPenyusutan1">Biaya Penyusutan 1</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan1" placeholder="Biaya Penyusutan 1" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('1')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan1" placeholder="%">
                 <span class="input-group-text">%</span>
               </div>
           <label for="input_edit_BiayaPenyusutan2">Biaya Penyusutan 2</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan2" placeholder="Biaya Penyusutan 2" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('2')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan2" placeholder="%">
                 <span class="input-group-text">%</span>
               </div>
           <label for="input_edit_BiayaPenyusutan3">Biaya Penyusutan 3</label>
-          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3"><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
+          <div class="input-group"><input type="text" class="form-control" id="input_edit_BiayaPenyusutan3" placeholder="Biaya Penyusutan 3" disabled><div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="buttonBiayaPenyusutan('3')" title="Cari"><i class="bi bi-search"></i></button></div></div>
           <div class="input-group" style="grid-column: 3 / -1">
                 <input type="number" class="form-control percentage-input text-right" id="input_edit_PersenBiayaPenyusutan3" placeholder="%">
                 <span class="input-group-text">%</span>

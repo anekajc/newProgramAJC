@@ -94,14 +94,14 @@
           <div class="bs-form">
           <label for="input_add_perkiraan">Perkiraan</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_add_perkiraan">
+                <input type="text" class="form-control" id="input_add_perkiraan" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_add_biayaPenyusutan1">Biaya Penyusutan 1</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                <input type="text" class="form-control" id="input_add_biayaPenyusutan1">
+                <input type="text" class="form-control" id="input_add_biayaPenyusutan1" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
@@ -114,14 +114,14 @@
           
           <label for="input_add_akm">Akumulasi Penyusutan</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_add_akm">
+                <input type="text" class="form-control" id="input_add_akm" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_add_biayaPenyusutan2">Biaya Penyusutan 2</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                <input type="text" class="form-control" id="input_add_biayaPenyusutan2">
+                <input type="text" class="form-control" id="input_add_biayaPenyusutan2" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
@@ -175,14 +175,14 @@
           <div class="bs-form">
           <label for="input_edit_perkiraan">Perkiraan</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_perkiraan">
+                <input type="text" class="form-control" id="input_edit_perkiraan" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_edit_biayaPenyusutan1">Biaya Penyusutan 1</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                <input type="text" class="form-control" id="input_edit_biayaPenyusutan1">
+                <input type="text" class="form-control" id="input_edit_biayaPenyusutan1" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP1()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
@@ -195,14 +195,14 @@
           
           <label for="input_edit_akm">Akumulasi Penyusutan</label>
           <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_akm">
+                <input type="text" class="form-control" id="input_edit_akm" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonAkumulasi()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>
               </div>
           <label for="input_edit_biayaPenyusutan2">Biaya Penyusutan 2</label>
           <div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                <input type="text" class="form-control" id="input_edit_biayaPenyusutan2">
+                <input type="text" class="form-control" id="input_edit_biayaPenyusutan2" disabled>
                 <div class="input-group-append">
                   <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanBP2()" title="Cari"><i class="bi bi-search"></i></button>
                 </div>

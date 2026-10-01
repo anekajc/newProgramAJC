@@ -74,7 +74,7 @@
           <input type="text" class="form-control" id="input_add_nama" placeholder="Keterangan">
 
           <label for="input_add_perkiraan">Perkiraan</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -112,7 +112,7 @@
           <input type="text" class="form-control" id="input_edit_nama" placeholder="Keterangan">
 
           <label for="input_edit_perkiraan">Perkiraan</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
 

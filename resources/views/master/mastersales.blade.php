@@ -74,7 +74,7 @@
           <select class="form-control" id="input_edit_kodeGudang"></select>
 
           <label for="input_edit_kodeCost">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_kodeCost" placeholder="Kode Cost"> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCosting()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_kodeCost" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCosting()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -129,7 +129,7 @@
           <div class="bs-form bs-form-1">
             <label for="input_custSupp_add_kodeCustSupp">Kode Cust Supp</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_custSupp_add_kodeCustSupp" placeholder="Kode Cust Supp">
+              <input type="text" class="form-control" id="input_custSupp_add_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCustSupp()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -162,7 +162,7 @@
             <input type="hidden" id="input_custSupp_edit_kodeCustSupp_old">
             <label for="input_custSupp_edit_kodeCustSupp">Kode Cust Supp</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_custSupp_edit_kodeCustSupp" placeholder="Kode Cust Supp">
+              <input type="text" class="form-control" id="input_custSupp_edit_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCustSupp()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -271,7 +271,7 @@
 
             <label for="input_target_add_merk">Merk</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_target_add_merk" placeholder="Merk">
+              <input type="text" class="form-control" id="input_target_add_merk" placeholder="Merk" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonMerk()" title="Cari"><i class="bi bi-search"></i></button>
               </div>

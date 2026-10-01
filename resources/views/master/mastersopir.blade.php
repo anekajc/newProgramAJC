@@ -84,7 +84,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_add_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
     </div>
@@ -125,7 +125,7 @@ function getStatus($data) {
                     </select>
 
           <label for="input_edit_perkiraan">Kode Cost</label>
-          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" readonly> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
         </div>
 
 

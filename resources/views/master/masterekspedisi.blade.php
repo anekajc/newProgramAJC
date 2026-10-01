@@ -334,7 +334,7 @@
             <div class="bs-form bs-form-1">
           <label for="input_detailAkun_add_hutPiut">Hutang / Piutang</label>
           <div class="input-group">
-                    <input type="text" class="form-control" id="input_detailAkun_add_hutPiut" placeholder="Hutang Piutang">
+                    <input type="text" class="form-control" id="input_detailAkun_add_hutPiut" placeholder="Hutang Piutang" disabled>
                     <div class="input-group-append">
                         <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()" title="Cari"><i class="bi bi-search"></i></button>
                     </div>
@@ -358,7 +358,7 @@
             <div class="bs-form bs-form-1">
           <label for="input_detailAkun_edit_hutPiut">Hutang / Piutang</label>
           <div class="input-group">
-                    <input type="text" class="form-control" id="input_detailAkun_edit_hutPiut" placeholder="Hutang Piutang">
+                    <input type="text" class="form-control" id="input_detailAkun_edit_hutPiut" placeholder="Hutang Piutang" disabled>
                     <div class="input-group-append">
                         <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonHutangPiutang()" title="Cari"><i class="bi bi-search"></i></button>
                     </div>

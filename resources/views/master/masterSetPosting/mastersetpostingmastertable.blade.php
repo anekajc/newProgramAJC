@@ -18,7 +18,7 @@
           <div class="bs-form bs-form-1">
             <label for="input_kode">Perkiraan</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_kode" readonly>
+              <input type="text" class="form-control" id="input_kode" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
