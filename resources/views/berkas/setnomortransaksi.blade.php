@@ -124,7 +124,7 @@
                       <div class="d-flex align-items-start" style="gap: 10px;">
                         <label class="btn btn-sm btn-outline-secondary mb-0">
                           <i class="bi bi-folder2-open"></i> Cari
-                          <input type="file" accept="image/*" hidden onchange="previewUploadImage(this, 'stp_ttd_box_1')">
+                          <input type="file" id="input_ttd_1" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp" hidden onchange="previewUploadImage(this, 'stp_ttd_box_1')">
                         </label>
                         <div class="stp-upload-box" id="stp_ttd_box_1">
                           <i class="bi bi-image stp-upload-placeholder"></i>
@@ -137,7 +137,7 @@
                       <div class="d-flex align-items-start" style="gap: 10px;">
                         <label class="btn btn-sm btn-outline-secondary mb-0">
                           <i class="bi bi-folder2-open"></i> Cari
-                          <input type="file" accept="image/*" hidden onchange="previewUploadImage(this, 'stp_logo_box_1')">
+                          <input type="file" id="input_logo_1" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp" hidden onchange="previewUploadImage(this, 'stp_logo_box_1')">
                         </label>
                         <div class="stp-upload-box" id="stp_logo_box_1">
                           <i class="bi bi-image stp-upload-placeholder"></i>
@@ -189,7 +189,7 @@
                       <div class="d-flex align-items-start" style="gap: 10px;">
                         <label class="btn btn-sm btn-outline-secondary mb-0">
                           <i class="bi bi-folder2-open"></i> Cari
-                          <input type="file" accept="image/*" hidden onchange="previewUploadImage(this, 'stp_ttd_box_2')">
+                          <input type="file" id="input_ttd_2" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp" hidden onchange="previewUploadImage(this, 'stp_ttd_box_2')">
                         </label>
                         <div class="stp-upload-box" id="stp_ttd_box_2">
                           <i class="bi bi-image stp-upload-placeholder"></i>
@@ -202,7 +202,7 @@
                       <div class="d-flex align-items-start" style="gap: 10px;">
                         <label class="btn btn-sm btn-outline-secondary mb-0">
                           <i class="bi bi-folder2-open"></i> Cari
-                          <input type="file" accept="image/*" hidden onchange="previewUploadImage(this, 'stp_logo_box_2')">
+                          <input type="file" id="input_logo_2" accept="image/png,image/jpeg,image/gif,image/bmp,image/webp" hidden onchange="previewUploadImage(this, 'stp_logo_box_2')">
                         </label>
                         <div class="stp-upload-box" id="stp_logo_box_2">
                           <i class="bi bi-image stp-upload-placeholder"></i>
@@ -379,8 +379,10 @@
                   <label for="input_contohformat">Contoh Format</label>
                   <input type="text" class="form-control" id="input_contohformat" disabled>
 
+                  {{-- No. Seri Faktur Pajak dihilangkan dari panel Konfigurasi (permintaan user).
                   <label for="input_noserifakturpajak">No. Seri Faktur Pajak</label>
                   <textarea class="form-control" id="input_noserifakturpajak" rows="3"></textarea>
+                  --}}
                 </div>
 
               </div>
@@ -744,6 +746,18 @@ function loadAll(){
       document.getElementById("input_penandatangan_2").value = res[0].Direksi
       document.getElementById("input_jabatan_2").value = res[0].Jabatan
 
+      // Gambar TTD & Logo tersimpan sebagai file di folder berkas/img/ttd & berkas/img/logoperusahaan;
+      // controller mengirimnya sebagai data URI (kosong = belum ada gambar). Pilihan file yang
+      // belum disimpan ikut dibuang supaya Batal benar-benar kembali ke data tersimpan.
+      let gambar = res[0].GAMBAR || {}
+      ;['ttd_1', 'logo_1', 'ttd_2', 'logo_2'].forEach(k => {
+        document.getElementById('input_' + k).value = ''
+        let jenis = k.split('_')[0], slot = k.split('_')[1]
+        document.getElementById('stp_' + jenis + '_box_' + slot).innerHTML = gambar[k]
+          ? `<img src="${gambar[k]}" alt="${jenis}">`
+          : '<i class="bi bi-image stp-upload-placeholder"></i>'
+      })
+
       berhasil = true
     },
     error: function (err) {
@@ -763,11 +777,7 @@ function submitSetingPerusahaan() {
     return
   }
 
-  $.ajax({
-    url: "{!! url('setnomortransaksispedit') !!}",
-    type: "post",
-    async: false,
-    data: {
+  let isian = {
       _token,
       nama:           $("#input_nama").val(),
       alamat1:        $("#input_alamat1").val(),
@@ -793,7 +803,24 @@ function submitSetingPerusahaan() {
 
       direksi: $("#input_penandatangan_1").val(),
       jabatan: $("#input_jabatan_1").val(),
-    },
+  }
+
+  // Dikirim sebagai FormData supaya gambar TTD & Logo yang dipilih ikut terunggah.
+  // Gambar yang tidak dipilih ulang tidak dikirim, jadi file lamanya tetap dipakai.
+  let data = new FormData()
+  Object.keys(isian).forEach(k => data.append(k, isian[k] == null ? '' : isian[k]))
+  ;['ttd_1', 'logo_1', 'ttd_2', 'logo_2'].forEach(k => {
+    let file = document.getElementById('input_' + k).files[0]
+    if (file) { data.append(k, file) }
+  })
+
+  $.ajax({
+    url: "{!! url('setnomortransaksispedit') !!}",
+    type: "post",
+    async: false,
+    data: data,
+    processData: false,
+    contentType: false,
     success: function (res) {
       if (res != 1) {
         alertify.warning(res);
