@@ -309,7 +309,9 @@
           <div class="bs-form bs-form-1">
             <label for="input_add_NIK">NIK</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_add_NIK" placeholder="NIK">
+              {{-- Yang tampil NIK karyawan; yang dikirim ke server KeyNIK (input hidden) - lihat buttonSelectKaryawan. --}}
+              <input type="text" class="form-control" id="input_add_NIK" placeholder="NIK" disabled>
+              <input type="hidden" id="input_add_keynik">
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonNIK('add')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -328,20 +330,14 @@
             <input type="text" class="form-control" id="input_add_namaLengkap" placeholder="Nama Lengkap" maxlength="50">
 
             <label for="input_add_departemen">Departemen</label>
-            <div class="input-group">
-              <input type="text" class="form-control" id="input_add_departemen" placeholder="Kode Departemen" maxlength="15">
-              <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDepartemen('add')" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
+            <select class="form-control" id="input_add_departemen">
+              <option value="" selected disabled>Pilih Departemen</option>
+            </select>
 
             <label for="input_add_jabatan">Jabatan</label>
-            <div class="input-group">
-              <input type="text" class="form-control" id="input_add_jabatan" placeholder="Kode Jabatan" maxlength="15">
-              <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonJabatan('add')" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
+            <select class="form-control" id="input_add_jabatan">
+              <option value="" selected disabled>Pilih Jabatan</option>
+            </select>
 
             <label for="input_add_level">Level</label>
             <select class="form-control" id="input_add_level">
@@ -393,6 +389,7 @@
               {{-- NIK hanya ditampilkan: Sp_FLpassWEB mode U tidak mengubah keynik (baris update-nya di-comment
                    di SP), jadi mengganti NIK di form Edit dulu tidak pernah tersimpan. --}}
               <input type="text" class="form-control" id="input_edit_NIK" placeholder="NIK" disabled>
+              <input type="hidden" id="input_edit_keynik">
               {{-- <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonNIK('edit')" title="Cari"><i class="bi bi-search"></i></button>
               </div> --}}
@@ -405,20 +402,14 @@
             <input type="text" class="form-control" id="input_edit_namaLengkap" placeholder="Nama Lengkap" maxlength="50">
 
             <label for="input_edit_departemen">Departemen</label>
-            <div class="input-group">
-              <input type="text" class="form-control" id="input_edit_departemen" placeholder="Kode Departemen" maxlength="15">
-              <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonDepartemen('edit')" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
+            <select class="form-control" id="input_edit_departemen">
+              <option value="" selected disabled>Pilih Departemen</option>
+            </select>
 
             <label for="input_edit_jabatan">Jabatan</label>
-            <div class="input-group">
-              <input type="text" class="form-control" id="input_edit_jabatan" placeholder="Kode Jabatan" maxlength="15">
-              <div class="input-group-append">
-                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonJabatan('edit')" title="Cari"><i class="bi bi-search"></i></button>
-              </div>
-            </div>
+            <select class="form-control" id="input_edit_jabatan">
+              <option value="" selected disabled>Pilih Jabatan</option>
+            </select>
 
             <label for="input_edit_level">Level</label>
             <select class="form-control" id="input_edit_level">
@@ -1088,8 +1079,10 @@
   /* ================= Tambah / Edit user ================= */
 
   function buttonAdd () {
-    ['NIK', 'user', 'password', 'passwordConfirm', 'namaLengkap', 'departemen', 'jabatan', 'kodeKasir']
+    ['NIK', 'keynik', 'user', 'password', 'passwordConfirm', 'namaLengkap', 'kodeKasir']
       .forEach(f => { document.getElementById('input_add_' + f).value = '' })
+    isiDropdown('departemen', 'add', '')
+    isiDropdown('jabatan', 'add', '')
     document.getElementById('input_add_level').value = '0'
     document.getElementById('input_add_status').value = '0'
     setNum("input_add_limit", '0')
@@ -1118,11 +1111,12 @@
           return
         }
 
-        document.getElementById('input_edit_NIK').value = res[0].keynik ?? ''
+        document.getElementById('input_edit_keynik').value = res[0].keynik ?? ''
+        document.getElementById('input_edit_NIK').value = nikDariKeynik(res[0].keynik)
         document.getElementById('input_edit_user').value = res[0].USERID ?? ''
         document.getElementById('input_edit_namaLengkap').value = res[0].FullName ?? ''
-        document.getElementById('input_edit_departemen').value = res[0].kodeBag ?? ''
-        document.getElementById('input_edit_jabatan').value = res[0].KodeJab ?? ''
+        isiDropdown('departemen', 'edit', res[0].kodeBag)
+        isiDropdown('jabatan', 'edit', res[0].KodeJab)
         document.getElementById('input_edit_level').value = String(Number(res[0].TINGKAT) || 0)
         document.getElementById('input_edit_status').value = String(Number(res[0].STATUS) || 0)
         document.getElementById('input_edit_kodeKasir').value = res[0].KodeKasir ?? ''
@@ -1158,7 +1152,7 @@
       $('#tabelModalOpen').DataTable().destroy()
     }
 
-    document.querySelector("#theadOpen").innerHTML = '<tr><th scope="col">Actions</th>' +
+    document.querySelector("#theadOpen").innerHTML = '<tr>' +
       kolom.map(k => `<th scope="col">${k}</th>`).join('') + '</tr>'
     document.getElementById("tabel_dataModalOpen").innerHTML = hasil.map(render).join('')
     document.getElementById("namaModalOpen").innerHTML = judul
@@ -1169,11 +1163,8 @@
 
   function buttonNIK (mode) {
     pickerTarget = mode === 'edit' ? 'edit' : 'add'
-    bukaPemilih("{!! url('newsetpemakaiLoadKaryawan') !!}", 'NIK Karyawan', ['Key NIK', 'NIK', 'Nama'], (item, i) => `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectKaryawan(${i})"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${spEsc(item.KeyNIK)}</td>
+    // Dipilih dengan klik baris (class pick-row, lihat public/js/picker-kas.js) - tanpa tombol Actions.
+    bukaPemilih("{!! url('newsetpemakaiLoadKaryawan') !!}", 'NIK Karyawan', ['NIK', 'Nama'], (item, i) => `<tr class="pick-row" style="cursor:pointer" onclick="buttonSelectKaryawan(${i})">
       <td>${spEsc(item.NIK)}</td>
       <td>${spEsc(item.Nama)}</td>
     </tr>`)
@@ -1183,7 +1174,9 @@
     let item = dataRefresh[i]
     // Yang disimpan ke DBFLPASS.keynik adalah KeyNIK (int), bukan NIK KTP 16 digit -
     // NIK KTP melebihi batas int @Keynik dan membuat Sp_FLpassWEB gagal.
-    document.getElementById('input_' + pickerTarget + '_NIK').value = item.KeyNIK
+    document.getElementById('input_' + pickerTarget + '_keynik').value = item.KeyNIK
+    // Yang tampil di form NIK karyawan.
+    document.getElementById('input_' + pickerTarget + '_NIK').value = item.NIK ?? ''
     // Nama Lengkap yang masih kosong diisi nama karyawan yang dipilih.
     let nama = document.getElementById('input_' + pickerTarget + '_namaLengkap')
     if (!nama.value.trim()) { nama.value = item.Nama ?? '' }
@@ -1191,37 +1184,62 @@
     $("#formModalOpen").modal("hide")
   }
 
-  function buttonJabatan (mode) {
-    pickerTarget = mode === 'edit' ? 'edit' : 'add'
-    bukaPemilih("{!! url('newsetpemakaiLoadJabatan') !!}", 'Jabatan', ['Kode', 'Jabatan'], (item, i) => `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectJabatan(${i})"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${spEsc(item.KODEJAB)}</td>
-      <td>${spEsc(item.NamaJab)}</td>
-    </tr>`)
+  /* ---------- Dropdown Departemen / Jabatan ---------- */
+
+  // Daftar diambil sekali saat halaman dibuka, lalu dipakai form Tambah dan Edit.
+  let listDepartemen = []
+  let listJabatan = []
+  let listKaryawan = null
+
+  function ambilList (url) {
+    let hasil = []
+    $.ajax({
+      url: url,
+      type: "get",
+      async: false,
+      success: function (res) {
+        if (spBukanData(res, 'array')) { return }
+        hasil = res
+      },
+      error: spGagal
+    })
+    return hasil
   }
 
-  function buttonSelectJabatan (i) {
-    document.getElementById('input_' + pickerTarget + '_jabatan').value = dataRefresh[i].KODEJAB
-    $("#formModalOpen").modal("hide")
+  // Isi <select> Departemen/Jabatan di form (add/edit) lalu pilih kode yang diberikan.
+  // Kode user yang sudah tidak ada di master tetap ditampilkan supaya tidak hilang saat disimpan.
+  function isiDropdown (jenis, mode, kode) {
+    let list = jenis === 'departemen' ? listDepartemen : listJabatan
+    let ambilKode = jenis === 'departemen' ? (r => r.KDDEP) : (r => r.KODEJAB)
+    let ambilNama = jenis === 'departemen' ? (r => r.NMDEP) : (r => r.NamaJab)
+    let judul = jenis === 'departemen' ? 'Pilih Departemen' : 'Pilih Jabatan'
+    kode = String(kode ?? '').trim()
+
+    let opsi = `<option value="" disabled>${judul}</option>` + list.map(r => {
+      let k = String(ambilKode(r) ?? '').trim()
+      return `<option value="${spEsc(k)}">${spEsc(k)} - ${spEsc(ambilNama(r))}</option>`
+    }).join('')
+    if (kode && !list.some(r => String(ambilKode(r) ?? '').trim() === kode)) {
+      opsi += `<option value="${spEsc(kode)}">${spEsc(kode)}</option>`
+    }
+
+    let el = document.getElementById('input_' + mode + '_' + jenis)
+    el.innerHTML = opsi
+    el.value = kode
   }
 
-  function buttonDepartemen (mode) {
-    pickerTarget = mode === 'edit' ? 'edit' : 'add'
-    bukaPemilih("{!! url('newsetpemakaiLoadDepartemen') !!}", 'Departemen', ['Kode', 'Departemen'], (item, i) => `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectDepartemen(${i})"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${spEsc(item.KDDEP)}</td>
-      <td>${spEsc(item.NMDEP)}</td>
-    </tr>`)
+  // Form Edit hanya menerima keynik dari DBFLPASS - NIK karyawan dicari dari daftar karyawan.
+  function nikDariKeynik (keynik) {
+    if (keynik === null || keynik === undefined || keynik === '') { return '' }
+    if (listKaryawan === null) { listKaryawan = ambilList("{!! url('newsetpemakaiLoadKaryawan') !!}") }
+    let k = listKaryawan.find(r => String(r.KeyNIK) === String(keynik).trim())
+    return k ? (k.NIK ?? '') : ''
   }
 
-  function buttonSelectDepartemen (i) {
-    document.getElementById('input_' + pickerTarget + '_departemen').value = dataRefresh[i].KDDEP
-    $("#formModalOpen").modal("hide")
-  }
+  $(function () {
+    listDepartemen = ambilList("{!! url('newsetpemakaiLoadDepartemen') !!}")
+    listJabatan = ambilList("{!! url('newsetpemakaiLoadJabatan') !!}")
+  })
 
   let passwordCheckState = 0
 
@@ -1262,7 +1280,8 @@
   function ambilFormUser (mode) {
     let v = id => String($('#input_' + mode + '_' + id).val() ?? '').trim()
     return {
-      nik: v('NIK'),
+      // Field "nik" berisi KeyNIK (int) - nilai yang disimpan ke DBFLPASS.keynik.
+      nik: v('keynik'),
       user: v('user'),
       namaLengkap: v('namaLengkap'),
       departemen: v('departemen'),

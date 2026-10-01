@@ -187,7 +187,7 @@
             <input id="input_subgroup_add_kodesubgroup" type="text" class="form-control">
             <label for="input_add_perkPers">Perk. Persiapan</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_add_perkPers">
+              <input type="text" class="form-control" id="input_add_perkPers" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('1')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -197,7 +197,7 @@
             <input id="input_subgroup_add_namasubgroup" type="text" class="form-control">
             <label for="input_add_perkJual">Perk. Jual</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_add_perkJual">
+              <input type="text" class="form-control" id="input_add_perkJual" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('2')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -222,7 +222,7 @@
             <input id="input_subgroup_edit_kodesubgroup" type="text" class="form-control" disabled>
             <label for="input_edit_perkPers">Perk. Persiapan</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_edit_perkPers">
+              <input type="text" class="form-control" id="input_edit_perkPers" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('3')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -232,7 +232,7 @@
             <input id="input_subgroup_edit_namasubgroup" type="text" class="form-control">
             <label for="input_edit_perkJual">Perk. Jual</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_edit_perkJual">
+              <input type="text" class="form-control" id="input_edit_perkJual" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraanSubGroup('4')" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -873,9 +873,9 @@ function refreshSubGroup () {
         rowTable += `
         <tr>
         <td class="text-center">
-          <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')" ><i class="bi bi-list"></i></button>
-          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="SubKategori" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')" ><i class="bi bi-list"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')" ><i class="bi bi-trash"></i></button>
         </td>
         <td>${item.KodeSubGrp}</td>
         <td>${item.NamaSubGrp}</td>
@@ -920,9 +920,9 @@ function buttonSubGroup (kode, kodegroup) {
         <tr>
         <td style="white-space:nowrap;" class='text-center'>
           <div class="action-buttons-wrap">
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')"><i class="bi bi-list"></i></button>
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')"><i class="bi bi-pen"></i></button>
-              <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')"><i class="bi bi-trash"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="SubKategori" class="btn-action-sm btn-action-primary" type="button" onclick="buttonSubKategori('${item.KodeSubGrp}')"><i class="bi bi-list"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubGroup('${item.KodeSubGrp}')"><i class="bi bi-pen"></i></button>
+              <button data-toggle="tooltip" data-placement="top" title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubGroup('${item.KodeSubGrp}')"><i class="bi bi-trash"></i></button>
           </div>
         </td>
         <td>${item.KodeSubGrp}</td>
@@ -964,8 +964,8 @@ function refreshSubKategori () {
         rowTable += `
         <tr>
         <td class="text-center">
-          <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
         </td>
         <td>${item.Urut}</td>
         <td>${item.Keterangan}</td>
@@ -1008,8 +1008,8 @@ function buttonSubKategori (kodesubgroup) {
         rowTable += `
         <tr>
         <td class="text-center">
-          <button class="btn-action-sm btn-action-success"type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
-          <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEditSubKategori('${item.Urut}')" ><i class="bi bi-pen"></i></button>
+          <button data-toggle="tooltip" data-placement="top" title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDeleteSubKategori('${item.Urut}')" ><i class="bi bi-trash"></i></button>
         </td>
         <td>${item.Urut}</td>
         <td>${item.Keterangan}</td>
@@ -1282,8 +1282,12 @@ function buttonPerkiraanSubGroup (kodeBiaya) {
     },
   });
 
+  // Judul picker mengikuti field yang dibrowse (1/3 = Perk. Persiapan, 2/4 = Perk. Jual)
+  $("#formAddBiayaPenyusutan .modal-title").text((kodeBiaya == '1' || kodeBiaya == '3') ? 'Perkiraan Persiapan' : 'Perkiraan Jual')
+
   let rowTable = "";
-  dataRefresh.forEach((item, i) => {
+  // Hanya perkiraan tipe Detail (Tipe = 1); Tipe = 0 adalah General
+  dataRefresh.filter(item => item.Tipe == 1).forEach((item, i) => {
     rowTable += `<tr class="pick-row" onclick="buttonPilihBiayaPenyusutan('${item.Perkiraan}', '${item.Keterangan}', '${kodeBiaya}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>

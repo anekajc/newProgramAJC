@@ -92,7 +92,7 @@
         <div class="bs-form bs-form-1">
           <label for="input_add_kode">Perkiraan</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="input_add_kode" readonly>
+            <input type="text" class="form-control" id="input_add_kode" disabled>
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>
@@ -131,7 +131,7 @@
         <div class="bs-form bs-form-1">
           <label for="input_edit_kode">Perkiraan</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="input_edit_kode" readonly>
+            <input type="text" class="form-control" id="input_edit_kode" disabled>
             <div class="input-group-append">
               <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonEditSelectPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
             </div>

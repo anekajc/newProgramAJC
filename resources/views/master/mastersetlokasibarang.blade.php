@@ -88,7 +88,7 @@
           <div class="bs-form bs-form-1">
             <label for="input_edit_lokasiBarang">Lokasi Barang</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_edit_lokasiBarang" placeholder="Lokasi Barang">
+              <input type="text" class="form-control" id="input_edit_lokasiBarang" placeholder="Lokasi Barang" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonLokasiBarang()" title="Cari"><i class="bi bi-search"></i></button>
               </div>

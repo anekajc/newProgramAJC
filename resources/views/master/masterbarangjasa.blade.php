@@ -69,9 +69,9 @@
 
             <div class="bs-form">
           <label for="input_add_kodegroup">Group</label>
-          <div class="d-flex align-items-center" style="gap:10px">
-            <input type="text" class="form-control" id="input_add_kodegroup" value='JS' disabled>
-            <span>Jasa</span>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_add_kodegroup" value='JS' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Jasa' disabled>
           </div>
           <label for="input_add_isaktif">Status</label>
           <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
@@ -142,9 +142,9 @@
 
             <div class="bs-form">
           <label for="input_edit_kodegroup">Group</label>
-          <div class="d-flex align-items-center" style="gap:10px">
-            <input type="text" class="form-control" id="input_edit_kodegroup" value='JS' disabled>
-            <span>Jasa</span>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_edit_kodegroup" value='JS' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Jasa' disabled>
           </div>
           <label for="input_edit_isaktif">Status</label>
           <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">

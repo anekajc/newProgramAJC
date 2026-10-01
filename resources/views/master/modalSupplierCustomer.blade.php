@@ -78,7 +78,7 @@
             </div>
             <div class="col-md-8">
               <div class="input-group">
-                <input type="text" class="form-control" id="input_add_perkiraandetail">
+                <input type="text" class="form-control" id="input_add_perkiraandetail" disabled>
                 <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
@@ -131,7 +131,7 @@
             </div>
             <div class="col-md-3">
               <div class="input-group">
-                <input type="text" class="form-control" id="input_edit_perkiraandetail">
+                <input type="text" class="form-control" id="input_edit_perkiraandetail" disabled>
                 <button type="button" class="btn btn-primary btn-select" onclick="buttonDetailAkunSelect()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>

@@ -142,7 +142,7 @@
           <div class="bs-form bs-form-1">
             <label for="input_perkiraan">Perkiraan</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_perkiraan">
+              <input type="text" class="form-control" id="input_perkiraan" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
@@ -158,7 +158,7 @@
           <div class="bs-form bs-form-1">
             <label for="input_perkiraanEdit">Perkiraan</label>
             <div class="input-group">
-              <input type="text" class="form-control" id="input_perkiraanEdit">
+              <input type="text" class="form-control" id="input_perkiraanEdit" disabled>
               <div class="input-group-append">
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
               </div>

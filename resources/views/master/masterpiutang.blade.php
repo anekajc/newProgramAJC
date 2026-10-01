@@ -116,7 +116,7 @@
           
           <label for="input_add_lokasiPenerima">Lok. Penerima</label>
           <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                  <input type="text" class="form-control" id="input_add_lokasiPenerima">
+                  <input type="text" class="form-control" id="input_add_lokasiPenerima" disabled>
                   <div class="input-group-append">
                       <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonLokasiPenerima()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
@@ -188,7 +188,7 @@
           
           <label for="input_edit_lokasiPenerima">Lok. Penerima</label>
           <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_lokasiPenerima">
+                  <input type="text" class="form-control" id="input_edit_lokasiPenerima" disabled>
                   <div class="input-group-append">
                       <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonLokasiPenerima()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>

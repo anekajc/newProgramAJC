@@ -45,7 +45,7 @@ class MasterNoPolController extends Controller
     if ($check) {
       return 'Kode Data sudah ada di database';
     }
-    $listData = DB::connection('SML')->insert('insert into DBKENDARAAN (KODEKEND, KODEJENISKEND, NAMAKEND, IsAktif, KodeCost ) VALUES (?, ?, ?, ?, ?)', [$req->kode, '', $req->kode, $req->nama, $req->kodecost]);
+    $listData = DB::connection('SML')->insert('insert into DBKENDARAAN (KODEKEND, KODEJENISKEND, NAMAKEND, NOCHASIS, MERKKEND, IsAktif, KodeCost ) VALUES (?, ?, ?, ?, ?, ?, ?)', [$req->kode, '', $req->nopol, $req->nochasis, $req->merk, $req->nama, $req->kodecost]);
 
     return 1;
 
@@ -63,8 +63,10 @@ class MasterNoPolController extends Controller
   }
 
   public function spEdit(Request $req) {
-    $edit = DB::connection('SML')->update('UPDATE DBKENDARAAN SET IsAktif = :nama, KodeCost = :kodecost, KODEJENISKEND = \'\' WHERE KODEKEND = :kode', [
+    $edit = DB::connection('SML')->update('UPDATE DBKENDARAAN SET NAMAKEND = :nopol, MERKKEND = :merk, IsAktif = :nama, KodeCost = :kodecost, KODEJENISKEND = \'\' WHERE KODEKEND = :kode', [
         'kode' => $req->kode,
+        'nopol' => $req->nopol,
+        'merk' => $req->merk,
         'nama' => $req->nama,
         'kodecost' => $req->kodecost
     ]);
