@@ -52,8 +52,8 @@
 </div>
 
 <style>
-  /* Tiga pasang label + input per baris (PPH 21 | PPH 23 | No. Fax), pola mastercustomer. */
-  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 80px minmax(0, 1fr) 70px minmax(0, 1fr); margin-top: 14px; }
+  /* Pasangan label + input per baris (Pph21 | Pph23), pola mastersupplier/mastercustomer. */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 70px minmax(0, 1fr) 70px minmax(0, 1fr); margin-top: 14px; }
   @media (max-width: 575.98px) {
     #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
   }
@@ -61,7 +61,7 @@
 
 <!-- start modal add -->
 <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 800px">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 700px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
@@ -74,113 +74,100 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
+          {{-- Label & cara input disamakan dengan mastersupplier/mastercustomer (satu tabel DBCUSTSUPP).
+               Alamat 2, Fax & Alamat Pajak 2 tidak tampil seperti di supplier, tetapi tetap dibawa
+               lewat input hidden supaya nilai lama tidak terhapus saat Edit disimpan. --}}
+          <input type="hidden" id="input_add_alamat2">
+          <input type="hidden" id="input_add_noFax">
+          <input type="hidden" id="input_add_alamatPajak2">
 
             <div class="bs-form">
           <label for="input_add_kode">Kode</label>
           <input type="text" class="form-control" id="input_add_kode" placeholder="Kode">
-          <label for="input_add_bentukUsaha">Tipe Usaha</label>
-          <div class="d-flex align-items-center" style="gap:8px">
-            <input type="text" class="form-control" id="input_add_bentukUsaha" placeholder="Bentuk Usaha">
-            <label for="input_add_ppn" class="mb-0">PPN</label>
-            <select id='input_add_ppn' class='form-control' style="max-width: 90px">
-                    <option value=0>Tidak</option>
-                    <option value=1>Iya</option>
+          <label for="input_add_bentukUsaha">Bentuk Usaha</label>
+          <div class="d-flex align-items-center" style="gap:8px"><select id="input_add_bentukUsaha" class="form-control" aria-label="Default select example" onchange=changePph23()>
+                    <option selected value="PT">PT</option>
+                    <option value="CV">CV</option>
+                    <option value="PD">PD</option>
+                    <option value="UD">UD</option>
+                    <option value="TOKO">TOKO</option>
+                    <option value="BAPAK">BAPAK</option>
+                    <option value="IBU">IBU</option>
+                    <option value="EXP">EXP</option>
+                    <option value="-">-</option>
                   </select>
-          </div>
+            <input type="checkbox" id="input_add_isPpn" name="" value="">
+                <label class="text-left">PKP</label></div>
 
           <label for="input_add_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
 
           <label for="input_add_alamat">Alamat</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat 1"></div>
-          <label></label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat2" placeholder="Alamat 2"></div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_alamat" placeholder="Alamat"></div>
 
           <label for="input_add_kota">Kota</label>
-          <div class="input-group">
-                      <input type="text" class="form-control" id="input_add_kota" placeholder="Kode Kota">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
-                      </div>
-                  </div>
-          <label for="input_add_kodePos">Kode Pos</label>
+          <select id="input_add_kota" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Pilih Kota</option>
+                  </select>
+          <label for="input_add_kodePos">KodePos</label>
           <input type="text" class="form-control" id="input_add_kodePos" placeholder="Kode Pos">
-
-          <label for="input_add_namaArea">Nama Kota</label>
-          <input type="text" class="form-control" id="input_add_namaArea" placeholder="Nama Kota" readonly>
-          <label for="input_add_kodeArea">Area</label>
-          <input type="text" class="form-control" id="input_add_kodeArea" placeholder="Kode Area">
 
           <label for="input_add_negara">Negara</label>
           <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
-          <label for="input_add_telepon">Telepon</label>
-          <input type="text" class="form-control" id="input_add_telepon" placeholder="Telepon">
+          <label for="input_add_telepon">Telp</label>
+          <input type="text" class="form-control" id="input_add_telepon" placeholder="No Telp">
 
-          <label for="input_add_email">E-Mail</label>
-          <input type="text" class="form-control" id="input_add_email" placeholder="E-Mail">
-          <label for="input_add_aktif">Aktif</label>
-          <select id="input_add_aktif" class='form-control'>
-                    <option value=0 selected>Non-Aktif</option>
-                    <option value=1>Aktif</option>
+          <label for="input_add_email">Email</label>
+          <input type="text" class="form-control" id="input_add_email" placeholder="Email">
+          <label for="input_add_aktif">Status</label>
+          <select id="input_add_aktif" class="form-control" aria-label="Default select example">
+                    <option selected value=1>Aktif</option>
+                    <option value=0>Tidak Aktif</option>
                   </select>
         </div>
 
+            {{-- Ekspedisi tidak memakai TOP (hanya supplier & customer). --}}
             <div class="bs-form bs-form-3">
-          <label for="input_add_pph21">PPH 21</label>
-          <input type="number" class="form-control text-right" id="input_add_pph21" placeholder="PPH 21">
-          <label for="input_add_pph23">PPH 23</label>
-          <input type="number" class="form-control text-right" id="input_add_pph23" placeholder="PPH 23">
-          <label for="input_add_noFax">No. Fax</label>
-          <input type="text" class="form-control" id="input_add_noFax" placeholder="Nomor Fax">
+          <label for="input_add_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
+          <label for="input_add_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_add_pph23" value=2>
+          <div style="grid-column: 5 / -1"></div>
         </div>
 
             <div class="bs-form">
-          <label for="input_add_att">Att</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+          <label for="input_add_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="PIC"></div>
 
-          <label for="input_add_attPhone">Att Phone</label>
-          <input type="text" class="form-control" id="input_add_attPhone" placeholder="Att Phone">
-          <label for="input_add_attDepart">Att Depart</label>
-          <input type="text" class="form-control" id="input_add_attDepart" placeholder="Att Depart">
+          <label for="input_add_attPhone">PIC Phone</label>
+          <input type="text" class="form-control" id="input_add_attPhone" placeholder="PIC Phone">
+          <label for="input_add_attDepart">PIC Depart</label>
+          <input type="text" class="form-control" id="input_add_attDepart" placeholder="PIC Depart">
 
           <label for="input_add_bank">Bank</label>
-          <input type="text" class="form-control" id="input_add_bank" placeholder="Bank">
-          <label for="input_add_accNo">Acc. No</label>
-          <input type="text" class="form-control" id="input_add_accNo" placeholder="No. Acc">
+          <input type="text" class="form-control" id="input_add_bank" placeholder="Nama Bank">
+          <label for="input_add_accNo">Acc No.</label>
+          <input type="text" class="form-control" id="input_add_accNo" placeholder="Acc No.">
 
-          <label for="input_add_atasNama">A/N</label>
+          <label for="input_add_atasNama">a/n</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_atasNama" placeholder="Atas Nama"></div>
         </div>
+            <br/>
 
-            <div class="row mb-1 mt-4">
-              <div class="col-12 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left text-dark">Data Pajak</label>
-                  <hr>
-                </div>
-              </div>
-            </div>
-
+            <h5>Data Pajak</h5>
+            <br/>
             <div class="bs-form bs-form-1">
           <label for="input_add_NPWP">NPWP</label>
           <input type="text" class="form-control" id="input_add_NPWP" placeholder="NPWP">
 
           <label for="input_add_namaPajak">Nama</label>
-          <input type="text" class="form-control" id="input_add_namaPajak" placeholder="Atas Nama">
+          <input type="text" class="form-control" id="input_add_namaPajak" placeholder="Nama PKP">
 
           <label for="input_add_alamatPajak">Alamat</label>
-          <input type="text" class="form-control" id="input_add_alamatPajak" placeholder="Alamat Pajak 1">
-        </div>
+          <input type="text" class="form-control" id="input_add_alamatPajak" placeholder="Alamat PKP">
 
-            <div class="bs-form bs-form-1">
-          <label></label>
-          <input type="text" class="form-control" id="input_add_alamatPajak2" placeholder="Alamat Pajak 2">
-        </div>
-
-            
-            <div class="bs-form bs-form-1">
           <label for="input_add_pajakKota">Kota</label>
-          <input type="text" class="form-control" id="input_add_pajakKota" placeholder="Kota">
+          <input type="text" class="form-control" id="input_add_pajakKota" placeholder="Kota PKP">
         </div>
 
     </div>
@@ -197,7 +184,7 @@
 
 <!-- start modal edit -->
 <div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 800px">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 700px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
@@ -210,113 +197,100 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
+          {{-- Label & cara input disamakan dengan mastersupplier/mastercustomer (satu tabel DBCUSTSUPP).
+               Alamat 2, Fax & Alamat Pajak 2 tidak tampil seperti di supplier, tetapi tetap dibawa
+               lewat input hidden supaya nilai lama tidak terhapus saat Edit disimpan. --}}
+          <input type="hidden" id="input_edit_alamat2">
+          <input type="hidden" id="input_edit_noFax">
+          <input type="hidden" id="input_edit_alamatPajak2">
 
             <div class="bs-form">
           <label for="input_edit_kode">Kode</label>
-          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode" disabled>
-          <label for="input_edit_bentukUsaha">Tipe Usaha</label>
-          <div class="d-flex align-items-center" style="gap:8px">
-            <input type="text" class="form-control" id="input_edit_bentukUsaha" placeholder="Bentuk Usaha">
-            <label for="input_edit_isPpn" class="mb-0">PPN</label>
-            <select id='input_edit_isPpn' class='form-control' style="max-width: 90px">
-                    <option value=0>Tidak</option>
-                    <option value=1>Iya</option>
+          <input type="text" class="form-control" disabled id="input_edit_kode" placeholder="Kode">
+          <label for="input_edit_bentukUsaha">Bentuk Usaha</label>
+          <div class="d-flex align-items-center" style="gap:8px"><select id="input_edit_bentukUsaha" class="form-control" aria-label="Default select example">
+                    <option selected value="PT">PT</option>
+                    <option value="CV">CV</option>
+                    <option value="PD">PD</option>
+                    <option value="UD">UD</option>
+                    <option value="TOKO">TOKO</option>
+                    <option value="BAPAK">BAPAK</option>
+                    <option value="IBU">IBU</option>
+                    <option value="EXP">EXP</option>
+                    <option value="-">-</option>
                   </select>
-          </div>
+            <input type="checkbox" id="input_edit_isPpn" name="" value="">
+                <label class="text-left">PKP</label></div>
 
           <label for="input_edit_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
 
           <label for="input_edit_alamat">Alamat</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat 1"></div>
-          <label></label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat2" placeholder="Alamat 2"></div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_alamat" placeholder="Alamat"></div>
 
           <label for="input_edit_kota">Kota</label>
-          <div class="input-group">
-                      <input type="text" class="form-control" id="input_edit_kota" placeholder="Kode Kota">
-                      <div class="input-group-append">
-                          <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKota()" title="Cari"><i class="bi bi-search"></i></button>
-                      </div>
-                  </div>
-          <label for="input_edit_kodePos">Kode Pos</label>
+          <select id="input_edit_kota" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Pilih Kota</option>
+                  </select>
+          <label for="input_edit_kodePos">KodePos</label>
           <input type="text" class="form-control" id="input_edit_kodePos" placeholder="Kode Pos">
-
-          <label for="input_edit_namaArea">Nama Kota</label>
-          <input type="text" class="form-control" id="input_edit_namaArea" placeholder="Nama Kota" readonly>
-          <label for="input_edit_kodeArea">Area</label>
-          <input type="text" class="form-control" id="input_edit_kodeArea" placeholder="Kode Area">
 
           <label for="input_edit_negara">Negara</label>
           <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
-          <label for="input_edit_telepon">Telepon</label>
-          <input type="text" class="form-control" id="input_edit_telepon" placeholder="Telepon">
+          <label for="input_edit_telepon">Telp</label>
+          <input type="text" class="form-control" id="input_edit_telepon" placeholder="No Telp">
 
-          <label for="input_edit_email">E-Mail</label>
-          <input type="text" class="form-control" id="input_edit_email" placeholder="E-Mail">
-          <label for="input_edit_aktif">Aktif</label>
-          <select id="input_edit_aktif" class='form-control'>
-                    <option value=0 selected>Non-Aktif</option>
-                    <option value=1>Aktif</option>
+          <label for="input_edit_email">Email</label>
+          <input type="text" class="form-control" id="input_edit_email" placeholder="Email">
+          <label for="input_edit_aktif">Status</label>
+          <select id="input_edit_aktif" class="form-control" aria-label="Default select example">
+                    <option selected value=1>Aktif</option>
+                    <option value=0>Tidak Aktif</option>
                   </select>
         </div>
 
+            {{-- Ekspedisi tidak memakai TOP (hanya supplier & customer). --}}
             <div class="bs-form bs-form-3">
-          <label for="input_edit_pph21">PPH 21</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph21" placeholder="PPH 21">
-          <label for="input_edit_pph23">PPH 23</label>
-          <input type="number" class="form-control text-right" id="input_edit_pph23" placeholder="PPH 23">
-          <label for="input_edit_noFax">No. Fax</label>
-          <input type="text" class="form-control" id="input_edit_noFax" placeholder="Nomor Fax">
+          <label for="input_edit_pph21">Pph21</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph21" value=0.00>
+          <label for="input_edit_pph23">Pph23</label>
+          <input type="number" class="form-control text-right" id="input_edit_pph23" value=0.00>
+          <div style="grid-column: 5 / -1"></div>
         </div>
 
             <div class="bs-form">
-          <label for="input_edit_att">Att</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+          <label for="input_edit_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="PIC"></div>
 
-          <label for="input_edit_attPhone">Att Phone</label>
-          <input type="text" class="form-control" id="input_edit_attPhone" placeholder="Att Phone">
-          <label for="input_edit_attDepart">Att Depart</label>
-          <input type="text" class="form-control" id="input_edit_attDepart" placeholder="Att Depart">
+          <label for="input_edit_attPhone">PIC Phone</label>
+          <input type="text" class="form-control" id="input_edit_attPhone" placeholder="PIC Phone">
+          <label for="input_edit_attDepart">PIC Depart</label>
+          <input type="text" class="form-control" id="input_edit_attDepart" placeholder="PIC Depart">
 
           <label for="input_edit_bank">Bank</label>
-          <input type="text" class="form-control" id="input_edit_bank" placeholder="Bank">
-          <label for="input_edit_accNo">Acc. No</label>
-          <input type="text" class="form-control" id="input_edit_accNo" placeholder="No. Acc">
+          <input type="text" class="form-control" id="input_edit_bank" placeholder="Nama Bank">
+          <label for="input_edit_accNo">Acc No.</label>
+          <input type="text" class="form-control" id="input_edit_accNo" placeholder="Acc No.">
 
-          <label for="input_edit_atasNama">A/N</label>
+          <label for="input_edit_atasNama">a/n</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_atasNama" placeholder="Atas Nama"></div>
         </div>
+            <br/>
 
-            <div class="row mb-1 mt-4">
-              <div class="col-12 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left text-dark">Data Pajak</label>
-                  <hr>
-                </div>
-              </div>
-            </div>
-
+            <h5>Data Pajak</h5>
+            <br/>
             <div class="bs-form bs-form-1">
           <label for="input_edit_NPWP">NPWP</label>
           <input type="text" class="form-control" id="input_edit_NPWP" placeholder="NPWP">
 
           <label for="input_edit_namaPajak">Nama</label>
-          <input type="text" class="form-control" id="input_edit_namaPajak" placeholder="Atas Nama">
+          <input type="text" class="form-control" id="input_edit_namaPajak" placeholder="Nama PKP">
 
           <label for="input_edit_alamatPajak">Alamat</label>
-          <input type="text" class="form-control" id="input_edit_alamatPajak" placeholder="Alamat Pajak 1">
-        </div>
+          <input type="text" class="form-control" id="input_edit_alamatPajak" placeholder="Alamat PKP">
 
-            <div class="bs-form bs-form-1">
-          <label></label>
-          <input type="text" class="form-control" id="input_edit_alamatPajak2" placeholder="Alamat Pajak 2">
-        </div>
-
-            
-            <div class="bs-form bs-form-1">
           <label for="input_edit_pajakKota">Kota</label>
-          <input type="text" class="form-control" id="input_edit_pajakKota" placeholder="Kota">
+          <input type="text" class="form-control" id="input_edit_pajakKota" placeholder="Kota PKP">
         </div>
 
     </div>
@@ -606,7 +580,7 @@ function renderTabel () {
   document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
 
   // Tampilan sel sama seperti sebelumnya: nilai kosong/0 ditulis kosong, PPN berupa ikon.
-  let kosong = function (field) { return function (item) { return '<td>' + (item[field] || '') + '</td>' } }
+  let kosong = function (field) { return function (item) { return '<td>' + (parseFloat(item[field]) ? MasterList.nolDepan(item[field]) : '') + '</td>' } }
   let khusus = {
     NPPH23: kosong('NPPH23'),
     NPPH22: kosong('NPPH22'),
@@ -654,10 +628,33 @@ function loadAll () {
 }
 
 
+// Kota berupa dropdown DBKOTA seperti mastersupplier/mastercustomer (dulu input kode + modal pemilih).
+function isiKota (id) {
+  $.ajax({
+    url: "{!! url('masterEkspedisiLoadKota') !!}",
+    type: "get",
+    async: false,
+    success: function(res) {
+      let rowTable = `<option selected disabled value=0>Pilih Kota</option>`
+      res.forEach((item, i) => {
+        rowTable += `
+          <option value="${item.KodeKota}">${item.NamaKota}</option>
+        `
+      });
+
+      document.getElementById(id).innerHTML = rowTable
+    }})
+}
+
 function buttonAdd () {
 
-  $('#form .modal-body input[type="text"], #form .modal-body input[type="number"]').val('')
+  // Form Add dikembalikan ke nilai bawaan HTML-nya (mis. Pph23 = 2), pola mastersupplier.
+  $('#form .modal-body input[type="text"], #form .modal-body input[type="number"]').each(function () { this.value = this.defaultValue })
+  $('#form .modal-body input[type="hidden"]').val('')
+  $('#form .modal-body input[type="checkbox"]').prop('checked', false)
   $('#form .modal-body select').prop('selectedIndex', 0)
+
+  isiKota('input_add_kota')
 
   $("#form").modal('toggle')
 
@@ -665,7 +662,9 @@ function buttonAdd () {
 
 function buttonEdit (kode) {
   let _token = $("#_token").val();
-  let kotaTemp = ''
+
+  isiKota('input_edit_kota')
+
   $.ajax({
     url: "{!! url('masterEkspedisiLoadDetail') !!}",
     type: "get",
@@ -682,7 +681,7 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_alamat").value = res[0].ALAMAT1
       document.getElementById("input_edit_alamat2").value = res[0].ALAMAT2
       document.getElementById("input_edit_kota").value = res[0].Kota
-      document.getElementById("input_edit_isPpn").value = res[0].IsPpn
+      document.getElementById("input_edit_isPpn").checked = Number(res[0].IsPpn) == 1
       document.getElementById("input_edit_kodePos").value = res[0].KODEPOS
       document.getElementById("input_edit_negara").value = res[0].NEGARA
       document.getElementById("input_edit_telepon").value = res[0].TELPON
@@ -702,25 +701,8 @@ function buttonEdit (kode) {
       document.getElementById("input_edit_namaPajak").value = res[0].NAMAPKP
       document.getElementById("input_edit_alamatPajak").value = res[0].ALAMATPKP1
       document.getElementById("input_edit_alamatPajak2").value = res[0].ALAMATPKP2
-      document.getElementById("input_edit_kodeArea").value = res[0].KodeArea
-      
+
       // document.getElementById("input_edit_kurs").value = parseFloat(res[0].KURS).toFixed(2);
-
-      kotaTemp = res[0].Kota 
-    }})
-
-    $.ajax({
-    url: "{!! url('masterEkspedisiLoadKotaEdit') !!}",
-    type: "get",
-    async: false,
-    data: {
-      _token : _token,
-      kodeKota: kotaTemp
-    },
-    success: function(res) {
-
-      document.getElementById("input_edit_namaArea").value = res[0].NamaKota
-
     }})
 
     $("#formEdit").modal('toggle')
@@ -770,7 +752,7 @@ function submitEdit () {
   let alamat2 = $("#input_edit_alamat2").val(); //Alamat2
   let kodeKota = $("#input_edit_kota").val(); //KodeKota
   let pCounter = $("#input_edit_counter").val(); //pCounter
-  let isPpn = $("#input_edit_isPpn").val(); //IsPpn
+  let isPpn = document.getElementById("input_edit_isPpn").checked ? 1 : 0; //IsPpn
   let kodePos = $("#input_edit_kodePos").val(); //KodePos
   let negara = $("#input_edit_negara").val(); //Negara
 
@@ -793,6 +775,20 @@ function submitEdit () {
   let namaPkp = $("#input_edit_namaPajak").val(); //NamaPKP
   let alamatPkp = $("#input_edit_alamatPajak").val(); //AlamatPkp1
   let alamatPkp2 = $("#input_edit_alamatPajak2").val() //AlamatPkp2
+
+  // Validasi sama dengan mastersupplier.
+  if (!kodeCustSupp) {
+    alertify.warning("Kode harus diisi");
+    return
+  }
+  if (!namaCustSupp) {
+    alertify.warning("Nama harus diisi");
+    return
+  }
+  if (kodeKota == 0 || !kodeKota) {
+    alertify.warning("Kota harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('masterEkspedisiSubmitEdit') !!}",
@@ -856,7 +852,7 @@ function submitAdd () {
   let alamat1 = $("#input_add_alamat").val(); //Alamat1
   let alamat2 = $("#input_add_alamat2").val(); //Alamat2
   let kodeKota = $("#input_add_kota").val(); //KodeKota
-  let IsPpn = $("#input_add_ppn").val(); //IsPpn
+  let IsPpn = document.getElementById("input_add_isPpn").checked ? 1 : 0; //IsPpn
 
   let kodePos = $("#input_add_kodePos").val(); //KodePos
   let negara = $("#input_add_negara").val(); //Negara
@@ -882,7 +878,23 @@ function submitAdd () {
   let alamatPkp2 = $("#input_add_alamatPajak2").val() //AlamatPkp2
 
   if(!attPhone){
-    alertify.warning('Att Phone Wajib Diisi')
+    alertify.warning('PIC Phone Wajib Diisi')
+    // dulu tanpa return - pesannya "wajib" tetapi data tetap tersimpan
+    return
+  }
+
+  // Validasi sama dengan mastersupplier.
+  if (!kodeCustSupp) {
+    alertify.warning("Kode harus diisi");
+    return
+  }
+  if (!namaCustSupp) {
+    alertify.warning("Nama harus diisi");
+    return
+  }
+  if (kodeKota == 0 || !kodeKota) {
+    alertify.warning("Kota harus diisi");
+    return
   }
 
   $.ajax({
@@ -1590,10 +1602,23 @@ function setupEnterKeySearch(inputId, buttonFunction, options = {}) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    setupEnterKeySearch('input_add_kota', 'buttonKota', { allowEmpty: true });
-    setupEnterKeySearch('input_edit_kota', 'buttonKota', { allowEmpty: true });
-});
+// Dinonaktifkan: Kota sekarang dropdown seperti mastersupplier, jadi pencarian kode kota lewat
+// Enter / modal pemilih (buttonKota) tidak dipakai lagi di form Add/Edit.
+// document.addEventListener('DOMContentLoaded', function() {
+//     setupEnterKeySearch('input_add_kota', 'buttonKota', { allowEmpty: true });
+//     setupEnterKeySearch('input_edit_kota', 'buttonKota', { allowEmpty: true });
+// });
+
+// Pph23 bawaan mengikuti Bentuk Usaha, sama dengan mastersupplier.
+function changePph23() {
+  let valueUsaha = document.getElementById('input_add_bentukUsaha').value
+
+  if (valueUsaha == 'PT' || valueUsaha == 'CV') {
+    document.getElementById('input_add_pph23').value = 2
+  } else {
+    document.getElementById('input_add_pph23').value = 2.5
+  }
+}
 
 
 </script>

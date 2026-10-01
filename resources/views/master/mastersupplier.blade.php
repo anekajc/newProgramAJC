@@ -95,7 +95,7 @@
                     <option value="-">-</option>
                   </select>
             <input type="checkbox" id="input_add_isppn" name="" value="">
-                <label class="text-left">PPN</label></div>
+                <label class="text-left">PKP</label></div>
 
           <label for="input_add_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
@@ -138,21 +138,18 @@
 
             <div class="bs-form">
           <label for="input_add_att">PIC</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="PIC"></div>
 
           <label for="input_add_attphone">PIC Phone</label>
-          <input type="text" class="form-control" id="input_add_attphone" placeholder="Att Phone">
+          <input type="text" class="form-control" id="input_add_attphone" placeholder="PIC Phone">
           <label for="input_add_attdepart">PIC Depart</label>
-          <input type="text" class="form-control" id="input_add_attdepart" placeholder="Att Depart">
+          <input type="text" class="form-control" id="input_add_attdepart" placeholder="PIC Depart">
 
             
           <label for="input_add_bank">Bank</label>
-          <select id="input_add_bank" class="form-control" aria-label="Default select example">
-                    <option selected value="BCA">BCA</option>
-                    <option value="MANDIRI">MANDIRI</option>
-                    <option value="NIAGA">NIAGA</option>
-                    <option value="CIMB">CIMB</option>
-                  </select>
+          {{-- Bank diisi sendiri (bukan dropdown) - sama dengan form Edit & ekspedisi; daftar bank
+               di data terlalu beragam untuk pilihan tetap. --}}
+          <input type="text" class="form-control" id="input_add_bank" placeholder="Nama Bank">
           <label for="input_add_accno">Acc No.</label>
           <input type="text" class="form-control" id="input_add_accno" placeholder="Acc No.">
 
@@ -228,7 +225,7 @@
                   </select>
                 </div>
             <input type="checkbox" id="input_edit_isppn" name="">
-                <label class="text-left">PPN</label></div>
+                <label class="text-left">PKP</label></div>
 
           <label for="input_edit_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
@@ -271,12 +268,12 @@
 
             <div class="bs-form">
           <label for="input_edit_att">PIC</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="PIC"></div>
 
           <label for="input_edit_attphone">PIC Phone</label>
-          <input type="text" class="form-control" id="input_edit_attphone" placeholder="Att Phone">
+          <input type="text" class="form-control" id="input_edit_attphone" placeholder="PIC Phone">
           <label for="input_edit_attdepart">PIC Depart</label>
-          <input type="text" class="form-control" id="input_edit_attdepart" placeholder="Att Depart">
+          <input type="text" class="form-control" id="input_edit_attdepart" placeholder="PIC Depart">
 
             
           <label for="input_edit_bank">Bank</label>

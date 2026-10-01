@@ -80,7 +80,11 @@ public function loadAll()
 public function spAdd(Request $req) {
     $check = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where KODECUSTSUPP = :kode', ['kode' => $req->kode]);
     
-    $checkNIK = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp', ['npwp' => $req->npwp]);
+    // NPWP kosong tidak dicek: form kosong sampai ke sini sebagai null, dan koneksi SQL Server
+    // produksi (ANSI_NULLS OFF) mencocokkan "NPWP = NULL" dengan baris yang NPWP-nya null -
+    // akibatnya supplier tanpa NPWP selalu ditolak "NPWP sudah ada".
+    $checkNIK = trim((string) $req->npwp) === '' ? [] :
+      DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp', ['npwp' => $req->npwp]);
 
     if ($check) {
         return 'Kode supplier sudah ada di database';

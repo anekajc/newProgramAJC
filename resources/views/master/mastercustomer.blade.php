@@ -97,7 +97,7 @@
                   </select>
                 </div>
             <input type="checkbox" id="input_add_isppn" name="" value="">
-                <label class="text-left">PPN</label></div>
+                <label class="text-left">PKP</label></div>
 
           <label for="input_add_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_nama" placeholder="Nama"></div>
@@ -146,13 +146,13 @@
         </div>
 
             <div class="bs-form">
-          <label for="input_add_att">Att</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="Att"></div>
+          <label for="input_add_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_att" placeholder="PIC"></div>
 
-          <label for="input_add_attphone">Att Phone</label>
-          <input type="text" class="form-control" id="input_add_attphone" placeholder="Att Phone">
-          <label for="input_add_attdepart">Att Depart</label>
-          <input type="text" class="form-control" id="input_add_attdepart" placeholder="Att Depart">
+          <label for="input_add_attphone">PIC Phone</label>
+          <input type="text" class="form-control" id="input_add_attphone" placeholder="PIC Phone">
+          <label for="input_add_attdepart">PIC Depart</label>
+          <input type="text" class="form-control" id="input_add_attdepart" placeholder="PIC Depart">
             <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -295,7 +295,7 @@
                   </select>
                 </div>
             <input type="checkbox" id="input_edit_isppn" name="" value="">
-                <label class="text-left">PPN</label></div>
+                <label class="text-left">PKP</label></div>
 
           <label for="input_edit_nama">Nama</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_nama" placeholder="Nama"></div>
@@ -344,13 +344,13 @@
         </div>
 
             <div class="bs-form">
-          <label for="input_edit_att">Att</label>
-          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="Att"></div>
+          <label for="input_edit_att">PIC</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_att" placeholder="PIC"></div>
 
-          <label for="input_edit_attphone">Att Phone</label>
-          <input type="text" class="form-control" id="input_edit_attphone" placeholder="Att Phone">
-          <label for="input_edit_attdepart">Att Depart</label>
-          <input type="text" class="form-control" id="input_edit_attdepart" placeholder="Att Depart">
+          <label for="input_edit_attphone">PIC Phone</label>
+          <input type="text" class="form-control" id="input_edit_attphone" placeholder="PIC Phone">
+          <label for="input_edit_attdepart">PIC Depart</label>
+          <input type="text" class="form-control" id="input_edit_attdepart" placeholder="PIC Depart">
             <!-- <div class="row mt-2">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
@@ -841,7 +841,7 @@ function submitEdit () {
   console.log('attphone' , attphone)
   
   if(!attphone){
-    alertify.warning('Att Phone wajib diisi.')
+    alertify.warning('PIC Phone wajib diisi.')
     // dulu tanpa return - pesannya "wajib" tetapi data tetap tersimpan
     return
   }
@@ -977,7 +977,7 @@ function submitAdd () {
   let attphone = $("#input_add_attphone").val();
   console.log('attphone' , attphone)
   if(!attphone){
-    alertify.warning('Att Phone wajib diisi.')
+    alertify.warning('PIC Phone wajib diisi.')
     // dulu tanpa return - pesannya "wajib" tetapi data tetap tersimpan
     return
   }

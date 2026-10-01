@@ -225,7 +225,7 @@ function buttonEdit(kode) {
 
       document.getElementById("input_edit_tglAwal").value = formattedTglAwal;
       document.getElementById("input_edit_tglAkhir").value = formattedTglAkhir;
-      document.getElementById("input_edit_PPN").value = res[0].NilaiPPN;
+      document.getElementById("input_edit_PPN").value = MasterList.nolDepan(res[0].NilaiPPN);
     }
   });
   $("#formEdit").modal('toggle');

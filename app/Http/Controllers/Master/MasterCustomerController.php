@@ -43,7 +43,11 @@ class MasterCustomerController extends Controller
 
   public function spAdd (Request $req) {
     $check = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where KODECUSTSUPP = :kode' , ['kode' => $req->kode]);
-    $checkNPWP = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp' , ['npwp' => $req->npwp]);
+    // NPWP kosong tidak dicek: form kosong sampai ke sini sebagai null, dan koneksi SQL Server
+    // produksi (ANSI_NULLS OFF) mencocokkan "NPWP = NULL" dengan baris yang NPWP-nya null -
+    // akibatnya customer tanpa NPWP selalu ditolak "NPWP sudah ada".
+    $checkNPWP = trim((string) $req->npwp) === '' ? [] :
+      DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp' , ['npwp' => $req->npwp]);
 
     if ($check) {
       return 'Kode supplier/customer sudah ada di database';

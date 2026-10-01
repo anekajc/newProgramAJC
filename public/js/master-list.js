@@ -351,8 +351,15 @@
     return t.length === 3 ? t[2] + '/' + t[1] + '/' + t[0] : v;
   }
 
+  // Desimal < 1 dari SQL Server datang tanpa nol di depan (".00", "-.50") - jadikan "0.00", "-0.50".
+  function nolDepan(v) {
+    if (v === null || v === undefined) { return ''; }
+    return String(v).replace(/^(-?)\.(\d)/, '$10.$2');
+  }
+
   ML.angka = angka;
   ML.tanggal = tanggal;
+  ML.nolDepan = nolDepan;
 
   // Satu <td> untuk kolom c milik baris item. `khusus` = { FIELD: function (item) { return '<td>..</td>' } }
   // untuk kolom yang tampilannya tidak sekadar teks (badge, centang, dsb).
@@ -362,7 +369,7 @@
     if (v === null || v === undefined) { v = ''; }
     if (c[3] === 'float') { return '<td class="text-right">' + angka(v, c[5]) + '</td>'; }
     if (c[3] === 'date') { return '<td>' + tanggal(v) + '</td>'; }
-    return '<td>' + v + '</td>';
+    return '<td>' + nolDepan(v) + '</td>';
   };
 
   // Satu <tr> utuh: sel Actions + sel tiap kolom yang tampil.

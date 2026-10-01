@@ -333,7 +333,9 @@ class NewSetPemakaiController extends Controller
   }
 
   public function loadKaryawan (){
-    $list = DB::connection('SML')->select('SELECT NIK, Nama FROM DBKARYAWAN');
+    // KeyNIK (int) yang disimpan ke DBFLPASS.keynik; NIK berisi nomor KTP (varchar, 16 digit)
+    // yang melebihi batas int @Keynik di Sp_FLpassWEB.
+    $list = DB::connection('SML')->select('SELECT KeyNIK, NIK, Nama FROM DBKARYAWAN');
 
     return $list;
   }
