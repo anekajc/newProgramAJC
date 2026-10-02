@@ -274,10 +274,10 @@
       <div class="toolbar">
         <div class="filter-wrap">
           <label>Periode</label>
-          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
+          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off"
             onchange="reloadData()">
           <span class="filter-sep">s/d</span>
-          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
+          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off"
             onchange="reloadData()">
         </div>
 
@@ -1301,6 +1301,11 @@ function applyModalFilter() {
 }
 
 $(document).ready(function(){
+  // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+  // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+  // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+  $('#inputDate1, #inputDate2').each(function() { this.value = this.defaultValue; });
+
   doSetHeader(g_modeReport);
   ReportTable.init({
     table: '#mainTable',

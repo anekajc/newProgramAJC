@@ -533,6 +533,12 @@ function ikatPeriode() {
     if (!awal || !akhir || awal.dataset.rtBound) { return; }
     awal.dataset.rtBound = '1';
 
+    // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+    // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+    // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+    awal.value = awal.defaultValue;
+    akhir.value = akhir.defaultValue;
+
     let onUbah = function() {
         if (!awal.value || !akhir.value) { return; }
         if (awal.value > akhir.value) {
