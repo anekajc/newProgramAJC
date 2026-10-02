@@ -182,6 +182,12 @@
     color: #2563eb; border-color: #cfdcff; background: #e8edff;
   }
 
+  #tabel td:first-child .btn-primary .bi-plus-lg,
+  #tabel2 td:first-child .btn-primary .bi-plus-lg {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
   #tabel td:first-child .btn-danger,
   #tabel2 td:first-child .btn-danger {
     color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
@@ -250,6 +256,11 @@
   .data-table th,
   .data-table td {
     white-space: nowrap;
+  }
+
+  #tabel_add_wrapper,
+  #tabel_add {
+    width: 100% !important;
   }
 
   #tabel_wrapper,
@@ -391,10 +402,10 @@
       <div class="card-body">
         <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
           <a class="nav-item nav-link" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="false">
-            Permintaan Transfer Barang
+            Outstanding Permintaan Transfer
           </a>
           <a class="nav-item nav-link active" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
-            Transaksi Transfer Barang
+            Transfer Barang
           </a>
           <a class="nav-item nav-link" id="nav-profile1-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile1" aria-selected="false">
             OutStanding Transfer (Transaksi Belum Terima)
@@ -671,12 +682,12 @@
         <div class="col-md-3">
           <div class="row">
 
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="form-group">
-                <label>Gudang Asal</label>
+                <label>Gdg Asal</label>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-9">
               <div class="input-group mb-3">
                 <select class="form-control text-center" id="input_add_kodeGudangAsal" onchange="tbOnChangeGudang('Asal')">
                   <option value="">-</option>
@@ -695,12 +706,12 @@
         <div class="col-md-3">
           <div class="row">
 
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="form-group">
-                <label>Gudang Tujuan</label>
+                <label>Gdg Tujuan</label>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-9">
               <div class="input-group mb-3">
                 <select class="form-control text-center" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
                   <option value="">-</option>
@@ -969,7 +980,6 @@
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-          <div class="row">
             <table id="tabel_add" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center">
                 <tr>
@@ -992,7 +1002,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
         </div>
 
         <div class="row">
@@ -2522,12 +2531,12 @@
                 <input type="text" class="form-control text-left" id="detail_nobukti" placeholder="" disabled>
               </div>
             </div>
-            <div class="col-md-6" style="margin-top:-10px;">
+            <div class="col-md-3" style="margin-top:-10px;">
               <div class="form-group">
-                <label>Gudang Asal</label>
+                <label>Gdg Asal</label>
               </div>
             </div>
-            <div class="col-md-6" style="margin-top:-10px;">
+            <div class="col-md-9" style="margin-top:-10px;">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangAsal" disabled>
                 {{-- <button class="btn btn-chip-biru btn-sm rounded-end shadow-sm" id="buttonAddListGudangAsal" onclick="buttonAddListGudangAsal()">
@@ -2547,12 +2556,12 @@
         <div class="col-md-3">
           <div class="row">
 
-            <div class="col-md-6">
+            <div class="col-md-3">
               <div class="form-group">
-                <label>Gudang Tujuan</label>
+                <label>Gdg Tujuan</label>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-9">
               <div class="input-group mb-3">
                 <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangTujuan" disabled>
                 {{-- <button class="btn btn-chip-biru btn-sm rounded-end shadow-sm" id="buttonAddListGudangTujuan" onclick="buttonAddListGudangTujuan()">
@@ -4725,7 +4734,7 @@ function tbTabelActionsCell (row) {
   let nobukti = tbPickCI(row, 'nobukti')
   return '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">'
     + '<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetailAdd(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>'
-    + '<button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Add" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus-lg"></i></button>'
+    + '<button class="btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="Add" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus-lg"></i></button>'
     + '</div></td>'
 }
 
@@ -6898,7 +6907,7 @@ function refreshDataTableAdd (NOBUKTI) {
               <input type="checkbox" class="checkbox-add-item" data-urut="${item.URUT}">
             </td>
             <td style="white-space:nowrap; vertical-align:middle;">${item.KODEBRG}</td>
-            <td style="white-space:nowrap; vertical-align:middle;">${item.NAMABRG}</td>
+            <td style="white-space:normal; vertical-align:middle;">${item.NAMABRG}</td>
             <td style="white-space:nowrap; text-align:center; vertical-align:middle;">${item.Satuan}</td>
             <td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTY).toLocaleString()}</td>
             ${showQtyTransfer ? `<td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTYTRANSFER || 0).toLocaleString()}</td>` : ''}
@@ -6929,12 +6938,14 @@ function refreshDataTableAdd (NOBUKTI) {
         searching: false,
         ordering: false,
         columnDefs: [
-          { width: "170px", targets: 1 },
-          { width: "775px", targets: 2 },
-          { width: "100px", targets: 3 },
+          { width: "5%", targets: 0 },
+          { width: "15%", targets: 1 },
+          { width: "30%", targets: 2 },
+          { width: "10%", targets: 3 },
           ...(showQtyTransfer
-            ? [{ width: "100px", targets: 4 }, { width: "100px", targets: 5 }]
-            : [{ width: "100px", targets: 4 }]),
+            ? [{ width: "9%", targets: 4 }, { width: "9%", targets: 5 }]
+            : [{ width: "10%", targets: 4 }]),
+          { width: "25%", targets: -1 },
         ]
       });
 	if (tipeform === 'add') {
@@ -7013,7 +7024,7 @@ function refreshDataTableEdit (NOBUKTI) {
           rowTable += `
             <tr>
               <td style="white-space:nowrap; vertical-align:middle;">${item.KODEBRG ?? ''}</td>
-              <td style="white-space:nowrap; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
+              <td style="white-space:normal; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
               <td style="white-space:nowrap; text-align:center; vertical-align:middle;">${item.SAT_1 ?? ''}</td>
               <td style="white-space:nowrap; text-align:right; vertical-align:middle;">${qtyMinta}</td>
               <td id="td_qty_transfer_${item.URUT}" 
@@ -7064,12 +7075,12 @@ function refreshDataTableEdit (NOBUKTI) {
         ordering: false,
         order: [[1, 'asc']],
         columnDefs: [
-          { width: "170px", targets: 0 },
-          { width: "775px", targets: 1 },
-          { width: "100px", targets: 2 },
-          { width: "100px", targets: 3, className: "text-end" },
-          { width: "100px", targets: 4, className: "text-end" },
-          { width: "100px", targets: 5, orderable: false, className: "text-end" },
+          { width: "15%", targets: 0 },
+          { width: "35%", targets: 1 },
+          { width: "10%", targets: 2 },
+          { width: "10%", targets: 3, className: "text-end" },
+          { width: "10%", targets: 4, className: "text-end" },
+          { width: "20%", targets: 5, orderable: false, className: "text-end" },
         ]
       });
 
@@ -7140,7 +7151,7 @@ function refreshDataTableDetail (NOBUKTI) {
           rowTable += `
             <tr>
               <td style="white-space:nowrap; vertical-align:middle;">${item.KODEBRG ?? ''}</td>
-              <td style="white-space:nowrap; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
+              <td style="white-space:normal; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
               <td style="white-space:nowrap; text-align:center; vertical-align:middle;">${item.SAT_1 ?? ''}</td>
               <td style="white-space:nowrap; text-align:right; vertical-align:middle;">${qtyMinta}</td>
               <td id="td_qty_transfer_${item.URUT}" 
@@ -7189,12 +7200,12 @@ function refreshDataTableDetail (NOBUKTI) {
         ordering: false,
         order: [[1, 'asc']],
         columnDefs: [
-          { width: "170px", targets: 0 },
-          { width: "775px", targets: 1 },
-          { width: "100px", targets: 2 },
-          { width: "100px", targets: 3, className: "text-end" },
-          { width: "100px", targets: 4, className: "text-end" },
-          { width: "100px", targets: 5, orderable: false, className: "text-end" },
+          { width: "15%", targets: 0 },
+          { width: "35%", targets: 1 },
+          { width: "10%", targets: 2 },
+          { width: "10%", targets: 3, className: "text-end" },
+          { width: "10%", targets: 4, className: "text-end" },
+          { width: "20%", targets: 5, orderable: false, className: "text-end" },
         ]
       });
 
@@ -7252,7 +7263,7 @@ function refreshDataTableDetailAdd (NOBUKTI) {
           rowTable += `
             <tr>
               <td style="white-space:nowrap; vertical-align:middle;">${item.KODEBRG ?? ''}</td>
-              <td style="white-space:nowrap; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
+              <td style="white-space:normal; vertical-align:middle;">${item.NAMABRG ?? ''}</td>
               <td style="white-space:nowrap; text-align:center; vertical-align:middle;">${item.Satuan ?? item.SAT_1 ?? ''}</td>
               <td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTY ?? item.QtyMinta ?? 0).toLocaleString()}</td>
             </tr>`;
@@ -7271,10 +7282,10 @@ function refreshDataTableDetailAdd (NOBUKTI) {
         ordering: false,
         order: [[0, 'asc']],
         columnDefs: [
-          { width: "170px", targets: 0 },
-          { width: "775px", targets: 1 },
-          { width: "50px", targets: 2 },
-          { width: "50px", targets: 3 },
+          { width: "20%", targets: 0 },
+          { width: "50%", targets: 1 },
+          { width: "15%", targets: 2 },
+          { width: "15%", targets: 3 },
         ]
       });
 

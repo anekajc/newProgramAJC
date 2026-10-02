@@ -88,7 +88,7 @@ class TransferBarangController extends Controller
                       else 1
                 end As Bit)=0
     AND B.NoBukti IS not NULL
-    and C.pSampit = 0");
+    order by Tanggal desc");
   }
 
   // Query header gabungan: Non-Otorisasi + Otorisasi + Belum/Sudah Diterima.
