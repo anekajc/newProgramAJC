@@ -50,13 +50,13 @@ class PermintaanTransferBarangController extends Controller
             Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                           Case when A.IsOtorisasi2=1 then 1 else 0 end+
                           Case when A.IsOtorisasi3=1 then 1 else 0 end+
-                          Case when A.IsOtorisasi4=1 then else 0 end+
+                          Case when A.IsOtorisasi4=1 then 1 else 0 end+
                           Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
                       else 1
                 end As Bit) NeedOtorisasi
     from dbPRTransfer a
     where	A.Tanggal between @Date1 and @Date2 and A.IsOtorisasi1 = 0
-    order by A.NoBukti desc
+    order by A.NoBukti
     ",["date1" => $date1 , "date2" => $date2]);
 
     $tempOutstanding2 = DB::connection("SML")->select("
