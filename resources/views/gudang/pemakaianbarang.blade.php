@@ -216,10 +216,12 @@
                 <div class="card-body" style="padding:0;">
 
                     <div class="po-toolbar">
-                        {{-- Rentang tanggal — berlaku untuk kedua tab sekaligus (lihat ikatPeriode()).
-                             Server tetap tahu periode aktif lewat #periode_bulan/#periode_tahun untuk
-                             validasi tanggal saat Add/Koreksi. --}}
-                        <div class="po-filter-wrap">
+                        {{-- Rentang tanggal — hanya untuk tab "Pemakaian Barang" (lihat ikatPeriode());
+                             tab Outstanding selalu menampilkan semua tanggal (lihat
+                             PemakaianBarangController::fetchOutstanding()), jadi disembunyikan saat tab
+                             Outstanding aktif, lihat shown.bs.tab. Server tetap tahu periode aktif lewat
+                             #periode_bulan/#periode_tahun untuk validasi tanggal saat Add/Koreksi. --}}
+                        <div class="po-filter-wrap" id="filterPeriode" style="display:none">
                             <label>Periode</label>
                             <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
                             <span class="po-filter-sep">s/d</span>
@@ -1212,6 +1214,7 @@
                 activeTable().search($('#searchBox').val() || '').draw();
                 $('#tabelLen').val(String(panjangHalaman[activeTableId()]));
                 $('#btnFilter').toggle(targetId === '#profile');
+                $('#filterPeriode').toggle(targetId === '#profile');
                 aturTinggiTabel();
             });
 

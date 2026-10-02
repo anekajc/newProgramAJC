@@ -2042,9 +2042,14 @@
 
      dlg.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 
+   Tambahkan 'is-success' untuk aksi proses (tombol OK jadi hijau):
+
+     dlg.elements.root.classList.add('ajs-app-buttons', 'is-success');
+
    Pemakai saat ini:
-     - Reset Kolom      -> public/js/report-table.js (resetHeader())
-     - Batal Otorisasi  -> resources/views/gudang/permintaanpemakaian.blade.php
+     - Reset Kolom       -> public/js/report-table.js (resetHeader())
+     - Batal Otorisasi   -> resources/views/gudang/permintaanpemakaian.blade.php
+     - Hitung Ulang Stock -> resources/views/utilitas/hitungulangstock.blade.php
 
    Tanpa kelas itu rule di bawah tidak jalan, jadi dialog alertify lain
    di aplikasi tidak ikut berubah.
@@ -2082,6 +2087,13 @@
   background: var(--sp-red-bg);
 }
 
+/* OK pada .is-success = aksi proses -> hijau, samakan dengan .btn-action-success */
+.ajs-app-buttons.is-success .ajs-footer .ajs-buttons .ajs-button.ajs-ok {
+  color: var(--sp-green);
+  border-color: #cdebd7;
+  background: var(--sp-green-bg);
+}
+
 /* Cancel = aksi netral */
 .ajs-app-buttons .ajs-footer .ajs-buttons .ajs-button.ajs-cancel {
   color: var(--sp-text-soft);
@@ -2101,4 +2113,8 @@
 
 .ajs-app-buttons.is-danger .ajs-footer .ajs-buttons .ajs-button:focus {
   box-shadow: 0 0 0 3px rgba(220, 38, 38, .15);
+}
+
+.ajs-app-buttons.is-success .ajs-footer .ajs-buttons .ajs-button:focus {
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, .15);
 }
