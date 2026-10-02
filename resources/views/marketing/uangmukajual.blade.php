@@ -288,7 +288,7 @@
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
 
-        <div class="container-fluid">
+        <div id='formBsGrid' class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
 
             <div class="row">
@@ -333,7 +333,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_customer"  disabled></textarea>
+                  <textarea type="text" style="width: 100%; height:75px !important; resize: none" rows=4  class="form-control" id="input_add_customer"  disabled></textarea>
                 </div>
               </div>
 
@@ -500,13 +500,13 @@
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
 
-        <div class="container-fluid">
+        <div id='formBsGrid' class="container-fluid">
           <input type="hidden" name="noUrut" id="input_detail_nourut" value="" />
 
             <div class="row">
               <div class="col-2 text-left">
                 <div class="form-group text-left">
-                  <label class="text-left">NOBUKTI</label>
+                  <label class="text-left">NO BUKTI</label>
                 </div>
               </div>
               <div class="col-4">
@@ -545,7 +545,7 @@
               </div>
               <div class="col-4">
                 <div class="form-group">
-                  <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_detail_customer"  disabled></textarea>
+                  <textarea type="text" style="width: 100%; height: 75px !important; resize: none" rows=4  class="form-control" id="input_detail_customer"  disabled></textarea>
                 </div>
               </div>
 
