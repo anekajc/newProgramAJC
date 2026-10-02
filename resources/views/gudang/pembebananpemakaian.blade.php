@@ -1,7 +1,7 @@
 @extends('newmasterTest')
 @section('buttons')
 @endsection
-@section('page-title', 'Pembebanan Pemakaian')
+@section('page-title', 'Biaya Pemakaian')
 
 @section('css')
     {{-- Layout newmasterTest (sama seperti gudang/ubahkemasanbarang.blade.php) sudah memuat

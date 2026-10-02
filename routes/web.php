@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
     require __DIR__.'/report.php';
 });
 require __DIR__.'/berkas.php';
+require __DIR__.'/utilitas.php';
 
 Route::get('/__debug_login_sa', function () {
     Auth::loginUsingId(\App\Models\User::where('username', 'SA')->first()->id);
