@@ -2087,19 +2087,20 @@ function formatAngka (angkaString) {
           // console.log(res[0] ,'i0')
 
           console.log('=================22222===============!!!!!!')
-          dataEditPembelianEdit = res[0]
-          dataLPB = res[0][0]
+          dataEditPembelianEdit = res
+          dataLPB = res[0]
           console.log(dataLPB,'areset')
           console.log(dataEditPembelianEdit)
           console.log('=================33333===============!!!!!!')
         }
       })
 
-      if (!dataEditPembelianEdit) {
+      if (!dataEditPembelianEdit || dataEditPembelianEdit.length === 0) {
         console.log('=================44444===============!!!!!!')
         // window.location.href = "newpo";
         // editPembelian
         $("#editPembelian").modal('toggle');
+        return;
 
 
       } else {
@@ -3060,7 +3061,7 @@ for (let f = 0; f < fillerCount; f++) {
       let _token = $("#_token").val();
       let choice = "U"
       let dataLPBEdit = dataEditPembelianEdit[indexEditPembelianEdit]
-      let reqQtyTerima = parseInt($("#editPembelianInputEditQty").val().replace(/,/g, ''), 10) || 0;
+      let reqQtyTerima = parseFloat($("#editPembelianInputEditQty").val().replace(/,/g, '')) || 0;
       // console.log(dataLPBEdit.QNTOUT, dataLPBEdit.Qnt , reqQtyTerima)
       // console.log(Number(reqQtyTerima) , Number(dataLPBEdit.QNTOUT) , Number(dataLPBEdit.Qnt))
       // console.log(Number(reqQtyTerima) , (Number(dataLPBEdit.QNTOUT) + Number(dataLPBEdit.Qnt)))
@@ -3070,8 +3071,8 @@ for (let f = 0; f < fillerCount; f++) {
         return
       }
 
-      if (Number(reqQtyTerima) < 0) {
-        alertify.warning("Qty tidak boleh negatif");
+      if (!(Number(reqQtyTerima) > 0)) {
+        alertify.warning("Qty harus lebih dari 0, untuk mengosongkan item gunakan tombol hapus");
         return
       }
       // console.log(dataLPBEdit.QNTOUT, dataLPBEdit.Qnt , reqQtyTerima)
@@ -3102,8 +3103,8 @@ for (let f = 0; f < fillerCount; f++) {
         reqQtyTerima2 = reqQtyTerima;
       }
 
-      reqQtyTerima1 = parseInt(reqQtyTerima1, 10) || 0;
-      reqQtyTerima2 = parseInt(reqQtyTerima2, 10) || 0;
+      reqQtyTerima1 = parseFloat(reqQtyTerima1) || 0;
+      reqQtyTerima2 = parseFloat(reqQtyTerima2) || 0;
 
       let reqNamaBarang = dataLPBEdit.namabrgx
       let reqNoBatch = ""
@@ -3184,8 +3185,8 @@ for (let f = 0; f < fillerCount; f++) {
         return;
       }
 
-      if (Number(reqQtyTerima) < 0) {
-        alertify.warning("Qty tidak boleh negatif");
+      if (!(Number(reqQtyTerima) > 0)) {
+        alertify.warning("Qty harus lebih dari 0");
         return;
       }
 
@@ -3453,14 +3454,14 @@ if (pcekglobal) {
 
 
 
-          dataLPB =  edit_pembelian_row_data
+          dataLPB =  edit_pembelian_row_data[0]
            // detailPembelianDate
           // document.getElementById("editPembelianDate").value = edit_pembelian_row_data.TANGGAL
           dataEditPembelianEdit = edit_pembelian_row_data
           // return
 
           // console.log(edit_pembelian_row_id, edit_pembelian_row_data , "<<<< edit pembelian")
-          let date = new Date(edit_pembelian_row_data.TANGGAL);
+          let date = new Date(edit_pembelian_row_data[0].TANGGAL);
           var day = ("0" + date.getDate()).slice(-2);
           var month = ("0" + (date.getMonth() + 1)).slice(-2);
           var date1 = date.getFullYear()+"-"+(month)+"-"+(day) ;
@@ -3906,6 +3907,12 @@ if (pcekglobal) {
 
 
 
+      // Item yang dicentang wajib qty > 0 - kalau semua 0, sp_InsertOutstandingPO tetap membuat
+      // header dbBeli tanpa detail (LPB kosong bertanggal 1970 yang tidak bisa di-edit).
+      if (tempData.some(item => !(Number(item.inputQntTerima) > 0))) {
+        alertify.warning("Qty Terima item yang dicentang harus lebih dari 0")
+        return
+      }
       console.log('else')
       let flag = false
       tempData.forEach((item, i) => {
