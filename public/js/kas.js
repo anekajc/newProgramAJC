@@ -1256,6 +1256,7 @@ function cleanFormAddAdd () {
 
   document.getElementById("AddAddKodeCustsupp").value = ''
   document.getElementById("AddAddNamaCustsupp").value = ''
+  resetTitipan()
 
   document.getElementById("AddAddLawan").value = ''
   $('#buttonBukaTunai').hide()
@@ -1457,6 +1458,17 @@ function submitAddAdd () {
   }
 
   if (lawan == '113400') {
+
+    // BKK memakai titipan yang dipilih lewat No Titipan - disimpan supaya Sisa titipan tsb
+    // berkurang (lihat KasController::getNoTitipan(), subquery E).
+    if (transaksi == 'BKK') {
+      notitipan = $("#AddAddNoTitipan").val()
+      uruttitipan = Number($("#AddAddUrutTitipan").val() || 0)
+      if (!notitipan || !uruttitipan) {
+        alertify.warning("Pilih No Titipan")
+        return
+      }
+    }
 
     custsupp = $("#AddAddKodeCustsupp").val()
     if (!custsupp) {
@@ -4913,6 +4925,128 @@ function buttonAddListCustsupp () {
 
 }
 
+/* No Titipan — hanya BKK dengan Lawan 113400 (titipan customer). Picker bisa dibuka 3 cara:
+   langsung saat Lawan 113400 dipilih (buttonAddPickLawan), Enter di input No Titipan
+   (onKeyPressNoTitipan), atau tombol cari (buttonAddListTitipan). Baris yang dipilih mengisi
+   No Titipan, Jumlah (= JumlahRp) dan Custsupp; NoTitipan/UrutTitipan ikut disimpan sebagai
+   notitipan/uruttitipan supaya Sisa titipan tsb berkurang. Data: KasController::getNoTitipan(). */
+let listTitipanKas = []
+
+function muatTitipan () {
+  let rows = null
+  $.ajax({
+    url: KAS_ROUTES.kasnotitipan,
+    type: "post",
+    async: false,
+    data: {
+      _token: $("#_token").val()
+    },
+    success: function(res) {
+      rows = res
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
+  })
+  return rows
+}
+
+// cari: teks awal kotak Search DataTables ('' = tampilkan semua). Kalau modal #form masih
+// terbuka (lanjut dari picker Lawan) hanya ganti pane, sama seperti bukaListCustSuppTunai().
+function bukaListTitipan (rows, cari) {
+  if (rows === null) {
+    return
+  }
+  if (!rows.length) {
+    alertify.warning("No Titipan tidak ditemukkan")
+    if ($('#form').hasClass('show')) {
+      buttonAddListBatal()
+    }
+    return
+  }
+
+  listTitipanKas = rows
+  let rowTable = ``
+  rows.forEach((item, i) => {
+    rowTable += `
+        <tr class="pick-row" onclick="buttonAddPickTitipan(${i})">
+        <td>${item.NOBUKTI}</td>
+        <td>${formatDate(item.TANGGAL)}</td>
+        <td>${item.namaCustSupp}</td>
+        <td>${item.Keterangan}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.JumlahRp).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(item.Sisa).toFixed(2))}</td>
+        </tr>`
+  });
+
+  document.getElementById("tabel_data_add_list_titipan").innerHTML = rowTable
+  kasInitPicker('tabel_add_list_titipan');
+  if (cari) {
+    $('#tabel_add_list_titipan').DataTable().search(cari).draw()
+  }
+
+  kasBukaPane('modalAddListTitipan');
+  if (!$('#form').hasClass('show')) {
+    $("#form").modal('show')
+  }
+}
+
+function buttonAddListTitipan () {
+  bukaListTitipan(muatTitipan(), '')
+}
+
+// Enter: kosong -> daftar lengkap; NoBukti persis cocok -> langsung dipilih; selain itu ->
+// daftar disaring dengan teks yang diketik (sama seperti resolveBarang() di permintaanpemakaian).
+function onKeyPressNoTitipan (e) {
+  if (e.which !== 13) {
+    return
+  }
+  e.preventDefault()
+
+  let cari = ($("#AddAddNoTitipan").val() || '').trim()
+  let rows = muatTitipan()
+  if (rows === null) {
+    return
+  }
+
+  if (cari) {
+    let idx = rows.findIndex(item => String(item.NOBUKTI || '').trim().toLowerCase() === cari.toLowerCase())
+    if (idx !== -1) {
+      listTitipanKas = rows
+      buttonAddPickTitipan(idx)
+      return
+    }
+  }
+
+  bukaListTitipan(rows, cari)
+}
+
+function buttonAddPickTitipan (index) {
+  let item = listTitipanKas[index]
+  if (!item) {
+    return
+  }
+
+  document.getElementById("AddAddNoTitipan").value = item.NOBUKTI
+  document.getElementById("AddAddUrutTitipan").value = item.URUT
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(item.Sisa).toFixed(2))
+  document.getElementById("AddAddKodeCustsupp").value = item.KodeCustSupp
+  document.getElementById("AddAddNamaCustsupp").value = item.namaCustSupp
+
+  if ($('#form').hasClass('show')) {
+    buttonAddListBatal()
+  }
+}
+
+function resetTitipan () {
+  document.getElementById("AddAddNoTitipan").value = ''
+  document.getElementById("AddAddUrutTitipan").value = ''
+  document.getElementById("AddAddNoTitipan").disabled = false
+  document.getElementById("buttonAddListTitipan").disabled = false
+  $('#rowNoTitipan').hide();
+}
+
 
 
 function buttonAddPickAktiva (index) {
@@ -5152,6 +5286,8 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   document.getElementById("AddAddNamaCosting").value = ''
   document.getElementById("AddAddNamaSubCosting").value = ''
   document.getElementById("AddAddKodeSubCosting").value = ''
+  // No Titipan hanya untuk BKK + 113400 (cabang di bawah); Lawan lain membersihkannya.
+  resetTitipan()
 
 
   if ((trans == 'BKK' || trans == 'BKM') && islocalorexim == 1) {
@@ -5228,8 +5364,16 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
     document.getElementById("AddAddKodeLawan").value = kode
     document.getElementById("AddAddKeteranganLawan").value = keterangan
 
-    buttonAddListBatal()
     $('#rowCustsupp').show();
+
+    if (trans == 'BKK') {
+      // Langsung ke daftar No Titipan (ganti pane di modal yang sama), sama seperti Hutang
+      // Usaha langsung ke daftar supplier. Lihat bukaListTitipan().
+      $('#rowNoTitipan').show();
+      buttonAddListTitipan()
+    } else {
+      buttonAddListBatal()
+    }
 
     return
   }
@@ -6003,6 +6147,16 @@ function buttonAddEditItem (i) {
     document.getElementById("AddAddKodeCustsupp").value = tempBarangAddEdit.CustSuppL
     document.getElementById("AddAddNamaCustsupp").value = tempBarangAddEdit.namacustsuppL
 
+  }
+
+  // Titipan yang sudah tersimpan hanya ditampilkan (terkunci, sama seperti Custsupp di mode
+  // edit); submitAddEdit() tetap mengirim notitipan/uruttitipan item ini apa adanya.
+  if (tempBarangAddEdit.TipeTrans == 'BKK' && tempBarangAddEdit.NOTITIPAN) {
+    document.getElementById("AddAddNoTitipan").value = tempBarangAddEdit.NOTITIPAN
+    document.getElementById("AddAddUrutTitipan").value = tempBarangAddEdit.URUTTITIPAN || ''
+    document.getElementById("AddAddNoTitipan").disabled = true
+    document.getElementById("buttonAddListTitipan").disabled = true
+    $('#rowNoTitipan').show();
   }
 
   if (tempBarangAddEdit.KODECOST) {

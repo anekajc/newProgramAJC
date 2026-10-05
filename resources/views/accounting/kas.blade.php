@@ -472,6 +472,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     kaslistbiayainput: "{!! url('kaslistbiayainput') !!}",
     kaslistbon: "{!! url('kaslistbon') !!}",
     kaslistcustsupp: "{!! url('kaslistcustsupp') !!}",
+    kasnotitipan: "{!! url('kasnotitipan') !!}",
     kaslistcustsupptunai: "{!! url('kaslistcustsupptunai') !!}",
     kaslistcustsuppumb: "{!! url('kaslistcustsuppumb') !!}",
     kaslistdepartemen: "{!! url('kaslistdepartemen') !!}",

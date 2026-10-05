@@ -469,6 +469,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     banklistbiayainput: "{!! url('banklistbiayainput') !!}",
     banklistcosting: "{!! url('banklistcosting') !!}",
     banklistcustsupp: "{!! url('banklistcustsupp') !!}",
+    banknotitipan: "{!! url('banknotitipan') !!}",
     banklistcustsuppumb: "{!! url('banklistcustsuppumb') !!}",
     banklistdepartemen: "{!! url('banklistdepartemen') !!}",
     banklistdevisi: "{!! url('banklistdevisi') !!}",
