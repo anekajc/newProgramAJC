@@ -2,7 +2,7 @@
 @section('buttons')
 
 @endsection
-@section('page-title', 'Hitung Ulang Stock')
+@section('page-title', 'Posting')
 
 {{-- kp-* rules copied verbatim from berkas/newsetupperiodekerja.blade.php so this
      page matches Setup Periode Kerja. Progress bar uses Bootstrap 4.5 classes
@@ -150,11 +150,11 @@
 
       <div class="kp-header">
         <div class="kp-header-icon">
-          <i class="bi bi-arrow-repeat"></i>
+          <i class="bi bi-journal-check"></i>
         </div>
         <div>
-          <div class="kp-header-title">Hitung Ulang Stock</div>
-          <div class="kp-header-subtitle">Proses ini akan menghitung ulang stock</div>
+          <div class="kp-header-title">Posting</div>
+          <div class="kp-header-subtitle">Periode transaksi yang akan diposting ulang</div>
         </div>
       </div>
 
@@ -162,8 +162,8 @@
 
         <div class="kp-periode-row">
           <div class="kp-periode-field">
-            <label for="input_hitungulang_bulan">Bulan</label>
-            <select id="input_hitungulang_bulan" class="form-select kp-periode-select">
+            <label for="input_posting_bulan">Bulan</label>
+            <select id="input_posting_bulan" class="form-select kp-periode-select">
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -180,21 +180,21 @@
           </div>
 
           <div class="kp-periode-field">
-            <label for="input_hitungulang_tahun">Tahun</label>
-            <input type="number" class="form-control kp-tahun-input" id="input_hitungulang_tahun" placeholder="Tahun">
+            <label for="input_posting_tahun">Tahun</label>
+            <input type="number" class="form-control kp-tahun-input" id="input_posting_tahun" placeholder="Tahun">
           </div>
         </div>
 
-        <div id="hitungulang_progress_wrap" class="mb-4" style="display:none;">
+        <div id="posting_progress_wrap" class="mb-4" style="display:none;">
           <div class="progress" style="height: 20px;">
-            <div id="hitungulang_progress" class="progress-bar progress-bar-striped progress-bar-animated"
+            <div id="posting_progress" class="progress-bar progress-bar-striped progress-bar-animated"
               role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
-          <small id="hitungulang_status" class="d-block mt-2 text-muted"></small>
+          <small id="posting_status" class="d-block mt-2 text-muted"></small>
         </div>
 
         <div class="kp-footer">
-          <button type="button" id="btn_hitungulang_proses" class="kp-ok-btn" onclick="prosesHitungUlang()">
+          <button type="button" id="btn_posting_proses" class="kp-ok-btn" onclick="prosesPosting()">
             <i class="bi bi-gear-fill"></i> Proses
           </button>
         </div>
@@ -211,53 +211,53 @@
 @section('js')
 <script type="text/javascript">
 
-let huTimer = null;
-let huMulai = 0;
+let psTimer = null;
+let psMulai = 0;
 
 $(document).ready(function () {
-  document.getElementById("input_hitungulang_tahun").value = $("#periode_tahun").val();
-  document.getElementById("input_hitungulang_bulan").value = $("#periode_bulan").val();
+  document.getElementById("input_posting_tahun").value = $("#periode_tahun").val();
+  document.getElementById("input_posting_bulan").value = $("#periode_bulan").val();
 });
 
-function huDurasi () {
-  let detik = Math.floor((Date.now() - huMulai) / 1000);
+function psDurasi () {
+  let detik = Math.floor((Date.now() - psMulai) / 1000);
   let mm = String(Math.floor(detik / 60)).padStart(2, '0');
   let ss = String(detik % 60).padStart(2, '0');
   return mm + ':' + ss;
 }
 
-function huCegahTutup (e) {
+function psCegahTutup (e) {
   e.preventDefault();
   e.returnValue = '';
 }
 
-function huSetProses (jalan) {
-  $('#btn_hitungulang_proses, #input_hitungulang_bulan, #input_hitungulang_tahun').prop('disabled', jalan);
+function psSetProses (jalan) {
+  $('#btn_posting_proses, #input_posting_bulan, #input_posting_tahun').prop('disabled', jalan);
   if (jalan) {
-    window.addEventListener('beforeunload', huCegahTutup);
+    window.addEventListener('beforeunload', psCegahTutup);
   } else {
-    window.removeEventListener('beforeunload', huCegahTutup);
+    window.removeEventListener('beforeunload', psCegahTutup);
   }
 }
 
-function huSelesai (berhasil, pesan) {
-  clearInterval(huTimer);
-  huTimer = null;
+function psSelesai (berhasil, pesan) {
+  clearInterval(psTimer);
+  psTimer = null;
 
-  $('#hitungulang_progress')
+  $('#posting_progress')
     .removeClass('progress-bar-animated progress-bar-striped')
     .addClass(berhasil ? 'bg-success' : 'bg-danger');
-  $('#hitungulang_status')
+  $('#posting_status')
     .removeClass('text-muted')
     .addClass(berhasil ? 'text-success' : 'text-danger')
     .text(pesan);
 
-  huSetProses(false);
+  psSetProses(false);
 }
 
-function prosesHitungUlang () {
-  let bulan = Number($("#input_hitungulang_bulan").val());
-  let tahun = Number($("#input_hitungulang_tahun").val());
+function prosesPosting () {
+  let bulan = Number($("#input_posting_bulan").val());
+  let tahun = Number($("#input_posting_tahun").val());
 
   if (!bulan || bulan < 1 || bulan > 12) {
     alertify.warning('Bulan tidak valid');
@@ -268,25 +268,25 @@ function prosesHitungUlang () {
     return;
   }
 
-  var dlgHitungUlang = alertify.confirm('Hitung Ulang Stock', `Proses hitung ulang stock periode ${bulan} / ${tahun}?`, function () {
-    huSetProses(true);
+  var dlgPosting = alertify.confirm('Posting', `Posting ulang transaksi periode ${bulan} / ${tahun}?`, function () {
+    psSetProses(true);
 
-    huMulai = Date.now();
-    $('#hitungulang_progress')
+    psMulai = Date.now();
+    $('#posting_progress')
       .removeClass('bg-success bg-danger')
       .addClass('progress-bar-striped progress-bar-animated');
-    $('#hitungulang_status')
+    $('#posting_status')
       .removeClass('text-success text-danger')
       .addClass('text-muted')
       .text('Memproses... 00:00');
-    $('#hitungulang_progress_wrap').show();
+    $('#posting_progress_wrap').show();
 
-    huTimer = setInterval(function () {
-      $('#hitungulang_status').text('Memproses... ' + huDurasi());
+    psTimer = setInterval(function () {
+      $('#posting_status').text('Memproses... ' + psDurasi());
     }, 1000);
 
     $.ajax({
-      url: "{!! url('hitungulangstockproses') !!}",
+      url: "{!! url('postingproses') !!}",
       type: "post",
       timeout: 0,
       data: {
@@ -296,23 +296,23 @@ function prosesHitungUlang () {
       },
       success: function (res) {
         if (res.success) {
-          huSelesai(true, 'Selesai (' + huDurasi() + ')');
-          alertify.success('Hitung ulang stock selesai');
+          psSelesai(true, 'Selesai (' + psDurasi() + ')');
+          alertify.success('Posting selesai');
         } else {
-          huSelesai(false, 'Gagal: ' + (res.message || 'Terjadi kesalahan'));
-          alertify.error(res.message || 'Gagal menghitung ulang stock');
+          psSelesai(false, 'Gagal: ' + (res.message || 'Terjadi kesalahan'));
+          alertify.error(res.message || 'Gagal memposting');
         }
       },
       error: function (xhr) {
         let pesan = xhr.responseJSON?.message || 'Terjadi kesalahan, silakan refresh browser';
-        huSelesai(false, 'Gagal: ' + pesan);
+        psSelesai(false, 'Gagal: ' + pesan);
         alertify.error(pesan);
       }
     });
   }, function () {}).set('labels', { ok: 'Proses', cancel: 'Batal' });
   // 'is-success' bikin tombol OK hijau (aksi proses), Cancel tetap netral --
   // gaya bersama di public/css/report-table.css.
-  dlgHitungUlang.elements.root.classList.add('ajs-app-buttons', 'is-success');
+  dlgPosting.elements.root.classList.add('ajs-app-buttons', 'is-success');
 }
 
 </script>
