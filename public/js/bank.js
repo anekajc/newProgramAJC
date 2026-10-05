@@ -704,6 +704,7 @@ function refreshDataTableTunai (diam) {
       document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
 
       document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
+      filterTunai()
 
 
     },
@@ -749,7 +750,7 @@ function tunaiRowHtml (item, i, xsaldo, nobukti) {
   }
 
   return `
-        <tr${kelas}>
+        <tr${kelas} data-idx="${i}">
         <td class="kolom-tunai-action">${aksi}</td>
         <td>${item.NoFaktur}</td>
         <td>${item.NoRetur}</td>
@@ -761,6 +762,33 @@ function tunaiRowHtml (item, i, xsaldo, nobukti) {
         <td>${item.Valas}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Kurs).toFixed(2))}</td>
         </tr>`
+}
+
+// Pencarian client-side tabel Pelunasan Hutang (#searchTunai): NoFaktur, Tanggal, dan kolom
+// Supplier (isinya item.NoBukti). Baris hanya di-hide/show, tidak di-render ulang, supaya index
+// listTunai di onclick/ondblclick tetap cocok. Satu faktur tampil utuh (baris faktur + seluruh
+// pelunasannya) bila salah satu barisnya cocok, supaya Saldo berjalan tetap terbaca; faktur yang
+// punya baris merah (pelunasan bukti ini) selalu tampil.
+function filterTunai () {
+  let q = ($('#searchTunai').val() || '').trim().toLowerCase()
+  let nobukti = $("#input_add_nobukti").val()
+  let fakturTampil = new Set()
+
+  listTunai.forEach((item) => {
+    let merah = Number(item.Debet) > 0 && item.NoBukti == nobukti
+    let teks = [item.NoFaktur, formatDate(item.Tanggal), item.NoBukti].join(' ').toLowerCase()
+    if (!q || merah || teks.includes(q)) {
+      fakturTampil.add(item.NoFaktur)
+    }
+  })
+
+  $('#tabel_data_add_list_tunai > tr').each(function () {
+    let item = listTunai[$(this).data('idx')]
+    if (item === undefined) {
+      return
+    }
+    $(this).toggle(fakturTampil.has(item.NoFaktur))
+  })
 }
 
 // Sisa saldo satu faktur = jumlah Saldo seluruh barisnya di listTunai (faktur + pelunasannya).
@@ -927,6 +955,10 @@ function simpanTambahTunai (data, debet) {
    tertutup: bila keduanya dianimasikan bersamaan, event 'hidden' milik #form mencabut class
    modal-open dari <body> setelah #formTunai tampil, sehingga halaman di belakang ikut ter-scroll. */
 function bankBukaFormTunai () {
+  // Tiap kali dibuka mulai tanpa pencarian.
+  $('#searchTunai').val('')
+  filterTunai()
+
   if ($('#form').hasClass('show')) {
     $('#form').one('hidden.bs.modal', function () {
       $('#formTunai').modal('show')
@@ -1008,6 +1040,7 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
 
       document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
       document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
+      filterTunai()
 
       bankBukaFormTunai()
 
