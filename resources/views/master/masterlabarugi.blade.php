@@ -312,6 +312,13 @@ function buttonAdd () {
 
   $("#form").modal('toggle')
 
+  resetFormAdd()
+
+}
+
+// Dipakai saat membuka form Add dan setelah Simpan berhasil, supaya isian sebelumnya tidak tertinggal.
+function resetFormAdd () {
+
   document.getElementById('input_add_nomor').value = ''
   document.getElementById('input_add_perkiraan').value = ''
   document.getElementById('input_add_keterangan').value = ''
@@ -574,6 +581,7 @@ function submitAdd () {
       }  else {
         console.log(res ,'!')
         alertify.success("Data Laba Rugi telah ditambah");
+        resetFormAdd()
         loadAll()
       }
     }})
