@@ -3228,7 +3228,7 @@ for (let f = 0; f < fillerCount; f++) {
       let _token = $("#_token").val();
       let choice = "U"
       let dataLPBEdit = dataEditPembelianEdit[indexEditPembelianEdit]
-      let reqQtyTerima = parseInt($("#editPembelianInputEditQty").val().replace(/,/g, ''), 10) || 0;
+      let reqQtyTerima = parseFloat($("#editPembelianInputEditQty").val().replace(/,/g, '')) || 0;
 
       // console.log(dataLPBEdit.QNTOUT, dataLPBEdit.Qnt , reqQtyTerima)
       // console.log(Number(reqQtyTerima) , Number(dataLPBEdit.QNTOUT) , Number(dataLPBEdit.Qnt))
@@ -3238,8 +3238,8 @@ for (let f = 0; f < fillerCount; f++) {
         console.log('error')
         return
       }
-      if (Number(reqQtyTerima) < 0) {
-        alertify.warning("Qty tidak boleh negatif");
+      if (!(Number(reqQtyTerima) > 0)) {
+        alertify.warning("Qty harus lebih dari 0, untuk mengosongkan item gunakan tombol hapus");
         return
       }
       // console.log(dataLPBEdit.QNTOUT, dataLPBEdit.Qnt , reqQtyTerima)
@@ -3270,8 +3270,8 @@ for (let f = 0; f < fillerCount; f++) {
         reqQtyTerima2 = reqQtyTerima;
       }
 
-      reqQtyTerima1 = parseInt(reqQtyTerima1, 10) || 0;
-      reqQtyTerima2 = parseInt(reqQtyTerima2, 10) || 0;
+      reqQtyTerima1 = parseFloat(reqQtyTerima1) || 0;
+      reqQtyTerima2 = parseFloat(reqQtyTerima2) || 0;
 
       let reqNamaBarang = dataLPBEdit.namabrgx
       let reqNoBatch = ""
@@ -3351,8 +3351,8 @@ for (let f = 0; f < fillerCount; f++) {
         return;
       }
 
-      if (Number(reqQtyTerima) < 0) {
-        alertify.warning("Qty tidak boleh negatif");
+      if (!(Number(reqQtyTerima) > 0)) {
+        alertify.warning("Qty harus lebih dari 0");
         return;
       }
 
@@ -4148,6 +4148,12 @@ if (pcekglobal) {
 
 
 
+      // Item yang dicentang wajib qty > 0 - kalau semua 0, sp_InsertOutstandingPO tetap membuat
+      // header dbBeli tanpa detail (LPB kosong bertanggal 1970 yang tidak bisa di-edit).
+      if (tempData.some(item => !(Number(item.inputQntTerima) > 0))) {
+        alertify.warning("Qty Terima item yang dicentang harus lebih dari 0")
+        return
+      }
       console.log('else')
       let flag = false
       tempData.forEach((item, i) => {
