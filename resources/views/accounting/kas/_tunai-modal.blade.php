@@ -2,13 +2,14 @@
        baris faktur -> + (tanya nominal) atau dobel-klik (lunasi seluruh sisa saldo); baris
        pelunasan milik bukti ini merah -> tombol hapus atau dobel-klik (konfirmasi lalu batalkan).
        Lihat tunaiRowHtml() di public/js/kas.js; warnanya di @section('css') kas.blade.php. --}}
-  <div class="modal fade rt-picker-v2" id="formTunai" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade rt-picker-v2" id="formTunai" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="min-width: 1400px">
           <div id="" class="modal-content ">
 
               <div id= "" class="">
                   <div class="modal-header">
-                      <h5 class="modal-title" id="">Pelunasan</h5>
+                      <h5 class="modal-title" id="">Pelunasan Hutang</h5>
                       <button type="button" class="close" onclick="selesaiTunai()" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                       </button>
@@ -16,7 +17,7 @@
                   <div id="" class="">
                       <div class="modal-body">
                           <div class="container-fluid">
-                              <div class="row">
+                              <div class="row" style="padding: 1rem 0;" id="formBsGrid">
                                   <div class="col-md-4">
                                       <div class="row">
                                           <div class="col-md-4">
@@ -48,6 +49,15 @@
                                           </div>
                                       </div>
                                   </div>
+
+                                  {{-- Pencarian client-side NoFaktur/Tanggal/Supplier — filterTunai() di public/js/kas.js. --}}
+                                  <div class="col-md-2">
+                                      <div class="form-group">
+                                          <input class="po-search-inp" type="search" id="searchTunai"
+                                              placeholder="Cari data" autocomplete="off" style="width: 100%"
+                                              oninput="filterTunai()">
+                                      </div>
+                                  </div>
                               </div>
                           </div>
                           <div class="row" style="margin-top:20px">
@@ -66,7 +76,7 @@
                                               <th scope="col">NoFaktur</th>
                                               <th scope="col">NoRetur</th>
                                               <th scope="col">Tanggal</th>
-                                              <th scope="col">NoPelunasan</th>
+                                              <th scope="col">Supplier</th>
                                               <th scope="col">Debet</th>
                                               <th scope="col">Kredit</th>
                                               <th scope="col">Saldo</th>
