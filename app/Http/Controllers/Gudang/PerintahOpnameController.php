@@ -355,7 +355,7 @@ and kodegrp='BJ'" , ["kode" => $req->kode , "kode1" => $req->kode1]);
 
 
     if ($req->choice =='D'){
-      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PRP',$nobukti,'',$xurut,'dbperintahopDET');
+      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PRP',$req->nobukti,'',$xurut,'dbperintahopDET');
       }
 
 
@@ -395,7 +395,7 @@ and kodegrp='BJ'" , ["kode" => $req->kode , "kode1" => $req->kode1]);
 
       }
     if ($req->choice !='D'){
-      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PROP',$nobukti,'',$xurut,'dbperintahopDET');
+      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PROP',$req->nobukti,'',$xurut,'dbperintahopDET');
       }
       return 1;
 
@@ -423,7 +423,7 @@ and kodegrp='BJ'" , ["kode" => $req->kode , "kode1" => $req->kode1]);
         $req->tanggalcutoff ? $req->tanggalcutoff : '',
       ]);
 
-      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PROP',$nobukti,'',$xurut,'dbperintahopDET');
+      $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( $req->choice,'PROP',$req->nobukti,'',$req->urut,'dbperintahopDET');
         return 1;
     }
 

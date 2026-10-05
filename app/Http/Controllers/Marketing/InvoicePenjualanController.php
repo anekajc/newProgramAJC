@@ -26,14 +26,15 @@ class InvoicePenjualanController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(4);
 
+    // Default periode awal/akhir bulan -- dihitung dari tahun+bulan periode (bukan
+    // Carbon::now()->month(...), yang overflow kalau hari-saat-ini tidak ada di bulan
+    // tujuan, mis. today=31 lalu ->month(9) jadi 1 Okt bukan 1 Sep, lalu endOfMonth()
+    // balik ke 31 Okt bukan 30 Sep).
+    $tglawal1 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+    $tglakhir1 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
 
     $tempOutstanding = DB::connection("SML")->select("
 
-declare @Tahun int, @Bulan int, @Periode Varchar(30)
-
-select @Tahun= :tahun , @Bulan= :bulan
-
-Set @Periode=CAST(@Tahun as varchar(4))+Case when @Bulan<10 then '0' else '' end+CAST(@Bulan as varchar(2))
 set nocount on
 Select distinct A.NoBukti,A.Tanggal,A.KodeCustSupp,
        D.NOBUKTI Noso, m1.PPN PPNCUST,
@@ -58,18 +59,15 @@ where Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
                 else 1
-           end As Bit)=0 and F.NoSPB is null and CAST(YEAR(A.Tanggal) as varchar(4))+Case when month(A.Tanggal)<10 then '0' else '' end+CAST(month(A.Tanggal) as varchar(2))<=@Periode
+           end As Bit)=0 and F.NoSPB is null and A.Tanggal between :tglawal1 and :tglakhir1
 and (B.Qntx>0 )
 order by A.NoBukti
 
-" , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
+" , [ "tglawal1" => $tglawal1, "tglakhir1" => $tglakhir1 ]);
 
 
-
-
-
-    $tglawal = \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-    $tglakhir = \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+    $tglawal = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+    $tglakhir = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
     $tempOutstanding2 = $this->queryInvoicePenjualanOtorisasi($tglawal, $tglakhir, 0);
 
     return view('marketing.invoicepenjualan' , [
@@ -89,8 +87,10 @@ order by A.NoBukti
   // terpisah dengan query nyaris identik (cuma beda IsOtorisasi1=0/1).
   // Digabung jadi satu dengan filterip yang menyaring di server, port 1:1
   // dari pola queryOutstanding() milik PerintahReturJualController. Tabel
-  // "Surat Pengiriman Barang" (tabel, bukan konsep otorisasi) sengaja tidak
-  // disentuh.
+  // "Surat Pengiriman Barang" dulu sengaja tidak disentuh (periode kumulatif
+  // <=@Periode, bukan filter tanggal independen) -- sekarang query-nya sendiri
+  // (lihat $tempOutstanding di index()/loadAll()) juga difilter tglawal1/
+  // tglakhir1 miliknya sendiri, terpisah dari tglawal/tglakhir tab ini.
   //   0 = Semua, 1 = Belum Otorisasi, 2 = Sudah Otorisasi
   private function queryInvoicePenjualanOtorisasi ($tglawal, $tglakhir, $filterip) {
     return DB::connection("SML")->select("
@@ -801,14 +801,11 @@ array_push($tes123 , $response);
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
+    $tglawal1 = $req->tglawal1 ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+    $tglakhir1 = $req->tglakhir1 ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
+
     $tempOutstanding = DB::connection("SML")->select("
 
-
-  declare @Tahun int, @Bulan int, @Periode Varchar(30)
-
-  select @Tahun= :tahun , @Bulan= :bulan
-
-  Set @Periode=CAST(@Tahun as varchar(4))+Case when @Bulan<10 then '0' else '' end+CAST(@Bulan as varchar(2))
   set nocount on
   Select distinct A.NoBukti,A.Tanggal,A.KodeCustSupp,
        D.NOBUKTI Noso,
@@ -834,18 +831,15 @@ array_push($tes123 , $response);
                      Case when A.IsOtorisasi4=1 then 1 else 0 end+
                      Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
                 else 1
-           end As Bit)=0 and F.NoSPB is null and CAST(YEAR(A.Tanggal) as varchar(4))+Case when month(A.Tanggal)<10 then '0' else '' end+CAST(month(A.Tanggal) as varchar(2))<=@Periode
+           end As Bit)=0 and F.NoSPB is null and A.Tanggal between :tglawal1 and :tglakhir1
   and (B.Qntx>0 )
   order by A.NoBukti
 
-  " , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
+  " , [ "tglawal1" => $tglawal1, "tglakhir1" => $tglakhir1 ]);
 
 
-
-
-
-  $tglawal = $req->tglawal ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d');
-  $tglakhir = $req->tglakhir ?: \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d');
+  $tglawal = $req->tglawal ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+  $tglakhir = $req->tglakhir ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
   $filterip = $req->filterip ?: 0;
   $tempOutstanding2 = $this->queryInvoicePenjualanOtorisasi($tglawal, $tglakhir, $filterip);
 
