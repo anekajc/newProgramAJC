@@ -1270,19 +1270,27 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
     WHERE KODESUPP= :custsupp and IDuser= :username order by nobukti , noretur", ["custsupp" => $req->kodesupp , "username" =>  \Auth::user()->username]);
 
     return $listData;
-
-
   }
 
+    // Browse No Titipan untuk item BBK ber-Lawan 113400 (lihat buttonAddListTitipan() di bank.js).
+  // Pakai tanda kutip biasa, BUKAN backtick: di PHP backtick menjalankan isinya sebagai
+  // perintah shell.
+  public function getNoTitipan () {
 
+  $data = DB::connection('SML')->select("select 	A.NOBUKTI,  A.TANGGAL,A.Valas ,C.namaCustSupp,
+                        (A.Debet+A.Kredit)*A.Kurs JumlahRp ,A.Keterangan  ,
+                       A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa,A.URUT,A.Debet,C.KodeCustSupp
+                       from dbTransaksi A
+                       LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
+                       LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
+                       LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB
+                                        from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
+                       LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
+                                        FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
+                       where A.Lawan=  '113400'AND A.CustSuppL<> ''     and A.TANGGAL>  '03/28/2016'
+                       and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0 and a.tipetrans in ('BBM')");
 
-
-
-
-
-
-
-
-
+    return $data;
+  }
 
 }

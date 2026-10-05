@@ -185,6 +185,7 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
       return $tempCetak1;
   }
 
+
   public function getDetail (Request $req ) {
         $tempOutstanding = DB::connection("SML")->select("
 
@@ -630,39 +631,10 @@ values ( :perkiraan , :bulan , :tahun , :devisi  , :valas , :kurs , 0 , 0 , :md 
 
   }
 
-
-
-
   public function listLawan (Request $req) {
 
         $username = \Auth::user()->username;
         $listData = [];
-
-        // if ($req->transaksi == 'BKK') {
-        //   $listData = DB::connection('SML')->select("
-        //   select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
-        //               left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-        //                Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-
-        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
-        //               where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-        //               and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
-
-        //               order by a.Perkiraan" , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-        // } else {
-        //   $listData = DB::connection('SML')->select("
-        //   select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
-        //         left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-        //          Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-
-        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
-        //         where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-        //         and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' )
-
-        //         order by a.Perkiraan     " , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-        // }
 
         $listData = DB::connection('SML')->select("
           select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
@@ -727,10 +699,6 @@ ORDER BY c.KODESUPP,B.NAMACUSTSUPP");
   }
 
   public function sumBKMUHT (Request $req) {
-
-
-
-
     $listData = DB::connection('SML')->select("select sum(DPP) SubTotal from tempRUMJual where IDUser= :username and Isnull(Noretur,'')<>''
       and Isnull(Notrans,'')<>''", ["username" =>  \Auth::user()->username]);
     return $listData;
@@ -740,9 +708,6 @@ ORDER BY c.KODESUPP,B.NAMACUSTSUPP");
   public function prosesUMB (Request $req) {
 
     $resx = DB::connection('SML')->update("delete TEMPRUMJUAL where IDUSER = :username", ["username" => \Auth::user()->username]);
-
-
-
 
 
     $res = DB::connection('SML')->update("declare @nilaippn numeric(18,2)
@@ -797,8 +762,6 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
 
 " , ["username" => $username ]);
       return $listData;
-
-
   }
 
 
@@ -1072,8 +1035,6 @@ $data['urutDPH'] ? $data['urutDPH'] : 0
 
 
     public function spAddNewAktiva (Request $req) {
-
-
         $username = \Auth::user()->username;
 
         // $jmlrecord = $req->jmlrecord;
@@ -1319,5 +1280,26 @@ $data['urutDPH'] ? $data['urutDPH'] : 0
     WHERE KODESUPP= :custsupp and IDuser= :username order by nobukti , noretur", ["custsupp" => $req->kodesupp ,"username1" =>  \Auth::user()->username ,"username" =>  \Auth::user()->username]);
 
     return $listData;
+  }
+
+  // Browse No Titipan untuk item BKK ber-Lawan 113400 (lihat buttonAddListTitipan() di kas.js).
+  // Pakai tanda kutip biasa, BUKAN backtick: di PHP backtick menjalankan isinya sebagai
+  // perintah shell.
+  public function getNoTitipan () {
+
+  $data = DB::connection('SML')->select("select 	A.NOBUKTI,  A.TANGGAL,A.Valas ,C.namaCustSupp,
+                        (A.Debet+A.Kredit)*A.Kurs JumlahRp ,A.Keterangan  ,
+                       A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa,A.URUT,A.Debet,C.KodeCustSupp
+                       from dbTransaksi A
+                       LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
+                       LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
+                       LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB
+                                        from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
+                       LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
+                                        FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
+                       where A.Lawan=  '113400'AND A.CustSuppL<> ''     and A.TANGGAL>  '03/28/2016'
+                       and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0 and a.tipetrans in ('BKM')");
+
+    return $data;
   }
 }
