@@ -651,9 +651,9 @@
               {{-- <button class="btn btn-primary" type="button" onclick="loadAll()"> --}}
                 {{-- <i class="bi bi-funnel"></i> Load All --}}
               {{-- </button> --}}
-                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalawal_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalawal_ip1" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
                 <span class="po-filter-sep">s/d</span>
-                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalakhir_ip1" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                <input type="date" onchange="onChangePeriodeIP1()" class="po-filter-inp" id="input_tanggalakhir_ip1" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
               </div>
               <input type="search" id="ipSearch1" class="po-search-inp" placeholder="Cari data">
               <div class="po-len-wrap">
@@ -743,9 +743,9 @@
             <div class="po-toolbar">
               <div class="po-filter-wrap">
                 <label>Periode</label>
-                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalawal_ip" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalawal_ip" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
                 <span class="po-filter-sep">s/d</span>
-                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalakhir_ip" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                <input type="date" onchange="onChangePeriodeIP()" class="po-filter-inp" id="input_tanggalakhir_ip" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
               </div>
               <input type="search" id="ipSearch2" class="po-search-inp" placeholder="Cari data">
               <div class="po-len-wrap">
@@ -1818,7 +1818,7 @@
       </div>
       <!-- <h5 class="modal-title" id="modalTitleDetail">Detail</h5> -->
 
-    <div id="" class="mt-4">
+    <div id="formBsGrid" class="mt-4">
     <div class="">
       <!-- <h1>Tes Modal</h1> -->
 
@@ -1845,7 +1845,7 @@
 
             <div class="col-12">
               <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_detail_alamat"  disabled></textarea>
+                <textarea  style="width: 100%; height:75px !important; resize: none" rows=4  class="form-control" id="input_add_detail_alamat"  disabled></textarea>
               </div>
             </div>
           </div>
@@ -3280,31 +3280,60 @@ function buttonFilterIP () {
   })
 }
 
+// #tabel ("Surat Pengiriman Barang", widget ip1) dan #tabel2 ("Invoice Otorisasi",
+// widget ip) masing-masing punya filter periode sendiri yang independen -- dulu
+// nilainya disamakan satu sama lain lewat sini, padahal query tempOutstanding (tabel)
+// waktu itu malah tidak membaca tglawal/tglakhir sama sekali, jadi widget ip1 cuma
+// kosmetik. Sekarang masing-masing mengirim tglawal1/tglakhir1 (tabel) dan
+// tglawal/tglakhir (tabel2) sendiri-sendiri ke loadAll(), tidak saling menimpa.
+//
+// lastGood* menyimpan nilai terakhir yang valid per widget. Kalau user mengetik/
+// geser tanggal jadi kombinasi yang sebenarnya tidak valid (mis. hari masih 31
+// padahal bulan baru diganti ke bulan yang cuma 30 hari), input date native diam-diam
+// mengosongkan .value-nya (bukan menolak dengan error) -- kalau nilai kosong ini
+// dikirim apa adanya, controller menganggap "tidak diisi" dan jatuh ke default
+// periode berjalan, membuat rentang tanggal efektif melebar (mis. awal bulan yang
+// dipilih user + akhir periode berjalan yang beda bulan) alih-alih gagal seperti
+// yang diharapkan. Makanya di sini dideteksi dan inputnya dikembalikan ke nilai
+// valid terakhir, bukan dibiarkan kosong/terkirim.
+let lastGoodTglawalIP1 = $('#input_tanggalawal_ip1').val()
+let lastGoodTglakhirIP1 = $('#input_tanggalakhir_ip1').val()
+let lastGoodTglawalIP = $('#input_tanggalawal_ip').val()
+let lastGoodTglakhirIP = $('#input_tanggalakhir_ip').val()
+
 function onChangePeriodeIP () {
   let tglawal = $('#input_tanggalawal_ip').val()
   let tglakhir = $('#input_tanggalakhir_ip').val()
-  if (tglawal && tglakhir && tglawal > tglakhir) {
+  if (!tglawal || !tglakhir) {
+    alertify.warning('Tanggal tidak valid, dikembalikan ke tanggal terakhir')
+    $('#input_tanggalawal_ip').val(lastGoodTglawalIP)
+    $('#input_tanggalakhir_ip').val(lastGoodTglakhirIP)
+    return
+  }
+  if (tglawal > tglakhir) {
     alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
     return
   }
-  // #tabel ("Surat Pengiriman Barang") punya widget periode sendiri (ip1) supaya
-  // kelihatan di tab itu juga -- disamakan ke sini karena loadAll() (satu-satunya
-  // yang me-refresh tabel & tabel2 sekaligus) baca dari #input_tanggalawal_ip/
-  // #input_tanggalakhir_ip yang sama, bukan dari input_..._ip1.
-  $('#input_tanggalawal_ip1').val(tglawal)
-  $('#input_tanggalakhir_ip1').val(tglakhir)
+  lastGoodTglawalIP = tglawal
+  lastGoodTglakhirIP = tglakhir
   loadAll()
 }
 
 function onChangePeriodeIP1 () {
-  let tglawal = $('#input_tanggalawal_ip1').val()
-  let tglakhir = $('#input_tanggalakhir_ip1').val()
-  if (tglawal && tglakhir && tglawal > tglakhir) {
+  let tglawal1 = $('#input_tanggalawal_ip1').val()
+  let tglakhir1 = $('#input_tanggalakhir_ip1').val()
+  if (!tglawal1 || !tglakhir1) {
+    alertify.warning('Tanggal tidak valid, dikembalikan ke tanggal terakhir')
+    $('#input_tanggalawal_ip1').val(lastGoodTglawalIP1)
+    $('#input_tanggalakhir_ip1').val(lastGoodTglakhirIP1)
+    return
+  }
+  if (tglawal1 > tglakhir1) {
     alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
     return
   }
-  $('#input_tanggalawal_ip').val(tglawal)
-  $('#input_tanggalakhir_ip').val(tglakhir)
+  lastGoodTglawalIP1 = tglawal1
+  lastGoodTglakhirIP1 = tglakhir1
   loadAll()
 }
 
@@ -4704,6 +4733,8 @@ function buttonCloseFormAddDetail () {
 
 function loadAll () {
   console.log('loadAll')
+  let tglawal1 = $('#input_tanggalawal_ip1').val()
+  let tglakhir1 = $('#input_tanggalakhir_ip1').val()
   let tglawal = $('#input_tanggalawal_ip').val()
   let tglakhir = $('#input_tanggalakhir_ip').val()
   let filterip = $('#input_filterip').val()
@@ -4712,7 +4743,7 @@ function loadAll () {
             type: "get",
             async: false,
             data: {
-              tglawal, tglakhir, filterip
+              tglawal1, tglakhir1, tglawal, tglakhir, filterip
             },
             success: function(res) {
 
