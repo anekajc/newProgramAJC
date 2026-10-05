@@ -356,6 +356,11 @@ td input[type="checkbox"] {
 }
 </style>
 {{-- end tampilan tampilan baru --}}
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /invoicepembelian itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah.
+     Sama seperti newpo.blade.php. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
 @endsection
 
 @section('content')
@@ -1887,6 +1892,11 @@ td input[type="checkbox"] {
         }
       })
 
+      if (!table_pembelian_row_detail || table_pembelian_row_detail.length === 0) {
+        alertify.warning('Detail dokumen tidak ditemukan')
+        return
+      }
+
       dataLPB =  table_pembelian_row_detail[0]
       dataEditPembelianEdit = table_pembelian_row_detail
 
@@ -1912,7 +1922,7 @@ td input[type="checkbox"] {
        let datebpotong = new Date(dataLPB.TglBuktiPotong);
       var daybpotong = ("0" + datebpotong.getDate()).slice(-2);
       var monthbpotong = ("0" + (datebpotong.getMonth() + 1)).slice(-2);
-       var date1bpotong = datefpajak.getFullYear()+"-"+(monthbpotong)+"-"+(daybpotong) ;
+       var date1bpotong = datebpotong.getFullYear()+"-"+(monthbpotong)+"-"+(daybpotong) ;
 
 
 
@@ -2002,6 +2012,11 @@ console.log('vvvvvvvvvvvvvvvvvv')
         }
       })
 
+      if (!table_pembelian_row_detail || table_pembelian_row_detail.length === 0) {
+        alertify.warning('Detail dokumen tidak ditemukan')
+        return
+      }
+
       let dataEdit = table_pembelian_row_detail[0]
 
       let date = new Date(dataEdit.Tanggal);
@@ -2028,7 +2043,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
       table_pembelian_row_detail.forEach((detail_row) => {
         table_row_detail_inf += `<tr>
         <td class="text-center">
-        <button class="btn btn-chip-merah btn-sm" type="button" onclick="hapustransaksi(${detail_row.KODEBARANG})"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-chip-merah btn-sm" type="button" onclick="hapustransaksi('${dataEdit.NoBukti}')"><i class="bi bi-trash"></i></button>
         </td>
         <td>${detail_row.NoBeli}</td>
         <td>${detail_row.KodeGdg}</td>
@@ -2106,7 +2121,9 @@ console.log('vvvvvvvvvvvvvvvvvv')
     }
 
 
-    function hapustransaksi () {
+    // nobukti dikirim oleh pemanggil (tombol hapus di modal Edit Kelengkapan). Dulu selalu
+    // dibaca dari #editnobukti2 (milik modal Detail) - dari modal Edit isinya kosong/nomor lain.
+    function hapustransaksi (nobukti) {
 
 
 
@@ -2115,7 +2132,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
       function(){
 
 
-                     let nobukti = document.getElementById("editnobukti2").value ;;
+                    nobukti = nobukti || document.getElementById("editnobukti2").value
                     console.log(nobukti)
                     let _token = $("#_token").val();
 
@@ -2134,7 +2151,8 @@ console.log('vvvvvvvvvvvvvvvvvv')
                           loadAll()
 
                           alertify.success('Berhasil Hapus Data')
-                          $("#detailPembelian").modal('toggle')
+                          $("#detailPembelian").modal('hide')
+                          $("#editKelengkapan").modal('hide')
                         }
 
 
@@ -2661,6 +2679,10 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
       let onUbah = function () {
         if (!awal.value || !akhir.value) { return }
+        // Tahun belum lengkap (mis. "0202" waktu mengetik 2025) - tunggu sampai tahunnya wajar.
+        // Tanpa ini setiap digit langsung memuat data dari tahun 0002/0020/0202 s/d sekarang
+        // (seluruh riwayat, AJAX sinkron) sehingga halaman macet tidak bisa diklik.
+        if (awal.value.slice(0, 4) < '1900' || akhir.value.slice(0, 4) < '1900') { return }
         if (awal.value > akhir.value) {
           alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
           return

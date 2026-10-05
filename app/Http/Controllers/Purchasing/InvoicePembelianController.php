@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\NewMenu;
 use App\Models\NewAksesMenu;
-use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,7 @@ class InvoicePembelianController extends Controller
 
   public function index (Request $req) {
     $kodemenu = '030401';
-    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path);
+    $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
     }
@@ -95,18 +94,18 @@ order by B.Urut
     ", ['nobukti' => $req->input('NoBukti')]);
   }
 
+  // Hak akses dibaca dari DBMENUWEB/DBFLMENUWEB (menu web 0305, href invoicepembelian) lewat
+  // GlobalController@getAkses - sama dengan index(). Dulu memakai model DBFLMENU (namespace
+  // App\Model, file di app/Models) sehingga class tidak ditemukan dan route ini error 500.
   public function getAkses () {
-    $kodemenu = '03007';
-    // $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
-      $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
-    return $akses;
+    return app('App\Http\Controllers\GlobalController')->getAkses('0305', 'invoicepembelian');
   }
 
   public function getAllPO (Request $req) {
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     list($tglawal, $tglakhir) = $this->periodeRange($periode);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if (preg_match('/^(19|20)\d{2}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^(19|20)\d{2}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
     $tglakhirPlus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
 
@@ -158,8 +157,8 @@ order by A.NOBUKTI
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     list($tglawal, $tglakhir) = $this->periodeRange($periode);
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
+    if (preg_match('/^(19|20)\d{2}-\d{2}-\d{2}$/', (string) $req->input('tglawal')))  { $tglawal  = $req->input('tglawal'); }
+    if (preg_match('/^(19|20)\d{2}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
     $tglakhirPlus = date('Y-m-d', strtotime($tglakhir . ' +1 day'));
 
@@ -273,13 +272,13 @@ order by A.NOBUKTI
         }
 
 
+// Detail satu dokumen invoice cukup dicari lewat NoBukti. Dulu ikut disaring bulan/tahun
+// periode kerja user, padahal tabel Kelengkapan Dokumen memakai rentang tanggal bebas -
+// dokumen di luar bulan periode menghasilkan array kosong dan tombol Detail/Edit error
+// (Cannot read properties of undefined reading Tanggal).
 public function getDetailPembelian (Request $req) {
-  $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
   $tampilinvoicebeli = DB::connection("SML")->select("
-  declare @Tahun int, @Bulan int
-
-select @Tahun=:tahun , @Bulan=:bulan
 
 Select 	A.NoBukti, A.NoUrut, A.Tanggal, A.KODECUSTSUPP, A.NamaCustSupp, A.NamaKota,
 A.NoPO,
@@ -298,8 +297,7 @@ A.IsOtorisasi5, A.OtoUser5, A.TglOto5, A.NeedOtorisasi,
   A.BlnMasaPajak, A.ThnMasaPajak,a.myppn, A.NoBeli,A.tglbeli,A.TglPO,
   A.KodeGdg,A.kodebrg KODEBARANG,A.namabrg NAMABARANG,A.QNT,A.SATUAN,A.HARGA,A.NNET
 From vwTransInvoice A
-where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-and A.FlagTipe<>9
+where A.FlagTipe<>9
 and a.noBukti =:nobukti
 
 /*
@@ -315,7 +313,7 @@ A.IsOtorisasi5, A.OtoUser5, A.TglOto5, A.NeedOtorisasi,
 order by A.NOBUKTI
 
 
-  " , [ "tahun" =>$periode->tahun , "bulan" => $periode->bulan, "nobukti" => $req->NoBukti]);
+  " , [ "nobukti" => $req->NoBukti]);
 
   return $tampilinvoicebeli;
 }
