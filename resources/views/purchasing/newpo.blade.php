@@ -413,6 +413,11 @@ td input[type="checkbox"] {
 }
 </style>
 {{-- end tampilan tampilan baru --}}
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /newpo dan /newpojasa itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah.
+     Sama seperti purchaseOrder.blade.php. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
 @endsection
 
 @section('content')
