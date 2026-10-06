@@ -1,9 +1,235 @@
-@extends('gudang.newmaster')
+@extends('newmasterTest')
 @section('buttons')
+
+@section('page-title', 'Berita Acara Opname')
+@section('title', 'SML - Berita Acara Opname')
 
 @endsection
 
 @section('css')
+
+<link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+
+{{-- Port 1:1 ke UI SO -- @extends newmasterTest (bukan lagi gudang.newmaster), custom-tabs
+     pill bar, po-toolbar, dan report-table.js column engine untuk kedua tabel (#tabel/
+     #tabel2 -- BAP Belum+Sudah Otorisasi digabung jadi satu tabel dengan filter Status
+     seperti perintahopname.blade.php), sama seperti transferbarang.blade.php. --}}
+<style>
+.custom-tabs {
+  display: inline-flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  background-color: #f1f3f5;
+  border-radius: 20px;
+  padding: 3px;
+}
+
+.custom-tabs .nav-link {
+  display: inline-block !important;
+  padding: 5px 16px !important;
+  font-size: 0.75rem !important;
+  border: none;
+  border-radius: 17px;
+  color: #495057;
+  background: transparent;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  background: transparent;
+  color: #007bff;
+}
+
+.custom-tabs .nav-link.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+}
+
+.tab-card {
+  display: block !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  border: none !important;
+  margin-bottom: 6px !important;
+}
+
+.tab-card .card-body {
+  padding: 5px 10px !important;
+}
+
+#page1 .card {
+  display: block !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+
+#page1 .card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border) !important;
+}
+
+#page1 .tab-content .col-md-12 {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.po-len-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--rt-card);
+  border: 1.5px solid var(--rt-border);
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+.po-len-wrap label {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--rt-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+
+.po-len-inp {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rt-ink);
+  outline: none;
+  cursor: pointer;
+  padding: 2px 20px 2px 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+#tabel td:first-child,
+#tabel2 td:first-child,
+#tabel_oto td:first-child,
+#addTable td:last-child {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+#tabel td:first-child .btn,
+#tabel2 td:first-child .btn,
+#tabel_oto td:first-child .btn,
+#addTable td:last-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+
+#tabel td:first-child .btn:hover,
+#tabel2 td:first-child .btn:hover,
+#tabel_oto td:first-child .btn:hover,
+#addTable td:last-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+#tabel td:first-child .btn-success,
+#tabel2 td:first-child .btn-success,
+#tabel_oto td:first-child .btn-success,
+#addTable td:last-child .btn-success {
+  color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
+}
+
+#tabel td:first-child .btn-warning,
+#tabel2 td:first-child .btn-warning,
+#tabel_oto td:first-child .btn-warning,
+#addTable td:last-child .btn-warning {
+  color: #b45309; border-color: #fbe3bd; background: #fef3e0;
+}
+
+#tabel td:first-child .btn-primary,
+#tabel2 td:first-child .btn-primary,
+#tabel_oto td:first-child .btn-primary,
+#addTable td:last-child .btn-primary {
+  color: #2563eb; border-color: #cfdcff; background: #e8edff;
+}
+
+#tabel td:first-child .btn-danger,
+#tabel2 td:first-child .btn-danger,
+#tabel_oto td:first-child .btn-danger,
+#addTable td:last-child .btn-danger {
+  color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
+}
+
+{{-- Tabel statis (bukan #tabel/#tabel2/#tabel_oto) yang dulu pakai thead bg-primary
+     text-white -- diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua
+     halaman. --}}
+#addTable thead th,
+#detailTable thead th,
+#tabel_add_list_modal thead th,
+#tabel_detailadd_list_modal thead th,
+#tabel thead th,
+#tabel2 thead th,
+#tabel_oto thead th {
+  background: #f8f9fb !important;
+  color: #6b7280 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+  border-bottom: 1px solid #e7e9ee;
+  border-top: none;
+}
+
+#tabel tbody tr:hover,
+#tabel2 tbody tr:hover,
+#tabel_oto tbody tr:hover {
+  background-color: #f5f3ff;
+}
+
+.data-table th,
+.data-table td {
+  white-space: nowrap;
+}
+
+#tabel tbody .action-buttons-wrap,
+#tabel2 tbody .action-buttons-wrap,
+#tabel_oto tbody .action-buttons-wrap {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+#tabel tbody tr:hover .action-buttons-wrap,
+#tabel2 tbody tr:hover .action-buttons-wrap,
+#tabel_oto tbody tr:hover .action-buttons-wrap,
+#tabel tbody tr:focus-within .action-buttons-wrap,
+#tabel2 tbody tr:focus-within .action-buttons-wrap,
+#tabel_oto tbody tr:focus-within .action-buttons-wrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+</style>
 
 
 {{-- tampilan search bar 1 --}}
@@ -195,19 +421,6 @@
 
 
 
-  <!-- <div id="qrcode"></div> -->
-  <div class="row" style="margin-top: -80px">
-    <div class="col-6 text-left">
-      <h2>Berita Acara Opname</h2>
-    </div>
-    <div class="col-6 text-right">
-      <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="buttonAdd()"  >+ Perintah Opname</button> -->
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-
-<!-- <button onclick="setNewNoBukti()">tes</button> -->
-<!-- <button onclick="buttonAdd('nobukti')">Add Tes</button> -->
 </div>
 
 <div id="printContainer" style="display:none">
@@ -227,187 +440,119 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-<div class="card-header">
-<div class="row">
-  <nav style="width: 100%;">
-    <div class="nav nav-tabs col-12" id="nav-tab" role="tablist" style="border-bottom: 0;">
-      <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: #fff; background-color: #007bff; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; text-align: left;">Perintah Opname</a>
-      <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false"
-         style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff; text-align: left;">
-        BAP Belum Otorisasi
-      </a>
-      <a class="nav-item nav-link" id="nav-home2-tab" data-toggle="tab" href="#home2" role="tab"
-        aria-controls="nav-home2" aria-selected="false"
-        style="color: #007bff; background-color: #f8f9fa; border-radius: 20px; padding: 4px 12px; margin: 0 10px; font-weight: 600; font-size: 0.75rem; border: 2px solid #007bff;">
-      BAP Sudah Otorisasi
-      </a>
-    </div>
-  </nav>
-</div>
-</div>
-<div class="card-body" style="padding:0;">
-<div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-    <div class="row">
-      <div class="col-12" style="overflow:auto; padding:0; margin:0; width:100%;">
-        <div class="container-fluid">
-
-              <table id="tabel" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Actions</th>
-                    <th style="padding: 4px 12px;" scope="col">Nobukti</th>
-                    <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                    <th style="padding: 4px 12px;" scope="col">KodeGdg</th>
-                    <th style="padding: 4px 12px;" scope="col">KodeHdGrp</th>
-                    <th style="padding: 4px 12px;" scope="col">NamaHdGrp</th>
-                    <th style="padding: 4px 12px;" scope="col">KodeSubGrp</th>
-                    <th style="padding: 4px 12px;" scope="col">NamaSubGrp</th>
-                    <th style="padding: 4px 12px;" scope="col">KodeMerk</th>
-                    <th style="padding: 4px 12px;" scope="col">NamaMerk</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="tabel_data" class="text-left" >
-                  @for ($i = 0; $i < count($tempOutstanding); $i++)
-                  <tr>
-                    <td class="text-center">
-                      <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailAdd('{{ $tempOutstanding[$i]->NoBukti }}')"><i class="bi bi-info"></i></button>
-                      <button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd('{{ $tempOutstanding[$i]->NoBukti }}')"><i class="bi bi-plus"></i></button>
-                    </td>
-                    <td>{{ $tempOutstanding[$i]->NoBukti }}</td>
-                    <td>{!! date("Y/m/d", strtotime($tempOutstanding[$i]->Tanggal)) !!}</td>
-                    <td>{{ $tempOutstanding[$i]->KodeGdg }}</td>
-                    <td>{{ $tempOutstanding[$i]->KodeHdGrp }}</td>
-                    <td>{{ $tempOutstanding[$i]->NAMAHDGRP }}</td>
-                    <td>{{ $tempOutstanding[$i]->KodeSubGrp }}</td>
-                    <td>{{ $tempOutstanding[$i]->NamaSubGrp }}</td>
-                    <td>{{ $tempOutstanding[$i]->KodeMerk }}</td>
-                    <td>{{ $tempOutstanding[$i]->NAMAMERK }}</td>
-
-                  </tr>
-                  @endfor
-                </tbody>
-
-
-              </table>
-        </div>
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Perintah Opname</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Berita Acara Opname</a>
       </div>
     </div>
   </div>
 
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="row">
-        <div class="col-12" style="overflow:auto;">
-          <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-
-                <table id="tabel2" class="table table-bordered table-striped"  >
-                  <thead class="text-center bg-primary text-white">
-                    <tr>
-                      <th style="padding: 4px 12px;" scope="col">Actions</th>
-                      <th style="padding: 4px 12px;" scope="col">Nobukti</th>
-                      <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                      <th style="padding: 4px 12px;" scope="col">PR OPN</th>
-                      <th style="padding: 4px 12px;" scope="col">Gudang</th>
-                      <th style="padding: 4px 12px;" scope="col">SubGrp</th>
-                      <th style="padding: 4px 12px;" scope="col">Merk</th>
-                      <th style="padding: 4px 12px;" scope="col">HeadGrp</th>
-                    </tr>
-                  </thead>
-
-
-                  <tbody id="tabel2_data" class="text-left" >
-
-                    @for ($i = 0; $i < count($tempPenerimaan); $i++)
-                    <tr>
-                      <td class="text-center">
-                        <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $tempPenerimaan[$i]->Nobukti }}' , 'detail' )"><i class="bi bi-info"></i></button>
-
-                        <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('{{ $tempPenerimaan[$i]->Nobukti }}'  )"><i class="bi bi-pen"></i></button>
-                        @if ($tempPenerimaan[$i]->IsOtorisasi1 == 0)
-                        <button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi('{{ $tempPenerimaan[$i]->Nobukti }}' , 'otorisasi' )"><i class="bi bi-key"></i></button>
-                        @else
-                        <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('{{ $tempPenerimaan[$i]->Nobukti }}'  )"><i class="bi bi-key"></i></button>
-                        @endif
-                      </td>
-                      <td>{{ $tempPenerimaan[$i]->Nobukti }}</td>
-                      <td>{!! date("Y/m/d", strtotime($tempPenerimaan[$i]->Tanggal)) !!}</td>
-                      <td>{{ $tempPenerimaan[$i]->NoPerintahOP }}</td>
-                      <td>{{ $tempPenerimaan[$i]->NamaGdg }}</td>
-                      <td>{{ $tempPenerimaan[$i]->NamaSubGrp ? $tempPenerimaan[$i]->NamaSubGrp : '' }}</td>
-                      <td>{{ $tempPenerimaan[$i]->NAMAMERK ? $tempPenerimaan[$i]->NAMAMERK : '' }}</td>
-                      <td>{{ $tempPenerimaan[$i]->NAMAHDGRP }}</td>
-
-                    </tr>
-                    @endfor
-
-                  </tbody>
+  <div class="card">
+    <div class="card-body" style="padding:0;">
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="baSearch1" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="baLen1">Tampilkan</label>
+                    <select id="baLen1" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="rtBarTabel"></div>
+                <table id="tabel" class="data-table">
+                  <thead style="white-space:nowrap;"></thead>
+                  <tbody id="tabel_data" class="text-left"></tbody>
                 </table>
+                <div class="po-rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="baSearch2" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="baLen2">Tampilkan</label>
+                    <select id="baLen2" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                  <button class="po-btn-filter" type="button" onclick="$('#modalFilterBA').modal('show')">
+                    <i class="bi bi-funnel"></i> Filter
+                  </button>
+                </div>
+
+                <div class="modal fade rt-filter" id="modalFilterBA">
+                  <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterBA').modal('hide')"><span aria-hidden="true">&times;</span></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="rt-section">
+                          <div class="rt-group-label">Status</div>
+                          <div>
+                            <label class="rt-field-label" for="baStatus">Status Otorisasi</label>
+                            <select class="rt-native" id="baStatus">
+                              <option value="" selected>Semua Status</option>
+                              <option value="0">Belum Otorisasi</option>
+                              <option value="1">Sudah Otorisasi</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="rt-reset-link" onclick="$('#baStatus').val('')">Reset semua</button>
+                        <div class="rt-footer-buttons">
+                          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" onclick="$('#modalFilterBA').modal('hide')">Batal</button>
+                          <button type="button" class="rt-btn rt-btn-primary" onclick="baFilterChanged(); $('#modalFilterBA').modal('hide');">Terapkan</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="rtBarTabel2"></div>
+                <table id="tabel2" class="data-table">
+                  <thead style="white-space:nowrap;"></thead>
+                  <tbody id="tabel2_data" class="text-left"></tbody>
+                </table>
+                <div class="po-rt-hint">
+                  <i class="bi bi-info-circle"></i>
+                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="tab-pane fade" id="home2" role="tabpanel" aria-labelledby="home2-tab">
-      <div class="row">
-        <div class="col-12" style="overflow:auto;">
-          <div class="container-fluid" style="padding:0; margin:0; width:100%;">
-
-                <table id="tabel_oto" class="table table-bordered table-striped"  >
-                  <thead class="text-center bg-primary text-white">
-                    <tr>
-                      <th style="padding: 4px 12px;" scope="col">Actions</th>
-                      <th style="padding: 4px 12px;" scope="col">Nobukti</th>
-                      <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                      <th style="padding: 4px 12px;" scope="col">PR OPN</th>
-                      <th style="padding: 4px 12px;" scope="col">Gudang</th>
-                      <th style="padding: 4px 12px;" scope="col">SubGrp</th>
-                      <th style="padding: 4px 12px;" scope="col">Merk</th>
-                      <th style="padding: 4px 12px;" scope="col">HeadGrp</th>
-                      <th style="padding: 4px 12px;" scope="col">OtoUser</th>
-                      <th style="padding: 4px 12px;" scope="col">TglOto</th> 
-                    </tr>
-                  </thead>
-
-
-                  <tbody id="tabel_oto_data" class="text-left" >
-
-                    @for ($i = 0; $i < count($tempPenerimaan1); $i++)
-                    <tr>
-                      <td class="text-center">
-                        <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $tempPenerimaan1[$i]->Nobukti }}' , 'detail' )"><i class="bi bi-info"></i></button>
-                        @if ($tempPenerimaan1[$i]->IsOtorisasi1 == 0)
-                        <button class="btn btn-primary btn-sm" type="button" onclick="buttonDetail('{{ $tempPenerimaan1[$i]->Nobukti }}' , 'otorisasi' )"><i class="bi bi-key"></i></button>
-                        @else
-                        <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('{{ $tempPenerimaan1[$i]->Nobukti }}'  )"><i class="bi bi-key"></i></button>
-                        @endif
-			<button style="" class="btn btn-primary btn-sm" type="button"   onclick="submitPrint('{{$tempPenerimaan1[$i]->Nobukti}}')" ><i class="bi bi-printer"></i></button>
-                      </td>
-                      <td>{{ $tempPenerimaan1[$i]->Nobukti }}</td>
-                      <td>{!! date("Y/m/d", strtotime($tempPenerimaan1[$i]->Tanggal)) !!}</td>
-                      <td>{{ $tempPenerimaan1[$i]->NoPerintahOP }}</td>
-                      <td>{{ $tempPenerimaan1[$i]->NamaGdg }}</td>
-                      <td>{{ $tempPenerimaan1[$i]->NamaSubGrp ? $tempPenerimaan1[$i]->NamaSubGrp : '' }}</td>
-                      <td>{{ $tempPenerimaan1[$i]->NAMAMERK ? $tempPenerimaan1[$i]->NAMAMERK : '' }}</td>
-                      <td>{{ $tempPenerimaan1[$i]->NAMAHDGRP }}</td>
-                      <td>{{ $tempPenerimaan1[$i]->OtoUser1 }}</td>
-                      <td>{!! $tempPenerimaan1[$i]->TglOto1 ? date("Y/m/d", strtotime($tempPenerimaan1[$i]->TglOto1)) : '' !!}</td>
-                    </tr>
-                    @endfor
-
-                  </tbody>
-                </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-</div>
-</div>
-</div>
+  </div>
 
 
 </div>
@@ -653,7 +798,7 @@
   <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
         <table id="addTable" class="table table-bordered table-striped"  >
-          <thead class="text-center bg-primary text-white">
+          <thead class="text-center">
             <tr>
               <th style="padding: 4px 12px;" scope="col">KodeBrg</th>
               <th style="padding: 4px 12px;" scope="col">NamaBrg</th>
@@ -945,7 +1090,7 @@
     <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
           <table id="detailTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
+            <thead class="text-center">
               <tr>
                 <th style="padding: 4px 12px;" scope="col">KodeBrg</th>
                 <th style="padding: 4px 12px;" scope="col">NamaBrg</th>
@@ -1087,7 +1232,7 @@
 
 
             <table id="tabel_add_list_modal" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white" style="position: sticky;
+              <thead class="text-center" style="position: sticky;
             top: 0;
             z-index: 1;">
                 <tr>
@@ -1233,7 +1378,7 @@
 
 
             <table id="tabel_detailadd_list_modal" class="table table-bordered table-striped" style="overflow:auto; " >
-              <thead class="text-center bg-primary text-white" style="position: sticky;
+              <thead class="text-center" style="position: sticky;
             top: 0;
             z-index: 1;">
                 <tr>
@@ -1302,6 +1447,7 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let tipeform = ''
@@ -1310,47 +1456,362 @@ let listDataDet = []
 let listDataAdd = []
 let tempDataAdd = []
 
+/* ============ Header tabel interaktif (window.ReportTable) ============
+ * Port 1:1 dari pola opCart/opAktifkanTabel milik perintahopname.blade.php, untuk
+ * dua tabel di halaman ini (#tabel = Perintah Opname outstanding, #tabel2 = BAP --
+ * Belum+Sudah Otorisasi digabung jadi satu tabel, dengan kolom Status dan filter
+ * Status di toolbar, sama seperti merge Belum/Sudah Otorisasi di perintahopname).
+ * Tiap render*Rows() mem-force aktivasi urut-nya sendiri sebelum membaca
+ * gcart_header, supaya tidak ada drift seperti bug yang ditemukan di
+ * perintahopname (gcart_header nyangkut di urut lain saat halaman pertama kali
+ * load). */
+let baCart = { 1 : [], 2 : [] }
+let baActiveUrut = 0
+const BA_HREF = 'beritaacaraopname'
+const BA_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+const BA_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
+
+function baPickCI (row, key) {
+  if (!row) { return undefined; }
+  if (row[key] !== undefined) { return row[key]; }
+  let lower = key.toLowerCase();
+  for (let k in row) {
+    if (k.toLowerCase() === lower) { return row[k]; }
+  }
+  return undefined;
+}
+
+function baDefaultCart (urut) {
+  if (urut === 2) {
+    return [
+      ['Nobukti',      'No. Bukti',      1, 'varchar', 0, 0],
+      ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
+      ['IsOtorisasi1', 'Status',         1, 'bool',    0, 0],
+      ['NoPerintahOP', 'No Perintah OP', 1, 'varchar', 0, 0],
+      ['NamaGdg',      'Gudang',         1, 'varchar', 0, 0],
+      ['NamaSubGrp',   'SubGrp',         1, 'varchar', 0, 0],
+      ['NAMAMERK',     'Merk',           1, 'varchar', 0, 0],
+      ['NAMAHDGRP',    'HeadGrp',        1, 'varchar', 0, 0],
+      ['OtoUser1',     'OtoUser',        1, 'varchar', 0, 0],
+      ['TglOto1',      'TglOto',         1, 'date',    0, 0],
+    ]
+  }
+  return [
+    ['NoBukti',      'No. Bukti',   1, 'varchar', 0, 0],
+    ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
+    ['KodeGdg',      'Kode Gudang', 1, 'varchar', 0, 0],
+    ['KodeHdGrp',    'Kode Hdgrp',  1, 'varchar', 0, 0],
+    ['NAMAHDGRP',    'Nama Hdgrp',  1, 'varchar', 0, 0],
+    ['KodeSubGrp',   'Kode Subgrp', 1, 'varchar', 0, 0],
+    ['NamaSubGrp',   'Nama Subgrp', 1, 'varchar', 0, 0],
+    ['KodeMerk',     'Kode Merk',   1, 'varchar', 0, 0],
+    ['NAMAMERK',     'Merk',        1, 'varchar', 0, 0],
+  ]
+}
+
+function baBuatCart (headers, values, isnumerics, isshowns, desimals) {
+  headers = headers || []
+  let cart = []
+  headers.forEach((h, i) => {
+    let tipe = Number(isnumerics[i]) || 0
+    let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+      ? Number(desimals[i])
+      : (tipe === 1 ? 2 : 0)
+    cart.push([
+      values[i],
+      h,
+      Number(isshowns[i]) === 1 ? 1 : 0,
+      BA_TIPE_NAMA[tipe] || 'varchar',
+      0,
+      isNaN(des) ? 0 : des,
+    ])
+  });
+  return cart
+}
+
+function baAktifkanTabel (urut) {
+  baActiveUrut = urut
+  window.g_modeReport = urut
+  window.gcart_header = baCart[urut]
+}
+
+function baOnChangeAktif () {
+  if (baActiveUrut === 2) { reinitTabel2(); }
+  else { reinitTabel(); }
+}
+
+window.g_href = BA_HREF
+window.g_modeReport = 1
+window.gcart_header = []
+
+window.doSimpanHeader = function (href, mode) {
+  let urut = mode === 2 ? 2 : 1
+  let cart = baCart[urut] || []
+
+  let header = [], value = [], isnumber = [], isshown = [], desimal = []
+  cart.forEach((c) => {
+    header.push(c[1])
+    value.push(c[0])
+    isnumber.push(BA_TIPE_KODE[c[3]] ?? 0)
+    isshown.push(Number(c[2]) === 1 ? 1 : 0)
+    desimal.push(Number(c[5]) || 0)
+  });
+
+  $.ajax({
+    url   : "{!! url('saveheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token   : $("#_token").val(),
+      header   : JSON.stringify(header),
+      isnumber : JSON.stringify(isnumber),
+      tipe     : JSON.stringify(desimal),
+      value    : JSON.stringify(value),
+      isshown  : JSON.stringify(isshown),
+      href     : BA_HREF,
+      urut     : urut
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan pengaturan kolom')
+    }
+  })
+}
+
+window.doSetHeader = function (mode, reset) {
+  let urut = mode === 2 ? 2 : 1
+
+  $.ajax({
+    url   : "{!! url('getheadertable') !!}",
+    type  : "post",
+    async : false,
+    data  : {
+      _token : $("#_token").val(),
+      href   : BA_HREF,
+      urut   : urut,
+      reset  : reset ? 1 : 0
+    },
+    success : function (res) {
+      if (!reset && res && res.headertableheader && res.headertableheader.length) {
+        baCart[urut] = baBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
+      } else {
+        baCart[urut] = baDefaultCart(urut)
+        window.gcart_header = baCart[urut]
+        window.doSimpanHeader(BA_HREF, urut)
+      }
+      window.gcart_header = baCart[urut]
+    },
+    error : function (err) {
+      console.log(err)
+      alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+      baCart[urut] = baDefaultCart(urut)
+      window.gcart_header = baCart[urut]
+    }
+  })
+}
+
+let baRtSudahInit = false
+function baInitReportTableSekali () {
+  if (baRtSudahInit || typeof ReportTable === 'undefined') { return }
+  baRtSudahInit = true
+
+  ReportTable.init({ table : '#tabel',  bar : '#rtBarTabel',  onChange : baOnChangeAktif })
+  ReportTable.init({ table : '#tabel2', bar : '#rtBarTabel2', onChange : baOnChangeAktif })
+
+  let baGuardUlangKlik = false;
+  ['#tabel', '#tabel2'].forEach((sel) => {
+    let thead = document.querySelector(sel + ' thead')
+    if (!thead) { return }
+    thead.addEventListener('click', function (e) {
+      if (baGuardUlangKlik) { return }
+      let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+      if (!interaktif) { return }
+      e.stopPropagation()
+      e.preventDefault()
+      baGuardUlangKlik = true
+      let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+      Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+      thead.dispatchEvent(ulang)
+      baGuardUlangKlik = false
+    }, true)
+  });
+}
+
+function tulisTheadHeaderBA (tableSel, cols) {
+  let thead = document.querySelector(tableSel + ' thead')
+  if (!thead || !window.ReportTable) { return; }
+  let headRowHtml = ReportTable.headHtml(cols)
+    .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+  thead.setAttribute('style', 'white-space:nowrap;');
+  thead.innerHTML = headRowHtml;
+}
+
+function baValueCell (row, col) {
+  let raw = baPickCI(row, col[0]);
+  let type = col[3];
+
+  if (type === 'date') {
+    if (!raw) { return '<td></td>'; }
+    return '<td>' + formatDate(raw, '/') + '</td>';
+  }
+  if (type === 'float') {
+    let dp = Number(col[5]) || 0;
+    let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+    return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+  }
+  if (type === 'bool') {
+    return Number(raw)
+      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
+      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
+  }
+  return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
+}
+
+function baTabelActionsCell (row) {
+  let nobukti = baPickCI(row, 'NoBukti');
+  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailAdd(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
+  html += '</div></td>';
+  return html;
+}
+
+function baTabel2ActionsCell (row) {
+  let nobukti = baPickCI(row, 'Nobukti');
+  let sudah = Number(baPickCI(row, 'IsOtorisasi1')) === 1;
+  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
+  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
+  if (sudah) {
+    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
+  } else {
+    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi(\'' + nobukti + '\' , \'otorisasi\')"><i class="bi bi-key"></i></button>';
+  }
+  html += '</div></td>';
+  return html;
+}
+
+function baFilterRows (rows) {
+  let status = $('#baStatus').val()
+  if (status === '') { return rows || [] }
+  return (rows || []).filter(function (row) {
+    return String(Number(baPickCI(row, 'IsOtorisasi1'))) === status
+  })
+}
+
+function baFilterChanged () {
+  reinitTabel2()
+}
+
+function renderTabelRows (rows) {
+  if (baActiveUrut !== 1) { baAktifkanTabel(1); }
+  let cols = (baCart[1].length ? baCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + baTabelActionsCell(row);
+    cols.forEach(function (col) { html += baValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel_data').innerHTML = html;
+  tulisTheadHeaderBA('#tabel', cols);
+}
+
+function renderTabel2Rows (rows) {
+  if (baActiveUrut !== 2) { baAktifkanTabel(2); }
+  let cols = (baCart[2].length ? baCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
+  let html = "";
+  (rows || []).forEach(function (row) {
+    html += '<tr>' + baTabel2ActionsCell(row);
+    cols.forEach(function (col) { html += baValueCell(row, col); });
+    html += '</tr>';
+  });
+  document.getElementById('tabel2_data').innerHTML = html;
+  tulisTheadHeaderBA('#tabel2', cols);
+}
+
+let lastTabelRows = []
+let lastTabel2Rows = []
+let baPanjangHalaman = { 1 : 10, 2 : 10 }
+
+function baIkatSearch (urut) {
+  let ids = { 1 : ['baSearch1', 'tabel'], 2 : ['baSearch2', 'tabel2'] }
+  let input = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!input || input.dataset.rtBound) { return }
+  input.dataset.rtBound = '1'
+
+  let timer = null
+  input.addEventListener('input', function () {
+    let nilai = input.value
+    if (timer) { clearTimeout(timer) }
+    timer = setTimeout(function () {
+      if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+        $('#' + idTabel).DataTable().search(nilai).draw()
+      }
+    }, 400)
+  })
+}
+
+function baIkatPanjangHalaman (urut) {
+  let ids = { 1 : ['baLen1', 'tabel'], 2 : ['baLen2', 'tabel2'] }
+  let sel = document.getElementById(ids[urut][0])
+  let idTabel = ids[urut][1]
+  if (!sel || sel.dataset.rtBound) { return }
+  sel.dataset.rtBound = '1'
+  sel.value = String(baPanjangHalaman[urut])
+
+  sel.addEventListener('change', function () {
+    let n = Number(sel.value)
+    baPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+      $('#' + idTabel).DataTable().page.len(baPanjangHalaman[urut]).draw()
+    }
+  })
+}
+
+const BA_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+
+function reinitTabel () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
+    renderTabelRows(lastTabelRows);
+    $('#tabel').DataTable({ dom: BA_DOM_STRING, lengthChange: false, pageLength: baPanjangHalaman[1], paging: true, ordering: false });
+    baIkatSearch(1);
+    baIkatPanjangHalaman(1);
+  } catch (e) {
+    console.error('reinitTabel failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
+function reinitTabel2 () {
+  try {
+    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
+    renderTabel2Rows(baFilterRows(lastTabel2Rows));
+    $('#tabel2').DataTable({ dom: BA_DOM_STRING, lengthChange: false, pageLength: baPanjangHalaman[2], paging: true, ordering: false });
+    baIkatSearch(2);
+    baIkatPanjangHalaman(2);
+  } catch (e) {
+    console.error('reinitTabel2 failed:', e);
+    alertify.error('Gagal memperbarui tabel: ' + e.message);
+  }
+}
+
 $(document).ready(function(){
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          // "searching": false,
-          "columnDefs": [
-          // { "type": "date", "targets": [3] },
-          // {  "className": "text-right", "targets": [5] },
-          // "columns" : [{"width" : "20px"}]
+      baAktifkanTabel(1);
+      window.doSetHeader(1, false);
+      lastTabelRows = @json($tempOutstanding);
+      reinitTabel();
 
+      baAktifkanTabel(2);
+      window.doSetHeader(2, false);
+      lastTabel2Rows = [].concat(@json($tempPenerimaan), @json($tempPenerimaan1));
+      reinitTabel2();
 
-        ]
-        });
-        // $(".mainpage").hide()
-        // $("#page2").show()
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            // "searching": false,
-            "columnDefs": [
-            // { "type": "date", "targets": [3] },
-            // {  "className": "text-right", "targets": [5] },
-            // "columns" : [{"width" : "20px"}]
-          ]
-          });
+      baAktifkanTabel(1);
 
-        $("#tabel_oto").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-             "columnDefs": [
-            // { "type": "date", "targets": [3] },
-            // {  "className": "text-right", "targets": [5] },
-            // "columns" : [{"width" : "20px"}]
-          ]
-          });
-
-
-        $("#tabel_add_list_custsupp").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-      });
+      baInitReportTableSekali();
 });
 
 
@@ -1367,117 +1828,10 @@ function loadAll () {
     },
     success: function(res) {
       console.log(res)
-      let rowTable = ""
-      let rowTable2 = ""
-      let rowTable3 = ""
-
-      res.tempPenerimaan.forEach((item, i) => {
-        rowTable2 += `
-        <tr>
-          <td class="text-center">
-          <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.Nobukti}' , 'detail' )"><i class="bi bi-info"></i></button>
-            <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item.Nobukti}'  )"><i class="bi bi-pen"></i></button>
-
-
-            ${item.IsOtorisasi1 == 0 ?
-              `<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi('${item.Nobukti}' , 'otorisasi' )"><i class="bi bi-key"></i></button>`
-              :
-              `<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item.Nobukti}'  )"><i class="bi bi-key"></i></button>`
-
-            }
-
-          </td>
-          <td>${item.Nobukti}</td>
-          <td>${formatDate(item.Tanggal)}</td>
-          <td>${item.NoPerintahOP}</td>
-          <td>${item.NamaGdg}</td>
-          <td>${item.NamaSubGrp ? item.NamaSubGrp : ''}</td>
-          <td>${item.NAMAMERK ? item.NAMAMERK : ''}</td>
-          <td>${item.NAMAHDGRP}</td>
-
-        </tr>
-        `
-
-      });
-
-      res.tempPenerimaan1.forEach((item) => {
-        rowTable3 += `
-          <tr>
-            <td class="text-center">
-              <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.Nobukti}', 'detail')"><i class="bi bi-info"></i></button>
-              <button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi('${item.Nobukti}')"><i class="bi bi-key"></i></button>
-	      <button class="btn btn-primary btn-sm" title="Print" onclick="submitPrint('${item.Nobukti}')">
-                <i class="bi bi-printer"></i>
-              </button>
-            </td>
-            <td>${item.Nobukti}</td>
-            <td>${formatDate(item.Tanggal)}</td>
-            <td>${item.NoPerintahOP}</td>
-            <td>${item.NamaGdg}</td>
-            <td>${item.NamaSubGrp ?? ''}</td>
-            <td>${item.NAMAMERK ?? ''}</td>
-            <td>${item.NAMAHDGRP}</td>
-            <td>${item.OtoUser1 ?? ''}</td>
-            <td>${item.TglOto1 ? formatDate(item.TglOto1) : ''}</td>
-          </tr>`
-      });
-
-
-      res.tempOutstanding.forEach((item, i) => {
-          rowTable += `
-          <tr>
-            <td class="text-center">
-              <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetailAdd('${item.NoBukti}')"><i class="bi bi-info"></i></button>
-              <button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd('${item.NoBukti}')"><i class="bi bi-plus"></i></button>
-            </td>
-            <td>${item.NoBukti}</td>
-            <td>${formatDate(item.Tanggal)}</td>
-            <td>${item.KodeGdg}</td>
-            <td>${item.KodeHdGrp}</td>
-            <td>${item.NAMAHDGRP}</td>
-            <td>${item.KodeSubGrp}</td>
-            <td>${item.NamaSubGrp}</td>
-            <td>${item.KodeMerk}</td>
-            <td>${item.NAMAMERK}</td>
-
-          </tr>
-
-          `
-
-
-
-
-
-      });
-      console.log(1)
-      $('#tabel').DataTable().destroy();
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        ]
-        });
-        $('#tabel_oto').DataTable().destroy();
-      document.getElementById("tabel_oto_data").innerHTML = rowTable3
-      $("#tabel_oto").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-          "columnDefs": [
-        ]
-        });
-console.log(2)
-        $('#tabel2').DataTable().destroy();
-        document.getElementById("tabel2_data").innerHTML = rowTable2
-        $("#tabel2").DataTable({
-          "lengthChange": false,
-            "paging": false ,
-            "columnDefs": [
-          ]
-          });
-
-
-
+      lastTabelRows = res.tempOutstanding
+      lastTabel2Rows = [].concat(res.tempPenerimaan, res.tempPenerimaan1)
+      reinitTabel()
+      reinitTabel2()
     }})
 
 }
@@ -3419,43 +3773,5 @@ function formatAngka (angkaString) {
 
 
 </script>
-
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
-  <script>
-    const tabHome = document.getElementById('nav-home-tab');
-    const tabHome2 = document.getElementById('nav-home2-tab');
-    const tabProfile = document.getElementById('nav-profile-tab');
-
-    function setActiveTab(activeTab) {
-      // reset semua tab ke warna default
-      [tabHome, tabHome2, tabProfile].forEach(tab => {
-        tab.style.backgroundColor = '#f8f9fa';
-        tab.style.color = '#007bff';
-      });
-
-      // aktifkan tab yang dipilih
-      activeTab.style.backgroundColor = '#007bff';
-      activeTab.style.color = '#fff';
-    }
-
-    // Default warna tab pertama
-    setActiveTab(tabHome);
-
-    tabHome.addEventListener('click', function () {
-      setActiveTab(tabHome);
-    });
-
-    tabHome2.addEventListener('click', function () {
-      setActiveTab(tabHome2);
-    });
-
-    tabProfile.addEventListener('click', function () {
-      setActiveTab(tabProfile);
-    });
-  </script>
-{{-- script buat hover belum otorisasi dan sudah otorisasi --}}
-
-
-
 
 @endsection
