@@ -389,105 +389,84 @@
   <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  {{-- Tab bar: pola card.tab-card + custom-tabs anchor, disalin verbatim dari
-       transferbarang.blade.php/so.blade.php. id nav-home-tab/nav-profile-tab dan
-       home/profile dipertahankan -- dipakai lagi lebih bawah pada
-       opActiveVisibleTabKey()/shown.bs.tab dan juga oleh kode JS lama di bagian lain
-       file ini (document.getElementById('nav-home-tab')). --}}
-  <div class="card mb-3 tab-card">
-    <div class="card-body">
-      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">
-          POP Belum Otorisasi
-        </a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">
-          POP Sudah Otorisasi
-        </a>
-      </div>
-    </div>
-  </div>
-
+  {{-- Tab Belum/Sudah Otorisasi digabung jadi satu tabel, dengan filter Status +
+       Periode di toolbar (client-side, lastTabelRows sudah berisi gabungan
+       tempOutstanding+tempPenerimaan dari periode berjalan). --}}
   <div class="card">
     <div class="card-body" style="padding:0;">
-      <div class="tab-content" id="myTabContent">
+      <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+        <div class="po-toolbar">
+          <div class="po-filter-wrap">
+            <label>Periode</label>
+            <input type="date" onchange="opFilterChanged()" class="po-filter-inp" id="opTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+            <span class="po-filter-sep">s/d</span>
+            <input type="date" onchange="opFilterChanged()" class="po-filter-inp" id="opTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+          </div>
+          <input type="search" id="opSearch1" class="po-search-inp" placeholder="Cari data">
+          <div class="po-len-wrap">
+            <label for="opLen1">Tampilkan</label>
+            <select id="opLen1" class="po-len-inp">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="-1">Semua</option>
+            </select>
+          </div>
+          <button class="po-btn-filter" type="button" onclick="$('#modalFilterOP').modal('show')">
+            <i class="bi bi-funnel"></i> Filter
+          </button>
+          @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
+            <div class="po-toolbar-act">
+              <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
+            </div>
+          @endif
+        </div>
 
-        {{-- Belum Otorisasi: toolbar + rtBarTabel + tabel kosong (diisi JS lewat
-             reinitTabel()/loadAll()), sama seperti transferbarang.blade.php. --}}
-        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                <div class="po-toolbar">
-                  <input type="search" id="opSearch1" class="po-search-inp" placeholder="Cari data">
-                  <div class="po-len-wrap">
-                    <label for="opLen1">Tampilkan</label>
-                    <select id="opLen1" class="po-len-inp">
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                      <option value="-1">Semua</option>
+        <div class="modal fade rt-filter" id="modalFilterOP">
+          <div class="modal-dialog modal-md">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterOP').modal('hide')"><span aria-hidden="true">&times;</span></button>
+              </div>
+              <div class="modal-body">
+                <div class="rt-section">
+                  <div class="rt-group-label">Status</div>
+                  <div>
+                    <label class="rt-field-label" for="opStatus">Status Otorisasi</label>
+                    <select class="rt-native" id="opStatus">
+                      <option value="" selected>Semua Status</option>
+                      <option value="0">Belum Otorisasi</option>
+                      <option value="1">Sudah Otorisasi</option>
                     </select>
                   </div>
-                  @if ((int) ($akses->ISTAMBAH ?? 0) === 1)
-                    <div class="po-toolbar-act">
-                      <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
-                    </div>
-                  @endif
                 </div>
-                <div id="rtBarTabel"></div>
-                <table id="tabel" class="data-table">
-                  <thead style="white-space:nowrap;"></thead>
-                  <tbody id="tabel_data" class="text-left"></tbody>
-                </table>
-                <div class="po-rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="rt-reset-link" onclick="$('#opStatus').val('')">Reset semua</button>
+                <div class="rt-footer-buttons">
+                  <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" onclick="$('#modalFilterOP').modal('hide')">Batal</button>
+                  <button type="button" class="rt-btn rt-btn-primary" onclick="opFilterChanged(); $('#modalFilterOP').modal('hide');">Terapkan</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {{-- Sudah Otorisasi. --}}
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
-                <div class="po-toolbar">
-                  <input type="search" id="opSearch2" class="po-search-inp" placeholder="Cari data">
-                  <div class="po-len-wrap">
-                    <label for="opLen2">Tampilkan</label>
-                    <select id="opLen2" class="po-len-inp">
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                      <option value="-1">Semua</option>
-                    </select>
-                  </div>
-                </div>
-                <div id="rtBarTabel2"></div>
-                <table id="tabel2" class="data-table">
-                  <thead style="white-space:nowrap;"></thead>
-                  <tbody id="tabel2_data" class="text-left"></tbody>
-                </table>
-                <div class="po-rt-hint">
-                  <i class="bi bi-info-circle"></i>
-                  Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                  untuk menyembunyikan kolom atau mengatur jumlah desimal.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> {{-- End Sudah Otorisasi --}}
-
-
-
-</div>
-</div>
-</div>
+        <div id="rtBarTabel"></div>
+        <table id="tabel" class="data-table">
+          <thead style="white-space:nowrap;"></thead>
+          <tbody id="tabel_data" class="text-left"></tbody>
+        </table>
+        <div class="po-rt-hint">
+          <i class="bi bi-info-circle"></i>
+          Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+          untuk menyembunyikan kolom atau mengatur jumlah desimal.
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 </div>
@@ -758,7 +737,6 @@
         <table id="addTable" class="table table-bordered table-striped"  >
           <thead class="text-center">
             <tr>
-              <th style="padding: 4px 12px;" scope="col">Urut</th>
               <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
               <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
               <th style="padding: 4px 12px;" scope="col">Satuan</th>
@@ -789,7 +767,7 @@
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;">+ Tambah</button>
+  text-transform: uppercase;">Tambah Item</button>
 </div>
 
 
@@ -1122,17 +1100,7 @@
       </div>
 
 
-
-
-
-
-
-
     </div>
-
-
-
-
 
 
 
@@ -1467,7 +1435,7 @@
             top: 0;
             z-index: 1;">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col" class="text-center">v</th>
+                  <th style="padding: 4px 12px;" scope="col" class="text-center">Pilih</th>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Satuan</th>
@@ -1527,7 +1495,7 @@
                 font-weight: 600; 
                 text-transform: uppercase; 
                 transition: background-color 0.3s, box-shadow 0.3s;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddItem()">Submit</button>
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddItem()">Simpan</button>
       </div>
       </div>
 
@@ -1576,16 +1544,10 @@ let tempDataAdd = []
  * loadAll() (res.tempOutstanding[i][0].NoBukti). opPickCI() karena itu selalu
  * dipanggil dengan row[0], bukan row.
  */
-let opCart = { 1 : [], 2 : [] }
-let opActiveUrut = 0
+let opCart = []
 const OP_HREF = 'perintahopname'
 const OP_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const OP_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
-let opPerluGambar = { 1 : false, 2 : false }
-
-function opActiveVisibleTabKey () {
-  return $('#nav-profile-tab').hasClass('active') ? 2 : 1
-}
 
 function opPickCI (row, key) {
   if (!row) { return undefined; }
@@ -1597,26 +1559,11 @@ function opPickCI (row, key) {
   return undefined;
 }
 
-function opDefaultCart (urut) {
-  if (urut === 2) {
-    return [
-      ['NoBukti',      'No. Bukti',   1, 'varchar', 0, 0],
-      ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
-      ['Keterangan',   'Keterangan',  1, 'varchar', 0, 0],
-      ['KodeGdg',      'Gudang',      1, 'varchar', 0, 0],
-      ['KodeHdGrp',    'Kode Hdgrp',  1, 'varchar', 0, 0],
-      ['NAMAHDGRP',    'Nama Hdgrp',  1, 'varchar', 0, 0],
-      ['KodeSubGrp',   'Kode Subgrp', 1, 'varchar', 0, 0],
-      ['NamaSubGrp',   'Nama Subgrp', 1, 'varchar', 0, 0],
-      ['KodeMerk',     'Kode Merk',   1, 'varchar', 0, 0],
-      ['NAMAMERK',     'Merk',        1, 'varchar', 0, 0],
-      ['OtoUser1',     'OtoUser',     1, 'varchar', 0, 0],
-      ['TglOto1',      'TglOto',      1, 'date',    0, 0],
-    ]
-  }
+function opDefaultCart () {
   return [
     ['NoBukti',      'No. Bukti',   1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
+    ['IsOtorisasi1', 'Status',      1, 'bool',    0, 0],
     ['Keterangan',   'Keterangan',  1, 'varchar', 0, 0],
     ['KodeGdg',      'Gudang',      1, 'varchar', 0, 0],
     ['KodeHdGrp',    'Kode Hdgrp',  1, 'varchar', 0, 0],
@@ -1625,6 +1572,8 @@ function opDefaultCart (urut) {
     ['NamaSubGrp',   'Nama Subgrp', 1, 'varchar', 0, 0],
     ['KodeMerk',     'Kode Merk',   1, 'varchar', 0, 0],
     ['NAMAMERK',     'Merk',        1, 'varchar', 0, 0],
+    ['OtoUser1',     'OtoUser',     1, 'varchar', 0, 0],
+    ['TglOto1',      'TglOto',      1, 'date',    0, 0],
   ]
 }
 
@@ -1648,26 +1597,13 @@ function opBuatCart (headers, values, isnumerics, isshowns, desimals) {
   return cart
 }
 
-function opAktifkanTabel (urut) {
-  opActiveUrut = urut
-  window.g_modeReport = urut
-  window.gcart_header = opCart[urut]
-}
-
-function opOnChangeAktif () {
-  if (opActiveUrut === 2) { reinitTabel2(); } else { reinitTabel(); }
-}
-
 window.g_href = OP_HREF
 window.g_modeReport = 1
 window.gcart_header = []
 
 window.doSimpanHeader = function (href, mode) {
-  let urut = mode === 2 ? 2 : 1
-  let cart = opCart[urut] || []
-
   let header = [], value = [], isnumber = [], isshown = [], desimal = []
-  cart.forEach((c) => {
+  opCart.forEach((c) => {
     header.push(c[1])
     value.push(c[0])
     isnumber.push(OP_TIPE_KODE[c[3]] ?? 0)
@@ -1687,7 +1623,7 @@ window.doSimpanHeader = function (href, mode) {
       value    : JSON.stringify(value),
       isshown  : JSON.stringify(isshown),
       href     : OP_HREF,
-      urut     : urut
+      urut     : 1
     },
     error : function (err) {
       console.log(err)
@@ -1697,8 +1633,6 @@ window.doSimpanHeader = function (href, mode) {
 }
 
 window.doSetHeader = function (mode, reset) {
-  let urut = mode === 2 ? 2 : 1
-
   $.ajax({
     url   : "{!! url('getheadertable') !!}",
     type  : "post",
@@ -1706,59 +1640,38 @@ window.doSetHeader = function (mode, reset) {
     data  : {
       _token : $("#_token").val(),
       href   : OP_HREF,
-      urut   : urut,
+      urut   : 1,
       reset  : reset ? 1 : 0
     },
     success : function (res) {
       if (!reset && res && res.headertableheader && res.headertableheader.length) {
-        let header = res.headertableheader
-        let value = res.headertablevalue
-        let isnumeric = res.isnumeric
-        let isshown = res.isshown
-        let tipe = res.desimal || []
-        opCart[urut] = opBuatCart(header, value, isnumeric, isshown, tipe)
+        opCart = opBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
       } else {
-        opCart[urut] = opDefaultCart(urut)
-        window.gcart_header = opCart[urut]
-        window.doSimpanHeader(OP_HREF, urut)
+        opCart = opDefaultCart()
+        window.gcart_header = opCart
+        window.doSimpanHeader(OP_HREF, 1)
       }
-      window.gcart_header = opCart[urut]
+      window.gcart_header = opCart
     },
     error : function (err) {
       console.log(err)
       alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
-      opCart[urut] = opDefaultCart(urut)
-      window.gcart_header = opCart[urut]
+      opCart = opDefaultCart()
+      window.gcart_header = opCart
     }
   })
 }
-
-const OP_SELEKTOR_TABEL_AKTIF = '#myTabContent .tab-pane.active table.data-table'
-const OP_SELEKTOR_BAR_AKTIF = '#myTabContent .tab-pane.active [id^="rtBarTabel"]'
 
 let opRtSudahInit = false
 function opInitReportTableSekali () {
   if (opRtSudahInit || typeof ReportTable === 'undefined') { return }
   opRtSudahInit = true
 
-  let urutAktif = opActiveVisibleTabKey()
-  let idTabel = { 1 : '#tabel', 2 : '#tabel2' }
-  let idBar = { 1 : '#rtBarTabel', 2 : '#rtBarTabel2' }
-  Object.keys(idTabel).forEach((u) => {
-    if (Number(u) === urutAktif) { return }
-    ReportTable.init({ table : idTabel[u], bar : idBar[u], onChange : opOnChangeAktif })
-  });
-
-  ReportTable.init({
-    table    : OP_SELEKTOR_TABEL_AKTIF,
-    bar      : OP_SELEKTOR_BAR_AKTIF,
-    onChange : opOnChangeAktif
-  })
+  ReportTable.init({ table : '#tabel', bar : '#rtBarTabel', onChange : reinitTabel })
 
   let opGuardUlangKlik = false;
-  ['#tabel', '#tabel2'].forEach((sel) => {
-    let thead = document.querySelector(sel + ' thead')
-    if (!thead) { return }
+  let thead = document.querySelector('#tabel thead')
+  if (thead) {
     thead.addEventListener('click', function (e) {
       if (opGuardUlangKlik) { return }
       let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
@@ -1771,7 +1684,7 @@ function opInitReportTableSekali () {
       thead.dispatchEvent(ulang)
       opGuardUlangKlik = false
     }, true)
-  });
+  }
 }
 
 function tulisTheadHeaderOP (tableSel, cols) {
@@ -1798,8 +1711,8 @@ function opValueCell (row, col) {
   }
   if (type === 'bool') {
     return Number(raw)
-      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
-      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
+      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1807,36 +1720,45 @@ function opValueCell (row, col) {
 function opTabelActionsCell (row) {
   let r = row[0];
   let nobukti = opPickCI(r, 'NoBukti');
+  let sudah = Number(opPickCI(r, 'IsOtorisasi1')) === 1;
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
-  if (Number(opPickCI(r, 'IsOtorisasi1')) === 1) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+  html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
+  if (sudah) {
+    html += '<button class="btn btn-danger btn-sm" title="Batal Otorisasi" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" title="Print" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitOtorisasi(\'' + nobukti + '\' , \'otorisasi\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-success btn-sm" title="Edit" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-pen"></i></button>';
+    html += '<button class="btn btn-primary btn-sm" title="Otorisasi" type="button" onclick="submitOtorisasi(\'' + nobukti + '\' , \'otorisasi\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
   return html;
 }
 
-function opTabel2ActionsCell (row) {
-  let r = row[0];
-  let nobukti = opPickCI(r, 'NoBukti');
-  let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
-  if (Number(opPickCI(r, 'IsOtorisasi1')) === 1) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOtorisasi(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
-  } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'otorisasi\')"><i class="bi bi-key"></i></button>';
-  }
-  html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
-  html += '</div></td>';
-  return html;
+function opFilterRows (rows) {
+  let status = $('#opStatus').val()
+  let awal = $('#opTanggalAwal').val()
+  let akhir = $('#opTanggalAkhir').val()
+  return (rows || []).filter(function (row) {
+    let r = row[0]
+    if (status !== '' && String(Number(opPickCI(r, 'IsOtorisasi1'))) !== status) { return false }
+    if (awal || akhir) {
+      let tgl = opPickCI(r, 'Tanggal')
+      if (!tgl) { return false }
+      let t = String(tgl).slice(0, 10)
+      if (awal && t < awal) { return false }
+      if (akhir && t > akhir) { return false }
+    }
+    return true
+  })
+}
+
+function opFilterChanged () {
+  reinitTabel()
 }
 
 function renderTabelRows (rows) {
-  if (opActiveUrut !== 1) { opAktifkanTabel(1); }
-  let cols = (opCart[1].length ? opCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
+  window.gcart_header = opCart
+  let cols = (opCart.length ? opCart : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
     html += '<tr>' + opTabelActionsCell(row);
@@ -1847,27 +1769,11 @@ function renderTabelRows (rows) {
   tulisTheadHeaderOP('#tabel', cols);
 }
 
-function renderTabel2Rows (rows) {
-  if (opActiveUrut !== 2) { opAktifkanTabel(2); }
-  let cols = (opCart[2].length ? opCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
-  let html = "";
-  (rows || []).forEach(function (row) {
-    html += '<tr>' + opTabel2ActionsCell(row);
-    cols.forEach(function (col) { html += opValueCell(row[0], col); });
-    html += '</tr>';
-  });
-  document.getElementById('tabel2_data').innerHTML = html;
-  tulisTheadHeaderOP('#tabel2', cols);
-}
-
 let lastTabelRows = []
-let lastTabel2Rows = []
-let opPanjangHalaman = { 1 : 10, 2 : 10 }
+let opPanjangHalaman = 10
 
-function opIkatSearch (urut) {
-  let ids = { 1 : ['opSearch1', 'tabel'], 2 : ['opSearch2', 'tabel2'] }
-  let input = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function opIkatSearch () {
+  let input = document.getElementById('opSearch1')
   if (!input || input.dataset.rtBound) { return }
   input.dataset.rtBound = '1'
 
@@ -1876,26 +1782,24 @@ function opIkatSearch (urut) {
     let nilai = input.value
     if (timer) { clearTimeout(timer) }
     timer = setTimeout(function () {
-      if ($.fn.DataTable.isDataTable('#' + idTabel)) {
-        $('#' + idTabel).DataTable().search(nilai).draw()
+      if ($.fn.DataTable.isDataTable('#tabel')) {
+        $('#tabel').DataTable().search(nilai).draw()
       }
     }, 400)
   })
 }
 
-function opIkatPanjangHalaman (urut) {
-  let ids = { 1 : ['opLen1', 'tabel'], 2 : ['opLen2', 'tabel2'] }
-  let sel = document.getElementById(ids[urut][0])
-  let idTabel = ids[urut][1]
+function opIkatPanjangHalaman () {
+  let sel = document.getElementById('opLen1')
   if (!sel || sel.dataset.rtBound) { return }
   sel.dataset.rtBound = '1'
-  sel.value = String(opPanjangHalaman[urut])
+  sel.value = String(opPanjangHalaman)
 
   sel.addEventListener('change', function () {
     let n = Number(sel.value)
-    opPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
-    if ($.fn.DataTable.isDataTable('#' + idTabel)) {
-      $('#' + idTabel).DataTable().page.len(opPanjangHalaman[urut]).draw()
+    opPanjangHalaman = (n === -1 || n > 0) ? n : 10
+    if ($.fn.DataTable.isDataTable('#tabel')) {
+      $('#tabel').DataTable().page.len(opPanjangHalaman).draw()
     }
   })
 }
@@ -1905,78 +1809,36 @@ const OP_DOM_STRING = "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-1
 function reinitTabel () {
   try {
     if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
-    renderTabelRows(lastTabelRows);
+    renderTabelRows(opFilterRows(lastTabelRows));
     $('#tabel').DataTable({
       dom: OP_DOM_STRING,
       lengthChange: false,
-      pageLength: opPanjangHalaman[1],
+      pageLength: opPanjangHalaman,
       paging: true,
       ordering: false,
     });
-    opIkatSearch(1);
-    opIkatPanjangHalaman(1);
-    opPerluGambar[1] = false;
+    opIkatSearch();
+    opIkatPanjangHalaman();
   } catch (e) {
     console.error('reinitTabel failed:', e);
     alertify.error('Gagal memperbarui tabel: ' + e.message);
   }
 }
 
-function reinitTabel2 () {
-  try {
-    if ($.fn.DataTable.isDataTable('#tabel2')) { $('#tabel2').DataTable().destroy(); }
-    renderTabel2Rows(lastTabel2Rows);
-    $('#tabel2').DataTable({
-      dom: OP_DOM_STRING,
-      lengthChange: false,
-      pageLength: opPanjangHalaman[2],
-      paging: true,
-      ordering: false,
-    });
-    opIkatSearch(2);
-    opIkatPanjangHalaman(2);
-    opPerluGambar[2] = false;
-  } catch (e) {
-    console.error('reinitTabel2 failed:', e);
-    alertify.error('Gagal memperbarui tabel: ' + e.message);
-  }
-}
-
-function buttonHeaderTable (key) {
+function buttonHeaderTable () {
   alertify.confirm('Reset Kolom', 'Kembalikan kolom tabel ke tampilan default?', function () {
-    let urut = key === 'tabel2' ? 2 : 1
-    opAktifkanTabel(urut)
-    window.doSetHeader(urut, true)
-    ;(urut === 2 ? reinitTabel2 : reinitTabel)()
+    window.doSetHeader(1, true)
+    reinitTabel()
     alertify.success('Kolom telah direset ke tampilan default')
   }, function () {})
 }
 
 $(document).ready(function(){
-      opAktifkanTabel(1);
       window.doSetHeader(1, false);
-      lastTabelRows = @json($tempOutstanding);
+      lastTabelRows = [].concat(@json($tempOutstanding), @json($tempPenerimaan));
       reinitTabel();
 
-      opAktifkanTabel(2);
-      window.doSetHeader(2, false);
-      lastTabel2Rows = @json($tempPenerimaan);
-      reinitTabel2();
-
-      opAktifkanTabel(1);
-
       opInitReportTableSekali();
-
-      $('#nav-home-tab').on('shown.bs.tab', function () {
-        opAktifkanTabel(1);
-        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
-        if (opPerluGambar[1]) { reinitTabel(); }
-      });
-      $('#nav-profile-tab').on('shown.bs.tab', function () {
-        opAktifkanTabel(2);
-        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
-        if (opPerluGambar[2]) { reinitTabel2(); }
-      });
 
         // $('.mainpage').hide()
         // $('#page2').show()
@@ -2020,10 +1882,8 @@ function loadAll () {
     success: function(res) {
       console.log(res)
 
-      lastTabelRows = res.tempOutstanding
-      lastTabel2Rows = res.tempPenerimaan
+      lastTabelRows = [].concat(res.tempOutstanding, res.tempPenerimaan)
       reinitTabel()
-      reinitTabel2()
     }
   })
 }
@@ -3721,7 +3581,6 @@ function refreshDataTable (nobukti) {
 
                 rowTable += `
                   <tr>
-                    <td class="text-right">${item.Urut}</td>
 
                     <td>${item.KodeBrg}</td>
                     <td>${item.NamaBrg}</td>
