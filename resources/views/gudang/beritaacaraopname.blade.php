@@ -173,6 +173,10 @@
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
+#tabel td:first-child .btn-primary .bi-plus {
+  font-size: 18px;
+}
+
 #tabel td:first-child .btn-danger,
 #tabel2 td:first-child .btn-danger,
 #tabel_oto td:first-child .btn-danger,
@@ -489,6 +493,12 @@
             <div class="col-md-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="baFilterChanged()" class="po-filter-inp" id="baTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="baFilterChanged()" class="po-filter-inp" id="baTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="baSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
                     <label for="baLen2">Tampilkan</label>
@@ -560,9 +570,9 @@
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top: -80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Berita Acara Opname</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="
@@ -573,7 +583,7 @@
           font-weight: 600;
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()"  >CLOSE</button>
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
@@ -581,7 +591,7 @@
 
 
 
-  <div id="" class="">
+  <div id="formBsGrid" class="">
   <div class="">
     <!-- <h1>Tes Modal</h1> -->
 
@@ -631,7 +641,7 @@
 
         <div class="col-md-4">
           <div class="form-group">
-            <label>No PROpname</label>
+            <label>No PR Opname</label>
           </div>
         </div>
         <div class="col-md-8">
@@ -800,11 +810,11 @@
         <table id="addTable" class="table table-bordered table-striped"  >
           <thead class="text-center">
             <tr>
-              <th style="padding: 4px 12px;" scope="col">KodeBrg</th>
-              <th style="padding: 4px 12px;" scope="col">NamaBrg</th>
+              <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+              <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
               <th style="padding: 4px 12px;" scope="col">Satuan</th>
               <th style="padding: 4px 12px;" scope="col">Saldo Stock</th>
-              <th style="padding: 4px 12px;" scope="col">QntOpname</th>
+              <th style="padding: 4px 12px;" scope="col">Qty Opname</th>
 
               <th style="padding: 4px 12px;" scope="col">Actions</th>
 
@@ -827,11 +837,11 @@
 
 
   <div class="col-md-12 mt-2 text-right">
-  <button id="buttonSubmitKoreksi" type="button" class="btn btn-primary" onclick="submitKoreksi()" class="btn btn-secondary" style="height: 30px;
+  <button id="buttonSubmitKoreksi" type="button" class="btn btn-chip-biru" onclick="submitKoreksi()" class="btn btn-secondary" style="height: 30px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;" >Save</button>
+  text-transform: uppercase;">Simpan</button>
 </div>
 
 
@@ -852,9 +862,9 @@
 
   <div id="page3" style="display: none" class="mainpage container-fluid" >
 
-    <div class="row" style="margin-top: -80px">
+    <div class="row">
       <div class="col-8 text-left">
-        <h2>Berita Acara Opname</h2>
+        <h2></h2>
       </div>
       <div class="col-4 text-right">
         <button type="button" class="btn btn-danger btn-lg " style="
@@ -873,7 +883,7 @@
 
 
 
-    <div id="" class="">
+    <div id="formBsGrid" class="">
     <div class="">
       <!-- <h1>Tes Modal</h1> -->
 
@@ -923,7 +933,7 @@
 
           <div class="col-md-4">
             <div class="form-group">
-              <label>No PROpname</label>
+              <label>No PR Opname</label>
             </div>
           </div>
           <div class="col-md-8">
@@ -1092,36 +1102,30 @@
           <table id="detailTable" class="table table-bordered table-striped"  >
             <thead class="text-center">
               <tr>
-                <th style="padding: 4px 12px;" scope="col">KodeBrg</th>
-                <th style="padding: 4px 12px;" scope="col">NamaBrg</th>
+                <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                 <th style="padding: 4px 12px;" scope="col">Satuan</th>
                 <th style="padding: 4px 12px;" scope="col">Saldo Stock</th>
-                <th style="padding: 4px 12px;" scope="col">QntOpname</th>
+                <th style="padding: 4px 12px;" scope="col">Qty Opname</th>
 
               </tr>
             </thead>
 
-
             <tbody id="detailTableData" class="" >
               <tr>
-
                   <td colspan=5 class="text-center">Belum ada data</td>
-
             </tr>
-
             </tbody>
-
 
           </table>
     </div>
 
-
     <div class="col-md-12 mt-2 text-right">
-    <button id="buttonSubmitOtorisasi" type="button" class="btn btn-primary" onclick="submitOtorisasi()" class="btn btn-secondary" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;" >Otorisasi</button>
+      <button id="buttonSubmitOtorisasi" type="button" class="btn btn-primary" onclick="submitOtorisasi()" class="btn btn-secondary" style="height: 30px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;" >Otorisasi</button>
   </div>
 
 
@@ -1164,15 +1168,13 @@
       <div id= "" class="">
       <div class="modal-header">
 
-
           <h5 class="modal-title" id="">Tambah Item</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
 
-
-      <div id="" class="">
+      <div id="formBsGrid" class="">
       <div class="modal-body">
 
         <div class="container-fluid" >
@@ -1277,7 +1279,7 @@
 
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" style="
+        <button type="button" class="btn btn-danger" style="
           height: 30px;
           margin-top: -10px;
           padding: 4px 12px;
@@ -1287,7 +1289,7 @@
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" data-dismiss="modal" >Batal</button>
-        <button type="button" class="btn btn-primary" style="
+        <button type="button" class="btn btn-chip-biru" style="
           height: 30px;
           margin-top: -10px;
           padding: 4px 12px;
@@ -1296,7 +1298,7 @@
           font-weight: 600;
           text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAdd()">Submit</button>
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAdd()">Simpan</button>
       </div>
       </div>
 
@@ -1324,7 +1326,7 @@
       </div>
 
 
-      <div id="" class="">
+      <div id="formBsGrid" class="">
       <div class="modal-body">
 
         <div class="container-fluid" >
@@ -1694,9 +1696,18 @@ function baTabel2ActionsCell (row) {
 
 function baFilterRows (rows) {
   let status = $('#baStatus').val()
-  if (status === '') { return rows || [] }
+  let awal = $('#baTanggalAwal').val()
+  let akhir = $('#baTanggalAkhir').val()
   return (rows || []).filter(function (row) {
-    return String(Number(baPickCI(row, 'IsOtorisasi1'))) === status
+    if (status !== '' && String(Number(baPickCI(row, 'IsOtorisasi1'))) !== status) { return false }
+    if (awal || akhir) {
+      let tgl = baPickCI(row, 'Tanggal')
+      if (!tgl) { return false }
+      let t = String(tgl).slice(0, 10)
+      if (awal && t < awal) { return false }
+      if (akhir && t > akhir) { return false }
+    }
+    return true
   })
 }
 
@@ -2725,22 +2736,20 @@ function buttonDetail (nobukti, tipe = "detail") {
         // <td>${item.TipeTrans == 'BBK' ? item.Perkiraan : item.Lawan }</td>
         // <td>${item.TipeTrans == 'BBK' ?  item.NamaPerkiraan : item.NamaLawan }</td>
 
-              rowTable += `
-                <tr>
+        rowTable += `
+          <tr>
 
-                  <td>${item.kodebrg}</td>
-                  <td>${item.namaBrg}</td>
-                  <td class="text-center">${item.Satuan}</td>
-                  <td class="text-right">${item.SaldoComp ? formatAngka(parseFloat(item.SaldoComp).toFixed(2)) : '0.00'}</td>
-                  <td class="text-right">${formatAngka(parseFloat(item.QntOpname).toFixed(2))}</td></td>
+            <td>${item.kodebrg}</td>
+            <td>${item.namaBrg}</td>
+            <td class="text-center">${item.Satuan}</td>
+            <td class="text-right">${item.SaldoComp ? formatAngka(parseFloat(item.SaldoComp).toFixed(2)) : '0.00'}</td>
+            <td class="text-right">${formatAngka(parseFloat(item.QntOpname).toFixed(2))}</td></td>
 
+          </tr>
 
+        `
 
-                </tr>
-
-              `
-
-              // <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+        // <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
       });
 
       document.getElementById("detailTableData").innerHTML = rowTable

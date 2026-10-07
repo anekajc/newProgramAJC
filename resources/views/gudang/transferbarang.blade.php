@@ -651,10 +651,21 @@
 
             <div class="col-md-4" style="margin-top:-12px;">
               <div class="form-group">
-                <label>No Urut</label>
+                <label>Tanggal</label>
               </div>
             </div>
             <div class="col-md-8" style="margin-top:-12px;">
+              <div class="form-group">
+                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+              </div>
+            </div>
+
+            <div class="col-md-4" style="margin-top:-12px;" hidden>
+              <div class="form-group">
+                <label>No Urut</label>
+              </div>
+            </div>
+            <div class="col-md-8" style="margin-top:-12px;"hidden>
               <div class="form-group">
                 <input type="text" class="form-control text-center" id="input_add_nourut" placeholder="" readonly>
               </div>
@@ -662,17 +673,6 @@
             <div class="col-md-8" style="margin-top:-12px;" hidden>
               <div class="form-group">
                 <input type="text" class="form-control text-center" id="input_add_urut" placeholder="" readonly>
-              </div>
-            </div>
-
-            <div class="col-md-4" style="margin-top:-12px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-12px;">
-              <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
             
@@ -695,7 +695,7 @@
               </div>
             </div>
 
-            <div class="col-md-12" style="margin-top:-10px;">
+            <div class="col-md-12" style="margin-top:-22px;">
               <div class="form-group">
                 <textarea style="width: 100%; height:75px !important; resize: none;" rows=3 placeholder="Gudang Asal" class="form-control text-center align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
               </div>
@@ -711,7 +711,7 @@
                 <label>Gdg Tujuan</label>
               </div>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-9" >
               <div class="input-group mb-3">
                 <select class="form-control text-center" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
                   <option value="">-</option>
@@ -719,7 +719,7 @@
               </div>
             </div>
 
-            <div class="col-md-12" style="margin-top:-10px;">
+            <div class="col-md-12" style="margin-top:-22px;">
               <div class="form-group">
                 <textarea style="width: 100%; height:75px !important; resize: none;" rows=3 placeholder="Gudang Tujuan" class="form-control text-center align-items-center" id="input_add_namaGudangTujuan"  disabled></textarea>
               </div>
@@ -729,7 +729,7 @@
 
       <div class="col-md-3">
         <div class="row">
-          <div class="col-md-12" style="margin-top:-5px;">
+          <div class="col-md-12" style="margin-top:-15px;">
             <div class="form-group">
               <textarea style="width: 100%; height:120px !important; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
             </div>
@@ -1563,10 +1563,8 @@
   </div>
 </div>
 
-
             <div class="col-md-12">
               <div class="row">
-
 
               <div class="col-md-2">
                 <div class="row">
@@ -1576,7 +1574,6 @@
                   <label>Qty</label>
                 </div>
               </div>
-
 
             <div class="col-md-12">
               <div class="form-group">
@@ -6911,7 +6908,7 @@ function refreshDataTableAdd (NOBUKTI) {
             <td style="white-space:nowrap; text-align:center; vertical-align:middle;">${item.Satuan}</td>
             <td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTY).toLocaleString()}</td>
             ${showQtyTransfer ? `<td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTYTRANSFER || 0).toLocaleString()}</td>` : ''}
-            <td style="white-space:nowrap; text-align:center; vertical-align:middle;">
+            <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
               <input
                 type="number"
                 class="form-control text-right"
@@ -7031,11 +7028,11 @@ function refreshDataTableEdit (NOBUKTI) {
                   style="white-space:nowrap; text-align:right; vertical-align:middle;">
                   ${sisa}
               </td>
-              <td style="white-space:nowrap; text-align:center; vertical-align:middle;">
-                <input 
+              <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
+                <input
                   type="number"
                   class="form-control text-right"
-                  id="input_table_qty${item.URUT}" 
+                  id="input_table_qty${item.URUT}"
                   step="any"
                   min="0"
                   value="${qnt > 0 ? qnt : ''}"
