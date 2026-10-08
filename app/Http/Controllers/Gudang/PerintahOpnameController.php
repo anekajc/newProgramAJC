@@ -12,9 +12,6 @@ use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 
-
-
-
 class PerintahOpnameController extends Controller
 
 
@@ -33,11 +30,10 @@ class PerintahOpnameController extends Controller
 
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
+    $date1 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+    $date2 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
 
-    $tempOutstanding = DB::connection("SML")->select("declare @Tahun int, @Bulan int
-
-select @Tahun= :tahun , @Bulan=:bulan
-
+    $tempOutstanding = DB::connection("SML")->select("
 select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*
 ,
         Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
@@ -51,10 +47,10 @@ from DBPerintahOp A
 left outer join DBHDGROUP b on b.KODEHDGRP=a.KodeHdGrp
 left outer join DBSubGroup c on c.KodeSubGrp=a.KodeSubGrp  and C.KodeHDGrp=C.KodeGrp
 left outer join DBMERK d on d.KODEMERK=a.KodeMerk
-where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 0
+where CAST(A.Tanggal as date) between :date1 and :date2 and A.IsOtorisasi1 = 0
 order by A.NoBukti
 
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
+" , ["date1" => $date1 , "date2" => $date2]);
         // $tempOutstanding = [];
         // foreach ($outstanding as $p) {
         //   // code...
@@ -68,26 +64,23 @@ order by A.NoBukti
           // code...
           array_push($tempOutstanding1, $p);
         }
-    
-    $tempPenerimaan = DB::connection("SML")->select("
-        declare @Tahun int, @Bulan int
-        select @Tahun= :tahun , @Bulan=:bulan
 
+    $tempPenerimaan = DB::connection("SML")->select("
         select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*,
-            Cast(Case when 
+            Cast(Case when
                 (Case when A.IsOtorisasi1=1 then 1 else 0 end+
                  Case when A.IsOtorisasi2=1 then 1 else 0 end+
                  Case when A.IsOtorisasi3=1 then 1 else 0 end+
                  Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                 Case when A.IsOtorisasi5=1 then 1 else 0 end) = A.MaxOL 
+                 Case when A.IsOtorisasi5=1 then 1 else 0 end) = A.MaxOL
                  then 0 else 1 end As Bit) NeedOtorisasi
         from DBPerintahOp A
         left outer join DBHDGROUP b on b.KODEHDGRP=a.KodeHdGrp
         left outer join DBSubGroup c on c.KodeSubGrp=a.KodeSubGrp and c.KodeHDGrp=c.KodeGrp
         left outer join DBMERK d on d.KODEMERK=a.KodeMerk
-        where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 1
+        where CAST(A.Tanggal as date) between :date1 and :date2 and A.IsOtorisasi1 = 1
         order by A.NoBukti
-    ", ["tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
+    ", ["date1" => $date1 , "date2" => $date2]);
 
     $collection2 = collect($tempPenerimaan)->groupBy('NoBukti');
     $tempPenerimaan1 = [];
@@ -98,22 +91,22 @@ order by A.NoBukti
     return view('gudang.perintahopname' , [
       "menul0"            => $menul0,
       "periode"           => $periode,
-      "tempOutstanding"   => $tempOutstanding1,   
-      "tempPenerimaan"  => $tempPenerimaan1,  
+      "tempOutstanding"   => $tempOutstanding1,
+      "tempPenerimaan"  => $tempPenerimaan1,
       "akses"             => $akses
     ]);
 
   }
 
-  public function loadAll () {
+  public function loadAll (Request $req) {
 
 
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-    $tempOutstanding = DB::connection("SML")->select("declare @Tahun int, @Bulan int
+    $date1 = $req->date1 ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
+    $date2 = $req->date2 ?: \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
 
-select @Tahun= :tahun , @Bulan=:bulan
-
+    $tempOutstanding = DB::connection("SML")->select("
 select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*
 ,
         Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
@@ -127,10 +120,10 @@ from DBPerintahOp A
 left outer join DBHDGROUP b on b.KODEHDGRP=a.KodeHdGrp
 left outer join DBSubGroup c on c.KodeSubGrp=a.KodeSubGrp  and C.KodeHDGrp=C.KodeGrp
 left outer join DBMERK d on d.KODEMERK=a.KodeMerk
-where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 0
+where CAST(A.Tanggal as date) between :date1 and :date2 and A.IsOtorisasi1 = 0
 order by A.NoBukti
 
-" , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
+" , ["date1" => $date1 , "date2" => $date2]);
         // $tempOutstanding = [];
         // foreach ($outstanding as $p) {
         //   // code...
@@ -146,24 +139,21 @@ order by A.NoBukti
         }
 
         $tempPenerimaan = DB::connection("SML")->select("
-        declare @Tahun int, @Bulan int
-        select @Tahun= :tahun , @Bulan=:bulan
-
         select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*,
-            Cast(Case when 
+            Cast(Case when
                 (Case when A.IsOtorisasi1=1 then 1 else 0 end+
                  Case when A.IsOtorisasi2=1 then 1 else 0 end+
                  Case when A.IsOtorisasi3=1 then 1 else 0 end+
                  Case when A.IsOtorisasi4=1 then 1 else 0 end+
-                 Case when A.IsOtorisasi5=1 then 1 else 0 end) = A.MaxOL 
+                 Case when A.IsOtorisasi5=1 then 1 else 0 end) = A.MaxOL
                  then 0 else 1 end As Bit) NeedOtorisasi
         from DBPerintahOp A
         left outer join DBHDGROUP b on b.KODEHDGRP=a.KodeHdGrp
         left outer join DBSubGroup c on c.KodeSubGrp=a.KodeSubGrp and c.KodeHDGrp=c.KodeGrp
         left outer join DBMERK d on d.KODEMERK=a.KodeMerk
-        where year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan and A.IsOtorisasi1 = 1
+        where CAST(A.Tanggal as date) between :date1 and :date2 and A.IsOtorisasi1 = 1
         order by A.NoBukti
-    ", ["tahun" =>$periode->tahun , "bulan" => $periode->bulan]);
+    ", ["date1" => $date1 , "date2" => $date2]);
 
     $collection2 = collect($tempPenerimaan)->groupBy('NoBukti');
     $tempPenerimaan1 = [];
@@ -173,7 +163,7 @@ order by A.NoBukti
 
     return [
         "tempOutstanding" => $tempOutstanding1,
-        "tempPenerimaan"  => $tempPenerimaan1 
+        "tempPenerimaan"  => $tempPenerimaan1
     ];
   }
 

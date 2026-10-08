@@ -5543,7 +5543,9 @@ function buttonTerimaAcc (kodeInvoice, kodeCust, tglAcc){
 
 function formatTanggal(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toISOString().split('T')[0]; // "2024-01-15"
+    var d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    return d.toISOString().split('T')[0]; // "2024-01-15"
 }
 </script>
 
