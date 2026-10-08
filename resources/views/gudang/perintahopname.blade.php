@@ -685,11 +685,9 @@
               </div> -->
             <div class="col-md-8">
               <div class="input-group form-group">
-                <input id="input_add_gudang" type="text" class="form-control" disabled>
-                <button id="buttonAddListGudang" type="button" onclick="buttonAddListGudang()" class="btn btn-chip-biru"><i class="bi bi-search"></i></button>
-
-                <!-- <button id="buttonAddListValas" type="button" onclick="buttonAddListValas()" class="btn btn-primary" disabled >+</button> -->
-
+                <select id="input_add_gudang" class="form-control" disabled>
+                  <option value="">- Pilih Gudang -</option>
+                </select>
               </div>
             </div>
           </div>
@@ -775,12 +773,6 @@
 </div>
 
     </div>
-
-
-
-
-
-
 
 
   </div>
@@ -1263,7 +1255,7 @@
       </div>
 
 
-      <div id="formBsGrid" class="">
+      <div id="formBsGrid" style='margin-top:-25px;'>
       <div class="modal-body">
 
         <div class="container-fluid" >
@@ -1544,6 +1536,7 @@ let tempDataAdd = []
  * loadAll() (res.tempOutstanding[i][0].NoBukti). opPickCI() karena itu selalu
  * dipanggil dengan row[0], bukan row.
  */
+
 let opCart = []
 const OP_HREF = 'perintahopname'
 const OP_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
@@ -1563,7 +1556,6 @@ function opDefaultCart () {
   return [
     ['NoBukti',      'No. Bukti',   1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
-    ['IsOtorisasi1', 'Status',      1, 'bool',    0, 0],
     ['Keterangan',   'Keterangan',  1, 'varchar', 0, 0],
     ['KodeGdg',      'Gudang',      1, 'varchar', 0, 0],
     ['KodeHdGrp',    'Kode Hdgrp',  1, 'varchar', 0, 0],
@@ -1572,6 +1564,7 @@ function opDefaultCart () {
     ['NamaSubGrp',   'Nama Subgrp', 1, 'varchar', 0, 0],
     ['KodeMerk',     'Kode Merk',   1, 'varchar', 0, 0],
     ['NAMAMERK',     'Merk',        1, 'varchar', 0, 0],
+    ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'OtoUser',     1, 'varchar', 0, 0],
     ['TglOto1',      'TglOto',      1, 'date',    0, 0],
   ]
@@ -1711,8 +1704,8 @@ function opValueCell (row, col) {
   }
   if (type === 'bool') {
     return Number(raw)
-      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
-      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1753,7 +1746,7 @@ function opFilterRows (rows) {
 }
 
 function opFilterChanged () {
-  reinitTabel()
+  loadAll()
 }
 
 function renderTabelRows (rows) {
@@ -1840,6 +1833,8 @@ $(document).ready(function(){
 
       opInitReportTableSekali();
 
+      loadGudangOptions();
+
         // $('.mainpage').hide()
         // $('#page2').show()
         //
@@ -1875,10 +1870,16 @@ function buttonAddListBatal () {
 
 function loadAll () {
   console.log('loadall')
+  let awal = $('#opTanggalAwal').val()
+  let akhir = $('#opTanggalAkhir').val()
   $.ajax({
     url: "{!! url('perintahopnameloadall') !!}",
     type: "get",
     async: false,
+    data: {
+      date1: awal,
+      date2: akhir
+    },
     success: function(res) {
       console.log(res)
 
@@ -2652,7 +2653,7 @@ function buttonAddItem () {
           <td>${item.KodeBrg}</td>
           <td>${item.NamaBrg}</td>
           <td class="text-center">${item.Satuan}</td>
-          <td class="text-right">${item.Qnt1 ? parseFloat(item.Qnt1).toFixed(2) : ''}</td>
+          <td class="text-right">${item.Qnt1 ? parseFloat(item.Qnt1).toFixed(2) : '0'}</td>
           </tr>`
         });
 
@@ -3153,14 +3154,6 @@ function buttonDeleteItem (index) {
 }
 
 
-function buttonAddPickGudang (index, kode,nama) {
-
-
-  document.getElementById("input_add_gudang").value = kode
-          $("#form").modal('toggle')
-
-}
-
 function buttonAddPickKategori (index, kode,nama) {
 
   document.getElementById("input_add_kodesubkategori").value = '-'
@@ -3457,7 +3450,7 @@ function buttonAddListHeadGroup () {
 
 }
 
-function buttonAddListGudang () {
+function loadGudangOptions () {
   let _token = $("#_token").val();
 
   $.ajax({
@@ -3468,52 +3461,17 @@ function buttonAddListGudang () {
       _token,
     },
     success: function(res) {
-      console.log(res)
-      // listLawan  = res
-      let rowTable = `
-      <tr class="pick-row" onclick="buttonAddPickGudang('-','-' , '-'  )">
-      <td>-</td>
-      <td>-</td>
-      </tr>
-      `
-      res.forEach((item, i) => {
-        rowTable += `
-        <tr class="pick-row" onclick="buttonAddPickGudang(${i},'${item.KodeGdg}' , '${item.Nama}'  )">
-        <td>${item.KodeGdg}</td>
-        <td>${item.Nama}</td>
-        </tr>`
+      let options = '<option value="">- Pilih Gudang -</option>'
+      res.forEach((item) => {
+        options += `<option value="${item.KodeGdg}">${item.KodeGdg} - ${item.Nama}</option>`
       });
-
-
-
-
-
-
-      // if(!res.length) {
-      //   rowTable= `<tr><td class="text-center" colspan=5>Tidak ada data</td></tr>`
-      // }
-      document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable
-      pickerKasInit('tabel_add_list_gudang', { order: [[0, 'asc']] })
-
-      document.getElementById("modalAddListGudangTitle").innerHTML= 'Gudang'
-      if (res.length) {
-
-        $('.showhidemodalbodyadd').hide();
-        $('#modalAddListGudang').show();
-        $("#form").modal('toggle')
-      } else {
-        alertify.warning("Gudang tidak ditemukkan")
-      }
-
-
+      document.getElementById("input_add_gudang").innerHTML = options
     },
     error: function (err) {
       console.log(err)
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
-
   })
-
 }
 
 function lockForm (value = false) {
@@ -3522,7 +3480,7 @@ function lockForm (value = false) {
   document.getElementById("input_add_tanggalcutoff").disabled = value
   document.getElementById("input_add_keterangan").disabled = value
   document.getElementById("buttonAddListHeadGroup").disabled = value
-  document.getElementById("buttonAddListGudang").disabled = value
+  document.getElementById("input_add_gudang").disabled = value
   document.getElementById("buttonAddListMerk").disabled = value
   document.getElementById("buttonAddListKategori").disabled = value
   document.getElementById("buttonAddListSubKategori").disabled = value
@@ -3535,7 +3493,7 @@ function cleanFormAdd () {
   document.getElementById("input_add_tanggalcutoff").value = ''
   document.getElementById("input_add_keterangan").value = ''
   document.getElementById("input_add_kodehdgrp").value = '-'
-  document.getElementById("input_add_gudang").value = '-'
+  document.getElementById("input_add_gudang").value = ''
   document.getElementById("input_add_kodemerk").value = '-'
   document.getElementById("input_add_kodesubkategori").value = '-'
   document.getElementById("input_add_kodekategori").value = '-'

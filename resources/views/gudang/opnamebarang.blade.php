@@ -525,6 +525,12 @@
             <div class="col-md-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="obFilterChanged()" class="po-filter-inp" id="obTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="obFilterChanged()" class="po-filter-inp" id="obTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="obSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
                     <label for="obLen2">Tampilkan</label>
@@ -1597,12 +1603,12 @@ function obDefaultCart (urut) {
     return [
       ['Nobukti',      'No. Bukti',      1, 'varchar', 0, 0],
       ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-      ['IsOtorisasi1', 'Status',         1, 'bool',    0, 0],
       ['NoPerintahOP', 'No Perintah OP', 1, 'varchar', 0, 0],
       ['NamaGdg',      'Gudang',         1, 'varchar', 0, 0],
       ['NamaSubGrp',   'SubGrp',         1, 'varchar', 0, 0],
       ['NAMAMERK',     'Merk',           1, 'varchar', 0, 0],
       ['NAMAHDGRP',    'HeadGrp',        1, 'varchar', 0, 0],
+      ['IsOtorisasi1', 'Otorisasi',      1, 'bool',    0, 0],
       ['OtoUser1',     'OtoUser',        1, 'varchar', 0, 0],
       ['TglOto1',      'TglOto',         1, 'date',    0, 0],
     ]
@@ -1772,8 +1778,8 @@ function obValueCell (row, col) {
   }
   if (type === 'bool') {
     return Number(raw)
-      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
-      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1804,9 +1810,18 @@ function obTabel2ActionsCell (row) {
 
 function obFilterRows (rows) {
   let status = $('#obStatus').val()
-  if (status === '') { return rows || [] }
+  let awal = $('#obTanggalAwal').val()
+  let akhir = $('#obTanggalAkhir').val()
   return (rows || []).filter(function (row) {
-    return String(Number(obPickCI(row, 'IsOtorisasi1'))) === status
+    if (status !== '' && String(Number(obPickCI(row, 'IsOtorisasi1'))) !== status) { return false }
+    if (awal || akhir) {
+      let tgl = obPickCI(row, 'Tanggal')
+      if (!tgl) { return false }
+      let t = String(tgl).slice(0, 10)
+      if (awal && t < awal) { return false }
+      if (akhir && t > akhir) { return false }
+    }
+    return true
   })
 }
 
@@ -1922,6 +1937,15 @@ $(document).ready(function(){
       obAktifkanTabel(1);
 
       obInitReportTableSekali();
+
+      $('#nav-home-tab').on('shown.bs.tab', function () {
+        obAktifkanTabel(1);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+      });
+      $('#nav-profile-tab').on('shown.bs.tab', function () {
+        obAktifkanTabel(2);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+      });
 });
 
 
