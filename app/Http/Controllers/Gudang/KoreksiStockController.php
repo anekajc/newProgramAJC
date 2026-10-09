@@ -11,7 +11,6 @@ use App\Model\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
-
 class KoreksiStockController extends Controller
 {
 

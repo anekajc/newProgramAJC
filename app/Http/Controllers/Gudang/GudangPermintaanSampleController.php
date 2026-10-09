@@ -137,8 +137,8 @@ class GudangPermintaanSampleController extends Controller
     " , ["tahun" =>$periode->tahun , "bulan" => $periode->bulan ]);
 
     // Grouping pakai Collection
-    $listData = collect($tempOutstanding)->groupBy('NOBUKTI');
-    $listData3 = collect($tempOutstanding3)->groupBy('NOBUKTI');
+    $listData = collect($tempOutstanding)->groupBy('NOBUKTI')->values();
+    $listData3 = collect($tempOutstanding3)->groupBy('NOBUKTI')->values();
 
     return view('gudang.gudangpermintaansample' , [
       "menul0" => $menul0,
