@@ -228,28 +228,9 @@
 </style>
 
 
-{{-- tampilan search modal barang all --}}
-  <style>
-    #input_search_barang_all {
-      width: 150px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      box-shadow: none;
-      font-size: 0.65rem;
-      display: flex;
-      align-items: flex-end;
-      margin-left: 95px;
-    }
-    .search-label {
-    font-weight: bold;
-    font-size: 0.75rem;
-    margin-right: 155px;
-    margin-top : -45px;
-    display: inline-block;
-    vertical-align: middle;
-    }
-  </style>
-{{-- end tampilan search modal barang all --}}
+{{-- Search bar hardcoded modal Barang All dihapus -- sekarang pakai satu-satunya
+     search box native DataTables (hasil pickerKasInit), lihat searchBarangAll()
+     di @section('js') yang sekarang diikat ke #tabel_add_list_barangall_filter input. --}}
 
 {{-- tampilan search bar 1 --}}
   <style>
@@ -454,7 +435,7 @@
             <i class="bi bi-funnel"></i> Filter
           </button>
           <div class="po-toolbar-act">
-            <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">+ Koreksi Stock</button>
+            <button class="btn btn-chip-biru" type="button" onclick="buttonAdd()">Tambah</button>
           </div>
         </div>
 
@@ -462,7 +443,7 @@
           <div class="modal-dialog modal-md">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                <h5 class="modal-title"><i class="bi bi-funnel"></i>Filter Data</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterKS').modal('hide')"><span aria-hidden="true">&times;</span></button>
               </div>
               <div class="modal-body">
@@ -658,8 +639,8 @@
               <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
               <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
               <th style="padding: 4px 12px;" scope="col">Sat</th>
-              <th style="padding: 4px 12px;" scope="col">Debet</th>
-              <th style="padding: 4px 12px;" scope="col">Kredit</th>
+              <th style="padding: 4px 12px;" scope="col">Qty Debet</th>
+              <th style="padding: 4px 12px;" scope="col">Qty Kredit</th>
               <th style="padding: 4px 12px;" scope="col">Harga</th>
               <th style="padding: 4px 12px;" scope="col">Total</th>
               <th style="padding: 4px 12px;" scope="col">Actions</th>
@@ -1047,8 +1028,8 @@
                 <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                 <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                 <th style="padding: 4px 12px;" scope="col">Sat</th>
-                <th style="padding: 4px 12px;" scope="col">Debet</th>
-                <th style="padding: 4px 12px;" scope="col">Kredit</th>
+                <th style="padding: 4px 12px;" scope="col">Qty Debet</th>
+                <th style="padding: 4px 12px;" scope="col">Qty Kredit</th>
                 <th style="padding: 4px 12px;" scope="col">Harga</th>
                 <th style="padding: 4px 12px;" scope="col">Total</th>
 
@@ -1126,17 +1107,13 @@
 
         <div class="container-fluid mt-4" >
           <div class="row">
-            <div id="modalBodyAddAddListBarangAllTitle" class="col-md-9" style="">
+            <div id="modalBodyAddAddListBarangAllTitle" class="col-12" style="">
               {{-- <h3>Barang All</h3> --}}
-            </div>
-            <div class="col-3 text-right form-group" style="margin-top:-30px;">
-              <input id="input_search_barang_all" type="text" name="" value="" class="form-control" onkeypress="searchBarangAll(event)">
-              <label for="input_search_barang_all" class="search-label">SEARCH:</label>
             </div>
           </div>
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <div class="col-12" style="overflow:auto; margin-top:-40px;">
+            <div class="col-12" style="overflow:auto; margin-top:-10px;">
             <!-- <div class="container-fluid"> -->
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center">
@@ -1318,11 +1295,12 @@ function ksPickCI (row, key) {
 
 function ksDefaultCart (urut) {
   return [
-    ['GroupNobukti',  'No. Bukti', 1, 'varchar', 0, 0],
+    ['Nobukti',       'No Bukti',  1, 'varchar', 0, 0],
+    ['NamaGdg',       'Gudang',    1, 'varchar', 0, 0],
     ['Tanggal',       'Tanggal',   1, 'date',    0, 0],
-    ['IsOtorisasi1',  'Status',    1, 'bool',    0, 0],
+    ['IsOtorisasi1',  'Otorisasi', 1, 'bool',    0, 0],
     ['OtoUser1',      'OtoUser',   1, 'varchar', 0, 0],
-    ['TglOto1',       'TglOto',    1, 'date',    0, 0],
+    ['TglOto1',       'TglOto',    1, 'date',    0, 0]
   ]
 }
 
@@ -1476,8 +1454,8 @@ function ksValueCell (row, col) {
   }
   if (type === 'bool') {
     return Number(raw)
-      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
-      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1595,6 +1573,13 @@ $(document).ready(function(){
       ksInitReportTableSekali();
 
       loadGudangOptions();
+
+      {{-- Box "Search:" bawaan DataTables di modal Barang All dibuat ulang setiap
+           pickerKasInit() memanggil .destroy(), jadi diikat via delegated event
+           supaya tetap jalan walau elemennya diganti. --}}
+      {{-- keyup dipakai (bukan keypress) -- input bawaan DataTables type="search"
+           tidak selalu memicu event keypress saat Enter ditekan di semua browser. --}}
+      $(document).on('keyup', '#tabel_add_list_barangall_filter input', searchBarangAll);
 });
 
 
@@ -1602,8 +1587,7 @@ function onKeyPressBarang (e) {
   if (e.which === 13) {
     let _token = $("#_token").val()
     let kodebrg = $('#AddAddKodeBrg').val();
-    document.getElementById("input_search_barang_all").value = kodebrg
-    let search = $("#input_search_barang_all").val();
+    let search = kodebrg
     console.log(search)
     let gudang = $("#input_add_gudang").val();
 
@@ -2834,12 +2818,16 @@ function lockForm (value = false) {
 
 
 
+{{-- Dulu diikat ke box search hardcoded (#input_search_barang_all) yang terpisah
+     dari box "Search:" bawaan DataTables di modal ini -- sekarang diikat langsung
+     ke box bawaan itu (#tabel_add_list_barangall_filter input), lihat binding
+     delegated di $(document).ready() di bawah. --}}
 function searchBarangAll (e) {
   let _token = $("#_token").val()
   if (e.which == 13) {
     console.log('enter')
 
-    let search = $("#input_search_barang_all").val();
+    let search = e.target.value;
     let gudang = $("#input_add_gudang").val();
 
     $.ajax({
@@ -2890,14 +2878,13 @@ function buttonAddListBarang () {
     document.getElementById("tabel_data_add_list_barangall").innerHTML = ''
     pickerKasInit('tabel_add_list_barangall', { order: [[0, 'asc']] })
 
-    document.getElementById("input_search_barang_all").value = ''
     $("#form").modal('toggle')
 
 
     document.getElementById("modalBodyAddAddListBarangAllTitle").scrollIntoView();
 
     $('#form').on('shown.bs.modal', function () {
-    $('#input_search_barang_all').trigger('focus')
+    $('#tabel_add_list_barangall_filter input').trigger('focus')
     })
 }
 
