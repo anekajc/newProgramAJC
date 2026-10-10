@@ -2657,7 +2657,6 @@ function buttonAddItem () {
           </tr>`
         });
 
-
         $('#tabel_add_list_modal').DataTable().destroy();
         document.getElementById("tabel_data_add_list_modal").innerHTML = rowTable
 
@@ -2669,7 +2668,6 @@ function buttonAddItem () {
       });
 
       $("#formAddItem").modal('toggle');
-
 
 
       },
