@@ -177,6 +177,26 @@
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
+{{-- Badge kolom Status (IsOtorisasi1) di tabel KRS gabungan -- hijau untuk Sudah
+     Otorisasi, amber untuk Belum Otorisasi, warna sama dengan palet btn-success/
+     btn-warning di atas (sama seperti gudangpermintaansample.blade.php). --}}
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.status-badge-sudah {
+  color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed;
+}
+.status-badge-belum {
+  color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0;
+}
+
 {{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary text-white --
      diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua halaman. --}}
 #addTable thead th,
@@ -650,14 +670,13 @@
 
 
           <tbody id="addTableData" class="" >
-            <tr >
+            <tr>
 
                 <td colspan=8 class="text-center">Belum ada data</td>
 
           </tr>
 
           </tbody>
-
 
         </table>
   </div>
@@ -684,15 +703,6 @@
       <h4 id="labelEditItem">Edit Item</h4>
     </div>
   </div>
-
-
-
-
-
-
-
-
-
 
 <div class="row" style="margin-top: -10px">
 <div class="col-md-3">
@@ -763,7 +773,7 @@
           <div class="row" >
             <div class="col-md-8" style="padding-right: 0px">
               <div class="input-group form-group">
-                <input id="AddAddQntDb" type="number" class="form-control text-right" onblur="onchangeqntdb()">
+                <input id="AddAddQntDb" type="text" inputmode="decimal" class="form-control text-right" oninput="formatAngkaInput(event)" onblur="onchangeqntdb()">
                 <!-- <input id="AddAddQntDbSat" type="text" class="form-control" style="width: 5px"  disabled> -->
 
               </div>
@@ -799,7 +809,7 @@
         <div class="row" >
           <div class="col-md-8" style="padding-right: 0px">
             <div class="input-group form-group">
-              <input id="AddAddQntCr" type="number" class="form-control text-right" onblur="onchangeqntcr()">
+              <input id="AddAddQntCr" type="text" inputmode="decimal" class="form-control text-right" oninput="formatAngkaInput(event)" onblur="onchangeqntcr()">
               <!-- <input id="AddAddQntCrSat" type="text" class="form-control" style="width: 5px"  disabled> -->
 
             </div>
@@ -836,7 +846,7 @@
         <div class="col-md-8" >
 
           <div class="input-group form-group">
-            <input id="AddAddHarga" type="number" class="form-control text-right" >
+            <input id="AddAddHarga" type="text" inputmode="decimal" class="form-control text-right" oninput="formatAngkaInput(event)">
             <!-- <input id="AddAddQntCrSat" type="text" class="form-control" style="width: 5px"  disabled> -->
 
           </div>
@@ -1118,8 +1128,8 @@
             <table id="tabel_add_list_barangall" class="table table-bordered table-hover table-striped table-responsive-lg">
               <thead class="text-center">
                 <tr>
-                  <th style="padding: 4px 12px;" scope="col">Kode</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama</th>
+                  <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
+                  <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add_list_barangall" class="text-left" >
@@ -1271,6 +1281,35 @@ let itemEdit = {}
 let listBarang = []
 let barangx = {}
 
+/* ============ Separator ribuan untuk AddAddQntDb/AddAddQntCr/AddAddHarga ============
+ * Field-field ini sekarang type="text" (bukan type="number", yang tidak bisa
+ * menampilkan titik ribuan) + oninput="formatAngkaInput(event)" supaya tampilannya
+ * "12.312" / "123.123,50" gaya id-ID. Field disimpan sebagai STRING berformat di
+ * DOM, jadi setiap tempat yang baca .val() untuk perhitungan/submit WAJIB lewat
+ * parseAngka() dulu (buang titik ribuan, ganti koma desimal jadi titik) supaya
+ * Number(...) dan proses submit ke backend tetap dapat angka mentah yang benar --
+ * bukan string "12.312" yang kalau di-Number()-kan langsung akan salah jadi 12.312
+ * (dibaca sebagai 12 koma 312, bukan 12 ribu 312). */
+function parseAngka (str) {
+  if (str === undefined || str === null || str === '') { return 0; }
+  let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function formatAngkaDisplay (n, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function formatAngkaInput (e) {
+  let el = e.target;
+  let parts = el.value.replace(/[^\d,]/g, '').split(',');
+  let intPart = parts[0].replace(/^0+(?=\d)/, '');
+  let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+  let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+  el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+}
+
 /* ============ Header tabel interaktif (window.ReportTable) ============
  * Port 1:1 dari pola opCart/opAktifkanTabel milik perintahopname.blade.php, untuk
  * satu tabel di halaman ini (#tabel -- KRS Belum+Sudah Otorisasi digabung jadi
@@ -1298,7 +1337,7 @@ function ksDefaultCart (urut) {
     ['Nobukti',       'No Bukti',  1, 'varchar', 0, 0],
     ['NamaGdg',       'Gudang',    1, 'varchar', 0, 0],
     ['Tanggal',       'Tanggal',   1, 'date',    0, 0],
-    ['IsOtorisasi1',  'Otorisasi', 1, 'bool',    0, 0],
+    ['IsOtorisasi1',  'Status',    1, 'bool',    0, 0],
     ['OtoUser1',      'OtoUser',   1, 'varchar', 0, 0],
     ['TglOto1',       'TglOto',    1, 'date',    0, 0]
   ]
@@ -1443,6 +1482,14 @@ function ksValueCell (row, col) {
   let raw = ksPickCI(row, col[0]);
   let type = col[3];
 
+  {{-- Kolom Status (IsOtorisasi1) dirender sebagai badge hijau (Sudah Otorisasi)
+       atau amber (Belum Otorisasi), bukan ikon check/x bool biasa -- sama seperti
+       gudangpermintaansample.blade.php. --}}
+  if (col[0] === 'IsOtorisasi1') {
+    return Number(raw) === 1
+      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
+      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+  }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
     return '<td>' + formatDate(raw, '/') + '</td>';
@@ -1643,8 +1690,8 @@ function buttonAddBatal () {
 
 
 function onchangeqntdb () {
-    let qnt = $("#AddAddQntDb").val()
-    if (Number(qnt) == 0) {
+    let qnt = parseAngka($("#AddAddQntDb").val())
+    if (qnt == 0) {
       document.getElementById("AddAddQntCr").disabled = false
     } else {
       document.getElementById("AddAddQntCr").disabled = true
@@ -1653,8 +1700,8 @@ function onchangeqntdb () {
 
 function onchangeqntcr () {
 
-    let qnt = $("#AddAddQntCr").val()
-    if (Number(qnt) == 0) {
+    let qnt = parseAngka($("#AddAddQntCr").val())
+    if (qnt == 0) {
       document.getElementById("AddAddQntDb").disabled = false;
       document.getElementById("AddAddHarga").disabled = false;
     } else {
@@ -2634,9 +2681,9 @@ function submitAddItem () {
   let gudang = $("#input_add_gudang").val();
   let keterangan = $("#input_add_keterangan").val();
 
-  let qntcr = $("#AddAddQntCr").val();
-  let harga = $("#AddAddHarga").val();
-  let qntdb = $("#AddAddQntDb").val();
+  let qntcr = parseAngka($("#AddAddQntCr").val());
+  let harga = parseAngka($("#AddAddHarga").val());
+  let qntdb = parseAngka($("#AddAddQntDb").val());
   let satuan = $("#AddAddQntDbSat").val();
   let qntsaldo = Number(barangx.QntSaldo) ? barangx.QntSaldo : '0.00'
   let selisih = Number(qntcr) > 0 ? qntcr : qntdb
@@ -2898,9 +2945,9 @@ function buttonAddPickBarang (index , x = 0) {
   document.getElementById("AddAddNamaBrg").value = barangx.NamaBrg
   document.getElementById("AddAddQntCrSat").value = barangx.Sat1
   document.getElementById("AddAddQntDbSat").value = barangx.Sat1
-  document.getElementById("AddAddQntDb").value = '0.00'
-  document.getElementById("AddAddQntCr").value = '0.00'
-  document.getElementById("AddAddHarga").value = '0.00'
+  document.getElementById("AddAddQntDb").value = formatAngkaDisplay(0)
+  document.getElementById("AddAddQntCr").value = formatAngkaDisplay(0)
+  document.getElementById("AddAddHarga").value = formatAngkaDisplay(0)
 
   if (x == 1) {
     return
@@ -2926,11 +2973,11 @@ function lockFormAddItem (value = false) {
 function cleanFormAddItem () {
   document.getElementById("AddAddKodeBrg").value = ''
   document.getElementById("AddAddNamaBrg").value = ''
-  document.getElementById("AddAddQntCr").value = '0.00'
-  document.getElementById("AddAddQntDb").value = '0.00'
+  document.getElementById("AddAddQntCr").value = formatAngkaDisplay(0)
+  document.getElementById("AddAddQntDb").value = formatAngkaDisplay(0)
   document.getElementById("AddAddQntCrSat").value = ''
   document.getElementById("AddAddQntDbSat").value = ''
-  document.getElementById("AddAddHarga").value = '0.00'
+  document.getElementById("AddAddHarga").value = formatAngkaDisplay(0)
 
 
 }
@@ -3113,9 +3160,9 @@ function submitEditItem () {
   let gudang = $("#input_add_gudang").val();
   let keterangan = $("#input_add_keterangan").val();
 
-  let qntcr = $("#AddAddQntCr").val();
-  let harga = $("#AddAddHarga").val();
-  let qntdb = $("#AddAddQntDb").val();
+  let qntcr = parseAngka($("#AddAddQntCr").val());
+  let harga = parseAngka($("#AddAddHarga").val());
+  let qntdb = parseAngka($("#AddAddQntDb").val());
   let satuan = $("#AddAddQntDbSat").val();
   let qntsaldo = Number(itemEdit.SaldoComp) ? itemEdit.SaldoComp : '0.00'
   let selisih = Number(qntcr) > 0 ? qntcr : qntdb
@@ -3218,11 +3265,11 @@ function buttonEditItem (index) {
   document.getElementById("AddAddKodeBrg").value = itemEdit.kodebrg
 
   document.getElementById("AddAddNamaBrg").value = itemEdit.namaBrg
-  document.getElementById("AddAddQntCr").value = parseFloat(itemEdit.QntCr).toFixed(2)
+  document.getElementById("AddAddQntCr").value = formatAngkaDisplay(itemEdit.QntCr)
   document.getElementById("AddAddQntCrSat").value = itemEdit.Satuan
-  document.getElementById("AddAddQntDb").value = parseFloat(itemEdit.Qntdb).toFixed(2)
+  document.getElementById("AddAddQntDb").value = formatAngkaDisplay(itemEdit.Qntdb)
   document.getElementById("AddAddQntDbSat").value = itemEdit.Satuan
-  document.getElementById("AddAddHarga").value = parseFloat(itemEdit.Harga).toFixed(2)
+  document.getElementById("AddAddHarga").value = formatAngkaDisplay(itemEdit.Harga)
   document.getElementById("AddAddKodeBrg").disabled = true
 
   if (Number(itemEdit.QntCr)) {

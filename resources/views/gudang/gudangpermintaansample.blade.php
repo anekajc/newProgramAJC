@@ -9,16 +9,8 @@
   @section('css')
 
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
-
-{{-- Modal pemilih Customer/Sales/Gudang/Barang disamakan persis dengan modal pemilih
-     menu Kas -- lihat public/css/picker-kas.css, sama seperti so.blade.php/
-     perintahopname.blade.php. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
-{{-- Port 1:1 ke UI SO -- @extends newmasterTest (bukan lagi gudang.newmaster), custom-tabs
-     pill bar, po-toolbar, dan report-table.js column engine untuk #tabel (PRS Belum+
-     Sudah Otorisasi digabung) dan #tabel2 (OutStanding), sama seperti beritaacaraopname.
-     blade.php/perintahopname.blade.php. --}}
 <style>
 .custom-tabs {
   display: inline-flex;
@@ -176,9 +168,9 @@
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
-{{-- Badge kolom Status (IsOtorisasi1) di tabel PRS gabungan -- hijau untuk Sudah
+/* {{-- Badge kolom Status (IsOtorisasi1) di tabel PRS gabungan -- hijau untuk Sudah
      Otorisasi, amber untuk Belum Otorisasi, warna sama dengan palet btn-success/
-     btn-warning di atas. --}}
+     btn-warning di atas. --}} */
 .status-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -196,14 +188,13 @@
   color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0;
 }
 
-{{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary
+/* {{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary
      text-white -- diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua
-     halaman. --}}
+     halaman. --}} */
 #tabel_add thead th,
 #tabel_detail thead th,
 #tabel_add_list_customer thead th,
 #tabel_add_list_sales thead th,
-#tabel_add_list_gudang thead th,
 #tabel_add_list_item thead th,
 #tabel thead th,
 #tabel2 thead th {
@@ -227,8 +218,8 @@
   white-space: nowrap;
 }
 
-{{-- "+"-button picker Customer/Sales/Gudang/Barang dikonversi jadi click-anywhere-
-     on-row, sama seperti konvensi so.blade.php/perintahopname.blade.php. --}}
+/* {{-- "+"-button picker Customer/Sales/Gudang/Barang dikonversi jadi click-anywhere-
+     on-row, sama seperti konvensi so.blade.php/perintahopname.blade.php. --}} */
 .pick-row { cursor: pointer; }
 .pick-row:hover { background-color: #f5f3ff !important; }
 
@@ -343,22 +334,7 @@
   </style>
 {{-- end tampilan search customer --}}
 
-{{-- tampilan search gudang --}}
-  <style>
-    #tabel_add_list_gudang_filter{
-      display: flex;
-      align-items: flex-end;
-      margin-bottom: -10px;
-    }
-    #tabel_add_list_gudang_filter label input {
-      width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem;
-    }
-  </style>
-{{-- end tampilan search gudang --}}
+{{-- search gudang dihapus -- Gudang Asal sekarang <select> biasa. --}}
 @endsection
 
 @section('content')
@@ -371,9 +347,9 @@
   <!-- <div id="qrcode"></div> -->
   <div class="">
 
-<div id="printContainer" style="display:none">
+{{-- <div id="printContainer" style="display:none">
 
-</div>
+</div> --}}
 <div id="contentContainer" class="container-fluid">
   {{-- Hidden Inputs --}}
   <input type="hidden" id="periode_tahun" value="{{ $periode->tahun }}">
@@ -404,6 +380,12 @@
             <div class="col-md-12">
               <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
                 <div class="po-toolbar">
+                  <div class="po-filter-wrap">
+                    <label>Periode</label>
+                    <input type="date" onchange="gpFilterChanged()" class="po-filter-inp" id="gpTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+                    <span class="po-filter-sep">s/d</span>
+                    <input type="date" onchange="gpFilterChanged()" class="po-filter-inp" id="gpTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+                  </div>
                   <input type="search" id="gpSearch1" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
                     <label for="gpLen1">Tampilkan</label>
@@ -507,23 +489,13 @@
 </div>
 </div>
 
-<!-- start modal add -->
-{{-- <div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div> --}}
 <div id="page2" class="container-fluid" style="display:none;">
   <div class="row">
     <div class="col-6 text-left">
       <h1></h1>
     </div>
     <div class="col-6 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="
+      <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px; 
             padding: 4px 12px; 
             border-radius: 20px; 
@@ -562,7 +534,7 @@
             <div class="mb-2 row">
                 <label class="col-sm-4 col-form-label">Keterangan</label>
                 <div class="col-sm-8">
-                    <textarea class="form-control text-left" id="input_keterangan" rows="3" onblur="onChangeHeader('NOTE' , 'input_keterangan')" style="resize: none;"></textarea>
+                    <textarea class="form-control text-left" id="input_keterangan" rows="3" onblur="onChangeHeader('NOTE' , 'input_keterangan')" style="resize: none; height:75px !important;"></textarea>
                 </div>
             </div>
         </div>
@@ -585,11 +557,9 @@
               <label class="col-sm-4 col-form-label text-nowrap">Gudang Asal</label>
               <div class="col-sm-8">
                 <div class="input-group">
-                  <input id="input_gudang_nama" type="text" class="form-control text-center" placeholder="Gudang Asal" disabled>
-                  <input type="hidden" id="input_gudang">
-                  <button type="button" id="btn_gudang" onclick="buttonAddListGudang()" class="btn btn-chip-biru btn-sm">
-                    <i class="bi bi-search"></i>
-                  </button>
+                  <select id="input_gudang" class="form-control">
+                    <option value="">- Pilih Gudang -</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -769,7 +739,7 @@
                 font-size: 0.75rem; 
                 font-weight: 600; 
                 text-transform: uppercase; 
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Submit Add</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Simpan</button>
 
                 <button type="button" id="submitAddEdit" class="btn btn-chip-biru btn-lg" style="
                 height: 30px; 
@@ -884,12 +854,6 @@
         </div>
     <!-- END ADD EDIT -->
   </div>
-    <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-</div>
-
-</div> {{-- end page 2 --}}
-
-
 <!-- End modal add-->
 
 {{-- Start Modal List Customer --}}
@@ -988,49 +952,8 @@
 {{-- End Modal List Sales --}}
 
 {{-- Start Modal List gudang --}}
-<div class="modal fade" id="modalAddListGudang" role="dialog" aria-labelledby="labelGudang" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Gudang</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body" style="margin-top:-30px;">
-        <div class="container-fluid px-3 mt-4">
-          <div class="row">
-            <div class="table-responsive">
-              <table id="tabel_add_list_gudang" class="table table-bordered table-striped">
-                <thead class="text-center">
-                  <tr>
-                    <th>Kode</th>
-                    <th>Nama Gudang</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data_add_list_gudang" class="text-left">
-                  <tr class="pick-row">
-                    <td>-</td>
-                    <td>-</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="d-flex justify-content-end mt-3">
-            {{-- <button type="button" class="btn btn-danger btn-lg"
-              style="height: 30px; padding: 4px 12px; border-radius: 20px;
-              font-size: 0.75rem; font-weight: 600; text-transform: uppercase;"
-              onclick="buttonAddListBatal()">Batal</button> --}}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{{-- End Modal List gudang --}}
+{{-- Modal pemilih Gudang dihapus -- Gudang Asal sekarang pakai <select> biasa
+     (loadGudangOptions()), sama seperti koreksistock.blade.php/perintahopname.blade.php. --}}
 
 <!-- start modal list item add -->
 <div class="modal fade" id="formAddListItem" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -1088,12 +1011,11 @@
 <div id="page3" class="container-fluid" style="display: none">
         <div class="row">
           <div class="col-6 text-left">
-            <h2>Detail Permintaan Sample</h2>
+            <h2></h2>
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
             height: 30px; 
-            margin-top: 20px; 
             padding: 4px 12px; 
             border-radius: 20px; 
             font-size: 0.75rem; 
@@ -1104,7 +1026,7 @@
             onclick="buttonCloseForm()">Close</button>
           </div>
         </div>  
-        <div class="modal-body">
+        <div id='formBsGrid' class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
         <div class="row">
@@ -1128,7 +1050,7 @@
             <div class="mb-2 row">
                 <label class="col-sm-4 col-form-label">Keterangan</label>
                 <div class="col-sm-8">
-                    <textarea class="form-control text-left" id="input_detail_keterangan" rows="3" style="resize: none;" disabled></textarea>
+                    <textarea class="form-control text-left" id="input_detail_keterangan" rows="3" style="resize: none; height:75px !important;" disabled></textarea>
                 </div>
             </div>
         </div>
@@ -1216,8 +1138,6 @@
     <!-- <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button> -->
   </div>
 </div>
-</div>
-</div>
 <!-- End modal detail-->
 
 
@@ -1230,8 +1150,8 @@
      menu Kas, pola yang sama persis dengan perintahopname.blade.php/so.blade.php. --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#modalAddListCustomer, #modalAddListSales, #modalAddListGudang, #formAddListItem').addClass('picker-kas')
-  jQuery('#modalAddListCustomer .modal-footer .btn, #modalAddListSales .modal-footer .btn, #modalAddListGudang .modal-footer .btn, #formAddListItem .modal-footer .btn').filter(function () {
+  jQuery('#modalAddListCustomer, #modalAddListSales, #formAddListItem').addClass('picker-kas')
+  jQuery('#modalAddListCustomer .modal-footer .btn, #modalAddListSales .modal-footer .btn, #formAddListItem .modal-footer .btn').filter(function () {
     return jQuery.trim(jQuery(this).text()) === 'Batal'
   }).addClass('picker-kas-batal')
 })
@@ -1441,8 +1361,8 @@ function gpValueCell (row, col) {
        atau amber (Belum Otorisasi), bukan ikon check/x bool biasa. --}}
   if (col[0] === 'IsOtorisasi1') {
     return Number(raw) === 1
-      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
@@ -1484,7 +1404,7 @@ function gpFilterRows (rows) {
 }
 
 function gpFilterChanged () {
-  reinitTabel()
+  loadAll()
 }
 
 function renderTabelRows (rows) {
@@ -1614,6 +1534,8 @@ $(document).ready(function () {
 
   gpInitReportTableSekali();
 
+  loadGudangOptions();
+
   $('#nav-home-tab').on('shown.bs.tab', function () {
     gpAktifkanTabel(1);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
@@ -1637,7 +1559,7 @@ $(document).ready(function () {
 
       const sales = document.getElementById("input_sales_nama").value.trim();
       const customer = document.getElementById("input_customer_nama").value.trim();
-      const gudang = document.getElementById("input_gudang_nama").value.trim();
+      const gudang = document.getElementById("input_gudang").value.trim();
 
       if (!sales || !customer || !gudang) {
         alertify.warning("Silakan isi terlebih dahulu Customer, Sales, dan Gudang Asal");
@@ -1816,63 +1738,6 @@ $(document).ready(function () {
     });
   }
 
-  // gudang
-  const elGdg = document.getElementById("input_gudang_nama");
-  if (elGdg) {
-    elGdg.addEventListener("keypress", function (e) {
-      if (e.which == 13) {
-        const search = this.value.trim();
-        if (!search) {
-          alertify.warning("Silakan ketik kode/nama gudang terlebih dahulu.");
-          return;
-        }
-
-        $("#tabel_data_add_list_gudang").html(
-          `<tr><td class="text-center" colspan="2">Mencari data...</td></tr>`
-        );
-
-        $.ajax({
-          url: "{{ url('permintaansamplelistgudang') }}",
-          type: "get",
-          async: false,
-          data: { search: search },
-          success: function (res) {
-            if (!res.length) {
-              $("#modalAddListGudang").modal("show");
-              $("#tabel_data_add_list_gudang").html(
-                `<tr><td class="text-center" colspan="2">Tidak ada data</td></tr>`
-              );
-              return;
-            }
-
-            if (res.length === 1) {
-              const g = res[0];
-              buttonAddPickGudang(g.NamaGdg, g.KodeGdg);
-              return;
-            }
-
-            let rows = "";
-            res.forEach((item) => {
-              rows += `
-                <tr class="pick-row" onclick="buttonAddPickGudang('${item.NamaGdg ?? ""}', '${item.KodeGdg ?? ""}')">
-                  <td>${item.KodeGdg ?? ""}</td>
-                  <td>${item.NamaGdg ?? ""}</td>
-                </tr>`;
-            });
-
-            $("#tabel_data_add_list_gudang").html(rows);
-            $("#modalAddListGudang").modal("show");
-            pickerKasInit('tabel_add_list_gudang', { order: [[0, 'asc']] })
-          },
-          error: function (err) {
-            console.log(err);
-            alertify.warning("Terjadi kesalahan saat mengambil data gudang.");
-          },
-        });
-      }
-    });
-  }
-
   // loadAll();
 });
 
@@ -1944,12 +1809,17 @@ function formatDate(date , pemisah = '-') {
 
 function loadAll () {
   let _token = $("#_token").val();
+  let awal = $('#gpTanggalAwal').val()
+  let akhir = $('#gpTanggalAkhir').val()
 
   $.ajax({
     url: "{!! url('permintaansampleloadall') !!}",
     type: "get",
     async: false,
-    data: {},
+    data: {
+      date1: awal,
+      date2: akhir
+    },
     success: function (res) {
       lastTabelRows = [].concat(res.belum_otorisasi, res.sudah_otorisasi)
       lastTabel2Rows = res.outstanding
@@ -2765,51 +2635,30 @@ function buttonAddPickSales (nama, kode) {
   onChangeHeader('KODESLS', 'input_sales');
 }
 
-function buttonAddListGudang () {
-  console.log('buttonAddListGudang');
-
+{{-- Gudang Asal sekarang <select> biasa (bukan picker modal lagi), sama seperti
+     koreksistock.blade.php/perintahopname.blade.php. --}}
+function loadGudangOptions () {
   $.ajax({
     url: "{{ url('permintaansamplelistgudang') }}",
     type: "get",
     async: false,
-    success: function(res) {
-      console.log(res);
-
-      let rowTable = ``;
-      res.forEach((item, i) => {
-        rowTable += `
-          <tr class="pick-row" onclick="buttonAddPickGudang('${item.NamaGdg}', '${item.KodeGdg}')">
-            <td>${item.KodeGdg}</td>
-            <td>${item.NamaGdg}</td>
-          </tr>`;
+    success: function (res) {
+      let options = '<option value="">- Pilih Gudang -</option>'
+      res.forEach((item) => {
+        options += `<option value="${item.KodeGdg}">${item.KodeGdg} - ${item.NamaGdg}</option>`
       });
-
-      if (!res.length) {
-        rowTable = `<tr><td class="text-center" colspan="2">Tidak ada data</td></tr>`;
-      }
-
-      document.getElementById("tabel_data_add_list_gudang").innerHTML = rowTable;
-      pickerKasInit('tabel_add_list_gudang', { order: [[0, 'asc']] })
-
-      $('#modalAddListGudang').modal('show');
+      document.getElementById("input_gudang").innerHTML = options
     },
-    error: function(err) {
+    error: function (err) {
       console.log(err);
       alertify.warning('Terjadi kesalahan saat mengambil data gudang.');
     }
   });
 }
 
-function buttonAddPickGudang (nama, kode) {
-  $('#input_gudang_nama').val(nama);
-  $('#input_gudang').val(kode);
-  $('#modalAddListGudang').modal('hide');
-}
-
 function buttonAddListBatal() {
   $('#modalAddListCustomer').modal('hide');
   $('#modalAddListSales').modal('hide');
-  $('#modalAddListGudang').modal('hide');
 }
 
 // function closeListItemAdd () {
@@ -3032,7 +2881,6 @@ function buttonEdit (nobukti) {
       let date = new Date(data.TANGGAL);
       let dateFormatted = data.TANGGAL?.substring(0, 10) ?? '';
 
-
       let dateKirim = new Date(data.TglKirim);
       let tglKirimFormatted = data.TglKirim?.substring(0, 10) ?? '';
 
@@ -3047,7 +2895,6 @@ function buttonEdit (nobukti) {
       $('#input_sales').val(data.KODESLS);
       $('#input_customer_nama').val(data.NamaCustSupp);
       $('#input_customer').val(data.KODECUSTSUPP);
-      $('#input_gudang_nama').val(data.NamaGgdAsal);
       $('#input_gudang').val(data.gdgAsal);
 
       // Isi tabel item
@@ -3143,8 +2990,7 @@ function buttonAddDeleteItem (index) {
           if (!dataTableAdd || dataTableAdd.length === 0) {
             document.getElementById("btn_customer").disabled = false;
             document.getElementById("input_customer_nama").disabled = false;
-            document.getElementById("btn_gudang").disabled = false;
-            document.getElementById("input_gudang_nama").disabled = false;
+            document.getElementById("input_gudang").disabled = false;
             unlockFormAdd();
             tipeform = 'new';
           }
@@ -3162,6 +3008,7 @@ function buttonAddDeleteItem (index) {
 
 
 function buttonDetail (nobukti) {
+  
   $.ajax({
     url: "{!! url('permintaansamplespdetail') !!}",
     type: "get",
@@ -3283,7 +3130,7 @@ function buttonCloseForm () {
 function buttonAddListKodeBarang () {
   const sales = document.getElementById("input_sales_nama").value.trim();
   const customer = document.getElementById("input_customer_nama").value.trim();
-  const gudang = document.getElementById("input_gudang_nama").value.trim();
+  const gudang = document.getElementById("input_gudang").value.trim();
 
   if (!sales || !customer || !gudang) {
     alertify.warning("Silakan isi terlebih dahulu Customer, Sales, dan Gudang Asal");
@@ -3534,8 +3381,7 @@ function buttonAddAddInsertItem (i) {
 
         document.getElementById("btn_customer").disabled = true;
         document.getElementById("input_customer_nama").disabled = true;
-        document.getElementById("btn_gudang").disabled = true;
-        document.getElementById("input_gudang_nama").disabled = true;
+        document.getElementById("input_gudang").disabled = true;
         document.getElementById("input_add_tanggal").disabled = true;
 
         alertify.success('Berhasil menambah item');
@@ -3629,7 +3475,6 @@ function refreshDataTableAdd (NOBUKTI = "") {
       </tr>`;
     
     document.getElementById("btn_customer").disabled = false;
-    document.getElementById("btn_gudang").disabled = false;
     tipeform = "new";
     return;
   }
@@ -3656,7 +3501,6 @@ function refreshDataTableAdd (NOBUKTI = "") {
         $('#page2').hide();
         $('#page1').show();
         document.getElementById("btn_customer").disabled = false;
-        document.getElementById("btn_gudang").disabled = false;
         tipeform = "new";
         return;
       }
@@ -3706,7 +3550,6 @@ function cleanFormAdd (){
   document.getElementById("input_sales").value = ''
   document.getElementById("input_sales_nama").value = ''
   document.getElementById("input_gudang").value = ''
-  document.getElementById("input_gudang_nama").value = ''
   document.getElementById("input_refpr").value = ''
   document.getElementById("input_keterangan").value = ''
 }
@@ -3715,15 +3558,14 @@ function lockFormAdd (){
   document.getElementById("input_add_tanggal").disabled = true
   document.getElementById("btn_customer").disabled = true
   document.getElementById("input_customer_nama").disabled = true
-  document.getElementById("btn_gudang").disabled = true
-  document.getElementById("input_gudang_nama").disabled = true
+  document.getElementById("input_gudang").disabled = true
   document.getElementById("input_refpr").disabled = true
 }
 
 function unlockFormAdd () {
   document.getElementById("input_add_tanggal").disabled = false
   document.getElementById("input_refpr").disabled = false
-  // document.getElementById("input_gudang_nama").disabled = false
+  // document.getElementById("input_gudang").disabled = false
   // document.getElementById("input_customer_nama").disabled = false
 }
 </script>
