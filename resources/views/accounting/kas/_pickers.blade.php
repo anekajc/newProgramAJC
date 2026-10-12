@@ -1543,7 +1543,7 @@
                 <div class="modal-header">
 
 
-                    <h5 class="modal-title" id="">Supplier</h5>
+                    <h5 class="modal-title" id="">CustSupp</h5>
                     <button type="button" class="close" onclick="buttonAddListTutup()" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

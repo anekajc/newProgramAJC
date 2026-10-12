@@ -2051,6 +2051,7 @@
      - Batal Otorisasi   -> resources/views/gudang/permintaanpemakaian.blade.php
      - Hitung Ulang Stock -> resources/views/utilitas/hitungulangstock.blade.php
      - Posting            -> resources/views/utilitas/posting.blade.php
+     - Tutup Buku         -> resources/views/utilitas/tutupbuku.blade.php
 
    Tanpa kelas itu rule di bawah tidak jalan, jadi dialog alertify lain
    di aplikasi tidak ikut berubah.

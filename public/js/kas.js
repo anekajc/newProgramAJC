@@ -651,8 +651,11 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
     data: {
       _token,
       nobukti: nobukti + nourut,
+      // NoBukti saja, untuk menandai pelunasan bukti ini (lihat KasController::tunaiRows()).
+      nobuktiview: nobukti,
       lawan,
       kodecustsupp,
+    //   namacustsupp,
       agent
     },
     success: function(res) {
@@ -663,43 +666,14 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
         alertify.warning("Tidak ada transaksi ditemukkan")
         return
       }
-      listTunai = res
       flagtunai = 1
       tunaiKodeCustsupp = kodecustsupp
 
+      let ui = tunaiUI()
+      document.getElementById(ui.nobukti).value=nobukti
+      document.getElementById(ui.custsupp).value=kodecustsupp
 
-      document.getElementById("input_tunai_nobukti").value=nobukti
-      document.getElementById("input_tunai_custsupp").value=kodecustsupp
-
-
-      // listLawan  = res
-
-      let xsaldo = 0
-      // Total pelunasan bukti ini — Jumlah diisi dari sini (sama seperti refreshDataTableTunai()),
-      // supaya saat dibuka ulang Jumlah langsung benar, tidak menunggu "+"/"-" berikutnya.
-      let xdebet = 0
-      let rowTable = ``
-      res.forEach((item, i) => {
-        if (item.NoBukti == nobukti && item.StatusUID == 'I') {
-          xdebet += nominalLunasTunai(item)
-        }
-        if (nominalLunasTunai(item) <= 0) {
-          console.log("saldo")
-          xsaldo = saldoBarisTunai(item)
-
-        } else {
-          console.log("minus")
-          xsaldo += saldoBarisTunai(item)
-        }
-        rowTable += tunaiRowHtml(item, i, xsaldo, nobukti)
-      });
-
-
-
-
-      document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
-      document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
-      filterTunai()
+      renderTunai(res)
 
       kasBukaFormTunai()
 
@@ -714,21 +688,23 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
 
 }
 
-/* Buka #formTunai. Kalau picker #form masih terbuka, tutup dulu dan tunggu sampai benar-benar
-   tertutup: bila keduanya dianimasikan bersamaan, event 'hidden' milik #form mencabut class
-   modal-open dari <body> setelah #formTunai tampil, sehingga halaman di belakang ikut ter-scroll. */
+/* Buka modal pelunasan yang aktif (#formTunai / #formPiutang, lihat tunaiUI()). Kalau picker
+   #form masih terbuka, tutup dulu dan tunggu sampai benar-benar tertutup: bila keduanya
+   dianimasikan bersamaan, event 'hidden' milik #form mencabut class modal-open dari <body>
+   setelah modal pelunasan tampil, sehingga halaman di belakang ikut ter-scroll. */
 function kasBukaFormTunai () {
+  let ui = tunaiUI()
   // Tiap kali dibuka mulai tanpa pencarian.
-  $('#searchTunai').val('')
+  $(ui.search).val('')
   filterTunai()
 
   if ($('#form').hasClass('show')) {
     $('#form').one('hidden.bs.modal', function () {
-      $('#formTunai').modal('show')
+      $(ui.modal).modal('show')
     })
     $('#form').modal('hide')
   } else {
-    $('#formTunai').modal('show')
+    $(ui.modal).modal('show')
   }
 }
 
@@ -737,7 +713,7 @@ function kasBukaFormTunai () {
 // mengosongkan dbTempHutPiut. Jadi tidak ada yang perlu disimpan atau dibatalkan di sini.
 function selesaiTunai () {
 
-  $("#formTunai").modal('hide')
+  $(tunaiUI().modal).modal('hide')
 
 
 }
@@ -4099,7 +4075,7 @@ function buttonAddListDevisi () {
 }
 
 // diam = true: jangan tampilkan peringatan kalau kosong (dipakai buttonBukaTunai(), yang
-// lalu jatuh ke daftar supplier). Mengembalikan true bila dbTempHutPiut berisi data.
+// lalu jatuh ke daftar supplier/customer). Mengembalikan true bila dbTempHutPiut berisi data.
 function refreshDataTableTunai (diam) {
   let nobukti = $("#input_add_nobukti").val()
   let adaData = false
@@ -4108,6 +4084,7 @@ function refreshDataTableTunai (diam) {
     type: "get",
     async: false,
     data: {
+      nobukti
     },
     success: function(res) {
       console.log(res)
@@ -4119,43 +4096,8 @@ function refreshDataTableTunai (diam) {
         }
         return
       }
-      listTunai = res
       adaData = true
-
-      // listLawan  = res
-      let rowTable = ``
-      let xdebet = 0
-      let xsaldo = 0
-      res.forEach((item, i) => {
-
-        if (item.NoBukti == nobukti && item.StatusUID == 'I') {
-          xdebet += nominalLunasTunai(item)
-
-        }
-
-        console.log(xsaldo)
-        if (nominalLunasTunai(item) <= 0) {
-          console.log("saldo")
-          xsaldo = saldoBarisTunai(item)
-
-        } else {
-          console.log("minus")
-          xsaldo += saldoBarisTunai(item)
-        }
-        console.log(item.Saldo)
-        console.log(Number(item.Saldo))
-        console.log(xsaldo ,'.')
-        rowTable += tunaiRowHtml(item, i, xsaldo, nobukti)
-      });
-
-
-
-
-      document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(xdebet).toFixed(2))
-
-      document.getElementById("tabel_data_add_list_tunai").innerHTML = rowTable
-      filterTunai()
-
+      renderTunai(res)
 
     },
     error: function (err) {
@@ -4168,29 +4110,51 @@ function refreshDataTableTunai (diam) {
   return adaData
 }
 
-/* Baris tabel Pelunasan Hutang (#tabel_add_list_tunai) — mengikuti tabel kartu hutang
-   Memorial Koreksi (mkKartuRender() di accounting/memorialkoreksi.blade.php):
-     - Baris faktur (Debet <= 0): tombol + di kolom Action -> tanya nominal lewat prompt
+/* Isi tabel modal pelunasan yang aktif (lihat tunaiUI()) dari KasController::tunaiRows():
+   baris 'F' = satu faktur (pelunasan bukti lain sudah ikut dijumlahkan), baris 'L' = pelunasan
+   bukti ini, tepat di bawah fakturnya. Saldo baris F = sisa sebelum pelunasan bukti ini, baris
+   L = sisa sesudahnya. Jumlah diisi total pelunasan bukti ini. Dipakai buttonAddPickCustSuppX()
+   dan refreshDataTableTunai() supaya kedua render sama. */
+function renderTunai (res) {
+  listTunai = res
+  let rowTable = ``
+  let jumlah = 0
+  let saldo = 0
+  res.forEach((item, i) => {
+    if (item.Baris == 'L') {
+      jumlah += nominalLunasTunai(item)
+      saldo += saldoBarisTunai(item)
+    } else {
+      saldo = saldoBarisTunai(item)
+    }
+    rowTable += tunaiRowHtml(item, i, saldo)
+  })
+
+  document.getElementById("AddAddJumlah").value = formatAngka(parseFloat(jumlah).toFixed(2))
+  document.getElementById(tunaiUI().tbody).innerHTML = rowTable
+  filterTunai()
+}
+
+/* Baris tabel Pelunasan Hutang/Piutang — mengikuti tabel kartu hutang Memorial Koreksi
+   (mkKartuRender() di accounting/memorialkoreksi.blade.php):
+     - Baris faktur ('F'): tombol + di kolom Action -> tanya nominal lewat prompt
        (buttonTambahTunai); dobel-klik baris -> langsung lunasi sebesar sisa saldo faktur tanpa
-       prompt (buttonLunasCepatTunai). Tombol + mati dan dobel-klik tidak aktif kalau saldo
-       faktur sudah habis.
-     - Baris pelunasan milik bukti ini: ditandai merah (.tunai-baris-lunas), tombol hapus, dan
+       prompt (buttonLunasCepatTunai). Tombol + mati dan dobel-klik tidak aktif kalau sisa saldo
+       <= 0 atau faktur sudah punya pelunasan bukti ini (satu pelunasan per faktur, lihat
+       KasController::spTempHutPiut()).
+     - Baris pelunasan bukti ini ('L'): ditandai merah (.tunai-baris-lunas), tombol hapus, dan
        dobel-klik = hapus - keduanya lewat konfirmasi (buttonHapusTunai).
-     - Baris pelunasan milik bukti lain: tanpa aksi.
    Tombol di kolom Action menghentikan dblclick-nya supaya klik cepat dua kali pada tombol
-   tidak ikut memicu aksi dobel-klik barisnya. Dipakai buttonAddPickCustSuppX() dan
-   refreshDataTableTunai() (keduanya mengisi listTunai lebih dulu) supaya kedua render sama. */
-function tunaiRowHtml (item, i, xsaldo, nobukti) {
+   tidak ikut memicu aksi dobel-klik barisnya. */
+function tunaiRowHtml (item, i, saldo) {
   let aksi = ``
   let kelas = ``
 
-  if (nominalLunasTunai(item) > 0) {
-    if (item.NoBukti == nobukti) {
-      aksi = `<button class="btn btn-danger btn-tunai-hapus" type="button" onclick="buttonHapusTunai(${i})" ondblclick="event.stopPropagation()" title="Hapus"><i class="bi bi-trash"></i></button>`
-      kelas = ` class="tunai-baris-lunas tunai-bisa-dobel" ondblclick="buttonHapusTunai(${i})"`
-    }
+  if (item.Baris == 'L') {
+    aksi = `<button class="btn btn-danger btn-tunai-hapus" type="button" onclick="buttonHapusTunai(${i})" ondblclick="event.stopPropagation()" title="Hapus"><i class="bi bi-trash"></i></button>`
+    kelas = ` class="tunai-baris-lunas tunai-bisa-dobel" ondblclick="buttonHapusTunai(${i})"`
   } else {
-    let bisaLunas = sisaSaldoFakturTunai(item.NoFaktur) > 0
+    let bisaLunas = !fakturLunasTunai(item) && sisaSaldoFakturTunai(item) > 0
     aksi = `<button class="btn btn-tunai-lunas" type="button" onclick="buttonTambahTunai(${i})" ondblclick="event.stopPropagation()" title="Pelunasan"${bisaLunas ? '' : ' disabled'}><i class="bi bi-plus-lg"></i></button>`
     if (bisaLunas) {
       kelas = ` class="tunai-bisa-dobel" ondblclick="buttonLunasCepatTunai(${i})"`
@@ -4201,64 +4165,76 @@ function tunaiRowHtml (item, i, xsaldo, nobukti) {
         <tr${kelas} data-idx="${i}">
         <td class="kolom-tunai-action">${aksi}</td>
         <td>${item.NoFaktur}</td>
-        <td>${item.NoRetur}</td>
         <td>${formatDate(item.Tanggal)}</td>
-        <td>${item.NoBukti}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Debet).toFixed(2))}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Kredit).toFixed(2))}</td>
-        <td class="text-right">${formatAngka(parseFloat(xsaldo).toFixed(2))}</td>
+        <td class="text-right">${formatAngka(parseFloat(saldo).toFixed(2))}</td>
         <td>${item.Valas}</td>
         <td class="text-right">${formatAngka(parseFloat(item.Kurs).toFixed(2))}</td>
         </tr>`
 }
 
-// Pencarian client-side tabel Pelunasan Hutang (#searchTunai): NoFaktur, Tanggal, dan kolom
-// Supplier (isinya item.NoBukti). Baris hanya di-hide/show, tidak di-render ulang, supaya index
-// listTunai di onclick/ondblclick tetap cocok. Satu faktur tampil utuh (baris faktur + seluruh
-// pelunasannya) bila salah satu barisnya cocok, supaya Saldo berjalan tetap terbaca; faktur yang
-// punya baris merah (pelunasan bukti ini) selalu tampil.
+// Satu faktur = NoFaktur + KodeCustSupp (kunci pengelompokan di KasController::tunaiRows()).
+function kunciFakturTunai (item) {
+  return item.NoFaktur + '|' + item.KodeCustSupp
+}
+
+// Pencarian client-side tabel pelunasan (#searchTunai / #searchPiutang): NoFaktur, Tanggal, dan
+// NoBukti. Baris hanya di-hide/show, tidak di-render ulang, supaya index listTunai di
+// onclick/ondblclick tetap cocok. Satu faktur tampil utuh (baris faktur + pelunasannya) bila
+// salah satu barisnya cocok; faktur yang punya pelunasan bukti ini (merah) selalu tampil.
 function filterTunai () {
-  let q = ($('#searchTunai').val() || '').trim().toLowerCase()
-  let nobukti = $("#input_add_nobukti").val()
+  let ui = tunaiUI()
+  let q = ($(ui.search).val() || '').trim().toLowerCase()
   let fakturTampil = new Set()
 
   listTunai.forEach((item) => {
-    let merah = nominalLunasTunai(item) > 0 && item.NoBukti == nobukti
     let teks = [item.NoFaktur, formatDate(item.Tanggal), item.NoBukti].join(' ').toLowerCase()
-    if (!q || merah || teks.includes(q)) {
-      fakturTampil.add(item.NoFaktur)
+    if (!q || item.Baris == 'L' || teks.includes(q)) {
+      fakturTampil.add(kunciFakturTunai(item))
     }
   })
 
-  $('#tabel_data_add_list_tunai > tr').each(function () {
+  $('#' + ui.tbody + ' > tr').each(function () {
     let item = listTunai[$(this).data('idx')]
     if (item === undefined) {
       return
     }
-    $(this).toggle(fakturTampil.has(item.NoFaktur))
+    $(this).toggle(fakturTampil.has(kunciFakturTunai(item)))
   })
 }
 
-// Sisa saldo satu faktur = jumlah Saldo seluruh barisnya di listTunai (faktur + pelunasannya).
-function sisaSaldoFakturTunai (nofaktur) {
+// Sisa saldo satu faktur = jumlah saldoBarisTunai() baris fakturnya + pelunasan bukti ini.
+function sisaSaldoFakturTunai (data) {
+  let kunci = kunciFakturTunai(data)
   let sisasaldo = 0
   listTunai.forEach((item) => {
-    if (item.NoFaktur == nofaktur) {
+    if (kunciFakturTunai(item) == kunci) {
       sisasaldo += saldoBarisTunai(item)
     }
   })
   return Number(sisasaldo.toFixed(2))
 }
 
+// Faktur ini sudah punya pelunasan bukti ini (baris merah)?
+function fakturLunasTunai (data) {
+  let kunci = kunciFakturTunai(data)
+  return listTunai.some((item) => item.Baris == 'L' && kunciFakturTunai(item) == kunci)
+}
+
 // Dobel-klik baris faktur: langsung lunasi SELURUH sisa saldonya tanpa prompt nominal
 // (sama seperti mkKartuLunasCepat() di Memorial Koreksi). Untuk pelunasan sebagian, pakai +.
 function buttonLunasCepatTunai (index) {
   let data = listTunai[index]
-  if (!data) {
+  if (!data || data.Baris == 'L') {
+    return
+  }
+  if (fakturLunasTunai(data)) {
+    alertify.warning('Sudah terdapat pelunasan')
     return
   }
 
-  let sisasaldo = sisaSaldoFakturTunai(data.NoFaktur)
+  let sisasaldo = sisaSaldoFakturTunai(data)
   if (sisasaldo <= 0) {
     alertify.warning("Saldo habis")
     return
@@ -4268,10 +4244,12 @@ function buttonLunasCepatTunai (index) {
 }
 
 // Tombol hapus / dobel-klik baris pelunasan (merah): konfirmasi dulu, lalu batalkan
-// (buttonDeleteTunai). Pelunasan milik bukti lain langsung diberi peringatan, tanpa
-// konfirmasi yang pasti gagal.
+// (buttonDeleteTunai).
 function buttonHapusTunai (index) {
   let data = listTunai[index]
+  if (!data || data.Baris != 'L') {
+    return
+  }
 
   if ($("#input_add_nobukti").val() != data.NoBukti) {
     alertify.warning("Nobukti berbeda")
@@ -4291,28 +4269,36 @@ function buttonHapusTunai (index) {
   dlgHapus.set('onclose', pulihkanFokusModalTunai)
 }
 
-// Bootstrap 4.0 menarik fokus kembali ke modal yang sedang terbuka (#formTunai) setiap kali
-// fokus pindah ke luar modal, sehingga dialog alertify (dipasang di <body>) tidak bisa diketik
-// atau dipakai lewat keyboard. Matikan SEBELUM dialog dibuka, pulihkan lewat onclose dialog.
+// Bootstrap 4.0 menarik fokus kembali ke modal yang sedang terbuka (#formTunai/#formPiutang)
+// setiap kali fokus pindah ke luar modal, sehingga dialog alertify (dipasang di <body>) tidak
+// bisa diketik atau dipakai lewat keyboard. Matikan SEBELUM dialog dibuka, pulihkan lewat
+// onclose dialog.
 function lepasFokusModalTunai () {
   $(document).off('focusin.bs.modal')
 }
 
 function pulihkanFokusModalTunai () {
-  let modalTunai = $('#formTunai').data('bs.modal')
-  if (modalTunai && $('#formTunai').hasClass('show') && typeof modalTunai._enforceFocus === 'function') {
+  let modalId = tunaiUI().modal
+  let modalTunai = $(modalId).data('bs.modal')
+  if (modalTunai && $(modalId).hasClass('show') && typeof modalTunai._enforceFocus === 'function') {
     modalTunai._enforceFocus()
   }
 }
 
 /* "+" pada satu faktur: tanya nominal yang dibayar (default = sisa saldo faktur; ketik angka
-   lebih kecil untuk pelunasan sebagian). Dulu nominalnya diambil dari Jumlah yang wajib
-   diketik lebih dulu; sekarang Jumlah justru terisi otomatis dari total pelunasan lewat
-   refreshDataTableTunai(). */
+   lebih kecil untuk pelunasan sebagian). Jumlah terisi otomatis dari total pelunasan lewat
+   renderTunai(). */
 function buttonTambahTunai (index) {
   let data = listTunai[index]
+  if (!data || data.Baris == 'L') {
+    return
+  }
+  if (fakturLunasTunai(data)) {
+    alertify.warning('Sudah terdapat pelunasan')
+    return
+  }
 
-  let sisasaldo = sisaSaldoFakturTunai(data.NoFaktur)
+  let sisasaldo = sisaSaldoFakturTunai(data)
 
   if (sisasaldo <= 0) {
     alertify.warning("Saldo habis")
@@ -4348,6 +4334,8 @@ function buttonTambahTunai (index) {
   }
 }
 
+// Baris faktur sudah dikelompokkan, jadi yang dikirim hanya NoFaktur + KodeCustSupp; kolom
+// lain untuk sp_TempHutPiut diambil server dari baris faktur itu (KasController::spTempHutPiut()).
 function simpanTambahTunai (data, nominal) {
   let _token = $("#_token").val()
 
@@ -4356,9 +4344,9 @@ function simpanTambahTunai (data, nominal) {
   let nobukti = $("#input_add_nobukti").val()
   let urut = 0
 
-  // Pelunasan hutang (BKK) di Debet, pelunasan piutang (BKM) di Kredit.
-  let debet = isTunaiPiutang() ? 0 : nominal
-  let kredit = isTunaiPiutang() ? nominal : 0
+  // Kas/bank keluar -> Debet, kas/bank masuk -> Kredit (lihat isTunaiMasuk()).
+  let debet = isTunaiMasuk() ? 0 : nominal
+  let kredit = isTunaiMasuk() ? nominal : 0
 
   let noinvoice = 'LNS'
 
@@ -4369,7 +4357,8 @@ function simpanTambahTunai (data, nominal) {
       data: {
         choice,
         _token,
-        data,
+        nofaktur: data.NoFaktur,
+        kodecustsupp: data.KodeCustSupp,
         tipetrans,
         nobukti,
         urut,
@@ -4382,13 +4371,15 @@ function simpanTambahTunai (data, nominal) {
         console.log(res ,'!')
 
         if (res == 1) {
-          // $("#form").modal('toggle')
           alertify.success('Pelunasan telah ditambah');
           refreshDataTableTunai()
 
         }
         if (res == 2) {
           alertify.warning('Sudah terdapat pelunasan');
+        }
+        if (res == 0) {
+          alertify.warning('Faktur tidak ditemukan, pilih ulang customer/supplier');
         }
 
       },
@@ -4446,7 +4437,6 @@ function buttonDeleteTunai (index) {
         console.log(res ,'!')
 
         if (res == 1) {
-          // $("#form").modal('toggle')
           alertify.success('Pelunasan telah dihapus');
           refreshDataTableTunai()
 
@@ -4463,30 +4453,56 @@ function buttonDeleteTunai (index) {
 
 }
 
-/* Pelunasan Hutang (BKK) / Piutang (BKM) — Lawan IsLokalOrExim = 1, saat menambah item. Alurnya:
-   pilih Lawan -> daftar supplier/customer (pane Customer di modal #form yang sama) -> #formTunai.
-   Jumlah tidak perlu diketik lebih dulu (dulu onblur Jumlah yang membuka alur ini);
-   tombol #buttonBukaTunai di samping Jumlah membuka ulang alurnya setelah ditutup. */
+/* Pelunasan Hutang / Piutang — BKK/BKM dengan Lawan IsLokalOrExim = 1, saat menambah
+   item. Alurnya: pilih Lawan -> daftar supplier/customer (pane Customer di modal #form yang sama)
+   -> modal pelunasan: #formPiutang (Pelunasan Piutang) untuk Lawan 113100, selain itu #formTunai
+   (Pelunasan Hutang). Jumlah tidak perlu diketik lebih dulu; tombol #buttonBukaTunai di samping
+   Jumlah membuka ulang alurnya setelah ditutup. */
 function isModeTunai () {
   let trans = $("#input_add_transaksi").val()
   return (trans == 'BKK' || trans == 'BKM') && xislocalorexim == 1 && tipeformdet == 'add'
 }
 
-// BKM = pelunasan piutang: faktur ada di Debet, pelunasan di Kredit (kebalikan BKK/hutang,
-// lihat penandaBaris() di MemorialKoreksiController).
-function isTunaiPiutang () {
+// Lawan 113100 (Piutang Usaha) memakai modal Pelunasan Piutang.
+function isLawanPiutangTunai () {
+  return $("#AddAddLawan").val() == '113100'
+}
+
+// Elemen modal pelunasan yang sedang dipakai.
+function tunaiUI () {
+  if (isLawanPiutangTunai()) {
+    return {
+      modal: '#formPiutang',
+      tbody: 'tabel_data_add_list_piutang',
+      search: '#searchPiutang',
+      nobukti: 'input_piutang_nobukti',
+      custsupp: 'input_piutang_custsupp'
+    }
+  }
+  return {
+    modal: '#formTunai',
+    tbody: 'tabel_data_add_list_tunai',
+    search: '#searchTunai',
+    nobukti: 'input_tunai_nobukti',
+    custsupp: 'input_tunai_custsupp'
+  }
+}
+
+// Arah pelunasan hanya ditentukan keluar/masuk, untuk hutang maupun piutang:
+//   BKK (keluar): pelunasan di Debet, sisa faktur = Kredit - Debet
+//   BKM (masuk) : pelunasan di Kredit, sisa faktur = Debet - Kredit
+function isTunaiMasuk () {
   return $("#input_add_transaksi").val() == 'BKM'
 }
 
-// Nominal pelunasan satu baris sesuai arah hutang/piutang (> 0 = baris pelunasan).
+// Nominal pelunasan satu baris sesuai arah (dipakai untuk baris 'L').
 function nominalLunasTunai (item) {
-  return Number(isTunaiPiutang() ? item.Kredit : item.Debet)
+  return Number(isTunaiMasuk() ? item.Kredit : item.Debet)
 }
 
-// Saldo satu baris. Kolom Saldo di dbTempHutPiut berarah hutang, jadi untuk piutang dihitung
-// sendiri (Debet - Kredit), sama seperti mkSaldoFaktur() di Memorial Koreksi.
+// Saldo satu baris menurut arah pelunasan (> 0 = masih bisa dilunasi).
 function saldoBarisTunai (item) {
-  return isTunaiPiutang() ? Number(item.Debet) - Number(item.Kredit) : Number(item.Saldo)
+  return isTunaiMasuk() ? Number(item.Debet) - Number(item.Kredit) : Number(item.Kredit) - Number(item.Debet)
 }
 
 function aturTombolBukaTunai () {
