@@ -74,9 +74,7 @@
                                           <tr>
                                               <th scope="col">Action</th>
                                               <th scope="col">NoFaktur</th>
-                                              <th scope="col">NoRetur</th>
                                               <th scope="col">Tanggal</th>
-                                              <th scope="col">Supplier</th>
                                               <th scope="col">Debet</th>
                                               <th scope="col">Kredit</th>
                                               <th scope="col">Saldo</th>
@@ -89,9 +87,6 @@
                                       <tbody id="tabel_data_add_list_tunai" class="text-left">
 
                                           <tr>
-
-                                              <td>-</td>
-                                              <td>-</td>
                                               <td>-</td>
                                               <td>-</td>
                                               <td>-</td>

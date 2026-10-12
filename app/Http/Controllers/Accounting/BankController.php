@@ -651,13 +651,10 @@ where b.Perkiraan = :lawan
       }
 
 
-      public function listTunaiX () {
-        $username = \Auth::user()->username;
-        $listTunai = DB::connection('SML')->select("select
-        *, '' MyID from dbTempHutPiut where IDUSER = :username and statusuid <> 'D' order by nofaktur, urut", ["username" => $username]);
-        return $listTunai;
-
-
+      // Bentuk baris (faktur dikelompokkan + pelunasan bukti ini) sama dengan Kas - lihat
+      // KasController::tunaiRows().
+      public function listTunaiX (Request $req) {
+        return app('App\Http\Controllers\Accounting\KasController')->tunaiRows($req->nobukti ?? '');
       }
 
 
@@ -702,9 +699,8 @@ where b.Perkiraan = :lawan
       );
 
 
-        $listTunai = DB::connection('SML')->select("select
-        *, '' MyID from dbTempHutPiut where IDUSER = :username order by nofaktur , urut", ["username" => $username]);
-        return $listTunai;
+        // nobukti di atas = NoBukti + NoUrut; nobuktiview = NoBukti saja (lihat listTunaiX()).
+        return app('App\Http\Controllers\Accounting\KasController')->tunaiRows($req->nobuktiview ?? '');
 
         }
 
@@ -1019,6 +1015,13 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
         $uruttunai = DB::connection('SML')->select('Select isnull(MAX(urut) , 0) + 1 URUT from dbTransaksi where NoBukti = :nobukti', ["nobukti" => $req->nobukti ]);
         // return ['a'=> $uruttunai[0]->URUT];
         DB::connection('SML')->statement('update dbtemphutpiut set nomsk = :urut where iduser = :username', ["urut" => $uruttunai[0]->URUT , "username" => $username]);
+
+        // Pelunasan Piutang (Lawan 113100): NoRetur pelunasan dibukukan kosong - sama seperti
+        // KasController::spAdd().
+        if ($req->lawan == '113100') {
+          DB::connection('SML')->statement("update dbTempHutPiut set NoRetur = '' where IDUSER = :username and NoBukti = :nobukti and StatusUID = 'I'",
+            ["username" => $username, "nobukti" => $req->nobukti]);
+        }
 
       }
       // return $xplok;

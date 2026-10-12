@@ -84,6 +84,7 @@
                                               <th scope="col">NoRetur</th>
                                               <th scope="col">Tanggal</th>
                                               <th scope="col">Supplier</th>
+                                              <th scope="col">Debet</th>
                                               <th scope="col">Kredit</th>
                                               <th scope="col">Saldo</th>
                                               <th scope="col">Valas</th>

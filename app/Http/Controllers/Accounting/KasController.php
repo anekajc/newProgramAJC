@@ -85,13 +85,60 @@ Order by A.Nobukti
     ]);
 
   }
-  public function listTunaiX () {
+  public function listTunaiX (Request $req) {
+    return $this->tunaiRows($req->nobukti ?? '');
+  }
+
+  /* Isi modal Pelunasan Hutang/Piutang dari dbTempHutPiut user ini, dipakai listTunai() (saat
+     customer/supplier dipilih) dan listTunaiX() (refresh) supaya bentuknya selalu sama:
+       - Baris 'F': satu baris per faktur, Debet/Kredit = jumlah semua barisnya KECUALI pelunasan
+         bukti ini; NoRetur/NoBukti/Tanggal/Valas/Kurs dari baris pertama faktur (Urut terkecil).
+       - Baris 'L': pelunasan milik bukti ini (StatusUID 'I'), baris mentah (select *) tepat di
+         bawah fakturnya - dipakai apa adanya oleh spTempHutPiut 'D' saat dibatalkan.
+     Juga dipakai BankController (dbTempHutPiut yang sama). */
+  public function tunaiRows ($nobukti) {
     $username = \Auth::user()->username;
-    $listTunai = DB::connection('SML')->select("select
-    *, '' MyID from dbTempHutPiut where IDUSER = :username and statusuid <> 'D' order by nofaktur, urut", ["username" => $username]);
-    return $listTunai;
 
+    $listFaktur = DB::connection('SML')->select("
+    select g.NoFaktur, g.KodeCustSupp, f.NoRetur, f.NoBukti, f.Tanggal, g.Debet, g.Kredit, f.Valas, f.Kurs,
+      0 Urut, '' MyID
+    from
+      (select NoFaktur, KodeCustSupp, SUM(Debet) Debet, SUM(Kredit) Kredit
+      from dbTempHutPiut
+      where IDUSER = :username1 and isnull(StatusUID, '') <> 'D'
+      and not (NoBukti = :nobukti and isnull(StatusUID, '') = 'I')
+      group by NoFaktur, KodeCustSupp) g
+    outer apply
+      (select top 1 t.NoRetur, t.NoBukti, t.Tanggal, t.Valas, t.Kurs
+      from dbTempHutPiut t
+      where t.IDUSER = :username2 and t.NoFaktur = g.NoFaktur and t.KodeCustSupp = g.KodeCustSupp
+      and isnull(t.StatusUID, '') not in ('I', 'D')
+      order by t.Urut) f
+    order by g.NoFaktur, g.KodeCustSupp
+    ", ["username1" => $username, "nobukti" => $nobukti, "username2" => $username]);
 
+    $listLunas = DB::connection('SML')->select("select *, '' MyID from dbTempHutPiut
+    where IDUSER = :username and NoBukti = :nobukti and StatusUID = 'I'
+    order by NoFaktur, Urut
+    ", ["username" => $username, "nobukti" => $nobukti]);
+
+    $lunasPerFaktur = [];
+    foreach ($listLunas as $l) {
+      $l->Baris = 'L';
+      $lunasPerFaktur[$l->NoFaktur . '|' . $l->KodeCustSupp][] = $l;
+    }
+
+    $hasil = [];
+    foreach ($listFaktur as $f) {
+      $f->Baris = 'F';
+      $hasil[] = $f;
+      $kunci = $f->NoFaktur . '|' . $f->KodeCustSupp;
+      foreach ($lunasPerFaktur[$kunci] ?? [] as $l) {
+        $hasil[] = $l;
+      }
+    }
+
+    return $hasil;
   }
 
   public function listCustSuppTunai (Request $req) {
@@ -138,7 +185,9 @@ left outer join vwHutPiut Y on Y.NoFaktur=X.NoFaktur and Y.KodeCustSupp=X.KodeCu
 left outer join DBBELI yy on y.NoFaktur=yy.NOBUKTI
 left outer join DBCUSTSUPP xx on yy.KODESUPP=xx.KODECUSTSUPP
 where Y.KodeCustSupp in (select KodeCustSupp from dbCustSupp where KodeCustSupp= @KodeCustSupp or KodeCustSupp= @agent or ISnull(Agent,'')= @agent)
-and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
+and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti
+
+",
   // agent kosong ('') diubah Laravel (ConvertEmptyStringsToNull) jadi NULL, dan dengan @agent NULL
   // query ini mengembalikan 0 baris - jadi supplier tanpa agent selalu "Tidak ada transaksi".
   // Kirim '' seperti saat query dijalankan langsung di SQL Server.
@@ -146,9 +195,9 @@ and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
 );
 
 
-  $listTunai = DB::connection('SML')->select("select
-  *, '' MyID from dbTempHutPiut where IDUSER = :username order by nofaktur , urut", ["username" => $username]);
-  return $listTunai;
+  // nobukti di atas = NoBukti + NoUrut (filter vwHutPiut); nobuktiview = NoBukti saja, sama
+  // seperti yang dikirim refresh (listTunaiX) - lihat tunaiRows().
+  return $this->tunaiRows($req->nobuktiview ?? '');
 
   }
 
@@ -897,7 +946,19 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
  $data = $req->data;
     $username = \Auth::user()->username;
     if ($req->choice == 'I' ) {
-      $check = DB::connection('SML')->select("select * from dbTempHutPiut where NoFaktur = :nobukti and StatusUID = 'I'",["nobukti" => $data['NoFaktur']]);
+      // Baris di modal sudah dikelompokkan per faktur (lihat tunaiRows()) dan tidak membawa
+      // semua kolom yang dibutuhkan sp_TempHutPiut, jadi ambil baris pertama faktur itu sendiri.
+      $base = DB::connection('SML')->select("select top 1 * from dbTempHutPiut
+      where IDUSER = :username and NoFaktur = :nofaktur and KodeCustSupp = :kodecustsupp
+      and isnull(StatusUID, '') not in ('I', 'D')
+      order by Urut", ["username" => $username, "nofaktur" => $req->nofaktur, "kodecustsupp" => $req->kodecustsupp]);
+      if (!$base) {
+        return 0;
+      }
+      $data = (array) $base[0];
+
+      $check = DB::connection('SML')->select("select * from dbTempHutPiut where NoFaktur = :nofaktur and StatusUID = 'I' and IDUSER = :username",
+        ["nofaktur" => $data['NoFaktur'], "username" => $username]);
         if ($check) {
           return 2;
       }
@@ -935,8 +996,8 @@ $data['Kurs_'],
 0,
 0,
 '',
-$data['NoDPH'] ? $data['NoDPH'] : '',
-$data['urutDPH'] ? $data['urutDPH'] : 0
+($data['NoDPH'] ?? '') ?: '',
+($data['urutDPH'] ?? 0) ?: 0
 
     ]);
 
@@ -970,6 +1031,13 @@ $data['urutDPH'] ? $data['urutDPH'] : 0
       $uruttunai = DB::connection('SML')->select('Select isnull(MAX(urut) , 0) + 1 URUT from dbTransaksi where NoBukti = :nobukti', ["nobukti" => $req->nobukti ]);
       // return ['a'=> $uruttunai[0]->URUT];
       DB::connection('SML')->statement('update dbtemphutpiut set nomsk = :urut where iduser = :username', ["urut" => $uruttunai[0]->URUT , "username" => $username]);
+
+      // Pelunasan Piutang (Lawan 113100): NoRetur pelunasan dibukukan kosong. NoRetur ikut
+      // tersalin dari baris faktur saat + (spTempHutPiut) dan tetap tampil di modal sampai disimpan.
+      if ($req->lawan == '113100') {
+        DB::connection('SML')->statement("update dbTempHutPiut set NoRetur = '' where IDUSER = :username and NoBukti = :nobukti and StatusUID = 'I'",
+          ["username" => $username, "nobukti" => $req->nobukti]);
+      }
 
     }
 
