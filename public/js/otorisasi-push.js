@@ -112,6 +112,8 @@
                     el.textContent = n > 99 ? '99+' : n;
                     el.style.display = n ? '' : 'none';
                 }
+                // Panel Beranda mobile (newmaster) ikut mendengarkan angka yang sama.
+                document.dispatchEvent(new CustomEvent('otopush:count', { detail: res }));
                 if ('setAppBadge' in navigator) {
                     (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(function () {});
                 }

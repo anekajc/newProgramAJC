@@ -10,6 +10,8 @@
     <link rel="apple-touch-icon" href="{!! URL::asset('img/pwa-192.png') !!}" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="AJC" />
+    <link rel="stylesheet" href="{!! URL::asset('css/otorisasi-push.css') !!}?v={{ @filemtime(base_path('public/css/otorisasi-push.css')) ?: '1' }}" />
+    <link rel="stylesheet" href="{!! URL::asset('css/header-mobile.css') !!}?v={{ @filemtime(base_path('public/css/header-mobile.css')) ?: '1' }}" />
     <link
         href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap"
         rel="stylesheet" type="text/css" />
@@ -348,40 +350,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-
-        .oto-bell {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid #e5e7eb;
-            background: #fff;
-            color: #4b5563;
-            font-size: 15px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .oto-bell:hover { color: var(--blue); border-color: #bfdbfe; }
-
-        .oto-bell-count {
-            position: absolute;
-            top: -5px;
-            right: -6px;
-            min-width: 17px;
-            height: 17px;
-            padding: 0 4px;
-            border-radius: 9px;
-            background: #dc2626;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            line-height: 17px;
-            text-align: center;
         }
 
         .period-badge {
@@ -1022,28 +990,31 @@
                   <i class="bi bi-bell"></i>
                   <span id="otoBellCount" class="oto-bell-count" style="display:none">0</span>
                 </a>
-                <div class="period-badge">
-                  Username: {{ Auth::user()->username }}
+                @php
+                  $namaBulanHeader = [
+                      1 => 'Januari',
+                      2 => 'Februari',
+                      3 => 'Maret',
+                      4 => 'April',
+                      5 => 'Mei',
+                      6 => 'Juni',
+                      7 => 'Juli',
+                      8 => 'Agustus',
+                      9 => 'September',
+                      10 => 'Oktober',
+                      11 => 'November',
+                      12 => 'Desember',
+                  ][$periode->bulan] ?? '';
+                @endphp
+                {{-- .pb-full (layar lebar) / .pb-short (mobile < 768px) - lihat css/header-mobile.css.
+                     berkas/newsetupperiodekerja.blade.php menulis ulang isi badge ini dengan pola yang sama. --}}
+                <div class="period-badge"><span class="pb-full">Username: {{ Auth::user()->username }}
           &nbsp;–&nbsp;
-                    Periode:
-                    {{ [
-                        1 => 'Januari',
-                        2 => 'Februari',
-                        3 => 'Maret',
-                        4 => 'April',
-                        5 => 'Mei',
-                        6 => 'Juni',
-                        7 => 'Juli',
-                        8 => 'Agustus',
-                        9 => 'September',
-                        10 => 'Oktober',
-                        11 => 'November',
-                        12 => 'Desember',
-                    ][$periode->bulan] ?? '' }}
-                    {!! $periode->tahun !!}</div>
+                    Periode: {{ $namaBulanHeader }}
+                    {!! $periode->tahun !!}</span><span class="pb-short">{{ mb_substr($namaBulanHeader, 0, 3) }} {!! $periode->tahun !!}</span></div>
                 <div id="avatar" class="avatar">{{ \Auth::user()->username[0] }}</div>
-                <a class="logout-link" href="{{ route('logout') }}">
-                  <i class="bi bi-power"></i> Log Out
+                <a class="logout-link" href="{{ route('logout') }}" title="Log Out">
+                  <i class="bi bi-power"></i><span class="logout-text"> Log Out</span>
                 </a>
             </div>
         </header>
