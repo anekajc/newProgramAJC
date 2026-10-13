@@ -459,7 +459,6 @@
 <div id="printContainer" style="display:none">
 
 
-
 </div>
 <div id="contentContainer" class="container-fluid">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />

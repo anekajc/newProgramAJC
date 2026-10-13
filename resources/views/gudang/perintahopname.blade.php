@@ -284,6 +284,21 @@
   color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
 }
 
+{{-- Badge kolom Status (varchar "Belum"/"Sudah") -- hijau untuk Sudah, merah untuk
+     Belum, warna sama dengan palet btn-success/btn-danger di atas. --}}
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
+.status-badge-belum { color: #dc2626; border: 1px solid #f7cfcf; background: #fdeaea; }
+
 {{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary text-white --
      diganti abu-abu + teks gelap, disamakan dengan thead th di atas, sesuai UI baru
      yang sama di semua halaman. --}}
@@ -1556,6 +1571,7 @@ function opDefaultCart () {
   return [
     ['NoBukti',      'No. Bukti',   1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',     1, 'date',    0, 0],
+    ['Status',       'Status',      1, 'varchar', 0, 0],
     ['Keterangan',   'Keterangan',  1, 'varchar', 0, 0],
     ['KodeGdg',      'Gudang',      1, 'varchar', 0, 0],
     ['KodeHdGrp',    'Kode Hdgrp',  1, 'varchar', 0, 0],
@@ -1566,7 +1582,7 @@ function opDefaultCart () {
     ['NAMAMERK',     'Merk',        1, 'varchar', 0, 0],
     ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'OtoUser',     1, 'varchar', 0, 0],
-    ['TglOto1',      'TglOto',      1, 'date',    0, 0],
+    ['TglOto1',      'TglOto',      1, 'date',    0, 0]
   ]
 }
 
@@ -1693,6 +1709,13 @@ function opValueCell (row, col) {
   let raw = opPickCI(row, col[0]);
   let type = col[3];
 
+  {{-- Status (varchar "Belum"/"Sudah") -- badge hijau untuk Sudah, merah untuk Belum. --}}
+  if (col[0] === 'Status') {
+    let sudah = String(raw).trim().toLowerCase() === 'sudah';
+    return sudah
+      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah</span></td>'
+      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum</span></td>';
+  }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
     return '<td>' + formatDate(raw, '/') + '</td>';
@@ -1733,7 +1756,15 @@ function opFilterRows (rows) {
   let akhir = $('#opTanggalAkhir').val()
   return (rows || []).filter(function (row) {
     let r = row[0]
-    if (status !== '' && String(Number(opPickCI(r, 'IsOtorisasi1'))) !== status) { return false }
+    {{-- Filter Status Otorisasi dicocokkan ke dua kolom -- IsOtorisasi1 (bool) DAN
+         Status (varchar "Belum"/"Sudah"), supaya baris yang kolom varchar-nya tidak
+         sinkron dengan bool-nya tetap ikut tersaring dengan benar. --}}
+    if (status !== '') {
+      let matchOto = String(Number(opPickCI(r, 'IsOtorisasi1'))) === status
+      let statusText = String(opPickCI(r, 'Status') ?? '').trim().toLowerCase()
+      let matchStatus = status === '1' ? statusText === 'sudah' : statusText === 'belum'
+      if (!matchOto || !matchStatus) { return false }
+    }
     if (awal || akhir) {
       let tgl = opPickCI(r, 'Tanggal')
       if (!tgl) { return false }

@@ -84,45 +84,7 @@
   max-width: 100%;
 }
 
-.po-len-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--rt-card);
-  border: 1.5px solid var(--rt-border);
-  border-radius: 8px;
-  padding: 5px 12px;
-}
-
-.po-len-wrap label {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--rt-ink-soft);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  white-space: nowrap;
-}
-
-.po-len-inp {
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--rt-ink);
-  outline: none;
-  cursor: pointer;
-  padding: 2px 20px 2px 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right center;
-}
-
 #tabel td:first-child,
-#tabel2 td:first-child,
 #addTable td:last-child {
   display: flex;
   gap: 4px;
@@ -130,8 +92,6 @@
   align-items: center;
 }
 
-#tabel td:first-child .btn,
-#tabel2 td:first-child .btn,
 #addTable td:last-child .btn {
   width: 30px;
   height: 30px;
@@ -146,33 +106,23 @@
   transition: all .12s ease;
 }
 
-#tabel td:first-child .btn:hover,
-#tabel2 td:first-child .btn:hover,
 #addTable td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
-#tabel td:first-child .btn-success,
-#tabel2 td:first-child .btn-success,
 #addTable td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
-#tabel td:first-child .btn-primary,
-#tabel2 td:first-child .btn-primary,
 #addTable td:last-child .btn-primary {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
-#tabel td:first-child .btn-danger,
-#tabel2 td:first-child .btn-danger,
 #addTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
-#tabel td:first-child .btn-warning,
-#tabel2 td:first-child .btn-warning,
 #addTable td:last-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
@@ -197,14 +147,13 @@
   color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0;
 }
 
-{{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary text-white --
-     diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua halaman. --}}
+{{-- Tabel statis (bukan #tabel) yang dulu pakai thead bg-primary text-white -- diganti
+     abu-abu + teks gelap, sesuai UI baru yang sama di semua halaman. --}}
 #addTable thead th,
 #detailTable thead th,
 #tabel_add_list_merk thead th,
 #tabel_add_list_barangall thead th,
-#tabel thead th,
-#tabel2 thead th {
+#tabel thead th {
   background: #f8f9fb !important;
   color: #6b7280 !important;
   font-size: 12px;
@@ -215,8 +164,7 @@
   border-top: none;
 }
 
-#tabel tbody tr:hover,
-#tabel2 tbody tr:hover {
+#tabel tbody tr:hover {
   background-color: #f5f3ff;
 }
 
@@ -230,17 +178,14 @@
 .pick-row { cursor: pointer; }
 .pick-row:hover { background-color: #f5f3ff !important; }
 
-#tabel tbody .action-buttons-wrap,
-#tabel2 tbody .action-buttons-wrap {
+#tabel tbody .action-buttons-wrap {
   opacity: 0;
   visibility: hidden;
   transform: translateX(-6px);
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
 }
 #tabel tbody tr:hover .action-buttons-wrap,
-#tabel2 tbody tr:hover .action-buttons-wrap,
-#tabel tbody tr:focus-within .action-buttons-wrap,
-#tabel2 tbody tr:focus-within .action-buttons-wrap {
+#tabel tbody tr:focus-within .action-buttons-wrap {
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
@@ -403,7 +348,7 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="page1" class="container-fluid mainpage">
+<div id="page1" class="container-fluid mainpage po-list-page">
 <div class="container-fluid" >
 
 

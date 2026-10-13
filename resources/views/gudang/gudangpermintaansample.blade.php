@@ -77,42 +77,13 @@
   max-width: 100%;
 }
 
-.po-len-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--rt-card);
-  border: 1.5px solid var(--rt-border);
-  border-radius: 8px;
-  padding: 5px 12px;
-}
-
-.po-len-wrap label {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--rt-ink-soft);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  white-space: nowrap;
-}
-
-.po-len-inp {
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--rt-ink);
-  outline: none;
-  cursor: pointer;
-  padding: 2px 20px 2px 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right center;
-}
+{{-- #tabel sudah dapat width/min-width/warna tombol Aksi dari CSS terpusat
+     (:where(.po-list-page) ...) sejak #page1 diberi class "po-list-page" -- lihat
+     po-table-header.css. #tabel2 (tab OutStanding, tanpa kolom Actions) tidak disentuh
+     aturan #tabel di sana (id berbeda), jadi tetap butuh min-width manual supaya tidak
+     menyempit karena width inline DataTables -- TANPA flex/warna tombol td:first-child,
+     karena kolom pertamanya data biasa, bukan Actions. --}}
+#tabel2 { min-width: 100%; }
 
 #tabel td:first-child,
 #tabel_add td:last-child {
@@ -122,7 +93,6 @@
   align-items: center;
 }
 
-#tabel td:first-child .btn,
 #tabel_add td:last-child .btn {
   width: 30px;
   height: 30px;
@@ -137,33 +107,27 @@
   transition: all .12s ease;
 }
 
-#tabel td:first-child .btn:hover,
 #tabel_add td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
-#tabel td:first-child .btn-success,
 #tabel_add td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
-#tabel td:first-child .btn-info,
 #tabel_add td:last-child .btn-info {
   color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
 }
 
-#tabel td:first-child .btn-primary,
 #tabel_add td:last-child .btn-primary {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
-#tabel td:first-child .btn-danger,
 #tabel_add td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
-#tabel td:first-child .btn-warning,
 #tabel_add td:last-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
@@ -236,65 +200,8 @@
   transform: translateX(0);
 }
 </style>
-  <style>
-  #tabel_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;  
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-  </style>
-{{-- end tampilan search bar 1 --}}
-
-{{-- tampilan search bar 2 --}}
-  <style>
-  #tabel2_filter {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 8px;
-      margin-right: 10px;
-      margin-bottom: -10px;
-    }
-
-  #tabel2_filter label input {
-      width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
-    }
-
-  #tabel2_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      color: #333;
-    }
-
-  #tabel2_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
-    }
-  </style>
-{{-- end tampilan search bar 2 --}}
-
-{{-- search bar 3 (#tabel_oto) dihapus -- tabelnya sudah digabung ke #tabel. --}}
+{{-- Search bar 1/2/3 lama (#tabel_filter/#tabel2_filter/#tabel_oto) dihapus -- toolbar
+     sekarang pakai po-toolbar/po-search-inp, selector lama itu sudah tidak dipakai lagi. --}}
 
 {{-- Search bar hardcoded modal Barang All dihapus -- sekarang pakai satu-satunya
      search box native DataTables (hasil pickerKasInit), lihat searchBarangAll()
@@ -343,7 +250,7 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id='page1' class="container-fluid">
+<div id='page1' class="container-fluid po-list-page">
   <!-- <div id="qrcode"></div> -->
   <div class="">
 

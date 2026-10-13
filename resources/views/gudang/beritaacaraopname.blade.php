@@ -184,6 +184,21 @@
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
+{{-- Badge kolom Status (varchar "Belum"/"Sudah") -- sama seperti perintahopname.blade.php:
+     hijau untuk Sudah, merah untuk Belum. --}}
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
+.status-badge-belum { color: #dc2626; border: 1px solid #f7cfcf; background: #fdeaea; }
+
 {{-- Tabel statis (bukan #tabel/#tabel2/#tabel_oto) yang dulu pakai thead bg-primary
      text-white -- diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua
      halaman. --}}
@@ -1488,12 +1503,13 @@ function baDefaultCart (urut) {
     return [
       ['Nobukti',      'No. Bukti',      1, 'varchar', 0, 0],
       ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-      ['IsOtorisasi1', 'Status',         1, 'bool',    0, 0],
+      ['status',       'Status',         1, 'varchar', 0, 0],
       ['NoPerintahOP', 'No Perintah OP', 1, 'varchar', 0, 0],
       ['NamaGdg',      'Gudang',         1, 'varchar', 0, 0],
       ['NamaSubGrp',   'SubGrp',         1, 'varchar', 0, 0],
       ['NAMAMERK',     'Merk',           1, 'varchar', 0, 0],
       ['NAMAHDGRP',    'HeadGrp',        1, 'varchar', 0, 0],
+      ['IsOtorisasi1', 'Otorisasi',      1, 'bool',    0, 0],
       ['OtoUser1',     'OtoUser',        1, 'varchar', 0, 0],
       ['TglOto1',      'TglOto',         1, 'date',    0, 0],
     ]
@@ -1652,6 +1668,14 @@ function baValueCell (row, col) {
   let raw = baPickCI(row, col[0]);
   let type = col[3];
 
+  {{-- Status (varchar "Belum"/"Sudah") -- badge hijau/merah, sama seperti
+       perintahopname.blade.php. --}}
+  if (col[0] === 'status') {
+    let sudah = String(raw).trim().toLowerCase() === 'sudah';
+    return sudah
+      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah</span></td>'
+      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum</span></td>';
+  }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
     return '<td>' + formatDate(raw, '/') + '</td>';
@@ -1661,10 +1685,11 @@ function baValueCell (row, col) {
     let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
     return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
   }
+  {{-- Otorisasi (bool) -- ikon check/silang, sama seperti perintahopname.blade.php. --}}
   if (type === 'bool') {
     return Number(raw)
-      ? '<td class="text-center"><span class="text-success" style="font-weight:700">Sudah</span></td>'
-      : '<td class="text-center"><span class="text-warning" style="font-weight:700">Belum</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1699,7 +1724,15 @@ function baFilterRows (rows) {
   let awal = $('#baTanggalAwal').val()
   let akhir = $('#baTanggalAkhir').val()
   return (rows || []).filter(function (row) {
-    if (status !== '' && String(Number(baPickCI(row, 'IsOtorisasi1'))) !== status) { return false }
+    {{-- Filter Status Otorisasi dicocokkan ke dua kolom -- IsOtorisasi1 (bool) DAN
+         status (varchar "Belum"/"Sudah"), supaya baris yang kolom varchar-nya tidak
+         sinkron dengan bool-nya tetap ikut tersaring dengan benar. --}}
+    if (status !== '') {
+      let matchOto = String(Number(baPickCI(row, 'IsOtorisasi1'))) === status
+      let statusText = String(baPickCI(row, 'status') ?? '').trim().toLowerCase()
+      let matchStatus = status === '1' ? statusText === 'sudah' : statusText === 'belum'
+      if (!matchOto || !matchStatus) { return false }
+    }
     if (awal || akhir) {
       let tgl = baPickCI(row, 'Tanggal')
       if (!tgl) { return false }
@@ -1823,6 +1856,21 @@ $(document).ready(function(){
       baAktifkanTabel(1);
 
       baInitReportTableSekali();
+
+      {{-- Tanpa ini baActiveUrut tetap nyangkut di 1 selamanya setelah load pertama --
+           baOnChangeAktif() (dipanggil tombol "Reset kolom"/geser-sembunyikan kolom
+           bawaan ReportTable) baca baActiveUrut buat milih reinitTabel() vs
+           reinitTabel2(), jadi tabel Berita Acara Opname (urut 2) tidak pernah
+           ke-update saat tab-nya lagi aktif. Port 1:1 dari pola yang sama di
+           gudangpenyerahansample.blade.php. --}}
+      $('#nav-home-tab').on('shown.bs.tab', function () {
+        baAktifkanTabel(1);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+      });
+      $('#nav-profile-tab').on('shown.bs.tab', function () {
+        baAktifkanTabel(2);
+        if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+      });
 });
 
 

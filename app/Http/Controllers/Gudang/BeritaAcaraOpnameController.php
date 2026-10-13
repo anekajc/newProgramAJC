@@ -12,9 +12,6 @@ use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 
-
-
-
 class BeritaAcaraOpnameController extends Controller
 
 

@@ -33,8 +33,7 @@ class PerintahOpnameController extends Controller
     $date1 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d');
     $date2 = \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d');
 
-    $tempOutstanding = DB::connection("SML")->select("
-select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*
+    $tempOutstanding = DB::connection("SML")->select("select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*
 ,
         Cast(Case when Case when A.IsOtorisasi1=1 then 1 else 0 end+
                        Case when A.IsOtorisasi2=1 then 1 else 0 end+
@@ -42,14 +41,18 @@ select b.NAMAHDGRP,c.NamaSubGrp,d.NAMAMERK,a.*
                        Case when A.IsOtorisasi4=1 then 1 else 0 end+
                        Case when A.IsOtorisasi5=1 then 1 else 0 end=A.MaxOL then 0
                   else 1
-             end As Bit) NeedOtorisasi
+             end As Bit) NeedOtorisasi,
+             case when ISNULL(e.nopropname,'')='' then 'Belum' else 
+             case when isnull(x.btl,1)=0 then 'Batal' else'Sudah' end end Status
 from DBPerintahOp A
+left outer join (select nobukti,sum(QtyComp)-sum(qntbatal)btl from DBPerintahOPDet group by NoBukti) x on x.NoBukti=a.NoBukti
 left outer join DBHDGROUP b on b.KODEHDGRP=a.KodeHdGrp
 left outer join DBSubGroup c on c.KodeSubGrp=a.KodeSubGrp  and C.KodeHDGrp=C.KodeGrp
 left outer join DBMERK d on d.KODEMERK=a.KodeMerk
-where CAST(A.Tanggal as date) between :date1 and :date2 and A.IsOtorisasi1 = 0
-order by A.NoBukti
 
+left outer join (select NOPROPNAME from DBBAOPdet group by NOPROPNAME) e on e.NOPROPNAME=a.NoBukti 
+where CAST(A.Tanggal as date) between :date1 and :date2 --and A.IsOtorisasi1 = 0
+order by A.NoBukti
 " , ["date1" => $date1 , "date2" => $date2]);
         // $tempOutstanding = [];
         // foreach ($outstanding as $p) {
