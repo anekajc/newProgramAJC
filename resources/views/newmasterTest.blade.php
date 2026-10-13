@@ -4,6 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{-- PWA (notifikasi push permintaan otorisasi) - lihat public/js/otorisasi-push.js --}}
+    <link rel="manifest" href="{!! URL::asset('manifest.webmanifest') !!}" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="apple-touch-icon" href="{!! URL::asset('img/pwa-192.png') !!}" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="AJC" />
     <link
         href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap"
         rel="stylesheet" type="text/css" />
@@ -342,6 +348,40 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .oto-bell {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            color: #4b5563;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .oto-bell:hover { color: var(--blue); border-color: #bfdbfe; }
+
+        .oto-bell-count {
+            position: absolute;
+            top: -5px;
+            right: -6px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            border-radius: 9px;
+            background: #dc2626;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 17px;
+            text-align: center;
         }
 
         .period-badge {
@@ -975,6 +1015,13 @@
                 <div class="breadcrumb" id="breadcrumb"><span>Beranda</span></div>
             </div>
             <div class="header-right">
+                <button type="button" id="otoPushToggle" class="oto-bell" title="Aktifkan notifikasi otorisasi di perangkat ini" style="display:none">
+                  <i class="bi bi-bell-slash"></i>
+                </button>
+                <a href="{{ url('otorisasiinbox') }}" class="oto-bell" title="Permintaan otorisasi">
+                  <i class="bi bi-bell"></i>
+                  <span id="otoBellCount" class="oto-bell-count" style="display:none">0</span>
+                </a>
                 <div class="period-badge">
                   Username: {{ Auth::user()->username }}
           &nbsp;–&nbsp;
@@ -1735,6 +1782,18 @@ function goHome() {
 }
 
 </script>
+
+    <script>
+      window.OTO_PUSH = {
+        vapidKey: @json(config('services.webpush.public_key')),
+        swUrl: "{!! URL::asset('sw.js') !!}",
+        subscribeUrl: "{!! url('pushsubscribe') !!}",
+        unsubscribeUrl: "{!! url('pushunsubscribe') !!}",
+        countUrl: "{!! url('otorisasicount') !!}",
+        token: "{!! csrf_token() !!}",
+      };
+    </script>
+    <script src="{!! URL::asset('js/otorisasi-push.js') !!}?v={{ @filemtime(base_path('public/js/otorisasi-push.js')) ?: '1' }}"></script>
 
     @include('partials.ajax-error-logger')
     @yield('js')

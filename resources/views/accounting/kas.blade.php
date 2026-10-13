@@ -507,6 +507,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     kreditnotelistinvoice: "{!! url('kreditnotelistinvoice') !!}",
     kreditnotespadd: "{!! url('kreditnotespadd') !!}",
     kreditnotespdetail: "{!! url('kreditnotespdetail') !!}",
+    otorisasirequest: "{!! url('otorisasirequest') !!}",
     perintahreturjuallistnobeli: "{!! url('perintahreturjuallistnobeli') !!}",
     perintahreturjuallistnoinvoice: "{!! url('perintahreturjuallistnoinvoice') !!}",
     spnobuktisimbol: "{!! url('spnobuktisimbol') !!}",

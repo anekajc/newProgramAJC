@@ -9,6 +9,7 @@ use App\Model\NewAksesMenu;
 use App\Model\DBFLMENU;
 use App\Model\NewPeriode;
 use App\Model\NewUsers;
+use App\Services\OtorisasiService;
 use Illuminate\Support\Facades\DB;
 
 class KasController extends Controller
@@ -824,12 +825,22 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
       return $listData;
   }
 
-  public function spOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
-    $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+  // Sebelumnya tanpa cek hak di server (tombol pun tidak mengecek) - kini wajib
+  // DBFLMENUWEB.IsOtorisasi1 untuk menu 'kas'. UPDATE-nya pindah ke App\Otorisasi\KasOtorisasi
+  // supaya sama dengan yang dipakai halaman approve mobile (/otorisasi/{id}).
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, 'kas')) {
+      return response('Anda tidak berhak otorisasi Kas', 403);
+    }
+    $res = $oto->handler('kas')->approve($req->nobukti, $username);
+    $oto->closePending('kas', $req->nobukti, $username);
     return $res;
   }
-  public function spBatalOtorisasi (Request $req) {
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    if (!$oto->canApprove(\Auth::user()->username, 'kas')) {
+      return response('Anda tidak berhak batal otorisasi Kas', 403);
+    }
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
     return $res;
