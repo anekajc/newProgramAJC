@@ -173,8 +173,9 @@
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
-#tabel td:first-child .btn-primary .bi-plus {
-  font-size: 18px;
+#tabel td:first-child .btn-primary .bi-plus-lg {
+  font-size: 20px;
+  font-weight: bold;
 }
 
 #tabel td:first-child .btn-danger,
@@ -183,21 +184,6 @@
 #addTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
-
-{{-- Badge kolom Status (varchar "Belum"/"Sudah") -- sama seperti perintahopname.blade.php:
-     hijau untuk Sudah, merah untuk Belum. --}}
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
-.status-badge-belum { color: #dc2626; border: 1px solid #f7cfcf; background: #fdeaea; }
 
 {{-- Tabel statis (bukan #tabel/#tabel2/#tabel_oto) yang dulu pakai thead bg-primary
      text-white -- diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua
@@ -534,24 +520,38 @@
                   <div class="modal-dialog modal-md">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title"><i class="bi bi-funnel"></i> Filter Data</h5>
+                        <h5 class="modal-title">
+                          <i class="bi bi-funnel"></i>
+                          Filter Data
+                          <span class="rt-active-badge" id="baFilterBadge">0 aktif</span>
+                        </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterBA').modal('hide')"><span aria-hidden="true">&times;</span></button>
                       </div>
                       <div class="modal-body">
                         <div class="rt-section">
                           <div class="rt-group-label">Status</div>
-                          <div>
-                            <label class="rt-field-label" for="baStatus">Status Otorisasi</label>
-                            <select class="rt-native" id="baStatus">
-                              <option value="" selected>Semua Status</option>
-                              <option value="0">Belum Otorisasi</option>
-                              <option value="1">Sudah Otorisasi</option>
-                            </select>
+                          <div class="rt-grid-2">
+                            <div>
+                              <label class="rt-field-label" for="baStatus">Otorisasi</label>
+                              <select class="rt-native" id="baStatus">
+                                <option value="" selected>Semua Status</option>
+                                <option value="0">Belum Otorisasi</option>
+                                <option value="1">Sudah Otorisasi</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="rt-field-label" for="baStatusOpname">Status</label>
+                              <select class="rt-native" id="baStatusOpname">
+                                <option value="" selected>Semua Status</option>
+                                <option value="Belum">Belum</option>
+                                <option value="Sudah">Sudah</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div class="modal-footer">
-                        <button type="button" class="rt-reset-link" onclick="$('#baStatus').val('')">Reset semua</button>
+                        <button type="button" class="rt-reset-link" onclick="$('#baStatus').val(''); $('#baStatusOpname').val('');">Reset semua</button>
                         <div class="rt-footer-buttons">
                           <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal" onclick="$('#modalFilterBA').modal('hide')">Batal</button>
                           <button type="button" class="rt-btn rt-btn-primary" onclick="baFilterChanged(); $('#modalFilterBA').modal('hide');">Terapkan</button>
@@ -1473,6 +1473,32 @@ let listDataDet = []
 let listDataAdd = []
 let tempDataAdd = []
 
+/* ============ Separator ribuan untuk input QTY (add_qnt${i}/koreksi_qnt${i}) ============
+ * Field QTY sekarang type="text" (bukan type="number", yang tidak bisa menampilkan
+ * titik ribuan) + oninput="formatAngkaInput(event)" supaya tampilannya "12.312" /
+ * "123.123,50" gaya id-ID. Field disimpan sebagai STRING berformat di DOM, jadi setiap
+ * tempat yang baca .val() untuk perhitungan/submit WAJIB lewat parseAngka() dulu --
+ * sama persis dengan pola di koreksistock.blade.php/opnamebarang.blade.php. */
+function parseAngka (str) {
+  if (str === undefined || str === null || str === '') { return 0; }
+  let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function formatAngkaDisplay (n, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function formatAngkaInput (e) {
+  let el = e.target;
+  let parts = el.value.replace(/[^\d,]/g, '').split(',');
+  let intPart = parts[0].replace(/^0+(?=\d)/, '');
+  let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+  let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+  el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+}
+
 /* ============ Header tabel interaktif (window.ReportTable) ============
  * Port 1:1 dari pola opCart/opAktifkanTabel milik perintahopname.blade.php, untuk
  * dua tabel di halaman ini (#tabel = Perintah Opname outstanding, #tabel2 = BAP --
@@ -1668,13 +1694,14 @@ function baValueCell (row, col) {
   let raw = baPickCI(row, col[0]);
   let type = col[3];
 
-  {{-- Status (varchar "Belum"/"Sudah") -- badge hijau/merah, sama seperti
-       perintahopname.blade.php. --}}
+  {{-- Status -- badge titik+pill .sp-badge, sama seperti kolom Status di
+       permintaanpemakaian.blade.php/perintahopname.blade.php. Backend Berita Acara
+       Opname tidak punya kolom 'status' sendiri (tidak seperti Perintah Opname yang
+       punya CASE Belum/Batal/Sudah) dan tidak ada menu closing BAP, jadi di sini
+       Status diturunkan langsung dari IsOtorisasi1 -- cuma Sudah/Belum, tanpa Batal. --}}
   if (col[0] === 'status') {
-    let sudah = String(raw).trim().toLowerCase() === 'sudah';
-    return sudah
-      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah</span></td>'
-      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum</span></td>';
+    let sudah = Number(baPickCI(row, 'IsOtorisasi1')) === 1;
+    return '<td><span class="sp-badge ' + (sudah ? 'is-active' : 'is-inactive') + '">' + (sudah ? 'Sudah' : 'Belum') + '</span></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
@@ -1698,7 +1725,7 @@ function baTabelActionsCell (row) {
   let nobukti = baPickCI(row, 'NoBukti');
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetailAdd(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus-lg"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1720,18 +1747,19 @@ function baTabel2ActionsCell (row) {
 }
 
 function baFilterRows (rows) {
-  let status = $('#baStatus').val()
+  let oto = $('#baStatus').val()
+  let statusOpname = $('#baStatusOpname').val()
   let awal = $('#baTanggalAwal').val()
   let akhir = $('#baTanggalAkhir').val()
   return (rows || []).filter(function (row) {
-    {{-- Filter Status Otorisasi dicocokkan ke dua kolom -- IsOtorisasi1 (bool) DAN
-         status (varchar "Belum"/"Sudah"), supaya baris yang kolom varchar-nya tidak
-         sinkron dengan bool-nya tetap ikut tersaring dengan benar. --}}
-    if (status !== '') {
-      let matchOto = String(Number(baPickCI(row, 'IsOtorisasi1'))) === status
-      let statusText = String(baPickCI(row, 'status') ?? '').trim().toLowerCase()
-      let matchStatus = status === '1' ? statusText === 'sudah' : statusText === 'belum'
-      if (!matchOto || !matchStatus) { return false }
+    {{-- Kolom Otorisasi dan Status sama-sama diturunkan dari IsOtorisasi1 (lihat
+         baValueCell() -- BAP tidak punya field 'status' sendiri di backend), tapi tetap
+         dua dropdown terpisah di UI (sama seperti Status Otorisasi + Status Opname di
+         perintahopname.blade.php), jadi disaring independen. --}}
+    if (oto !== '' && String(Number(baPickCI(row, 'IsOtorisasi1'))) !== oto) { return false }
+    if (statusOpname !== '') {
+      let sudah = Number(baPickCI(row, 'IsOtorisasi1')) === 1
+      if ((statusOpname === 'Sudah') !== sudah) { return false }
     }
     if (awal || akhir) {
       let tgl = baPickCI(row, 'Tanggal')
@@ -2671,7 +2699,7 @@ function buttonAdd (nobukti) {
 
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td class="text-center"><input onchange="" id="add_qnt${i}"  class="text-right" type="number" min=0 value=0.00></td>
+          <td class="text-center"><input id="add_qnt${i}" class="text-right" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" value="${formatAngkaDisplay(0)}"></td>
 
           </tr>`
         });
@@ -2978,7 +3006,7 @@ function submitAdd () {
     console.log(i)
     if (document.getElementById(`add_checkbox${i}`).checked) {
       console.log($(`#add_qnt${i}`).val())
-      let x = $(`#add_qnt${i}`).val()
+      let x = parseAngka($(`#add_qnt${i}`).val())
       if (Number(x)  < 0) {
               checkQnt = 1
             }
@@ -3091,7 +3119,7 @@ function submitKoreksi () {
     console.log(i)
     // if (document.getElementById(`add_checkbox${i}`).checked) {
       console.log($(`#koreksi_qnt${i}`).val())
-      let x = $(`#koreksi_qnt${i}`).val()
+      let x = parseAngka($(`#koreksi_qnt${i}`).val())
       if (Number(x)  < 0) {
               checkQnt = 1
             }
@@ -3682,7 +3710,7 @@ function refreshDataTable (nobukti) {
                     <td>${item.namaBrg}</td>
                     <td class="text-center">${item.Satuan}</td>
                     <td class="text-right">${item.SaldoComp ? parseFloat(item.SaldoComp).toFixed(2) : '0.00'}</td>
-                    <td class="text-center"><input onchange="" id="koreksi_qnt${i}"  class="text-right" type="number" min=0 value=${parseFloat(item.QntOpname).toFixed(2)}></td>
+                    <td class="text-center"><input id="koreksi_qnt${i}" class="text-right" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" value="${formatAngkaDisplay(item.QntOpname)}"></td>
                     <td class='text-center'>
                       <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
 

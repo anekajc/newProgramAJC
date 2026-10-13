@@ -16,6 +16,14 @@
        milik SO -> #tabel3 di sini, yang juga tidak punya kolom Actions). Tidak ada CSS
        baru -- report-table.js/po-table-header.css sudah menyediakan sisanya. --}}
   <style>
+  {{-- po-table-header.css cuma punya .sp-badge.is-active/is-inactive/is-user/is-supervisor
+       -- kolom Status di tab Transfer Barang butuh state ketiga ("Batal"), jadi warnanya
+       (abu-abu) ditambah khusus di sini, bukan di file CSS bersama. --}}
+  .sp-badge.is-batal {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+
   .toolbar {
     display: flex;
     align-items: center;
@@ -729,6 +737,11 @@
 
       <div class="col-md-3">
         <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label style="visibility:hidden;">Keterangan</label>
+            </div>
+          </div>
           <div class="col-md-12" style="margin-top:-15px;">
             <div class="form-group">
               <textarea style="width: 100%; height:120px !important; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
@@ -2569,22 +2582,27 @@
 
             <div class="col-md-12" style="margin-top:-10px;">
               <div class="form-group">
-                <textarea style="width: 100%; height:120px !important; resize: none;" rows=5 placeholder="Gudang Tujuan" class="form-control text-left align-items-center" id="detail_namaGudangTujuan"  disabled></textarea>
+                <textarea style="width: 100%; resize: none; height:75px !important;" rows=3 placeholder="Gudang Tujuan" class="form-control text-left align-items-center" id="detail_namaGudangTujuan"  disabled></textarea>
               </div>
             </div>
 
           </div>
         </div>
 
-      {{-- <div class="col-md-3">
+      <div class="col-md-3">
         <div class="row">
-          <div class="col-md-12" style="margin-top:-5px;">
+          <div class="col-md-12">
             <div class="form-group">
-              <textarea style="width: 100%; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
+              <label style="visibility:hidden;">Keterangan</label>
+            </div>
+          </div>
+          <div class="col-md-12" style="margin-top:-10px;">
+            <div class="form-group">
+              <textarea style="width: 100%; resize: none; height:75px !important;" rows=3 placeholder="Keterangan" class="form-control" id="detail_keterangan" disabled></textarea>
             </div>
           </div>
         </div>
-      </div> --}}
+      </div>
 
     </div>
     <hr/>
@@ -2643,6 +2661,32 @@ let tableIsiRefreshDataList = []
 let dataNoBuktiSatuan = {}
 let dataNoUrutSatuan = {}
 let tempSatuanBarang = []
+
+/* ============ Separator ribuan untuk input QTY (input_table_qty${URUT}) ============
+ * Field QTY sekarang type="text" (bukan type="number", yang tidak bisa menampilkan
+ * titik ribuan) + oninput="formatAngkaInput(event)" supaya tampilannya "12.312" /
+ * "123.123,50" gaya id-ID. Field disimpan sebagai STRING berformat di DOM, jadi setiap
+ * tempat yang baca .value/.val() untuk perhitungan/submit WAJIB lewat parseAngka()
+ * dulu -- sama persis dengan pola di koreksistock.blade.php/opnamebarang.blade.php. */
+function parseAngka (str) {
+  if (str === undefined || str === null || str === '') { return 0; }
+  let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+
+function formatAngkaDisplay (n, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function formatAngkaInput (e) {
+  let el = e.target;
+  let parts = el.value.replace(/[^\d,]/g, '').split(',');
+  let intPart = parts[0].replace(/^0+(?=\d)/, '');
+  let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+  let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+  el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+}
 
 function buttonOtorisasi (nobukti) {
   console.log(nobukti)
@@ -3038,7 +3082,7 @@ function submitAddAdd () {
   for (let i = 0; i < checkedBoxes.length; i++) {
     let urut = $(checkedBoxes[i]).data('urut')
     let item = tableIsiRefreshDataList.find(x => x.URUT == urut)
-    let qtyValue = document.getElementById('input_table_qty' + urut).value
+    let qtyValue = parseAngka(document.getElementById('input_table_qty' + urut).value)
 
     if (!item || qtyValue === '' || Number(qtyValue) <= 0) {
       alertify.warning('Isi Qty untuk setiap item yang dicentang (Urut ' + urut + ')')
@@ -4513,6 +4557,8 @@ function tbDefaultCart(urut) {
     ['NamagdgAsal',   'Gudang Asal',   1, 'varchar', 0, 0],
     ['NamagdgTujuan', 'Gudang Tujuan', 1, 'varchar', 0, 0],
     ['JmlItem',       'Jml Item',      1, 'float',   0, 0],
+    ['IsOtorisasi1',  'Otorisasi',     1, 'bool',    0, 0],
+    ['Status',        'Status',        1, 'varchar', 0, 0],
     ['OtoUser1',      'User Oto',      1, 'varchar', 0, 0],
     ['TglOto1',       'Tgl Oto',       1, 'date',    0, 0]
   ]
@@ -4705,6 +4751,16 @@ function tbValueCell(row, col) {
   let raw = tbPickCI(row, col[0])
   let type = col[3]
 
+  {{-- Status (varchar "Belum"/"Sudah"/"Batal") -- badge titik+pill .sp-badge, sama
+       seperti kolom Status di perintahopname.blade.php/beritaacaraopname.blade.php
+       (hijau untuk Sudah, merah untuk Belum). "Batal" dipetakan ke .is-batal (abu-abu,
+       ditambahkan khusus di sini karena po-table-header.css cuma punya is-active/
+       is-inactive/is-user/is-supervisor). --}}
+  if (col[0] === 'Status') {
+    let s = String(raw || '').trim().toLowerCase()
+    let kelas = s === 'sudah' ? 'is-active' : (s === 'batal' ? 'is-batal' : 'is-inactive')
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>'
+  }
   if (type === 'date') {
     if (!raw) { return '<td></td>' }
     return '<td>' + tbFormatDate(raw) + '</td>'
@@ -4963,9 +5019,14 @@ function loadAll () {
   else { reinitTabel3() }
 }
 
-// Dropdown Gudang Asal/Tujuan di form Add -- menggantikan modal picker yang tombolnya
-// sempat tidak punya fungsi JS sama sekali (buttonAddListGudangAsal/Tujuan belum pernah
-// diimplementasikan). Satu daftar DBGUDANG dipakai bareng oleh kedua dropdown.
+// Dropdown Gudang Asal/Tujuan di form Add -- disamakan dengan pola
+// muatDropdownGudangAsal()/onChangeGudangAsal() milik permintaantransferbarang.blade.php:
+// opsi "Kode - Nama" dan kotak di bawah dropdown menampilkan ALAMAT gudang (bukan lagi
+// "Nama (Kode)" dari NamagdgAsal/NamagdgTujuan hasil listing). Satu daftar DBGUDANG
+// (sudah termasuk kolom Alamat lewat endpoint polistgudang) dipakai bareng oleh kedua
+// dropdown dan juga dicari ulang oleh tbIsiDetailGudang() untuk mengisi #detail_namaGudang*
+// di page4 (Detail) dari kode Gudang Asal/Tujuan yang sudah tersimpan.
+let listGudangDropdown = []
 function tbIsiDropdownGudang () {
   $.ajax({
     url: "{!! url('polistgudang') !!}",
@@ -4973,9 +5034,10 @@ function tbIsiDropdownGudang () {
     async: false,
     data: { _token: $("#_token").val() },
     success: function (res) {
-      let options = '<option value="">-</option>'
-      ;(res || []).forEach(function (item) {
-        options += '<option value="' + item.KODEGDG + '" data-nama="' + item.NAMA + '">' + item.NAMA + '</option>'
+      listGudangDropdown = res || []
+      let options = '<option value="">Pilih Gudang</option>'
+      listGudangDropdown.forEach(function (item) {
+        options += '<option value="' + item.KODEGDG + '">' + item.KODEGDG + ' - ' + item.NAMA + '</option>'
       })
       $('#input_add_kodeGudangAsal').html(options)
       $('#input_add_kodeGudangTujuan').html(options)
@@ -4989,9 +5051,20 @@ function tbIsiDropdownGudang () {
 
 // Dipanggil onchange #input_add_kodeGudangAsal/#input_add_kodeGudangTujuan.
 function tbOnChangeGudang (suffix) {
-  let select = document.getElementById('input_add_kodeGudang' + suffix)
-  let selected = select.options[select.selectedIndex]
-  document.getElementById('input_add_namaGudang' + suffix).value = selected ? (selected.dataset.nama || '') : ''
+  let kode = $('#input_add_kodeGudang' + suffix).val()
+  let item = listGudangDropdown.find(function (g) { return g.KODEGDG === kode })
+  document.getElementById('input_add_namaGudang' + suffix).value = item ? (item.Alamat || '') : ''
+}
+
+// Isi kotak alamat di page4 (Detail) dari listGudangDropdown yang sama -- dipanggil
+// setelah #detail_kodeGudangAsal/Tujuan di-set ke kode gudangnya (lihat buttonDetailAdd()).
+function tbIsiDetailGudang () {
+  let kodeAsal = $('#detail_kodeGudangAsal').val()
+  let kodeTujuan = $('#detail_kodeGudangTujuan').val()
+  let itemAsal = listGudangDropdown.find(function (g) { return g.KODEGDG === kodeAsal })
+  let itemTujuan = listGudangDropdown.find(function (g) { return g.KODEGDG === kodeTujuan })
+  document.getElementById('detail_namaGudangAsal').value = itemAsal ? (itemAsal.Alamat || '') : ''
+  document.getElementById('detail_namaGudangTujuan').value = itemTujuan ? (itemTujuan.Alamat || '') : ''
 }
 
 $(function () {
@@ -6418,7 +6491,7 @@ function changeQnt (urut, kodebrg, gudangAsal) {
   console.log('change qnt bro');
 
   let _token = $("#_token").val();
-  let qntValue = document.getElementById('input_table_qty' + urut).value;
+  let qntValue = parseAngka(document.getElementById('input_table_qty' + urut).value);
 
   let item = tableIsiRefreshDataList ? tableIsiRefreshDataList.find(i => i.URUT == urut) : null;
 
@@ -6530,7 +6603,7 @@ function changeQntEdit (urut, kodebrg, gudangAsal) {
   console.log('changeQntEdit urut:', urut);
 
   let _token = $("#_token").val();
-  let qntValue = parseFloat(document.getElementById('input_table_qty' + urut).value || 0);
+  let qntValue = parseAngka(document.getElementById('input_table_qty' + urut).value);
 
   if (!dataTableAdd || !dataTableAdd.length) {
     alertify.warning('Data item tidak ditemukan');
@@ -6884,7 +6957,8 @@ function refreshDataTableAdd (NOBUKTI) {
     success: function (res) {
       console.log('Data diterima', res);
 
-      if (!res.list.length) {
+      if (!res.list.length || !res.listHeader || !res.listHeader.length) {
+        alertify.warning('Data permintaan transfer tidak ditemukan atau sudah tidak outstanding. Silakan refresh halaman.');
         $('#page3').hide();
         $('#page2').hide();
         $('#page1').show();
@@ -6910,9 +6984,11 @@ function refreshDataTableAdd (NOBUKTI) {
             ${showQtyTransfer ? `<td style="white-space:nowrap; text-align:right; vertical-align:middle;">${parseFloat(item.QTYTRANSFER || 0).toLocaleString()}</td>` : ''}
             <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
               <input
-                type="number"
+                type="text"
+                inputmode="decimal"
                 class="form-control text-right"
                 id="input_table_qty${item.URUT}"
+                oninput="formatAngkaInput(event)"
                 onchange="changeQnt(${item.URUT}, '${item.KODEBRG}', '${item.GdgAsal}')"
                 style="width:80px; height:30px; padding:2px 6px; margin:0; line-height:1.2; vertical-align:middle;"
               >
@@ -6923,9 +6999,9 @@ function refreshDataTableAdd (NOBUKTI) {
       document.getElementById("tabel_data_add").innerHTML = rowTable;
 
       document.getElementById("input_add_kodeGudangAsal").value = dataTableAdd[0].GdgAsal;
-      document.getElementById("input_add_namaGudangAsal").value = dataTableAdd[0].NamagdgAsal;
+      tbOnChangeGudang('Asal');
       document.getElementById("input_add_kodeGudangTujuan").value = dataTableAdd[0].GdgTujuan;
-      document.getElementById("input_add_namaGudangTujuan").value = dataTableAdd[0].NamagdgTujuan;
+      tbOnChangeGudang('Tujuan');
       document.getElementById("input_add_keterangan").value = dataHeaderAdd[0].Keterangan;
 
       $('#tabel_add').DataTable({
@@ -7030,12 +7106,12 @@ function refreshDataTableEdit (NOBUKTI) {
               </td>
               <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
                 <input
-                  type="number"
+                  type="text"
+                  inputmode="decimal"
                   class="form-control text-right"
                   id="input_table_qty${item.URUT}"
-                  step="any"
-                  min="0"
-                  value="${qnt > 0 ? qnt : ''}"
+                  oninput="formatAngkaInput(event)"
+                  value="${qnt > 0 ? formatAngkaDisplay(qnt) : ''}"
                   onchange="changeQntEdit(${item.URUT}, '${item.KODEBRG}', '${item.GdgAsal}')"
                   style="width:80px; height:30px; padding:2px 6px; margin:0; line-height:1.2; vertical-align:middle;"
                 >
@@ -7055,9 +7131,9 @@ function refreshDataTableEdit (NOBUKTI) {
       if (dataHeaderAdd.length) {
         const hdr = dataHeaderAdd[0];
         $("#input_add_kodeGudangAsal").val(hdr.GDGASAL ?? filteredList[0]?.GdgAsal ?? '');
-        $("#input_add_namaGudangAsal").val(filteredList[0]?.NamagdgAsal ?? '');
+        tbOnChangeGudang('Asal');
         $("#input_add_kodeGudangTujuan").val(filteredList[0]?.GdgTujuan ?? '');
-        $("#input_add_namaGudangTujuan").val(filteredList[0]?.NamagdgTujuan ?? '');
+        tbOnChangeGudang('Tujuan');
         $("#input_add_nobukti").val(hdr.nobukti ?? '');
         $("#input_add_nourut").val(hdr.NoUrut ?? '');
         $("#input_add_tanggal").val(formatDate(hdr.Tanggal ?? ''));
@@ -7156,12 +7232,11 @@ function refreshDataTableDetail (NOBUKTI) {
                   ${sisa}
               </td>
               <td style="white-space:nowrap; text-align:center; vertical-align:middle;">
-                <input 
-                  type="number"
+                <input
+                  type="text"
                   class="form-control text-right"
-                  id="input_table_qty${item.URUT}" 
-                  step="any"
-                  value="${qnt}"
+                  id="input_table_qty${item.URUT}"
+                  value="${formatAngkaDisplay(qnt)}"
                   disabled
                   style="width:80px; height:30px; padding:2px 6px; margin:0; line-height:1.2; vertical-align:middle;"
                 >
@@ -7180,9 +7255,9 @@ function refreshDataTableDetail (NOBUKTI) {
       if (dataHeaderAdd.length) {
         const hdr = dataHeaderAdd[0];
         $("#input_add_kodeGudangAsal").val(hdr.GDGASAL ?? filteredList[0]?.GdgAsal ?? '');
-        $("#input_add_namaGudangAsal").val(filteredList[0]?.NamagdgAsal ?? '');
+        tbOnChangeGudang('Asal');
         $("#input_add_kodeGudangTujuan").val(filteredList[0]?.GdgTujuan ?? '');
-        $("#input_add_namaGudangTujuan").val(filteredList[0]?.NamagdgTujuan ?? '');
+        tbOnChangeGudang('Tujuan');
         $("#input_add_nobukti").val(hdr.nobukti ?? '');
         $("#input_add_nourut").val(hdr.NoUrut ?? '');
         $("#input_add_tanggal").val(formatDate(hdr.Tanggal ?? ''));
@@ -7249,9 +7324,8 @@ function refreshDataTableDetailAdd (NOBUKTI) {
 
       $("#detail_nobukti").val(header.nobukti ?? '');
       $("#detail_kodeGudangAsal").val(header.GDGASAL ?? '');
-      $("#detail_namaGudangAsal").val(list[0]?.NamagdgAsal ?? '');
-      $("#detail_kodeGudangTujuan").val(list[0].GdgTujuan ?? '');
-      $("#detail_namaGudangTujuan").val(list[0]?.NamagdgTujuan ?? '');
+      $("#detail_kodeGudangTujuan").val(list[0]?.GdgTujuan ?? '');
+      tbIsiDetailGudang();
       $("#detail_keterangan").val(header.Keterangan ?? '');
 
       let rowTable = "";

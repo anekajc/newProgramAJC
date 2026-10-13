@@ -97,7 +97,7 @@
                 <i class="bi bi-funnel"></i> Filter
               </button>
               <div class="po-toolbar-act">
-                <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Add BBS</button>
+                <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
               </div>
             </div>
 
@@ -132,22 +132,16 @@
               </div>
             </div>
 
+            <div id="rtBarTabel"></div>
             <table id="tabel" class="data-table">
-              <thead>
-                <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
-                  <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-                  <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-                  <th style="padding: 4px 12px;" scope="col">Kode Cust</th>
-                  <th style="padding: 4px 12px;" scope="col">Nama Customer</th>
-                  <th style="padding: 4px 12px;" scope="col">User</th>
-                  <th style="padding: 4px 12px;" scope="col">Status</th>
-                  <th style="padding: 4px 12px;" scope="col">User Oto</th>
-                  <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
-                </tr>
-              </thead>
+              <thead style="white-space:nowrap;"></thead>
               <tbody id="tabel_data" class="text-left"></tbody>
             </table>
+            <div class="po-rt-hint">
+              <i class="bi bi-info-circle"></i>
+              Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+              untuk menyembunyikan kolom atau mengatur jumlah desimal.
+            </div>
           </div>
         </div>
     	</div>
@@ -404,6 +398,7 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/ajc-func-core.js') !!}"></script>
 <script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
 <script>
@@ -581,7 +576,18 @@
 
   {{-- BBS Belum + Sudah Otorisasi digabung jadi satu tabel (#tabel), dengan kolom Status
        dan filter Status di toolbar, sama seperti engine bbs/rs/gp/ps di
-       gudangreturpenyerahansample.blade.php/gudangpermintaansample.blade.php. --}}
+       gudangreturpenyerahansample.blade.php/gudangpermintaansample.blade.php.
+
+       Judul kolom interaktif (geser urutan/sembunyikan lewat window.ReportTable) --
+       port 1:1 dari pola opCart/opDefaultCart milik perintahopname.blade.php (juga
+       satu tabel saja, bukan dua/tiga seperti gudangpermintaansample). Ketinggalan
+       waktu port awal (halaman ini masih thead statis, tanpa #rtBarTabel/report-table.js
+       sama sekali), baru ditambah di sini. --}}
+  let bbsCart = []
+  const BBS_HREF = 'pembebanansample'
+  const BBS_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
+  const BBS_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
+
   function bbsPickCI (row, key) {
     if (!row) { return undefined; }
     if (row[key] !== undefined) { return row[key]; }
@@ -590,6 +596,166 @@
       if (k.toLowerCase() === lower) { return row[k]; }
     }
     return undefined;
+  }
+
+  function bbsDefaultCart () {
+    return [
+      ['NoBukti',      'No. Bukti',     1, 'varchar', 0, 0],
+      ['Tanggal',      'Tanggal',       1, 'date',    0, 0],
+      ['KodeCustSupp', 'Kode Cust',     1, 'varchar', 0, 0],
+      ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
+      ['IDUSER',       'User',          1, 'varchar', 0, 0],
+      ['IsOtorisasi1', 'Status',        1, 'bool',    0, 0],
+      ['OtoUser1',     'User Oto',      1, 'varchar', 0, 0],
+      ['TglOto1',      'Tgl Oto',       1, 'date',    0, 0],
+    ]
+  }
+
+  function bbsBuatCart (headers, values, isnumerics, isshowns, desimals) {
+    headers = headers || []
+    let cart = []
+    headers.forEach((h, i) => {
+      let tipe = Number(isnumerics[i]) || 0
+      let des = (desimals && desimals[i] !== undefined && desimals[i] !== null && desimals[i] !== '')
+        ? Number(desimals[i])
+        : (tipe === 1 ? 2 : 0)
+      cart.push([
+        values[i],
+        h,
+        Number(isshowns[i]) === 1 ? 1 : 0,
+        BBS_TIPE_NAMA[tipe] || 'varchar',
+        0,
+        isNaN(des) ? 0 : des,
+      ])
+    });
+    return cart
+  }
+
+  window.g_href = BBS_HREF
+  window.g_modeReport = 1
+  window.gcart_header = []
+
+  window.doSimpanHeader = function (href, mode) {
+    let header = [], value = [], isnumber = [], isshown = [], desimal = []
+    bbsCart.forEach((c) => {
+      header.push(c[1])
+      value.push(c[0])
+      isnumber.push(BBS_TIPE_KODE[c[3]] ?? 0)
+      isshown.push(Number(c[2]) === 1 ? 1 : 0)
+      desimal.push(Number(c[5]) || 0)
+    });
+
+    $.ajax({
+      url   : "{!! url('saveheadertable') !!}",
+      type  : "post",
+      async : false,
+      data  : {
+        _token   : $("#_token").val(),
+        header   : JSON.stringify(header),
+        isnumber : JSON.stringify(isnumber),
+        tipe     : JSON.stringify(desimal),
+        value    : JSON.stringify(value),
+        isshown  : JSON.stringify(isshown),
+        href     : BBS_HREF,
+        urut     : 1
+      },
+      error : function (err) {
+        console.log(err)
+        alertify.warning('Gagal menyimpan pengaturan kolom')
+      }
+    })
+  }
+
+  window.doSetHeader = function (mode, reset) {
+    $.ajax({
+      url   : "{!! url('getheadertable') !!}",
+      type  : "post",
+      async : false,
+      data  : {
+        _token : $("#_token").val(),
+        href   : BBS_HREF,
+        urut   : 1,
+        reset  : reset ? 1 : 0
+      },
+      success : function (res) {
+        if (!reset && res && res.headertableheader && res.headertableheader.length) {
+          bbsCart = bbsBuatCart(res.headertableheader, res.headertablevalue, res.isnumeric, res.isshown, res.desimal || [])
+        } else {
+          bbsCart = bbsDefaultCart()
+          window.gcart_header = bbsCart
+          window.doSimpanHeader(BBS_HREF, 1)
+        }
+        window.gcart_header = bbsCart
+      },
+      error : function (err) {
+        console.log(err)
+        alertify.warning(reset ? 'Gagal mengembalikan kolom ke tampilan default' : 'Gagal memuat pengaturan kolom')
+        bbsCart = bbsDefaultCart()
+        window.gcart_header = bbsCart
+      }
+    })
+  }
+
+  let bbsRtSudahInit = false
+  function bbsInitReportTableSekali () {
+    if (bbsRtSudahInit || typeof ReportTable === 'undefined') { return }
+    bbsRtSudahInit = true
+
+    ReportTable.init({ table : '#tabel', bar : '#rtBarTabel', onChange : reinitTabel })
+
+    let bbsGuardUlangKlik = false
+    let thead = document.querySelector('#tabel thead')
+    if (thead) {
+      thead.addEventListener('click', function (e) {
+        if (bbsGuardUlangKlik) { return }
+        let interaktif = e.target && e.target.closest && e.target.closest('.th-gear, .th-grip')
+        if (!interaktif) { return }
+        e.stopPropagation()
+        e.preventDefault()
+        bbsGuardUlangKlik = true
+        let ulang = new MouseEvent('click', { bubbles: false, cancelable: true, view: window })
+        Object.defineProperty(ulang, 'target', { value: interaktif, configurable: true })
+        thead.dispatchEvent(ulang)
+        bbsGuardUlangKlik = false
+      }, true)
+    }
+  }
+
+  function tulisTheadHeaderBBS (tableSel, cols) {
+    let thead = document.querySelector(tableSel + ' thead')
+    if (!thead || !window.ReportTable) { return; }
+    let headRowHtml = ReportTable.headHtml(cols)
+      .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
+    thead.setAttribute('style', 'white-space:nowrap;');
+    thead.innerHTML = headRowHtml;
+  }
+
+  function bbsValueCell (row, col) {
+    let raw = bbsPickCI(row, col[0]);
+    let type = col[3];
+
+    {{-- Status (IsOtorisasi1) -- badge "Sudah/Belum Otorisasi", bukan ikon check/x bool
+         biasa. --}}
+    if (col[0] === 'IsOtorisasi1') {
+      return Number(raw) === 1
+        ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
+        : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+    }
+    if (type === 'date') {
+      if (!raw) { return '<td></td>'; }
+      return '<td>' + doSetFormatDate(raw, '/') + '</td>';
+    }
+    if (type === 'float') {
+      let dp = Number(col[5]) || 0;
+      let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+      return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+    }
+    if (type === 'bool') {
+      return Number(raw)
+        ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+    }
+    return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
   }
 
   function bbsTabelActionsCell (row) {
@@ -621,25 +787,22 @@
   }
 
   function renderTabelRows (rows) {
+    window.gcart_header = bbsCart
+    let cols = (bbsCart.length ? bbsCart : gcart_header).filter(function (c) { return c[2] === 1; });
     let html = '';
     bbsFilterRows(rows).forEach(function (row) {
-      let sudah = Number(bbsPickCI(row, 'IsOtorisasi1')) === 1;
       html += '<tr>' + bbsTabelActionsCell(row);
-      html += '<td>' + nullToEmpty(bbsPickCI(row, 'NoBukti')) + '</td>';
-      html += '<td>' + doSetFormatDate(bbsPickCI(row, 'Tanggal'), '/') + '</td>';
-      html += '<td>' + nullToEmpty(bbsPickCI(row, 'KodeCustSupp')) + '</td>';
-      html += '<td>' + nullToEmpty(bbsPickCI(row, 'NAMACUSTSUPP')) + '</td>';
-      html += '<td>' + nullToEmpty(bbsPickCI(row, 'IDUSER')) + '</td>';
-      html += sudah
-        ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-        : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
-      html += '<td>' + nullToEmpty(bbsPickCI(row, 'OtoUser1')) + '</td>';
-      let tglOto = bbsPickCI(row, 'TglOto1');
-      html += '<td>' + (tglOto ? doSetFormatDate(tglOto, '/') : '') + '</td>';
+      cols.forEach(function (col) { html += bbsValueCell(row, col); });
       html += '</tr>';
     });
-    if (!html) { html = doSetEmptyTable(9, 'Tidak ada transaksi'); }
+    {{-- Baris placeholder colspan buatan sendiri (doSetEmptyTable()) TIDAK dipakai di sini
+         -- DataTables menghitung <td> fisik per baris (bukan hasil visual colspan-nya),
+         jadi baris 1-sel dianggap "kurang kolom" dibanding jumlah kolom aktif di thead dan
+         bikin DataTables crash saat indexing ("Cannot set properties of undefined (setting
+         '_DT_CellIndex')"). Serahkan status kosong ke opsi language.emptyTable bawaan
+         DataTables (lihat reinitTabel()) yang memang didesain aman untuk kasus ini. --}}
     document.getElementById('tabel_data').innerHTML = html;
+    tulisTheadHeaderBBS('#tabel', cols);
   }
 
   let lastTabelRows = [];
@@ -683,7 +846,14 @@
     try {
       if ($.fn.DataTable.isDataTable('#tabel')) { $('#tabel').DataTable().destroy(); }
       renderTabelRows(lastTabelRows);
-      $('#tabel').DataTable({ dom: BBS_DOM_STRING, lengthChange: false, pageLength: bbsPanjangHalaman, paging: true, ordering: false });
+      $('#tabel').DataTable({
+        dom: BBS_DOM_STRING,
+        lengthChange: false,
+        pageLength: bbsPanjangHalaman,
+        paging: true,
+        ordering: false,
+        language: { emptyTable: 'Tidak ada transaksi', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
+      });
       bbsIkatSearch();
       bbsIkatPanjangHalaman();
     } catch (e) {
@@ -693,8 +863,11 @@
   }
 
   $(document).ready(function(){
+    window.doSetHeader(1, false);
     lastTabelRows = [].concat(@json($listBBS), @json($listSdhOto));
     reinitTabel();
+
+    bbsInitReportTableSekali();
   });
 
   function loadAll() {
