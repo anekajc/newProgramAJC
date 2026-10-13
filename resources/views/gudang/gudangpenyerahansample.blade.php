@@ -81,44 +81,12 @@
   max-width: 100%;
 }
 
-.po-len-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--rt-card);
-  border: 1.5px solid var(--rt-border);
-  border-radius: 8px;
-  padding: 5px 12px;
-}
+{{-- #tabel sudah dapat width/min-width/warna tombol Aksi dari CSS terpusat
+     (:where(.po-list-page) ...) sejak #page1 diberi class "po-list-page" -- lihat
+     po-table-header.css. #tabel2/#koreksiTable tidak disentuh aturan #tabel di sana (id
+     berbeda), jadi tetap butuh aturan manual di sini. --}}
+#tabel2 { min-width: 100%; }
 
-.po-len-wrap label {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--rt-ink-soft);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  white-space: nowrap;
-}
-
-.po-len-inp {
-  border: none;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--rt-ink);
-  outline: none;
-  cursor: pointer;
-  padding: 2px 20px 2px 0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right center;
-}
-
-#tabel td:first-child,
 #tabel2 td:first-child {
   display: flex;
   gap: 4px;
@@ -126,7 +94,6 @@
   align-items: center;
 }
 
-#tabel td:first-child .btn,
 #tabel2 td:first-child .btn,
 #koreksiTable td:last-child .btn {
   width: 30px;
@@ -142,36 +109,30 @@
   transition: all .12s ease;
 }
 
-#tabel td:first-child .btn:hover,
 #tabel2 td:first-child .btn:hover,
 #koreksiTable td:last-child .btn:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
 }
 
-#tabel td:first-child .btn-success,
 #tabel2 td:first-child .btn-success,
 #koreksiTable td:last-child .btn-success {
   color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
 }
 
-#tabel td:first-child .btn-info,
 #tabel2 td:first-child .btn-info {
   color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
 }
 
-#tabel td:first-child .btn-primary,
 #tabel2 td:first-child .btn-primary {
   color: #2563eb; border-color: #cfdcff; background: #e8edff;
 }
 
-#tabel td:first-child .btn-danger,
 #tabel2 td:first-child .btn-danger,
 #koreksiTable td:last-child .btn-danger {
   color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
 }
 
-#tabel td:first-child .btn-warning,
 #tabel2 td:first-child .btn-warning {
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
@@ -249,7 +210,7 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id='page1' class="container-fluid mainpage">
+<div id='page1' class="container-fluid mainpage po-list-page">
 <div class="container-fluid" >
 
 
