@@ -1052,6 +1052,9 @@ function setNewNoBukti () {
 
 function cleanFormAddAdd () {
 
+  // Jumlah dikunci hanya oleh Lawan pelunasan (lihat buttonAddPickLawan/buttonAddEditItem).
+  document.getElementById("AddAddJumlah").readOnly = false
+
   if (tipeform == 'add') {
     bankPilihOpsi('AddAddKodeDevisi', '01', '01 - Accounting')
     document.getElementById("AddAddNamaDevisi").value = 'Accounting'
@@ -3898,7 +3901,7 @@ function isLawanTunai (trans, perkiraan, islocalorexim) {
     return islocalorexim == 1
   }
   if (trans == 'BBM') {
-    return perkiraan == '21201'
+    return perkiraan == '21201' || perkiraan == '113100'
   }
   return false
 }
@@ -5093,11 +5096,14 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   let trans =  $("#input_add_transaksi").val();
   console.log(trans)
   xlawan = listLawan[index]
-  // BBK: pelunasan hanya bila IsLokalOrExim = 1. BBM: flag diabaikan - hanya Lawan 21201
+  // BBK: pelunasan hanya bila IsLokalOrExim = 1. BBM: flag diabaikan - hanya Lawan 21201 dan 113100
   // yang selalu masuk pelunasan (dianggap 1 walau flagnya 0); Lawan lain jalur biasa. Nilai ini
   // juga yang dikirim ke spAdd dan menentukan cabang simpan, jadi dinormalkan di sini.
   let tunaiLawan = isLawanTunai(trans, perkiraan, islocalorexim)
   xislocalorexim = trans == 'BBM' ? (tunaiLawan ? 1 : 0) : islocalorexim
+  // Jumlah read-only selama Lawan hutang 21201 / piutang 113100 memakai alur pelunasan: nilainya
+  // diisi dari total pelunasan, bukan diketik. Lawan lain membukanya lagi.
+  document.getElementById("AddAddJumlah").readOnly = tunaiLawan && (perkiraan == '21201' || perkiraan == '113100')
   aturTombolBukaTunai()
   document.getElementById("AddAddKodeCosting").value = ''
   document.getElementById("AddAddNamaCosting").value = ''
@@ -5927,6 +5933,11 @@ function buttonAddEditItem (i) {
   } else {
     document.getElementById("AddAddJumlah").disabled = false
   }
+
+  // Item Lawan pelunasan (hutang 21201 / piutang 113100): Jumlah berasal dari pelunasan, jadi
+  // tidak boleh diubah sendiri. Lawan disimpan di Perkiraan untuk BBK, di Lawan untuk lainnya.
+  let lawanEdit = tempBarangAddEdit.TipeTrans == 'BBK' ? tempBarangAddEdit.Perkiraan : tempBarangAddEdit.Lawan
+  document.getElementById("AddAddJumlah").readOnly = (lawanEdit == '21201' || lawanEdit == '113100')
 
   bankPilihOpsi('AddAddKodeDevisi', tempBarangAddEdit.Devisi,
     tempBarangAddEdit.Devisi + ' - ' + (tempBarangAddEdit.NamaDevisi || ''))
