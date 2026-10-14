@@ -591,6 +591,9 @@ let xislocalorexim = 0
 // Supplier yang sudah dipilih untuk Pelunasan Hutang — dipakai tombol #buttonBukaTunai
 // supaya bisa kembali ke daftar faktur tanpa memilih ulang Lawan dan supplier.
 let tunaiKodeCustsupp = ''
+// Nama customer/supplier per kode, diisi bukaListCustSuppTunai() — ditampilkan di header modal
+// pelunasan. Lewat lookup (bukan argumen onclick) supaya nama ber-tanda kutip tidak merusak HTML.
+let tunaiNamaCustsupp = {}
 
 let xaktiva = {}
 let listAktiva = []
@@ -711,6 +714,7 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
       let ui = tunaiUI()
       document.getElementById(ui.nobukti).value=nobukti
       document.getElementById(ui.custsupp).value=kodecustsupp
+      document.getElementById(ui.namacustsupp).value=tunaiNamaCustsupp[kodecustsupp] || ''
 
       renderTunai(res)
 
@@ -3883,11 +3887,22 @@ function buttonDeleteTunai (index) {
 
 }
 
-/* Pelunasan Hutang / Piutang — BBK/BBM dengan Lawan IsLokalOrExim = 1, saat menambah
+/* Pelunasan Hutang / Piutang — saat menambah
    item. Alurnya: pilih Lawan -> daftar supplier/customer (pane Customer di modal #form yang sama)
    -> modal pelunasan: #formPiutang (Pelunasan Piutang) untuk Lawan 113100, selain itu #formTunai
    (Pelunasan Hutang). Jumlah tidak perlu diketik lebih dulu; tombol #buttonBukaTunai di samping
    Jumlah membuka ulang alurnya setelah ditutup. */
+// Apakah Lawan yang dipilih masuk alur pelunasan (lihat isLawanTunai di bawah).
+function isLawanTunai (trans, perkiraan, islocalorexim) {
+  if (trans == 'BBK') {
+    return islocalorexim == 1
+  }
+  if (trans == 'BBM') {
+    return perkiraan == '21201'
+  }
+  return false
+}
+
 function isModeTunai () {
   let trans = $("#input_add_transaksi").val()
   return (trans == 'BBK' || trans == 'BBM') && xislocalorexim == 1 && tipeformdet == 'add'
@@ -3906,6 +3921,7 @@ function tunaiUI () {
       tbody: 'tabel_data_add_list_piutang',
       search: '#searchPiutang',
       nobukti: 'input_piutang_nobukti',
+      namacustsupp: 'input_piutang_namacustsupp',
       custsupp: 'input_piutang_custsupp'
     }
   }
@@ -3914,6 +3930,7 @@ function tunaiUI () {
     tbody: 'tabel_data_add_list_tunai',
     search: '#searchTunai',
     nobukti: 'input_tunai_nobukti',
+    namacustsupp: 'input_tunai_namacustsupp',
     custsupp: 'input_tunai_custsupp'
   }
 }
@@ -3958,8 +3975,10 @@ function bukaListCustSuppTunai () {
       console.log(res)
 
       let rowTable = ``
+      tunaiNamaCustsupp = {}
       res.forEach((item, i) => {
 
+        tunaiNamaCustsupp[item.KODECUSTSUPP] = item.NAMACUSTSUPP
         rowTable += `
         <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
 
@@ -5074,7 +5093,11 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   let trans =  $("#input_add_transaksi").val();
   console.log(trans)
   xlawan = listLawan[index]
-  xislocalorexim = islocalorexim
+  // BBK: pelunasan hanya bila IsLokalOrExim = 1. BBM: flag diabaikan - hanya Lawan 21201
+  // yang selalu masuk pelunasan (dianggap 1 walau flagnya 0); Lawan lain jalur biasa. Nilai ini
+  // juga yang dikirim ke spAdd dan menentukan cabang simpan, jadi dinormalkan di sini.
+  let tunaiLawan = isLawanTunai(trans, perkiraan, islocalorexim)
+  xislocalorexim = trans == 'BBM' ? (tunaiLawan ? 1 : 0) : islocalorexim
   aturTombolBukaTunai()
   document.getElementById("AddAddKodeCosting").value = ''
   document.getElementById("AddAddNamaCosting").value = ''
@@ -5082,7 +5105,7 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   document.getElementById("AddAddKodeSubCosting").value = ''
   // No Titipan hanya untuk BBK + 113400 (cabang di bawah); Lawan lain membersihkannya.
   resetTitipan()
-  if ((trans == 'BBK' || trans == 'BBM') && islocalorexim == 1) {
+  if (tunaiLawan) {
 
     // Cabang UHT BBM di bawah mematikan Jumlah; hidupkan lagi kalau Lawan diganti ke sini.
     document.getElementById("AddAddJumlah").disabled = false
