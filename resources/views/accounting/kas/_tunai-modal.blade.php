@@ -34,6 +34,23 @@
                                       </div>
                                   </div>
 
+                                  {{-- Nama customer/supplier — diisi buttonAddPickCustSuppX() di public/js/kas.js. --}}
+                                  <div class="col-md-4">
+                                      <div class="row">
+                                          <div class="col-md-4">
+                                              <div class="form-group">
+                                                  <label>Nama</label>
+                                              </div>
+                                          </div>
+                                          <div class="col-md-8">
+                                              <div class="form-group">
+                                                  <input type="text" class="form-control " id="input_tunai_namacustsupp"
+                                                      disabled>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
                                   <div class="col-md-4">
                                       <div class="row">
                                           <div class="col-md-4">
@@ -49,9 +66,10 @@
                                           </div>
                                       </div>
                                   </div>
-
+                              </div>
+                              <div class="row">
                                   {{-- Pencarian client-side NoFaktur/Tanggal/Supplier — filterTunai() di public/js/kas.js. --}}
-                                  <div class="col-md-2">
+                                  <div class="col-md-4">
                                       <div class="form-group">
                                           <input class="po-search-inp" type="search" id="searchTunai"
                                               placeholder="Cari data" autocomplete="off" style="width: 100%"
