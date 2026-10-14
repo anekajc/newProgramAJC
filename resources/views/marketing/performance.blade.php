@@ -93,13 +93,14 @@
   white-space: nowrap;
 }
 </style>
+@include('marketing.partials.tampilan-purchasing-css')
 @endsection
 
 @section('content')
-<div id="page1" class="container-fluid">
+<div id="page1">
 
 <div id="printContainer" style="display:none"></div>
-<div id="contentContainer" class="container-fluid" >
+<div id="contentContainer" class="">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
@@ -119,7 +120,7 @@
         <div class="modal-header">
           <h5 class="modal-title">
             <i class="bi bi-funnel"></i>
-            Filter Data
+            Filter Perintah Uang Muka
             <span class="rt-active-badge" id="perfFilterBadge">0 aktif</span>
           </h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterPerf').modal('hide')">
@@ -129,14 +130,16 @@
 
         <div class="modal-body">
           <div class="rt-section">
-            <div class="rt-group-label">Status</div>
-            <div>
-              <label class="rt-field-label" for="input_filterperf">Status Otorisasi</label>
-              <select class="rt-native" id="input_filterperf">
-                <option value=0 selected>Semua</option>
-                <option value=1>Belum Otorisasi</option>
-                <option value=2>Sudah Otorisasi</option>
-              </select>
+            <div class="rt-group-label">Penyaringan Data</div>
+            <div class="rt-grid-2">
+              <div>
+                <label class="rt-field-label" for="input_filterperf">Otorisasi</label>
+                <select class="rt-native" id="input_filterperf">
+                  <option value=0 selected>Semua</option>
+                  <option value=2>Sudah</option>
+                  <option value=1>Belum</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -159,9 +162,9 @@
       <div class="po-toolbar">
         <div class="po-filter-wrap">
           <label>Periode</label>
-          <input type="date" onchange="onChangePeriodePerf()" class="po-filter-inp" id="input_tanggalawal_perf" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <input type="date" onchange="onChangePeriodePerf()" class="po-filter-inp" id="input_tanggalawal_perf" value="{!! $tglawal !!}">
           <span class="po-filter-sep">s/d</span>
-          <input type="date" onchange="onChangePeriodePerf()" class="po-filter-inp" id="input_tanggalakhir_perf" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+          <input type="date" onchange="onChangePeriodePerf()" class="po-filter-inp" id="input_tanggalakhir_perf" value="{!! $tglakhir !!}">
         </div>
         <input type="search" id="perfSearch1" class="po-search-inp" placeholder="Cari data">
         <div class="po-len-wrap"><label for="perfLen1">Tampilkan</label>
@@ -328,8 +331,12 @@
                       <th style="padding: 4px 12px;" scope="col">Part Number</th>
 
                       <th style="padding: 4px 12px;" scope="col">Merk</th>
-                      <th style="padding: 4px 12px;" scope="col">Qty</th>
-                      <th style="padding: 4px 12px;" scope="col">Sat</th>
+                      <th style="padding: 4px 12px;" scope="col">Qty1</th>
+                      <th style="padding: 4px 12px;" scope="col">Sat1</th>
+                      <th style="padding: 4px 12px;" scope="col">Qty2</th>
+                      <th style="padding: 4px 12px;" scope="col">Sat2</th>
+                      <th style="padding: 4px 12px;" scope="col">Qty3</th>
+                      <th style="padding: 4px 12px;" scope="col">Sat3</th>
                       <th style="padding: 4px 12px;" scope="col">Harga</th>
                       <th style="padding: 4px 12px;" scope="col">Diskon</th>
                       <th style="padding: 4px 12px;" scope="col">Subtotal</th>
@@ -370,9 +377,9 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-danger" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
     <button id="buttonSubmitAdd" type="button" class="btn btn-chip-biru" onclick="submitAdd()">Otorisasi</button>
-    <button id="buttonSubmitBatalOto" type="button" class="btn btn-danger" onclick="submitBatalOto()">Batal Otorisasi</button>
+    <button id="buttonSubmitBatalOto" type="button" class="btn btn-chip-merah" onclick="submitBatalOto()">Batal Otorisasi</button>
   </div>
 </div>
 </div>
@@ -386,6 +393,7 @@
 @endsection
 
 @section('js')
+@include('marketing.partials.tampilan-purchasing-js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
@@ -506,7 +514,7 @@ function tulisTheadHeaderPerf (tableSel, cols) {
 function perfValueCell (row, col) {
   let raw = perfPickCI(row, col[0]);
   let type = col[3];
-  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/') + '</td>'; }
+  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/').split('/').reverse().join('/') + '</td>'; }
   if (type === 'float') {
     let dp = Number(col[5]) || 0;
     let n = (raw !== undefined && raw !== null && raw !== '') ? parseFloat(raw) : 0;
@@ -528,12 +536,12 @@ function tabelActionsCell (row) {
   let nobukti = perfPickCI(row, 'NoBukti');
   let otoPerf = Number(perfPickCI(row, 'OtoPerf'));
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
+  html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonAdd(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button>';
   if (otoPerf === 1) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonAdd(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
     html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
   } else {
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitAdd(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="submitAdd(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
   return html;
@@ -632,6 +640,8 @@ $(document).ready(function(){
 
 function submitAdd (nobukti) {
   console.log('submitAdd')
+  // tombol Otorisasi di modal memanggil submitAdd() tanpa argumen
+  nobukti = nobukti || tempNoBukti
 
   let _token  = $("#_token").val()
   $.ajax({
@@ -686,6 +696,10 @@ function submitBatalOto () {
       console.log(err)
       console.log(err.status)
       console.log(err.statusText)
+      if (err.status == 422 && err.responseText) {
+        alertify.warning(err.responseText)
+        return
+      }
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
 
@@ -728,16 +742,24 @@ function buttonAdd (NOBUKTI , tipe) {
     },
     success: function(res) {
       console.log(res)
+      if (!res || !res.header || !res.header.length) {
+        alertify.warning('Data SO ' + NOBUKTI + ' tidak ditemukan atau belum otorisasi penuh, silahkan muat ulang data')
+        return
+      }
       let rowTable = ''
-      res.detail.forEach((item, i) => {
+      ;(res.detail || []).forEach((item, i) => {
         rowTable += `
         <tr>
-          <td>${item.KodeBrg}</td>
-          <td>${item.NamaBrg}</td>
+          <td>${item.KodeBrg ? item.KodeBrg : ''}</td>
+          <td>${item.NamaBrg ? item.NamaBrg : ''}</td>
           <td>${item.PartNumber ? item.PartNumber : ''}</td>
-          <td>${item.NAMAMERK}</td>
-          <td class="text-right">${formatAngka(parseFloat(item.Qnt1x).toFixed(2))}</td>
+          <td>${item.NAMAMERK ? item.NAMAMERK : ''}</td>
+          <td class="text-right">${formatAngka(parseFloat(item.Qnt1x || 0).toFixed(2))}</td>
           <td>${item.SAT1X ? item.SAT1X : ''}</td>
+          <td class="text-right">${formatAngka(parseFloat(item.Qnt2x || 0).toFixed(2))}</td>
+          <td>${item.SAT2X ? item.SAT2X : ''}</td>
+          <td class="text-right">${formatAngka(parseFloat(item.Qnt3x || 0).toFixed(2))}</td>
+          <td>${item.SAT3X ? item.SAT3X : ''}</td>
           <td class="text-right">${formatAngka(parseFloat(item.Harga).toFixed(2))}</td>
           <td class="text-right">${formatAngka(parseFloat(item.DiscTot).toFixed(2))}</td>
           <td class="text-right">${formatAngka(parseFloat(item.Total).toFixed(2))}</td>
@@ -1377,16 +1399,16 @@ function submitPrint (nobukti) {
          <td style="width: 10%; text-align: right; border-bottom: none; border-top: none; border-left: none; border-right: none;">
             ${itemSub.harga
               ? Number(itemSub.harga).toLocaleString('id-ID', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
                 }) 
               : ''}
           </td>
           <td style="width: 15%; text-align: right; border-bottom: none; border-top: none; border-left: none; border-right: none;">
             ${itemSub.Jumlah
               ? Number(itemSub.Jumlah).toLocaleString('id-ID', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
                 }) 
               : ''}
           </td>
@@ -1425,7 +1447,7 @@ function submitPrint (nobukti) {
             SUB TOTAL
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold; border-bottom: none; border-left: none; border-right: none;">
-            ${Number(dataPrint[0].TJumlah || 0).toLocaleString('id-ID', {minimumFractionDigits:2})}
+            ${Number(dataPrint[0].TJumlah || 0).toLocaleString('id-ID', {minimumFractionDigits:0})}
           </td>
         </tr>
         <!-- DISKON -->
@@ -1435,7 +1457,7 @@ function submitPrint (nobukti) {
             DISKON
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold; border-top: none; border-left: none; border-right: none;">
-            ${Number(dataPrint[0].Tdiskon || 0).toLocaleString('id-ID', {minimumFractionDigits:2})}
+            ${Number(dataPrint[0].Tdiskon || 0).toLocaleString('id-ID', {minimumFractionDigits:0})}
           </td>
         </tr>
 
@@ -1446,7 +1468,7 @@ function submitPrint (nobukti) {
             DPP
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold; border-top: none; border-left: none; border-right: none; border-bottom: none;">
-            ${Number(dataPrint[0].TNDPPRp || 0).toLocaleString('id-ID', {minimumFractionDigits:2})}
+            ${Math.round(Number(dataPrint[0].TNDPPRp) || 0).toLocaleString('id-ID')}
           </td>
         </tr>
         <!-- PPN -->
@@ -1456,7 +1478,7 @@ function submitPrint (nobukti) {
             PPN
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold; border-top: none; border-left: none; border-right: none;">
-            ${Number(dataPrint[0].TNPPNRp || 0).toLocaleString('id-ID', {minimumFractionDigits:2})}
+            ${Number(dataPrint[0].TNPPNRp || 0).toLocaleString('id-ID', {minimumFractionDigits:0})}
           </td>
         </tr>
         <!-- TOTAL -->
@@ -1466,7 +1488,7 @@ function submitPrint (nobukti) {
             TOTAL
           </td>
           <td style="border:1px solid; text-align:right; font-weight:bold; border-top: none; border-left: none; border-right: none;">
-            ${Number(dataPrint[0].TNNETRp || 0).toLocaleString('id-ID', {minimumFractionDigits:2})}
+            ${Number(dataPrint[0].TNNETRp || 0).toLocaleString('id-ID', {minimumFractionDigits:0})}
           </td>
         </tr>`};
         // end
@@ -1538,6 +1560,7 @@ function submitPrint (nobukti) {
             </tr>
           </table>
         </div>`
+
 
         tempPrintStr += `</div>`
       });

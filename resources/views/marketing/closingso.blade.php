@@ -6,20 +6,6 @@
 
 @endsection
 
-{{-- Rerouted to match Purchase Order's UI 1:1 via so.blade.php's own pattern,
-     same as invoicejasa/fakturpajak/cetaktandaterima/perintahreturjual/
-     returpenjualangudang/kreditnote/notareturpenjualan before it. Only
-     layout/toolbar/column-header interactivity changed -- business logic
-     (buttonAdd/buttonAddAll/buttonOpenSO/buttonOpenAllSO, submitAdd/
-     submitAddAll/submitOpenSO/submitOpenAllSO) is untouched.
-     Periode filter added later (tanggalawal/tanggalakhir, same widget as
-     so.blade.php's own): shown once on the "Outstanding SO" toolbar, same as
-     so.blade.php only shows it on its "SO" tab, but drives both #tabel and
-     #tabel2 together via loadAll() -- ClosingSOController's Outstanding SO
-     and Closing SO queries both got a new `and A.Tanggal between :tglawal
-     and :tglakhir` clause (additive, alongside their existing outstanding
-     qty > 0 / isbatal=1 filters), defaulting to the current periode's month
-     range when no range is sent. --}}
 @section('css')
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <style>
@@ -125,16 +111,17 @@
   white-space: nowrap;
 }
 </style>
+@include('marketing.partials.tampilan-purchasing-css')
 @endsection
 
 @section('content')
-<div id="page1" class="container-fluid mainpage">
+<div id="page1" class="mainpage">
 
 <div id="printContainer" style="display:none">
 
 
 </div>
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
@@ -229,6 +216,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
@@ -271,9 +259,10 @@
 
     </div>
   </div>
+      </div>{{-- /#formBsGrid --}}
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -290,6 +279,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
 
@@ -320,9 +310,10 @@
 
     </div>
   </div>
+      </div>{{-- /#formBsGrid --}}
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitAddAll(1)">Submit</button>
+    <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-chip-biru" onclick="submitAddAll(1)">Simpan</button>
   </div>
 </div>
 </div>
@@ -339,6 +330,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
 
@@ -380,9 +372,10 @@
 
     </div>
   </div>
+      </div>{{-- /#formBsGrid --}}
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitOpenSO()">Submit</button>
+    <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-chip-biru" onclick="submitOpenSO()">Simpan</button>
   </div>
 </div>
 </div>
@@ -399,6 +392,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
         <div class="container-fluid">
 
@@ -429,9 +423,10 @@
 
     </div>
   </div>
+      </div>{{-- /#formBsGrid --}}
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitOpenAllSO(1)">Submit</button>
+    <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+    <button type="button" class="btn btn-chip-biru" onclick="submitOpenAllSO(1)">Simpan</button>
   </div>
 </div>
 </div>
@@ -441,6 +436,7 @@
 @endsection
 
 @section('js')
+@include('marketing.partials.tampilan-purchasing-js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
@@ -628,11 +624,11 @@ function tulisTheadHeaderCSO (tableSel, cols, withActions) {
 function csoValueCell (row, col) {
   let raw = csoPickCI(row, col[0]);
   let type = col[3];
-  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw) + '</td>'; }
+  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/').split('/').reverse().join('/') + '</td>'; }
   if (type === 'float') {
     let dp = Number(col[5]) || 0;
     let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
-    return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+    return '<td class="text-right">' + n.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -645,7 +641,9 @@ function tabelActionsCell (row) {
   let qntout = csoPickCI(row, 'QntOut');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-primary btn-sm" type="button" title="Close Item" onclick="buttonAdd(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-lock-fill"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" title="Close NoBukti" onclick="buttonAddAll(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-lock-fill"></i></button>';
+  // Close NoBukti dinonaktifkan seperti programajcSML: update all=1 mengisi QNTBATAL
+  // semua item dengan qty out item yang diklik.
+  // html += '<button class="btn btn-success btn-sm" type="button" title="Close NoBukti" onclick="buttonAddAll(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-lock-fill"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -658,7 +656,8 @@ function tabel2ActionsCell (row) {
   let qntout = csoPickCI(row, 'QntOut');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Open Item" onclick="buttonOpenSO(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-unlock"></i></button>';
-  html += '<button class="btn btn-danger btn-sm" type="button" title="Open NoBukti" onclick="buttonOpenAllSO(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-unlock-fill"></i></button>';
+  // Open NoBukti dinonaktifkan seperti programajcSML.
+  // html += '<button class="btn btn-danger btn-sm" type="button" title="Open NoBukti" onclick="buttonOpenAllSO(\'' + nobukti + '\' , \'' + kodebrg + '\' , \'' + urut + '\' , \'' + qntout + '\')"><i class="bi bi-unlock-fill"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -789,6 +788,8 @@ function submitAddAll (all = 0) {
         loadAll()
           $("#formAll").modal('toggle')
           alertify.success("Berhasil closing SO")
+      }else if (res == 99) {
+        alertify.warning("Tidak bisa closing SO, data sudah masuk picking")
       }
     },
     error: function (err) {
@@ -837,6 +838,8 @@ function submitAdd (all = 0) {
         loadAll()
           $("#form").modal('toggle')
           alertify.success("Berhasil closing SO")
+      }else if (res == 99) {
+        alertify.warning("Tidak bisa closing SO, data sudah masuk picking")
       }
     },
     error: function (err) {

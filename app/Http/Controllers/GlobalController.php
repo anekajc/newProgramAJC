@@ -509,4 +509,11 @@ public function getAkses1 ($kodemenu, $path) {
     return $akses;
   }
 
+// Tanggal diambil dari jam server SQL, bukan jam komputer user.
+public function getTanggalServer () {
+    $tanggal = DB::connection('SML')->select('select convert(varchar(10), getdate(), 23) as tanggal');
+
+    return $tanggal;
+  }
+
 }

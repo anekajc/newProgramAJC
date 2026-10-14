@@ -282,13 +282,14 @@ input[type=number] {
   white-space: nowrap;
 }
 </style>
+@include('marketing.partials.tampilan-purchasing-css')
 @endsection
 
 @section('content')
 
-<div id="page1" class="container-fluid mainpage">
+<div id="page1" class="mainpage">
   <!--mulai--><div class="modal fade" id="formAldok" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 440px;">
     <div class="modal-content">
       <div id="modalListCustomer" class="showhideform">
 
@@ -299,7 +300,8 @@ input[type=number] {
           </button>
         </div>
 
-        <div class="modal-body">
+        <div id="formBsGrid">
+      <div class="modal-body">
           <div class="row">
             <div class="col-12">
               <div class="form-group">
@@ -316,12 +318,21 @@ input[type=number] {
             </div>
 
             <div class="col-12 text-right">
-              <button type="button" class="btn btn-primary btn-lg"
-                      style="height: 40px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase"
+              <button type="button" class="btn btn-lg btn-chip-biru"
+                      style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
                       onclick="updatealdok()">Simpan</button>
             </div>
           </div>
         </div>
+      </div>{{-- /#formBsGrid --}}
 
       </div>
     </div>
@@ -329,7 +340,7 @@ input[type=number] {
 </div>
 <!--end-->
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
@@ -402,9 +413,9 @@ input[type=number] {
                 <div class="po-toolbar">
                   <div class="po-filter-wrap">
                     <label>Periode</label>
-                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalawal_ctt2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalawal_ctt2" value="{!! \Carbon\Carbon::create((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
                     <span class="po-filter-sep">s/d</span>
-                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalakhir_ctt2" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+                    <input type="date" onchange="onChangePeriodeTabel2()" class="po-filter-inp" id="input_tanggalakhir_ctt2" value="{!! \Carbon\Carbon::create((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
                   </div>
                   <input type="search" id="ctSearch2" class="po-search-inp" placeholder="Cari data">
                   <div class="po-len-wrap">
@@ -443,13 +454,24 @@ input[type=number] {
 
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
   <div class="row">
     <div class="col-8 text-left">
       {{-- <h2>Cetak Tanda Terima Invoice</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()"  >
+        Close
+      </button>
     </div>
   </div>
 
@@ -463,7 +485,8 @@ input[type=number] {
 
       <div class="row">
 
-        <div class="col-md-3">
+        {{-- No Urut tetap diisi setNewNoBukti() & dikirim saat cetak, tapi tidak ditampilkan ke user. --}}
+        <div class="col-md-3 d-none">
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -519,19 +542,27 @@ input[type=number] {
     </div>
 
 <div class="col-md-12 mt-2 text-right">
-<button type="button" class="btn btn-chip-biru" onclick="previewPrint()" class="btn btn-secondary" style="height: 30px;
-border-radius: 20px;
-font-size: 0.75rem;
-font-weight: 600;
-text-transform: uppercase;" >+ Preview</button>
+<button type="button" class="btn btn-lg btn-chip-biru" onclick="ctPreview()" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Preview</button>
 
 
 
-<button type="button" class="btn btn-chip-biru" onclick="submitPrint()" class="btn btn-secondary" style="height: 30px;
-border-radius: 20px;
-font-size: 0.75rem;
-font-weight: 600;
-text-transform: uppercase;" >+ Cetak</button>
+<button type="button" class="btn btn-lg btn-chip-biru" onclick="ctCetak()" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Cetak</button>
 </div>
 
 
@@ -584,7 +615,6 @@ text-transform: uppercase;" >+ Cetak</button>
               <table id="tabel_add_list_pelanggan" class="data-table">
                 <thead class="text-center">
                   <tr>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
                     <th style="padding: 4px 12px;" scope="col">Kode</th>
                     <th style="padding: 4px 12px;" scope="col">Nama</th>
                     <th style="padding: 4px 12px;" scope="col">Alamat</th>
@@ -597,9 +627,6 @@ text-transform: uppercase;" >+ Cetak</button>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
-                      <td class="text-center">
-                        <button class="btn btn-primary btn-sm" style="padding-top:10px;" type="button" ><i class="bi bi-plus"></i></button>
-                      </td>
                 </tr>
                 </tbody>
               </table>
@@ -608,17 +635,16 @@ text-transform: uppercase;" >+ Cetak</button>
               </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger btn-lg"
+          <button type="button" class="btn btn-lg btn-batal-add"
           style="
-          margin-top:-10px;
-          height: 30px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="buttonAddListBatal()">Batal</button>
         </div>
       </div>
@@ -756,18 +782,26 @@ text-transform: uppercase;" >+ Cetak</button>
 
 <div class="row mt-2" style="margin-top: 0">
   <div class="col-md-12 text-right mt-4">
-    <button type="button" class="btn btn-secondary" onclick="buttonAddBatal()" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;">Batal</button>
+    <button type="button" class="btn btn-lg btn-batal-add" onclick="buttonAddBatal()" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Batal</button>
 
 
-    <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-primary" style="height: 30px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;">Submit Edit</button>
+    <button id="buttonSubmitEdit" type="button" onclick="submitEdit()" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
 
 
   </div>
@@ -801,6 +835,7 @@ text-transform: uppercase;" >+ Cetak</button>
     </div>
 
     <div id="page3" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
       <div class="row" style="margin-top: -30px">
         <div class="col-8 text-left">
@@ -808,7 +843,17 @@ text-transform: uppercase;" >+ Cetak</button>
           <h2 class="page3showhide otorisasishowhide"> Otorisasi Piutang DPP</h2>
         </div>
         <div class="col-4 text-right">
-          <button type="button" class="btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+          <button type="button" class="btn btn-danger btn-lg" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()"  >
+        Close
+      </button>
         </div>
       </div>
 
@@ -1021,7 +1066,15 @@ text-transform: uppercase;" >+ Cetak</button>
         <div class="row">
 
                 <div class="col-12 text-right">
-                  <button type="button" class="page3showhide otorisasishowhide btn btn-primary btn-lg " style="height: 40px; border-radius: 20px; font-size: 0.75rem;font-weight: 600;  " onclick="submitOtorisasi()"  >Otorisasi</button>
+                  <button type="button" class="page3showhide otorisasishowhide btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitOtorisasi()"  >Otorisasi</button>
                 </div>
         </div>
 
@@ -1037,7 +1090,8 @@ text-transform: uppercase;" >+ Cetak</button>
 
 
     </div>
-  </div>
+  </div>{{-- /#formBsGrid --}}
+</div>
 
 <!-- start modal add -->
 <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -1179,8 +1233,8 @@ text-transform: uppercase;" >+ Cetak</button>
         </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+        <button type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button>
       </div>
 
 
@@ -1340,7 +1394,7 @@ text-transform: uppercase;" >+ Cetak</button>
                 <input type="text" class="form-control text-right" id="input_modalx_perkiraanlebihbayar" disabled>
 
                 <input type="text" class="form-control" id="input_modalx_namaperkiraanlebihbayar" disabled>
-                <button id="buttonAddListPerkiraanLebihBayar" type="button" onclick="buttonAddListPerkiraanLebihBayar('lebihbayar')" class="btn btn-primary" >+</button>
+                <button id="buttonAddListPerkiraanLebihBayar" type="button" onclick="buttonAddListPerkiraanLebihBayar('lebihbayar')" class="btn btn-chip-biru btn-sm" ><i class="bi bi-search"></i></button>
 
               </div>
             </div>
@@ -1355,16 +1409,22 @@ text-transform: uppercase;" >+ Cetak</button>
           <div class="row mt-2" style="margin-top: 0">
             <div class="col-md-12 text-right mt-4">
 
-              <button id="buttonSaveLB" type="button" onclick="buttonSaveLB()" class="btn btn-success" style="height: 30px;
+              <button id="buttonSaveLB" type="button" onclick="buttonSaveLB()" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;">Save</button>
-              <button type="button" id="buttonAddKL" class="btn btn-primary" onclick="buttonAddKL()" style="height: 30px;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
+              <button type="button" id="buttonAddKL" class="btn btn-lg btn-chip-biru" onclick="buttonAddKL()" style="
+              height: 30px;
+              padding: 4px 12px;
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;">+ KL</button>
+              transition: background-color 0.3s, box-shadow 0.3s;">Tambah KL</button>
             </div>
 
           </div>
@@ -1433,7 +1493,7 @@ text-transform: uppercase;" >+ Cetak</button>
                     <div class="form-group input-group">
                       <input type="text" class="form-control" id="input_modalx_perkiraankurangbayar" disabled>
                       <input type="text" class="form-control" id="input_modalx_namaperkiraankurangbayar" disabled>
-                      <button id="buttonAddListPerkiraanKurangBayar" type="button" onclick="buttonAddListPerkiraanLebihBayar('kurangbayar')" class="btn btn-primary" >+</button>
+                      <button id="buttonAddListPerkiraanKurangBayar" type="button" onclick="buttonAddListPerkiraanLebihBayar('kurangbayar')" class="btn btn-chip-biru btn-sm" ><i class="bi bi-search"></i></button>
 
                     </div>
                   </div>
@@ -1467,17 +1527,25 @@ text-transform: uppercase;" >+ Cetak</button>
 
           <div class="row mt-2" style="margin-top: 0">
             <div class="col-md-12 text-right mt-4">
-              <button type="button" class="btn btn-secondary" onclick="buttonAddBatalKL()" style="height: 30px;
+              <button type="button" class="btn btn-lg btn-batal-add" onclick="buttonAddBatalKL()" style="
+              height: 30px;
+              padding: 4px 12px;
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;">Batal</button>
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Batal</button>
 
-              <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()" class="btn btn-primary" style="height: 30px;
+              <button id="buttonSubmitAddKL" type="button" onclick="submitAddKL()" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
               border-radius: 20px;
               font-size: 0.75rem;
               font-weight: 600;
-              text-transform: uppercase;">Submit Add</button>
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
             </div>
 
           </div>
@@ -1536,7 +1604,7 @@ text-transform: uppercase;" >+ Cetak</button>
 
 
 
-        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+        <button type="button" class="btn btn-batal-add" data-dismiss="modal"
         >Batal</button>
       </div>
       </div>
@@ -1613,8 +1681,8 @@ text-transform: uppercase;" >+ Cetak</button>
 
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-            <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+            <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button>
+            <button type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button>
           </div>
           </div>
 
@@ -1636,11 +1704,13 @@ text-transform: uppercase;" >+ Cetak</button>
 
 
 
-  </div>
+  </div>{{-- /#formBsGrid --}}
+</div>
 
 @endsection
 
 @section('js')
+@include('marketing.partials.tampilan-purchasing-js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 let listData = []
@@ -1883,12 +1953,12 @@ function ctValueCell (row, col) {
 
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
-    return '<td>' + formatDate(raw, '/') + '</td>';
+    return '<td>' + formatDate(raw, '/').split('/').reverse().join('/') + '</td>';
   }
   if (type === 'float') {
     let dp = Number(col[5]) || 0;
     let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
-    return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+    return '<td class="text-right">' + n.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
   }
   if (type === 'bool') {
     return Number(raw)
@@ -1903,7 +1973,7 @@ function tabelActionsCell (row) {
   let nobukti = ctPickCI(r, 'nobukti');
   let kodecustsupp = ctPickCI(r, 'kodecustsupp');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonAdd(\'' + kodecustsupp + '\')"><i class="bi bi-plus"></i></button>';
+  html += '<button class="btn btn-success btn-sm" type="button" title="Buat Tanda Terima" onclick="buttonAdd(\'' + kodecustsupp + '\')"><i class="bi bi-plus-lg"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1913,14 +1983,36 @@ function tabel2ActionsCell (row) {
   let nocetak = ctPickCI(r, 'nocetak');
   let tglterima = ctPickCI(r, 'tglterima');
   let namapenerima = ctPickCI(r, 'namapenerima');
+  // Nilai dimasukkan ke onclick: kutip & backslash di-escape supaya nama penerima
+  // seperti O'Neil tidak memutus tombol. Tanggal pakai format Y-m-d agar terbaca input type=date.
+  let esc = function (v) {
+    return String(v === undefined || v === null ? '' : v)
+      .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/</g, '&lt;')
+  };
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonAldok(\'' + nocetak + '\',\'' + (tglterima ? formatDate(tglterima, '/') : '') + '\',\'' + (namapenerima || '') + '\')"><i class="bi bi-pen"></i></button>';
-  html += '<button class="btn btn-primary btn-sm" type="button" onclick="submitPrintUlang(\'' + nocetak + '\')"><i class="bi bi-printer"></i></button>';
+  html += '<button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonAldok(\'' + esc(nocetak) + '\',\'' + (tglterima ? formatDate(tglterima) : '') + '\',\'' + esc(namapenerima) + '\')"><i class="bi bi-pen"></i></button>';
+  html += '<button title="Print" class="btn btn-primary btn-sm" type="button" onclick="submitPrintUlang(\'' + nocetak + '\')"><i class="bi bi-printer"></i></button>';
   html += '</div></td>';
   return html;
 }
 
+// Tooltip tombol aksi (dipasang partial tampilan-purchasing-js, container body) bisa
+// "nyangkut": tombol tetap fokus selama dialog print/modal terbuka, dan saat baris
+// digambar ulang tombolnya hilang tanpa tooltip-nya dibuang. Tutup saat diklik dan
+// buang sebelum tbody diganti.
+function ctBuangTooltip (sel) {
+  if (!$.fn.tooltip) { return }
+  $(sel).find('[data-toggle="tooltip"]').tooltip('dispose')
+  $('body > .tooltip').remove()
+}
+
+$(document).on('click', '#tabel .action-buttons-wrap .btn, #tabel2 .action-buttons-wrap .btn', function () {
+  if ($.fn.tooltip) { $(this).tooltip('hide') }
+  this.blur()
+})
+
 function renderTabelRows (rows) {
+  ctBuangTooltip('#tabel_data');
   if (ctActiveUrut !== 1 && ctCart[1].length === 0) { ctAktifkanTabel(1); }
   let cols = (ctCart[1].length ? ctCart[1] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
@@ -1934,6 +2026,7 @@ function renderTabelRows (rows) {
 }
 
 function renderTabel2Rows (rows) {
+  ctBuangTooltip('#tabel2_data');
   let cols = (ctCart[2].length ? ctCart[2] : gcart_header).filter(function (c) { return c[2] === 1; });
   let html = "";
   (rows || []).forEach(function (row) {
@@ -2029,7 +2122,9 @@ function onChangePeriodeTabel2 () {
     alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
     return
   }
-  reinitTabel2()
+  // Data "sudah cetak" diambil ulang dari server sesuai rentang Tgl Cetak
+  // (seperti filter Periode programajcSML), bukan disaring dari data 2 tahun.
+  loadAll()
 }
 
 function reinitTabel2 () {
@@ -2064,17 +2159,21 @@ function buttonHeaderTable (key) {
 }
 
 $(document).ready(function(){
+      // Tabel digambar kosong dulu supaya halaman langsung tampil, lalu data
+      // diambil lewat loadAll() dengan animasi "Memuat data...".
       ctAktifkanTabel(1);
       window.doSetHeader(1, false);
-      lastTabelRows = @json($tempOutstanding);
       reinitTabel();
 
       ctAktifkanTabel(2);
       window.doSetHeader(2, false);
-      lastTabel2Rows = @json($tempPenerimaan);
       reinitTabel2();
 
+      // Kolom aktif harus milik tab yang tampil SEBELUM ReportTable diikat: init()
+      // langsung menggambar bar kolom tersembunyi dari window.gcart_header.
+      ctAktifkanTabel(activeVisibleTabKeyCT());
       ctInitReportTableSekali();
+      loadAll();
 
       $('#nav-home-tab').on('shown.bs.tab', function () {
         ctAktifkanTabel(1);
@@ -3380,18 +3479,18 @@ function refreshDataTable (nobukti) {
                   <td>${item.Perkiraan ? item.Perkiraan : '' }</td>
 
                   <td>${item.Noinvoice ? item.Noinvoice : '' }</td>
-                  <td>${item.TglInv ? formatDate(item.TglInv) : '' }</td>
+                  <td>${item.TglInv ? formatDate(item.TglInv,'/').split('/').reverse().join('/') : '' }</td>
 
 
                   <td class="text-center">
 
-                    <button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete(${i}  )"><i class="bi bi-trash"></i></button>
+                    <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonDelete(${i}  )"><i class="bi bi-trash"></i></button>
                   </td>
                 </tr>
 
               `
 
-              // <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+              // <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
       });
 
       document.getElementById("addTableData").innerHTML = rowTable
@@ -3562,7 +3661,7 @@ function buttonAddItem () {
             <div class="input-group form-group">
               <input style="height:30px; width:160px" id="list_proses_dibayar${i}" type="number" value='${parseFloat(item.DIBAYAR).toFixed(2)}' class="form-control text-right" disabled>
 
-              <button id="buttonChangeDibayar${i}" style="height:30px; padding: 0px; width: 25px" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-primary" >+</button>
+              <button id="buttonChangeDibayar${i}" style="height:30px; padding: 0px; width: 25px" type="button" onclick="buttonChangeDibayar(${i})" class="btn btn-chip-biru" title="Ubah"><i class="bi bi-pen"></i></button>
 
             </div></td>
             <td class="text-center">
@@ -3893,8 +3992,8 @@ let _token = $("#_token").val();
             <td>${item.KodeCustSuppD}</td>
             <td>${item.NamaCustSuppD ? item.NamaCustSuppD : ''}</td>
             <td class="text-center">
-              <button class="btn btn-success btn-sm" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen"></i></button>
-              <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
+              <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen"></i></button>
+              <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
 
@@ -4115,8 +4214,8 @@ function buttonKoreksi (nobukti , nodpp) {
               <td>${item.KodeCustSuppD}</td>
               <td>${item.NamaCustSuppD ? item.NamaCustSuppD : ''}</td>
               <td class="text-center">
-                <button class="btn btn-success btn-sm" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen"></i></button>
-                <button class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
+                <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonEditItem('${i}' )"><i class="bi bi-pen"></i></button>
+                <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonDeleteItem('${i}' )"><i class="bi bi-trash"></i></button>
               </td>
             </tr>
 
@@ -4188,6 +4287,9 @@ function buttonAdd (kodecustsupp) {
   document.getElementById("input_add_tanggal").valueAsDate = new Date()
 
   let _token = $("#_token").val();
+  // dbTempTTInvc diisi di langkah ini; kalau gagal jangan lanjut, supaya form
+  // tidak menampilkan isi temp sisa customer lain.
+  let tempSiap = false
   $.ajax({
    url: "{!! url('cetaktandaterimadetailoutstanding') !!}",
    type: "post",
@@ -4198,7 +4300,7 @@ function buttonAdd (kodecustsupp) {
 
    },
    success: function(res) {
-
+     tempSiap = true
    },
    error: function (err) {
      console.log(err)
@@ -4206,6 +4308,7 @@ function buttonAdd (kodecustsupp) {
    }
 
  })
+  if (!tempSiap) { return }
 
   $.ajax({
     url: "{!! url('cetaktandaterimadetailCetak') !!}",
@@ -4219,7 +4322,8 @@ function buttonAdd (kodecustsupp) {
     success: function(res) {
       console.log(res , '!!!')
 
-      listOutstanding = res
+      // Diurutkan per No Invoice seperti tabel programajcSML (order [[1,'asc']]).
+      listOutstanding = (res || []).slice().sort((a, b) => String(a.NoBukti).localeCompare(String(b.NoBukti)))
       let rowTable = ""
 
 
@@ -4232,12 +4336,16 @@ function buttonAdd (kodecustsupp) {
       </div>
       </td>
         <td>${item.NoBukti }</td>
-        <td>${item.Tanggal ? formatDate(item.Tanggal,'/') : ''  }</td>
+        <td>${item.Tanggal ? formatDate(item.Tanggal,'/').split('/').reverse().join('/') : ''  }</td>
         <td>${item.pono? item.pono : '' }</td>
-        <td>${item.NamaCustSupp }</td>
+        <td>${item.penerima ? item.penerima : '' }</td>
       </tr>
         `
       });
+
+      if (!listOutstanding.length) {
+        rowTable = '<tr><td colspan="5" class="text-center">Tidak ada invoice yang belum dicetak tanda terimanya</td></tr>'
+      }
 
       document.getElementById("addTableData").innerHTML = rowTable
 
@@ -4336,28 +4444,100 @@ function buttonCloseForm () {
 
 }
 
+// Lapisan "Memuat data..." yang sama dengan fakturpajak/purchaseOrder (CSS .dataTables_processing
+// + .po-loading-chip dari partial tampilan-purchasing-css), ditempel ke wrapper DataTables.
+function ctTampilMemuat (tampil) {
+  ['#tabel_wrapper', '#tabel2_wrapper'].forEach(function (sel) {
+    $(sel).children('.ct-memuat').remove()
+    if (!tampil) { return }
+    $(sel).css('position', 'relative').append(
+      '<div class="dataTables_processing ct-memuat" style="display:block"><span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span></div>'
+    )
+  })
+}
+
+// Request async supaya halaman tidak membeku; permintaan lama dibatalkan bila
+// tanggal diganti lagi sebelum selesai.
+let ctLoadTimer = null
+let ctLoadXhr = null
+
 function loadAll () {
+  if (ctLoadTimer) { clearTimeout(ctLoadTimer) }
+  ctTampilMemuat(true)
+  ctLoadTimer = setTimeout(ctAmbilData, 300)
+}
 
-  console.log('loadall')
-  let _token = $("#_token").val();
+function ctAmbilData () {
+  if (ctLoadXhr) { ctLoadXhr.abort() }
+  ctTampilMemuat(true)
 
-
-  $.ajax({
+  ctLoadXhr = $.ajax({
     url: "{!! url('cetaktandaterimaloadall') !!}",
     type: "get",
-    async: false,
     data: {
+      tglawal  : $('#input_tanggalawal_ctt2').val(),
+      tglakhir : $('#input_tanggalakhir_ctt2').val()
     },
     success: function(res) {
-      console.log(res)
+      lastTabelRows = res.tempOutstanding || [];
+      lastTabel2Rows = res.tempPenerimaan || [];
+      // Hanya tabel di tab yang tampil yang digambar (pola purchaseOrder). ReportTable.headHtml()
+      // membaca window.gcart_header, jadi menggambar tabel tab lain sekaligus membuat data-gidx
+      // kolomnya -1 dan drag/roda gigi/sembunyikan kolom tidak jalan. Tab lain digambar saat dibuka.
+      let urutTampil = activeVisibleTabKeyCT();
+      ctPerluGambar[1] = true;
+      ctPerluGambar[2] = true;
+      ctAktifkanTabel(urutTampil);
+      (urutTampil === 2 ? reinitTabel2 : reinitTabel)();
+    },
+    error: function (err) {
+      if (err.statusText === 'abort') { return }
+      console.log(err)
+      alertify.warning('Gagal memuat data, silahkan refresh browser')
+    },
+    complete: function (xhr) {
+      if (xhr.statusText === 'abort') { return }
+      ctLoadXhr = null
+      ctTampilMemuat(false)
+    }
+  })
+}
 
-      lastTabelRows = res.tempOutstanding;
-      lastTabel2Rows = res.tempPenerimaan;
-      reinitTabel();
-      reinitTabel2();
+// Invoice yang dicentang di form tambah; dipakai untuk mencegah Preview/Cetak
+// tanpa pilihan (submitPrint/previewPrint membaca dataPrint[0] dan akan error).
+function ctJumlahDipilih () {
+  let n = 0
+  for (let i = 0; i < listOutstanding.length; i++) {
+    let cb = document.getElementById(`addChecklist${i}`)
+    if (cb && cb.checked) { n++ }
+  }
+  return n
+}
 
-    }})
+function ctPreview () {
+  if (!ctJumlahDipilih()) {
+    alertify.warning('Pilih minimal satu invoice terlebih dahulu')
+    return
+  }
+  previewPrint()
+}
 
+function ctCetak () {
+  if (!ctJumlahDipilih()) {
+    alertify.warning('Pilih minimal satu invoice terlebih dahulu')
+    return
+  }
+  if (!$('#input_add_nobukti').val()) {
+    alertify.warning('No Bukti tanda terima belum terbentuk, silahkan buka ulang form')
+    return
+  }
+  if (!$('#input_add_tanggal').val()) {
+    alertify.warning('Tanggal harus diisi')
+    return
+  }
+  submitPrint()
+  // Invoice yang sudah dicetak pindah ke tab "sudah cetak".
+  loadAll()
 }
 
 function submitPrint (nobukti) {
@@ -4812,7 +4992,7 @@ function submitPrint (nobukti) {
       .footer-print-date {
         position: absolute;
         width: 100%;
-        bottom: 5px;
+        bottom: 45px;
       }
 
        .solid{
@@ -5028,7 +5208,7 @@ function submitPrint (nobukti) {
              </tr>
            </table>
             <div style="margin-top:10px; font-size:10px; font-style:italic; white-space:nowrap;">
-                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : sml.accounting@yahoo.co.id
+                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : accounting@sinarmahakamlestari.com
             </div>
 
           </div>
@@ -5753,7 +5933,7 @@ function previewPrint (nobukti) {
              </tr>
            </table>
             <div style="margin-top:10px; font-size:10px; font-style:italic; white-space:nowrap;">
-                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : sml.accounting@yahoo.co.id
+                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : accounting@sinarmahakamlestari.com
             </div>
 
           </div>
@@ -5817,6 +5997,7 @@ function previewPrint (nobukti) {
 
 
 
+
 //=====
 
 
@@ -5834,7 +6015,7 @@ function previewPrint (nobukti) {
     //   dataPrint.push(dataPrint[0])
     // }
 
-
+  console.log(nobukti)
     let _token = $('#_token').val()
     // let dataPrint = []
 
@@ -5856,7 +6037,7 @@ function previewPrint (nobukti) {
     // NOBUKTI: nobukti1,
     // tempData: dataPrint, tanggal,
     // nourut})
-
+ 
     $.ajax({
       url: "{!! url('cetaktandaterimadetailCetakUlang') !!}",
       type: "post",
@@ -6283,7 +6464,7 @@ function previewPrint (nobukti) {
       .footer-print-date {
         position: absolute;
         width: 100%;
-        bottom: 5px;
+        bottom: 45px;
       }
 
        .solid{
@@ -6499,7 +6680,7 @@ function previewPrint (nobukti) {
              </tr>
            </table>
            <div style="margin-top:10px; font-size:10px; font-style:italic; white-space:nowrap;">
-                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : sml.accounting@yahoo.co.id
+                *Setelah ditandatangani mohon dikirim kembali ke SML atau di Fax ke NO : 0541-4104195, atau email ke : accounting@sinarmahakamlestari.com
            </div>
           </div>
 

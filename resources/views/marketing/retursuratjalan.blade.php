@@ -222,14 +222,14 @@
   /* Kolom Aksi #addTable (Add Item cart di page2) -- pastel round-button treatment,
      sama seperti #tabel/#tabel2 di atas, cuma di sini tombolnya ada di td TERAKHIR
      (bukan first-child) karena kolom Actions memang ditaruh paling kanan. */
-  #addTable td:last-child {
+  #addTable td:last-child:not([colspan]) {
     display: flex;
     gap: 4px;
     justify-content: center;
     align-items: center;
   }
 
-  #addTable td:last-child .btn {
+  #addTable td:last-child:not([colspan]) .btn {
     width: 30px;
     height: 30px;
     padding: 0;
@@ -243,16 +243,16 @@
     transition: all .12s ease;
   }
 
-  #addTable td:last-child .btn:hover {
+  #addTable td:last-child:not([colspan]) .btn:hover {
     filter: brightness(0.97);
     transform: translateY(-1px);
   }
 
-  #addTable td:last-child .btn-success {
+  #addTable td:last-child:not([colspan]) .btn-success {
     color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
   }
 
-  #addTable td:last-child .btn-danger {
+  #addTable td:last-child:not([colspan]) .btn-danger {
     color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
   }
 </style>
@@ -449,17 +449,18 @@
 </style>
 {{-- end tampilan search modal barang all --}}
 
+@include('marketing.partials.tampilan-purchasing-css')
 @endsection
 
 
 @section('content')
-<div id="page1" class="container-fluid">
+<div id="page1">
 
 <div id="printContainer" style="display:none">
 
 
 </div>
-<div id="contentContainer" class="container-fluid" >
+<div id="contentContainer" class="">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
@@ -482,7 +483,7 @@
         <div class="modal-header">
           <h5 class="modal-title">
             <i class="bi bi-funnel"></i>
-            Filter Data
+            Filter Retur Surat Jalan
             <span class="rt-active-badge" id="rsjFilterBadge">0 aktif</span>
           </h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterRSJ').modal('hide')">
@@ -492,14 +493,16 @@
 
         <div class="modal-body">
           <div class="rt-section">
-            <div class="rt-group-label">Status</div>
-            <div>
-              <label class="rt-field-label" for="input_filterrsj">Status Otorisasi</label>
-              <select class="rt-native" id="input_filterrsj">
-                <option value=0 selected>Semua</option>
-                <option value=1>Belum Otorisasi</option>
-                <option value=2>Sudah Otorisasi</option>
-              </select>
+            <div class="rt-group-label">Penyaringan Data</div>
+            <div class="rt-grid-2">
+              <div>
+                <label class="rt-field-label" for="input_filterrsj">Otorisasi</label>
+                <select class="rt-native" id="input_filterrsj">
+                  <option value=0 selected>Semua</option>
+                  <option value=2>Sudah</option>
+                  <option value=1>Belum</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -523,9 +526,9 @@
 
         <div class="po-filter-wrap">
           <label>Periode</label>
-          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalawal_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalawal_rsj" value="{!! \Carbon\Carbon::create((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
           <span class="po-filter-sep">s/d</span>
-          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalakhir_rsj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+          <input type="date" onchange="onChangePeriodeRSJ()" class="po-filter-inp" id="input_tanggalakhir_rsj" value="{!! \Carbon\Carbon::create((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
         </div>
 
         <input type="search" id="tabel_filter_visual" class="po-search-inp" placeholder="Cari data">
@@ -550,28 +553,25 @@
         </div>
 
       </div>
-    </div>
-  </div>
 
-  <div class="card">
-  <div class="card-body" style="padding:0;">
+      {{-- Satu card seperti purchaseOrder: toolbar, bar kolom, tabel, dan petunjuk berada
+           di card yang sama. Kotak scroll .po-table-wrap dibuat DataTables (RSJ_DOM_STRING),
+           jadi tabel tidak dibungkus .po-table-wrap lagi di sini. --}}
       <div id="rtBarTabel"></div>
-      <div class="po-table-wrap">
-        <table id="tabel" class="data-table">
-          {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
-               renderTabelRows(), which runs on page load via reinitTabel()) replaces
-               this <thead>'s contents based on gcart_header before the user ever sees
-               it -- the tag itself is just a placeholder for that selector. --}}
-          <thead style="white-space:nowrap;"></thead>
-          <tbody id="tabel_data" class="text-left"></tbody>
-        </table>
-      </div>
+      <table id="tabel" class="data-table po-aksi-hover">
+        {{-- Header content is fully JS-owned: replaceTheadWithHeader() (called from
+             renderTabelRows(), which runs on page load via reinitTabel()) replaces
+             this <thead>'s contents based on gcart_header before the user ever sees
+             it -- the tag itself is just a placeholder for that selector. --}}
+        <thead style="white-space:nowrap;"></thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
       <div class="po-rt-hint">
         <i class="bi bi-info-circle"></i>
         Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
         untuk menyembunyikan kolom atau mengatur jumlah desimal.
       </div>
-  </div>
+    </div>
   </div>
 
 </div>
@@ -579,42 +579,38 @@
 </div>
 
 <div id="page2" class="container-fluid" style="display: none">
+<div id="formBsGrid">
 
   <div class="container-fluid">
-
-    <!-- <div id="qrcode"></div> -->
     <div class="row d-flex justify-content-between align-items-center">
       <div class="col-auto text-left">
         {{-- <h1>Form Retur SJ</h1> --}}
       </div>
       <div class="col-auto text-right">
         <button type="button" class="btn btn-danger btn-lg" style="
-            height: 30px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
             onclick="buttonCloseForm()">
-          Close
-        </button>
+        Close
+      </button>
       </div>
     </div>
-  <!-- <button onclick="loadAll()">tes</button> -->
   </div>
+
   <div id="modalBodyAddMain" class="">
   <div class="modal-body">
-    <!-- <h1>Tes Modal</h1> -->
 
-    <div id="formBsGrid" class="container-fluid">
+    <div class="container-fluid">
       <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
       <div class="row g-3">
 
         <div class="col-3">
-
           <div class="row align-items-center mb-2">
             <div class="col-4">
               <label class="form-label mb-0">Customer</label>
@@ -626,91 +622,76 @@
               </div>
             </div>
           </div>
-
         </div>
 
         <div class="col-3">
-
           <div class="row align-items-center mb-2">
             <div class="col-4">
               <label class="form-label mb-0">No SJ</label>
             </div>
             <div class="col-8">
               <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
-                  <button class="btn btn-chip-biru btn-sm" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-search"></i></button>
+                <input type="text" class="form-control" id="input_add_nosj" placeholder="" disabled>
+                <button class="btn btn-chip-biru btn-sm" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-search"></i></button>
               </div>
             </div>
           </div>
-
         </div>
 
-          <div class="col-3">
-            <div class="row align-items-center mb-2">
-              <div class="col-4">
-                <label class="form-label mb-0">No Bukti</label>
-              </div>
-              <div class="col-8">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="No SO" disabled>
-              </div>
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No Bukti</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_add_nobukti" placeholder="No Bukti" disabled>
             </div>
           </div>
-
-          <div class="col-3">
-            <div class="row align-items-center mb-2">
-              <div class="col-4">
-                <label class="form-label mb-0">Tanggal</label>
-              </div>
-              <div class="col-8">
-                <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
-              </div>
-            </div>
-          </div>
-
-
         </div>
 
-
-
-
-
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tanggal</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
+            </div>
+          </div>
+        </div>
 
       </div>
+    </div>
 
-      <hr/>
+    <hr/>
 
-      <div id='formBsGrid' class="container-fluid">
-
-
+    <div class="container-fluid">
       <div class="row g-3">
-        <div class="col-3">
-            <div class="row mb-2">
 
+        <div class="col-3">
+          <div class="row mb-2">
             <div class="col-12">
-                <textarea  style="width: 100%; height: 75px !important; resize: none" rows=4  class="form-control" id="input_add_customer"  disabled></textarea>
+              <textarea style="width: 100%; height: 75px !important; resize: none" rows=4 class="form-control" id="input_add_customer" disabled></textarea>
             </div>
           </div>
-
         </div>
+
         <div class="col-3">
           <div class="row align-items-center mb-2">
             <div class="col-4">
               <label class="form-label mb-0">No SO</label>
             </div>
             <div class="col-8">
-                <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
-                <input type="text" class="form-control" id="input_add_noso" placeholder="" disabled>
+              <input type="text" class="form-control" id="input_add_noso" placeholder="" disabled>
             </div>
           </div>
-            <div class="row align-items-start mb-2">
-
+          <div class="row align-items-start mb-2">
             <div class="col-4">
-                <label class="form-label mb-0">Catatan</label>
+              <label class="form-label mb-0">Catatan</label>
             </div>
             <div class="col-8">
-                <textarea  style="width: 100%; height: 75px !important; resize: none; " rows=4  class="form-control" id="input_add_catatan"  ></textarea>
+              <textarea style="width: 100%; height: 75px !important; resize: none;" rows=4 class="form-control" id="input_add_catatan"></textarea>
             </div>
-
           </div>
         </div>
 
@@ -720,20 +701,16 @@
               <label class="form-label mb-0">Tgl SJ</label>
             </div>
             <div class="col-8">
-                <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
               <input type="date" class="form-control" id="input_add_tanggalsj" value="{!! date('Y-m-d') !!}" disabled>
             </div>
-
           </div>
-            <div class="row align-items-center mb-2">
-
-              <div class="col-4">
-                <label class="form-label mb-0">Gudang</label>
-              </div>
-              <div class="col-8">
-                    <input type="text" class="form-control" id="input_add_gudang" placeholder="" disabled>
-              </div>
-
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Gudang</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_add_gudang" placeholder="" disabled>
+            </div>
           </div>
         </div>
 
@@ -742,368 +719,278 @@
             <div class="col-4">
               <label class="form-label mb-0">Tgl SC</label>
             </div>
-
             <div class="col-8">
-                <!-- <input type="hidden" class="form-control" id="input_add_kodegdg" placeholder="" > -->
-
               <input type="date" class="form-control" id="input_add_tanggalsc" value="{!! date('Y-m-d') !!}" disabled>
             </div>
-
           </div>
-            <div class="row align-items-center mb-2">
-
+          <div class="row align-items-center mb-2">
             <div class="col-4">
               <label class="form-label mb-0">No Pol Kend</label>
             </div>
             <div class="col-8">
-                  <input type="text" class="form-control" id="input_add_nopol" placeholder="" >
+              <input type="text" class="form-control" id="input_add_nopol" placeholder="" >
             </div>
-
           </div>
         </div>
 
-
       </div>
-
-      <div class="row">
-        <div class="col-3">
-
-        </div>
-
-        <div class="col-8">
-          <div class="row">
-            <div class="col-6">
-
-            </div>
-
-            <div class="col-6">
-              <div class="row">
-
-
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="row">
-
-
-              </div>
-
-            </div>
-
-
-
-          </div>
-
-        </div>
-
-      </div>
-
-      </div>
-
-
-
     </div>
+
     <div class="container-fluid">
       <hr/>
-
     </div>
 
-  <div class="container-fluid mt-4" style="overflow-x: auto;">
-
-        <table id="addTable" class="data-table">
-          <thead class="text-center">
-            <tr>
-              <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
-              <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
-              <th style="padding: 4px 12px;" scope="col">Qty</th>
-              <th style="padding: 4px 12px;" scope="col">Sat</th>
-              <th style="padding: 4px 12px;" scope="col">Actions</th>
-
-            </tr>
-          </thead>
-
-
-          <tbody id="addTableData" class="text-right" >
-            <tr >
-
-                <td colspan=5 class="text-center">Belum ada data</td>
-
+    {{-- Kolom Qty1/Sat1/Qty2/Sat2 dikembalikan seperti tabel item programajcSML. --}}
+    <div class="container-fluid mt-4" style="overflow-x: auto;">
+      <table id="addTable" class="data-table">
+        <thead class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Qty1</th>
+            <th style="padding: 4px 12px;" scope="col">Sat1</th>
+            <th style="padding: 4px 12px;" scope="col">Qty2</th>
+            <th style="padding: 4px 12px;" scope="col">Sat2</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
-
-          </tbody>
-
-
-        </table>
-  </div>
-
-
-
-  <div class="col-12">
-
-  <div class="row">
-    <div class="col-12  text-right">
-
-      <button type="button" class="btn btn-chip-biru btn-lg" style="
-        height: 30px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        transition: background-color 0.3s, box-shadow 0.3s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-        onclick="buttonAddAdd()" ><b>Tambah Item</b></button>
-      </div>
+        </thead>
+        <tbody id="addTableData" class="text-right" >
+          <tr>
+            <td colspan=7 class="text-center">Belum ada data</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-  </div>
-</div>
-<div id="formAddAdd" class="container-fluid showhide mb-2">
-  <div id="formBsGrid">
-  <!-- <div class="line"></div> -->
-  <hr/>
-  <div class="row">
     <div class="col-12">
-      <h4>Add Item</h4>
-    </div>
-  </div>
-  <div class="row g-3">
-
-    <div class="col-3">
-
-  <div class="row align-items-center mb-2">
-    <div class="col-4">
-      <label class="form-label mb-0">Kode Barang</label>
-    </div>
-    <div class="col-8">
-      <div class="input-group">
-
-        <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
-        <button type="button" id="buttonAddListBarang" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
-<div class="col-6">
-  <div class="row align-items-center mb-2">
-    <div class="col-2">
-      <label class="form-label mb-0">Nama Barang</label>
-    </div>
-    <div class="col-6">
-      <input id="AddAddNamaBrg" type="text" class="form-control" disabled>
-    </div>
-  </div>
-</div>
-
-<div class="col-3">
-
-</div>
-
-<div class="col-3 ">
-  <div class="row align-items-center mb-2">
-    <div class="col-4">
-      <label class="form-label mb-0">Retur Supp</label>
-    </div>
-    <div class="col-8">
-      <select  id="AddAddReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-        <option value=0 selected>Tidak</option>
-        <option value=1 >Ya</option>
-      </select>
-      <!-- <input id="AddAddNamaGdg" type="text" class="form-control" disabled>
-      <input id="AddAddKodeGdg" type="hidden" class="form-control" disabled> -->
-    </div>
-
-  </div>
-</div>
-<div class="col-6 ">
-  <div class="row align-items-center mb-2">
-    <div class="col-2">
-      <label class="form-label mb-0">Qty</label>
-    </div>
-    <div class="col-4">
-      <input id="AddAddInputQty" type="number" value='0.00' class="form-control text-right">
-    </div>
-    <div class="col-2">
-      <input id="AddAddInputSatuan" type="text"  class="form-control  " disabled>
-      <input id="AddAddInputIsi" type="hidden"  class="form-control  " disabled>
-      <input id="AddAddInputSatuan1" type="hidden"  class="form-control  " disabled>
-    </div>
-
-
-  </div>
-</div>
-</div>
-
-
-
-  <div class="row mt-2">
-    <div class="col-md-12 text-right mt-4">
-      <button type="button" class="btn btn-danger btn-lg" style="
-      height: 30px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
-
-      <button type="button" id="buttonSubmitAddAdd" class="btn btn-chip-biru btn-lg" style="
-      height: 30px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="submitAddAdd()" class="btn btn-secondary">Simpan</button>
-</div>
-
-  </div>
-  <!-- <div class="line"></div> -->
-  <!-- <hr/> -->
-</div>
-
-<div id="formAddEdit" class="container-fluid showhide mb-2">
-  <!-- <div class="line"></div> -->
-  <hr/>
-  <div class="row">
-    <div class="col-12">
-      <h4>Edit Item</h4>
-    </div>
-  </div>
-  <div class="row g-3">
-
-    <div class="col-3">
-
-  <div class="row align-items-center mb-2">
-    <div class="col-4">
-      <label class="form-label mb-0">Kode Barang</label>
-    </div>
-    <div class="col-8">
-      <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
-    </div>
-
-  </div>
-
-</div>
-
-<div class="col-6">
-  <div class="row align-items-center mb-2">
-    <div class="col-2">
-      <label class="form-label mb-0">Nama Barang</label>
-    </div>
-    <div class="col-6">
-      <input id="AddEditNamaBrg" type="text" class="form-control" disabled>
-    </div>
-  </div>
-</div>
-
-<div class="col-3">
-
-</div>
-
-<div class="col-3 ">
-  <div class="row align-items-center mb-2">
-    <div class="col-4">
-      <label class="form-label mb-0">Retur Supp</label>
-    </div>
-    <div class="col-8">
-      <select  id="AddEditReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-        <option value=0 selected>Tidak</option>
-        <option value=1 >Ya</option>
-      </select>
-      <!-- <input id="AddEditNamaGdg" type="text" class="form-control" disabled>
-      <input id="AddEditKodeGdg" type="hidden" class="form-control" disabled> -->
-    </div>
-
-  </div>
-</div>
-<div class="col-6">
-  <div class="row align-items-center mb-2">
-    <div class="col-2">
-      <label class="form-label mb-0">Qty</label>
-    </div>
-    <div class="col-4">
-      <input id="AddEditInputQty" type="number" value='0.00' class="form-control text-right">
-    </div>
-    <div class="col-2">
-      <input id="AddEditInputSatuan" type="text"  class="form-control  " disabled>
-      <input id="AddEditInputIsi" type="hidden"  class="form-control  " disabled>
-      <input id="AddEditInputSatuan1" type="hidden"  class="form-control  " disabled>
-    </div>
-
-
-  </div>
-</div>
-</div>
-
-
-  <div class="row mt-2">
-    <div class="col-md-12 text-right mt-4">
-      <!-- <button type="button" class="btn btn-secondary" onclick="buttonBatalAdd()" >Batal</button>
-
-      <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
-      <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
-
-      <button type="button" class="btn btn-danger btn-lg" style="
-      height: 30px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonBatalAdd()" class="btn btn-danger">Batal</button>
-
-      <button type="button" id="buttonSubmitAddEdit" class="btn btn-chip-biru btn-lg" style="
-      height: 30px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="submitAddEdit()" class="btn btn-secondary">Simpan</button>
-
-
-    </div>
-
-  </div>
-  <!-- <div class="line"></div> -->
-  <!-- <hr/> -->
-</div>
-
-</div>
-  </div>
-
-  </div>
-
-  <div id="page3" class="container-fluid" style="display: none">
-
-    <div class="container-fluid">
-
-      <!-- <div id="qrcode"></div> -->
       <div class="row">
-        <div class="col-6 text-left">
-          <h1 class="" id="modalTitleDetail">
-            {{-- Detail --}}
-          </h1>
-
-          <h1 class="" id="modalTitleOto">
-            {{-- Otorisasi --}}
-          </h1>
+        <div class="col-12 text-right">
+          <button type="button" class="btn btn-lg btn-chip-biru" style="
+                  height: 30px;
+                  padding: 4px 12px;
+                  border-radius: 20px;
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  transition: background-color 0.3s, box-shadow 0.3s;"
+            onclick="buttonAddAdd()" >Tambah Item</button>
         </div>
-        <div class="col-6 text-right">
-          <button type="button" class="btn btn-danger btn-lg" style="
+      </div>
+    </div>
+
+  </div>
+  </div>{{-- /#modalBodyAddMain --}}
+
+  {{-- formAddAdd dan formAddEdit sejajar (dulu formAddEdit tidak sengaja bersarang di
+       dalam formAddAdd karena ada div yang tidak tertutup, sehingga form Edit Item ikut
+       tersembunyi dan tidak pernah tampil). --}}
+  <div id="formAddAdd" class="container-fluid showhide mb-2">
+    <hr/>
+    <div class="row">
+      <div class="col-12">
+        <h4>Add Item</h4>
+      </div>
+    </div>
+    <div class="row g-3">
+
+      <div class="col-3">
+        <div class="row align-items-center mb-2">
+          <div class="col-4">
+            <label class="form-label mb-0" style="white-space: nowrap;">Kode Barang</label>
+          </div>
+          <div class="col-8">
+            <div class="input-group">
+              <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+              <button type="button" id="buttonAddListBarang" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="row align-items-center mb-2">
+          <div class="col-2">
+            <label class="form-label mb-0">Retur Supp</label>
+          </div>
+          <div class="col-4">
+            <select id="AddAddReturSupp" class="form-control">
+              <option value=0 selected>Tidak</option>
+              <option value=1 >Ya</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-3">
+      </div>
+
+      <div class="col-3">
+        <div class="row align-items-center mb-2">
+          <div class="col-4">
+            <label class="form-label mb-0" style="white-space: nowrap;">Nama Barang</label>
+          </div>
+          <div class="col-8">
+            <input id="AddAddNamaBrg" type="text" class="form-control" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="row align-items-center mb-2">
+          <div class="col-2">
+            <label class="form-label mb-0">Qty</label>
+          </div>
+          <div class="col-4">
+            <input id="AddAddInputQty" type="number" value='0.00' class="form-control text-right">
+          </div>
+          <div class="col-2">
+            <input id="AddAddInputSatuan" type="text" class="form-control" disabled>
+            <input id="AddAddInputIsi" type="hidden" class="form-control" disabled>
+            <input id="AddAddInputSatuan1" type="hidden" class="form-control" disabled>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-12 text-right mt-4">
+        <button type="button" class="btn btn-lg btn-batal-add" style="
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                transition: background-color 0.3s, box-shadow 0.3s;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="buttonBatalAdd()">Batal</button>
+
+        <button type="button" id="buttonSubmitAddAdd" class="btn btn-lg btn-chip-biru" style="
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                transition: background-color 0.3s, box-shadow 0.3s;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="submitAddAdd()">Simpan</button>
+      </div>
+    </div>
+  </div>{{-- /#formAddAdd --}}
+
+  <div id="formAddEdit" class="container-fluid showhide mb-2">
+    <hr/>
+    <div class="row">
+      <div class="col-12">
+        <h4>Edit Item</h4>
+      </div>
+    </div>
+    <div class="row g-3">
+
+      <div class="col-3">
+        <div class="row align-items-center mb-2">
+          <div class="col-4">
+            <label class="form-label mb-0" style="white-space: nowrap;">Kode Barang</label>
+          </div>
+          <div class="col-8">
+            <input id="AddEditKodeBrg" type="text" class="form-control" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="row align-items-center mb-2">
+          <div class="col-2">
+            <label class="form-label mb-0">Retur Supp</label>
+          </div>
+          <div class="col-4">
+            <select id="AddEditReturSupp" class="form-control">
+              <option value=0 selected>Tidak</option>
+              <option value=1 >Ya</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-3">
+      </div>
+
+      <div class="col-3">
+        <div class="row align-items-center mb-2">
+          <div class="col-4">
+            <label class="form-label mb-0" style="white-space: nowrap;">Nama Barang</label>
+          </div>
+          <div class="col-8">
+            <input id="AddEditNamaBrg" type="text" class="form-control" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="row align-items-center mb-2">
+          <div class="col-2">
+            <label class="form-label mb-0">Qty</label>
+          </div>
+          <div class="col-4">
+            <input id="AddEditInputQty" type="number" value='0.00' class="form-control text-right">
+          </div>
+          <div class="col-2">
+            <input id="AddEditInputSatuan" type="text" class="form-control" disabled>
+            <input id="AddEditInputIsi" type="hidden" class="form-control" disabled>
+            <input id="AddEditInputSatuan1" type="hidden" class="form-control" disabled>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-12 text-right mt-4">
+        <button type="button" class="btn btn-lg btn-batal-add" style="
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                transition: background-color 0.3s, box-shadow 0.3s;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="buttonBatalAdd()">Batal</button>
+
+        <button type="button" id="buttonSubmitAddEdit" class="btn btn-lg btn-chip-biru" style="
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                transition: background-color 0.3s, box-shadow 0.3s;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="submitAddEdit()">Simpan</button>
+      </div>
+    </div>
+  </div>{{-- /#formAddEdit --}}
+
+</div>{{-- /#formBsGrid --}}
+</div>{{-- /#page2 --}}
+
+{{-- Detail/Otorisasi: susunan field disamakan dengan form Add/Edit (bsgrid), semua read-only. --}}
+<div id="page3" class="container-fluid" style="display: none">
+<div id="formBsGrid">
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-6 text-left">
+        <h1 class="" id="modalTitleDetail">
+          {{-- Detail --}}
+        </h1>
+        <h1 class="" id="modalTitleOto">
+          {{-- Otorisasi --}}
+        </h1>
+      </div>
+      <div class="col-6 text-right">
+        <button type="button" class="btn btn-danger btn-lg" style="
               height: 30px;
               padding: 4px 12px;
               border-radius: 20px;
@@ -1112,315 +999,184 @@
               text-transform: uppercase;
               transition: background-color 0.3s, box-shadow 0.3s;
               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-              onclick="buttonCloseForm()">
-            Close
-          </button>
-        </div>
+            onclick="buttonCloseForm()">
+        Close
+      </button>
       </div>
-    <!-- <button onclick="loadAll()">tes</button> -->
     </div>
-    <div id="formBsGrid" class="">
-    <div class="modal-body">
-      <!-- <h1>Tes Modal</h1> -->
+  </div>
 
-      <div class="container-fluid">
-        <input type="hidden" name="noUrut" id="input_detail_nourut" value="" />
-        <div class="row">
+  <div class="modal-body">
 
-          <div class="col-3">
-            <div class="row">
+    <div class="container-fluid">
+      <input type="hidden" name="noUrut" id="input_detail_nourut" value="" />
+      <div class="row g-3">
 
-
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
             <div class="col-4">
-              <div class="form-group">
-                <label>No SJ</label>
-              </div>
+              <label class="form-label mb-0">Customer</label>
             </div>
-            <!-- <div class="col-3 text-right">
-              <div class="form-group">
-            </div> -->
             <div class="col-8">
-              <div class="form-group input-group">
-                <input type="text" class="form-control" id="input_detail_nosj" placeholder="No SJ" disabled>
-                <!-- <button class="btn btn-primary btn-sm text-right" id="buttonAddListNoSJ" onclick="buttonAddListNoSJ()"><i class="bi bi-plus"></i></button> -->
-              </div>
+              <input type="text" class="form-control" id="input_detail_kodecustomer" placeholder="" disabled>
             </div>
           </div>
-            </div>
-
-            <div class="col-3">
-              <div class="row">
-                <div class="col-4">
-                  <div class="form-group">
-                    <label>No Bukti</label>
-                  </div>
-                </div>
-                <div class="col-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_detail_nobukti" placeholder="No SO" disabled>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-3">
-              <div class="row">
-                <div class="col-4">
-                  <div class="form-group">
-                    <label>Tanggal</label>
-                  </div>
-                </div>
-                <div class="col-8">
-                  <div class="form-group">
-                    <input type="date" class="form-control" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}"  disabled>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
-        <hr/>
-
-        <div class="container-fluid">
-
-
-        <div class="row">
-          <div class="col-3">
-            <div class="row">
-              <div class="col-4">
-                <div class="form-group">
-                  <label>Customer</label>
-                </div>
-              </div>
-              <div class="col-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_detail_kodecustomer" placeholder="" disabled>
-                  </div>
-              </div>
-
-
-
-
-              </div>
-              <div class="row" style="margin-top: -10px">
-              <!-- <div class="col-2">
-                <div class="form-group">
-                div
-
-                </div>
-
-              </div> -->
-              <div class="col-12">
-                <div class="form-group">
-                  <textarea  style="width: 100%; height: 75px !important; resize: none" rows=4  class="form-control" id="input_detail_customer"  disabled></textarea>
-                </div>
-              </div>
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No SJ</label>
             </div>
-
-          </div>
-          <div class="col-3">
-            <div class="row">
-              <div class="col-4">
-                <div class="form-group">
-                  <label>No SO</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="hidden" class="form-control" id="input_detail_kodegdg" placeholder="" > -->
-                  <input type="text" class="form-control" id="input_detail_noso" placeholder="" disabled>
-                </div>
-              </div>
-
-
-              </div>
-              <div class="row" style="margin-top: -10px">
-
-              <div class="col-4">
-                <div class="form-group">
-
-                  <label>Catatan</label>
-                </div>
-
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <textarea  style="width: 100%; height: 75px !important; resize: none; " rows=4  class="form-control" id="input_detail_catatan"  disabled></textarea>
-                </div>
-              </div>
-
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_detail_nosj" placeholder="" disabled>
             </div>
           </div>
-
-          <div class="col-3">
-            <div class="row">
-              <div class="col-4">
-                <div class="form-group">
-                  <label>Tgl SJ</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="hidden" class="form-control" id="input_detail_kodegdg" placeholder="" > -->
-                <input type="date" class="form-control" id="input_detail_tanggalsj" value="{!! date('Y-m-d') !!}" disabled>
-                </div>
-              </div>
-
-              </div>
-              <div class="row" style="margin-top: -10px">
-
-              <!-- <div class="row"> -->
-                <div class="col-4">
-                  <div class="form-group">
-                    <label>Gudang</label>
-                  </div>
-                </div>
-                <div class="col-8">
-                    <div class="form-group">
-                      <input type="text" class="form-control" id="input_detail_gudang" placeholder="" disabled>
-                    </div>
-                </div>
-
-              <!-- </div> -->
-
-            </div>
-          </div>
-
-          <div class="col-3">
-            <div class="row">
-              <div class="col-4">
-                <div class="form-group">
-                  <label>Tgl SC</label>
-                </div>
-              </div>
-
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="hidden" class="form-control" id="input_detail_kodegdg" placeholder="" > -->
-
-                <input type="date" class="form-control" id="input_detail_tanggalsc" value="{!! date('Y-m-d') !!}" disabled>
-                </div>
-              </div>
-
-
-              </div>
-              <div class="row" style="margin-top: -10px">
-
-              <div class="col-4">
-                <div class="form-group">
-                  <label>No Pol Kend</label>
-                </div>
-              </div>
-              <div class="col-8">
-                  <div class="form-group">
-                    <input type="text" class="form-control" id="input_detail_nopol" placeholder="" disabled>
-                  </div>
-              </div>
-
-            </div>
-          </div>
-
-
         </div>
 
-        <div class="row">
-          <div class="col-3">
-
-          </div>
-
-          <div class="col-8">
-            <div class="row">
-              <div class="col-6">
-
-              </div>
-
-              <div class="col-6">
-                <div class="row">
-
-
-                </div>
-              </div>
-
-              <div class="col-12">
-                <div class="row">
-
-
-                </div>
-
-              </div>
-
-
-
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No Bukti</label>
             </div>
-
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_detail_nobukti" placeholder="" disabled>
+            </div>
           </div>
-
         </div>
 
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tanggal</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control" id="input_detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+          </div>
         </div>
-
-
 
       </div>
+    </div>
 
+    <hr/>
+
+    <div class="container-fluid">
+      <div class="row g-3">
+
+        <div class="col-3">
+          <div class="row mb-2">
+            <div class="col-12">
+              <textarea style="width: 100%; height: 75px !important; resize: none" rows=4 class="form-control" id="input_detail_customer" disabled></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No SO</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_detail_noso" placeholder="" disabled>
+            </div>
+          </div>
+          <div class="row align-items-start mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Catatan</label>
+            </div>
+            <div class="col-8">
+              <textarea style="width: 100%; height: 75px !important; resize: none;" rows=4 class="form-control" id="input_detail_catatan" disabled></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tgl SJ</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control" id="input_detail_tanggalsj" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Gudang</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_detail_gudang" placeholder="" disabled>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">Tgl SC</label>
+            </div>
+            <div class="col-8">
+              <input type="date" class="form-control" id="input_detail_tanggalsc" value="{!! date('Y-m-d') !!}" disabled>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-4">
+              <label class="form-label mb-0">No Pol Kend</label>
+            </div>
+            <div class="col-8">
+              <input type="text" class="form-control" id="input_detail_nopol" placeholder="" disabled>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <hr/>
+    </div>
 
     <div class="container-fluid" style="overflow-x: auto;">
-
-          <table id="detailTable" class="data-table">
-            <thead class="text-center">
-              <tr>
-                <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
-                <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
-                <th style="padding: 4px 12px;" scope="col">Qty</th>
-                <th style="padding: 4px 12px;" scope="col">Sat</th>
-                <!-- <th scope="col">Actions</th> -->
-
-              </tr>
-            </thead>
-
-
-            <tbody id="detailTableData" class="text-right" >
-              <tr >
-
-                  <td colspan=6 class="text-center">Belum ada data</td>
-
-            </tr>
-
-            </tbody>
-
-
-          </table>
+      <table id="detailTable" class="data-table">
+        <thead class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Kode Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Brg</th>
+            <th style="padding: 4px 12px;" scope="col">Qty1</th>
+            <th style="padding: 4px 12px;" scope="col">Sat1</th>
+            <th style="padding: 4px 12px;" scope="col">Qty2</th>
+            <th style="padding: 4px 12px;" scope="col">Sat2</th>
+          </tr>
+        </thead>
+        <tbody id="detailTableData" class="text-right" >
+          <tr>
+            <td colspan=6 class="text-center">Belum ada data</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div id="" class="container-fluid ">
+    <div class="container-fluid">
       <div class="row">
         <div class="col-12 text-right">
-          <button type="button" id="buttonSubmitOto" class="btn btn-chip-biru btn-lg" style="
-          height: 30px;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          onclick="submitOto()" class="btn btn-secondary">Otorisasi</button>
-
+          <button type="button" id="buttonSubmitOto" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+          onclick="submitOto()">Otorisasi</button>
         </div>
-
       </div>
-      <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
     </div>
 
-    </div>
+  </div>
 
-    </div>
-
-
-</div>
+</div>{{-- /#formBsGrid --}}
+</div>{{-- /#page3 --}}
 
 
 <!-- start modal add -->
@@ -1575,13 +1331,13 @@
 
 
       <div id="modalBodyFooterList" class="modal-footer showhidemodalfooteradd">
-        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-        <!-- <button type="button" class="btn btn-secondary" onclick="buttonAddListBatal()">Batal</button> -->
+        <!-- <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button> -->
+        <!-- <button type="button" class="btn btn-batal-add" onclick="buttonAddListBatal()">Batal</button> -->
       </div>
 
       <div id="modalBodyFooterMain" class="modal-footer showhidemodalfooteradd">
-        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button> -->
-        <!-- <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button> -->
+        <!-- <button type="button" class="btn btn-batal-add" data-dismiss="modal" >Batal</button> -->
+        <!-- <button type="button" class="btn btn-chip-biru" onclick="submitAdd()">Simpan</button> -->
       </div>
     </div>
   </div>
@@ -1599,6 +1355,7 @@
 @endsection
 
 @section('js')
+@include('marketing.partials.tampilan-purchasing-js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 {{-- Modal pemilih bersama (#form) disamakan persis dengan modal pemilih menu Kas.
@@ -1734,12 +1491,12 @@ function tabelActionsCell(row) {
   var nobukti = rsjPickCI(row, 'NOBUKTI');
   var isOto1 = rsjPickCI(row, 'IsOtorisasi1');
   var html = '<td class="text-center"><div class="action-buttons-wrap">';
-  html += '<button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
+  html += '<button title="Detail" class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'detail\')"><i class="bi bi-info"></i></button> ';
   if (Number(isOto1) === 1) {
-    html += '<button class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
+    html += '<button title="Batal Otorisasi" class="btn btn-danger btn-sm" type="button" onclick="buttonBatalOto(\'' + nobukti + '\' , \'edit\')"><i class="bi bi-key"></i></button>';
   } else {
-    html += '<button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + isOto1 + '\')"><i class="bi bi-pen"></i></button> ';
-    html += '<button class="btn btn-primary btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+    html += '<button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi(\'' + nobukti + '\' , \'' + isOto1 + '\')"><i class="bi bi-pen"></i></button> ';
+    html += '<button title="Otorisasi" class="btn btn-info btn-sm" type="button" onclick="buttonOto(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
   return html;
@@ -1754,7 +1511,7 @@ function retursuratjalanFormatTanggal(raw) {
   if (isNaN(d)) { return ''; }
   var dd = ('0' + d.getDate()).slice(-2);
   var mm = ('0' + (d.getMonth() + 1)).slice(-2);
-  return d.getFullYear() + '/' + mm + '/' + dd;
+  return dd + '/' + mm + '/' + d.getFullYear();
 }
 
 function tabelValueCell(row, col) {
@@ -1969,7 +1726,10 @@ function buttonBatalOto (nobukti) {
         console.log('!', res)
         loadAll()
 
-        // lockFormAdd()
+        if (res != 1) {
+          alertify.warning(res)
+          return
+        }
 
         alertify.success('Berhasil Batal Otorisasi RSPB')
 
@@ -2010,8 +1770,11 @@ function submitOto () {
       console.log('!', res)
       loadAll()
 
-      // lockFormAdd()
-      // $("#formDetail").modal('toggle')
+      if (res != 1) {
+        alertify.warning(res)
+        return
+      }
+
       $('#page3').hide();
       $('#page1').show();
 
@@ -2063,7 +1826,7 @@ function buttonAddPickBarang (index) {
 
 
   buttonAddListBatal()
-  $("#form").modal('toggle')
+  $("#form").modal('hide')
 }
 
 function buttonAddPickCust (index) {
@@ -2074,6 +1837,14 @@ function buttonAddPickCust (index) {
   document.getElementById("input_add_customer").value = dataCust.NAMACUSTSUPP + '\n' + dataCust.Alamat
   document.getElementById("input_add_kodecustomer").value = dataCust.KodeCustSupp
   document.getElementById("input_add_nosj").value = ''
+  // Ganti customer = SJ sebelumnya tidak berlaku lagi, kosongkan semua data turunannya.
+  dataForm = {}
+  document.getElementById("input_add_noso").value = ''
+  document.getElementById("input_add_gudang").value = ''
+  document.getElementById("input_add_tanggalsj").value = ''
+  document.getElementById("input_add_tanggalsc").value = ''
+  document.getElementById("input_add_nobukti").value = ''
+  document.getElementById("input_add_nourut").value = ''
 
   // document.getElementById("input_add_nopol").value = ''
   //
@@ -2149,27 +1920,35 @@ function buttonOto (nobukti) {
           // $("#form").modal('toggle')
           return
       }
+      // Otorisasi hanya untuk retur di periode aktif (sama seperti programajcSML);
+      // daftar bisa menampilkan rentang tanggal lain, jadi header bisa kosong.
+      if (!res.header || !res.header.length) {
+        alertify.warning('Retur SJ ' + nobukti + ' di luar periode aktif, tidak bisa diotorisasi')
+        return
+      }
+      if (Number(res.header[0].IsOtorisasi1) === 1) {
+        loadAll()
+        alertify.warning('Retur SJ ' + nobukti + ' sudah diotorisasi')
+        return
+      }
       dataTableDetail = res.detail
       dataTableDetailHeader = res.header[0]
-      dataFormDetail = res.dataForm[0]
+      dataFormDetail = res.dataForm[0] || {}
       console.log(formatDate(dataTableDetailHeader.TANGGAL))
       document.getElementById("input_detail_tanggal").value = formatDate(dataTableDetailHeader.TANGGAL)
-      document.getElementById("input_detail_nopol").value = dataTableDetailHeader.NoPolKend
-      document.getElementById("input_detail_catatan").value = dataTableDetailHeader.Catatan
+      document.getElementById("input_detail_nopol").value = dataTableDetailHeader.NoPolKend || ''
+      document.getElementById("input_detail_catatan").value = dataTableDetailHeader.Catatan || ''
 
       document.getElementById("input_detail_nobukti").value = nobukti
       document.getElementById("input_detail_nourut").value = dataTableDetailHeader.NOURUT
 
-      document.getElementById("input_detail_nosj").value = dataFormDetail.NoSPB
-      document.getElementById("input_detail_noso").value = dataFormDetail.NoSC
-      document.getElementById("input_detail_customer").value = dataFormDetail.NAMACUSTSUPP + '\n' + dataFormDetail.Alamat
-      document.getElementById("input_detail_kodecustomer").value = dataFormDetail.KodeCustSupp
-      document.getElementById("input_detail_gudang").value = dataFormDetail.Nama
-      // document.getElementById("input_detail_nopol").value = ''
-      //
-      // document.getElementById("input_detail_tanggal").value = formatDate(new Date())
-      document.getElementById("input_detail_tanggalsj").value = formatDate(dataFormDetail.TglSPB)
-      document.getElementById("input_detail_tanggalsc").value = formatDate(dataFormDetail.TglSC)
+      document.getElementById("input_detail_nosj").value = dataFormDetail.NoSPB || dataTableDetailHeader.NOSPB || ''
+      document.getElementById("input_detail_noso").value = dataFormDetail.NoSC || ''
+      document.getElementById("input_detail_customer").value = (dataFormDetail.NAMACUSTSUPP || dataTableDetailHeader.NamaCustSupp || '') + '\n' + (dataFormDetail.Alamat || '')
+      document.getElementById("input_detail_kodecustomer").value = dataFormDetail.KodeCustSupp || dataTableDetailHeader.KODECUSTSUPP || ''
+      document.getElementById("input_detail_gudang").value = dataFormDetail.Nama || ''
+      document.getElementById("input_detail_tanggalsj").value = dataFormDetail.TglSPB ? formatDate(dataFormDetail.TglSPB) : ''
+      document.getElementById("input_detail_tanggalsc").value = dataFormDetail.TglSC ? formatDate(dataFormDetail.TglSC) : ''
 
 
       let rowTable = ''
@@ -2181,14 +1960,14 @@ function buttonOto (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-
+            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
+            <td>${item.SAT_2}</td>
           </tr>
         `
       });
 
 
       document.getElementById("detailTableData").innerHTML = rowTable
-       // $("#formDetail").modal('toggle')
        $('#page1').hide();
        $('#page3').show();
 
@@ -2219,40 +1998,32 @@ function buttonDetail (nobukti) {
     data: {
       _token : _token,
       nobukti,
-
-
+      // Detail hanya melihat, jadi boleh untuk retur di luar periode aktif.
+      semuaperiode: 1
     },
     success: function(res) {
       console.log(res ,'!')
-      // loadAll()
-      if(res.detail.length == 0) {
-          // addTableData
-
+      if(res.detail.length == 0 || !res.header || !res.header.length) {
           alertify.warning('Data habis/ tidak ditemukan')
-          // $("#form").modal('toggle')
           return
       }
       dataTableDetail = res.detail
       dataTableDetailHeader = res.header[0]
-      dataFormDetail = res.dataForm[0]
-      console.log(formatDate(dataTableDetailHeader.TANGGAL))
+      dataFormDetail = res.dataForm[0] || {}
       document.getElementById("input_detail_tanggal").value = formatDate(dataTableDetailHeader.TANGGAL)
-      document.getElementById("input_detail_nopol").value = dataTableDetailHeader.NoPolKend
-      document.getElementById("input_detail_catatan").value = dataTableDetailHeader.Catatan
+      document.getElementById("input_detail_nopol").value = dataTableDetailHeader.NoPolKend || ''
+      document.getElementById("input_detail_catatan").value = dataTableDetailHeader.Catatan || ''
 
       document.getElementById("input_detail_nobukti").value = nobukti
       document.getElementById("input_detail_nourut").value = dataTableDetailHeader.NOURUT
 
-      document.getElementById("input_detail_nosj").value = dataFormDetail.NoSPB
-      document.getElementById("input_detail_noso").value = dataFormDetail.NoSC
-      document.getElementById("input_detail_customer").value = dataFormDetail.NAMACUSTSUPP + '\n' + dataFormDetail.Alamat
-      document.getElementById("input_detail_kodecustomer").value = dataFormDetail.KodeCustSupp
-      document.getElementById("input_detail_gudang").value = dataFormDetail.Nama
-      // document.getElementById("input_detail_nopol").value = ''
-      //
-      // document.getElementById("input_detail_tanggal").value = formatDate(new Date())
-      document.getElementById("input_detail_tanggalsj").value = formatDate(dataFormDetail.TglSPB)
-      document.getElementById("input_detail_tanggalsc").value = formatDate(dataFormDetail.TglSC)
+      document.getElementById("input_detail_nosj").value = dataFormDetail.NoSPB || dataTableDetailHeader.NOSPB || ''
+      document.getElementById("input_detail_noso").value = dataFormDetail.NoSC || ''
+      document.getElementById("input_detail_customer").value = (dataFormDetail.NAMACUSTSUPP || dataTableDetailHeader.NamaCustSupp || '') + '\n' + (dataFormDetail.Alamat || '')
+      document.getElementById("input_detail_kodecustomer").value = dataFormDetail.KodeCustSupp || dataTableDetailHeader.KODECUSTSUPP || ''
+      document.getElementById("input_detail_gudang").value = dataFormDetail.Nama || ''
+      document.getElementById("input_detail_tanggalsj").value = dataFormDetail.TglSPB ? formatDate(dataFormDetail.TglSPB) : ''
+      document.getElementById("input_detail_tanggalsc").value = dataFormDetail.TglSC ? formatDate(dataFormDetail.TglSC) : ''
 
 
       let rowTable = ''
@@ -2264,15 +2035,14 @@ function buttonDetail (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
-
-
+            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
+            <td>${item.SAT_2}</td>
           </tr>
         `
       });
 
 
       document.getElementById("detailTableData").innerHTML = rowTable
-       // $("#formDetail").modal('toggle')
        $('#page1').hide();
        $('#page3').show();
 
@@ -2290,9 +2060,11 @@ function buttonDetail (nobukti) {
   // $("#formDetail").modal('toggle')
 }
 
+// Hasil true kalau data retur berhasil dimuat ke form, false kalau tidak (form ditutup).
 function refreshDataTableAdd (nobukti) {
   console.log('refreshDataTableAdd')
   let _token = $("#_token").val();
+  let berhasil = false
   $.ajax({
     url: "{!! url('retursuratjalanspdetail') !!}",
     type: "post",
@@ -2305,12 +2077,27 @@ function refreshDataTableAdd (nobukti) {
     },
     success: function(res) {
       console.log(res ,'!')
-      // loadAll()
       if(res.detail.length == 0) {
-          // addTableData
-
           alertify.warning('Data habis/ tidak ditemukan')
-          // $("#form").modal('toggle')
+
+          $('#page2').hide();
+          $('#page1').show();
+
+          return
+      }
+      // Koreksi hanya untuk retur di periode aktif (sama seperti programajcSML);
+      // daftar bisa menampilkan rentang tanggal lain, jadi header bisa kosong.
+      if (!res.header || !res.header.length) {
+          alertify.warning('Retur SJ ' + nobukti + ' di luar periode aktif, tidak bisa dikoreksi')
+
+          $('#page2').hide();
+          $('#page1').show();
+
+          return
+      }
+      if (Number(res.header[0].IsOtorisasi1) === 1) {
+          loadAll()
+          alertify.warning('RSPB sudah diotorisasi')
 
           $('#page2').hide();
           $('#page1').show();
@@ -2319,22 +2106,19 @@ function refreshDataTableAdd (nobukti) {
       }
       dataTableAdd = res.detail
       dataTableAddHeader = res.header[0]
-      dataForm = res.dataForm[0]
-      console.log(formatDate(dataTableAddHeader.TANGGAL))
+      dataForm = res.dataForm[0] || {}
       document.getElementById("input_add_tanggal").value = formatDate(dataTableAddHeader.TANGGAL)
-      document.getElementById("input_add_nopol").value = dataTableAddHeader.NoPolKend
-      document.getElementById("input_add_catatan").value = dataTableAddHeader.Catatan
+      document.getElementById("input_add_nopol").value = dataTableAddHeader.NoPolKend || ''
+      document.getElementById("input_add_catatan").value = dataTableAddHeader.Catatan || ''
       document.getElementById("input_add_nobukti").value = nobukti
       document.getElementById("input_add_nourut").value = dataTableAddHeader.NOURUT
-      document.getElementById("input_add_nosj").value = dataForm.NoSPB
-      document.getElementById("input_add_noso").value = dataForm.NoSC
-      document.getElementById("input_add_customer").value = dataForm.NAMACUSTSUPP + '\n' + dataForm.Alamat
-      document.getElementById("input_add_kodecustomer").value = dataForm.KodeCustSupp
-      document.getElementById("input_add_gudang").value = dataForm.Nama
-      // document.getElementById("input_add_nopol").value = ''
-      // document.getElementById("input_add_tanggal").value = formatDate(new Date())
-      document.getElementById("input_add_tanggalsj").value = formatDate(dataForm.TglSPB)
-      document.getElementById("input_add_tanggalsc").value = formatDate(dataForm.TglSC)
+      document.getElementById("input_add_nosj").value = dataForm.NoSPB || dataTableAddHeader.NOSPB || ''
+      document.getElementById("input_add_noso").value = dataForm.NoSC || ''
+      document.getElementById("input_add_customer").value = (dataForm.NAMACUSTSUPP || dataTableAddHeader.NamaCustSupp || '') + '\n' + (dataForm.Alamat || '')
+      document.getElementById("input_add_kodecustomer").value = dataForm.KodeCustSupp || dataTableAddHeader.KODECUSTSUPP || ''
+      document.getElementById("input_add_gudang").value = dataForm.Nama || ''
+      document.getElementById("input_add_tanggalsj").value = dataForm.TglSPB ? formatDate(dataForm.TglSPB) : ''
+      document.getElementById("input_add_tanggalsc").value = dataForm.TglSC ? formatDate(dataForm.TglSC) : ''
       document.getElementById("input_add_catatan").disabled = true;
       document.getElementById("input_add_nopol").disabled = true;
       document.getElementById("input_add_tanggal").disabled = true;
@@ -2348,21 +2132,18 @@ function refreshDataTableAdd (nobukti) {
             <td>${item.NAMABRG}</td>
             <td class='text-right'>${parseFloat(item.QNT).toFixed(2)}</td>
             <td>${item.SAT_1}</td>
+            <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
+            <td>${item.SAT_2}</td>
             <td class='text-center'>
-              <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
-              <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete('${item.NOBUKTI}' ,  ${item.URUT})"><i class="bi bi-trash"></i></button>
-
-
+              <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonAddEdit(${i})"><i class="bi bi-pen"></i></button>
+              <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonAddDelete('${item.NOBUKTI}' ,  ${item.URUT})"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
         `
       });
 
-        // <td class='text-right'>${parseFloat(item.QNT2).toFixed(2)}</td>
-        // <td>${item.SAT_2}</td>
-        // placeholder kalo qty & sat 2 dibutuhkan lagi
-
       document.getElementById("addTableData").innerHTML = rowTable
+      berhasil = true
 
     },
     error: function (err) {
@@ -2370,6 +2151,7 @@ function refreshDataTableAdd (nobukti) {
       alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
   })
+  return berhasil
 }
 
 
@@ -2389,6 +2171,13 @@ function submitAddEdit () {
 
   if (Number(tempQnt) <= 0) {
     alertify.warning("Qty <= 0")
+    return
+  }
+
+  // Batas = sisa SJ yang belum diretur + qty item ini sendiri (QtyMaks dari server).
+  let qtyMaks = parseFloat(dataBarangEdit.QtyMaks) || 0
+  if (Number(tempQnt) > qtyMaks + 0.0005) {
+    alertify.warning("Qty retur melebihi sisa surat jalan (maks " + qtyMaks.toFixed(2) + ")")
     return
   }
 
@@ -2481,16 +2270,13 @@ function submitAddEdit () {
       console.log(res ,'!')
       // loadAll()
       if(res == 1) {
-        // loadAll()
-        // refreshDataTableKoreksi(nobukti)
         refreshDataTableAdd(nobukti)
         $(".showhide").hide()
-        // $("#form").modal('toggle')
         alertify.success('Item telah diedit');
-        // console.log('before ===========')
-        // loadAll()
-        // console.log("after ===========")
+        return
       }
+
+      alertify.warning(res)
 
 
 
@@ -2530,6 +2316,13 @@ function submitAddAdd () {
 
   if (Number(tempQnt) <= 0) {
     alertify.warning("Qty <= 0")
+    return
+  }
+
+  // dataBarangAdd.Qty = sisa SJ yang belum diretur, dalam satuan yang tampil di form.
+  let qtySisa = parseFloat(dataBarangAdd.Qty) || 0
+  if (Number(tempQnt) > qtySisa + 0.0005) {
+    alertify.warning("Qty retur melebihi sisa surat jalan (maks " + qtySisa.toFixed(2) + ")")
     return
   }
 
@@ -2649,6 +2442,11 @@ function submitAddAdd () {
       if (res == 2) {
         setNewNoBukti(dataForm.PPNCUST)
         alertify.warning('Nobukti telah di refresh, silahkan submit ulang');
+        return
+      }
+
+      if (res != 1) {
+        alertify.warning(res)
       }
 
 
@@ -2716,6 +2514,10 @@ function buttonAddDelete (nobukti , urut) {
           },
           success: function(res) {
             console.log('res delete', res)
+            if (res != 1) {
+              alertify.warning(res)
+              return
+            }
             loadAll()
             refreshDataTableAdd(nobukti)
             // lockFormAdd()
@@ -2774,6 +2576,7 @@ function buttonAddListBarang () {
         alertify.warning('Tidak ada barang untuk ditambah')
         return
       }
+
       let rowTable = ``
       listBarang.forEach((item, i) => {
         rowTable += `
@@ -2792,7 +2595,7 @@ function buttonAddListBarang () {
 
       document.getElementById("tabel_data_add_list_barang").innerHTML = rowTable
       pickerKasInit('tabel_add_list_barang')
-      loadAll()
+
       $('#exampleModalLabel').text('Barang');
       $('.showhidemodalbodyadd').hide();
       $('#modalBodyAddListBarang').show();
@@ -2966,7 +2769,9 @@ function buttonKoreksi (nobukti , oto) {
   document.getElementById("input_add_catatan").disabled = true;
   document.getElementById("input_add_nopol").disabled = true;
   document.getElementById("input_add_tanggal").disabled = true;
-  refreshDataTableAdd(nobukti)
+  if (!refreshDataTableAdd(nobukti)) {
+    return
+  }
   document.getElementById("buttonAddListNoSJ").disabled = true;
   document.getElementById("buttonAddListCustSupp").disabled = true;
   $('.showhidemodalfooteradd').hide();
@@ -2987,6 +2792,7 @@ function buttonAdd () {
   }
 
   dataTableAdd = []
+  dataForm = {}
   resetForm()
   // setNewNoBukti()
   $('#buttonAddListNoSJ').show();
@@ -3015,6 +2821,7 @@ function buttonAdd () {
 }
 
 function resetFormAddAdd () {
+  dataBarangAdd = {}
   document.getElementById("AddAddKodeBrg").value = ''
   document.getElementById("AddAddNamaBrg").value = ''
   document.getElementById("AddAddInputSatuan").value = ''
