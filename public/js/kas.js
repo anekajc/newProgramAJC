@@ -4457,11 +4457,22 @@ function buttonDeleteTunai (index) {
 
 }
 
-/* Pelunasan Hutang / Piutang — BKK/BKM dengan Lawan IsLokalOrExim = 1, saat menambah
+/* Pelunasan Hutang / Piutang — saat menambah
    item. Alurnya: pilih Lawan -> daftar supplier/customer (pane Customer di modal #form yang sama)
    -> modal pelunasan: #formPiutang (Pelunasan Piutang) untuk Lawan 113100, selain itu #formTunai
    (Pelunasan Hutang). Jumlah tidak perlu diketik lebih dulu; tombol #buttonBukaTunai di samping
    Jumlah membuka ulang alurnya setelah ditutup. */
+// Apakah Lawan yang dipilih masuk alur pelunasan (lihat isLawanTunai di bawah).
+function isLawanTunai (trans, perkiraan, islocalorexim) {
+  if (trans == 'BKK') {
+    return islocalorexim == 1
+  }
+  if (trans == 'BKM') {
+    return perkiraan == '21201'
+  }
+  return false
+}
+
 function isModeTunai () {
   let trans = $("#input_add_transaksi").val()
   return (trans == 'BKK' || trans == 'BKM') && xislocalorexim == 1 && tipeformdet == 'add'
@@ -5334,7 +5345,11 @@ function buttonAddPickBon (index, nobon, nilaibon) {
 function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost, islocalorexim) {
   let trans =  $("#input_add_transaksi").val();
   console.log(trans)
-  xislocalorexim = islocalorexim
+  // BKK: pelunasan hanya bila IsLokalOrExim = 1. BKM: flag diabaikan - hanya Lawan 21201
+  // yang selalu masuk pelunasan (dianggap 1 walau flagnya 0); Lawan lain jalur biasa. Nilai ini
+  // juga yang dikirim ke spAdd dan menentukan cabang simpan, jadi dinormalkan di sini.
+  let tunaiLawan = isLawanTunai(trans, perkiraan, islocalorexim)
+  xislocalorexim = trans == 'BKM' ? (tunaiLawan ? 1 : 0) : islocalorexim
   xlawan = listLawan[index]
   aturTombolBukaTunai()
 
@@ -5347,7 +5362,7 @@ function buttonAddPickLawan (index, perkiraan, keterangan , simbol, kode, iscost
   resetTitipan()
 
 
-  if ((trans == 'BKK' || trans == 'BKM') && islocalorexim == 1) {
+  if (tunaiLawan) {
 
     // Cabang UHT BKM di bawah mematikan Jumlah; hidupkan lagi kalau Lawan diganti ke sini.
     document.getElementById("AddAddJumlah").disabled = false
