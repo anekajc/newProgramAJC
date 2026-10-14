@@ -2892,8 +2892,8 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.KODEBRG}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 30%;">${itemSub.NAMABRG}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: center;">${itemSub.SATUAN}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QNTPO ? formatAngka(itemSub.QNTPO) : ''}</td>
-      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QntTerima ? formatAngka(itemSub.QntTerima) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QNTPO ? parseFloat(itemSub.QNTPO).toFixed(2) : ''}</td>
+      <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.QntTerima ? parseFloat(itemSub.QntTerima).toFixed(2) : ''}</td>
       <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; width: 5%; text-align: right;">${itemSub.SISA ? parseFloat(itemSub.SISA).toFixed(2) : ''}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.KETERANGAN}</td>
     </tr>`;

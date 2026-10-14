@@ -3070,7 +3070,7 @@ function submitPrint (nobukti) {
 
   overlay.innerHTML = `
     <div style="background:#fff;padding:24px;border-radius:8px;min-width:320px;font-family:sans-serif;font-size:14px;">
-      <h3 style="margin:0 0 16px;">Cetak Retur Pembelian Gudang</h3>
+      <h3 style="margin:0 0 16px;">Cetak Purchase Order</h3>
       <label style="display:block;margin-bottom:6px;">Ditandatangani oleh :</label>
       <select id="selectNamaTtd" style="width:100%;padding:6px;font-size:14px;border:1px solid #ccc;border-radius:4px;">
         <option value="">-- Pilih --</option>
@@ -3104,15 +3104,10 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-
+        
       }
     })
-
-    if (!dataPrint || !dataPrint.length) {
-      alertify.warning('Data cetak kosong')
-      return
-    }
-
+  
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=7) 
     {
@@ -3618,13 +3613,13 @@ function submitPrint (nobukti) {
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 2%;">${z+1}</td>
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NAMABRG  }</td>
         <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 5%;">${itemSub.KodeBrg}</td>
-        <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.QNT ? formatAngka(itemSub.QNT) : ''}</td>
+        <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 5%;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
         <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.SATUAN}</td>
       </tr>`;
     z++;
   });
 
-// Fill remaining empty rows ï¿½ table is 225px, each row ~24px, header ~24px = ~8 total slots
+// Fill remaining empty rows — table is 225px, each row ~24px, header ~24px = ~8 total slots
 const maxRows = 7;
 const fillerCount = Math.max(0, maxRows - item.length);
 for (let f = 0; f < fillerCount; f++) {

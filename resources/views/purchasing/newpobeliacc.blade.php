@@ -1794,7 +1794,7 @@ td input[type="checkbox"] {
           if (isOtorisasi === 1) {
             tombolAksi += `
               <button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonUnOtoPembelian('${item.NoBukti}', ${pjasa})"><i class="bi bi-key"></i></button>
-              <button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="submitPrint('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
+              <button class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="${pjasa === 1 ? 'submitPrintJasa' : (Number(item.TipeBayar) === 1 ? 'submitPrint' : 'submitPrintTunai')}('${item.NoBukti}')"><i class="bi bi-printer"></i></button>
             `
           } else {
             tombolAksi += `
@@ -2070,33 +2070,46 @@ function detailPembelian1(index) {
           console.log(nobukti)
           let otorisasi = 1
           console.log(nobukti, otorisasi)
-          let _token = $("#_token").val();
 
-
-          $.ajax({
-            url: "{!! url('spUnotorisasiBeliAcc') !!}",
-            type: "post",
-            async: false,
-            data: {
-              _token,
-              nobukti,
-              otorisasi
-            },
-            success: function(res) {
-              if (res > 0) {
-                console.log(nobukti, otorisasi)
-                loadAll()
-
-                alertify.success('Berhasil update otorisasi')
-                pbaClosePage()
+          // Keterangan batal otorisasi wajib diisi untuk semua jenis (dulu hanya di menu Acc Tunai newSML).
+          alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+            function(evt, value) {
+              if (value.trim() == '') {
+                alertify.warning('Keterangan harus diisi.');
+                return false;
               }
 
+              let _token = $("#_token").val();
+              $.ajax({
+                url: "{!! url('spUnotorisasiBeliAcc') !!}",
+                type: "post",
+                async: false,
+                data: {
+                  _token,
+                  nobukti,
+                  otorisasi,
+                  pket: value
+                },
+                success: function(res) {
+                  if (res > 0) {
+                    console.log(nobukti, otorisasi)
+                    loadAll()
 
-          },
-          error: function (err) {
-            alertify.warning('Terjadi kesalahan pada server, silahkan refresh ulang')
-          }
-        })
+                    alertify.success('Berhasil update otorisasi')
+                    pbaClosePage()
+                  }
+
+
+              },
+              error: function (err) {
+                alertify.warning('Terjadi kesalahan pada server, silahkan refresh ulang')
+              }
+            })
+            },
+            function() {
+              alertify.error("Action cancelled");
+            }
+          );
         }
 
 
@@ -4984,7 +4997,7 @@ let _token = $('#_token').val()
                   <div style="display: flex; font-size: 12px;">
                     <div class="pb-1" style="width: 30%">NO. PR/SO</div>
                     <div class="pb-1" style="width: 5%">:</div>
-                    <div class="pb-1" style="width: 65%">${dataPrint[0].NOSO}</div>
+                    <div class="pb-1" style="width: 65%">${dataPrint[0].NOSO ?? ''}</div>
                   </div>
                   <div style="display: flex; font-size: 12px;">
                     <div class="pb-1" style="width: 30%">No. PO Cust</div>
@@ -5045,9 +5058,9 @@ tempPrintStr += `
     <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NamaBrg}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 15%;">${itemSub.KodeBrg}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Satuan}</td>
-    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? formatAngka(itemSub.Qnt) : ''}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngkaRound(itemSub.harga)}</td>
-    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.DISC}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.DISC ?? ''}</td>
     <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngka(Math.round(Number(itemSub.subtotal))).split('.')[0]}</td>
   </tr>`;
 z++;
@@ -5211,6 +5224,1475 @@ tempPrintStr += `
   w.document.write(tempPrintStr)
   w.print()
   w.close()
+  }
+
+// Cetak per jenis tetap persis seperti menu lamanya di newSML:
+//   submitPrint      = Penerimaan Acc Kredit (newpobeliacc)
+//   submitPrintTunai = Penerimaan Acc Tunai (newpobeliacctunai)
+//   submitPrintJasa  = Biaya Tunai / Biaya Kredit (newpobeliaccbiayatunai / newpobeliaccbiayakredit)
+// Menu Tunai dan Biaya membulatkan harga cetak ke atas (Math.ceil), jadi dipisah dari formatAngkaRound.
+function formatAngkaRoundCeil(angkaString) {
+  angkaString = Math.ceil(Number(angkaString) * 100) / 100;
+  return formatAngka(angkaString);
+}
+
+function submitPrintTunai (nobukti) {
+
+let _token = $('#_token').val()
+
+  $.ajax({
+    url: "{!! url('invoicepembelianprint') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token : _token,
+      NOBUKTI: nobukti
+    },
+    success: function(res) {
+
+      dataPrint = res.detail;
+      dataSO = res.dbumjual;
+
+      console.log(dataPrint);
+      console.log(dataSO);
+      
+    }
+  })
+
+  let arrayDataPrint = []
+
+  for (let i = 0; i < dataPrint.length; i+=7) 
+  {
+    let tempArray = dataPrint.slice(i,i+7)
+    arrayDataPrint.push(tempArray)
+  }
+  let xsubtotal = 0
+  for (let i = 0; i < dataPrint.length; i++) {
+    // const element = array[i];
+    console.log("===========!!============")
+    // console.log(dataPrint[i])
+     xsubtotal += Number(dataPrint[i].subtotal)
+     console.log(xsubtotal)
+  }
+
+  let printContent = ''
+  let imageContent = document.getElementById(`imagecontainer`).innerHTML;
+  let css = ''
+  let hdr = ''
+  let str= ''
+  let ftr= ''
+  let tanggalOnly = dataPrint[0].Tanggal.split(' ')[0].split('-').reverse().join('/');
+  let userLogin = "{{ auth()->user()->username }}"
+
+  const now = new Date()
+  const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric'});
+  const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  css = `<style type="text/css">
+    body {
+      font-family: sans-serif;
+      font-size: 11px !important;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #3c3c3c;
+      height: 18px;
+      padding: 0px 4px;
+      overflow: hidden;
+    }
+
+    a {
+      background: blue;
+      color: #fff;
+      padding: 8px 10px;
+      text-decoration: none;
+      border-radius: 2px;
+    }
+
+    .ttd-place {
+      height: 80px;
+      text-align: center;
+    }
+
+    #ttd {
+      width: 1000px;
+      border: none;
+    }
+
+    .ttd-header {
+      padding-top: 40px;
+    }
+
+    .body-main-print {
+      padding: 1rem;
+      padding-top: 1rem;
+
+    }
+
+    .header-ba {
+      margin-bottom: 2rem;
+      text-decoration: underline;
+      margin-top: 2rem;
+    }
+
+    .detail-spb-table {
+      margin: 0;
+    }
+
+    .no-border {
+      border: none;
+    }
+
+    .border-bottom {
+      border: bottom;
+    }
+    .detail-ba-div {
+    }
+
+    .vertical-align-baseline {
+      vertical-align: baseline;
+    }
+
+    .mt-2rem {
+      margin-top: 2rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .fw-bold {
+      font-weight: bold;
+    }
+
+    .mb-1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 1rem;
+    }
+
+    .mb-4 {
+      margin-bottom: 1.5rem;
+    }
+
+    .mb-5 {
+      margin-bottom: 3rem;
+    }
+
+    .mt-1 {
+      margin-top: 0.25rem;
+    }
+
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+
+    .mt-3 {
+      margin-top: 1rem;
+    }
+
+    .mt-4 {
+      margin-top: 1.5rem;
+    }
+
+    .mt-5 {
+      margin-top: 3rem;
+    }
+
+    .ms-1 {
+      margin-left: 0.25rem;
+    }
+
+    .ms-2 {
+      margin-left: 0.5rem;
+    }
+
+    .ms-3 {
+      margin-left: 1rem;
+    }
+
+    .ms-4 {
+      margin-left: 1.5rem;
+    }
+
+    .ms-5 {
+      margin-left: 3rem;
+    }
+
+    .me-1 {
+      margin-right: 0.25rem;
+    }
+
+    .me-2 {
+      margin-right: 0.5rem;
+    }
+
+    .me-3 {
+      margin-right: 1rem;
+    }
+
+    .me-4 {
+      margin-right: 1.5rem;
+    }
+
+    .me-5 {
+      margin-right: 3rem;
+    }
+
+    .my-1 {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .my-2 {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .my-3 {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .my-4 {
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .my-5 {
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .pb-1 {
+      padding-bottom: 0.25rem;
+    }
+
+    .pb-2 {
+      padding-bottom: 0.5rem;
+    }
+
+    .pb-3 {
+      padding-bottom: 1rem;
+    }
+
+    .pb-4 {
+      padding-bottom: 1.5rem;
+    }
+
+    .pb-5 {
+      padding-bottom: 3rem;
+    }
+
+    .pt-1 {
+      padding-top: 0.25rem;
+    }
+
+    .pt-2 {
+      padding-top: 0.5rem;
+    }
+
+    .pt-3 {
+      padding-top: 1rem;
+    }
+
+    .pt-4 {
+      padding-top: 1.5rem;
+    }
+
+    .pt-5 {
+      padding-top: 3rem;
+    }
+
+    .ps-0 {
+      padding-left: 0;
+    }
+
+    .ps-1 {
+      padding-left: 0.25rem;
+    }
+
+    .ps-2 {
+      padding-left: 0.5rem;
+    }
+
+    .ps-3 {
+      padding-left: 1rem;
+    }
+
+    .ps-4 {
+      padding-left: 1.5rem;
+    }
+
+    .ps-5 {
+      padding-left: 3rem;
+    }
+
+    .pe-1 {
+      padding-right: 0.25rem;
+    }
+
+    .pe-2 {
+      padding-right: 0.5rem;
+    }
+
+    .pe-3 {
+      padding-right: 1rem;
+    }
+
+    .pe-4 {
+      padding-right: 1.5rem;
+    }
+
+    .pe-5 {
+      padding-right: 3rem;
+    }
+
+    .py-1 {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .py-1-5 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .py-3 {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    .py-4 {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .py-5 {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+
+    .px-1 {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+
+    .px-1-5 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .px-2 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .px-3 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .px-4 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .px-5 {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-decoration-underline {
+      text-decoration: underline;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 10px;
+    }
+
+    .note {
+      width: 75%;
+    }
+
+    .w-15 {
+      width: 16%;
+    }
+
+    .w-25 {
+      width: 30%;
+    }
+
+    .w-10 {
+      width: 4%;
+    }
+
+    .w-1 {
+      width: 1%;
+    }
+
+    .m-0 {
+      margin: 0;
+    }
+
+    .body-main-prints {
+      width: 21cm;
+      height: 14cm;
+      position: relative;
+    }
+
+    .footer-sign {
+      padding-top: 5px;
+      position: absolute;
+      width: 100%;
+      bottom: 70px;
+    }
+
+    .footer-print-date {
+      position: absolute;
+      width: 95%;
+      bottom: 120px;
+    }
+
+     .solid{
+      border-left: 0px red solid;
+      height: 225px;
+      width: 0px;
+      display: inline-block;
+      padding-left: 0px;
+      }
+
+    </style>`;
+  hdr = `<div style="width: 100%;">
+
+                  <div style="display: flex; width: 100%;">
+                    <div class="pb-1" style="width: 15%; margin-top: 15px">
+                      `+ imageContent +`
+                    </div>
+                    <div class="pb-1 ps-3" style="width: 100%; margin-top: 10px; font-size:12px;">
+                      <h2 class="m-0 pb-2">CV. SINAR MAHAKAM LESTARI</h2>
+                      <div class="pb-1" style="width: 100%">JL. AMPERA PERGUDANGAN MANGKUPALAS BISNIS CENTRE BLOK D NO.18 RT.022 SIMPANG PASIR PALARAN SAMARINDA-KALIMANTAN TIMUR</div>
+                      <div class="pb-1" style="width: 100%">Telp (0541) 4104142, Fax (0541) 4104195</div>
+                      <div class="pb-1" style="width: 100%">E-Mail : sml@indo.net.id</div>
+                    </div>
+                    <div style="width:80%; padding-top:45px; display:flex; justify-content:flex-start;">
+                      <h2 style="margin-left:-10px; font-size:24px;">
+                        FAKTUR PEMBELIAN
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div style="display:flex; width:100%;">
+                    <div style="width:60%;">
+                      <div style="display: flex; font-size: 12px;">
+                        <div class="pb-1" style="width: 30%">Tanggal</div>
+                        <div class="pb-1" style="width: 5%">:</div>
+                        <div class="pb-1" style="width: 65%">`+tanggalOnly+`</div>
+                      </div>
+                      <div style="display: flex; font-size: 12px;">
+                        <div class="pb-1" style="width: 30%">No. SJ</div>
+                        <div class="pb-1" style="width: 5%">:</div>
+                        <div class="pb-1" style="width: 65%">${dataPrint[0].FakturSupp ?? ''}</div>
+                      </div>
+                      <div style="display: flex; font-size: 12px;">
+                        <div class="pb-1" style="width: 30%">Diterima Dari</div>
+                        <div class="pb-1" style="width: 5%">:</div>
+                        <div class="pb-1" style="width: 65%">${dataPrint[0].NamaCustSupp}</div>
+                      </div>
+                      <div style="display: flex; font-size: 12px;">
+                        <div class="pb-1" style="width: 30%">Expedisi</div>
+                        <div class="pb-1" style="width: 5%">:</div>
+                        <div class="pb-1" style="width: 65%">${dataPrint[0].namaexp}</div>
+                      </div>
+                    </div>
+
+                  <div style="width:40%;">
+                  <div style="display: flex; font-size: 12px;">
+                    <div class="pb-1" style="width: 30%">No. FB</div>
+                    <div class="pb-1" style="width: 5%">:</div>
+                    <div class="pb-1" style="width: 65%">${dataPrint[0].NoBukti}</div>
+                  </div>
+                  <div style="display: flex; font-size: 12px;">
+                    <div class="pb-1" style="width: 30%">No. PO</div>
+                    <div class="pb-1" style="width: 5%">:</div>
+                    <div class="pb-1" style="width: 65%">${dataPrint[0].NoPO}</div>
+                  </div>
+                  <div style="display: flex; font-size: 12px;">
+                    <div class="pb-1" style="width: 30%">NO. PR/SO</div>
+                    <div class="pb-1" style="width: 5%">:</div>
+                    <div class="pb-1" style="width: 65%">${dataPrint[0].NOSO ?? ''}</div>
+                  </div>
+                  <div style="display: flex; font-size: 12px;">
+                    <div class="pb-1" style="width: 30%">No. PO Cust</div>
+                    <div class="pb-1" style="width: 5%">:</div>
+                    <div class="pb-1" style="width: 65%">${dataPrint[0].NOPOCUST}</div>
+                  </div>
+                </div>
+
+              </div>
+          <table
+          class="detail-spb-table"
+          style="width: 95%; font-family: sans-serif; display: table; font-size: 10px; border: 1px solid #3c3c3c;">
+              <thead>
+                <tr>
+                  <td class="text-center" style="width: 1%">No.</td>
+                  <td class="text-center" style="width: 30%">NAMA BARANG</td>
+                  <td class="text-center" style="width: 15%">KODE BRG</td>
+                  <td class="text-center" style="width: 5%">SAT</td>
+                  <td class="text-center" style="width: 5%">QTY</td>
+                  <td class="text-center" style="width: 15%">HARGA</td>
+                  <td class="text-center" style="width: 10%">DISKON</td>
+                  <td class="text-center" style="width: 15%">JUMLAH</td>
+                </tr>
+              </thead> `;
+
+  let z = 0
+  let jumlahTotal = 0
+  let diskonTotal = 0
+  let subTotal = 0
+  let ppnTotal = 0
+  let totalTotal = 0
+  
+  let tempPrintStr = ``
+  tempPrintStr += `<html>
+  <head>
+    <title></title>
+  </head>
+
+  <body onload="window.print()">
+    ` + css
+
+    arrayDataPrint.forEach((item, i) => {
+      console.log('arrayDataPrint' , i)
+      if (i == 0) {
+
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
+      // } else if ( i < 1) {
+      //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
+      } else {
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
+      }
+      tempPrintStr += hdr
+      tempPrintStr += `<tbody border="1">`;
+item.forEach((itemSub, j) => {
+tempPrintStr += `
+  <tr>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 1%;">${z+1}</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 30%;">${itemSub.NamaBrg}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 15%;">${itemSub.KodeBrg}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Satuan}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngkaRoundCeil(itemSub.harga)}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.DISC ?? ''}</td>
+    <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 15%;">${formatAngka(Math.round(Number(itemSub.subtotal))).split('.')[0]}</td>
+  </tr>`;
+z++;
+});
+
+// Fill remaining empty rows   table is 225px, each row ~24px, header ~24px = ~8 total slots
+// const maxRows = 7;
+// const fillerCount = Math.max(0, maxRows - item.length);
+// for (let f = 0; f < fillerCount; f++) {
+//   tempPrintStr += `
+//     <tr style="height: 24px;">
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//       <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+//     </tr>`;
+// }
+
+tempPrintStr += `</tbody>`;
+tempPrintStr += `</table>`;
+
+if (i == arrayDataPrint.length - 1) {
+
+let tableSO = '';
+if (dataSO && dataSO.length > 0) {
+
+    tableSO = `
+    <table style="width:100%; border-collapse:collapse; font-size:10px;">
+        <tr>
+            <th style="border:1px solid black;width:2%;">No</th>
+            <th style="border:1px solid black;">No Bukti</th>
+            <th style="border:1px solid black;">DPP</th>
+        </tr>
+    `;
+
+    dataSO.forEach(function(item, index) {
+        tableSO += `
+        <tr>
+            <td style="border:1px solid black;text-align:center;">
+                ${index + 1}
+            </td>
+            <td style="border:1px solid black;">
+                ${item.NOBUKTI}
+            </td>
+            <td style="border:1px solid black;text-align:right;">
+                ${formatAngka(parseFloat(item.DPP).toFixed(2))}
+            </td>
+        </tr>`;
+    });
+
+    tableSO += `</table>`;
+  }
+
+  tempPrintStr += `<div style="display: flex; width: 98%; margin-top: 10px;">
+
+    <div style="width:70%;">
+      ${dataSO && dataSO.length > 0 ? tableSO : ''}
+    </div>
+
+<div style="width: 90%; font-family: sans-serif; font-size: 10px;" class=''>
+  <table style="width: 100%; table-layout: fixed; margin-left: 125px; border-collapse: collapse; margin-top: -6px;">
+    <tr>
+      <td class="no-border text-left" style="width: 34%; font-size:10px;">Dibuat Oleh,</td>
+    </tr>
+    <tr style="height: 3.5rem;">
+      <td class="no-border" colspan="3">&nbsp;</td>
+    </tr>
+
+    <tr>
+      <td class="no-border px-2" style="padding:0;">
+        <p class="m-0" style="font-size:10px; line-height:1.2;">
+          Nama : ${dataPrint[0].OtoUser1}
+        </p>
+        <div style="border-bottom:1px solid #000; margin:2px 0;"></div>
+        <p class="m-0" style="font-size:10px; line-height:1.2;">
+          Tgl :
+        </p>
+      </td>
+    </tr>
+
+  </table>
+</div>`;}
+
+if(i == arrayDataPrint.length - 1){
+tempPrintStr += `
+<div style="width: 95%; font-family: sans-serif; font-size: 10px;">
+
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+    <div style="width: 40%; text-align:left;"> SUB TOTAL </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(xsubtotal).toFixed(2)).split('.')[0]}</div>
+  </div>
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+    <div style="width: 40%; text-align:left;"> DISKON </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].POTONGAN).toFixed(2)).split('.')[0]}</div>
+  </div>
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 4px; position: relative;">
+    <div style="width: 40%; text-align:left;"> UANG MUKA </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NuangMuka).toFixed(2)).split('.')[0]}</div>
+    <div style="
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 60%;
+    border-bottom: 1px solid #000;"></div>
+  </div>
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+    <div style="width: 40%; text-align:left;"> DPP </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NDPPRP).toFixed(2)).split('.')[0]}</div>
+  </div>
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+    <div style="width: 40%; text-align:left;"> PPN </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NPPNRP).toFixed(2)).split('.')[0]}</div>
+  </div>
+  <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 6px; position: relative; font-weight: bold;">
+    <div style="width: 40%; text-align:left;"> TOTAL </div>
+    <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NNETRP).toFixed(2)).split('.')[0]}</div>
+    <div style="
+      position: absolute;
+      right: 0;
+      bottom: 3px;
+      width: 60%;
+      border-bottom: 1px solid #000;">
+    </div>
+
+    <!-- garis bawah 2 -->
+    <div style="
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 60%;
+      border-bottom: 1px solid #000;">
+    </div>
+  </div>
+</div>`};
+
+tempPrintStr += `
+<div class="footer-print-date" style="margin-bottom:-100px;">
+      <table class="m-0" style="width: 100%; font-family: sans-serif;
+      font-size: 10px;">
+        <tr>
+          <td class="no-border">${i+1}/${arrayDataPrint.length} `+userLogin+` `+tanggalCetak+`      `+jamCetak+`</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>`
+
+
+  tempPrintStr += `</div>`
+  });
+
+
+    tempPrintStr +=  `</body></html>`
+
+  w=window.open(' ')
+  w.document.write(tempPrintStr)
+  w.print()
+  w.close()
+  }
+
+    function submitPrintJasa (nobukti) {
+
+let _token = $('#_token').val()
+
+  $.ajax({
+    url: "{!! url('invoicepembelianprint') !!}",
+    type: "get",
+    async: false,
+    data: {
+      _token : _token,
+      NOBUKTI: nobukti
+    },
+    success: function(res) {
+
+      dataPrint = res.detail;
+
+      console.log(dataPrint);
+      console.log(dataPrint.detail);
+      
+    }
+  })
+
+  let arrayDataPrint = []
+  for (let i = 0; i < dataPrint.length; i+=7) 
+  {
+    let tempArray = dataPrint.slice(i,i+7)
+    arrayDataPrint.push(tempArray)
+  }
+
+  let xsubtotal = 0
+  for (let i = 0; i < dataPrint.length; i++) {
+    // const element = array[i];
+    console.log("===========!!============")
+    // console.log(dataPrint[i])
+    xsubtotal += Number(dataPrint[i].subtotal)
+    console.log(xsubtotal)
+  }
+
+  let printContent = ''
+  let imageContent = document.getElementById(`imagecontainer`).innerHTML;
+  let css = ''
+  let hdr = ''
+  let str= ''
+  let ftr= ''
+  let tanggalOnly = dataPrint[0].Tanggal.split(' ')[0].split('-').reverse().join('/');
+  let userLogin = "{{ auth()->user()->username }}"
+
+
+  const now = new Date()
+  const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric'});
+  const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
+  css = `<style type="text/css">
+    body {
+      font-family: sans-serif;
+      font-size: 11px !important;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #3c3c3c;
+      height: 24px;
+      padding: 1px 5px 0px;
+      overflow: hidden;
+    }
+
+    a {
+      background: blue;
+      color: #fff;
+      padding: 8px 10px;
+      text-decoration: none;
+      border-radius: 2px;
+    }
+
+    .ttd-place {
+      height: 80px;
+      text-align: center;
+    }
+
+    #ttd {
+      width: 1000px;
+      border: none;
+    }
+
+    .ttd-header {
+      padding-top: 40px;
+    }
+
+    .body-main-print {
+      padding: 1rem;
+      padding-top: 1rem;
+
+    }
+
+    .header-ba {
+      margin-bottom: 2rem;
+      text-decoration: underline;
+      margin-top: 2rem;
+    }
+
+    .detail-spb-table {
+      margin: 0;
+    }
+
+    .no-border {
+      border: none;
+    }
+
+    .border-bottom {
+      border: bottom;
+    }
+    .detail-ba-div {
+    }
+
+    .vertical-align-baseline {
+      vertical-align: baseline;
+    }
+
+    .mt-2rem {
+      margin-top: 2rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .fw-bold {
+      font-weight: bold;
+    }
+
+    .mb-1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .mb-3 {
+      margin-bottom: 1rem;
+    }
+
+    .mb-4 {
+      margin-bottom: 1.5rem;
+    }
+
+    .mb-5 {
+      margin-bottom: 3rem;
+    }
+
+    .mt-1 {
+      margin-top: 0.25rem;
+    }
+
+    .mt-2 {
+      margin-top: 0.5rem;
+    }
+
+    .mt-3 {
+      margin-top: 1rem;
+    }
+
+    .mt-4 {
+      margin-top: 1.5rem;
+    }
+
+    .mt-5 {
+      margin-top: 3rem;
+    }
+
+    .ms-1 {
+      margin-left: 0.25rem;
+    }
+
+    .ms-2 {
+      margin-left: 0.5rem;
+    }
+
+    .ms-3 {
+      margin-left: 1rem;
+    }
+
+    .ms-4 {
+      margin-left: 1.5rem;
+    }
+
+    .ms-5 {
+      margin-left: 3rem;
+    }
+
+    .me-1 {
+      margin-right: 0.25rem;
+    }
+
+    .me-2 {
+      margin-right: 0.5rem;
+    }
+
+    .me-3 {
+      margin-right: 1rem;
+    }
+
+    .me-4 {
+      margin-right: 1.5rem;
+    }
+
+    .me-5 {
+      margin-right: 3rem;
+    }
+
+    .my-1 {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .my-2 {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .my-3 {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .my-4 {
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .my-5 {
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .pb-1 {
+      padding-bottom: 0.25rem;
+    }
+
+    .pb-2 {
+      padding-bottom: 0.5rem;
+    }
+
+    .pb-3 {
+      padding-bottom: 1rem;
+    }
+
+    .pb-4 {
+      padding-bottom: 1.5rem;
+    }
+
+    .pb-5 {
+      padding-bottom: 3rem;
+    }
+
+    .pt-1 {
+      padding-top: 0.25rem;
+    }
+
+    .pt-2 {
+      padding-top: 0.5rem;
+    }
+
+    .pt-3 {
+      padding-top: 1rem;
+    }
+
+    .pt-4 {
+      padding-top: 1.5rem;
+    }
+
+    .pt-5 {
+      padding-top: 3rem;
+    }
+
+    .ps-0 {
+      padding-left: 0;
+    }
+
+    .ps-1 {
+      padding-left: 0.25rem;
+    }
+
+    .ps-2 {
+      padding-left: 0.5rem;
+    }
+
+    .ps-3 {
+      padding-left: 1rem;
+    }
+
+    .ps-4 {
+      padding-left: 1.5rem;
+    }
+
+    .ps-5 {
+      padding-left: 3rem;
+    }
+
+    .pe-1 {
+      padding-right: 0.25rem;
+    }
+
+    .pe-2 {
+      padding-right: 0.5rem;
+    }
+
+    .pe-3 {
+      padding-right: 1rem;
+    }
+
+    .pe-4 {
+      padding-right: 1.5rem;
+    }
+
+    .pe-5 {
+      padding-right: 3rem;
+    }
+
+    .py-1 {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .py-1-5 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .py-2 {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .py-3 {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+
+    .py-4 {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .py-5 {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+
+    .px-1 {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+    }
+
+    .px-1-5 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .px-2 {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .px-3 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .px-4 {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .px-5 {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-decoration-underline {
+      text-decoration: underline;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 10px;
+    }
+
+    .note {
+      width: 75%;
+    }
+
+    .w-15 {
+      width: 16%;
+    }
+
+    .w-25 {
+      width: 30%;
+    }
+
+    .w-10 {
+      width: 4%;
+    }
+
+    .w-1 {
+      width: 1%;
+    }
+
+    .m-0 {
+      margin: 0;
+    }
+
+    .body-main-prints {
+      width: 21cm;
+      height: 13.5cm;
+      position: relative;
+    }
+
+    .footer-sign {
+      padding-top: 5px;
+      position: absolute;
+      width: 100%;
+      bottom: 12px;
+    }
+
+    .footer-print-date {
+      position: absolute;
+      width: 95%;
+      bottom: 120px;
+    }
+
+     .solid{
+      border-left: 0px red solid;
+      height: 225px;
+      width: 0px;
+      display: inline-block;
+      padding-left: 0px;
+      }
+
+    </style>`;
+  hdr = `<div style="width: 100%;">
+
+          <div style="display: flex; width: 100%;">
+            <div class="pb-1" style="width: 15%; margin-top: 15px">
+              `+ imageContent +`
+            </div>
+            <div class="pb-1 ps-3" style="width: 100%; margin-top: 10px; font-size:12px;">
+              <h2 class="m-0 pb-2">CV. SINAR MAHAKAM LESTARI</h2>
+              <div class="pb-1" style="width: 100%">JL. AMPERA PERGUDANGAN MANGKUPALAS BISNIS CENTRE BLOK D NO.18 RT.022 SIMPANG PASIR PALARAN SAMARINDA-KALIMANTAN TIMUR</div>
+              <div class="pb-1" style="width: 100%">Telp (0541) 4104142, Fax (0541) 4104195</div>
+              <div class="pb-1" style="width: 100%">E-Mail : sml@indo.net.id</div>
+            </div>
+            <div style="width:80%; padding-top:45px; display:flex; justify-content:flex-start;">
+              <h2 style="margin-left:-10px; font-size:24px;">
+                FAKTUR PEMBELIAN
+              </h2>
+            </div>
+          </div>
+
+          <div style="display:flex; width:100%;">
+            <div style="width:60%;">
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">Tanggal</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">`+tanggalOnly+`</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">No. SJ</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].FakturSupp ?? ''}</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">Diterima Dari</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].NamaCustSupp}</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">Expedisi</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].namaexp ?? '-'}</div>
+              </div>
+            </div>
+
+            <div style="width:40%;">
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">No. FB</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].NoBukti}</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">No. PO</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].NoPO}</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">NO. PR/SO</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].NOSO ?? ''}</div>
+              </div>
+              <div style="display: flex; font-size: 12px;">
+                <div class="pb-1" style="width: 30%">No. PO Cust</div>
+                <div class="pb-1" style="width: 5%">:</div>
+                <div class="pb-1" style="width: 65%">${dataPrint[0].NOPOCUST}</div>
+              </div>
+            </div>
+
+          </div> 
+  
+          <table
+            class="detail-spb-table"
+            style="width: 95%; font-family: sans-serif; display: table; font-size: 10px; border: 1px solid #3c3c3c;">
+              <thead>
+                <tr>
+                  <td class="text-center" style="width: 1%">No.</td>
+                  <td class="text-center" style="width: 25%">NAMA BARANG</td>
+                  <td class="text-center" style="width: 5%">COA</td>
+                  <td class="text-center" style="width: 20%">Ket.COA</td>
+                  <td class="text-center" style="width: 10%">Sub Cost</td>
+                  <td class="text-center" style="width: 5%">SAT</td>
+                  <td class="text-center" style="width: 10%">QTY</td>
+                  <td class="text-center" style="width: 10%">HARGA</td>
+                  <td class="text-center" style="width: 5%">DISKON</td>
+                  <td class="text-center" style="width: 10%">JUMLAH</td>
+                </tr>
+              </thead> `;
+
+  let z = 0
+  let jumlahTotal = 0
+  let diskonTotal = 0
+  let subTotal = 0
+  let ppnTotal = 0
+  let totalTotal = 0
+  
+  let tempPrintStr = ``
+  tempPrintStr += `<html>
+  <head>
+    <title></title>
+  </head>
+
+  <body onload="window.print()">
+    ` + css
+
+    arrayDataPrint.forEach((item, i) => {
+      console.log('arrayDataPrint' , i)
+      if (i == 0) {
+
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; margin-top:5px">`
+      // } else if ( i < 1) {
+      //   tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px; padding-top:15px; page-break-before: always">`
+      } else {
+        tempPrintStr +=  `<div class="body-main-prints" style="break-inside: avoid; margin-left: 7px;padding-top:7px; ">`
+      }
+      tempPrintStr += hdr
+      tempPrintStr += `<tbody border="1">`;
+      item.forEach((itemSub, j) => {
+        tempPrintStr += `
+        <tr>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 1%;">${z+1}</td>
+          <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 25%;">${itemSub.NamaBrg}</td>
+          <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 5%;">${itemSub.Perkiraan ?? ''}</td>
+          <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 20%;">${itemSub.KetPerk ?? ''}</td>
+          <td style='border-left:1px solid black; border-right:1px solid black;' class="no-border" style="width: 10%;">${itemSub.SUBCOST ?? ''}</td>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.SATX}</td>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 10%;">${itemSub.Qnt ? parseFloat(itemSub.Qnt).toFixed(2) : ''}</td>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 10%;">${formatAngkaRoundCeil(itemSub.harga)}</td>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: center; width: 5%;">${itemSub.DISC ?? ''}</td>
+          <td class="no-border" style="border-left:1px solid black; border-right:1px solid black; text-align: right; width: 10%;">${formatAngka(Math.round(Number(itemSub.subtotal))).split('.')[0]}</td>
+        </tr>`;
+      z++;
+    });
+
+// Fill remaining empty rows � table is 225px, each row ~24px, header ~24px = ~8 total slots
+const maxRows = 7;
+const fillerCount = Math.max(0, maxRows - item.length);
+for (let f = 0; f < fillerCount; f++) {
+tempPrintStr += `
+  <tr style="height: 24px;">
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+    <td style='border-left:1px solid black; border-right:1px solid black;' class='no-border'>&nbsp;</td>
+  </tr>`;
+}
+
+  tempPrintStr += `</tbody>`;
+  tempPrintStr += `</table>`;
+
+    if (i == arrayDataPrint.length - 1) {
+       tempPrintStr += `<div style="display: flex; width: 98%; margin-top: 10px;">
+
+    <div style="width: 90%; font-family: sans-serif; font-size: 10px;" class=''>
+      <table style="width: 100%; table-layout: fixed; margin-left: 225px; border-collapse: collapse; margin-top: -6px;">
+        <tr>
+          <td class="no-border text-left" style="width: 34%; font-size:10px;">Dibuat Oleh,</td>
+        </tr>
+        <tr style="height: 3.5rem;">
+          <td class="no-border" colspan="3">&nbsp;</td>
+        </tr>
+
+        <tr>
+          <td class="no-border px-2" style="padding:0;">
+            <p class="m-0" style="font-size:10px; line-height:1.2;">
+              Nama : ${dataPrint[0].OtoUser1}
+            </p>
+            <div style="border-bottom:1px solid #000; margin:2px 0;"></div>
+            <p class="m-0" style="font-size:10px; line-height:1.2;">
+              Tgl :
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </div>`;}
+
+  if(i == arrayDataPrint.length - 1){
+    tempPrintStr += `
+    <div style="width: 95%; font-family: sans-serif; font-size: 10px;">
+
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+      <div style="width: 40%; text-align:left;"> SUB TOTAL </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(xsubtotal).toFixed(2)).split('.')[0]}</div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+      <div style="width: 40%; text-align:left;"> DISKON </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].POTONGAN).toFixed(2)).split('.')[0]}</div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 4px; position: relative;">
+      <div style="width: 40%; text-align:left;"> UANG MUKA </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NuangMuka).toFixed(2)).split('.')[0]}</div>
+      <div style="
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 60%;
+      border-bottom: 1px solid #000;"></div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+      <div style="width: 40%; text-align:left;"> DPP </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NDPPRP).toFixed(2)).split('.')[0]}</div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+      <div style="width: 40%; text-align:left;"> PPH </div>
+      <div style="width: 20%; text-align: right">-${formatAngka(parseFloat(dataPrint[0].RpNPPH23).toFixed(2)).split('.')[0]}</div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 2px;">
+      <div style="width: 40%; text-align:left;"> PPN </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].NPPNRP).toFixed(2)).split('.')[0]}</div>
+    </div>
+    <div style="display: flex; font-size:10px; justify-content: flex-end; width: 91%; padding-bottom: 6px; position: relative; font-weight: bold;">
+      <div style="width: 40%; text-align:left;"> TOTAL </div>
+      <div style="width: 20%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TotRpNPPH23).toFixed(2)).split('.')[0]}</div>
+      <div style="
+        position: absolute;
+        right: 0;
+        bottom: 3px;
+        width: 60%;
+        border-bottom: 1px solid #000;">
+      </div>
+
+      <!-- garis bawah 2 -->
+      <div style="
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 60%;
+        border-bottom: 1px solid #000;">
+      </div>
+    </div>
+
+  </div>`};
+
+  tempPrintStr += `
+    <div class="footer-print-date" style="margin-bottom:-100px;">
+      <table class="m-0" style="width: 100%; font-family: sans-serif;
+      font-size: 10px ">
+        <tr>
+          <td class="no-border">${i+1}/${arrayDataPrint.length} `+userLogin+` `+tanggalCetak+`      `+jamCetak+`</td>
+        </tr>
+      </table>
+    </div>`
+
+
+  tempPrintStr += `</div>`
+});
+
+
+    tempPrintStr +=  `</body></html>`
+
+    w=window.open(' ')
+    w.document.write(tempPrintStr)
+    w.print()
+    w.close()
   }
     
 
