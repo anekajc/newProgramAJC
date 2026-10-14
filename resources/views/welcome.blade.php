@@ -10,7 +10,7 @@
 
   <title>AnekaJC - Login</title>
 
-    <link rel="stylesheet" href="{!! URL::asset('css/loginpage.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/loginpage.css') !!}?v={{ filemtime(public_path('css/loginpage.css')) }}">
 
 </head>
 

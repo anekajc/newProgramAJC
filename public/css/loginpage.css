@@ -212,17 +212,20 @@
     .toggle-password:hover,
     .toggle-password:focus-visible { color: #534AB7; }
 
-    .toggle-password svg {
+    /* Higher specificity so it beats the generic ".input-wrapper svg" icon rule (absolute, left side) */
+    .input-wrapper .toggle-password svg {
       position: static;
+      left: auto;
+      top: auto;
       transform: none;
       width: 18px;
       height: 18px;
       pointer-events: none;
     }
 
-    .toggle-password .icon-eye-off { display: none; }
-    .toggle-password.is-visible .icon-eye     { display: none; }
-    .toggle-password.is-visible .icon-eye-off { display: block; }
+    .input-wrapper .toggle-password .icon-eye-off { display: none; }
+    .input-wrapper .toggle-password.is-visible .icon-eye     { display: none; }
+    .input-wrapper .toggle-password.is-visible .icon-eye-off { display: block; }
 
     .forgot-link {
       text-align: right;
