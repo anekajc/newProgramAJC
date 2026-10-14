@@ -84,6 +84,16 @@
 
 
     <style>
+        /* newmaster.css memaku `#formBsGrid .form-control` setinggi 38px, sehingga atribut rows pada
+           textarea (Keterangan rows=5, alamat Gudang rows=3) tidak berefek dan kotaknya hanya satu
+           baris. Textarea dikembalikan ke tinggi aslinya — pengecualian yang sama seperti di
+           accounting/memorialkoreksi.blade.php. */
+        #formBsGrid textarea.form-control {
+            height: auto;
+        }
+    </style>
+
+    <style>
         .rodokNdukurTitik {
             margin-top: -12px;
         }
@@ -365,7 +375,7 @@
         </div>
 
         <div id="modalBodyAddMain" class="">
-            <div class="modal-body" id="">
+            <div class="modal-body" id="formBsGrid">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="row">
@@ -4929,6 +4939,12 @@
             document.getElementById("input_add_kodeGudangTujuan").value = ''
             document.getElementById("input_add_namaGudangTujuan").value = ''
             document.getElementById("input_add_keterangan").value = ''
+            // Tanggal harus kembali ke hari ini — kalau tidak, tanggal dokumen terakhir yang dibuka
+            // lewat Detail/Edit (refreshDataTableAdd) ikut terbawa ke form Tambah.
+            let hariIni = new Date()
+            document.getElementById("input_add_tanggal").value = hariIni.getFullYear() + '-' +
+                String(hariIni.getMonth() + 1).padStart(2, '0') + '-' +
+                String(hariIni.getDate()).padStart(2, '0')
             muatDropdownGudangAsal()
             muatDropdownGudangTujuan()
         }

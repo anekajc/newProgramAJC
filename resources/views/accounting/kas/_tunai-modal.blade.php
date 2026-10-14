@@ -18,7 +18,7 @@
                       <div class="modal-body">
                           <div class="container-fluid">
                               <div class="row" style="padding: 1rem 0;" id="formBsGrid">
-                                  <div class="col-md-4">
+                                  <div class="col-md-3">
                                       <div class="row">
                                           <div class="col-md-4">
                                               <div class="form-group">
@@ -35,7 +35,7 @@
                                   </div>
 
                                   {{-- Nama customer/supplier — diisi buttonAddPickCustSuppX() di public/js/kas.js. --}}
-                                  <div class="col-md-4">
+                                  <div class="col-md-3">
                                       <div class="row">
                                           <div class="col-md-4">
                                               <div class="form-group">
@@ -51,7 +51,7 @@
                                       </div>
                                   </div>
 
-                                  <div class="col-md-4">
+                                  <div class="col-md-3">
                                       <div class="row">
                                           <div class="col-md-4">
                                               <div class="form-group">
@@ -66,15 +66,13 @@
                                           </div>
                                       </div>
                                   </div>
-                              </div>
-                              <div class="row">
-                                  {{-- Pencarian client-side NoFaktur/Tanggal/Supplier — filterTunai() di public/js/kas.js. --}}
-                                  <div class="col-md-4">
+
+                                  <div class="col-md-3">
                                       <div class="form-group">
                                           <input class="po-search-inp" type="search" id="searchTunai"
                                               placeholder="Cari data" autocomplete="off" style="width: 100%"
                                               oninput="filterTunai()">
-                                      </div>
+                                      </div>    
                                   </div>
                               </div>
                           </div>

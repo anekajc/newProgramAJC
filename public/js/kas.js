@@ -4130,9 +4130,9 @@ function renderTunai (res) {
   res.forEach((item, i) => {
     if (item.Baris == 'L') {
       jumlah += nominalLunasTunai(item)
-      saldo += saldoBarisTunai(item)
+      saldo += saldoTampilTunai(item)
     } else {
-      saldo = saldoBarisTunai(item)
+      saldo = saldoTampilTunai(item)
     }
     rowTable += tunaiRowHtml(item, i, saldo)
   })
@@ -4521,6 +4521,16 @@ function nominalLunasTunai (item) {
 }
 
 // Saldo satu baris menurut arah pelunasan (> 0 = masih bisa dilunasi).
+// Saldo yang DITAMPILKAN di kolom Saldo (renderTunai). Sama dengan saldoBarisTunai() kecuali
+// BKK + Lawan 113100: ditampilkan Debet - Kredit. Hanya tampilan - sisa faktur untuk tombol +,
+// nominal default dan batas nominal tetap memakai saldoBarisTunai().
+function saldoTampilTunai (item) {
+  if ($("#input_add_transaksi").val() == 'BKK' && isLawanPiutangTunai()) {
+    return Number(item.Debet) - Number(item.Kredit)
+  }
+  return saldoBarisTunai(item)
+}
+
 function saldoBarisTunai (item) {
   return isTunaiMasuk() ? Number(item.Debet) - Number(item.Kredit) : Number(item.Kredit) - Number(item.Debet)
 }
