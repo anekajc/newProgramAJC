@@ -589,6 +589,9 @@ let xislocalorexim = 0
 // Supplier yang sudah dipilih untuk Pelunasan Hutang — dipakai tombol #buttonBukaTunai
 // supaya bisa kembali ke daftar faktur tanpa memilih ulang Lawan dan supplier.
 let tunaiKodeCustsupp = ''
+// Nama customer/supplier per kode, diisi bukaListCustSuppTunai() — ditampilkan di header modal
+// pelunasan. Lewat lookup (bukan argumen onclick) supaya nama ber-tanda kutip tidak merusak HTML.
+let tunaiNamaCustsupp = {}
 let xaktiva = {}
 let listData = []
 let listAktiva = []
@@ -672,6 +675,7 @@ function buttonAddPickCustSuppX (kodecustsupp, agent) {
       let ui = tunaiUI()
       document.getElementById(ui.nobukti).value=nobukti
       document.getElementById(ui.custsupp).value=kodecustsupp
+      document.getElementById(ui.namacustsupp).value=tunaiNamaCustsupp[kodecustsupp] || ''
 
       renderTunai(res)
 
@@ -4476,6 +4480,7 @@ function tunaiUI () {
       tbody: 'tabel_data_add_list_piutang',
       search: '#searchPiutang',
       nobukti: 'input_piutang_nobukti',
+      namacustsupp: 'input_piutang_namacustsupp',
       custsupp: 'input_piutang_custsupp'
     }
   }
@@ -4484,6 +4489,7 @@ function tunaiUI () {
     tbody: 'tabel_data_add_list_tunai',
     search: '#searchTunai',
     nobukti: 'input_tunai_nobukti',
+    namacustsupp: 'input_tunai_namacustsupp',
     custsupp: 'input_tunai_custsupp'
   }
 }
@@ -4528,8 +4534,10 @@ function bukaListCustSuppTunai () {
       console.log(res)
 
       let rowTable = ``
+      tunaiNamaCustsupp = {}
       res.forEach((item, i) => {
 
+        tunaiNamaCustsupp[item.KODECUSTSUPP] = item.NAMACUSTSUPP
         rowTable += `
         <tr class="pick-row" onclick="buttonAddPickCustSuppX('${item.KODECUSTSUPP}', '${item.Agent}')">
 

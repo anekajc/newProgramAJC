@@ -187,7 +187,7 @@ left outer join DBBELI yy on y.NoFaktur=yy.NOBUKTI
 left outer join DBCUSTSUPP xx on yy.KODESUPP=xx.KODECUSTSUPP
 where Y.KodeCustSupp in (select KodeCustSupp from dbCustSupp where KodeCustSupp= @KodeCustSupp or KodeCustSupp= @agent or ISnull(Agent,'')= @agent)
 and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti
-
+ and y.KodeCustSupp=@KodeCustSupp
 ",
   // agent kosong ('') diubah Laravel (ConvertEmptyStringsToNull) jadi NULL, dan dengan @agent NULL
   // query ini mengembalikan 0 baris - jadi supplier tanpa agent selalu "Tidak ada transaksi".
