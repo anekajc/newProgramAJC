@@ -137,26 +137,6 @@
   color: #b45309; border-color: #fbe3bd; background: #fef3e0;
 }
 
-{{-- Badge kolom Status (IsOtorisasi1) di tabel SSP gabungan -- hijau untuk Sudah
-     Otorisasi, amber untuk Belum Otorisasi, warna sama dengan palet btn-success/
-     btn-warning di atas. --}}
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah {
-  color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed;
-}
-.status-badge-belum {
-  color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0;
-}
-
 {{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary text-white --
      diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua halaman. --}}
 #addTable thead th,
@@ -202,6 +182,14 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+{{-- Perbesar glyph + pada tombol Tambah (psTabelActionsCell) tanpa mengubah ukuran
+     bingkai tombol -- port 1:1 dari notareturpenjualan.blade.php. --}}
+#tabel .action-buttons-wrap .btn-primary .bi-plus {
+  font-size: 1.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
 </style>
 @endsection
 @section('content')
@@ -238,7 +226,7 @@
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Permintaan Sample</a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">SSP</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Serah Sample</a>
       </div>
     </div>
   </div>
@@ -358,9 +346,9 @@
 
 <div id="page2" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top:-80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Form Penyerahan Sample</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
@@ -369,7 +357,7 @@
 
   <div class="container-fluid">
     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-    <div class="row">
+    <div id='formBsGrid' class="row">
       <div class="col-md-12">
         <div class="row">
           <div class="col-md-3">
@@ -460,7 +448,7 @@
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
-        text-transform: uppercase;">Submit</button>
+        text-transform: uppercase;">Simpan</button>
         <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
       </div>
     </div>
@@ -469,16 +457,16 @@
 
 
 <div id="page3" style="display: none" class="mainpage container-fluid" >
-  <div class="row" style="margin-top:-80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Koreksi Penyerahan Sample</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
-  <div class="container-fluid">
+  <div id='formBsGrid' class="container-fluid">
     {{-- <input type="hidden" name="noUrut" id="input_koreksi_nourut" value="" /> --}}
     <div class="row">
         <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
@@ -515,7 +503,7 @@
             <div class="mb-2 row">
                 <label class="col-sm-4 col-form-label">Keterangan</label>
                 <div class="col-sm-8">
-                    <textarea  style="width: 100%; resize: none" rows=3 placeholder="" class="form-control" id="input_koreksi_keterangan"  onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+                    <textarea  style="width: 100%; height:75px !important; resize: none" rows=3 placeholder="" class="form-control" id="input_koreksi_keterangan"  onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
                 </div>
             </div>
         </div>
@@ -563,7 +551,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div id='formBsGrid' class="row">
       <div class="col-md-6">
         <div class="row">
           <div class="col-md-3" style="margin-top:5px;">
@@ -623,7 +611,7 @@
 
     <div class="row mt-3">
       <div class="col-md-12 text-right">
-        <button type="button" class="btn btn-secondary" onclick="buttonKoreksiItemBatal()" style="
+        <button type="button" class="btn btn-danger" onclick="buttonKoreksiItemBatal()" style="
           height: 30px; 
           padding: 4px 12px; 
           border-radius: 20px; 
@@ -633,7 +621,7 @@
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Batal</button>
 
-        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary" style="
+        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-chip-biru" style="
           height: 30px; 
           padding: 4px 12px; 
           border-radius: 20px; 
@@ -748,16 +736,16 @@
 {{-- End Modal List gudang tujuan --}}
 
 <div id="page4" style="display: none" class="mainpage container-fluid" >
-  <div class="row" style="margin-top:-80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Detail Penyerahan Sample</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
-  <div class="container-fluid">
+  <div id='formBsGrid' class="container-fluid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
         <!-- Kiri -->
@@ -836,16 +824,16 @@
 
 <div id="page5" style="display: none" class="mainpage container-fluid" >
 
-  <div class="row" style="margin-top:-80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Form Detail Permintaan Sample</h2>
+      <h2></h2>
     </div>
     <div class="col-4 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
-  <div class="container-fluid">
+  <div id='formBsGrid' class="container-fluid">
     <input type="hidden" name="noUrut" id="detail_nourut" value="" />
     <div class="row">
       <div class="col-md-12">
@@ -1148,12 +1136,12 @@ function psValueCell (row, col) {
   let raw = psPickCI(row, col[0]);
   let type = col[3];
 
-  {{-- Kolom Status (IsOtorisasi1) dirender sebagai badge hijau (Sudah Otorisasi)
-       atau amber (Belum Otorisasi), bukan ikon check/x bool biasa. --}}
+  {{-- Kolom Status (IsOtorisasi1) -- ikon check/silang hijau/merah biasa, sama seperti
+       kolom Otorisasi bool di perintahopname.blade.php/beritaacaraopname.blade.php. --}}
   if (col[0] === 'IsOtorisasi1') {
     return Number(raw) === 1
-      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
@@ -1171,7 +1159,7 @@ function psTabelActionsCell (row) {
   let nobukti = psPickCI(row, 'NoBukti');
   let html = '<td class="text-center" style="white-space:nowrap;"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetailAdd(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" type="button" title="Proses" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1711,7 +1699,7 @@ function buttonBatalOtorisasi (nobukti) {
   }
 
 
-alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+alertify.prompt("Batal Otorisasi","Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;

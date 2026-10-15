@@ -216,11 +216,6 @@ return $tempOutstanding;
   }
 
 
-
-
-
-
-
   public function spUpdateHeader (Request $req) {
     $res = DB::connection('SML')->update("update dbbaop set note = :keterangan where nobukti = :nobukti", ["keterangan" => $req->keterangan , "nobukti" => $req->nobukti]);
     return $res;
@@ -233,6 +228,7 @@ return $tempOutstanding;
     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','BAOP',$req->nobukti,'',0,'dbbaop');
     return $res;
   }
+  
   public function spBatalOtorisasi (Request $req) {
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update dbbaop set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL  where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);

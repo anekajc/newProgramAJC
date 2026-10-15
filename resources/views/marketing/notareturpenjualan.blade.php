@@ -3923,7 +3923,7 @@ function refreshDataTableKoreksi (nobukti , noretur) {
       document.getElementById("input_add_kurs").value = dataTableKoreksi[0].KURS ? parseFloat(dataTableKoreksi[0].KURS).toFixed(2) : '1.00'
       document.getElementById("input_add_tipeppn").value = dataTableKoreksi[0].PPN
       document.getElementById("input_add_tipebayar").value = dataTableKoreksi[0].TIPEBAYAR
-
+      
       document.getElementById("input_add_headerdiscp").value = '0.00'
       document.getElementById("input_add_headerdiscrp").value = '0.00'
       // Total seluruh item (xTotal* dari view), dalam Rp seperti kolom Sub Total & daftar nota.
@@ -3959,7 +3959,6 @@ function refreshDataTableKoreksi (nobukti , noretur) {
             <td>${item.Satuan}</td>
             <td class="text-right">${formatAngka(parseFloat(item.Harga).toFixed(2))}</td>
 
-
             <td class="text-right">${formatAngka(parseFloat(item.DiscRp).toFixed(2))}</td>
             <td class="text-right">${formatAngka(parseFloat(item.SUBTOTALRp).toFixed(2))}</td>
             ${actionsCol}
@@ -3974,8 +3973,6 @@ function refreshDataTableKoreksi (nobukti , noretur) {
       document.getElementById("addTableData").innerHTML = rowTable
 
       document.getElementById("input_add_tipebayar").value = dataTableKoreksi[0].TIPEBAYAR
-
-
 
 
     },

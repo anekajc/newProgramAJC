@@ -885,7 +885,7 @@ $listHeader = DB::connection('SML')->select("declare @Tahun int, @Bulan int
                     end As Bit) NeedOtorisasi
         from dbTransfer a
         where	year(A.Tanggal)=@Tahun and month(A.Tanggal)=@Bulan
-        and isnull(pterima,0)=0 and nobukti = :nobukti
+        and nobukti = :nobukti
         order by A.NoBukti",['nobukti'=>$nobukti, 'tahun'=>$periode->tahun, 'bulan'=>$periode->bulan]);
 
       
