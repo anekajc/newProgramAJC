@@ -894,12 +894,12 @@ Order by a.Nobukti,a.Urut
     }
 
   public function spOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
+    $tanggal = date('Y-m-d 00:00:00');
     $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
     return $res;
   }
   public function spBatalOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
+    $tanggal = date('Y-m-d 00:00:00');
     $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL  where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
     app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'MK', $req->nobukti, $req->pket, 0, 'DBTRANS');
     return $res;
