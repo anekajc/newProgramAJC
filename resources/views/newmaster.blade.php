@@ -331,8 +331,28 @@
   {{-- SIDEBAR --}}
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo" onclick="goHome()" style="cursor:pointer;">
-      <div class="logo-icon">SPL</div>
-      <span class="logo-text">PT. SPL</span>
+      {{-- Ikon sidebar memakai Logo NPWP 1 dari menu Set Nomor Transaksi
+           (storage/app/gambar-perusahaan/logoperusahaan/npwp1.*). Belum ada logo = kotak "SPL" lama. --}}
+      @php
+        $fileLogoSidebar = \App\Http\Controllers\Berkas\SetNomorTransaksiController::fileLogoSidebar();
+      @endphp
+      @if ($fileLogoSidebar)
+        <div class="logo-icon" style="background:#fff; overflow:hidden;">
+          <img src="{{ url('setnomortransaksilogo') }}?v={{ @filemtime($fileLogoSidebar) }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+      @else
+        <div class="logo-icon">SPL</div>
+      @endif
+      {{-- Nama di sidebar mengikuti Inisial Perusahaan di menu Set Nomor Transaksi (DBNOMOR.ALIAS),
+           bukan hardcode lagi. Kalau query gagal, tetap tampil teks lama supaya layout tidak error. --}}
+      @php
+        try {
+          $inisialPerusahaan = trim((string) (\DB::connection('SML')->select('select top 1 ALIAS from DBNOMOR')[0]->ALIAS ?? ''));
+        } catch (\Throwable $e) {
+          $inisialPerusahaan = '';
+        }
+      @endphp
+      <span class="logo-text">{{ $inisialPerusahaan !== '' ? $inisialPerusahaan : 'PT. SPL' }}</span>
     </div>
     <nav class="sidebar-nav" id="nav"></nav>
 
@@ -355,13 +375,28 @@
           <i class="bi bi-bell"></i>
           <span id="otoBellCount" class="oto-bell-count" style="display:none">0</span>
         </a>
-        {{-- .pb-full (layar lebar) / .pb-short (mobile < 768px) - lihat css/header-mobile.css. --}}
-        <div class="period-badge" id="period-badge">
-          <span class="pb-full">Username: {{ Auth::user()->username }}
+        @php
+          $namaBulanHeader = [
+              1 => 'Januari',
+              2 => 'Februari',
+              3 => 'Maret',
+              4 => 'April',
+              5 => 'Mei',
+              6 => 'Juni',
+              7 => 'Juli',
+              8 => 'Agustus',
+              9 => 'September',
+              10 => 'Oktober',
+              11 => 'November',
+              12 => 'Desember',
+          ][(int) $periode->bulan] ?? '';
+        @endphp
+        {{-- .pb-full (layar lebar) / .pb-short (mobile < 768px) - lihat css/header-mobile.css.
+             berkas/newsetupperiodekerja.blade.php menulis ulang isi badge ini dengan pola yang sama. --}}
+        <div class="period-badge" id="period-badge"><span class="pb-full">Username: {{ Auth::user()->username }}
           &nbsp;–&nbsp;
-          Periode: {{ $periode->bulan }} / {{ $periode->tahun }}</span>
-          <span class="pb-short">{{ [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][(int) $periode->bulan] ?? $periode->bulan }} {{ $periode->tahun }}</span>
-        </div>
+          Periode: {{ $namaBulanHeader }}
+          {{ $periode->tahun }}</span><span class="pb-short">{{ mb_substr($namaBulanHeader, 0, 3) }} {{ $periode->tahun }}</span></div>
         <div class="avatar">{{ strtoupper(substr(Auth::user()->username, 0, 1)) }}</div>
         <a class="logout-link" href="{{ route('logout') }}" title="Log Out">
           <i class="bi bi-power"></i><span class="logout-text"> Log Out</span>
