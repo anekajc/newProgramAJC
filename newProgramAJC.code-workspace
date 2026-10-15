@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"workbench.colorTheme": "Quiet Light",
+		"workbench.colorTheme": "macOS Classic Dark",
 		"workbench.iconTheme": "material-icon-theme",
 		"workbench.productIconTheme": "fluent-icons"
 	}

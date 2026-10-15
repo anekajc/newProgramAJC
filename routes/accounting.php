@@ -110,7 +110,6 @@ Route::post('/banklisttunai', [BankController::class, 'listTunai']);
 Route::get('/banklisttunaix', [BankController::class, 'listTunaiX']);
 Route::post('/banklistcustsupptunai', [BankController::class, 'listCustSuppTunai']);
 
-Route::post('/banksptemphutpiut', [BankController::class, 'spTempHutPiut']);
 
 Route::get('/banklistcustsuppumb', [BankController::class, 'listCustsuppUMB']);
 
