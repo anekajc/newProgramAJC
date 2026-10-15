@@ -48,7 +48,7 @@ class MasterDepartemenController extends Controller
     $check = DB::connection('SML')->select('SELECT * FROM DBDEPART where KDDEP = :kode' , ['kode' => $req->kode]);
 
     if ($check) {
-      return 'Kode jenis sudah ada di database';
+      return 'Kode departemen sudah ada di database';
     }
     $listData = DB::connection('SML')->update('insert into DBDEPART (KDDEP, NMDEP) values (:kode, :nama)' , ['kode' => $req->kode , 'nama' => $req->nama]);
     return 1;

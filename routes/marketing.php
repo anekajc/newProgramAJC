@@ -60,7 +60,7 @@ Route::post('/penawaransoonchangeheader', [PenawaranSOController::class, 'onChan
 Route::post('/penawaransolistbarangnosominusallso', [PenawaranSOController::class, 'listBarangNonFOC1AllSO']);
 Route::get('/penawaransolistvalas', [PenawaranSOController::class, 'listValas']);
 Route::get('/penawaransocheckhargaddd', [PenawaranSOController::class, 'CheckHargaAdd']);
-Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']);
+// Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd']); // dinonaktifkan: menimpa route cetak di atas (spCetak), sama seperti programajcSML
 
 
   // VERIF PENAWARAN
@@ -75,27 +75,30 @@ Route::get('/penawaransoprint', [PenawaranSOController::class, 'CheckHargaAdd'])
   Route::post('/get-barang', [VerifikasiPenawaranController::class, 'getBarang']);
   Route::post('/get-customer', [VerifikasiPenawaranController::class, 'getCustomer']);
 
-//   // VERIF BARANG
-//   Route::get('/verifikasibarang', [VerifikasiBarangController::class, 'index']);
-//   Route::post('/verifikasibarangotorisasi', [VerifikasiBarangController::class, 'spOtorisasi']);
-//   Route::post('/verifikasibarangbatalotorisasi', [VerifikasiBarangController::class, 'spBatalOtorisasi']);
-//   Route::get('/verifikasibarangloadall', [VerifikasiBarangController::class, 'loadAll']);
-//   Route::get('/verifikasibarangloadallinfo', [VerifikasiBarangController::class, 'loadAllInfo']);
-//   Route::post('/verifikasibarangdetailbarang', [VerifikasiBarangController::class, 'detailBarang']);
-//   Route::post('/verifikasibarangdetailbarangx', [VerifikasiBarangController::class, 'detailBarangx']);
-//   Route::get('/verifikasibaranglistbarang', [VerifikasiBarangController::class, 'listBarang']);
-//   Route::post('/verifikasibarangspadd', [VerifikasiBarangController::class, 'spOtorisasi']);
+  // VERIF BARANG (diaktifkan dari programajcSML)
+  Route::get('/verifikasibarang', [VerifikasiBarangController::class, 'index']);
+  Route::post('/verifikasibarangotorisasi', [VerifikasiBarangController::class, 'spOtorisasi']);
+  Route::post('/verifikasibarangbatalotorisasi', [VerifikasiBarangController::class, 'spBatalOtorisasi']);
+  Route::get('/verifikasibarangloadall', [VerifikasiBarangController::class, 'loadAll']);
+  Route::get('/verifikasibarangloadallinfo', [VerifikasiBarangController::class, 'loadAllInfo']);
+  // Route::post('/verifikasibarangdetailbarang', [VerifikasiBarangController::class, 'detailBarang']); // method detailBarang tidak ada, juga di programajcSML
+  Route::post('/verifikasibarangdetailbarangx', [VerifikasiBarangController::class, 'detailBarangx']);
+  Route::get('/verifikasibaranglistbarang', [VerifikasiBarangController::class, 'listBarang']);
+  Route::post('/verifikasibarangspadd', [VerifikasiBarangController::class, 'spOtorisasi']);
 
-//   // Terima PO Cust
-//   Route::get('/terimapocustomer', [TerimaPoCustomerController::class, 'index']);
-//   Route::post('/terimapocustomerspadd', [TerimaPoCustomerController::class, 'spAdd']);
-//   Route::get('/terimapocustomerloadall', [TerimaPoCustomerController::class, 'loadAll']);
-//   Route::get('/terimapocustomerpelanggan', [TerimaPoCustomerController::class, 'getCustomer']);
-//   Route::post('/terimapocustomerspclose', [TerimaPoCustomerController::class, 'spClose']);
+  // Terima PO Cust (diaktifkan dari programajcSML)
+  Route::get('/terimapocustomer', [TerimaPoCustomerController::class, 'index']);
+  Route::post('/terimapocustomerspadd', [TerimaPoCustomerController::class, 'spAdd']);
+  Route::get('/terimapocustomerloadall', [TerimaPoCustomerController::class, 'loadAll']);
+  Route::get('/terimapocustomerpelanggan', [TerimaPoCustomerController::class, 'getCustomer']);
+  Route::post('/terimapocustomerspclose', [TerimaPoCustomerController::class, 'spClose']);
 
-//   // Ubah PO Cust
-//   Route::get('/ubahpocust', [UbahPOCustomerController::class, 'index']);
-//   Route::get('/ubahPoCustomerListData', [UbahPOCustomerController::class, 'listData']);
+  // Ubah PO Cust (diaktifkan dari programajcSML)
+  Route::get('/ubahpocust', [UbahPOCustomerController::class, 'index']);
+  Route::get('/ubahPoCustomerListData', [UbahPOCustomerController::class, 'listData']);
+  Route::get('/ubahpocustloadall', [UbahPOCustomerController::class, 'loadAll']);
+  Route::get('/ubahpocustlistpo', [UbahPOCustomerController::class, 'listPO']);
+  Route::post('/ubahpocustsimpan', [UbahPOCustomerController::class, 'simpan']);
 
   // SO
   Route::get('/so', [SOController::class, 'index']);
@@ -148,6 +151,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/soloadsofilter', [SOController::class, 'loadSOFilter']);
   Route::get('/soloadheader', [SOController::class, 'loadHeader']);
   Route::get('/sosimpanheader', [SOController::class, 'simpanHeader']);
+  Route::get('/sochecknoposo', [SOController::class, 'checknoposo']);
 
 
   // closing so
@@ -225,8 +229,9 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/ambilNomorSPB', [InvoicePenjualanController::class, 'getDetailCetakSPB']);
   Route::post('/invoicePenjualanPrintSPB', [InvoicePenjualanController::class, 'getDetailPenerimaancetak']);
   Route::post('/invoicepenjualangetdetail', [InvoicePenjualanController::class, 'spDetailKoreksi']);
-  Route::post('/invoicepenjualangetspbdetail', [InvoicePenjualanController::class, 'spAddDetailKoreksi']);
-  Route::get('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
+  Route::post('/invoicepenjualangetdetailadd', [InvoicePenjualanController::class, 'spAddDetailKoreksi']);
+  Route::post('/invoicepenjualangetlistinvoicecetak', [InvoicePenjualanController::class, 'getListInvoiceCetak']);
+  Route::post('/invoicepenjualangetlistinvoice', [InvoicePenjualanController::class, 'getListInvoice']);
   Route::post('/invoicepenjualandetailcetakall', [InvoicePenjualanController::class, 'getDetailCetakAll']);
 
   // Invoice Jasa
@@ -248,7 +253,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::post('/fakturpajakspdelete', [FakturPajakController::class, 'spDelete']);
   Route::post('/fakturpajakloadall', [FakturPajakController::class, 'loadAll']);
   Route::post('/fakturpajakimportexcel', [FakturPajakController::class, 'importExcel']);
-  Route::get('/fakturpajakexportexcel', [FakturPajakController::class, 'spExport']);
+  Route::post('/fakturpajakexportexcel', [FakturPajakController::class, 'spExport']);
 
   // Perintah Retur Jual
   Route::get('/perintahreturjualcetak', [PerintahReturJualController::class, 'spCetak']);
@@ -311,6 +316,7 @@ Route::get('/socheckhargaddd', [SOController::class, 'SOCheckHargaAdd']);
   Route::get('/notareturpenjualanloadall', [NotaReturPenjualanController::class, 'loadAll']);
   Route::post('/notareturpenjualanspotorisasi', [NotaReturPenjualanController::class, 'spOtorisasi']);
   Route::post('/notareturpenjualanspbatalotorisasi', [NotaReturPenjualanController::class, 'spBatalOtorisasi']);
+  Route::post('/notareturpenjualanonchangeheader', [NotaReturPenjualanController::class, 'onChangeHeader']);
 
   // KREDITNOTE
   Route::get('/kreditnote', [KreditNoteController::class, 'index']);
@@ -350,10 +356,12 @@ Route::post('/cetaktandaterimadetailoutstanding', [CetakTandaTerimaController::c
 Route::post('/cetaktandaterimalistproses', [CetakTandaTerimaController::class, 'listProses']);
 
 Route::post('/cetaktandaterimaspadd', [CetakTandaTerimaController::class, 'spAdd']);
+Route::post('/cetaktandaterimaspcetak', [CetakTandaTerimaController::class, 'spCetak']);
 Route::post('/cetaktandaterimaspkoreksi', [CetakTandaTerimaController::class, 'spKoreksi']);
 Route::post('/cetaktandaterimaspproses', [CetakTandaTerimaController::class, 'spProses']);
-Route::get('/cetaktandaterimaloadall' , 'CetakTandaTerimaController@loadAll' )->middleware('auth');
+Route::get('/cetaktandaterimaloadall', [CetakTandaTerimaController::class, 'loadAll']);
 Route::post('/cetaktandaterimadetailCetak', [CetakTandaTerimaController::class, 'getDetailCetak']);
+Route::post('/cetaktandaterimadetailCetakUlang', [CetakTandaTerimaController::class, 'getDetailCetakUlang']);
 
 
 });

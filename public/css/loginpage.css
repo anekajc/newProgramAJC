@@ -4,16 +4,20 @@
     {
       font-family: 'Poppins', sans-serif;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 1rem;
       background: #f0eefe;
+      -webkit-text-size-adjust: 100%;
     }
- 
-    .login-wrapper 
+
+    .login-wrapper
     {
       display: flex;
-      width: 820px;
+      width: 100%;
+      max-width: 820px;
       min-height: 520px;
       border-radius: 20px;
       overflow: hidden;
@@ -183,7 +187,46 @@
     .input-wrapper input::placeholder {
       color: #bbb;
     }
- 
+
+    /* Show/hide password toggle */
+    .input-wrapper.has-toggle input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      border-radius: 0 10px 10px 0;
+      cursor: pointer;
+      color: #aaa;
+    }
+
+    .toggle-password:hover,
+    .toggle-password:focus-visible { color: #534AB7; }
+
+    /* Higher specificity so it beats the generic ".input-wrapper svg" icon rule (absolute, left side) */
+    .input-wrapper .toggle-password svg {
+      position: static;
+      left: auto;
+      top: auto;
+      transform: none;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    .input-wrapper .toggle-password .icon-eye-off { display: none; }
+    .input-wrapper .toggle-password.is-visible .icon-eye     { display: none; }
+    .input-wrapper .toggle-password.is-visible .icon-eye-off { display: block; }
+
     .forgot-link {
       text-align: right;
       margin-bottom: 1.25rem;
@@ -216,6 +259,7 @@
  
     .btn-login:hover  { opacity: 0.92; }
     .btn-login:active { transform: scale(0.98); }
+    .btn-login:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
  
     .form-footer {
       font-size: 11px;
@@ -225,8 +269,65 @@
     }
  
     /* ── Responsive ── */
+    /* Tablet / small landscape: let the form column shrink instead of overflowing */
+    @media (max-width: 900px) {
+      .left-panel  { padding: 2.5rem 1.5rem; }
+      .right-panel { flex: 0 1 340px; width: auto; min-width: 280px; padding: 2.5rem 1.75rem; }
+    }
+
+    /* Phone: compact brand header on top, form card below */
     @media (max-width: 680px) {
-      .login-wrapper { flex-direction: column; width: 100%; min-height: unset; border-radius: 0; }
-      .left-panel    { padding: 2rem 1.5rem; }
-      .right-panel   { width: 100%; }
+      body { align-items: flex-start; padding: 1rem 1rem 1.5rem; }
+
+      .login-wrapper {
+        flex-direction: column;
+        min-height: unset;
+        margin: auto 0;
+        border-radius: 16px;
+      }
+
+      .left-panel {
+        flex: none;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 14px;
+        padding: 1rem 1.25rem;
+      }
+
+      .brand-icon { width: 44px; height: 44px; border-radius: 12px; margin-bottom: 0; flex-shrink: 0; }
+      .brand-icon svg { width: 24px; height: 24px; }
+      .brand-name { font-size: 20px; margin-bottom: 0; line-height: 1.2; }
+      .brand-subtitle { margin-bottom: 0; line-height: 1.2; }
+
+      .right-panel {
+        flex: none;
+        width: 100%;
+        min-width: 0;
+        padding: 1.75rem 1.25rem 1.5rem;
+      }
+
+      .form-title { font-size: 20px; }
+      .form-subtitle { margin-bottom: 1.5rem; }
+      .form-group label { font-size: 11px; }
+
+      /* 16px font prevents iOS Safari from zooming in on focus; 48px height = comfortable touch target */
+      .input-wrapper input { font-size: 16px; min-height: 48px; padding-top: 12px; padding-bottom: 12px; }
+      .input-wrapper svg { width: 18px; height: 18px; }
+      .input-wrapper.has-toggle input { padding-right: 48px; }
+      .toggle-password { width: 48px; }
+
+      .btn-login { min-height: 48px; font-size: 16px; margin-top: 0.25rem; }
+      .form-footer { margin-top: 1.25rem; }
+    }
+
+    /* Very small phones */
+    @media (max-width: 360px) {
+      body { padding: 0.75rem; }
+      .right-panel { padding: 1.5rem 1rem 1.25rem; }
+    }
+
+    /* Short landscape phones: keep it scrollable and compact */
+    @media (max-height: 480px) and (orientation: landscape) {
+      body { align-items: flex-start; }
+      .login-wrapper { min-height: unset; margin: 0 auto; }
     }

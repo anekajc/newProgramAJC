@@ -206,8 +206,16 @@ $xurut=0;
   }
 
   public function onChangeHeader (Request $req) {
+    // Nama kolom masuk ke SQL apa adanya (tidak bisa jadi parameter) — batasi ke kolom yang memang
+    // boleh diubah dari form.
+    $allowedFields = ['NOTE'];
+    if (!in_array($req->field, $allowedFields, true)) {
+      return response("Field tidak valid", 400);
+    }
+
     $query = 'update DBUBAHKEMASAN set ' . $req->field . ' = :value where NOBUKTI = :nobukti';
-    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
+    // Textarea kosong sampai sebagai null (ConvertEmptyStringsToNull) — simpan "" seperti spAdd.
+    $res = DB::connection('SML')->update($query, ["value" => $req->value ?? "", "nobukti" => $req->nobukti]);
     return $res;
   }
 

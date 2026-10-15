@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Sales')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,31 +22,31 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Sales</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+  @include('master.partials.toolbarMaster', ['tanpaTambah' => true])
+
+  <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Nama Sales</th>
-            <th scope="col">Telepon HP</th>
-            <th scope="col">Kode Gudang</th>
-            <th scope="col">Nama Gudang</th>
-            <th scope="col">Kode Cost</th>
-            <th scope="col">Nama Cost</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
-</div>
+  </div>
 
 </div>
   
@@ -56,64 +56,32 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Sales</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_Sales" placeholder="Sales" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_Sales">Sales</label>
+          <input type="text" class="form-control" id="input_edit_Sales" placeholder="Sales" disabled>
 
-            </div>
+          <label for="input_edit_kodeGudang">Kode Gudang</label>
+          <select class="form-control" id="input_edit_kodeGudang"></select>
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Gudang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_edit_kodeGudang" placeholder="Kode Gudang">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonGudang()">+</button>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Cost</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_edit_kodeCost" placeholder="Kode Cost">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonCosting()">+</button>
-                    </div>
-                </div>
-              </div>
-            </div>
+          <label for="input_edit_kodeCost">Kode Cost</label>
+          <div class="input-group"> <input type="text" class="form-control" id="input_edit_kodeCost" placeholder="Kode Cost" disabled> <div class="input-group-append"> <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCosting()" title="Cari"><i class="bi bi-search"></i></button> </div> </div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -125,27 +93,29 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Sales Customer</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
+          <div class="row align-items-center">
 
             <input type="hidden" id="input_harga_kodegroup" value="" />
             <div class="col-2">
-              <div class="form-group">
-                <label>Kode Sales</label>
+              <div class="form-group mb-0">
+                <label class="mb-0">Kode Sales</label>
               </div>
             </div>
             <div class="col-4">
-              <div class="form-group">
+              <div class="form-group mb-0">
                 <input type="text" class="form-control" id="input_harga_kodesales" placeholder="Kode Sales" disabled>
               </div>
             </div>
           
             <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddSales()" class="btn btn-secondary">Add Sales Cust</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddSales()">Tambah</button>
             </div>
 
           </div>
@@ -154,122 +124,65 @@
     <!-- ADD SUBGROUP -->
 
     <div id="addHarga" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Sales/Cust</h4>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Tambah Sales/Cust</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_custSupp_add_kodeCustSupp">Kode Cust Supp</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_custSupp_add_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCustSupp()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Kode Cust Supp</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_custSupp_add_kodeCustSupp" placeholder="Kode Cust Supp">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonCustSupp()">+</button>
-                    </div>
-                </div>
-            </div>
-            </div>
-            
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                  <label>Minggu Ke</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <select id="input_custSupp_add_mingguKe" class="form-control" aria-label="Default select example">
-                  <option value ='0'>-</option>
-                  <option value ='1'>1</option>
-                  <option value ='2'>2</option>
-                  <option value ='3'>3</option>
-                  <option value ='4'>4</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitAddSales()" class="btn btn-primary" >Add</button>
-              </div>
-
-            </div>
+            <label for="input_custSupp_add_mingguKe">Minggu Ke</label>
+            <select id="input_custSupp_add_mingguKe" class="form-control">
+              <option value ='0'>-</option>
+              <option value ='1'>1</option>
+              <option value ='2'>2</option>
+              <option value ='3'>3</option>
+              <option value ='4'>4</option>
+            </select>
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddSales()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END ADD SUBGROUP -->
 
     <!-- EDIT SUBGROUP -->
 
     <div id="editHarga" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Sales/Cust</h4>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Edit Sales/Cust</div>
+          <div class="bs-form bs-form-1">
+            <input type="hidden" id="input_custSupp_edit_kodeCustSupp_old">
+            <label for="input_custSupp_edit_kodeCustSupp">Kode Cust Supp</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_custSupp_edit_kodeCustSupp" placeholder="Kode Cust Supp" disabled>
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonCustSupp()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row" hidden>
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Kode Cust Supp LAMA</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_custSupp_edit_kodeCustSupp_old" placeholder="Kode Cust Supp">
-                </div>
-            </div>
-            </div>
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Kode Cust Supp</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_custSupp_edit_kodeCustSupp" placeholder="Kode Cust Supp">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonCustSupp()">+</button>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                  <label>Minggu Ke</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <select id="input_custSupp_edit_mingguKe" class="form-control" aria-label="Default select example">
-                  <option value ='0'>-</option>
-                  <option value ='1'>1</option>
-                  <option value ='2'>2</option>
-                  <option value ='3'>3</option>
-                  <option value ='4'>4</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitEditSales()" class="btn btn-primary" >Edit</button>
-              </div>
-
-            </div>
+            <label for="input_custSupp_edit_mingguKe">Minggu Ke</label>
+            <select id="input_custSupp_edit_mingguKe" class="form-control">
+              <option value ='0'>-</option>
+              <option value ='1'>1</option>
+              <option value ='2'>2</option>
+              <option value ='3'>3</option>
+              <option value ='4'>4</option>
+            </select>
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditSales()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END EDIT SUBGROUP -->
 
@@ -318,28 +231,30 @@
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Sales Customer</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="exampleModalLabel">Target Sales</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
+          <div class="row align-items-center">
 
             <input type="hidden" id="input_harga_kodegroup" value="" />
             <div class="col-2">
-              <div class="form-group">
-                <label>Kode Sales</label>
+              <div class="form-group mb-0">
+                <label class="mb-0">Kode Sales</label>
               </div>
             </div>
             <div class="col-4">
-              <div class="form-group">
+              <div class="form-group mb-0">
                 <input type="text" class="form-control" id="input_target_kodesales" placeholder="Kode Sales" disabled>
               </div>
             </div>
           
             <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddTarget()" class="btn btn-secondary">Add Target Sales</button>
+              <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddTarget()">Tambah</button>
             </div>
 
           </div>
@@ -348,61 +263,28 @@
     <!-- ADD SUBGROUP -->
 
     <div id="addTarget" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Target</h4>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Tambah Target</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_target_add_tahun">Tahun</label>
+            <input type="text" class="form-control text-right" id="input_target_add_tahun" placeholder="Tahun">
+
+            <label for="input_target_add_merk">Merk</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="input_target_add_merk" placeholder="Merk" disabled>
+              <div class="input-group-append">
+                <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonMerk()" title="Cari"><i class="bi bi-search"></i></button>
               </div>
             </div>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Tahun</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control text-right" id="input_target_add_tahun" placeholder="Tahun">
-                </div>
-            </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Merk</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_target_add_merk" placeholder="Merk">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonMerk()">+</button>
-                    </div>
-                </div>
-            </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Target</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="number" class="form-control text-right" id="input_target_add_target" placeholder="Target">
-                </div>
-            </div>
-            </div>
-            
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" onclick="submitAddTarget()" class="btn btn-primary" >Add</button>
-              </div>
-
-            </div>
+            <label for="input_target_add_target">Target</label>
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_target_add_target" placeholder="Target">
+          </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddTarget()">Simpan</button>
+          </div>
+        </div>
       </div>
 
     <!-- END ADD SUBGROUP -->
@@ -410,69 +292,24 @@
     <!-- EDIT SUBGROUP -->
 
     <div id="editTarget" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Sales/Cust</h4>
-              </div>
-            </div>
+        <div id="formBsGrid" class="form-card mt-3">
+          <div class="form-card-title">Edit Target</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_target_edit_tahun">Tahun</label>
+            <input type="text" class="form-control text-right" id="input_target_edit_tahun" placeholder="Tahun" disabled>
 
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Target</h4>
-              </div>
-            </div>
+            <label for="input_target_edit_merk">Merk</label>
+            <input type="text" class="form-control" id="input_target_edit_merk" placeholder="Merk" disabled>
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Tahun</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control text-right" id="input_target_edit_tahun" placeholder="Tahun" disabled>
-                </div>
-            </div>
-            </div>
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Merk</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="input_target_edit_merk" placeholder="Merk" disabled>
-                    {{-- <div class="input-group-append">
-                        <button type="button" class="btn btn-primary btn-select" onclick="buttonMerk()">+</button>
-                    </div> --}}
-                </div>
-            </div>
-            </div>
-
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                 <label>Target</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                    <input type="number" class="form-control text-right" id="input_target_edit_target" placeholder="Target">
-                </div>
-            </div>
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowSales()" >Batal</button>
-                <button type="button" onclick="submitEditTarget()" class="btn btn-primary" >Edit</button>
-              </div>
-
-            </div>
+            <label for="input_target_edit_target">Target</label>
+            <input type="text" inputmode="decimal" class="form-control text-right format-number" id="input_target_edit_target" placeholder="Target">
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowSales()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditTarget()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END EDIT SUBGROUP -->
 
@@ -519,8 +356,13 @@
 
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -529,15 +371,53 @@ let listSelectHeadGroup = []
 let listSelectSubGroup = []
 let listSelectSubKategori = []
 
-function loadAll () {
-  let _token = $("#_token").val();
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MSL_KOLOM = [
+  ['Nama',       'Nama Sales',  1, 'varchar', 0, 0],
+  ['TeleponHP',  'Telepon HP',  1, 'varchar', 0, 0],
+  ['KodeGdg',    'Kode Gudang', 1, 'varchar', 0, 0],
+  ['NamaGdg',    'Nama Gudang', 1, 'varchar', 0, 0],
+  ['KodeCost',   'Kode Cost',   1, 'varchar', 0, 0],
+  ['NamaCost',   'Nama Cost',   1, 'varchar', 0, 0],
+]
 
-  document.getElementById('breadcrumb').innerHTML = "Master Sales"
-  document.getElementById('AddVisibility').hidden = true;
+// Data tabel utama disimpan terpisah dari dataRefresh - pemilih (valas, gudang, dsb) memakai
+// dataRefresh untuk daftarnya sendiri, dan renderTabel() dipanggil ulang saat kolom digeser.
+let dataTabel = []
 
+function renderTabel () {
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
   }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+      <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KeyNIK}')" title="Koreksi Gudang/Cost">
+        <i class="bi bi-pen"></i>
+      </button>
+      <button class="btn-action-sm btn-action-warning" type="button" onclick="buttonSales('${item.KeyNIK}')" title="Sales Cust">
+        <i class="bi bi-receipt"></i>
+      </button>
+      <button class="btn-action-sm btn-action-primary" type="button" onclick="buttonTarget('${item.KeyNIK}')" title="Target">
+        <i class="bi bi-bullseye"></i>
+      </button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
+function loadAll () {
+  let _token = $("#_token").val();
 
   $.ajax({
     url: "{!! url('mastersalesloadall') !!}",
@@ -547,48 +427,10 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr>
-    <td class="text-center">
-      <div class="action-buttons-wrap">
-      <button class="btn-action-sm btn-action-success hover-tooltip" type="button" onclick="buttonEdit('${item.KeyNIK}')" data-tooltip="Koreksi Gudang/Stok">
-        <i class="bi bi-pen"></i>
-      </button>
-      <button class="btn-action-sm btn-action-warning hover-tooltip" type="button" onclick="buttonSales('${item.KeyNIK}')" data-tooltip="Sales Cust">
-        <i class="bi bi-receipt"></i>
-      </button>
-      <button class="btn-action-sm btn-action-primary hover-tooltip" type="button" onclick="buttonTarget('${item.KeyNIK}')" data-tooltip="Target">
-        <i class="bi bi-bullseye"></i>
-      </button>
-      </div>
-    </td>
-    <td>${item.Nama || ''}</td>
-    <td>${item.TeleponHP || ''}</td>
-    <td>${item.KodeGdg || ''}</td>
-    <td>${item.NamaGdg || ''}</td>
-    <td>${item.KodeCost || ''}</td>
-    <td>${item.NamaCost || ''}</td>
-    </tr>`
-  });
-
-  
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
-
+  renderTabel()
 }
 
 function buttonEdit (keynik) {
@@ -607,7 +449,7 @@ function buttonEdit (keynik) {
       console.log(res)
 
       document.getElementById("input_edit_Sales").value = res[0].Nama
-      document.getElementById("input_edit_kodeGudang").value = res[0].KodeGdg
+      pilihGudang(res[0].KodeGdg)
       document.getElementById("input_edit_kodeCost").value = res[0].KodeCost
 
     }})
@@ -617,6 +459,7 @@ function buttonEdit (keynik) {
 
 function buttonAddSales () {
   document.getElementById("input_custSupp_add_kodeCustSupp").value = ''
+  document.getElementById("input_custSupp_add_mingguKe").value = '0'
 
   $('.showhide').hide();
   $('#addHarga').show()
@@ -624,7 +467,8 @@ function buttonAddSales () {
 
 function buttonAddTarget () {
   document.getElementById("input_target_add_tahun").value = ''
-  document.getElementById("input_target_add_target").value = ''
+  document.getElementById("input_target_add_merk").value = ''
+  setNum("input_target_add_target", '')
 
   $('.showhide').hide();
   $('#addTarget').show()
@@ -659,13 +503,15 @@ function closeShowSales () {
 function submitEditSales () {
 
   let _token = $("#_token").val();
-  console.log('submitEditSales')
-  
+
   let kodeCustSuppOld = $("#input_custSupp_edit_kodeCustSupp_old").val();
   let kodeCustSupp = $("#input_custSupp_edit_kodeCustSupp").val();
   let Mingguke = $("#input_custSupp_edit_mingguKe").val();
-  
-  console.log(keynikTemp,kodeCustSupp,Mingguke,kodeCustSuppOld)
+
+  if (!kodeCustSupp) {
+    alertify.warning("Kode Cust Supp harus diisi");
+    return
+  }
 
 $.ajax({
   url: "{!! url('masterSalesEditSalesCust') !!}",
@@ -679,10 +525,13 @@ $.ajax({
     Mingguke
   },
   success: function(res) {
-    console.log(res)
     $('.showhide').hide();
     refreshTableSales(keynikTemp)
     alertify.success("Data Sales Cust telah dikoreksi");
+  },
+  error: function (err) {
+    console.log(err)
+    alertify.warning("Data Sales Cust gagal dikoreksi");
   }})
 
 }
@@ -692,6 +541,12 @@ function submitAddSales () {
   let _token = $("#_token").val();
   let kodeCustSupp = $("#input_custSupp_add_kodeCustSupp").val();
   let Mingguke = $("#input_custSupp_add_mingguKe").val();
+
+  // Dulu tanpa validasi dan tanpa pesan - customer kosong/ganda tetap dikirim.
+  if (!kodeCustSupp) {
+    alertify.warning("Kode Cust Supp harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('masterSalesAddSalesCust') !!}",
@@ -705,10 +560,17 @@ function submitAddSales () {
       NIK : nikTemp
     },
     success: function(res) {
-      console.log(res)
+      if (res != 1) {
+        alertify.warning(res);
+        return
+      }
       $('.showhide').hide();
       refreshTableSales(keynikTemp)
-
+      alertify.success("Data Sales Cust telah ditambah");
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning("Data Sales Cust gagal ditambah");
     }})
 
 }
@@ -716,10 +578,24 @@ function submitAddSales () {
 function submitAddTarget () {
 
   let _token = $("#_token").val();
-  console.log('submitAddTarget')
   let Tahun = $("#input_target_add_tahun").val();
   let Merk = $("#input_target_add_merk").val();
-  let TgtSales = $("#input_target_add_target").val();
+  let TgtSales = $("#input_target_add_target").val().replace(/,/g, '');
+
+  if (!Tahun) {
+    alertify.warning("Tahun harus diisi");
+    return
+  }
+
+  if (!Merk) {
+    alertify.warning("Merk harus diisi");
+    return
+  }
+
+  if (!TgtSales) {
+    alertify.warning("Target harus diisi");
+    return
+  }
 
   $.ajax({
     url: "{!! url('masterSalesAddTarget') !!}",
@@ -733,22 +609,28 @@ function submitAddTarget () {
       keynik: keynikTemp
     },
     success: function(res) {
-      console.log(res)
+      if (res != 1) {
+        alertify.warning(res);
+        return
+      }
       $('.showhide').hide();
       alertify.success("Data Target telah ditambah");
       refreshTableTarget(keynikTemp)
-
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning("Data Target gagal ditambah");
     }})
 
 }
 
-function buttonDeleteTarget (keynik, Tahun) {
-  console.log('button Delete Target')
-  console.log(keynik, Tahun)
+// Merk ikut dikirim: target disimpan per tahun + merk, dan hapus/edit yang hanya memakai tahun
+// dulu ikut mengenai target merk lain di tahun yang sama.
+function buttonDeleteTarget (keynik, Tahun, Merk) {
 
   let _token = $("#_token").val();
 
-  alertify.confirm('Hapus Target', 'Apakah yakin ingin menghapus Target Sales?',
+  alertify.confirm('Hapus Target', 'Apakah yakin ingin menghapus Target Sales ' + Tahun + ' ' + (Merk || '') + ' ?',
       function() {
 
         $.ajax({
@@ -758,33 +640,35 @@ function buttonDeleteTarget (keynik, Tahun) {
           data: {
             _token : _token,
             keynik,
-            Tahun
+            Tahun,
+            Merk : Merk || ''
           },
           success: function(res) {
             if (res != 1) {
               alertify.warning(res);
             } else {
-              console.log(res)
-              loadAll()
               alertify.success("Target Sales telah dihapus");
               refreshTableTarget(keynik)
           }
           }})
       }
     ,function(){
-      console.log('no')
     });
 }
 
 function submitEditTarget () {
 
   let _token = $("#_token").val();
-  console.log('submitEditSales')
-  
-  let TgtSales = $("#input_target_edit_target").val();
+
+  let TgtSales = $("#input_target_edit_target").val().replace(/,/g, '');
   let Merk = $("#input_target_edit_merk").val();
   let Tahun = $("#input_target_edit_tahun").val();
-  
+
+  if (!TgtSales) {
+    alertify.warning("Target harus diisi");
+    return
+  }
+
   $.ajax({
     url: "{!! url('masterSalesEditTarget') !!}",
     type: "post",
@@ -797,17 +681,21 @@ function submitEditTarget () {
       Tahun
     },
     success: function(res) {
-      console.log(res)
       $('.showhide').hide();
       refreshTableTarget(keynikTemp)
       alertify.success("Data Target telah dikoreksi");
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning("Data Target gagal dikoreksi");
     }})
 
   }
 
-function buttonEditTarget (keynik, Tahun) {
+function buttonEditTarget (keynik, Tahun, Merk) {
 
   $('.showhide').hide();
+  let ketemu = false
   $.ajax({
     url: "{!! url('masterSalesLoadDataTargetEdit') !!}",
     type: "get",
@@ -815,16 +703,23 @@ function buttonEditTarget (keynik, Tahun) {
     data: {
       Tahun,
       keynik,
+      Merk : Merk || ''
     },
     success: function(res) {
-      console.log(res)
+      if (!res || !res.length) {
+        alertify.warning("Data target tidak ditemukan");
+        return
+      }
+      ketemu = true
       document.getElementById("input_target_edit_tahun").value = res[0].Tahun
       document.getElementById("input_target_edit_merk").value = res[0].Merk
-      document.getElementById("input_target_edit_target").value = res[0].TgtSales
+      setNum("input_target_edit_target", res[0].TgtSales)
 
     }})
 
-  $('#editTarget').show()
+  if (ketemu) {
+    $('#editTarget').show()
+  }
 }
 
 function buttonDelete (kodebarang) {
@@ -1000,13 +895,13 @@ function buttonTarget (keynik) {
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn-action-sm btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
-            <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}', '${item.Merk || ''}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}', '${item.Merk || ''}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
           <td>${item.namamerk}</td>
-          <td>${formatNumberDisplay(item.TgtSales)}</td>
+          <td>${formatNumberDisplay(MasterList.nolDepan(item.TgtSales))}</td>
           </tr>
           `
         });
@@ -1069,13 +964,13 @@ function refreshTableTarget(keynik){
           rowTable += `
           <tr>
           <td class="text-center">
-            <button class="btn-action-sm btn-action-success btn-sm hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
-            <button class="btn-action-sm btn-action-danger btn-sm hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
+            <button class="btn-action-sm btn-action-success btn-sm hover-tooltip" onclick="buttonEditTarget('${item.KeyNik}', '${item.Tahun}', '${item.Merk || ''}')" type="button" data-tooltip="Edit Target Sales"><i class="bi bi-pen"></i></button>
+            <button class="btn-action-sm btn-action-danger btn-sm hover-tooltip" onclick="buttonDeleteTarget('${item.KeyNik}', '${item.Tahun}', '${item.Merk || ''}')" type="button" data-tooltip="Delete Target Sales" ><i class="bi bi-trash"></i></button>
           </td>
           <td>${item.Tahun}</td>
           <td>${item.Merk}</td>
           <td>${item.namamerk}</td>
-          <td>${formatNumberDisplay(item.TgtSales)}</td>
+          <td>${formatNumberDisplay(MasterList.nolDepan(item.TgtSales))}</td>
           </tr>
           `
         });
@@ -1119,60 +1014,44 @@ function submitEdit () {
 
 }
 
-function buttonGudang () {
-  console.log('asd');
-  let _token = $("#_token").val();
+// Gudang dipilih lewat dropdown seperti purchasing/purchaseOrder (muatDropdownAlamatKirim).
+// Isinya dari masterSalesListGudang, sumber yang dulu dipakai modal browse gudang.
+let listGudang = []
 
-   if ($.fn.DataTable.isDataTable('#tabelModalOpen')) {
-    $('#tabelModalOpen').DataTable().destroy();
-  }
-
+function muatDropdownGudang () {
   $.ajax({
     url: "{!! url('masterSalesListGudang') !!}",
     type: "get",
     async: false,
     data: {
-      _token: _token,
+      _token: $("#_token").val(),
     },
     success: function (res) {
-      console.log(res);
-      dataRefresh = res;
+      listGudang = res
     },
   });
 
-  let rowTable = "";
-  dataRefresh.forEach((item, i) => {
-    let temp = "";
-
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectGudang('${item.KODEGDG}')"><i class="bi bi-plus-square"></i></button>
-      </td>
-      <td>${item.KODEGDG}</td>
-      <td>${item.NAMA}</td>
-      <td>${item.Alamat}</td>
-    </tr>`;
+  let selectEl = document.getElementById("input_edit_kodeGudang")
+  selectEl.innerHTML = '<option value=""></option>'
+  listGudang.forEach((item) => {
+    let opt = document.createElement('option')
+    opt.value = item.KODEGDG
+    opt.textContent = `${item.KODEGDG} - ${item.NAMA}`
+    selectEl.appendChild(opt)
   });
+}
 
-  document.getElementById("tabel_dataModalOpen").innerHTML = rowTable;
-
-  let headerTable = `
-  <tr>
-    <th scope="col">Actions</th>
-    <th scope="col">Kode Gudang</th>
-    <th scope="col">Nama Gudang</th>
-    <th scope="col">Alamat Gudang</th>
-  </tr>
-  `
-  document.querySelector("#theadOpen").innerHTML = headerTable;
-  document.getElementById("namaModalOpen").innerHTML = 'Gudang'
-
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
-  
-  $("#formModalOpen").modal('toggle')
+// Gudang tersimpan yang tidak ada di daftar tetap ditampilkan apa adanya.
+function pilihGudang (kode) {
+  let selectEl = document.getElementById("input_edit_kodeGudang")
+  kode = kode == null ? '' : kode
+  if (kode && !listGudang.some(item => item.KODEGDG === kode)) {
+    let opt = document.createElement('option')
+    opt.value = kode
+    opt.textContent = kode
+    selectEl.appendChild(opt)
+  }
+  selectEl.value = kode
 }
 
 function buttonCosting () {
@@ -1200,10 +1079,7 @@ function buttonCosting () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectCosting('${item.KodeCost}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectCosting('${item.KodeCost}')">
       <td>${item.KodeCost}</td>
       <td>${item.NamaCost}</td>
     </tr>`;
@@ -1213,7 +1089,6 @@ function buttonCosting () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Kode Costing</th>
     <th scope="col">Nama Costing</th>
   </tr>
@@ -1221,10 +1096,7 @@ function buttonCosting () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Costing'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -1254,10 +1126,7 @@ function buttonCustSupp () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectCustSupp('${item.KodeCust}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectCustSupp('${item.KodeCust}')">
       <td>${item.KodeCust}</td>
       <td>${item.NamaCust}</td>
       <td>${item.Alamat}</td>
@@ -1268,7 +1137,6 @@ function buttonCustSupp () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Kode</th>
     <th scope="col">Nama Pelanggan</th>
     <th scope="col">Alamat</th>
@@ -1277,10 +1145,7 @@ function buttonCustSupp () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Cust Supp'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -1310,10 +1175,7 @@ function buttonMerk () {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectMerk('${item.KodeMerk}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectMerk('${item.KodeMerk}')">
       <td>${item.KodeMerk}</td>
       <td>${item.NamaMerk}</td>
     </tr>`;
@@ -1323,7 +1185,6 @@ function buttonMerk () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Kode Merk</th>
     <th scope="col">Nama Merk</th>
   </tr>
@@ -1331,19 +1192,9 @@ function buttonMerk () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Merk'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
-}
-
-function buttonSelectGudang (kodegdg){
-
-  document.getElementById('input_edit_kodeGudang').value = kodegdg;
-
-  $("#formModalOpen").modal("hide");
 }
 
 function buttonSelectCosting (kodecost){
@@ -1369,31 +1220,62 @@ function buttonSelectMerk (merk){
   $("#formModalOpen").modal("hide");
 }
 
-window.onload = function() {
-    loadAll();
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
+
+window.onload = function(){
+  MasterList.kolom({ href: 'mastersales', kolom: MSL_KOLOM, onChange: renderTabel })
+  muatDropdownGudang()
+  loadAll();
 };
 </script>
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="namaModalOpen"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelModalOpen" class="table table-bordered table-striped">
-          <thead id='theadOpen' class="text-center bg-primary text-white">
-            <tr></tr>
-          </thead>
-          <tbody id="tabel_dataModalOpen" class="text-left">
-            <tr></tr>
-          </tbody>
-        </table>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelModalOpen">
+                <thead id='theadOpen' class="text-center">
+                  <tr></tr>
+                </thead>
+                <tbody id="tabel_dataModalOpen" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-         
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>

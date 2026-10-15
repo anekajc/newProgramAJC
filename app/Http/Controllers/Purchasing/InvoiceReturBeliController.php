@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\DBFLMENU;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewMenu;
+use App\Models\NewAksesMenu;
+use App\Models\DBFLMENU;
+use App\Models\NewPeriode;
+use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceReturBeliController extends Controller
@@ -303,14 +303,14 @@ public function onChangeHeader (Request $req) {
         $purut = DB::connection('SML')->select('select max(urut)+1 xurut from DBRBELIDET where Nobukti = :nobukti', ['nobukti' => $nobukti]);
             // return 'uuu';
         $xurut= $purut[0]->xurut;
-        }else { 
+        }else {
             // return 'mmm';
             $xurut = $req->urut;
         }
-        
+
     }else{
         // return 'ttt';
-        $xurut=1; 
+        $xurut=1;
     }
     // return ["asd" => $xurut] ;
 

@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Kota')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,28 +22,30 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Kota</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+
+          <table id="tabel" class="data-table po-aksi-hover">
                 <thead>
                   <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode Kota</th>
-                    <th scope="col">Nama Kota</th>
-                    <th scope="col">Kode Area</th>
+                    <th style="padding: 4px 12px;" scope="col">Actions</th>
+                    <th style="padding: 4px 12px;" scope="col">Kode Kota</th>
+                    <th style="padding: 4px 12px;" scope="col">Nama Kota</th>
+                    <th style="padding: 4px 12px;" scope="col">Kode Area</th>
                   </tr>
                 </thead>
-                <tbody id="tabel_data" class="text-right">
+                <tbody id="tabel_data" class="text-left">
               </tbody>
               </table>
-            </div>
-        </div>
+
+    </div>
+  </div>
 
 </div>
 
@@ -53,67 +55,39 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Kota</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodekota" placeholder="Kode Kota">
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_add_kodekota">Kode Kota</label>
+          <input type="text" class="form-control" id="input_add_kodekota" placeholder="Kode Kota">
 
-            </div>
+          <label for="input_add_namakota">Nama Kota</label>
+          <input type="text" class="form-control" id="input_add_namakota" placeholder="Nama Kota">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Kota</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namakota" placeholder="Nama Kota">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Area</label>
-                </div>
-              </div>
-              <div class="col-8">            
-                <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
+          <label for="input_add_kodearea">Kode Area</label>
+          <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
                   <select id="input_add_kodearea" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Area</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-                </div>
-              </div>
-
-            </div>
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -130,67 +104,39 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode kota</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodekota" placeholder="Kode Kota" disabled>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_kodekota">Kode kota</label>
+          <input type="text" class="form-control" id="input_edit_kodekota" placeholder="Kode Kota" disabled>
 
-            </div>
+          <label for="input_edit_namakota">Nama Kota</label>
+          <input type="text" class="form-control" id="input_edit_namakota" placeholder="Nama Kota">
 
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Kota</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namakota" placeholder="Nama Kota">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Area</label>
-                </div>
-              </div>
-              <div class="col-8">            
-                <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
+          <label for="input_edit_kodearea">Kode Area</label>
+          <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
                   <select id="input_edit_kodearea" class="form-control" aria-label="Default select example">
                     <option selected value="0">Pilih Area</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-                </div>
-              </div>
-
-            </div>
+        </div>
 
 
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -200,7 +146,7 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -208,7 +154,7 @@ let dataRefresh = []
 function loadAll () {
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Kota"
+  // document.getElementById('breadcrumb').innerHTML = "Master Kota" // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -247,9 +193,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -288,6 +235,25 @@ function buttonEdit (kodekota) {
   console.log(kodekota)
   let _token = $("#_token").val();
   let tempkodearea = ""
+
+  // Dropdown Area di form Edit dulu tidak pernah diisi (masih opsi contoh One/Two/Three),
+  // jadi area tidak bisa terpilih dan edit selalu tertahan validasi. Diisi sama seperti Add.
+  $.ajax({
+    url: "{!! url('masterkotalistarea') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      let rowTable = `<option selected value=0>Pilih Area</option>`
+      res.forEach((item, i) => {
+        rowTable += `
+          <option value="${item.KODEAREA}">${item.NAMAAREA}</option>
+        `
+      });
+
+      document.getElementById("input_edit_kodearea").innerHTML = rowTable
+    }})
 
   $.ajax({
     url: "{!! url('masterkotaspdetail') !!}",
@@ -356,7 +322,7 @@ function submitEdit () {
   let kodekota = $("#input_edit_kodekota").val();
 
   console.log(kodearea,namakota, kodekota)
-  if (!kodearea) {
+  if (!kodearea || kodearea == 0) {
     alertify.warning("Kode area harus diisi");
     return
   }

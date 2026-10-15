@@ -650,6 +650,7 @@ Route::get('/reportaccountinghutanglph_doKasharian', [LaporanAccountingHutangLPH
 Route::get('/reportaccountinghutanglph_doInvoice', [LaporanAccountingHutangLPHController::class, 'doInvoice']);
 Route::get('/reportaccountinghutanglph_doLpb', [LaporanAccountingHutangLPHController::class, 'doLpb']);
 Route::get('/reportaccountinghutanglph_doBp', [LaporanAccountingHutangLPHController::class, 'doBp']);
+Route::get('/reportaccountinghutanglph_doKartu', [LaporanAccountingHutangLPHController::class, 'doKartu']);
 
 // Hutang - UMUR
 Route::get('/reportaccountinghutangumur', [LaporanAccountingHutangUmurController::class, 'index']);

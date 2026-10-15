@@ -1,159 +1,85 @@
-@extends('gudang.newmasterx')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Terima Transfer Barang')
 
 @section('css')
+{{-- Layout newmasterTest (sama seperti gudang/permintaantransferbarang) sudah memuat newmaster.css +
+     po-table-header.css, dan TIDAK memuat tableMaster2.css — jadi tabel daftar tidak perlu aturan
+     penetral. Tampilan tabel daftar diambil dari blok .po-list-page di po-table-header.css (class-nya
+     dipasang di div#page1). report-table.css tetap dimuat untuk modal filter (.rt-filter). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+
+{{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
+     saat spesifisitas seri. --}}
+<link rel="stylesheet"
+  href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet"
+  href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+
 <style>
-  #contentContainer .toolbar {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+  /* Tabel item #page2 (Form Terima: #addTable), #page3 (Koreksi: #koreksiTable), #page4 (Detail Terima:
+     #detailKoreksiTable) dan #page5 (Detail Transfer
+     Barang: #detailTransferBarangTable, sama seperti #detailTable di accounting/kas/_detail.blade.php) — disamakan dengan tabel .dph-tb di
+     accounting/pengajuandphtunai.blade.php (kotak bergaris, header menempel di kotak scroll, baris
+     hover). Aturan .dph-* di bawah disalin dari public/css/pengajuandphtunai.css; file itu sendiri
+     tidak dimuat di sini karena membawa banyak aturan page-local lain. Padding sel isi memakai
+     !important untuk mengalahkan `table tbody td { padding: 0 10px !important }` di newmaster.css. */
+  .dph-table-outer {
+    border: 1px solid #E3E6F0;
+    border-radius: 10px;
+    overflow: hidden;
   }
 
-  #contentContainer .toolbar .action-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
+  .dph-table-wrap {
+    max-height: 65vh;
+    overflow: auto;
+    background: #fff;
   }
 
-  #tabelitem_header th,
-  #detailKoreksiTable_header th,
-  #detailTransferBarangTable_header th {
-    background: #f8f9fb !important;
-    color: #6b7280 !important;
+  .dph-tb {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .dph-tb thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #FAFBFF;
+    padding: 10px 12px;
     font-size: 12px;
+    font-weight: 700;
+    color: #6B7280;
     text-transform: uppercase;
-    letter-spacing: .04em;
-    font-weight: 600;
-    border-bottom: 1px solid #e7e9ee;
-    border-top: none;
+    letter-spacing: .05em;
+    border-bottom: 2px solid #E3E6F0;
+    white-space: nowrap;
+    text-align: left;
   }
 
-  #tabelitem.table-bordered th,
-  #tabelitem.table-bordered td,
-  #detailKoreksiTable.table-bordered th,
-  #detailKoreksiTable.table-bordered td,
-  #detailTransferBarangTable.table-bordered th,
-  #detailTransferBarangTable.table-bordered td {
-    border-color: #e7e9ee !important;
+  .dph-tb thead th.num {
+    text-align: right;
   }
 
-  #tabelitem tbody tr:nth-of-type(odd),
-  #detailKoreksiTable tbody tr:nth-of-type(odd),
-  #detailTransferBarangTable tbody tr:nth-of-type(odd) {
-    background-color: #fbfbfc;
-  }
-
-  #tabelitem tbody tr:hover,
-  #detailKoreksiTable tbody tr:hover,
-  #detailTransferBarangTable tbody tr:hover {
-    background-color: #f5f3ff;
-  }
-
-  #tabelitem tbody td,
-  #detailKoreksiTable tbody td,
-  #detailTransferBarangTable tbody td {
-    font-size: 12px;
-    padding: 6px 12px;
+  .dph-tb tbody td {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #F1F5F9;
     vertical-align: middle;
   }
 
-  #tabelitem td:last-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
+  .dph-tb tbody tr:hover {
+    background: #F8F9FF;
   }
 
-  #tabelitem td:last-child .btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 13px;
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition: all .12s ease;
-  }
-
-  #tabelitem td:last-child .btn:hover {
-    filter: brightness(0.97);
-    transform: translateY(-1px);
-  }
-
-  #tabelitem td:last-child .btn-success {
-    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-  }
-
-  #tabelitem td:last-child .btn-danger {
-    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-  }
-
-  #mainTable th.rt-fixed-th,
-  #mainTable td:first-child {
-    min-width: 140px;
-  }
-
-  #mainTable td:first-child {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  #mainTable td:first-child .btn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 7px;
-    font-size: 13px;
-    border: 1px solid transparent;
-    box-shadow: none;
-    transition: all .12s ease;
-  }
-
-  #mainTable td:first-child .btn:hover {
-    filter: brightness(0.97);
-    transform: translateY(-1px);
-  }
-
-  #mainTable tbody td:first-child .btn {
-    visibility: hidden;
-    opacity: 0;
-  }
-
-  #mainTable tbody tr:hover td:first-child .btn {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  #mainTable td:first-child .btn-success {
-    color: #16a34a; border-color: #cdebd7; background: #e7f7ed;
-  }
-
-  #mainTable td:first-child .btn-warning {
-    color: #b45309; border-color: #fbe3bd; background: #fef3e0;
-  }
-
-  #mainTable td:first-child .btn-primary {
-    color: #2563eb; border-color: #cfdcff; background: #e8edff;
-  }
-
-  #mainTable td:first-child .btn-danger {
-    color: #dc2626; border-color: #f7cfcf; background: #fdeaea;
-  }
-
-  #mainTable td:first-child .btn-info {
-    color: #0891b2; border-color: #a5f3fc; background: #ecfeff;
+  /* #koreksiTable punya dua baris judul. Baris pengelompokan (Deskripsi Barang / Satuan) dibiarkan
+     ikut tergulung; hanya baris judul kolom yang menempel — kalau keduanya sticky di top:0 saling
+     menimpa. */
+  #koreksiTable thead tr:first-child th {
+    position: static;
+    text-align: center;
   }
 
   .sp-badge {
@@ -174,6 +100,43 @@
     color: #b45309; background: #fef3e0;
   }
 
+  /* Tab #page1 (Transfer Belum Terima / Terima Transfer Barang) — disalin dari .tab-toggle di
+     public/css/tableMaster2.css (file itu tidak dimuat layout newmasterTest). Bootstrap sendiri
+     yang memasang class active lewat data-toggle="tab". */
+  .tab-toggle {
+    display: inline-flex;
+    align-self: flex-start;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .tab-toggle-btn {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    color: #495057;
+    border-radius: 17px;
+    padding: 5px 16px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+
+  .tab-toggle-btn:hover {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .tab-toggle-btn.active {
+    background-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
   .btn-pill-action {
     height: 30px;
     padding: 4px 12px;
@@ -185,67 +148,12 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
   }
 
-  .btn-pill-flat {
-    height: 30px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    border-width: 1px;
-    border-style: solid;
-  }
-
-  .btn-chip-biru {
-    background-color: #e8edff;
-    border-color: #cfdcff;
-    color: #2563eb;
-  }
-
-  .btn-chip-biru:hover,
-  .btn-chip-biru:focus {
-    background-color: #dce6ff;
-    border-color: #b9c9ff;
-    color: #1d4ed8;
-  }
-
-  .btn-chip-biru:active {
-    background-color: #cfdcff !important;
-    border-color: #a8bdff !important;
-    color: #1d4ed8 !important;
-  }
-
-  .btn-batal-add {
-    background-color: #f1f3f5;
-    border-color: #dee2e6;
-    color: #495057;
-  }
-
-  .btn-batal-add:hover,
-  .btn-batal-add:focus {
-    background-color: #e9ecef;
-    border-color: #ced4da;
-    color: #343a40;
-  }
-
-  .btn-batal-add:active {
-    background-color: #dee2e6 !important;
-    border-color: #ced4da !important;
-    color: #343a40 !important;
-  }
-
-  .btn-danger-solid {
-    color: #b91c1c;
-    background-color: #fef2f2;
-    border: 1.5px solid #fecaca;
-  }
-
-  .btn-danger-solid:hover,
-  .btn-danger-solid:focus,
-  .btn-danger-solid:active {
-    background-color: #c82333;
-    border-color: #bd2130;
-    color: #fff;
+  /* newmaster.css memaku `#formBsGrid .form-control` setinggi 38px, sehingga atribut rows pada
+     textarea (alamat Gudang rows=3, Keterangan rows=5/3) tidak berefek dan kotaknya hanya satu
+     baris. Textarea dikembalikan ke tinggi aslinya — sama seperti di
+     gudang/permintaantransferbarang.blade.php. */
+  #formBsGrid textarea.form-control {
+    height: auto;
   }
 </style>
 @endsection
@@ -255,375 +163,459 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
-<div id="page1" class="tb-report main mainpage">
-  <div class="content">
+<div id="page1" class="container-fluid po-list-page mainpage">
 
-    <div class="tb-report" id="contentContainer">
-      <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-      <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+  {{-- Kartu + toolbar + tabel mengikuti gudang/permintaantransferbarang.blade.php (skema po-*,
+       DataTables). Dua tab: kiri = transfer belum diterima (#tabel, tanpa periode), kanan = terima
+       transfer barang (#tabel2, pakai rentang tanggal) — pola dua tabel/ReportTable mengikuti
+       accounting/bonsementara.blade.php, markup tab mengikuti accounting/cetakpengajuandph.blade.php. --}}
+  <div id="contentContainer" class="container-fluid">
+    <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
+    <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
-      <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
-      <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
-      <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
-      <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
-      <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
-      <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
+    <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
+    <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
+    <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
+    <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+    <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+    <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
-      <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
+    <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-      <div class="toolbar">
-        <div class="filter-wrap">
-          <label>Periode</label>
-          <input type="date" class="filter-inp" id="inputDate1" value="{!! $date1 !!}"
-            onchange="reloadData()">
-          <span class="filter-sep">s/d</span>
-          <input type="date" class="filter-inp" id="inputDate2" value="{!! $date2 !!}"
-            onchange="reloadData()">
-        </div>
-
-        <input class="search-inp" type="text" id="searchBox2" placeholder="Cari data..."
-          oninput="currentPage = 1; renderTabel()" style="width:200px">
-
-        <div class="period-select-wrap">
-          <label for="tampilLen">Tampilkan</label>
-          <select class="period-select" id="tampilLen" onchange="onChangeTampilLen()">
-            <option value="10" selected>10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="-1">Semua</option>
-          </select>
-        </div>
-
-        <button class="btn-load" type="button" onclick="$('#modalFilter').modal('show')">
-          <i class="bi bi-filter-lg"></i> Filter
-        </button>
-      </div>
-
-      <div id="rtBar"></div>
-
-      <div class="table-outer">
-        <div class="table-wrap">
-          <table class="tb" id="mainTable">
-            <thead>
-              <tr>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tabel2_data"></tbody>
-          </table>
-        </div>
-        <div class="table-footer">
-          <span id="footerLabel2">Belum ada data</span>
-          <div class="pager-btns" id="pagerBtns"></div>
-        </div>
-      </div>
-
-      <div class="rt-hint">
-        <i class="bi bi-info-circle"></i>
-        Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
-        sembunyikan kolom.
-      </div>
-
+    <div class="tab-toggle nav" id="nav-tab" role="tablist" style="margin-bottom: 10px">
+      <a class="tab-toggle-btn active" id="nav-belum-tab" data-toggle="tab" href="#tabBelum" role="tab"
+        aria-controls="tabBelum" aria-selected="true">Transfer Belum Terima</a>
+      <a class="tab-toggle-btn" id="nav-terima-tab" data-toggle="tab" href="#tabTerima" role="tab"
+        aria-controls="tabTerima" aria-selected="false">Terima Transfer Barang</a>
     </div>
-  </div>
-</div>
 
-{{-- modal filter --}}
-<div class="modal fade rt-filter" id="modalFilter">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
+    <div class="tab-content">
+      {{-- Tab kiri: semua transfer yang belum diterima — tanpa filter periode. --}}
+      <div class="tab-pane fade show active" id="tabBelum" role="tabpanel" aria-labelledby="nav-belum-tab">
+        <div class="card">
+          <div class="card-body" style="padding:0;">
 
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-filter"></i>
-          Filter Laporan
-          <span class="rt-active-badge" id="filterBadge">0 aktif</span>
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+            <div class="po-toolbar">
+              <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
 
-      <div class="modal-body">
-        <div class="rt-section">
-          <div class="rt-group-label">Pengaturan Laporan</div>
-          <div class="rt-grid-2">
-            <div>
-              <label class="rt-field-label" for="modalStatusTerima">Status</label>
-              <select class="rt-native" id="modalStatusTerima">
-                <option value="2">Semua</option>
-                <option value="1">Terima</option>
-                <option value="0">Belum</option>
-              </select>
+              {{-- Jumlah baris per halaman. -1 = tampilkan semua data (tanpa pager) — diikat ke
+                   DataTables lewat ikatPanjangHalaman(), bukan onchange inline. --}}
+              <div class="po-len-wrap">
+                <label for="tampilLen">Tampilkan</label>
+                <select class="po-len-inp" id="tampilLen">
+                  <option value="10" selected>10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="-1">Semua</option>
+                </select>
+              </div>
             </div>
+
+            {{-- Bar kolom tersembunyi — diisi ReportTable.init() (lihat initReportTableSekali()). --}}
+            <div id="rtBar"></div>
+
+            <table id="tabel" class="data-table po-aksi-hover">
+              <thead id="tabel_header">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tabel_data" class="text-left"></tbody>
+            </table>
+
+            <div class="po-rt-hint">
+              <i class="bi bi-info-circle"></i>
+              Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+              sembunyikan kolom.
+            </div>
+
           </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="rt-reset-link" onclick="resetAllFilters()">Reset semua</button>
-        <div class="rt-footer-buttons">
-          <button type="button" class="rt-btn rt-btn-ghost" data-dismiss="modal">Batal</button>
-          <button type="button" class="rt-btn rt-btn-primary" onclick="applyModalFilter()">Terapkan</button>
+      {{-- Tab kanan: transfer yang sudah diterima, difilter rentang tanggal. --}}
+      <div class="tab-pane fade" id="tabTerima" role="tabpanel" aria-labelledby="nav-terima-tab">
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+
+            <div class="po-toolbar">
+              <div class="po-filter-wrap">
+                <label>Periode</label>
+                <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
+                <span class="po-filter-sep">s/d</span>
+                <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off">
+              </div>
+
+              <input class="po-search-inp" type="search" id="searchBoxTerima" placeholder="Cari data">
+
+              <div class="po-len-wrap">
+                <label for="tampilLenTerima">Tampilkan</label>
+                <select class="po-len-inp" id="tampilLenTerima">
+                  <option value="10" selected>10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="-1">Semua</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="rtBar2"></div>
+
+            <table id="tabel2" class="data-table po-aksi-hover">
+              <thead id="tabel2_header">
+                <tr>
+                  <th style="padding: 4px 12px;" scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tabel2_data" class="text-left"></tbody>
+            </table>
+
+            <div class="po-rt-hint">
+              <i class="bi bi-info-circle"></i>
+              Seret judul kolom untuk mengurutkan. Klik <i class="bi bi-gear"></i> pada judul kolom untuk
+              sembunyikan kolom.
+            </div>
+
+          </div>
         </div>
       </div>
-
     </div>
+
   </div>
+
 </div>
-{{-- end modal filter --}}
 
 <div id="printContainer" style="display:none">
 </div>
 
 
-<div id="page2" style="display: none" class="mainpage container-fluid" >
+<div id="page2" style="display: none" class="mainpage container-fluid po-form-page">
 
-  <div class="row" style="margin-top: -80px">
+  <div class="row">
     <div class="col-8 text-left">
-      <h2>Form Terima Transfer Barang</h2>
+      <h2></h2>
     </div>
-    <div class="col-4 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" onclick="buttonCloseForm()">Close</button>
+    <div class="col-4 text-right" id="contentContainer">
+      <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger" onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
   <div class="container-fluid">
     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-    <div class="row">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-3">
-            <div class="row">
-            <div class="col-md-4">
+    {{-- Header mengikuti struktur gudang/permintaantransferbarang.blade.php: No Bukti/Tanggal | Gudang Asal |
+         Gudang Tujuan | Keterangan. Gudang read-only (ditentukan oleh transfer yang diterima, diisi di
+         buttonAdd() dari getDetail); Keterangan disimpan ke DBTRANSFER.NOTE dokumen terima lewat spAdd. --}}
+    <div class="modal-body" id="formBsGrid">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="" disabled>
+                <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
               </div>
             </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="row">
-            <div class="col-md-4">
+
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
+                <input type="date" class="form-control text-left" id="input_add_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label>Gudang Asal</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_add_gudangAsal" placeholder="" disabled>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_add_alamatGudangAsal" disabled></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label>Gudang Tujuan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_add_gudangTujuan" placeholder="" disabled>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_add_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_add_keterangan"></textarea>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <hr/>
-        <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
 
-              <table id="addTable" class="table table-bordered table-striped"  >
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th style="padding: 4px 12px;" scope="col">Terima</th>
-                    <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">No Bukti</th>
-                    <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
-                    <th style="padding: 4px 12px;" scope="col">Satuan</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty Transfer</th>
-                    <th style="padding: 4px 12px;" scope="col">Qty Terima</th>
-                  </tr>
-                </thead>
-                <tbody id="addTableData" class="" >
-                  <tr>
-                    <td colspan=7 class="text-center">Belum ada data</td>
-                  </tr>
-                </tbody>
-              </table>
+    <div class="container-fluid mt-4" style="padding:0; margin:0;" id="formBsGrid">
+      <div class="dph-table-outer">
+        <div class="dph-table-wrap">
+          <table id="addTable" class="dph-tb">
+            <thead id="addTable_header">
+              <tr>
+                <th scope="col" class="text-center">Terima</th>
+                <th scope="col">Kode Barang</th>
+                <th scope="col">No Bukti</th>
+                <th scope="col">Nama Barang</th>
+                <th scope="col">Satuan</th>
+                <th scope="col" class="num">Qty Transfer</th>
+                <th scope="col" class="text-center">Qty Terima</th>
+              </tr>
+            </thead>
+            <tbody id="addTableData">
+              <tr>
+                <td colspan=7 class="text-center">Belum ada data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="row mt-2" style="margin-top: 0">
-      <div class="col-md-12 text-right mt-4">
-        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-pill-action btn-chip-biru">Submit</button>
+      <div class="col-md-12 text-right mt-4" id="contentContainer">
+        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-action-primary btn-primary btn-pill-primary">Simpan</button>
       </div>
     </div>
   </div>
 </div>
 
 
-<div id="page3" style="display: none" class="mainpage container-fluid" >
+<div id="page3" style="display: none" class="mainpage container-fluid po-form-page">
   <div class="row" >
     <div class="col-8 text-left">
-      <h2>Koreksi Terima Transfer Barang</h2>
+      <h2></h2>
     </div>
-    <div class="col-4 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" onclick="buttonCloseForm()">Close</button>
+    <div class="col-4 text-right" id="contentContainer">
+      <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger" onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
-  <div class="modal-body">
+  <div class="modal-body" id="formBsGrid">
     {{-- <input type="hidden" name="noUrut" id="input_koreksi_nourut" value="" /> --}}
     <div class="row">
         <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan (editable,
+             disimpan lewat onChangeHeader saat blur). --}}
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_koreksi_nobukti" placeholder="" disabled>
               </div>
             </div>
 
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_koreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                <input type="date" class="form-control text-left" id="input_koreksi_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Tengah -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_gudangasal_nama" type="text" class="form-control text-left" placeholder="" disabled>
               </div>
             </div>
-
-            <div class="col-md-4" style="margin-top:-10px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=3 placeholder="" class="form-control text-left" id="input_koreksi_keterangan"  onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangAsal" disabled></textarea>
               </div>
             </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_gudangtujuan_nama" type="text" class="form-control text-left" placeholder="" disabled>
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
-        </div>
 
-        <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-          <table id="koreksiTable" class="table table-bordered table-striped"  >
-            <thead class="text-center bg-primary text-white">
-            <tr>
-              <th colspan="4">Deskripsi Barang</th>
-              <th colspan="2">Satuan</th>
-              <th colspan="1"></th>
-            </tr>
-            <tr>
-              <th scope="col">Kode Barang</th>
-              <th scope="col">Nama Barang</th>
-              <th scope="col">Gudang Asal</th>
-              <th scope="col">Gudang Tujuan</th>
-              <th scope="col">Qty</th>
-              <th scope="col">Sat</th>
-              <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody id="koreksiTableData" class="" >
-              <tr>
-                <td colspan=7 class="text-center">Belum ada data</td>
-            </tr>
-            </tbody>
-          </table>
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_koreksi_keterangan" onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+              </div>
+            </div>
+          </div>
         </div>
-    <div id="formKoreksiEdit" class="container-fluid showhideitem">
-    <div class="row">
+    </div>
+
+        <div class="container-fluid mt-4" style="padding:0; margin:0;">
+          <div class="dph-table-outer">
+            <div class="dph-table-wrap">
+              <table id="koreksiTable" class="dph-tb">
+                <thead>
+                  <tr>
+                    <th scope="col">Kode Barang</th>
+                    <th scope="col">Nama Barang</th>
+                    <th scope="col">Gudang Asal</th>
+                    <th scope="col">Gudang Tujuan</th>
+                    <th scope="col" class="num">Qty</th>
+                    <th scope="col" class="text-center">Sat</th>
+                    <th scope="col" class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="koreksiTableData">
+                  <tr>
+                    <td colspan=7 class="text-center">Belum ada data</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+    <div id="formKoreksiEdit" class="container-fluid showhideitem mt-4">
+    <div class="row mb-3">
       <div class="col-4">
         <h4 id="h4KoreksiEditItem" style="margin-left:-15px;">Edit Item</h4>
       </div>
     </div>
 
-    <div class="row">
+    {{-- Jarak antar baris (mb-3) + label sejajar tengah dengan input (align-items-center, label mb-0). --}}
+    <div class="row" id="formBsGrid">
       <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label class="form-label fw-bold">Kode Barang</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Kode Barang</label>
           </div>
           <div class="col-md-4">
-            <input id="KoreksiEditKodeBrg" type="text" class="form-control text-center bg-light" disabled>
+            <input id="KoreksiEditKodeBrg" type="text" class="form-control text-center" disabled>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label class="form-label fw-bold">Nama Barang</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Nama Barang</label>
           </div>
-          <div class="col-md-8">
-            <input id="KoreksiEditNamaBrg" type="text" class="form-control text-center bg-light" disabled>
+          <div class="col-md-4">
+            <input id="KoreksiEditNamaBrg" type="text" class="form-control text-center" disabled>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label class="form-label fw-bold">Quantity</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Quantity</label>
           </div>
           <div class="col-md-3">
             <input id="KoreksiEditInputQty" type="number" step="0.01" class="form-control text-right" value="0.00">
           </div>
-          <div class="col-md-2" style="margin-top:5px;">
-            <label class="form-label fw-bold">Satuan</label>
+          <div class="col-md-2" >
+            <label class="mb-0">Satuan</label>
           </div>
           <div class="col-md-3">
-            <input id="KoreksiEditInputSat" type="text" class="form-control text-center bg-light" disabled>
+            <input id="KoreksiEditInputSat" type="text" class="form-control text-center" disabled>
           </div>
         </div>
       </div>
       <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label class="form-label fw-bold">Gudang Asal</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Gudang Asal</label>
           </div>
-          <div class="col-md-8">
-            <input id="KoreksiEditGudangAsal" type="text" class="form-control text-center bg-light" disabled>
+          <div class="col-md-4">
+            <input id="KoreksiEditGudangAsal" type="text" class="form-control text-center" disabled>
             <input type="hidden" id="input_gudang_asal">
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label class="form-label fw-bold">Gudang Tujuan</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Gudang Tujuan</label>
           </div>
-          <div class="col-md-8">
-            <input id="KoreksiEditGudangTujuan" type="text" class="form-control text-center bg-light" disabled>
+          <div class="col-md-4">
+            <input id="KoreksiEditGudangTujuan" type="text" class="form-control text-center" disabled>
             <input type="hidden" id="input_gudang_tujuan">
           </div>
         </div>
@@ -631,15 +623,14 @@
     </div>
 
     <div class="row mt-3">
-      <div class="col-md-12 text-right">
-        <button type="button" class="btn btn-pill-flat btn-batal-add" onclick="buttonKoreksiItemBatal()">Batal</button>
+      <div class="col-md-12 text-right" id="contentContainer">
+        <button type="button" class="btn btn-action-danger btn-danger btn-pill-primary" onclick="buttonKoreksiItemBatal()">Batal</button>
 
-        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-pill-action btn-chip-biru">Submit Edit</button>
+        <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
       </div>
     </div>
   </div>
-    <hr/>
-        
+
   </div>
 </div>
 {{-- Start Modal List gudang asal --}}
@@ -740,196 +731,257 @@
   </div>
 {{-- End Modal List gudang tujuan --}}
 
-<div id="page4" style="display: none" class="mainpage container-fluid" >
+<div id="page4" style="display: none" class="mainpage container-fluid po-form-page">
   <div class="row">
     <div class="col-8 text-left">
-      <h2>Detail Terima Transfer Barang</h2>
+      <h2></h2>
     </div>
-    <div class="col-4 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" onclick="buttonCloseForm()">Close</button>
+    <div class="col-4 text-right" id="contentContainer">
+      <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger" onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
-  <div class="modal-body">
+  {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+       No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
+  <div class="modal-body" id="formBsGrid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_detailkoreksi_nobukti" placeholder="" disabled>
               </div>
             </div>
 
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Tengah -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detailkoreksi_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detailkoreksi_gudangasal" type="hidden">
               </div>
             </div>
-
-            <div class="col-md-4" style="margin-top:-10px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=3 placeholder="" class="form-control text-left" id="input_detailkoreksi_keterangan" disabled></textarea>
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangAsal" disabled></textarea>
               </div>
             </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detailkoreksi_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detailkoreksi_gudangtujuan" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_detailkoreksi_keterangan" disabled></textarea>
+              </div>
+            </div>
+          </div>
         </div>
+    </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-              <table id="detailKoreksiTable" class="table table-bordered table-hover table-responsive-lg"  >
-                <thead id="detailKoreksiTable_header" class="text-center">
-                <tr>
-                  <th colspan="4">Deskripsi Barang</th>
-                  <th colspan="2">Satuan</th>
-                </tr>
-                <tr>
-                  <th scope="col">Kode Barang</th>
-                  <th scope="col">Nama Barang</th>
-                  <th scope="col">Gudang Asal</th>
-                  <th scope="col">Gudang Tujuan</th>
-                  <th scope="col">Qty</th>
-                  <th scope="col">Sat</th>
-                </tr>
+          <div class="dph-table-outer">
+            <div class="dph-table-wrap">
+              <table id="detailKoreksiTable" class="dph-tb">
+                <thead id="detailKoreksiTable_header">
+                  <tr>
+                    <th scope="col">Kode Barang</th>
+                    <th scope="col">Nama Barang</th>
+                    <th scope="col">Gudang Asal</th>
+                    <th scope="col">Gudang Tujuan</th>
+                    <th scope="col" class="num">Qty</th>
+                    <th scope="col">Sat</th>
+                  </tr>
                 </thead>
-                <tbody id="detailKoreksiTableData" class="" >
+                <tbody id="detailKoreksiTableData">
                   <tr>
                     <td colspan=6 class="text-center">Belum ada data</td>
-                </tr>
+                  </tr>
                 </tbody>
               </table>
-    </div>
+            </div>
+          </div>
+        </div>
   </div>
 </div>
 
-<div id="page5" style="display: none" class="mainpage container-fluid" >
+<div id="page5" style="display: none" class="mainpage container-fluid po-form-page">
   <div class="row">
     <div class="col-8 text-left">
-      
+
     </div>
-    <div class="col-4 text-right">
-      <button type="button" class="btn btn-lg btn-pill-action btn-danger-solid" onclick="buttonCloseForm()">Close</button>
+    <div class="col-4 text-right" id="contentContainer">
+      <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger" onclick="buttonCloseForm()">Close</button>
     </div>
   </div>
 
-  <div class="modal-body">
+  <div class="modal-body" id="formBsGrid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
               </div>
             </div>
+
+            <div class="col-6" style="margin-top:8px;">
+              <div class="form-group">
+                <label>Tanggal</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="date" class="form-control text-left" id="input_detail_tanggal" disabled>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Tengah -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detail_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detail_gudangasal" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_detail_alamatGudangAsal" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detail_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detail_gudangtujuan" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_detail_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_detail_keterangan" disabled></textarea>
+              </div>
+            </div>
+          </div>
         </div>
-    <hr/>
+    </div>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
-              <table id="detailTransferBarangTable" class="table table-bordered table-hover table-responsive-lg"  >
-                <thead id="detailTransferBarangTable_header" class="text-center">
-                <tr>
-                  <th scope="col">Kode Barang</th>
-                  <th scope="col">Nama Barang</th>
-                  <th scope="col">Sat</th>
-                  <th scope="col">Qty</th>
-                </tr>
+          <div class="dph-table-outer">
+            <div class="dph-table-wrap">
+              <table id="detailTransferBarangTable" class="dph-tb">
+                <thead id="detailTransferBarangTable_header">
+                  <tr>
+                    <th scope="col">Kode Barang</th>
+                    <th scope="col">Nama Barang</th>
+                    <th scope="col">Sat</th>
+                    <th scope="col" class="num">Qty</th>
+                  </tr>
                 </thead>
-                <tbody id="detailTransferBarangTableData" class="" >
+                <tbody id="detailTransferBarangTableData">
                   <tr>
                     <td colspan=4 class="text-center">Belum ada data</td>
-                </tr>
+                  </tr>
                 </tbody>
               </table>
-    </div>
+            </div>
+          </div>
+        </div>
   </div>
 </div>
 
@@ -939,6 +991,7 @@
 @endsection
 
 @section('js')
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 
@@ -947,15 +1000,24 @@ let dataTableAdd = []
 let dataTableKoreksi = []
 let barangKoreksiEdit = {}
 
-let lastRows = (function() {
-  // paint pertama tanpa AJAX; reloadData() menyegarkan setelahnya.
-  let belum = @json($listBelumTerima);
-  let sudah = @json($listSdhTerima);
-  return belum.concat(sudah);
-})();
-let globalStatusTerima = "2"; // filter modal: 2=Semua, 1=Terima saja
-let pageSize = 10;
-let currentPage = 1; 
+// Dua dataset terpisah, satu per tab. Paint pertama tanpa AJAX; loadBelum()/loadTerima() menyegarkan.
+let lastRowsBelum = @json($listBelumTerima); // tab kiri  (#tabel)
+let lastRowsTerima = @json($listSdhTerima);  // tab kanan (#tabel2)
+// jumlah baris per halaman (pageLength DataTables) per tabel; -1 = semua
+let pageSizes = { tabel: 10, tabel2: 10 };
+
+// Batas karakter kolom Keterangan di tabel daftar. Lebih dari ini dipotong dan diakhiri '...'
+// (teks lengkap tetap ada di tooltip dan ikut dicari). Ubah angka ini untuk mengatur batasnya.
+const KETERANGAN_MAX_CHARS = 50;
+
+function potongKeterangan(teks) {
+  let str = String(nullToEmpty(teks));
+  return (str.length > KETERANGAN_MAX_CHARS) ? str.slice(0, KETERANGAN_MAX_CHARS) + '...' : str;
+}
+
+function escapeAttr(teks) {
+  return String(teks).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 function pickCI(r, key) {
   if (r[key] !== undefined) {
@@ -996,6 +1058,13 @@ var gsum_issubtotal = 0;
 var gsum_isgrandtotal = 0;
 var gct_desimal_max = 4;
 
+// Tiap tab menyimpan susunan kolomnya sendiri (g_href sama, mode beda):
+// '2' = tab kiri (Transfer Belum Terima), '3' = tab kanan (Terima Transfer Barang).
+const MODE_BELUM = '2';
+const MODE_TERIMA = '3';
+let cartBelum = [];
+let cartTerima = [];
+
 function setDefaultHeader() {
   // [ field, label, visible, type, total, decimals ]
   gcart_header = [
@@ -1003,9 +1072,35 @@ function setDefaultHeader() {
     ['TANGGAL', 'Tanggal', 1, 'date', 0, 0],
     ['NamagdgAsal', 'Gudang Asal', 1, 'varchar', 0, 0],
     ['NamagdgTujuan', 'Gudang Tujuan', 1, 'varchar', 0, 0],
-    ['NOTE', 'Keterangan', 1, 'varchar', 0, 0],
-    ['IsTerima', 'Status', 1, 'varchar', 0, 0]
+    ['NOTE', 'Keterangan', 1, 'varchar', 0, 0]
   ];
+}
+
+// Muat susunan kolom satu mode. Kolom Status (IsTerima) sudah tidak dipakai sejak daftar dipecah
+// jadi dua tab — buang dari susunan yang terlanjur tersimpan, lalu simpan ulang.
+function muatKolom(mode) {
+  g_modeReport = mode;
+  doSetHeader(mode);
+
+  let adaStatus = gcart_header.some(c => c[0] === 'IsTerima');
+  if (adaStatus) {
+    gcart_header = gcart_header.filter(c => c[0] !== 'IsTerima');
+    doSimpanHeader(g_href, mode, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+  }
+  return gcart_header;
+}
+
+/* ReportTable membaca susunan kolom dari window.gcart_header, dan doSimpanHeader() dkk menyimpan
+   lewat g_modeReport — keduanya ditukar setiap kali tabel yang dipegang berganti (onActivate di
+   ReportTable.init() + dipanggil di awal tiap render), sama seperti accounting/bonsementara.blade.php. */
+function pakaiKolomBelum() {
+  g_modeReport = MODE_BELUM;
+  gcart_header = cartBelum;
+}
+
+function pakaiKolomTerima() {
+  g_modeReport = MODE_TERIMA;
+  gcart_header = cartTerima;
 }
 
 function doSetHeader(_modereport, _isReset = false) {
@@ -1123,300 +1218,260 @@ function doButtonTotal(_index) {
   doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
 }
 
-function filterByStatusTerima(rows, filterVal) {
-  if (filterVal === '1') { // hanya yang sudah diterima
-    return rows.filter(r => Number(pickCI(r, 'IsTerima')) === 1);
-  }
-  if (filterVal === '0') { // hanya yang belum diterima
-    return rows.filter(r => Number(pickCI(r, 'IsTerima')) === 0);
-  }
-  return rows; // Semua
-}
+// Markup + pemetaan warna/ikon tombol mengikuti aksiButtonsHtml() di gudang/ubahkemasanbarang.blade.php
+// (.po-aksi-wrap, cuma title, tanpa tooltip Bootstrap). Fungsi yang dipanggil tetap milik halaman ini.
 
-function getVisibleRows() {
-  const cols = gcart_header.filter(c => c[2] === 1);
-  const search = ($('#searchBox2').val() || '').trim().toLowerCase();
-  let rows = lastRows;
-  if (search) {
-    rows = rows.filter(function(r) {
-      return cols.some(function(c) {
-        const v = pickCI(r, c[0]);
-        return v != null && String(v).toLowerCase().indexOf(search) !== -1;
-      });
-    });
-  }
-  return filterByStatusTerima(rows, globalStatusTerima);
-}
-
-function gotoRowPage(nobukti) {
-  if (!nobukti) { currentPage = 1; return; }
-  let visible = getVisibleRows();
-  let idx = visible.findIndex(function(r) { return String(pickCI(r, 'NOBUKTI')) === String(nobukti); });
-  if (idx < 0) {
-    return;
-  }
-  currentPage = (pageSize === -1) ? 1 : Math.floor(idx / pageSize) + 1;
-}
-
-function aksiButtonsHtml(r) {
+// Tab kiri (belum diterima): Detail + Terima.
+function aksiButtonsBelum(r) {
   const nobukti = pickCI(r, 'NOBUKTI');
-  const isTerima = Number(pickCI(r, 'IsTerima')) === 1;
-
-  if (isTerima) {
-    // Sudah diterima 
-    return '<button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Detail" onclick="buttonDetailKoreksi(\'' +
-      nobukti + '\')"><i class="bi bi-info"></i></button>' +
-      '<button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Koreksi" onclick="buttonKoreksi(\'' +
-      nobukti + '\', \'edit\')"><i class="bi bi-pen"></i></button>';
-  }
-
-  // Belum diterima 
-  return '<button type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Detail" onclick="buttonDetailTransferBarang(\'' +
+  return '<div class="po-aksi-wrap">' +
+    '<button type="button" class="btn btn-warning btn-sm" title="Detail" onclick="buttonDetailTransferBarang(\'' +
     nobukti + '\')"><i class="bi bi-info"></i></button>' +
-    '<button type="button" class="btn btn-success btn-sm" data-toggle="tooltip" title="Terima" onclick="buttonAdd(\'' +
-    nobukti + '\')"><i class="bi bi-plus"></i></button>';
+    '<button type="button" class="btn btn-primary btn-sm" title="Terima" onclick="buttonAdd(\'' +
+    nobukti + '\')"><i class="bi bi-plus"></i></button>' +
+    '</div>';
 }
 
-function renderTabel() {
-  const cols = gcart_header.filter(c => c[2] === 1);
-  const thead = document.querySelector('#mainTable thead');
-  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>', '<tr><th class="rt-fixed-th">Aksi</th>');
+// Tab kanan (sudah diterima): Detail + Edit (koreksi) + Hapus. Hapus hanya dari sini — halaman
+// koreksi (#page3) tidak lagi punya tombol hapus per item.
+function aksiButtonsTerima(r) {
+  const nobukti = pickCI(r, 'NOBUKTI');
+  return '<div class="po-aksi-wrap">' +
+    '<button type="button" class="btn btn-warning btn-sm" title="Detail" onclick="buttonDetailKoreksi(\'' +
+    nobukti + '\')"><i class="bi bi-info"></i></button>' +
+    '<button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonKoreksi(\'' +
+    nobukti + '\')"><i class="bi bi-pen"></i></button>' +
+    '<button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="buttonHapus(\'' +
+    nobukti + '\')"><i class="bi bi-trash"></i></button>' +
+    '</div>';
+}
 
-  let rows = getVisibleRows();
-
-  const tbody = document.getElementById('tabel2_data');
-  $(tbody).find('[data-toggle="tooltip"]').tooltip('dispose');
-
-  if (!rows.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="' + (cols.length + 1) + '">Tidak ada data</td></tr>';
-    document.getElementById('footerLabel2').textContent = 'Tidak ada data';
-    document.getElementById('pagerBtns').innerHTML = '';
+/* Bar kolom tersembunyi harus berada tepat di atas tabelnya. DataTables membungkus tabel dengan
+   #<id>_wrapper saat init, jadi acuannya ikut berpindah — sama seperti rtPindahBar() di
+   gudang/permintaantransferbarang.blade.php. */
+function rtPindahBar(idBar, idTabel) {
+  let bar = document.getElementById(idBar);
+  let tabel = document.getElementById(idTabel);
+  if (!bar || !tabel) {
     return;
   }
 
-  const total = rows.length;
-  const totalPages = (pageSize === -1) ? 1 : Math.max(1, Math.ceil(total / pageSize));
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
-
-  let pageRows = rows;
-  let startIdx = 0;
-  if (pageSize !== -1) {
-    startIdx = (currentPage - 1) * pageSize;
-    pageRows = rows.slice(startIdx, startIdx + pageSize);
+  let acuan = tabel;
+  if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+    acuan = document.getElementById(idTabel + '_wrapper') || tabel;
   }
+
+  if (acuan.previousElementSibling !== bar) {
+    acuan.parentNode.insertBefore(bar, acuan);
+  }
+}
+
+// Kotak cari, dropdown "Tampilkan", dan periode diikat lewat JS (bukan atribut inline) dengan
+// penjaga dataset.rtBound supaya tidak terpasang dobel tiap render.
+function ikatSearch(idInput, idTabel) {
+  let input = document.getElementById(idInput);
+  if (!input || input.dataset.rtBound) {
+    return;
+  }
+  input.dataset.rtBound = '1';
+
+  input.addEventListener('input', function() {
+    $('#' + idTabel).DataTable().search(input.value).draw();
+  });
+}
+
+function ikatPanjangHalaman(idSelect, idTabel) {
+  let sel = document.getElementById(idSelect);
+  if (!sel || sel.dataset.rtBound) {
+    return;
+  }
+  sel.dataset.rtBound = '1';
+  sel.value = String(pageSizes[idTabel]);
+
+  sel.addEventListener('change', function() {
+    let n = Number(sel.value);
+    pageSizes[idTabel] = (n === -1 || n > 0) ? n : 10;
+    $('#' + idTabel).DataTable().page.len(pageSizes[idTabel]).draw();
+  });
+}
+
+// Periode hanya untuk tab kanan. Rentang yang belum lengkap tidak memicu request, dan urutan
+// tanggal terbalik ditolak dengan peringatan — sama seperti ikatPeriode() di
+// gudang/permintaantransferbarang.blade.php.
+function ikatPeriode() {
+  let awal = document.getElementById('inputDate1');
+  let akhir = document.getElementById('inputDate2');
+  if (!awal || !akhir || awal.dataset.rtBound) {
+    return;
+  }
+  awal.dataset.rtBound = '1';
+
+  // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+  // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+  // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+  awal.value = awal.defaultValue;
+  akhir.value = akhir.defaultValue;
+
+  let onUbah = function() {
+    if (!awal.value || !akhir.value) {
+      return;
+    }
+    if (awal.value > akhir.value) {
+      alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
+      return;
+    }
+    loadTerima();
+  };
+  awal.addEventListener('change', onUbah);
+  akhir.addEventListener('change', onUbah);
+}
+
+// Tinggi tabel mengikuti sisa ruang layar. Berhenti diam-diam kalau tabelnya sedang tidak tampil
+// (#page1 disembunyikan atau tab-nya tidak aktif); dihitung ulang saat tab dibuka (shown.bs.tab)
+// atau #page1 ditampilkan lagi (buttonCloseForm() -> loadAll() -> render).
+function aturTinggiTabel(idTabel) {
+  let page = document.getElementById('page1');
+  let area = document.getElementById('content');
+  let wrap = document.querySelector('#' + idTabel + '_wrapper .po-table-wrap');
+  if (!page || !area || !wrap || wrap.offsetParent === null) {
+    return;
+  }
+
+  wrap.style.maxHeight = 'none';
+
+  let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+  let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+  let kotak = wrap.getBoundingClientRect();
+  let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+  let sisa = batasBawah - kotak.top - bawah - 4;
+  wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
+}
+
+// Render satu tabel daftar. opt: { tabel, bar, search, len, rows, aksi, pakaiKolom }
+function renderTabelDaftar(opt) {
+  if (typeof ReportTable !== 'undefined' && ReportTable.use) {
+    ReportTable.use('#' + opt.tabel);
+  }
+  opt.pakaiKolom();
+
+  const cols = gcart_header.filter(c => c[2] === 1);
+  const selTabel = '#' + opt.tabel;
+
+  if ($.fn.DataTable.isDataTable(selTabel)) {
+    $(selTabel).DataTable().destroy();
+  }
+
+  const thead = document.querySelector(selTabel + ' thead');
+  thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>',
+    '<tr><th style="padding: 4px 12px;" scope="col">Action</th>');
 
   let html = '';
-  pageRows.forEach(function(r) {
-    html += '<tr class="data-row">';
-    html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+  opt.rows.forEach(function(r) {
+    html += '<tr>';
+    html += '<td class="text-center">' + opt.aksi(r) + '</td>';
     html += cols.map(function(c) {
       const v = pickCI(r, c[0]);
-      if (c[0] === 'IsTerima') {
-        return (Number(v) === 1) ?
-          '<td><span class="sp-badge is-active">Sudah Terima</span></td>' :
-          '<td><span class="sp-badge is-inactive">Belum Terima</span></td>';
-      }
       if (c[3] === 'date') {
         return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
+      }
+      if (c[0] === 'NOTE') {
+        // data-search = teks lengkap supaya pencarian DataTables tidak hanya mencocokkan yang terpotong.
+        const penuh = String(nullToEmpty(v));
+        return '<td data-search="' + escapeAttr(penuh) + '" title="' + escapeAttr(penuh) + '">' +
+          potongKeterangan(penuh) + '</td>';
       }
       return '<td>' + nullToEmpty(v) + '</td>';
     }).join('');
     html += '</tr>';
   });
 
-  tbody.innerHTML = html;
-  document.getElementById('footerLabel2').textContent =
-    'Menampilkan ' + (startIdx + 1) + '-' + (startIdx + pageRows.length) + ' dari ' + total + ' baris';
-  renderPager(totalPages);
-  $('[data-toggle="tooltip"]').tooltip({
-    container: 'body',
-    boundary: 'window'
+  document.querySelector(selTabel + ' tbody').innerHTML = html;
+
+  // dom membuat sendiri kotak scroll .po-table-wrap (header sticky) + baris info & pager.
+  $(selTabel).DataTable({
+    lengthChange: false,
+    pageLength: pageSizes[opt.tabel],
+    order: [],
+    columnDefs: [{
+      targets: [0],
+      orderable: false
+    }],
+    dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+    language: {
+      emptyTable: 'Tidak ada data',
+      zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+    }
+  });
+
+  rtPindahBar(opt.bar, opt.tabel);
+  ikatSearch(opt.search, opt.tabel);
+  ikatPanjangHalaman(opt.len, opt.tabel);
+
+  let inputSearch = document.getElementById(opt.search);
+  if (inputSearch && inputSearch.value) {
+    $(selTabel).DataTable().search(inputSearch.value).draw();
+  }
+
+  aturTinggiTabel(opt.tabel);
+}
+
+function renderTabelBelum() {
+  renderTabelDaftar({
+    tabel: 'tabel',
+    bar: 'rtBar',
+    search: 'searchBox2',
+    len: 'tampilLen',
+    rows: lastRowsBelum,
+    aksi: aksiButtonsBelum,
+    pakaiKolom: pakaiKolomBelum
   });
 }
 
-// Dropdown "Tampilkan"
-function onChangeTampilLen() {
-  pageSize = Number($('#tampilLen').val());
-  currentPage = 1;
-  renderTabel();
-}
-
-function goToPage(p) {
-  currentPage = p;
-  renderTabel();
-}
-
-function renderPager(totalPages) {
-  const el = document.getElementById('pagerBtns');
-  if (!el) return;
-
-  if (totalPages <= 1) {
-    el.innerHTML = '';
-    return;
-  }
-
-  let html = '';
-  html += '<div class="pg' + (currentPage === 1 ? ' disabled' : '') +
-    '" onclick="goToPage(' + Math.max(1, currentPage - 1) + ')"><i class="bi bi-chevron-left"></i></div>';
-
-  let start = Math.max(1, currentPage - 2);
-  let end = Math.min(totalPages, start + 4);
-  start = Math.max(1, end - 4);
-
-  for (let p = start; p <= end; p++) {
-    html += '<div class="pg' + (p === currentPage ? ' active' : '') +
-      '" onclick="goToPage(' + p + ')">' + p + '</div>';
-  }
-
-  html += '<div class="pg' + (currentPage === totalPages ? ' disabled' : '') +
-    '" onclick="goToPage(' + Math.min(totalPages, currentPage + 1) + ')"><i class="bi bi-chevron-right"></i></div>';
-
-  el.innerHTML = html;
-}
-
-// Filter Modal 
-function updateFilterBadge() {
-  let count = ($('#modalStatusTerima').val() !== '2') ? 1 : 0;
-  $('#filterBadge').text(count + ' aktif');
-}
-
-function resetAllFilters() {
-  $('#modalStatusTerima').val('2');
-  updateFilterBadge();
-}
-
-$(document).on('show.bs.modal', '#modalFilter', function() {
-  $('#modalStatusTerima').val(globalStatusTerima);
-  updateFilterBadge();
-});
-
-$(document).on('change', '#modalFilter select.rt-native', updateFilterBadge);
-
-function applyModalFilter() {
-  globalStatusTerima = $('#modalStatusTerima').val();
-  currentPage = 1;
-  renderTabel();
-  $('#modalFilter').modal('hide');
+function renderTabelTerima() {
+  renderTabelDaftar({
+    tabel: 'tabel2',
+    bar: 'rtBar2',
+    search: 'searchBoxTerima',
+    len: 'tampilLenTerima',
+    rows: lastRowsTerima,
+    aksi: aksiButtonsTerima,
+    pakaiKolom: pakaiKolomTerima
+  });
 }
 
 $(document).ready(function(){
-  doSetHeader(g_modeReport);
+  cartBelum = muatKolom(MODE_BELUM);
+  cartTerima = muatKolom(MODE_TERIMA);
+
   ReportTable.init({
-    table: '#mainTable',
+    table: '#tabel',
     bar: '#rtBar',
-    onChange: renderTabel
+    onChange: renderTabelBelum,
+    onActivate: pakaiKolomBelum
   });
-  renderTabel();
+
+  ReportTable.init({
+    table: '#tabel2',
+    bar: '#rtBar2',
+    onChange: renderTabelTerima,
+    onActivate: pakaiKolomTerima
+  });
+
+  renderTabelBelum();
+  renderTabelTerima();
+  ikatPeriode();
+
+  // Tabel di tab yang tersembunyi di-init saat lebarnya 0 — rapikan kolom & tinggi saat tab dibuka.
+  $('#nav-belum-tab').on('shown.bs.tab', function() {
+    $('#tabel').DataTable().columns.adjust();
+    aturTinggiTabel('tabel');
+  });
+  $('#nav-terima-tab').on('shown.bs.tab', function() {
+    $('#tabel2').DataTable().columns.adjust();
+    aturTinggiTabel('tabel2');
+  });
 });
-
-// function buttonKoreksiListGudangAsal () {
-//   console.log('buttonKoreksiListGudangAsal');
-//   $('#tabel_add_list_gudangasal').DataTable().destroy();
-
-//   $.ajax({
-//     url: "{{ url('penyerahansamplelistgudangasal') }}",
-//     type: "get",
-//     async: false,
-//     success: function(res) {
-//       console.log(res);
-
-//       let rowTable = ``;
-//       res.forEach((item, i) => {
-//         rowTable += `
-//           <tr>
-//             <td>${item.KodeGdg}</td>
-//             <td>${item.NamaGdg}</td>
-//             <td class="text-center">
-//               <button class="btn btn-primary btn-sm" type="button"
-//                 onclick="buttonAddPickGudangAsal('${item.NamaGdg}', '${item.KodeGdg}')">
-//                 <i class="bi bi-plus"></i>
-//               </button>
-//             </td>
-//           </tr>`;
-//       });
-
-//       if (!res.length) {
-//         rowTable = `<tr><td class="text-center" colspan="3">Tidak ada data</td></tr>`;
-//       }
-
-//       document.getElementById("tabel_data_add_list_gudangasal").innerHTML = rowTable;
-//       $("#tabel_add_list_gudangasal").DataTable({
-//         "lengthChange": false,
-//         "paging": false,
-//       });
-
-//       $('#modalAddListGudangAsal').modal('show');
-//     },
-//     error: function(err) {
-//       console.log(err);
-//       alertify.warning('Terjadi kesalahan saat mengambil data gudang.');
-//     }
-//   });
-// }
-
-// function buttonAddPickGudangAsal (nama, kode) {
-//   $('#KoreksiEditGudangAsal').val(nama);
-//   $('#input_gudang_asal').val(kode);
-//   $('#modalAddListGudangAsal').modal('hide');
-// }
-
-// function buttonKoreksiListGudangTujuan () {
-//   console.log('buttonKoreksiListGudangTujuan');
-//   $('#tabel_add_list_gudangtujuan').DataTable().destroy();
-
-//   $.ajax({
-//     url: "{{ url('penyerahansamplelistgudangtujuan') }}",
-//     type: "get",
-//     async: false,
-//     success: function(res) {
-//       console.log(res);
-
-//       let rowTable = ``;
-//       res.forEach((item, i) => {
-//         rowTable += `
-//           <tr>
-//             <td>${item.KodeGdg}</td>
-//             <td>${item.NamaGdg}</td>
-//             <td class="text-center">
-//               <button class="btn btn-primary btn-sm" type="button"
-//                 onclick="buttonAddPickGudangTujuan('${item.NamaGdg}', '${item.KodeGdg}')">
-//                 <i class="bi bi-plus"></i>
-//               </button>
-//             </td>
-//           </tr>`;
-//       });
-
-//       if (!res.length) {
-//         rowTable = `<tr><td class="text-center" colspan="3">Tidak ada data</td></tr>`;
-//       }
-
-//       document.getElementById("tabel_data_add_list_gudangtujuan").innerHTML = rowTable;
-//       $("#tabel_add_list_gudangtujuan").DataTable({
-//         "lengthChange": false,
-//         "paging": false,
-//       });
-
-//       $('#modalAddListGudangTujuan').modal('show');
-//     },
-//     error: function(err) {
-//       console.log(err);
-//       alertify.warning('Terjadi kesalahan saat mengambil data gudang.');
-//     }
-//   });
-// }
-
-// function buttonAddPickGudangTujuan (nama, kode) {
-//   $('#KoreksiEditGudangAsal').val(nama);
-//   $('#input_gudang_tujuan').val(kode);
-//   $('#modalAddListGudangTujuan').modal('hide');
-// }
-
-// function buttonAddListBatal() {
-//   $('#modalAddListGudangAsal').modal('hide');
-//   $('#modalAddListGudangTujuan').modal('hide');
-// }
-
 
 function onChangeHeader (field , idvalue) {
   let _token  = $("#_token").val()
@@ -1480,7 +1535,7 @@ function buttonKoreksiEditItem (i) {
   document.getElementById("input_gudang_tujuan").value = barang.GdgTujuan;
 
   $('#formKoreksiEdit').show();
-} 
+}
 
 function refreshDataTableKoreksi (nobukti) {
   let _token = $("#_token").val();
@@ -1512,15 +1567,12 @@ function refreshDataTableKoreksi (nobukti) {
           <td>${item.NAMABRG}</td>
           <td>${item.GdgAsal}</td>
           <td>${item.GdgTujuan}</td>
-          <td class="text-end">${item.QNT ? parseFloat(item.QNT).toLocaleString() : '0.00'}</td>
+          <td class="text-right">${item.QNT ? parseFloat(item.QNT).toLocaleString() : '0.00'}</td>
           <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
-            <button class="btn btn-success btn-sm" onclick="buttonKoreksiEditItem(${i})">
-              <i class="bi bi-pen"></i>
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="buttonKoreksiDeleteItem(${i})">
-              <i class="bi bi-trash"></i>
-            </button>
+            <div class="action-buttons">
+              <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
+            </div>
           </td>
         </tr>`;
       });
@@ -1534,9 +1586,11 @@ function refreshDataTableKoreksi (nobukti) {
       }
       $("#input_koreksi_tanggal").val(tanggal);
       $("#input_koreksi_nobukti").val(header.NOBUKTI);
-      $("#input_koreksi_catatan").val(header.KETERANGAN);
-      $("#input_koreksi_gudangtujuan_nama").val(header.GdgTujuan);
-      $("#input_gudangasal_nama").val(header.GdgAsal);
+      $("#input_gudangasal_nama").val(header.NamagdgAsal || '');
+      $("#input_gudangtujuan_nama").val(header.NamagdgTujuan || '');
+      $("#input_koreksi_alamatGudangAsal").val(header.AlamatGdgAsal || '');
+      $("#input_koreksi_alamatGudangTujuan").val(header.AlamatGdgTujuan || '');
+      $("#input_koreksi_keterangan").val(header.NOTE || '');
 
       buttonKoreksiItemBatal();
     },
@@ -1547,108 +1601,6 @@ function refreshDataTableKoreksi (nobukti) {
   });
 }
 
-
-function buttonKoreksiDeleteItem(i) {
-  console.log(i);
-  let barang = dataTableKoreksi[i];
-
-  let akses = $("#akses_ishapus").val();
-  if (!Number(akses)) {
-    alertify.warning('No access');
-    return;
-  }
-
-  alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus item ' + barang.NAMABRG + ' ?',
-    function () {
-      let _token = $("#_token").val();
-      let choice = "D"; 
-      let qnt = 0;
-      let qnt1 = 0;
-      let qnt2 = 0;
-
-      // Data dari barang
-      let nobukti = barang.NOBUKTI;
-      let urut = barang.URUT;
-      let kodebrg = barang.KODEBRG;
-      let namabrg = barang.NAMABRG;
-      let kodegdgasal = barang.GDGASAL;
-      let kodegdgtujuan = barang.GDGTUJUAN;
-      let nosat = barang.NOSAT;
-      let isi = parseFloat(barang.ISI);
-      let sat1 = barang.SAT_1;
-      let sat2 = barang.SAT_2;
-
-      // Dari DBTRANSFERDET
-      let noTransfer = barang.NoTransfer;
-      let urutTransfer = barang.UrutTransfer;
-
-      let keterangan = $("#input_koreksi_keterangan").val();
-
-      // log data
-      console.log({
-        choice,
-        qnt,
-        qnt1,
-        qnt2,
-        namabrg,
-        nobukti,
-        urut,
-        nosat,
-        isi,
-        sat1,
-        sat2,
-        kodebrg,
-        kodegdgasal,
-        kodegdgtujuan,
-        note: keterangan,
-        noTransfer,
-        urutTransfer
-      });
-
-      $.ajax({
-        url: "{!! url('terimatransferbarangspkoreksi') !!}",
-        type: "post",
-        async: false,
-        data: {
-          _token,
-          choice,
-          qnt,
-          qnt1,
-          qnt2,
-          namabrg,
-          nobukti,
-          urut,
-          nosat,
-          isi,
-          sat1,
-          sat2,
-          kodebrg,
-          kodegdgasal,
-          kodegdgtujuan,
-          note: keterangan,
-          noTransfer,
-          urutTransfer
-        },
-        success: function (res) {
-          if (res == 1) {
-            refreshDataTableKoreksi(nobukti);
-            loadAll();
-            alertify.success('Item telah dihapus');
-          } else {
-            alertify.warning("Gagal menghapus item");
-          }
-        },
-        error: function (err) {
-          console.log(err);
-          alertify.warning('Terjadi kesalahan, silakan refresh browser');
-        }
-      });
-    },
-    function () {
-      console.log('Hapus dibatalkan');
-    }
-  );
-}
 
 
 // function buttonOtorisasi (nobukti, isOtorisasi) {
@@ -1872,11 +1824,12 @@ function buttonKoreksi (nobukti) {
           <td>${item.NAMABRG}</td>
           <td>${item.GdgAsal}</td>
           <td>${item.GdgTujuan}</td>
-          <td>${parseFloat(item.QNT).toLocaleString()}</td>
-          <td>${item.SAT_1}</td>
+          <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
+          <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
-            <button class="btn btn-success btn-sm" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
-            <button class="btn btn-danger btn-sm" onclick="buttonKoreksiDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+            <div class="action-buttons">
+              <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
+            </div>
           </td>
         </tr>`;
       });
@@ -1885,9 +1838,11 @@ function buttonKoreksi (nobukti) {
 
       // Isi Form Header
       $("#input_koreksi_nobukti").val(data.NOBUKTI);
-      $("#input_gudangasal_nama").val(data.GdgAsal);
-      $("#input_gudangtujuan_nama").val(data.GdgTujuan);
-      $("#input_koreksi_keterangan").val(data.NOTE);
+      $("#input_gudangasal_nama").val(data.NamagdgAsal || '');
+      $("#input_gudangtujuan_nama").val(data.NamagdgTujuan || '');
+      $("#input_koreksi_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_koreksi_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_koreksi_keterangan").val(data.NOTE || '');
 
       const tanggal = data.TANGGAL ? data.TANGGAL.split(" ")[0] : "";
       $("#input_koreksi_tanggal").val(tanggal);
@@ -1944,9 +1899,13 @@ function buttonDetailKoreksi (nobukti) {
       const data = res[0];
 
       $("#input_detailkoreksi_nobukti").val(data.NOBUKTI);
-      $("#input_detailkoreksi_gudangasalnama").val(data.GdgAsal);
-      $("#input_detailkoreksi_gudangtujuannama").val(data.GdgTujuan);
-      $("#input_detailkoreksi_keterangan").val(data.KETERANGAN);
+      $("#input_detailkoreksi_gudangasal").val(data.GdgAsal || '');
+      $("#input_detailkoreksi_gudangtujuan").val(data.GdgTujuan || '');
+      $("#input_detailkoreksi_gudangasalnama").val(data.NamagdgAsal || '');
+      $("#input_detailkoreksi_gudangtujuannama").val(data.NamagdgTujuan || '');
+      $("#input_detailkoreksi_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_detailkoreksi_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_detailkoreksi_keterangan").val(data.NOTE || '');
 
       const tanggal = data.TANGGAL ? data.TANGGAL.split(" ")[0] : "";
       $("#input_detailkoreksi_tanggal").val(tanggal);
@@ -2006,8 +1965,14 @@ function buttonDetailTransferBarang (nobukti) {
       const data = res[0];
 
       $("#input_detail_nobukti").val(data.NOBUKTI);
+      $("#input_detail_gudangasal").val(data.GdgAsal || '');
+      $("#input_detail_gudangtujuan").val(data.GdgTujuan || '');
       $("#input_detail_gudangasalnama").val(data.NamagdgAsal || '');
       $("#input_detail_gudangtujuannama").val(data.NamagdgTujuan || '');
+      $("#input_detail_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_detail_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_detail_keterangan").val(data.NOTE || '');
+      $("#input_detail_tanggal").val(data.TANGGAL ? data.TANGGAL.split(" ")[0] : '');
 
       $('.mainpage').hide();
       $('#page5').show();
@@ -2019,11 +1984,24 @@ function buttonDetailTransferBarang (nobukti) {
   });
 }
 
-function reloadData(_focusNobukti) {
-  let listBelumTerima = [], listSdhTerima = [];
-
+// Tab kiri — semua transfer belum diterima, tanpa tanggal.
+function loadBelum() {
   $.ajax({
     url: "{!! url('terimatransferbarangloadall') !!}",
+    type: "get",
+    async: false,
+    success: function(res) {
+      lastRowsBelum = res.listBelumTerima || [];
+    }
+  });
+
+  renderTabelBelum();
+}
+
+// Tab kanan — transfer sudah diterima dalam rentang #inputDate1 s/d #inputDate2.
+function loadTerima() {
+  $.ajax({
+    url: "{!! url('terimatransferbarangloadterima') !!}",
     type: "get",
     async: false,
     data: {
@@ -2031,22 +2009,56 @@ function reloadData(_focusNobukti) {
       date2: $('#inputDate2').val()
     },
     success: function(res) {
-      listBelumTerima = res.listBelumTerima || [];
-      listSdhTerima = res.listSdhTerima || [];
+      lastRowsTerima = res.listSdhTerima || [];
     }
   });
 
-  lastRows = listBelumTerima.concat(listSdhTerima);
-  if (_focusNobukti) {
-    gotoRowPage(_focusNobukti);
-  } else {
-    currentPage = 1;
-  }
-  renderTabel();
+  renderTabelTerima();
 }
 
-function loadAll(_focusNobukti) {
-  reloadData(_focusNobukti);
+// Terima/koreksi/hapus memindahkan transfer antar tab, jadi kedua daftar selalu disegarkan.
+function loadAll() {
+  loadBelum();
+  loadTerima();
+}
+
+// Hapus seluruh item terima transfer untuk satu NOBUKTI (SP_TRANSFER 'D' per item, dijalankan
+// server dalam satu transaksi — lihat TerimaTransferBarangController::spDelete).
+function buttonHapus(nobukti) {
+  let akses = $("#akses_ishapus").val();
+  if (!Number(akses)) {
+    alertify.warning('No access');
+    return;
+  }
+
+  var dlgHapusItem = alertify.confirm('Hapus', 'Apakah yakin ingin menghapus terima transfer ' + nobukti + ' ?',
+    function () {
+      $.ajax({
+        url: "{!! url('terimatransferbarangspdelete') !!}",
+        type: "post",
+        data: {
+          _token: $("#_token").val(),
+          nobukti
+        },
+        success: function (res) {
+          if (res.success) {
+            alertify.success(res.message || 'Data telah dihapus');
+            loadAll();
+          } else {
+            alertify.warning(res.message || 'Gagal menghapus data');
+          }
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message :
+            'Terjadi kesalahan, silakan refresh browser';
+          alertify.error(msg);
+        }
+      });
+    },
+    function () {}
+  );
+  dlgHapusItem.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }
 
 function buttonAdd (nobukti) {
@@ -2061,7 +2073,7 @@ function buttonAdd (nobukti) {
   setNewNoBukti();
 
   let _token = $("#_token").val();
-  let tanggal = $("#input_add_tanggal").val(); 
+  let tanggal = $("#input_add_tanggal").val();
   if (!tanggal) {
     alertify.warning("Tanggal harus diisi.");
     return;
@@ -2074,7 +2086,7 @@ function buttonAdd (nobukti) {
     data: {
       _token,
       nobukti,
-      tanggal 
+      tanggal
     },
     success: function (res) {
       console.log('res', res);
@@ -2085,6 +2097,14 @@ function buttonAdd (nobukti) {
       }
 
       dataTableAdd = res;
+
+      // Header: gudang asal/tujuan sama untuk semua item satu transfer — ambil dari baris pertama.
+      $("#input_add_gudangAsal").val(res[0].NamagdgAsal || '');
+      $("#input_add_alamatGudangAsal").val(res[0].AlamatGdgAsal || '');
+      $("#input_add_gudangTujuan").val(res[0].NamagdgTujuan || '');
+      $("#input_add_alamatGudangTujuan").val(res[0].AlamatGdgTujuan || '');
+      $("#input_add_keterangan").val('');
+
       let rowTable = "";
 
       res.forEach((item, i) => {
@@ -2105,8 +2125,8 @@ function buttonAdd (nobukti) {
             <td>${satuan}</td>
             <td class="text-right">${qnt}</td>
             <td class="text-center">
-              <input 
-                class="input_add_qnt text-right" data-index="${i}" type="number" min="0" value="" placeholder="0">
+              <input
+                class="input_add_qnt  text-right" data-index="${i}" type="number" min="0" value="" placeholder="0">
             </td>
           </tr>`;
       });
@@ -2140,6 +2160,7 @@ function submitAdd () {
   const nobukti = $("#input_add_nobukti").val();
   const nourut = $("#input_add_nourut").val();
   const tanggal = $("#input_add_tanggal").val();
+  const note = $("#input_add_keterangan").val();
 
   $(".add_checkbox:checked").each(function() {
     const i = $(this).data("index");
@@ -2150,7 +2171,7 @@ function submitAdd () {
     if (inputQty < 0) {
       alertify.warning(`Qty tidak boleh negatif (row ${i+1})`);
       checkInvalid = true;
-      return false; 
+      return false;
     }
 
     if (inputQty > maxQty) {
@@ -2160,9 +2181,9 @@ function submitAdd () {
     }
 
     tempData.push({
-      NOBUKTI: item.NOBUKTI, 
-      URUT: item.URUT,      
-      KODEBRG: item.KODEBRG,   
+      NOBUKTI: item.NOBUKTI,
+      URUT: item.URUT,
+      KODEBRG: item.KODEBRG,
       inputQnt: inputQty,
       checked: true
     });
@@ -2187,7 +2208,8 @@ function submitAdd () {
       tempData,
       tanggal,
       nobukti,
-      nourut
+      nourut,
+      note
     },
     success: function(res) {
       console.log('submitAdd response', res);
@@ -2197,7 +2219,7 @@ function submitAdd () {
         loadAll();
         setTimeout(() => {
           $('.mainpage').hide();
-          $('#page3').show();  
+          $('#page3').show();
           buttonKoreksi(nobukti, 'edit');
         }, 100);
       } else {
@@ -2210,103 +2232,6 @@ function submitAdd () {
     }
   });
 }
-
-// function submitAdd () {
-//   const checkDate = new Date($("#input_add_tanggal").val());
-//   const periode_bulan = parseInt(document.getElementById("periode_bulan").value);
-//   const periode_tahun = parseInt(document.getElementById("periode_tahun").value);
-
-//   if (checkDate.getFullYear() !== periode_tahun || (checkDate.getMonth() + 1) !== periode_bulan) {
-//     alertify.warning("Tanggal tidak sesuai periode");
-//     return;
-//   }
-
-//   const _token = $("#_token").val();
-//   const tempData = [];
-//   let checkMinus = false;
-
-//   const nobukti = $("#input_add_nobukti").val();
-//   const nourut = $("#input_add_nourut").val();
-//   const tanggal = $("#input_add_tanggal").val();
-
-//   dataTableAdd.forEach((item, i) => {
-//     const checkbox = document.getElementById(`add_checkbox${i}`);
-//     if (checkbox && checkbox.checked) {
-//       const inputQty = $(`#input_add_qnt${i}`).val();
-
-//       if (inputQty < 0) {
-//         checkMinus = true;
-//       }
-
-//       const itemData = {
-//         ...item,
-//         inputQnt: inputQty
-//       };
-
-//       tempData.push(itemData);
-//     }
-//   });
-
-//   if (checkMinus) {
-//     alertify.warning("Qty tidak boleh negatif");
-//     return;
-//   }
-
-//   if (!tempData.length) {
-//     alertify.warning("Tidak ada item yang dipilih");
-//     return;
-//   }
-
-//   console.log("submitAdd payload", tempData);
-
-//   $.ajax({
-//     url: "{!! url('terimatransferbarangspadd') !!}",
-//     type: "post",
-//     async: false,
-//     data: {
-//       _token,
-//       tempData,
-//       tanggal,
-//       nobukti,
-//       nourut
-//     },
-//     success: function(res) {
-//     console.log('submitAdd response', res);
-
-//     if (res.success) {
-//       alertify.success(res.message);
-//       loadAll();
-//       buttonCloseForm();
-//     } else {
-//       alertify.error(res.message || 'Gagal menyimpan data');
-//     }
-//   }
-//     // success: function(res) {
-//     // console.log('submitAdd response', res);
-//     // if (res == 1) {
-//     //     alertify.success('TRT telah ditambah');
-//     //     loadAll();
-//     //     buttonCloseForm();
-//     //   // }
-//     //   // if (res == 1) {
-//     //   //   alertify.success('TRT telah ditambah');
-//     //   //   loadAll();
-//     //   //   setTimeout(() => {
-//     //   //     $('.mainpage').hide();
-//     //   //     $('#page3').show();  
-//     //   //     buttonKoreksi(nobukti, 'edit');
-//     //   //   }, 100);
-//     //   } else if (res == 2) {
-//     //     setNewNoBukti();
-//     //     alertify.warning('Nobukti telah direfresh silahkan submit ulang');
-//     //   } else {
-//     //     alertify.error('Respon tidak diketahui dari server');
-//     //   }
-//     // }
-
-//   });
-// }
-
 
 function setNewNoBukti () {
   $.ajax({

@@ -117,6 +117,21 @@ from dbPerkiraan");
       if ($check) {
         return 'Perkiraan digunakkan di sub group';
       }
+
+      // SP_PERKIRAAN (choice D) langsung menghapus tanpa cek pemakaian - perkiraan yang sudah
+      // dipakai transaksi / set posting / detail akun ditolak di sini.
+      $pemakai = [
+        ['dbTransaksi',    'Transaksi Accounting'],
+        ['DBPOSTHUTPIUT',  'Set Posting'],
+        ['DBPERKCUSTSUPP', 'Detail Akun Customer/Supplier'],
+        ['dbPerkCost',     'Detail Akun Costing'],
+      ];
+      foreach ($pemakai as $p) {
+        $check = DB::connection('SML')->select("select top 1 1 as ada from {$p[0]} where Perkiraan = :perk", ['perk' => $req->perkiraan]);
+        if ($check) {
+          return 'Perkiraan digunakan di ' . $p[1];
+        }
+      }
     }
 
     // $check = DB::connection('SML')->select('select * from DBPPLDET where kodebrg = :kodebarang', ['kodebarang' => $req->kodebarang] );

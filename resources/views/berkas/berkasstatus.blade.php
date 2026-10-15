@@ -1,10 +1,9 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Online / Offline')
 @section('content')
-
-<link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}">
 
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
@@ -21,102 +20,98 @@
     <button class="btn btn-primary" onclick="buttonAdd()">+ Online/Offline</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">User ID</th>
-                    <th scope="col">Nama Lengkap</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
-        </div>
+  @include('master.partials.toolbarMaster', ['tanpaTambah' => true])
 
-</div>
-
-<!-- start modal add -->
-<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">USER ID</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kode" readonly>
-                </div>
-              </div>
-
-            </div>
-              <div class="row mb-1">
-                  <div class="col-4 text-left">
-                      <div class="form-group text-left mb-1">
-                          <label class="text-left">Status</label>
-                      </div>
-                  </div>
-                  <div class="col-8 mb-1">
-                      <div class="form-group mb-1">
-                          <select class="form-control" id="input_edit_status">
-                              <option value="0">Offline</option>
-                              <option value="1">Online</option>
-                          </select>
-                      </div>
-                  </div>
-              </div>
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead>
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">User ID</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Lengkap</th>
+            <th style="padding: 4px 12px;" scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+        </tbody>
+      </table>
 
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+
+</div>
+
+<!-- start modal edit -->
+<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="judulEditStatus" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="judulEditStatus">Edit Status</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="formBsGrid">
+
+        <div class="container-fluid">
+          <div class="bs-form bs-form-1">
+            <label for="input_edit_kode">User ID</label>
+            <input type="text" class="form-control" id="input_edit_kode" readonly>
+
+            <label for="input_edit_nama">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_edit_nama" readonly>
+
+            <label for="input_edit_status">Status</label>
+            <select class="form-control" id="input_edit_status">
+              <option value="0">Offline</option>
+              <option value="1">Online</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
+      </div>
+    </div>
   </div>
 </div>
-</div>
-</div>
-<!-- End modal add-->
+<!-- End modal edit-->
 
 @endsection
 
 @section('js')
-
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Nilai dari database ditulis ke HTML lewat fungsi ini supaya nama yang mengandung kutip
+// atau < > tidak merusak baris tabel.
+function spEsc (v) {
+  if (v === null || v === undefined) { return '' }
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function spGagal (err) {
+  console.log(err)
+  alertify.error('Gagal terhubung ke server, silakan coba lagi')
+}
+
 function loadAll () {
   let _token = $("#_token").val();
-  
-  document.getElementById('breadcrumb').innerHTML = "Online / Offline"
-  document.getElementById('AddVisibility').hidden = true;
-
-  if ($.fn.DataTable.isDataTable('#tabel')) {
-    $('#tabel').DataTable().destroy();
-  }
+  let berhasil = false
 
   $.ajax({
     url: "{!! url('berkasstatusloadall') !!}",
@@ -126,51 +121,59 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
+      if (!Array.isArray(res)) {
+        alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+        return
+      }
       dataRefresh = res
-  }})
+      berhasil = true
+    },
+    error: spGagal
+  })
+  if (!berhasil) { return }
+
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
 
   let rowTable = ""
   dataRefresh.forEach((item, i) => {
-    let temp = ""
 
-    rowTable += `<tr class='theadCustom'>
+    rowTable += `<tr>
       <td style="white-space:nowrap;" class='text-center'>
         <div class="action-buttons-wrap">
-            <button data-toggle="tooltip" data-placement="top" title="Menu" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.USERID}')"><i class="bi bi-pen"></i></button>
+            <button title="Edit Status" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit(${i})"><i class="bi bi-pen"></i></button>
         </div>
       </td>
-    <td>${item.USERID}</td>
-    <td>${item.FullName}</td>
+    <td>${spEsc(item.USERID)}</td>
+    <td>${spEsc(item.FullName)}</td>
     <td>
       ${
-          item.STATUS == 0
-              ? '<span class="sp-badge is-supervisor">Offline</span>'
-              : '<span class="sp-badge is-user">Online</span>'
+          Number(item.STATUS) === 1
+              ? '<span class="sp-badge is-active">Online</span>'
+              : '<span class="sp-badge is-inactive">Offline</span>'
       }
     </td>
     </tr>`
 
   });
 
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable({
+    "lengthChange": false,
+    "paging": true,
+    "searching": true,
+    "ordering": false,
+    "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
+    "pageLength": MasterList.panjang()
+  });
+  MasterList.selesai('#tabel')
 
 }
 
-$("#tabel_filter_visual").on("keyup", function () {
-  $("#tabel").DataTable().search(this.value).draw();
-});
-
-function buttonEdit (kode) {
-  console.log(kode)
+function buttonEdit (idx) {
+  let kode = dataRefresh[idx] ? dataRefresh[idx].USERID : ''
+  if (!kode) { return }
   let _token = $("#_token").val();
   $.ajax({
     url: "{!! url('berkasstatusspdetail') !!}",
@@ -181,16 +184,21 @@ function buttonEdit (kode) {
       kode
     },
     success: function(res) {
+      if (!Array.isArray(res) || !res.length) {
+        alertify.warning('User ' + spEsc(kode) + ' tidak ditemukan')
+        return
+      }
 
-      console.log(res)
       document.getElementById("input_edit_kode").value = res[0].USERID
-      document.getElementById("input_edit_status").value = res[0].STATUS
-      
-      formatNumber(document.getElementById("input_edit_kurs"))
-      
+      document.getElementById("input_edit_nama").value = res[0].FullName ?? ''
+      document.getElementById("input_edit_status").value = Number(res[0].STATUS) === 1 ? '1' : '0'
 
-    }})
-    $("#formEdit").modal('toggle')
+      // formatNumber(document.getElementById("input_edit_kurs")) // dimatikan: sisa salinan menu valas - elemen #input_edit_kurs tidak ada, error-nya membuat modal Edit tidak pernah terbuka
+
+      $("#formEdit").modal('show')
+    },
+    error: spGagal
+  })
 }
 
 function submitEdit () {
@@ -198,6 +206,11 @@ function submitEdit () {
   let _token = $("#_token").val();
   let kode = $("#input_edit_kode").val();
   let status = $("#input_edit_status").val();
+
+  if (!kode) {
+    alertify.warning("User ID kosong");
+    return
+  }
 
   $.ajax({
     url: "{!! url('berkasstatusspedit') !!}",
@@ -213,14 +226,14 @@ function submitEdit () {
       if (res != 1) {
         alertify.warning(res);
       }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
         alertify.success("Status telah diedit");
+        $("#formEdit").modal('hide')
         loadAll()
-        $("#formEdit").modal('toggle')
       }
 
-    }})
+    },
+    error: spGagal
+  })
 
 }
 

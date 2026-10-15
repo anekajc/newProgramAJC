@@ -52,11 +52,12 @@ class MasterJabatanController extends Controller
   }
 
   public function spDelete (Request $req) {
-    // $check = DB::connection('SML')->select('SELECT * FROM DBKOTA where KodeArea = :kode' , ['kode' => $req->kode]);
-    //
-    // if ($check) {
-    //   return 'Area digunakkan di Master Kota';
-    // }
+    // Jabatan yang masih dipakai karyawan tidak boleh dihapus.
+    $check = DB::connection('SML')->select('SELECT top 1 1 as ada FROM dbKaryawan where KodeJab = :kode' , ['kode' => $req->kode]);
+
+    if ($check) {
+      return 'Jabatan digunakan di Master Karyawan';
+    }
 
     $delete = DB::connection('SML')->update('delete from DBJABATAN where KODEJAB = :kode' , ['kode' => $req->kode ]);
     return $delete;

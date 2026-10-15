@@ -240,6 +240,31 @@ join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
     if ($check) {
       return 'Barang digunakkan di permintaan pembelian';
     }
+
+    // Dulu hanya permintaan pembelian yang dicek - barang yang sudah dipakai transaksi lain
+    // tetap bisa terhapus.
+    $pemakai = [
+      ['DBPODET',        'Purchase Order'],
+      ['DBBELIDET',      'Pembelian'],
+      ['DBSODET',        'Sales Order'],
+      ['DBJUALDET',      'Penjualan'],
+      ['DBInvoiceDET',   'Invoice'],
+      ['dbSPBDet',       'SPB'],
+      ['DBTRANSFERDET',  'Transfer Barang'],
+    ];
+    foreach ($pemakai as $p) {
+      $check = DB::connection('SML')->select("select top 1 1 as ada from {$p[0]} where KODEBRG = :kodebarang", ['kodebarang' => $req->kodebarang]);
+      if ($check) {
+        return 'Barang digunakan di ' . $p[1];
+      }
+    }
+
+    // Baris stok hanya dihitung kalau ada kuantitasnya (baris kosong tidak menghalangi hapus).
+    $check = DB::connection('SML')->select("select top 1 1 as ada from DBSTOCKBRG where KODEBRG = :kodebarang
+      and (isnull(QNTAWAL,0) <> 0 or isnull(QNTIN,0) <> 0 or isnull(QNTOUT,0) <> 0 or isnull(SALDOQNT,0) <> 0)", ['kodebarang' => $req->kodebarang]);
+    if ($check) {
+      return 'Barang masih punya catatan stok';
+    }
     // return 1;
     $delete1 = DB::connection('SML')->update('delete from dbHARGAJUAL where KODEBRG = :kodebarang' , ['kodebarang' => $req->kodebarang ]);
     $delete = DB::connection('SML')->update('delete from DBBARANG where KODEBRG = :kodebarang' , ['kodebarang' => $req->kodebarang]);

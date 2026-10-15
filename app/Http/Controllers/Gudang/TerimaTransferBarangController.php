@@ -25,24 +25,28 @@ class TerimaTransferBarangController extends Controller
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(6);
 
+    // Rentang tanggal hanya dipakai tab kanan (Terima Transfer Barang): awal bulan periode s/d hari ini.
     $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
-    $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+    $date2 = date('Y-m-d');
 
-    $loadAll = $this->fetchHeaderList($date1, $date2);
+    $listBelum = $this->fetchHeaderList();
+    $listTerima = $this->fetchTerimaList($date1, $date2);
 
     return view('gudang.terimatransferbarang', [
         "menul0" => $menul0,
         "periode" => $periode,
         "date1" => $date1,
         "date2" => $date2,
-        "listBelumTerima" => $loadAll['listBelumTerima'],
-        "listSdhTerima" => $loadAll['listSdhTerima'],
+        "listBelumTerima" => $listBelum['listBelumTerima'],
+        "listSdhTerima" => $listTerima['listSdhTerima'],
         "akses" => $akses
     ]);
   }
 
-  private function fetchHeaderList($date1, $date2) {
+  // Tab kiri (Transfer Belum Terima) — semua outstanding, tanpa filter tanggal/periode.
+  private function fetchHeaderList() {
     $query = "
+    -- untuk outstanding
       SELECT
           B.NOBUKTI,
           X.TANGGAL,
@@ -64,36 +68,68 @@ class TerimaTransferBarangController extends Controller
       WHERE
           B.QNT - ISNULL(F.Qnt, 0) > 0
           AND ISNULL(B.isbatal, 0) = 0
-          AND CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
       GROUP BY B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA
     ";
 
     $listBelumTerima = DB::connection("SML")->select($query . " HAVING ISNULL(X.pTERIMA, 0) = 0
       ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
-      ", ["date1" => $date1, "date2" => $date2]);
-
-    $listSdhTerima = DB::connection("SML")->select($query . " HAVING ISNULL(X.pTERIMA, 0) = 1
-      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
-      ", ["date1" => $date1, "date2" => $date2]);
+      ");
 
     return [
-        "listBelumTerima" => $listBelumTerima,
-        "listSdhTerima" => $listSdhTerima
+        "listBelumTerima" => $listBelumTerima
     ];
   }
 
+  // Tab kanan (Terima Transfer Barang) — transfer yang sudah diterima (pTERIMA = 1) dalam rentang
+  // tanggal, termasuk yang sudah diterima penuh (tanpa syarat sisa qty > 0).
+  private function fetchTerimaList(string $date1, string $date2) {
+    $query = "
+      SELECT
+          B.NOBUKTI,
+          X.TANGGAL,
+          X.NOTE,
+          MIN(D.Nama + ' (' + B.GdgAsal + ')') AS NamagdgAsal,
+          MIN(E.Nama + ' (' + B.GdgTujuan + ')') AS NamagdgTujuan,
+          ISNULL(X.pTERIMA, 0) AS IsTerima,
+          COUNT(*) AS JmlItem
+      FROM dbTransferDet B
+      LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
+      LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
+      LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
+      LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
+      WHERE
+          ISNULL(B.isbatal, 0) = 0
+          AND CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
+      GROUP BY B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA
+    ";
+
+    $listSdhTerima = DB::connection("SML")->select($query . " HAVING ISNULL(X.pTERIMA, 0) = 1
+      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
+      ", ['date1' => $date1, 'date2' => $date2]);
+
+    return [
+        "listSdhTerima" => $listSdhTerima
+    ];
+
+  }
+
   public function loadAll(Request $request)
+  {
+    return response()->json($this->fetchHeaderList());
+  }
+
+  public function loadTerima(Request $request)
   {
     $date1 = $request->date1;
     $date2 = $request->date2;
 
     if (!$date1 || !$date2) {
-      $periode = NewPeriode::where('user_id', \Auth::user()->username)->first();
+      $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
       $date1 = date('Y-m-01', mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
-      $date2 = date('Y-m-t',  mktime(0, 0, 0, $periode->bulan, 1, $periode->tahun));
+      $date2 = date('Y-m-d');
     }
 
-    return response()->json($this->fetchHeaderList($date1, $date2));
+    return response()->json($this->fetchTerimaList($date1, $date2));
   }
 
   public function getDetail (Request $req ) {
@@ -103,32 +139,35 @@ class TerimaTransferBarangController extends Controller
 
 
     $tempOutstanding = DB::connection("SML")->select("
-        select  B.NOBUKTI, 
+        select  B.NOBUKTI,
         X.TANGGAL,
-        B.URUT,  
-        B.KODEBRG, 
-        C.NAMABRG, 
-        '' Jns_Kertas, 
+        B.URUT,
+        B.KODEBRG,
+        C.NAMABRG,
+        '' Jns_Kertas,
         '' Ukr_Kertas,
-        B.QNT, 
-        B.QNT2, 
-        B.SAT_1, 
-        B.SAT_2, 
-        B.ISI, 
-        B.GdgAsal, 
-        B.GdgTujuan, 
+        B.QNT,
+        B.QNT2,
+        B.SAT_1,
+        B.SAT_2,
+        B.ISI,
+        B.GdgAsal,
+        B.GdgTujuan,
         D.Nama+' ('+B.GdgAsal+')' NamagdgAsal,
-        E.Nama+' ('+B.GdgTujuan+')' NamagdgTujuan, 
+        E.Nama+' ('+B.GdgTujuan+')' NamagdgTujuan,
+        D.Alamat AlamatGdgAsal,
+        E.Alamat AlamatGdgTujuan,
+        X.NOTE,
         0.00 GSM,
-        case 
-            when B.nosat=1 then B.QNT  - ISNULL(F.Qnt,0) 
-            when B.nosat=2 then B.QNT2 - ISNULL(F.Qnt2,0) 
+        case
+            when B.nosat=1 then B.QNT  - ISNULL(F.Qnt,0)
+            when B.nosat=2 then B.QNT2 - ISNULL(F.Qnt2,0)
         end as Qntx,
-        case 
-            when B.nosat=1 then C.sat1 
-            when B.nosat=2 then C.sat2 
+        case
+            when B.nosat=1 then C.sat1
+            when B.nosat=2 then C.sat2
         end as Satx
-from    dbTransferDet B    
+from    dbTransferDet B
 left join dbBarang C on C.KodeBrg = B.KodeBrg
 left join dbGudang D on D.Kodegdg = B.GdgAsal
 left join dbGudang E on E.Kodegdg = B.GdgTujuan
@@ -140,9 +179,9 @@ left join (
     from DBTRANSFERDET
     where NoTransfer is not null
     group by NoTransfer, UrutTransfer
-) F ON B.NOBUKTI = F.NoTransfer 
+) F ON B.NOBUKTI = F.NoTransfer
     AND B.URUT = F.UrutTransfer
-where 
+where
     (
         (B.nosat=1 and B.QNT  - ISNULL(F.Qnt,0)  > 0) OR
         (B.nosat=2 and B.QNT2 - ISNULL(F.Qnt2,0) > 0)
@@ -160,8 +199,14 @@ order by B.Urut
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $tempPenerimaan = DB::connection("SML")->select("
-        SELECT 	
+    return $this->fetchDetailPenerimaan((string) $req->nobukti);
+  }
+
+  // Item transfer yang sudah diterima (pTERIMA = 1) — dipakai Info/Edit di tab kanan dan spDelete.
+  // Tanpa syarat sisa qty > 0 supaya transfer yang sudah diterima penuh tetap bisa dibuka/dihapus.
+  private function fetchDetailPenerimaan(string $nobukti) {
+    return DB::connection("SML")->select("
+        SELECT
         X.TANGGAL,
         B.NOBUKTI,
         B.URUT,
@@ -179,49 +224,48 @@ order by B.Urut
         B.GdgTujuan,
         D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
         E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
+        D.Alamat AS AlamatGdgAsal,
+        E.Alamat AS AlamatGdgTujuan,
         0.00 AS GSM,
-        CASE 
-            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0) 
-            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0) 
+        CASE
+            WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0)
+            WHEN B.nosat = 2 THEN B.QNT2 - ISNULL(F.Qnt2, 0)
         END AS Qntx,
-        CASE 
-            WHEN B.nosat = 1 THEN C.sat1 
-            WHEN B.nosat = 2 THEN C.sat2 
+        CASE
+            WHEN B.nosat = 1 THEN C.sat1
+            WHEN B.nosat = 2 THEN C.sat2
         END AS Satx,
         X.NOTE
-    FROM dbTransferDet B    
+    FROM dbTransferDet B
     LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
     LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
     LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
     LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
     LEFT JOIN (
-        SELECT NoTransfer, UrutTransfer, SUM(QNT) AS Qnt, SUM(QNT2) AS Qnt2 
-        FROM DBTRANSFERDET 
+        SELECT NoTransfer, UrutTransfer, SUM(QNT) AS Qnt, SUM(QNT2) AS Qnt2
+        FROM DBTRANSFERDET
         GROUP BY NoTransfer, UrutTransfer
     ) F ON B.NOBUKTI = F.NoTransfer AND B.URUT = F.UrutTransfer
-    WHERE	
-        B.QNT - ISNULL(F.Qnt, 0) > 0 
-        AND ISNULL(B.isbatal, 0) = 0
+    WHERE
+        ISNULL(B.isbatal, 0) = 0
         AND ISNULL(X.pTERIMA, 0) = 1
         AND B.NOBUKTI = :nobukti
     ORDER BY B.Urut
     ", [
-        "nobukti" => $req->nobukti
+        "nobukti" => $nobukti
     ]);
-
-    return $tempPenerimaan;
-}
+  }
 
 // public function GudangAsal(Request $req)
 //   {
 //     $data = DB::connection("SML")->select("
-//         SELECT 
-//         a.KodeGdg, 
-//         a.Nama AS NamaGdg, 
-//         a.IsRusak 
-//         FROM dbGudang a 
-//         LEFT OUTER JOIN dbPemakaiGdg b ON b.kodegdg = a.kodegdg 
-//         GROUP BY a.KodeGdg, a.Nama, a.IsRusak 
+//         SELECT
+//         a.KodeGdg,
+//         a.Nama AS NamaGdg,
+//         a.IsRusak
+//         FROM dbGudang a
+//         LEFT OUTER JOIN dbPemakaiGdg b ON b.kodegdg = a.kodegdg
+//         GROUP BY a.KodeGdg, a.Nama, a.IsRusak
 //         ORDER BY a.KodeGdg");
 
 //     return response()->json($data);
@@ -230,13 +274,13 @@ order by B.Urut
 //   public function GudangTujuan(Request $req)
 //   {
 //     $data = DB::connection("SML")->select("
-//         SELECT 
-//         a.KodeGdg, 
-//         a.Nama AS NamaGdg, 
-//         a.IsRusak 
-//         FROM dbGudang a 
-//         LEFT OUTER JOIN dbPemakaiGdg b ON b.kodegdg = a.kodegdg 
-//         GROUP BY a.KodeGdg, a.Nama, a.IsRusak 
+//         SELECT
+//         a.KodeGdg,
+//         a.Nama AS NamaGdg,
+//         a.IsRusak
+//         FROM dbGudang a
+//         LEFT OUTER JOIN dbPemakaiGdg b ON b.kodegdg = a.kodegdg
+//         GROUP BY a.KodeGdg, a.Nama, a.IsRusak
 //         ORDER BY a.KodeGdg");
 
 //     return response()->json($data);
@@ -279,19 +323,29 @@ public function spAdd (Request $req)
     $username = \Auth::user()->username;
 
     try {
+        $inserted = 0;
         foreach ($tempData as $d) {
             if (!empty($d['checked']) && $d['checked'] == true) {
                 DB::connection('SML')->statement('exec SP_InsertTERIMATRANSFERweb ?,?,?,?,?,?,?,?', [
-                    $req->nobukti,  
+                    $req->nobukti,
                     $req->nourut,
-                    $d['NOBUKTI'],       
+                    $d['NOBUKTI'],
                     $username,
                     -1,
                     $req->tanggal,
                     $d['inputQnt'],
-                    $d['URUT'],     
+                    $d['URUT'],
                 ]);
+                $inserted++;
             }
+        }
+
+        // SP tidak menerima parameter keterangan — isi NOTE header dokumen terima setelah SP membuatnya.
+        if ($inserted > 0) {
+            DB::connection('SML')->update('update DBTRANSFER set NOTE = :note where NOBUKTI = :nobukti', [
+                'note' => $req->note ?? '',
+                'nobukti' => $req->nobukti,
+            ]);
         }
 
         return response()->json([
@@ -315,11 +369,11 @@ public function spAdd (Request $req)
 //     foreach ($tempData as $d) {
 //         // dd($d);
 //         DB::connection('SML')->statement('exec SP_InsertTERIMATRANSFERweb ?,?,?,?,?,?', [
-//             $req->nobukti,                
-//             $req->nourut,                            
-//             $d['NOBUKTI'],                           
-//             $username,                             
-//             1,                                       
+//             $req->nobukti,
+//             $req->nourut,
+//             $d['NOBUKTI'],
+//             $username,
+//             1,
 //             date('Y-m-d', strtotime($req->tanggal))
 //         ]);
 //     }
@@ -330,43 +384,103 @@ public function spAdd (Request $req)
 
   public function spKoreksi (Request $req)
 {
-    $choice  = $req->choice; 
+    $choice  = $req->choice;
     $nobukti = $req->nobukti;
 
     $values = [
-        $choice,                       
-        $nobukti,                      
-        $req->nourut,              
-        $req->tanggal,          
-        $req->note ?? '',               
-        (int)$req->urut,                 
-        $req->kodebrg,                   
-        $req->kodegdgasal,               
-        $req->kodegdgtujuan,             
-        $req->sat1,                     
-        $req->sat2,                      
-        $req->qnt,                      
-        $req->qnt2,                     
-        $req->nosat,                    
-        $req->isi,                     
-        \Auth::user()->username,       
-        $req->nopenyerahan ?? ''         
+        $choice,
+        $nobukti,
+        $req->nourut,
+        $req->tanggal,
+        $req->note ?? '',
+        (int)$req->urut,
+        $req->kodebrg,
+        $req->kodegdgasal,
+        $req->kodegdgtujuan,
+        $req->sat1,
+        $req->sat2,
+        $req->qnt,
+        $req->qnt2,
+        $req->nosat,
+        $req->isi,
+        \Auth::user()->username,
+        $req->nopenyerahan ?? ''
     ];
 
     DB::connection('SML')->statement(
-        'exec SP_TRANSFER ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', 
+        'exec SP_TRANSFER ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?',
         $values
     );
 
     return 1;
 }
 
-  public function onChangeHeader (Request $req) {
-    $query = 'update dbserahsample set ' . $req->field . ' = :value where nobukti = :nobukti';
-    
-    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
-    return $res;
+  // Hapus dari tombol Aksi di tab kanan: SP_TRANSFER choice 'D' untuk SEMUA item NOBUKTI tsb (sama
+  // seperti hapus per item lama di halaman koreksi), dalam satu transaksi.
+  public function spDelete (Request $req)
+  {
+    $items = $this->fetchDetailPenerimaan((string) $req->nobukti);
 
+    if (empty($items)) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Data tidak ditemukan'
+      ]);
+    }
+
+    $username = \Auth::user()->username;
+
+    try {
+      DB::connection('SML')->transaction(function () use ($items, $username) {
+        foreach ($items as $item) {
+          DB::connection('SML')->statement(
+            'exec SP_TRANSFER ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?',
+            [
+              'D',
+              $item->NOBUKTI,
+              null,
+              $item->TANGGAL ? date('Y-m-d', strtotime($item->TANGGAL)) : null,
+              $item->NOTE ?? '',
+              (int) $item->URUT,
+              $item->KODEBRG,
+              $item->GdgAsal,
+              $item->GdgTujuan,
+              $item->SAT_1,
+              $item->SAT_2,
+              0,
+              0,
+              $item->NOSAT,
+              $item->ISI,
+              $username,
+              ''
+            ]
+          );
+        }
+      });
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Data berhasil dihapus'
+      ]);
+    } catch (\Exception $e) {
+      return response()->json([
+        'success' => false,
+        'message' => 'Gagal hapus: ' . $e->getMessage()
+      ], 500);
+    }
+  }
+
+  public function onChangeHeader (Request $req) {
+    // Nama kolom masuk ke SQL apa adanya (tidak bisa jadi parameter) — batasi ke kolom yang memang
+    // bisa diubah dari form (Keterangan).
+    $allowedFields = ['NOTE'];
+    if (!in_array($req->field, $allowedFields, true)) {
+      return response("Field tidak valid", 400);
+    }
+
+    $query = 'update DBTRANSFER set ' . $req->field . ' = :value where nobukti = :nobukti';
+    $res = DB::connection('SML')->update($query, ["value" => $req->value ?? "", "nobukti" => $req->nobukti]);
+    return $res;
   }
 
 }

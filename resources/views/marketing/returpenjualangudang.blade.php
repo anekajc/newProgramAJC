@@ -154,12 +154,13 @@
   white-space: nowrap;
 }
 </style>
+@include('marketing.partials.tampilan-purchasing-css')
 @endsection
 @section('content')
 
 
 
-<div id="page1" class="container-fluid mainpage">
+<div id="page1" class="mainpage">
 <div class="">
 
   <!-- <div id="qrcode"></div> -->
@@ -221,9 +222,9 @@
           <div class="po-toolbar">
             <div class="po-filter-wrap">
               <label>Periode</label>
-              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalawal_prj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalawal_prj" value="{!! $tglawalperiode !!}">
               <span class="po-filter-sep">s/d</span>
-              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalakhir_prj" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+              <input type="date" onchange="onChangePeriodePRJ()" class="po-filter-inp" id="input_tanggalakhir_prj" value="{!! $tglakhirperiode !!}">
             </div>
             <input type="search" id="rpgSearch1" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="rpgLen1">Tampilkan</label>
@@ -259,7 +260,7 @@
                 <div class="modal-header">
                   <h5 class="modal-title">
                     <i class="bi bi-funnel"></i>
-                    Filter Data
+                    Filter Retur Penjualan Gudang
                     <span class="rt-active-badge" id="sprFilterBadge">0 aktif</span>
                   </h5>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#modalFilterSPR').modal('hide')">
@@ -269,27 +270,25 @@
 
                 <div class="modal-body">
                   <div class="rt-section">
-                    <div class="rt-group-label">Status</div>
-                    <div>
-                      <label class="rt-field-label" for="input_filterstatus">Status SPR</label>
-                      <select class="rt-native" id="input_filterstatus">
-                        <option value=0 selected>Semua Status</option>
-                        <option value=1>Belum</option>
-                        <option value=2>Sebagian</option>
-                        <option value=3>Selesai</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="rt-section">
-                    <div class="rt-group-label">Otorisasi</div>
-                    <div>
-                      <label class="rt-field-label" for="input_filteroto">Status Otorisasi</label>
-                      <select class="rt-native" id="input_filteroto">
-                        <option value=0 selected>Semua</option>
-                        <option value=1>Belum Otorisasi</option>
-                        <option value=2>Sudah Otorisasi</option>
-                      </select>
+                    <div class="rt-group-label">Penyaringan Data</div>
+                    <div class="rt-grid-2">
+                      <div>
+                        <label class="rt-field-label" for="input_filterstatus">Status</label>
+                        <select class="rt-native" id="input_filterstatus">
+                          <option value=0 selected>Semua</option>
+                          <option value=1>Belum</option>
+                          <option value=2>Sebagian</option>
+                          <option value=3>Selesai</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="rt-field-label" for="input_filteroto">Otorisasi</label>
+                        <select class="rt-native" id="input_filteroto">
+                          <option value=0 selected>Semua</option>
+                          <option value=2>Sudah</option>
+                          <option value=1>Belum</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -310,9 +309,9 @@
           <div class="po-toolbar">
             <div class="po-filter-wrap">
               <label>Periode</label>
-              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalawal_spr" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->startOfMonth()->format('Y-m-d') !!}">
+              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalawal_spr" value="{!! $tglawalperiode !!}">
               <span class="po-filter-sep">s/d</span>
-              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalakhir_spr" value="{!! \Carbon\Carbon::now()->month((int) $periode->bulan)->endOfMonth()->format('Y-m-d') !!}">
+              <input type="date" onchange="onChangePeriodeSPR()" class="po-filter-inp" id="input_tanggalakhir_spr" value="{!! $tglakhirperiode !!}">
             </div>
             <input type="search" id="rpgSearch2" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="rpgLen2">Tampilkan</label>
@@ -373,6 +372,7 @@
         </button>
       </div>
 
+      <div id="formBsGrid">
       <div class="modal-body">
         <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
         <div class="container-fluid">
@@ -406,15 +406,16 @@
               <label>Tanggal</label>
             </div>
             <div class="col-2">
-              <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}">
+              <input type="date" class="form-control" id="input_add_tanggal" value="" disabled>
             </div>
           </div>
         </div>
       </div>
+      </div>{{-- /#formBsGrid --}}
 
         <div class="container-fluid" style="overflow-x: auto;">
 
-              <table id="addTable" class="table table-bordered">
+              <table id="addTable" class="data-table">
                 <thead class="text-center">
                   <tr>
                     <th scope="col" class="spr-col-terima">Terima</th>
@@ -438,8 +439,24 @@
         </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal" onclick="buttonCloseModalAddPRJ()">Batal</button>
-        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-lg btn-chip-biru">Simpan</button>
+        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal" onclick="buttonCloseModalAddPRJ()" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Batal</button>
+        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
       </div>
     </div>
   </div>
@@ -447,13 +464,24 @@
 
 
 <div id="page3" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
   <div class="row">
     <div class="col-8 text-left">
       {{-- <h2>Koreksi SPR</h2> --}}
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="margin-bottom:20px; height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()"  >
+        Close
+      </button>
     </div>
   </div>
 
@@ -737,7 +765,7 @@
         <div class="col-md-8">
           <div class="input-group form-group">
             <input id="KoreksiEditKodeBrg" type="text" class="form-control" disabled>
-            <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> -->
+            <!-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-chip-biru btn-sm" ><i class="bi bi-search"></i></button> -->
 
           </div>
         </div>
@@ -840,7 +868,7 @@
             <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
           </div> -->
         <div class="col-md-4">
-          <select id="KoreksiEditReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example" onchange="onChangePPN('ppn' , 'input_add_tipeppn')">
+          <select id="KoreksiEditReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
             <option value=0 selected>Tidak</option>
             <option value=1 >Ya</option>
           </select>
@@ -879,17 +907,25 @@
 
       <div class="row mt-2">
         <div class="col-md-12 text-right mt-4">
-          <button type="button" class="btn btn-secondary" onclick="buttonKoreksiItemBatal()" style="height: 30px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;">Batal</button>
+          <button type="button" class="btn btn-lg btn-batal-add" onclick="buttonKoreksiItemBatal()" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Batal</button>
 
-          <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-chip-biru" style="height: 30px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          text-transform: uppercase;">Simpan Edit</button>
+          <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-lg btn-chip-biru" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
           <!-- <button id="buttonSubmitKoreksiEdit" type="button" onclick="submitKoreksiEdit()" class="btn btn-primary" >Edit</button> -->
         </div>
 
@@ -899,18 +935,30 @@
     </div>
     </div>
   </div>
+</div>{{-- /#formBsGrid --}}
 </div>
 
 
 
 <div id="page4" style="display: none" class="mainpage container-fluid" >
+<div id="formBsGrid">
 
   <div class="row mb-4">
     <div class="col-8 text-left">
       <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg" style="height: 30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()"  >Close</button>
+      <button type="button" class="btn btn-danger btn-lg" style="
+              height: 30px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 600;
+              text-transform: uppercase;
+              transition: background-color 0.3s, box-shadow 0.3s;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="buttonCloseForm()"  >
+        Close
+      </button>
     </div>
   </div>
 
@@ -1158,6 +1206,7 @@
 
 
   </div>
+</div>{{-- /#formBsGrid --}}
 </div>
 
 
@@ -1168,6 +1217,7 @@
 @endsection
 
 @section('js')
+@include('marketing.partials.tampilan-purchasing-js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
@@ -1208,7 +1258,7 @@ function rpgDefaultCart (urut) {
   // urut 2: Transaksi Retur Gudang -- gabungan kolom tab lama "Belum Otorisasi"
   // + "Sudah Otorisasi" (OtoUser1/TglOto1), sejak keduanya digabung jadi satu tabel.
   return [
-    ['NoBukti',      'No. Bukti',  1, 'varchar', 01, 0],
+    ['NoBukti',      'No. Bukti',  1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',    1, 'date',    0, 0],
     ['NAMACUSTSUPP', 'Nama Cust',  1, 'varchar', 0, 0],
     ['Noinv',        'No Invoice', 1, 'varchar', 0, 0],
@@ -1357,11 +1407,11 @@ function rpgValueCell (row, col) {
     return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
   }
 
-  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/') + '</td>'; }
+  if (type === 'date') { if (!raw) { return '<td></td>'; } return '<td>' + formatDate(raw, '/').split('/').reverse().join('/') + '</td>'; }
   if (type === 'float') {
     let dp = Number(col[5]) || 0;
     let n = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
-    return '<td class="text-right">' + n.toLocaleString('id-ID', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
+    return '<td class="text-right">' + n.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp }) + '</td>';
   }
   return '<td>' + (raw !== undefined && raw !== null ? raw : '') + '</td>';
 }
@@ -1377,7 +1427,7 @@ function tabelActionsCell (row) {
   let ppn = rpgPickCI(row, 'PPN');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-primary btn-sm" title="Tambah" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus"></i></button>';
+  html += '<button class="btn btn-success btn-sm" title="Buat Retur" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus-lg"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1395,7 +1445,7 @@ function tabel2ActionsCell (row) {
     // (buttonKoreksiDeleteItem, choice 'D' ke sp_TransSPBRJUAL) utk mengembalikan
     // qty barang itu jadi outstanding lagi di tabel "Outstanding PRJ".
     html += '<button class="btn btn-success btn-sm" title="Edit" type="button" onclick="buttonKoreksi(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
-    html += '<button class="btn btn-primary btn-sm" title="Otorisasi" type="button" onclick="buttonOtorisasiPenerimaan(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
+    html += '<button class="btn btn-info btn-sm" title="Otorisasi" type="button" onclick="buttonOtorisasiPenerimaan(\'' + nobukti + '\' , \'add\')"><i class="bi bi-key"></i></button>';
   }
   html += '</div></td>';
   return html;
@@ -1492,41 +1542,38 @@ function rpgUpdateFilterBadge () {
 }
 
 function buttonFilterSPR () {
-  let tglawal = $('#input_tanggalawal_spr').val()
-  let tglakhir = $('#input_tanggalakhir_spr').val()
-  let filterstatus = $('#input_filterstatus').val()
-  let filteroto = $('#input_filteroto').val()
-  $.ajax({
-    url: "{!! url('returpenjualangudangloadall') !!}",
-    type: "get", async: false,
-    data: { tglawal, tglakhir, filterstatus, filteroto },
-    success: function (res) {
-      lastTabel2Rows = res.tempPenerimaan
-      reinitTabel2()
-      rpgUpdateFilterBadge()
-    },
-    error: function (err) { console.log(err); alertify.warning('Terjadi kesalahan silahkan refresh browser') }
-  })
+  loadAll()
+}
+
+// Rentang tanggal siap dipakai query: dua-duanya terisi, tahunnya sudah lengkap, dan awal
+// <= akhir. Saat tahun diketik manual, browser memicu onchange dengan tahun setengah jadi
+// (mis. 0002, 0020, 0202) yang di luar rentang datetime SQL Server -- dulu langsung dikirim
+// ke server dan berakhir "Terjadi kesalahan silahkan refresh browser". Tunggu sampai lengkap.
+function rpgRentangSiap (idAwal, idAkhir) {
+  let awal = $('#' + idAwal).val()
+  let akhir = $('#' + idAkhir).val()
+  if (!awal || !akhir) { return false }
+  if (awal.slice(0, 4) < '1900' || akhir.slice(0, 4) < '1900') { return false }
+  if (awal > akhir) {
+    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
+    return false
+  }
+  return true
 }
 
 function onChangePeriodeSPR () {
-  let tglawal = $('#input_tanggalawal_spr').val()
-  let tglakhir = $('#input_tanggalakhir_spr').val()
-  if (tglawal && tglakhir && tglawal > tglakhir) {
-    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
-    return
-  }
-  buttonFilterSPR()
+  if (!rpgRentangSiap('input_tanggalawal_spr', 'input_tanggalakhir_spr')) { return }
+  loadAll()
 }
 
 function onChangePeriodePRJ () {
-  let tglawal = $('#input_tanggalawal_prj').val()
-  let tglakhir = $('#input_tanggalakhir_prj').val()
-  if (tglawal && tglakhir && tglawal > tglakhir) {
-    alertify.warning('Tanggal awal tidak boleh lebih besar dari tanggal akhir')
-    return
-  }
+  if (!rpgRentangSiap('input_tanggalawal_prj', 'input_tanggalakhir_prj')) { return }
   loadAll()
+}
+
+// Jawaban ditolak dari controller berbentuk {status:0, pesan}.
+function rpgDitolak (res) {
+  return !!res && typeof res === 'object' && !Array.isArray(res) && Number(res.status) === 0
 }
 
 $(document).ready(function(){
@@ -1577,6 +1624,10 @@ function onChangeHeader (field , idvalue) {
       success: function(res) {
         console.log(res ,'!')
 
+        if (rpgDitolak(res)) {
+          alertify.warning(res.pesan)
+          return
+        }
         if (res == 1) {
           alertify.success(`${field} sudah diupdate`)
         }
@@ -1645,8 +1696,8 @@ function refreshDataTableKoreksi (nobukti) {
           <td>${item.NOSAT == 1 ? item.SAT_1 : item.SAT_2}</td>
 
           <td class="text-center">
-          <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
-           <button class="btn btn-danger btn-sm" type="button" onclick="buttonKoreksiDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
+          <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
+           <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonKoreksiDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
 
           </tr>`
         });
@@ -1779,6 +1830,11 @@ function buttonKoreksiDeleteItem (i) {
             success: function(res) {
               console.log(res ,'!')
 
+              if (rpgDitolak(res)) {
+                alertify.warning(res.pesan)
+                loadAll()
+                return
+              }
               if (res == 1) {
                 // $("#form").modal('toggle')
                 loadAll()
@@ -1822,11 +1878,12 @@ function buttonOtorisasiPenerimaan (nobukti) {
           },
           success: function(res) {
             console.log(res)
-            alertify.success('Berhasil update otorisasi')
             loadAll()
-
-
-
+            if (rpgDitolak(res)) {
+              alertify.warning(res.pesan)
+              return
+            }
+            alertify.success('Berhasil update otorisasi')
           },
           error: function (err) {
             console.log(err)
@@ -1848,10 +1905,23 @@ function buttonBatalOtorisasiPenerimaan (nobukti) {
   }
 
 
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  let baris = (lastTabel2Rows || []).find(function (r) { return rpgPickCI(r, 'NoBukti') === nobukti })
+  if (baris && rpgPickCI(baris, 'xstatus') && rpgPickCI(baris, 'xstatus') !== 'Belum') {
+    alertify.warning("SPR " + nobukti + " sudah dipakai Nota Retur Penjualan, tidak bisa batal otorisasi")
+    return
+  }
+
+  // Pola batal otorisasi menu lain (purchasing / SO / Surat Jalan / PRJ): prompt berjudul
+  // "Batal Otorisasi", keterangan wajib diisi (prompt tetap terbuka bila kosong), dicatat ke
+  // LoggingData('btloto') di controller.
+  alertify.prompt('Batal Otorisasi', "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
-    // alertify.success("You entered: " + value);
-    let xpket = value;
+    let xpket = String(value || '').trim();
+
+    if (!xpket) {
+      alertify.warning('Keterangan harus diisi.');
+      return false;
+    }
         let _token = $("#_token").val();
 
         $.ajax({
@@ -1861,16 +1931,17 @@ function buttonBatalOtorisasiPenerimaan (nobukti) {
           data: {
             _token,
             nobukti,
-          pket :value
+            pket : xpket
 
           },
           success: function(res) {
             console.log(res)
-            alertify.success('Berhasil batal otorisasi')
             loadAll()
-
-
-
+            if (rpgDitolak(res)) {
+              alertify.warning(res.pesan)
+              return
+            }
+            alertify.success('Berhasil batal otorisasi')
           },
           error: function (err) {
             console.log(err)
@@ -1923,6 +1994,15 @@ function submitKoreksiEdit () {
     alertify.warning("Qty kurang dari 0")
     return
   }
+  // Qty 0 akan menyisakan baris kosong di SPR; untuk membuang item pakai tombol hapus.
+  if (!(Number(qntTerima) > 0)) {
+    alertify.warning("Qty harus lebih dari 0, gunakan tombol hapus untuk menghapus item")
+    return
+  }
+  if (Number(qntReject) > Number(qntTerima)) {
+    alertify.warning("QTY Reject tidak boleh melebihi qty terima")
+    return
+  }
 
   console.log({choice,
   qntTerima,
@@ -1968,6 +2048,11 @@ function submitKoreksiEdit () {
       success: function(res) {
         console.log(res ,'!')
 
+        if (rpgDitolak(res)) {
+          alertify.warning(res.pesan)
+          loadAll()
+          return
+        }
         if (res == 1) {
           // $("#form").modal('toggle')
           loadAll()
@@ -2074,8 +2159,8 @@ if (pcekglobal) {
           <td>${item.NOSAT == 1 ? item.SAT_1 : item.SAT_2}</td>
 
           <td class="text-center">
-          <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
-           <button class="btn btn-danger btn-sm" type="button" onclick="buttonKoreksiDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
+          <button title="Edit" class="btn btn-success btn-sm" type="button" onclick="buttonKoreksiEditItem(${i})"><i class="bi bi-pen"></i></button>
+           <button title="Hapus" class="btn btn-danger btn-sm" type="button" onclick="buttonKoreksiDeleteItem(${i})"><i class="bi bi-trash"></i></button></td>
 
           </tr>`
         });
@@ -2123,32 +2208,9 @@ if (pcekglobal) {
 
 }
 
+// Detail hanya melihat data, jadi tidak dicek kunci periode (pola Surat Jalan / Retur SJ:
+// Detail boleh semua periode).
 function buttonDetailKoreksi (nobukti) {
-
-let pcekglobal = 0
-  $.ajax({
-    url: "{!! url('ceklockperiode') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function(res) {
-      if (res.length ) {
-        pcekglobal = 1
-      }
-    },
-    error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
-    }
-
-  })
-
-if (pcekglobal) {
-  alertify.warning("Periode sudah dikunci")
-  return
-}
-
 
   $('.showhideitem').hide();
 
@@ -2237,6 +2299,8 @@ if (pcekglobal) {
 
 }
 
+let rpgAjaxLoadAll = null
+
 function loadAll () {
   let tglawal = $('#input_tanggalawal_spr').val()
   let tglakhir = $('#input_tanggalakhir_spr').val()
@@ -2244,21 +2308,51 @@ function loadAll () {
   let filteroto = $('#input_filteroto').val()
   let tglawalprj = $('#input_tanggalawal_prj').val()
   let tglakhirprj = $('#input_tanggalakhir_prj').val()
-  $.ajax({
+  // Permintaan lama dibatalkan supaya hasil yang lebih lama tidak menimpa yang terbaru
+  // (pola perintahreturjual.blade.php).
+  if (rpgAjaxLoadAll) { rpgAjaxLoadAll.abort() }
+  rpgAjaxLoadAll = $.ajax({
     url: "{!! url('returpenjualangudangloadall') !!}",
-    type: "get", async: false, data: { tglawal, tglakhir, filterstatus, filteroto, tglawalprj, tglakhirprj },
+    type: "get", data: { tglawal, tglakhir, filterstatus, filteroto, tglawalprj, tglakhirprj },
     success: function(res) {
       lastTabelRows = res.tempOutstanding;
       lastTabel2Rows = res.tempPenerimaan;
       reinitTabel();
       reinitTabel2();
-    }})
+      rpgUpdateFilterBadge();
+    },
+    error: function (err) {
+      if (err && err.statusText === 'abort') { return }
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    },
+    complete: function () { rpgAjaxLoadAll = null }
+  })
 }
 
+
+function rpgIsiTanggalServer () {
+  document.getElementById("input_add_tanggal").value = ''
+  $.ajax({
+    url: "{!! url('gettanggalserver') !!}",
+    type: "get",
+    success: function(res) {
+      if (res && res[0]) {
+        document.getElementById("input_add_tanggal").value = res[0].tanggal
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal mengambil tanggal server, silahkan refresh browser')
+    }
+  })
+}
 
 function buttonAdd (nobukti , namacustsupp , ppn, mode = 'add') {
 
 let pcekglobal = 0
+  // Detail hanya melihat barang PRJ: tanpa cek kunci periode, hak Tambah, dan nomor bukti baru.
+  if (mode !== 'detail') {
   $.ajax({
     url: "{!! url('ceklockperiode') !!}",
     type: "get",
@@ -2301,7 +2395,16 @@ if (pcekglobal) {
         xppn =0
 
       }
+  } else {
+    document.getElementById("input_add_nobukti").value = ''
+    document.getElementById("input_add_nourut").value = ''
+  }
 
+    $('#modalAddPRJLabel').text(mode === 'detail' ? 'Detail PRJ' : 'Form SPR')
+    // Tanggal SPR selalu disabled dan diisi tanggal server (dulu bisa diubah user, dan
+    // nilai awalnya tanggal saat halaman dibuka). Server juga memakai tanggal server saat simpan.
+    $('#input_add_tanggal').prop('disabled', true)
+    rpgIsiTanggalServer()
 
     let _token  = $("#_token").val()
     $.ajax({
@@ -2424,7 +2527,13 @@ function checkRejectVsTerima (i) {
   }
 }
 
+let rpgSedangSimpan = false
+
 function submitAdd () {
+  if (!$("#input_add_tanggal").val()) {
+    alertify.warning("Tanggal server belum terambil, silahkan tutup form lalu buka lagi");
+    return
+  }
   let checkDate = new Date($("#input_add_tanggal").val())
   let periode_bulan = document.getElementById("periode_bulan").value
   let periode_tahun = document.getElementById("periode_tahun").value
@@ -2439,6 +2548,8 @@ function submitAdd () {
   let tempData = []
   let checkQnt = 0
   let checkMinus = 0
+  let checkNol = 0
+  let checkRejectLebih = 0
 
   let nobukti = $("#input_add_nobukti").val();
   let nourut = $("#input_add_nourut").val();
@@ -2467,8 +2578,23 @@ function submitAdd () {
         if(Number(checkQntReject)  < 0) {
           checkMinus = 1
         }
+        // SP_InsertPRRSPB hanya menyimpan baris dengan qty terima <> 0; bila semua 0 yang
+        // tersimpan cuma header SPR tanpa barang.
+        if (!(Number(checkQntTerima) > 0)) {
+          checkNol = 1
+        }
+        // Reject adalah bagian dari barang yang diterima, tidak boleh melebihi qty terima.
+        if (Number(checkQntReject) > Number(checkQntTerima)) {
+          checkRejectLebih = 1
+        }
         // check qntsisa
-      tempData.push(dataTableAdd[i])
+      tempData.push({
+        NOBUKTI: item.NOBUKTI,
+        URUT: item.URUT,
+        KODEBRG: item.KODEBRG,
+        inputQntTerima: dataTableAdd[i].inputQntTerima,
+        inputQntReject: dataTableAdd[i].inputQntReject
+      })
     }
   });
   if (checkQnt) {
@@ -2479,17 +2605,28 @@ function submitAdd () {
     alertify.warning("Qnt < 0");
     return
   }
+  if (checkNol) {
+    alertify.warning("Qty terima barang yang dicentang harus lebih dari 0");
+    return
+  }
+  if (checkRejectLebih) {
+    alertify.warning("QTY Reject tidak boleh melebihi qty terima");
+    return
+  }
 
 
   if (!tempData.length) {
     alertify.warning("Tidak ada item dipilih");
     return
   }
+  // Penjaga klik ganda: tombol dikunci sampai jawaban server tiba.
+  if (rpgSedangSimpan) { return }
+  rpgSedangSimpan = true
+  $('#buttonSubmitAdd').prop('disabled', true)
   console.log(tempData)
   $.ajax({
       url: "{!! url('returpenjualangudangspadd') !!}",
       type: "post",
-      async: false,
       data: {
         _token : _token,
         tempData,
@@ -2501,9 +2638,14 @@ function submitAdd () {
       success: function(res) {
         console.log(res ,'!')
 
-        if (res == 1) {
+        if (rpgDitolak(res)) {
+          alertify.warning(res.pesan)
+          return
+        }
+        if (res && Number(res.status) === 1) {
           // $("#form").modal('toggle')
-          alertify.success('SPR telah ditambah');
+          alertify.success('SPR ' + res.nobukti + ' telah ditambah');
+          dataTableAdd = []
           loadAll()
           buttonCloseModalAddPRJ()
 
@@ -2521,6 +2663,10 @@ function submitAdd () {
       error: function (err) {
         console.log(err)
         alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      },
+      complete: function () {
+        rpgSedangSimpan = false
+        $('#buttonSubmitAdd').prop('disabled', false)
       }
     })
 

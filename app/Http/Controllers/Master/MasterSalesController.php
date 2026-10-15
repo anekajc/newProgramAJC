@@ -117,6 +117,12 @@ Order by Keynik");
   }
 
   public function submitAddSalesCust (Request $req) {
+    $check = DB::connection('SML')->select('select top 1 1 as ada from DBSalesCustomer where KeyNik=:keynik and KodeCustSupp=:kodeCustSupp', [
+      'keynik' => $req->keynik, 'kodeCustSupp' => $req->kodeCustSupp
+    ]);
+    if ($check) {
+      return 'Customer ini sudah terdaftar di sales ini';
+    }
     $add = DB::connection('SML')->update('Insert Into DBSalesCustomer (KeyNik,KodeCustSupp,NIK,MingguKe)
     Values(:keynik,:kodeCustSupp,:NIK,:Mingguke)' , [
       'kodeCustSupp' => $req->kodeCustSupp,
@@ -151,6 +157,12 @@ where KeyNik=:keynik and kodecustSupp=:kodeCustSupp ' , [
   }
 
   public function submitAddTarget (Request $req) {
+    $check = DB::connection('SML')->select('select top 1 1 as ada from DbTargetsales where KeyNik=:keynik and tahun=:Tahun and isnull(MERK,\'\')=:Merk', [
+      'keynik' => $req->keynik, 'Tahun' => $req->Tahun, 'Merk' => (string) $req->Merk
+    ]);
+    if ($check) {
+      return 'Target untuk tahun dan merk ini sudah ada';
+    }
     $add = DB::connection('SML')->update('Insert Into DbTargetsales (KeyNik,tahun,Rp1,Rp2,Rp3,Rp4,Rp5,Rp6,Rp7,Rp8,Rp9,Rp10,Rp11,Rp12,MERK,TGTSALES)
          Values(:keynik,:Tahun, 0,0,0,0,0,0,0,0,0,0,0,0,:Merk,:TgtSales)' , [
       'TgtSales' => $req->TgtSales,
@@ -163,7 +175,19 @@ where KeyNik=:keynik and kodecustSupp=:kodeCustSupp ' , [
   }
 
   public function submitDeleteTarget (Request $req) {
-    $delete = DB::connection('SML')->update('Delete DbtargetSales 
+    // Dulu hanya per KeyNik + tahun, jadi menghapus satu baris target ikut menghapus target
+    // SEMUA merk di tahun itu. Blade sekarang ikut mengirim Merk baris yang dihapus.
+    if ($req->has('Merk')) {
+      DB::connection('SML')->update('Delete DbtargetSales
+          where KeyNik=:keynik and tahun=:Tahun and isnull(MERK,\'\') = :Merk' , [
+        'Tahun' => $req->Tahun,
+        'keynik' => $req->keynik,
+        'Merk' => (string) $req->Merk
+      ]);
+      return 1;
+    }
+
+    $delete = DB::connection('SML')->update('Delete DbtargetSales
           where KeyNik=:keynik and tahun=:Tahun' , [
       'Tahun' => $req->Tahun,
       'keynik' => $req->keynik
@@ -360,8 +384,8 @@ order by a.tahun',['keynik'=>$req->keynik]);
 from DbtargetSales A
 left outer join Dbkaryawan B on A.Keynik = B.KeyNik
 left outer join dbmerk c on a.merk=c.kodemerk
-where A.keyNik= :keynik and A.Tahun = :Tahun
-order by a.tahun',['keynik'=>$req->keynik, 'Tahun'=>$req->Tahun]);
+where A.keyNik= :keynik and A.Tahun = :Tahun and isnull(A.MERK,\'\') = :Merk
+order by a.tahun',['keynik'=>$req->keynik, 'Tahun'=>$req->Tahun, 'Merk'=>(string) $req->Merk]);
     return $listData;
   }
 

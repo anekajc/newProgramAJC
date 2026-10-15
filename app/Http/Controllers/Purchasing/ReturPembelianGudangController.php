@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Purchasing;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-use App\Model\NewMenu;
-use App\Model\NewAksesMenu;
-use App\Model\NewPeriode;
-use App\Model\NewUsers;
+use App\Models\NewMenu;
+use App\Models\NewAksesMenu;
+use App\Models\NewPeriode;
+use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
-use App\Model\VWOutRBeli;
-use App\Model\DBFLMENU;
+use App\Models\VWOutRBeli;
+use App\Models\DBFLMENU;
 
 
-use App\Model\VWRBeliOut;
+use App\Models\VWRBeliOut;
 
 
 class ReturPembelianGudangController extends Controller
@@ -29,6 +29,8 @@ class ReturPembelianGudangController extends Controller
   public function index (Request $req) {
 
     $kodemenu = '030502';
+    // path() - sebelumnya $req->path (tanpa kurung) selalu null, sehingga getAkses tidak
+    // pernah cocok dan semua user dilempar ke /home.
     $akses = app('App\Http\Controllers\GlobalController')->getAkses($kodemenu, $req->path());
     // $akses = DBFLMENU::where('USERID', \Auth::user()->username)-> where('L1', $kodemenu)->first();
     if(!$akses || !$akses->HASACCESS) {
@@ -118,31 +120,13 @@ AND a.KODESUPP=:nobukti
 
   public function getDetailPenerimaan (Request $req) {
 
-    // VWRBeliOut::all()->where(...) tidak pernah mengembalikan baris (sama seperti
-    // getDetailOutstanding() sebelum diperbaiki) - diganti query langsung ke
-    // dbRBeli/dbRBeliDet, meniru pola InvoiceReturBeliController@getDetail.
-    $detailPenerimaan = DB::connection("SML")->select("
-    Select  A.NoBukti NOBUKTI, A.Tanggal TANGGAL, A.KodeSupp KODESUPP, C.NamaCustSupp NAMACUSTSUPP,
-            F.Nama Namagdg, B.NoPRB NooutBRg, B.Urut URUT,
-            B.KodeBrg KODEBRG, E.NamaBrg NAMABRG, B.Qnt QNT,
-            case when B.NoSat=1 then E.Sat1 when B.NoSat=2 then E.Sat2 when B.NoSat=3 then E.Sat3 end Satuan,
-            case when P.NOSAT=1 then Isnull(P.Qnt1,0)-Isnull(S.Qnt1,0)
-                 else Isnull(P.Qnt2,0)-Isnull(S.Qnt2,0) end QntOS
-    From    dbRBeli A
-    Left Outer Join dbRBeliDet B on B.NoBukti = A.NoBukti
-    Left Outer Join dbCustSupp C on C.KodeCustSupp = A.KodeSupp
-    Left Outer Join dbBarang  E on E.KodeBrg = B.KodeBrg
-    Left Outer Join dbGudang  F on F.KodeGdg = B.KodeGdg
-    Left Outer Join DBPRRBELIDET P on P.NOBUKTI = B.NoPRB and P.URUT = B.UrutPRB
-    Left Outer Join (select NOPRB,UrutPRB,SUM(Qnt1) Qnt1,SUM(Qnt2) Qnt2
-                     from DBRBELIDET Group By NOPRB,UrutPRB) S
-                     on S.NOPRB = B.NoPRB and S.UrutPRB = B.UrutPRB
-    where   A.NoBukti = :nobukti
-    order by B.Urut
-    " , [ "nobukti" => $req->input('NOBUKTI') ]);
-
+    // Tetap memakai VWRBeliOut (di DBSMLBARU view ini berisi dan memuat kolom NOURUT/
+    // Kodegdg/UrutOutBRg/NOSAT/ISI/QntOS yang dibutuhkan form Koreksi). Hanya filternya
+    // dipindah ke SQL - sebelumnya seluruh isi view ditarik lalu disaring di PHP.
+    $detailPenerimaan = VWRBeliOut::where('NOBUKTI', $req->input('NOBUKTI'))->orderBy('URUT')->get();
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
+      // code...
       array_push($tempPenerimaan, $p);
     }
     return $tempPenerimaan;
@@ -184,6 +168,7 @@ AND a.KODESUPP=:nobukti
 
           $check2 = DB::connection('SML')->select('exec Sp_CekStockAkhir ?,?,?,?',[$d['NOSAT'], $date, $d['Kodegdg'],  $d['Kodebrg']]);
 
+          // Bandingkan sebagai desimal - sebelumnya (int) sehingga 1,5 vs saldo 1 lolos.
           $checkSaldo = 0;
           if ($check2) {
             if ((float)$d['inputQntTerima'] > (float)$check2[0]->SALDOQNT ) {
@@ -245,6 +230,8 @@ AND a.KODESUPP=:nobukti
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $req->input('tglakhir'))) { $tglakhir = $req->input('tglakhir'); }
     if ($tglawal > $tglakhir) { $tglakhir = $tglawal; }
 
+    // Syarat outstanding disamakan dengan getDetailOutstanding() - (Qnt x Isi) - sudah
+    // diretur. Sebelumnya loadAll memakai Qnt1 sedangkan tampilan awal memakai Qnt x Isi.
     $tempoutstanding = DB::connection("SML")->select("
     declare @tglawal1 date, @tglakhir1 date
     select @tglawal1=:tglawal1, @tglakhir1=:tglakhir1

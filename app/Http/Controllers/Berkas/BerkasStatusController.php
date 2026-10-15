@@ -18,35 +18,42 @@ class BerkasStatusController extends Controller
 
   public function index(Request $req) {
 
-    // $user = DB::connection("SML")->select('select * from DBGUDANG where KODEGDG <> :id', ['id' => 'GTC']);
-    $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // Daftar user diisi lewat AJAX loadAll() dan menu samping layout newmasterTest diambil lewat
+    // AJAX /getmenu, jadi dua query ini tidak dipakai halaman - dimatikan supaya lebih ringan.
+    // $users = DB::connection("SML")->select('select * from DBFLPASS');
+    // $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
 
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(1);
-
     return view('berkas.berkasstatus' , [
-      "menul0" => $menul0,
+      "menul0" => [],
       "periode" => $periode,
-      "users"=> $users
     ]);
 
   }
 
   public function loadAll () {
-    $users = DB::connection("SML")->select('select * from DBFLPASS');
+    $users = DB::connection("SML")->select('select USERID, FullName, STATUS from DBFLPASS order by USERID');
     return $users;
 
   }
 
   public function spEdit (Request $req) {
+    if (!$req->kode) {
+      return 'User ID kosong';
+    }
+    if ((string) $req->status !== '0' && (string) $req->status !== '1') {
+      return 'Status tidak dikenal';
+    }
+
     $edit = DB::connection('SML')->update('update DBFLPASS set STATUS = :status where USERID = :kode' , ['kode' => $req->kode , 'status' => $req->status]);
 
-    return $edit;
+    // Dulu jumlah baris dikembalikan apa adanya, jadi 0 (user tidak ada) tampil sebagai "0".
+    return $edit ? 1 : 'User ' . $req->kode . ' tidak ditemukan';
   }
 
   public function spDetail (Request $req) {
-    $detail = DB::connection('SML')->select('SELECT * FROM DBFLPASS where USERID = :kode' , ['kode' => $req->kode]);
+    $detail = DB::connection('SML')->select('SELECT USERID, FullName, STATUS FROM DBFLPASS where USERID = :kode' , ['kode' => $req->kode]);
     return $detail;
   }
 

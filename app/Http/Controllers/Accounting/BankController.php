@@ -651,13 +651,10 @@ where b.Perkiraan = :lawan
       }
 
 
-      public function listTunaiX () {
-        $username = \Auth::user()->username;
-        $listTunai = DB::connection('SML')->select("select
-        *, '' MyID from dbTempHutPiut where IDUSER = :username and statusuid <> 'D' order by nofaktur, urut", ["username" => $username]);
-        return $listTunai;
-
-
+      // Bentuk baris (faktur dikelompokkan + pelunasan bukti ini) sama dengan Kas - lihat
+      // KasController::tunaiRows().
+      public function listTunaiX (Request $req) {
+        return app('App\Http\Controllers\Accounting\KasController')->tunaiRows($req->nobukti ?? '');
       }
 
 
@@ -695,14 +692,16 @@ where b.Perkiraan = :lawan
       left outer join DBBELI yy on y.NoFaktur=yy.NOBUKTI
       left outer join DBCUSTSUPP xx on yy.KODESUPP=xx.KODECUSTSUPP
       where Y.KodeCustSupp in (select KodeCustSupp from dbCustSupp where KodeCustSupp= @KodeCustSupp or KodeCustSupp= @agent or ISnull(Agent,'')= @agent)
-      and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti",
-        ["nobukti" => $req->nobukti , "kodecustsupp" => $req->kodecustsupp , "username" => $username , "agent" => $req->agent , "lawan" => $req->lawan]
+      and Y.NoBukti+right('0000'+cast(Y.NoMsk as varchar(4)),4)<> @NoBukti
+      and y.KodeCustSupp=@KodeCustSupp",
+        // agent kosong ('') diubah Laravel jadi NULL; dengan @agent NULL query ini 0 baris.
+        // Lihat catatan yang sama di KasController::listTunai().
+        ["nobukti" => $req->nobukti , "kodecustsupp" => $req->kodecustsupp , "username" => $username , "agent" => $req->agent ?? '' , "lawan" => $req->lawan]
       );
 
 
-        $listTunai = DB::connection('SML')->select("select
-        *, '' MyID from dbTempHutPiut where IDUSER = :username order by nofaktur , urut", ["username" => $username]);
-        return $listTunai;
+        // nobukti di atas = NoBukti + NoUrut; nobuktiview = NoBukti saja (lihat listTunaiX()).
+        return app('App\Http\Controllers\Accounting\KasController')->tunaiRows($req->nobuktiview ?? '');
 
         }
 
@@ -808,35 +807,40 @@ where b.Perkiraan = :lawan
         //
         //
         // }
-        if ($req->transaksi == 'BBK') {
-          $listData = DB::connection('SML')->select("
+        // if ($req->transaksi == 'BBK') {
+        //   $listData = DB::connection('SML')->select("
+        //   select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim ,  isnull(d.iscost , 0) iscost from dbPerkiraan a
+        //               left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
+        //                Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
+
+        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
+        //               where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
+        //               and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
+
+        //               order by a.Perkiraan" , ["perkiraan" => $req->perkiraan , "username" => $username ]);
+
+        // } else {
+        //   $listData = DB::connection('SML')->select("
+        //   select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
+        //         left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
+        //          Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
+
+        //                left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
+        //         where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
+        //         and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' and Perkiraan not in ('116100','21203') )
+
+        //         order by a.Perkiraan     " , ["perkiraan" => $req->perkiraan , "username" => $username ]);
+        // }
+
+        $listData = DB::connection('SML')->select("
           select a.Perkiraan, a.Keterangan,a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim ,  isnull(d.iscost , 0) iscost from dbPerkiraan a
                       left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
                        Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
 
                        left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
                       where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-                      and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='PT')
 
                       order by a.Perkiraan" , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-        } else {
-          $listData = DB::connection('SML')->select("
-          select a.Perkiraan, a.Keterangan, a.Simbol,C.Kode, isnull(C.IsLokalOrExim, 0) IsLokalOrExim, isnull(d.iscost , 0) iscost from dbPerkiraan a
-                left Outer join dbAksesPerkiraan b on b.Perkiraan=a.Perkiraan
-                 Left Outer Join (select perkiraan,kode,IsLokalOrExim from dbPOSTHUTPIUT group by perkiraan,kode,IsLokalOrExim)  C on A.Perkiraan=C.Perkiraan
-
-                       left outer join (select COUNT(kodecost) iscost , perkiraan from DBPERKCOST group by Perkiraan) D on a.Perkiraan = D.perkiraan
-                where a.Tipe=1 and a.Perkiraan <> :perkiraan and b.UserID = :username
-                and a.perkiraan not in (select Perkiraan from DBPOSTHUTPIUT where Kode='HT' and Perkiraan not in ('116100','21203') )
-
-                order by a.Perkiraan     " , ["perkiraan" => $req->perkiraan , "username" => $username ]);
-
-
-
-
-
-        }
 
 
     return $listData;
@@ -1012,6 +1016,13 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
         $uruttunai = DB::connection('SML')->select('Select isnull(MAX(urut) , 0) + 1 URUT from dbTransaksi where NoBukti = :nobukti', ["nobukti" => $req->nobukti ]);
         // return ['a'=> $uruttunai[0]->URUT];
         DB::connection('SML')->statement('update dbtemphutpiut set nomsk = :urut where iduser = :username', ["urut" => $uruttunai[0]->URUT , "username" => $username]);
+
+        // Pelunasan Piutang (Lawan 113100): NoRetur pelunasan dibukukan kosong - sama seperti
+        // KasController::spAdd().
+        if ($req->lawan == '113100') {
+          DB::connection('SML')->statement("update dbTempHutPiut set NoRetur = '' where IDUSER = :username and NoBukti = :nobukti and StatusUID = 'I'",
+            ["username" => $username, "nobukti" => $req->nobukti]);
+        }
 
       }
       // return $xplok;
@@ -1263,19 +1274,27 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
     WHERE KODESUPP= :custsupp and IDuser= :username order by nobukti , noretur", ["custsupp" => $req->kodesupp , "username" =>  \Auth::user()->username]);
 
     return $listData;
-
-
   }
 
+    // Browse No Titipan untuk item BBK ber-Lawan 113400 (lihat buttonAddListTitipan() di bank.js).
+  // Pakai tanda kutip biasa, BUKAN backtick: di PHP backtick menjalankan isinya sebagai
+  // perintah shell.
+  public function getNoTitipan () {
 
+  $data = DB::connection('SML')->select("select 	A.NOBUKTI,  A.TANGGAL,A.Valas ,C.namaCustSupp,
+                        (A.Debet+A.Kredit)*A.Kurs JumlahRp ,A.Keterangan  ,
+                       A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) Sisa,A.URUT,A.Debet,C.KodeCustSupp
+                       from dbTransaksi A
+                       LEFT OUTER JOIN DBTRANS B ON A.NoBukti=B.NoBukti
+                       LEFT OUTER JOIN DBCUSTSUPP C ON A.CustSuppL=C.KODECUSTSUPP
+                       LEFT OUTER JOIN (select UrutDPP,NODPP,sum(dibayar) Dibayar,sum(LB) LB
+                                        from DBTerimaDPPDET group by UrutDPP,NODPP) D ON A.NObukti=D.NoDPP AND A.urut=D.UrutDPP
+                       LEFT OUTER JOIN (SELECT NOTITIPAN,URUTTITIPAN,SUM(Debet) DEBET
+                                        FROM dbTransaksi GROUP BY NOTITIPAN,URUTTITIPAN) E ON A.NoBukti=E.NOTITIPAN AND A.Urut=E.URUTTITIPAN
+                       where A.Lawan=  '113400'AND A.CustSuppL<> ''     and A.TANGGAL>  '03/28/2016'
+                       and    A.debet - (isnull(d.Dibayar,0)+isnull(D.LB,0))-ISNULL(E.DEBET,0) >0 and a.tipetrans in ('BBM')");
 
-
-
-
-
-
-
-
-
+    return $data;
+  }
 
 }

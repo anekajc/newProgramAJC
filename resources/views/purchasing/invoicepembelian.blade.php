@@ -356,15 +356,16 @@ td input[type="checkbox"] {
 }
 </style>
 {{-- end tampilan tampilan baru --}}
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /invoicepembelian itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah.
+     Sama seperti newpo.blade.php. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
 @endsection
 
 @section('content')
 <div id="printContainer" style="display:none">
 
-</div>
-
-<div id="imagecontainer" class="d-none" style="">
-  <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 
 <div id="tempPrintContainer" style="display:none">
@@ -1887,6 +1888,11 @@ td input[type="checkbox"] {
         }
       })
 
+      if (!table_pembelian_row_detail || table_pembelian_row_detail.length === 0) {
+        alertify.warning('Detail dokumen tidak ditemukan')
+        return
+      }
+
       dataLPB =  table_pembelian_row_detail[0]
       dataEditPembelianEdit = table_pembelian_row_detail
 
@@ -1912,7 +1918,7 @@ td input[type="checkbox"] {
        let datebpotong = new Date(dataLPB.TglBuktiPotong);
       var daybpotong = ("0" + datebpotong.getDate()).slice(-2);
       var monthbpotong = ("0" + (datebpotong.getMonth() + 1)).slice(-2);
-       var date1bpotong = datefpajak.getFullYear()+"-"+(monthbpotong)+"-"+(daybpotong) ;
+       var date1bpotong = datebpotong.getFullYear()+"-"+(monthbpotong)+"-"+(daybpotong) ;
 
 
 
@@ -2002,6 +2008,11 @@ console.log('vvvvvvvvvvvvvvvvvv')
         }
       })
 
+      if (!table_pembelian_row_detail || table_pembelian_row_detail.length === 0) {
+        alertify.warning('Detail dokumen tidak ditemukan')
+        return
+      }
+
       let dataEdit = table_pembelian_row_detail[0]
 
       let date = new Date(dataEdit.Tanggal);
@@ -2028,7 +2039,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
       table_pembelian_row_detail.forEach((detail_row) => {
         table_row_detail_inf += `<tr>
         <td class="text-center">
-        <button class="btn btn-chip-merah btn-sm" type="button" onclick="hapustransaksi(${detail_row.KODEBARANG})"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-chip-merah btn-sm" type="button" onclick="hapustransaksi('${dataEdit.NoBukti}')"><i class="bi bi-trash"></i></button>
         </td>
         <td>${detail_row.NoBeli}</td>
         <td>${detail_row.KodeGdg}</td>
@@ -2106,7 +2117,9 @@ console.log('vvvvvvvvvvvvvvvvvv')
     }
 
 
-    function hapustransaksi () {
+    // nobukti dikirim oleh pemanggil (tombol hapus di modal Edit Kelengkapan). Dulu selalu
+    // dibaca dari #editnobukti2 (milik modal Detail) - dari modal Edit isinya kosong/nomor lain.
+    function hapustransaksi (nobukti) {
 
 
 
@@ -2115,7 +2128,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
       function(){
 
 
-                     let nobukti = document.getElementById("editnobukti2").value ;;
+                    nobukti = nobukti || document.getElementById("editnobukti2").value
                     console.log(nobukti)
                     let _token = $("#_token").val();
 
@@ -2134,7 +2147,8 @@ console.log('vvvvvvvvvvvvvvvvvv')
                           loadAll()
 
                           alertify.success('Berhasil Hapus Data')
-                          $("#detailPembelian").modal('toggle')
+                          $("#detailPembelian").modal('hide')
+                          $("#editKelengkapan").modal('hide')
                         }
 
 
@@ -2661,6 +2675,10 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
       let onUbah = function () {
         if (!awal.value || !akhir.value) { return }
+        // Tahun belum lengkap (mis. "0202" waktu mengetik 2025) - tunggu sampai tahunnya wajar.
+        // Tanpa ini setiap digit langsung memuat data dari tahun 0002/0020/0202 s/d sekarang
+        // (seluruh riwayat, AJAX sinkron) sehingga halaman macet tidak bisa diklik.
+        if (awal.value.slice(0, 4) < '1900' || akhir.value.slice(0, 4) < '1900') { return }
         if (awal.value > akhir.value) {
           alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir')
           return
@@ -3193,14 +3211,17 @@ console.log('vvvvvvvvvvvvvvvvvv')
                 printContent1 += `<div style="break-inside: avoid; width:7.5cm; height: 4.5cm; page-break-before: always; margin-top: 10px; padding-right: 3px">`
               }
 
+              // printContent1 += `<div style="break-inside: avoid; width:7.5cm; height: 4.5cm; page-break-after: always">`
               printContent1 += `<div  style="display: flex; flex-direction: column; margin-top: -25px" >`
               printContent1 += `<div class="" style="display: flex; flex-direction: row; text-align: center,">`
               printContent1 += `<div style="width:70%; padding-left: 5px; text-align: left"><h6 style=""> ${item.NoBukti}</h6> </div>`
+              // printContent1 += `<div style="width:40%" ></div>`
               printContent1 += `<div style=" width:30%; padding-right: 8px; margin-right: 10px" > <h6>${item.KodeBrg} </h6> </div>`
               printContent1 += `</div>`
 
               printContent1 += `<div class="" style="display: flex; flex-direction: row;margin-top: -20px">`
               printContent1 += `<div  style="width:70%; padding-left: 5px">` + printContent +`</div>`
+              // printContent1 += `<div style="width:10%">` + `</div>`
               printContent1 += `<div style=" width:30%; padding-right: 18px">`+ printContent2 +`</div>`
               printContent1 += `</div>`
 
@@ -3212,14 +3233,28 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
 
               printContent1 += `<div style="margin-top: -25px; text-align: center">`
-              printContent1 += `<h6>${date1} / ${formatAngka(item.QntTerima)} ${item.Satuan}</h6>`
+              printContent1 += `<h6>${date1} / ${item.QntTerima} ${item.Satuan}</h6>`
               printContent1 += `</div>`
               printContent1 += `</div>`
+              // printContent1 += `<div style=' page-break-before: always'></div>`
               z++
             }
             printContent1 += '</div>'
           }
         });
+
+        // printContent1 += `<div ><div style="flex: 3" >${item.NoBukti}</div><div style="flex: 3"></div><div style="flex: 3" >${item.KodeBrg}</div></div>`
+        // printContent1 += `<div  >`
+        // printContent1 += `<div style="display: flex">`
+        // printContent1 += printContent
+        // printContent1 += `</div>`
+        // printContent1 += `<div class="col-2">asd</div>`
+        // printContent1 += `<div >`
+        // printContent1 += printContent
+        // printContent1 += `</div>`
+        // printContent1 += `</div>`
+        // printContent1 += `<div ><div class="mt-4">${item.NoBukti}.${item.Urut}.${item.KodeBrg}</div></div>`
+
 
         document.getElementById("printContainer").innerHTML = printContent1
         w=window.open(' ');
@@ -3227,6 +3262,24 @@ console.log('vvvvvvvvvvvvvvvvvv')
         w.document.write($(`#printContainer`).html());
         w.print();
         w.close();
+
+
+        // console.log(idBarcode , idJumlah)
+        // let printContent = document.getElementById(`${idBarcode}`).innerHTML;
+        // let jumlahPrint = $(`#${idJumlah}`).val();
+        // console.log(jumlahPrint)
+        // let printContent1 = ""
+        // for (let i=0; i < jumlahPrint ; i++ ) {
+        //   printContent1 += `<div class="row">`
+        //   printContent1 += printContent
+        //   printContent1 += `</div>`
+        // }
+        // document.getElementById("printContainer").innerHTML = printContent1
+        // w=window.open(' ');
+        //
+        // w.document.write($(`#printContainer`).html());
+        // w.print();
+        // w.close();
 
     }
 
@@ -3265,6 +3318,12 @@ console.log('vvvvvvvvvvvvvvvvvv')
       console.log(dataPrint[0])
       if (dataPrint[0].pQC === '1') {
 
+
+
+
+
+
+
         let date = new Date(dataPrint[0].TANGGAL);
         var day = ("0" + date.getDate()).slice(-2);
         var month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -3281,7 +3340,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
           rowTable += `<tr><td>
           <div class="form-check text-center">
               <input id="printChecklist${i}" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-              </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${formatAngka(r.QntTerima)}</td><td>${formatAngka(r.QNTPO)}</td><td>${satuan}</td></tr>`
+              </div></td><td>${r.KodeBrg}</td><td>${r.namabrgx}</td><td>${r.QntTerima}</td><td>${r.QNTPO}</td><td>${satuan}</td></tr>`
           rowTableTemp += `
           <div id="tempqrcodeprint${i}" style="width: 10px; height: 10px"></div>
           <div id="tempqrcodeprintkodebrg${i}" style="width: 10px; height: 10px"></div>
@@ -3296,6 +3355,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
         document.getElementById("printPembelianTableData").innerHTML = rowTable
         document.getElementById("tempPrintContainer").innerHTML = rowTableTemp
         dataPrint.forEach((item, i) => {
+          // new QRCode(document.getElementById(`qrcodeprint${i}`), `${item.NOBUKTI}${item.KODEBRG}`);
           new QRCode(document.getElementById(`tempqrcodeprint${i}`), {text: `${item.NoBukti}.${item.Urut}.${item.KodeBrg}` , width: 90, height: 90});
           new QRCode(document.getElementById(`tempqrcodeprintkodebrg${i}`), {text: `${item.KodeBrg}` , width: 90, height: 90});
         });

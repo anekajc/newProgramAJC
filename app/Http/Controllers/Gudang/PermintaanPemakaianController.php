@@ -24,7 +24,7 @@ class PermintaanPemakaianController extends Controller
     {
         $rows = VWMASTERPRPENYERAHANBHN::where('TANGGAL', '>=', $date1)
             ->where('TANGGAL', '<', date('Y-m-d', strtotime($date2 . ' +1 day')))
-            ->orderBy('Tanggal', 'desc')->orderBy('NOBUKTI', 'asc')->orderBy('URUT', 'asc')
+            ->orderBy('Tanggal', 'desc')->orderBy('NOBUKTI', 'desc')->orderBy('URUT', 'asc')
             ->get()->groupBy('NOBUKTI');
 
         $out = [];
@@ -84,7 +84,7 @@ class PermintaanPemakaianController extends Controller
     public function listBarang(Request $req)
     {
         $search = trim($req->input('search'));
-        $query  = "select KODEBRG,NAMABRG,SAT1,SAT2,SAT3, ISI1,ISI2,ISI3 from DBBARANG
+        $query  = "select KODEBRG,NAMABRG, PartNumber, SAT1,SAT2,SAT3, ISI1,ISI2,ISI3 from DBBARANG
                where isnull(ISAKTIF,0)=1 and KODEGRP = 'BJ'";
         $params = [];
 

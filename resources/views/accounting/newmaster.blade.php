@@ -1599,6 +1599,7 @@ function goHome() {
 
 </script>
 
+    @include('partials.ajax-error-logger')
     @yield('js')
 </body>
 

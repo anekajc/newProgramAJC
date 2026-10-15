@@ -1,10 +1,10 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Barang')
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -22,220 +22,114 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Barang</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-  <div class="table-outer">
-    <div class="table-wrap">
-      <table class="tb" id="tabel">
-        <thead>
+  @include('master.partials.toolbarMaster')
+
+  <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
           <tr>
-            <th scope="col">Actions</th>
-            <th scope="col">Kode Brg</th>
-            <th scope="col">Nama Brg</th>
-            <th scope="col">Agen</th>
-            <th scope="col">SubJenis</th>
-            <th scope="col">Jenis Barang</th>
-            <th scope="col">Nama Merk</th>
-            <th scope="col">SKU</th>
-            <th scope="col">Sat 1</th>
-            <th scope="col">Sat 2</th>
-            <th scope="col">Part Number</th>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
           </tr>
         </thead>
-        <tbody id="tabel_data" class="text-right">
-      </tbody>
+        <tbody id="tabel_data" class="text-left"></tbody>
       </table>
+
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
+
     </div>
-</div>
+  </div>
 
 </div>
 
+
+<style>
+  /* Tiga pasang label + input per baris (Qty Min | Qty Max | Toleransi, dst). */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 120px minmax(0, 1fr) 100px minmax(0, 1fr) 100px minmax(0, 1fr); }
+  #formBsGrid .bs-form.bs-form-3 .bs-full-3 { grid-column: 4 / -1; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+    #formBsGrid .bs-form.bs-form-3 .bs-full-3 { grid-column: 1 / -1; }
+  }
+</style>
 
 <!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade"  id="form"tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-          <div class="row">
-            <div class="col-4">
-
-            </div>
-
-            <div class="col-3">
-              <div class="form-group ">
-              <input type="checkbox" id="input_add_isagen" name="" value="">
-              <span class="text-left">Keagenan</span>
-            </div>
-            </div>
-
+          <div class="bs-form">
+          <label for="input_add_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_add_kodegroup" value='BJ' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Barang Jadi' disabled>
           </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodegroup" value='BJ' disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <span>Barang Jadi</span>
-                </div>
-              </div>
+          <label for="input_add_isagen">Keagenan</label>
+          <div class="bs-check"><input type="checkbox" id="input_add_isagen" name="" value=""></div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">HeadGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
+          <label for="input_add_kodeheadgroup">HeadGroup</label>
+          <select id="input_add_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
-                    <option selected disabled value="">Pilih SubGroup</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubKategori</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
+          <label for="input_add_kodesubkategori">SubKategori</label>
+          <select id="input_add_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih Subkategori</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Merk</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select id="input_add_kodemerk" onchange="changeInputMerk()" class="form-control" aria-label="Default select example">
+          <label for="input_add_kodesubgroup">SubGroup</label>
+          <select id="input_add_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+                    <option selected disabled value="">Pilih SubGroup</option>
+                  </select>
+
+          <label for="input_add_kodemerk">Merk</label>
+          <select id="input_add_kodemerk" onchange="changeInputMerk()" class="form-control" aria-label="Default select example">
                     <option selected disabled value="">Pilih Merk</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_kodebarang" disabled >
-                </div>
-              </div>
+          <label for="input_add_kodebarang">Kode Barang</label>
+          <input type="text" class="form-control" id="input_add_kodebarang" disabled >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namabarang" >
-                </div>
-              </div>
+          <label for="input_add_kodesku">Kode SKU</label>
+          <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-leftt" id="input_add_kodesku" >
+            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="">
+                <span class="text-left">Kontrak</span></div></div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang 2</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_namabarang2" >
-                </div>
-              </div>
+          <label for="input_add_namabarang">Nama Barang</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang" ></div>
 
-            </div>
+          <label for="input_add_namabarang2">Nama Barang 2</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang2" ></div>
+        </div>
 
             <br/>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <!-- <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div> -->
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <b>Satuan</b>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <b>Isi</b>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <b>Harga</b>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <div class="d-flex" style="gap:8px"><b class="form-control border-0 bg-transparent px-0">Satuan</b><b class="form-control border-0 bg-transparent px-0">Isi</b><b class="form-control border-0 bg-transparent px-0">Harga</b></div>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div>
-              </div>
-              <div class="col-3">
-
-
-                <!-- <div class="form-group">
+            <div class="bs-form bs-form-1">
+          <label for="input_add_satuan">Satuan</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_add_satuan" >
                 </div> -->
 
@@ -248,30 +142,13 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi" >
+            <input type="text" inputmode="decimal" value=1000 min=0 class="form-control text-right format-number" id="input_add_harga" ></div></div>
 
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi" >
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=1000 min=0 class="form-control text-right" id="input_add_harga" >
-                </div>
-              </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan 2</label>
-                </div>
-              </div>
-              <div class="col-3">
-
-                <!-- <div class="form-group">
+            
+          <label for="input_add_satuan2">Satuan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_add_satuan2" >
                 </div> -->
 
@@ -285,34 +162,15 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi2" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_harga2" ></div></div>
 
-
-
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi2" >
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_harga2" >
-                </div>
-              </div>
-
-            </div>
 
    
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan 3</label>
-                </div>
-              </div>
-              <div class="col-3">
-
-                <!-- <div class="form-group">
+            
+          <label for="input_add_satuan3">Satuan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_add_satuan3" >
                 </div> -->
 
@@ -324,22 +182,9 @@
                     <option value="3">Three</option>
                   </select>
                 </div>
-
-
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_isi3" >
-                </div>
-              </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_harga3" >
-                </div>
-              </div>
-
-            </div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_isi3" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_harga3" ></div></div>
+        </div>
 
 
 
@@ -352,132 +197,32 @@
 
             <br/>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Qty Min</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_qtymin" >
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Qty Max</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_qtymax" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-3">
+          <label for="input_add_qtymin">Qty Min</label>
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymin" >
+          <label for="input_add_qtymax">Qty Max</label>
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_add_qtymax" >
+          <label for="input_add_toleransi">Toleransi</label>
+          <input type="number" value=0 min=0 class="form-control text-right" id="input_add_toleransi" >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Toleransi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_add_toleransi" >
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat/Volume</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_isberat" class="form-control" aria-label="Default select example">
-                    <option value=0>Volume</option>
-                    <option value=1>Berat</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
+          <label for="input_add_isaktif">Status</label>
+          <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat/Volume</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_add_beratvolume" value=0.00>
-                </div>
-              </div>
+          <label for="input_add_isberat">Berat/Volume</label>
+          <select id="input_add_isberat" class="form-control" aria-label="Default select example">
+                    <option value=0>Volume</option>
+                    <option value=1>Berat</option>
+                  </select>
+          <label for="input_add_beratvolume">Berat/Volume</label>
+          <input type="number" class="form-control text-right" id="input_add_beratvolume" value=0.00>
 
-            </div>
-
-            <div class="row mt-2">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Part Number</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_add_partnumber" >
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Lokasi</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_add_lokasi" >
-                </div>
-              </div>
-
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode SKU</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-leftt" id="input_add_kodesku" >
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group ">
-                <input type="checkbox" id="input_add_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span>
-              </div>
-              </div>
-
-
-            </div>
+          <label for="input_add_partnumber">Part Number</label>
+          <input type="text" class="form-control text-left" id="input_add_partnumber" >
+          <label for="input_add_lokasi">Lokasi</label>
+          <div class="bs-full-3"><input type="text" class="form-control text-left" id="input_add_lokasi" ></div>
+        </div>
 
 
 
@@ -486,7 +231,8 @@
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -499,179 +245,68 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
-          <div class="row">
-            <div class="col-4">
-
-            </div>
-
-            <div class="col-3">
-              <div class="form-group ">
-              <input type="checkbox" id="input_edit_isagen" name="" value="">
-              <span class="text-left">Keagenan</span>
-            </div>
-            </div>
-
+          <div class="bs-form">
+          <label for="input_edit_kodegroup">Group</label>
+          <div class="d-flex align-items-center" style="gap:8px">
+            <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" value='Barang Jadi' disabled>
           </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <span>Barang Jadi</span>
-                </div>
-              </div>
+          <label for="input_edit_isagen">Keagenan</label>
+          <div class="bs-check"><input type="checkbox" id="input_edit_isagen" name="" value=""></div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">HeadGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
+          <label for="input_edit_kodeheadgroup">HeadGroup</label>
+          <select disabled id="input_edit_kodeheadgroup" onchange="changeInputHeadGroup()" class="form-control" aria-label="Default select example">
                     <option selected value="" disabled>Pilih HeadGroup</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubGroup</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
-                    <option selected disabled value="">Pilih SubGroup</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">SubKategori</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
+          <label for="input_edit_kodesubkategori">SubKategori</label>
+          <select disabled id="input_edit_kodesubkategori" onchange="changeInputSubKategori()" class="form-control" aria-label="Default select example" >
                     <option selected disabled value="">Pilih Subkategori</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Merk</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <select disabled id="input_edit_kodemerk" onchange="changeInputMerk()" class="form-control" aria-label="Default select example">
+          <label for="input_edit_kodesubgroup">SubGroup</label>
+          <select disabled id="input_edit_kodesubgroup" onchange="changeInputSubGroup()"  class="form-control" aria-label="Default select example" >
+                    <option selected disabled value="">Pilih SubGroup</option>
+                  </select>
+
+          <label for="input_edit_kodemerk">Merk</label>
+          <select disabled id="input_edit_kodemerk" onchange="changeInputMerk()" class="form-control" aria-label="Default select example">
                     <option selected disabled value="">Pilih Merk</option>
                   </select>
-                </div>
-              </div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
-                </div>
-              </div>
+          <label for="input_edit_kodebarang">Kode Barang</label>
+          <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namabarang" >
-                </div>
-              </div>
+          <label for="input_edit_kodesku">Kode SKU</label>
+          <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-left" id="input_edit_kodesku" >
+            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="">
+                <span class="text-left">Kontrak</span></div></div>
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama Barang 2</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_namabarang2" >
-                </div>
-              </div>
+          <label for="input_edit_namabarang">Nama Barang</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang" ></div>
 
-            </div>
+          <label for="input_edit_namabarang2">Nama Barang 2</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang2" ></div>
+        </div>
 
             <br/>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <!-- <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div> -->
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <b>Satuan</b>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <b>Isi</b>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <b>Harga</b>
-                </div>
-              </div>
+            <div class="bs-form bs-form-1">
+          <label></label>
+          <div class="d-flex" style="gap:8px"><b class="form-control border-0 bg-transparent px-0">Satuan</b><b class="form-control border-0 bg-transparent px-0">Isi</b><b class="form-control border-0 bg-transparent px-0">Harga</b></div>
+        </div>
 
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan</label>
-                </div>
-              </div>
-
-              <div class="col-3">
-                <!-- <div class="form-group">
+            <div class="bs-form bs-form-1">
+          <label for="input_edit_satuan">Satuan</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_edit_satuan" >
                 </div> -->
 
@@ -684,42 +319,13 @@
                     <option value="3">Three</option>
                   </select>
               </div>
-              
-              </div> 
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi" >
+            <input type="text" inputmode="decimal" value=1000 min=0 class="form-control text-right format-number" id="input_edit_harga" ></div></div>
 
 
-              
-
-
-
-
-
-
-
-
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi" >
-                </div>
-               </div>
-
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=1000 min=0 class="form-control text-right" id="input_edit_harga" >
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan 2</label>
-                </div>
-              </div>
-              <div class="col-3">
-
-                <!-- <div class="form-group">
+            
+          <label for="input_edit_satuan2">Satuan 2</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_edit_satuan2" >
                 </div> -->
 
@@ -733,33 +339,13 @@
                   </select>
               
                 </div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi2" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_harga2" ></div></div>
 
 
-
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi2" >
-                </div>
-               </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_harga2" >
-                </div>
-              </div>
-
-             </div>
-
-              <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Satuan 3</label>
-                </div>
-              </div>
-              <div class="col-3">
-
-
-                <!-- <div class="form-group">
+              
+          <label for="input_edit_satuan3">Satuan 3</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><!-- <div class="form-group">
                   <input type="text" class="form-control" id="input_edit_satuan3" >
                 </div> -->
 
@@ -773,159 +359,45 @@
                   </select>
               
                 </div>
-
-
-              </div>
-
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_isi3" >
-                </div>
-              </div>
-
-             <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_harga3" >
-                </div>
-              </div>
-
-
-            </div>
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_isi3" >
+            <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_harga3" ></div></div>
+        </div>
 
             <br/>
 
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Qty Min</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_qtymin" >
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Qty Max</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_qtymax" >
-                </div>
-              </div>
+            <div class="bs-form bs-form-3">
+          <label for="input_edit_qtymin">Qty Min</label>
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymin" >
+          <label for="input_edit_qtymax">Qty Max</label>
+          <input type="text" inputmode="decimal" value=0 min=0 class="form-control text-right format-number" id="input_edit_qtymax" >
+          <label for="input_edit_toleransi">Toleransi</label>
+          <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_toleransi" >
 
-            </div>
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Toleransi</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" value=0 min=0 class="form-control text-right" id="input_edit_toleransi" >
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat/Volume</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_edit_isberat" class="form-control" aria-label="Default select example">
-                    <option value=0>Volume</option>
-                    <option value=1>Berat</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Status</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
+          <label for="input_edit_isaktif">Status</label>
+          <select id="input_edit_isaktif" class="form-control" aria-label="Default select example">
                     <option value=1>Aktif</option>
                     <option value=0>NonAktif</option>
                   </select>
-                </div>
-              </div>
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Berat/Volume</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="number" class="form-control text-right" id="input_edit_beratvolume" value=0.00>
-                </div>
-              </div>
+          <label for="input_edit_isberat">Berat/Volume</label>
+          <select id="input_edit_isberat" class="form-control" aria-label="Default select example">
+                    <option value=0>Volume</option>
+                    <option value=1>Berat</option>
+                  </select>
+          <label for="input_edit_beratvolume">Berat/Volume</label>
+          <input type="number" class="form-control text-right" id="input_edit_beratvolume" value=0.00>
 
-            </div>
-
-            <div class="row mt-2">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Part Number</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_edit_partnumber" >
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Lokasi</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_edit_lokasi" >
-                </div>
-              </div>
-
-
-            </div>
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Kode SKU</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control text-left" id="input_edit_kodesku" >
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group ">
-                <input type="checkbox" id="input_edit_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span>
-              </div>
-              </div>
-
-
-            </div>
+          <label for="input_edit_partnumber">Part Number</label>
+          <input type="text" class="form-control text-left" id="input_edit_partnumber" >
+          <label for="input_edit_lokasi">Lokasi</label>
+          <div class="bs-full-3"><input type="text" class="form-control text-left" id="input_edit_lokasi" ></div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -941,254 +413,67 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Harga</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
-          <div class="row">
-
-            <input type="hidden" id="input_harga_kodegroup" value="" />
-            <div class="col-2">
-              <div class="form-group">
-                <label>Kode Barang</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_harga_kodebarang" placeholder="Kode Barang" disabled>
-              </div>
-            </div>
-            
-            
-            <div class="col-2 ml-auto text-right">
-              <button type="button" class="btn btn-primary" onclick="buttonAddHarga()" class="btn btn-secondary"  >Add Harga</button>
-            </div>
-
-          </div>
+          <input type="hidden" id="input_harga_kodegroup" value="" /><div class="bs-form bs-form-1">
+          <label for="input_harga_kodebarang">Kode Barang</label>
+          <div class="bs-full"><div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control" id="input_harga_kodebarang" placeholder="Kode Barang" disabled>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="buttonAddHarga()">Tambah</button></div></div>
+        </div>
     </div>
 
     <!-- ADD SUBGROUP -->
 
     <div id="addHarga" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Add Harga</h4>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Supplier</label>
-              </div>
-              </div>
-              <div class="col-4">
+        <div class="form-card mt-3">
+          <div class="form-card-title">Tambah Harga</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_harga_add_kodesupplier">Supplier</label>
+            <select id="input_harga_add_kodesupplier" class="form-control">
+            </select>
 
-                <select id="input_harga_add_kodesupplier" class="form-control" aria-label="Default select example">
-                </select>
-              </div>
-            </div>
+            <label for="input_harga_add_harga">Harga1</label>
+            <input id="input_harga_add_harga" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Harga1</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_harga_add_harga" value=0.00 min=0 type="number" class="form-control text-right">
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_harga_add_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-
-            </div>
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Harga2</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_harga_add_harga2" value=0.00 min=0  type="number" class="form-control text-right">
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_harga_add_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-            </div>
-            <!-- <div class="row">
-              <div class="col-1">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-3">
-                <select id="input_harga_add_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div>
-              <div class="col-1">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              <div class="col-3">
-
-                <select id="input_harga_add_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div>
-            </div> -->
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHarga()" >Batal</button>
-                <button type="button" onclick="submitAddHarga()" class="btn btn-primary" >Add</button>
-              </div>
-
-            </div>
+            <label for="input_harga_add_harga2">Harga2</label>
+            <input id="input_harga_add_harga2" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHarga()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAddHarga()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END ADD SUBGROUP -->
 
     <!-- EDIT SUBGROUP -->
 
     <div id="editHarga" class="container-fluid showhide">
-            <!-- <div class="line"></div> -->
-            <div class="row">
-              <div class="col-4">
-                <h4>Edit Harga</h4>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Supplier</label>
-              </div>
-              </div>
-              <div class="col-4">
+        <div class="form-card mt-3">
+          <div class="form-card-title">Edit Harga</div>
+          <div class="bs-form bs-form-1">
+            <label for="input_harga_edit_kodesupplier">Supplier</label>
+            <select id="input_harga_edit_kodesupplier" disabled class="form-control">
+            </select>
 
-                <select id="input_harga_edit_kodesupplier" disabled class="form-control" aria-label="Default select example">
-                </select>
-              </div>
-            </div>
+            <label for="input_harga_edit_harga">Harga1</label>
+            <input id="input_harga_edit_harga" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
 
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Harga1</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_harga_edit_harga" value=0.00 min=0 type="number" class="form-control text-right">
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_harga_edit_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-
-            </div>
-            <div class="row">
-              <div class="col-2">
-                <div class="form-group">
-                <label>Harga2</label>
-              </div>
-              </div>
-              <div class="col-4">
-                <input id="input_harga_edit_harga2" value=0.00 min=0  type="number" class="form-control text-right">
-              </div>
-              <!-- <div class="col-2">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              <div class="col-4">
-
-                <select id="input_harga_add_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div> -->
-            </div>
-            <!-- <div class="row">
-              <div class="col-1">
-                <div class="form-group">
-                <label>Perkiraan Persiapan</label>
-              </div>
-              </div>
-              <div class="col-3">
-                <select id="input_harga_add_perkpers" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div>
-              <div class="col-1">
-                <div class="form-group">
-                <label>Perkiraan Jual</label>
-              </div>
-              </div>
-              <div class="col-3">
-
-                <select id="input_harga_add_perkjual" class="form-control" aria-label="Default select example">
-                  <option selected>Open this select menu</option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
-                </select>
-              </div>
-            </div> -->
-
-            <div class="row mt-2">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="closeShowHarga()" >Batal</button>
-                <button type="button" onclick="submitEditHarga()" class="btn btn-primary" >Edit</button>
-              </div>
-
-            </div>
+            <label for="input_harga_edit_harga2">Harga2</label>
+            <input id="input_harga_edit_harga2" value=0.00 min=0 type="text" inputmode="decimal" class="form-control text-right format-number">
           </div>
+          <div class="text-right mt-3">
+            <button type="button" class="btn btn-sm btn-batal-add" onclick="closeShowHarga()">Batal</button>
+            <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEditHarga()">Simpan</button>
+          </div>
+        </div>
+      </div>
 
     <!-- END EDIT SUBGROUP -->
 
@@ -1246,7 +531,8 @@
 
 @section('js')
 
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 
 <script type="text/javascript">
 
@@ -1256,21 +542,46 @@ let listSelectHeadGroup = []
 let listSelectSubGroup = []
 let listSelectSubKategori = []
 
-function loadAll () {
-  $('#tabel').DataTable().destroy();
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MB_KOLOM = [
+  ['KODEBRG',          'Kode Brg',     1, 'varchar', 0, 0],
+  ['NAMABRG',          'Nama Brg',     1, 'varchar', 0, 0],
+  ['pAgen',            'Agen',         1, 'varchar', 0, 0],
+  ['nNAMASUBGROUP',    'SubJenis',     1, 'varchar', 0, 0],
+  ['nNAMASUBKATEGORI', 'Jenis Barang', 1, 'varchar', 0, 0],
+  ['nNAMAMERK',        'Nama Merk',    1, 'varchar', 0, 0],
+  ['SKU',              'SKU',          1, 'varchar', 0, 0],
+  ['SAT1',             'Sat 1',        1, 'varchar', 0, 0],
+  ['SAT2',             'Sat 2',        1, 'varchar', 0, 0],
+  ['PartNumber',       'Part Number',  1, 'varchar', 0, 0],
+]
 
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-  document.getElementById('breadcrumb').innerHTML = "Master Barang"
+// Tabel server-side (masterbarangloadall): kolom DataTables disusun ulang dari kolom yang tampil
+// setiap kali kolom digeser/disembunyikan (ReportTable memanggil loadAll lewat onChange).
+function loadAll () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+  document.getElementById('tabel_data').innerHTML = ''
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
   $('#tabel').DataTable({
     processing: true,
     serverSide: true,
 
     paging: true,
     searching: true,
-    lengthChange: true,
-    pageLength: currentLength,
+    lengthChange: false,
+    pageLength: MasterList.panjang(),
+    // Server (masterbarangloadall) tidak memproses urutan kolom - klik judul hanya memuat
+    // ulang data yang sama, jadi pengurutan dimatikan.
+    ordering: false,
 
-    dom: 'tip',
+    dom: MasterList.dom,
+    language: MasterList.bahasa,
 
     autoWidth: false,
     responsive: false,
@@ -1279,49 +590,28 @@ function loadAll () {
       url: "{!! url('masterbarangloadall') !!}",
       type: "GET",
     },
-    columns: [
-      {
-        data: "KODEBRG",
-        render: function(data, type, row) {
-          return `
-            <div class="action-buttons-wrap text-center" style="position: relative;">
-              <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KODEBRG}')"><i class="bi bi-pen"></i></button>
-              <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.KODEBRG}')"><i class="bi bi-trash"></i></button>
-            </div>
-          `;
-        },
-        orderable: false,
-        searchable: false,
-        className: "text-center"
-      },
-      { data: "KODEBRG" },
-      { data: "NAMABRG" },
-      {
-        data: "pAgen",
-        render: function(data) {
+    columns: MasterList.kolomServer(cols, function (data, type, row) {
+      return `
+        <div class="action-buttons-wrap text-center" style="position: relative;">
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KODEBRG}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.KODEBRG}')"><i class="bi bi-trash"></i></button>
+        </div>
+      `;
+    }, {
+      pAgen: {
+        render: function (data) {
           if (data == 0) {
-            return '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
-          } else {
-            return '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>';
+            return '<span class="text-danger"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></span>';
           }
+          return '<span class="text-success"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></span>';
         },
-        orderable: false,
         searchable: false,
         className: "text-center"
-      },
-      // { data: "nNAMAGROUP" },
-      // { data: "nNAMAHDGROUP" },
-      { data: "nNAMASUBGROUP" },
-      { data: "nNAMASUBKATEGORI" },
-      { data: "nNAMAMERK" },
-      { data: "SKU" },
-      { data: "SAT1" },
-      { data: "SAT2" },
-      { data: "PartNumber" },
-    ],
-    lengthChange: true,
-    paging: true
+      }
+    })
   });
+
+  MasterList.selesai('#tabel')
 }
 
 function buttonAdd () {
@@ -1331,13 +621,13 @@ function buttonAdd () {
   document.getElementById("input_add_satuan").value = ''
   document.getElementById("input_add_satuan2").value= ''
   // let satuan3 document.getElementById("input_add_satuan3").value=
-  document.getElementById("input_add_isi").value= '1.00'
-  document.getElementById("input_add_isi2").value= '1.00'
-  document.getElementById("input_add_harga").value= '0.00'
-  document.getElementById("input_add_harga2").value= '0.00'
+  setNum("input_add_isi", '1.00')
+  setNum("input_add_isi2", '1.00')
+  setNum("input_add_harga", '0.00')
+  setNum("input_add_harga2", '0.00')
   // let isi3 document.getElementById("input_add_isi3").value=
-  document.getElementById("input_add_qtymax").value= '0.00'
-  document.getElementById("input_add_qtymin").value= '0.00'
+  setNum("input_add_qtymax", '0.00')
+  setNum("input_add_qtymin", '0.00')
   document.getElementById("input_add_toleransi").value= '0.00'
   document.getElementById("input_add_isberat").value= '0.00'
   document.getElementById("input_add_isaktif").value= 1
@@ -1629,17 +919,17 @@ function buttonEdit (kodebarang) {
     document.getElementById("input_edit_satuan3").value = res[0].SAT3
     tempsat3 = res[0].SAT3
 
-    document.getElementById("input_edit_isi").value = res[0].ISI1
-    document.getElementById("input_edit_isi2").value = res[0].ISI2
-    document.getElementById("input_edit_isi3").value = res[0].ISI3
-    document.getElementById("input_edit_harga").value = res[0].Hrg1_1
-    document.getElementById("input_edit_harga2").value = res[0].Hrg2_1
-    document.getElementById("input_edit_harga3").value = res[0].Hrg3_1
-    document.getElementById("input_edit_qtymin").value = res[0].QntMin
-    document.getElementById("input_edit_qtymax").value = res[0].QntMax
-    document.getElementById("input_edit_toleransi").value = res[0].Tolerate
+    setNum("input_edit_isi", res[0].ISI1)
+    setNum("input_edit_isi2", res[0].ISI2)
+    setNum("input_edit_isi3", res[0].ISI3)
+    setNum("input_edit_harga", res[0].Hrg1_1)
+    setNum("input_edit_harga2", res[0].Hrg2_1)
+    setNum("input_edit_harga3", res[0].Hrg3_1)
+    setNum("input_edit_qtymin", res[0].QntMin)
+    setNum("input_edit_qtymax", res[0].QntMax)
+    document.getElementById("input_edit_toleransi").value = (parseFloat(res[0].Tolerate) || 0).toFixed(2)
     document.getElementById("input_edit_isberat").value = res[0].pBerat
-    document.getElementById("input_edit_beratvolume").value = res[0].Berat
+    document.getElementById("input_edit_beratvolume").value = (parseFloat(res[0].Berat) || 0).toFixed(2)
     document.getElementById("input_edit_isaktif").value = res[0].ISAKTIF
     document.getElementById("input_edit_partnumber").value = res[0].PartNumber
     document.getElementById("input_edit_lokasi").value = res[0].Mlokasi
@@ -1753,8 +1043,8 @@ function buttonEditHarga (kodebarang , kodesupplier) {
     success: function(res) {
       console.log(res)
       document.getElementById("input_harga_edit_kodesupplier").value = res[0].KODEJENISCUSTSUPP
-      document.getElementById("input_harga_edit_harga").value = res[0].HARGA1
-      document.getElementById("input_harga_edit_harga2").value = res[0].HARGA2
+      setNum("input_harga_edit_harga", res[0].HARGA1)
+      setNum("input_harga_edit_harga2", res[0].HARGA2)
 
     }})
 
@@ -1770,8 +1060,8 @@ function submitEditHarga () {
 console.log('submitEditHarga')
 let kodebarang = $("#input_harga_kodebarang").val();
 let kodesupplier = $("#input_harga_edit_kodesupplier").val();
-let harga = $("#input_harga_edit_harga").val();
-let harga2 = $("#input_harga_edit_harga2").val();
+let harga = $("#input_harga_edit_harga").val().replace(/,/g, '');
+let harga2 = $("#input_harga_edit_harga2").val().replace(/,/g, '');
 
 console.log('kodebarang' , kodebarang)
 console.log('kodesupplier' , kodesupplier)
@@ -1805,8 +1095,8 @@ function submitAddHarga () {
   console.log('submitAddHarga')
   let kodebarang = $("#input_harga_kodebarang").val();
   let kodesupplier = $("#input_harga_add_kodesupplier").val();
-  let harga = $("#input_harga_add_harga").val();
-  let harga2 = $("#input_harga_add_harga2").val();
+  let harga = $("#input_harga_add_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_harga_add_harga2").val().replace(/,/g, '');
 
   console.log('kodebarang' , kodebarang)
   console.log('kodesupplier' , kodesupplier)
@@ -2071,14 +1361,14 @@ function submitAdd () {
   let satuan = $("#input_add_satuan").val();
   let satuan2 = $("#input_add_satuan2").val();
   let satuan3 = $("#input_add_satuan3").val();
-  let isi = $("#input_add_isi").val();
-  let isi2 = $("#input_add_isi2").val();
-  let isi3 = $("#input_add_isi3").val();
-  let harga = $("#input_add_harga").val();
-  let harga2 = $("#input_add_harga2").val();
-  let harga3 = $("#input_add_harga3").val();
-  let qtymax = $("#input_add_qtymax").val();
-  let qtymin = $("#input_add_qtymin").val();
+  let isi = $("#input_add_isi").val().replace(/,/g, '');
+  let isi2 = $("#input_add_isi2").val().replace(/,/g, '');
+  let isi3 = $("#input_add_isi3").val().replace(/,/g, '');
+  let harga = $("#input_add_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_add_harga2").val().replace(/,/g, '');
+  let harga3 = $("#input_add_harga3").val().replace(/,/g, '');
+  let qtymax = $("#input_add_qtymax").val().replace(/,/g, '');
+  let qtymin = $("#input_add_qtymin").val().replace(/,/g, '');
   let toleransi = $("#input_add_toleransi").val();
   let isberat = $("#input_add_isberat").val();
   let isaktif = $("#input_add_isaktif").val();
@@ -2145,7 +1435,7 @@ function submitAdd () {
     alertify.warning("NamaBarang harus diisi");
     return
   }
-  if (!satuan) {
+  if (!satuan || satuan == 0) {
     alertify.warning("Satuan 1 harus diisi");
     return
   }
@@ -2237,15 +1527,15 @@ function submitEdit () {
   let satuan = $("#input_edit_satuan").val();
   let satuan2 = $("#input_edit_satuan2").val();
   let satuan3 = $("#input_edit_satuan3").val();
-  let isi = $("#input_edit_isi").val();
-  let isi2 = $("#input_edit_isi2").val();
-  let isi3 = $("#input_edit_isi3").val();
-  let harga = $("#input_edit_harga").val();
-  let harga2 = $("#input_edit_harga2").val();
-  let harga3 = $("#input_edit_harga3").val();
+  let isi = $("#input_edit_isi").val().replace(/,/g, '');
+  let isi2 = $("#input_edit_isi2").val().replace(/,/g, '');
+  let isi3 = $("#input_edit_isi3").val().replace(/,/g, '');
+  let harga = $("#input_edit_harga").val().replace(/,/g, '');
+  let harga2 = $("#input_edit_harga2").val().replace(/,/g, '');
+  let harga3 = $("#input_edit_harga3").val().replace(/,/g, '');
   
-  let qtymax = $("#input_edit_qtymax").val();
-  let qtymin = $("#input_edit_qtymin").val();
+  let qtymax = $("#input_edit_qtymax").val().replace(/,/g, '');
+  let qtymin = $("#input_edit_qtymin").val().replace(/,/g, '');
   let toleransi = $("#input_edit_toleransi").val();
   let isberat = $("#input_edit_isberat").val();
   let isaktif = $("#input_edit_isaktif").val();
@@ -2311,7 +1601,7 @@ function submitEdit () {
     alertify.warning("NamaBarang harus diisi");
     return
   }
-  if (!satuan) {
+  if (!satuan || satuan == 0) {
     alertify.warning("Satuan 1 harus diisi");
     return
   }
@@ -2375,7 +1665,31 @@ function submitEdit () {
 
 }
 
-window.onload = function() {
+// Separator ribuan pada input angka (.format-number) - pola accounting/pengajuandpp.blade.php:
+// autoNumeric memformat tampilan, nilai yang diisi program lewat setNum(), dan pembacaan nilai
+// membuang koma dengan .replace(/,/g, '') sebelum dikirim / dihitung.
+function toNum (v) {
+  let n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''))
+  return isNaN(n) ? 0 : n
+}
+function setNum (id, v) {
+  let el = document.getElementById(id)
+  if (!el) return
+  // Nilai kosong tetap kosong (validasi "harus diisi" bergantung pada ini).
+  if (v === '' || v == null) {
+    el.value = ''
+  } else if ($(el).data('autoNumeric')) {
+    $(el).autoNumeric('set', toNum(v))
+  } else {
+    el.value = v
+  }
+}
+$(function () {
+  $('.format-number').autoNumeric('init', { mDec: '2', vMin: '-9999999999999.99' })
+})
+
+window.onload = function(){
+    MasterList.kolom({ href: 'masterbarang', kolom: MB_KOLOM, onChange: loadAll })
     loadAll();
 };
 </script>

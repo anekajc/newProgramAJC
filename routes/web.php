@@ -75,6 +75,7 @@ Route::post('/newsetupperiodekerjaupdate', [NewSetupPeriodeKerjaController::clas
 Route::post('/spnobuktisimbol', [GlobalController::class, 'getNoBuktiSimbol'])->middleware('auth');
 Route::post('/spnobukti', [GlobalController::class, 'getNoBukti'])->middleware('auth');
 Route::get('/spgetstockakhir', [GlobalController::class, 'getStockAkhir'])->middleware('auth');
+Route::get('/gettanggalserver', [GlobalController::class, 'getTanggalServer'])->middleware('auth');
 
 require __DIR__.'/accounting.php';
 require __DIR__.'/marketing.php';
@@ -85,6 +86,8 @@ Route::middleware('auth')->group(function () {
     require __DIR__.'/report.php';
 });
 require __DIR__.'/berkas.php';
+require __DIR__.'/utilitas.php';
+require __DIR__.'/otorisasi.php';
 
 Route::get('/__debug_login_sa', function () {
     Auth::loginUsingId(\App\Models\User::where('username', 'SA')->first()->id);

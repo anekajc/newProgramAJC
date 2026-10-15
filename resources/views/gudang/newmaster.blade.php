@@ -560,6 +560,7 @@
          dipakai oleh script halaman. --}}
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 
+    @include('partials.ajax-error-logger')
     @yield('js')
 </body>
 

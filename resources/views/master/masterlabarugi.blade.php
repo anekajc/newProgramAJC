@@ -1,12 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Laba Rugi')
 @section('content')
-<div class="container-fluid">
 
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
   {{-- <div class="sp-breadcrumb">
@@ -24,184 +23,94 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Laba Rugi</button>
   </div> --}}
 
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    <style>
-    .sp-length-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }    
-    
-    .sp-filter-wrap {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
+  {{-- Filter Devisi & jenis Laporan ada di dalam tombol Filter toolbar, seperti modal filter
+       purchasing/purchaseOrder. Id & nilai option sama seperti sebelumnya. --}}
+  @php
+    $filterLabaRugi = '<div class="rt-grid-2"><div><label class="rt-field-label" for="jenisDevisi">Devisi</label>'
+      . '<select name="devisi" id="jenisDevisi" class="rt-native">';
+    foreach ($listDataDevisi as $Devisi) {
+      $filterLabaRugi .= '<option value="' . e($Devisi->Devisi) . '">' . e($Devisi->Devisi) . ' - ' . e($Devisi->NamaDevisi) . '</option>';
     }
+    $filterLabaRugi .= '</select></div>'
+      . '<div><label class="rt-field-label" for="jenisLaporan">Laporan</label>'
+      . '<select name="perkiraanCustomer" id="jenisLaporan" class="rt-native">'
+      . '<option value="0">Laba Rugi</option><option value="1">HPP</option>'
+      . '</select></div></div>';
+  @endphp
 
-    .sp-length-wrap label {
-      margin: 0; /* stops default label margin from pushing the select down/over */
-    }
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    .sp-length-wrap select {
-      width: auto; /* stops form-select from stretching full-width and forcing a wrap */
-    }
+      @include('master.partials.toolbarMaster', ['filterIsi' => $filterLabaRugi, 'filterJudul' => 'Filter Laba Rugi'])
 
-    .sp-toolbar {
-      display: flex;
-      flex-wrap: wrap; /* lets controls drop to a new line on narrow screens instead of overflowing */
-      align-items: center;
-      row-gap: 10px;
-      column-gap: 12px; /* controls the tight spacing between search and the dropdown next to it */
-    }
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead id="tabel_header" class="text-center">
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
 
-    .sp-filter-wrap select {
-      width: auto;
-      min-width: 150px; /* keeps "Hutang Usaha (21201)" from getting clipped */
-    }
+      <div class="po-rt-hint">
+        <i class="bi bi-info-circle"></i>
+        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom untuk menyembunyikan kolom.
+      </div>
 
-    .sp-length-wrap {
-      margin-left: auto; /* pushes Tampilkan to the far right, away from the search+filter group */
-    }
-  </style>
-
-  <div class="sp-toolbar">
-    <div class="sp-search-wrap">
-      <i class="bi bi-search sp-search-icon"></i>
-      <input type="text" id="tabel_filter_visual" placeholder="Cari user...">
-    </div>
-
-    <div class="sp-filter-wrap">
-      <label for="tabel_length_visual">Tampilkan</label>
-      <select id="tabel_length_visual" class="form-select form-select-sm" style='width:40px;'>
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="-1">Semua</option>
-      </select>
-    </div>
-
-    <div class="sp-filter-wrap">
-      <label for="jenisDevisi">Devisi :</label>
-      <select name="devisi" id="jenisDevisi" class="form-control" onChange='loadAll()'>
-        @foreach ($listDataDevisi as $Devisi)
-            <option value="{{ $Devisi->Devisi }}">{{ $Devisi->Devisi }} - {{ $Devisi->NamaDevisi }}</option>
-        @endforeach
-      </select>
-    </div>
-    <div class="sp-filter-wrap">
-      <label for="jenisLaporan">Laporan :</label>
-      <select name="perkiraanCustomer" id="jenisLaporan" class="form-control" onChange='loadAll()'>
-        <option value='0'> Laba Rugi</option>
-        <option value='1'> HPP </option>
-      </select>
-    </div>
-
-    <div class="sp-length-wrap">
-      <button id='AddVisibility' class="btn btn-action-primary" onclick="buttonAdd()">+ Add</button>
     </div>
   </div>
-
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Nomor</th>
-                    <th scope="col">Perkiraan</th>
-                    <th scope="col">Keterangan</th>
-                    <th scope="col">Grup</th>
-                    <th scope="col">Tipe</th>
-                    <th scope="col">Tanda</th>
-                    <th scope="col">Persen</th>
-                    <th scope="col">Jumlah</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
-        </div>
 
 </div>
 
 
+<style>
+  /* Tiga pasang label + input per baris (Tipe | Jumlah | Group, Tanda | Persentasi | Tampil).
+     Nomor & Perkiraan masing-masing satu baris selebar kolom input pertama (.bs-baris memaksa
+     label mulai di baris baru), Keterangan (.bs-full) membentang sampai ujung kanan input Jumlah. */
+  #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 110px minmax(0, 1fr) 90px minmax(0, 1fr) 90px minmax(0, 1fr); }
+  #formBsGrid .bs-form.bs-form-3 .bs-baris { grid-column: 1; }
+  /* Keterangan berhenti sejajar ujung kanan input Jumlah. */
+  #formBsGrid .bs-form.bs-form-3 .bs-full { grid-column: 2 / 5; }
+  @media (max-width: 575.98px) {
+    #formBsGrid .bs-form.bs-form-3 { grid-template-columns: 1fr; }
+    #formBsGrid .bs-form.bs-form-3 .bs-full { grid-column: 1 / -1; }
+  }
+</style>
+
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="form"tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 900px">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nomor" placeholder="Nomor">
-                </div>
-              </div>
-
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan">
+            <div class="bs-form bs-form-3">
+          <label for="input_add_nomor">Nomor</label>
+          <input type="text" class="form-control" id="input_add_nomor" placeholder="Nomor">
+          <label for="input_add_perkiraan" class="bs-baris">Perkiraan</label>
+          <div class="input-group">
+                  <input type="text" class="form-control" id="input_add_perkiraan" placeholder="Perkiraan" disabled>
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tipe</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tipe'>
+          <label for="input_add_keterangan" class="bs-baris">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_add_keterangan" placeholder="Keterangan"></div>
+          <label class="bs-baris">Tipe</label>
+          <select class='form-control' id='input_add_tipe'>
                     <option value='' selected disabled></option>
                     <option value=1>1 - Mutasi Debet</option>
                     <option value=2>2 - Mutasi Kredit</option>
@@ -213,87 +122,36 @@
                     <option value='M'>M -Mutasi</option>
                     <option value='H'>H - HPP</option>
                   </select>
-                </div>
-              </div>
-
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanda</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tanda'>
-                    <option value='' selected disabled></option>
-                    <option value='+'>+</option>
-                    <option value='-'>-</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Jumlah</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_jumlah'>
+          <label>Jumlah</label>
+          <select class='form-control' id='input_add_jumlah'>
                     <option value='' selected disabled></option>
                     <option value='T'>T - Total</option>
                     <option value='G'>G - Group</option>
                     <option value='S'>S - Sub Group</option>
                   </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mt-2">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Persentasi</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_persentasi" placeholder="Persentasi">
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tampil</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_add_tampil'>
+          <label for="input_add_group">Group</label>
+          <input type="text" class="form-control" id="input_add_group" placeholder="Group">
+          <label class="bs-baris">Tanda</label>
+          <select class='form-control' id='input_add_tanda'>
+                    <option value='' selected disabled></option>
+                    <option value='+'>+</option>
+                    <option value='-'>-</option>
+                  </select>
+          <label for="input_add_persentasi">Persentasi</label>
+          <input type="text" class="form-control" id="input_add_persentasi" placeholder="Persentasi">
+          <label>Tampil</label>
+          <select class='form-control' id='input_add_tampil'>
                     <option value='Y'>Y - Ya</option>
                     <option value='T'>T - Tidak</option>
                   </select>
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_group" placeholder="Group">
-                </div>
-              </div>
-
-            </div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
   </div>
 </div>
 </div>
@@ -306,68 +164,30 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
 
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nomor</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nomor" placeholder="Nomor" disabled>
-                </div>
-              </div>
-
-              
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Perkiraan</label>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="input-group">
-                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan">
+            <div class="bs-form bs-form-3">
+          <label for="input_edit_nomor">Nomor</label>
+          <input type="text" class="form-control" id="input_edit_nomor" placeholder="Nomor" disabled>
+          <label for="input_edit_perkiraan" class="bs-baris">Perkiraan</label>
+          <div class="input-group">
+                  <input type="text" class="form-control" id="input_edit_perkiraan" placeholder="Perkiraan" disabled>
                   <div class="input-group-append">
-                      <button type="button" class="btn btn-primary btn-select" onclick="buttonPerkiraan()">+</button>
+                      <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonPerkiraan()" title="Cari"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Keterangan</label>
-                </div>
-              </div>
-              <div class="col-10">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tipe</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tipe'>
+          <label for="input_edit_keterangan" class="bs-baris">Keterangan</label>
+          <div class="bs-full"><input type="text" class="form-control" id="input_edit_keterangan" placeholder="Keterangan"></div>
+          <label class="bs-baris">Tipe</label>
+          <select class='form-control' id='input_edit_tipe'>
                     <option value='' selected disabled></option>
                     <option value=1>1 - Mutasi Debet</option>
                     <option value=2>2 - Mutasi Kredit</option>
@@ -379,87 +199,36 @@
                     <option value='M'>M -Mutasi</option>
                     <option value='H'>H - HPP</option>
                   </select>
-                </div>
-              </div>
-
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tanda</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tanda'>
-                    <option value='' selected disabled></option>
-                    <option value='+'>+</option>
-                    <option value='-'>-</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Jumlah</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_jumlah'>
+          <label>Jumlah</label>
+          <select class='form-control' id='input_edit_jumlah'>
                     <option value='' selected disabled></option>
                     <option value='T'>T - Total</option>
                     <option value='G'>G - Group</option>
                     <option value='S'>S - Sub Group</option>
                   </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-2 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Persentasi</label>
-                </div>
-              </div>
-              <div class="col-2">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_persentasi" placeholder="Persentasi">
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Tampil</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <select class='form-control' id='input_edit_tampil'>
+          <label for="input_edit_group">Group</label>
+          <input type="text" class="form-control" id="input_edit_group" placeholder="Group">
+          <label class="bs-baris">Tanda</label>
+          <select class='form-control' id='input_edit_tanda'>
+                    <option value='' selected disabled></option>
+                    <option value='+'>+</option>
+                    <option value='-'>-</option>
+                  </select>
+          <label for="input_edit_persentasi">Persentasi</label>
+          <input type="text" class="form-control" id="input_edit_persentasi" placeholder="Persentasi">
+          <label>Tampil</label>
+          <select class='form-control' id='input_edit_tampil'>
                     <option value='Y'>Y - Ya</option>
                     <option value='T'>T - Tidak</option>
                   </select>
-                </div>
-              </div>
-
-              <div class="col-1 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Group</label>
-                </div>
-              </div>
-              <div class="col-3">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_group" placeholder="Group">
-                </div>
-              </div>
-
-            </div>
+        </div>
 
     </div>
   </div>
   <div class="modal-footer">
      
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
+    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+    <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
   </div>
 </div>
 </div>
@@ -467,22 +236,61 @@
 <!-- End modal add-->
 @endsection
 
+{{-- Modal pemilih mengikuti picker purchasing (picker-kas.css / pickerKasInit()). --}}
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
+// Kolom tabel daftar (lebih dari 5 kolom -> bisa digeser & disembunyikan, lihat MasterList.kolom()).
+// [field, label, tampil, tipe, total, desimal]
+const MLR_KOLOM = [
+  ['Nomor',      'Nomor',      1, 'varchar', 0, 0],
+  ['Perkiraan',  'Perkiraan',  1, 'varchar', 0, 0],
+  ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+  ['Grup',       'Grup',       1, 'varchar', 0, 0],
+  ['Tipe',       'Tipe',       1, 'varchar', 0, 0],
+  ['Tanda',      'Tanda',      1, 'varchar', 0, 0],
+  ['Persen',     'Persen',     1, 'varchar', 0, 0],
+  ['Jumlah',     'Jumlah',     1, 'varchar', 0, 0],
+]
+
+// Data tabel utama disimpan terpisah dari dataRefresh (dipakai juga oleh pemilih perkiraan).
+let dataTabel = []
+
+function renderTabel () {
+  if ($.fn.DataTable.isDataTable('#tabel')) {
+    $('#tabel').DataTable().destroy();
+  }
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
+
+  let rowTable = ""
+  dataTabel.forEach((item, i) => {
+    let aksi = `
+      <div class="action-buttons-wrap">
+        <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.Nomor}')"><i class="bi bi-pen"></i></button>
+        <button title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.Nomor}')"><i class="bi bi-trash"></i></button>
+      </div>`
+    rowTable += MasterList.baris(item, cols, aksi)
+  });
+
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
+}
+
 function loadAll () {
-  console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Laba Rugi"
-  
   let filterDevisi = $("#jenisDevisi").val();
   let filterLaporan = $("#jenisLaporan").val();
-
-  $('#tabel').DataTable().destroy();
 
   $.ajax({
     url: "{!! url('masterlabarugiloadall') !!}",
@@ -494,46 +302,22 @@ function loadAll () {
       filterLaporan
     },
     success: function(res) {
-      console.log(res)
-      dataRefresh = res
+      dataTabel = res
   }})
 
-  let rowTable = ""
-  dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr>
-                      
-    <td class="text-center">
-      <button class="btn btn-success btn-sm hover-tooltip" data-tooltip='Edit' type="button" onclick="buttonEdit('${item.Nomor}')"><i class="bi bi-pen"></i></button>
-      <button class="btn btn-danger btn-sm hover-tooltip" data-tooltip='Delete' type="button" onclick="buttonDelete('${item.Nomor}')"><i class="bi bi-trash"></i></button>
-    </td>
-    <td>${item.Nomor}</td>
-    <td>${item.Perkiraan}</td>
-    <td>${item.Keterangan}</td>
-    <td>${item.Grup}</td>
-    <td>${item.Tipe}</td>
-    <td>${item.Tanda}</td>
-    <td>${item.Persen}</td>
-    <td>${item.Jumlah}</td>
-    </tr>`
-  });
-
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
-
+  renderTabel()
 }
 
 function buttonAdd () {
 
   $("#form").modal('toggle')
+
+  resetFormAdd()
+
+}
+
+// Dipakai saat membuka form Add dan setelah Simpan berhasil, supaya isian sebelumnya tidak tertinggal.
+function resetFormAdd () {
 
   document.getElementById('input_add_nomor').value = ''
   document.getElementById('input_add_perkiraan').value = ''
@@ -570,8 +354,8 @@ function buttonEdit (nomor) {
       document.getElementById("input_edit_keterangan").value = res[0].Keterangan
       document.getElementById("input_edit_tipe").value = res[0].Tipe
       document.getElementById("input_edit_tanda").value = res[0].Tanda
-      document.getElementById("input_edit_jumlah").value = res[0].Jumlah
-      document.getElementById("input_edit_persentasi").value = res[0].Persen
+      document.getElementById("input_edit_jumlah").value = MasterList.nolDepan(res[0].Jumlah)
+      document.getElementById("input_edit_persentasi").value = MasterList.nolDepan(res[0].Persen)
       document.getElementById("input_edit_tampil").value = res[0].Tampil
       document.getElementById("input_edit_group").value = res[0].Grup
 
@@ -797,12 +581,14 @@ function submitAdd () {
       }  else {
         console.log(res ,'!')
         alertify.success("Data Laba Rugi telah ditambah");
+        resetFormAdd()
         loadAll()
       }
     }})
 }
 
 window.onload = function(){
+  MasterList.kolom({ href: 'masterlabarugi', kolom: MLR_KOLOM, onChange: renderTabel })
   loadAll();
 };
 
@@ -837,10 +623,7 @@ function buttonPerkiraan () {
           tipePerkiraan = `<td>Detail</td>`;
         }
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonSelectPerkiraan('${item.Perkiraan}', '${item.Keterangan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
       ${tipePerkiraan}
@@ -851,7 +634,6 @@ function buttonPerkiraan () {
 
   let headerTable = `
   <tr>
-    <th scope="col">Actions</th>
     <th scope="col">Perkiraan</th>
     <th scope="col">Keterangan</th>
     <th scope="col">Tipe</th>
@@ -860,10 +642,7 @@ function buttonPerkiraan () {
   document.querySelector("#theadOpen").innerHTML = headerTable;
   document.getElementById("namaModalOpen").innerHTML = 'Merk'
 
-  $("#tabelModalOpen").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelModalOpen')
   
   $("#formModalOpen").modal('toggle')
 }
@@ -882,25 +661,31 @@ function buttonSelectPerkiraan (perkiraan, keterangan){
 </script>
 
 <!-- start modal select add akumulasi penyusutan -->
-<div class="modal fade" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 1200px">
+<div class="modal fade picker-kas" id="formModalOpen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="namaModalOpen"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        <table id="tabelModalOpen" class="table table-bordered table-striped">
-          <thead id='theadOpen' class="text-center bg-primary text-white">
-            <tr></tr>
-          </thead>
-          <tbody id="tabel_dataModalOpen" class="text-left">
-            <tr></tr>
-          </tbody>
-        </table>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto;">
+              <table id="tabelModalOpen">
+                <thead id='theadOpen' class="text-center">
+                  <tr></tr>
+                </thead>
+                <tbody id="tabel_dataModalOpen" class="text-left"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-         
+        <button type="button" class="btn picker-kas-batal" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>

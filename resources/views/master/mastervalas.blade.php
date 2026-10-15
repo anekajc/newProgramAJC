@@ -1,230 +1,129 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
-
 @endsection
+@section('page-title', 'Master Valas')
+
 @section('content')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
-
-
-  {{-- <div class="sp-breadcrumb">
-    <span>Beranda</span>
-    <span class="sp-sep">›</span>
-    <span>Master</span>
-    <span class="sp-sep">›</span>
-    <span class="sp-crumb-active">Valas</span>
-  </div> --}}
-
-  {{-- <div class="sp-page-head">
-    <div>
-      <h1>Master Valas</h1>
-    </div>
-    <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Valas</button>
-  </div> --}}
-
-<div id="contentContainer" class="container-fluid">
+<div id="contentContainer" class="container-fluid po-list-page">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  @include('master.partials.headerTableMaster')
+  <div class="card">
+    <div class="card-body" style="padding:0;">
 
-          <div class="table-outer">
-            <div class="table-wrap">
-              <table class="tb" id="tabel">
-                <thead>
-                  <tr>
-                    <th scope="col">Actions</th>
-                    <th scope="col">Kode Valas</th>
-                    <th scope="col">Nama Valas</th>
-                    <th scope="col">Kurs</th>
-                    <th scope="col">Valas</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data" class="text-right">
-              </tbody>
-              </table>
-            </div>
+      @include('master.partials.toolbarMaster')
+
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead>
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">Kode Valas</th>
+            <th style="padding: 4px 12px;" scope="col">Nama Valas</th>
+            <th style="padding: 4px 12px;" scope="col">Kurs</th>
+            <th style="padding: 4px 12px;" scope="col">Simbol</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left"></tbody>
+      </table>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- start modal add -->
+<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="labelFormAdd" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="labelFormAdd">Add</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div id="formBsGrid">
+      <div class="modal-body">
+        <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
+
+        <div class="bs-form bs-form-1">
+          <label for="input_add_kode">Kode Valas</label>
+          <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Valas">
+
+          <label for="input_add_nama">Nama Valas</label>
+          <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Valas">
+
+          <label for="input_add_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_add_kurs"
+            value="0.00"
+            style="font-variant-numeric: tabular-nums;"
+            oninput="formatNumber(this)">
+
+          <label for="input_add_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol" maxlength="4">
         </div>
-
-</div>
-
-
-<!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Valas</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_kode" placeholder="Kode Valas">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama Valas</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_nama" placeholder="Nama Valas">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kurs</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control text-right" id="input_add_kurs" 
-                    value="0.00" 
-                    style="font-variant-numeric: tabular-nums;" 
-                    oninput="formatNumber(this)">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Simbol</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_add_simbol" placeholder="Simbol" maxlength="4">
-                </div>
-              </div>
-
-            </div>
-
+      </div>{{-- /#formBsGrid --}}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal add-->
 
-<!-- start modal add -->
-<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<!-- start modal edit -->
+<div class="modal fade" id="formEdit" tabindex="-1" role="dialog" aria-labelledby="labelFormEdit" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="labelFormEdit">Edit</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+      <div id="formBsGrid">
       <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+        <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
 
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_edit_noUrut" value="" />
+        <div class="bs-form bs-form-1">
+          <label for="input_edit_kode">Kode Valas</label>
+          <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Valas" disabled>
 
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kode Valas</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_kode" placeholder="Kode Valas" disabled>
-                </div>
-              </div>
+          <label for="input_edit_nama">Nama Valas</label>
+          <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Valas">
 
-            </div>
+          <label for="input_edit_kurs">Kurs</label>
+          <input type="text" class="form-control text-right" id="input_edit_kurs"
+            value="0.00"
+            style="font-variant-numeric: tabular-nums;"
+            oninput="formatNumber(this)">
 
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Nama Valas</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama Valas">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Kurs</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control text-right" id="input_edit_kurs" 
-                    value="0.00" 
-                    style="font-variant-numeric: tabular-nums;" 
-                    oninput="formatNumber(this)">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row mb-1">
-              <div class="col-4 text-left">
-                <div class="form-group text-left mb-1">
-                  <label class="text-left">Simbol</label>
-                </div>
-              </div>
-              <div class="col-8 mb-1">
-                <div class="form-group mb-1">
-                  <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol" maxlength="4">
-                </div>
-              </div>
-            </div>
-
+          <label for="input_edit_simbol">Simbol</label>
+          <input type="text" class="form-control" id="input_edit_simbol" placeholder="Simbol" maxlength="4">
+        </div>
+      </div>
+      </div>{{-- /#formBsGrid --}}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
-  </div>
 </div>
-</div>
-</div>
-<!-- End modal add-->
+<!-- End modal edit-->
 
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
 
 function loadAll () {
-
-  document.getElementById('breadcrumb').innerHTML = 'Master Valas'
 
   let _token = $("#_token").val();
   if ($.fn.DataTable.isDataTable('#tabel')) {
@@ -239,54 +138,45 @@ function loadAll () {
       _token : _token,
     },
     success: function(res) {
-      console.log(res)
       dataRefresh = res
   }})
 
   let rowTable = ""
   dataRefresh.forEach((item, i) => {
-    let temp = ""
-
-    rowTable += `<tr class='theadCustom'>
-      <td style="white-space:nowrap;" class='text-center'>
-        <div class="action-buttons-wrap">
-            <button data-toggle="tooltip" data-placement="top" title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.KODEVLS}')"><i class="bi bi-pen"></i></button>
-            <button data-toggle="tooltip" data-placement="top" title="Delete" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.KODEVLS}')"><i class="bi bi-trash"></i></button>
+    rowTable += `<tr>
+      <td class="text-center">
+        <div class="po-aksi-wrap">
+          <button title="Edit" class="btn btn-success" type="button" onclick="buttonEdit('${item.KODEVLS}')"><i class="bi bi-pen"></i></button>
+          <button title="Delete" class="btn btn-danger" type="button" onclick="buttonDelete('${item.KODEVLS}')"><i class="bi bi-trash"></i></button>
         </div>
       </td>
     <td>${item.KODEVLS}</td>
     <td>${item.NAMAVLS}</td>
     <td class='text-right'>${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(item.KURS))}</td>
-    <td>${item.Simbol}</td>
+    <td>${item.Simbol ?? ''}</td>
     </tr>`
 
   });
 
-   let currentLength = $("#tabel_length_visual").val() ? Number($("#tabel_length_visual").val()) : 10;
-      document.getElementById("tabel_data").innerHTML = rowTable
-      $("#tabel").DataTable({
-        "lengthChange": false,
-        "paging": true,
-        "searching": true,
-        "dom": 'tip',
-        "pageLength": currentLength
-      });
+  document.getElementById("tabel_data").innerHTML = rowTable
+  $("#tabel").DataTable(MasterList.opsi())
+  MasterList.selesai('#tabel')
 
 }
 
 function buttonAdd () {
   document.getElementById("input_add_kode").value = ""
   document.getElementById("input_add_nama").value = ""
-  document.getElementById("input_add_kurs").value = ""
+  document.getElementById("input_add_kurs").value = "0.00"
   document.getElementById("input_add_simbol").value = ""
 
-  $("#form").modal('toggle')
+  $("#form").modal('show')
 
 }
 
 function buttonEdit (kode) {
-  console.log(kode)
   let _token = $("#_token").val();
+  let ketemu = false
   $.ajax({
     url: "{!! url('mastervalasspdetail') !!}",
     type: "get",
@@ -296,30 +186,29 @@ function buttonEdit (kode) {
       kode
     },
     success: function(res) {
-
-      console.log(res)
+      if (!res || !res.length) {
+        alertify.warning("Data valas tidak ditemukan, silakan refresh halaman")
+        return
+      }
+      ketemu = true
       document.getElementById("input_edit_kode").value = res[0].KODEVLS
       document.getElementById("input_edit_nama").value = res[0].NAMAVLS
       document.getElementById("input_edit_kurs").value = parseFloat(res[0].KURS).toFixed(2);
-      document.getElementById("input_edit_simbol").value = res[0].Simbol
+      document.getElementById("input_edit_simbol").value = res[0].Simbol ?? ''
 
-      
       formatNumber(document.getElementById("input_edit_kurs"))
-      
 
     }})
-    $("#formEdit").modal('toggle')
+    if (ketemu) {
+      $("#formEdit").modal('show')
+    }
 }
 
 function buttonDelete (kode) {
-  console.log(kode)
   let _token = $("#_token").val();
-
 
   alertify.confirm('Hapus Valas', 'Apakah yakin ingin menghapus Kode Valas ' + kode + ' ?',
       function() {
-        console.log('yes')
-
         $.ajax({
           url: "{!! url('mastervalasspdelete') !!}",
           type: "post",
@@ -332,17 +221,13 @@ function buttonDelete (kode) {
             if (res != 1) {
               alertify.warning(res);
             } else {
-              console.log(res)
               loadAll()
               alertify.success("Kode Valas telah dihapus");
-
             }
           }})
       }
     ,function(){
-      console.log('no')
     });
-
 
 }
 //
@@ -354,24 +239,23 @@ function submitEdit () {
   let kurs = parseFloat(($("#input_edit_kurs").val() || 0).toString().replace(/,/g, '')) || 0;
   let simbol = $("#input_edit_simbol").val();
 
-  console.log(kode,nama)
   if (!kode) {
-    alertify.warning("Kode  harus diisi");
+    alertify.warning("Kode harus diisi");
     return
   }
 
   if (!nama) {
-    alertify.warning("Nama  harus diisi");
+    alertify.warning("Nama harus diisi");
     return
   }
 
   if (!kurs) {
-    alertify.warning("Kurs  harus diisi");
+    alertify.warning("Kurs harus diisi");
     return
   }
 
   if (!simbol) {
-    alertify.warning("Simbol  harus diisi");
+    alertify.warning("Simbol harus diisi");
     return
   }
 
@@ -391,11 +275,9 @@ function submitEdit () {
       if (res != 1) {
         alertify.warning(res);
       }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
-        alertify.success("Data Departemen telah diedit");
+        alertify.success("Data Valas telah diedit");
         loadAll()
-        $("#formEdit").modal('toggle')
+        $("#formEdit").modal('hide')
       }
 
     }})
@@ -405,7 +287,7 @@ function submitEdit () {
 function submitAdd () {
 
   let _token = $("#_token").val();
-  let kode = $("#input_add_kode").val();
+  let kode = ($("#input_add_kode").val() || '').trim();
   let nama = $("#input_add_nama").val();
   let kurs = parseFloat(($("#input_add_kurs").val() || 0).toString().replace(/,/g, '')) || 0;
   let simbol = $("#input_add_simbol").val();
@@ -421,12 +303,12 @@ function submitAdd () {
   }
 
   if (!kurs) {
-    alertify.warning("Nama harus diisi");
+    alertify.warning("Kurs harus diisi");
     return
   }
 
   if (!simbol) {
-    alertify.warning("Nama harus diisi");
+    alertify.warning("Simbol harus diisi");
     return
   }
 
@@ -446,11 +328,9 @@ function submitAdd () {
       if (res != 1) {
         alertify.warning(res);
       }  else {
-        console.log(res ,'!')
-        // $("#formEdit").modal('toggle')
         alertify.success("Data Valas telah ditambah");
         loadAll()
-        $("#form").modal('toggle')
+        $("#form").modal('hide')
       }
 
     }})
@@ -462,7 +342,5 @@ window.onload = function(){
 };
 
 </script>
-
-
 
 @endsection

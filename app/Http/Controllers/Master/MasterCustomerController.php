@@ -43,7 +43,11 @@ class MasterCustomerController extends Controller
 
   public function spAdd (Request $req) {
     $check = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where KODECUSTSUPP = :kode' , ['kode' => $req->kode]);
-    $checkNPWP = DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp' , ['npwp' => $req->npwp]);
+    // NPWP kosong tidak dicek: form kosong sampai ke sini sebagai null, dan koneksi SQL Server
+    // produksi (ANSI_NULLS OFF) mencocokkan "NPWP = NULL" dengan baris yang NPWP-nya null -
+    // akibatnya customer tanpa NPWP selalu ditolak "NPWP sudah ada".
+    $checkNPWP = trim((string) $req->npwp) === '' ? [] :
+      DB::connection('SML')->select('SELECT * FROM DBCUSTSUPP where NPWP = :npwp' , ['npwp' => $req->npwp]);
 
     if ($check) {
       return 'Kode supplier/customer sudah ada di database';
@@ -94,6 +98,25 @@ class MasterCustomerController extends Controller
 
   public function spDelete (Request $req) {
 
+    // Customer/supplier yang sudah dipakai transaksi tidak boleh dihapus (dulu tidak dicek sama sekali).
+    $pemakai = [
+      ['DBHUTPIUT',   'KodeCustSupp', 'Hutang/Piutang'],
+      ['DBPO',        'KODESUPP',     'Purchase Order'],
+      ['DBBELI',      'KODESUPP',     'Pembelian'],
+      ['DBPembelian', 'KodeCustSupp', 'Pembelian'],
+      ['DBRBELI',     'KODESUPP',     'Retur Pembelian'],
+      ['DBInvoice',   'KodeSupp',     'Invoice'],
+      ['DBSO',        'KODECUST',     'Sales Order'],
+      ['DBJUAL',      'KODECUST',     'Penjualan'],
+      ['DBPenjualan', 'KodeCustSupp', 'Penjualan'],
+      ['dbSPB',       'KodeCustSupp', 'SPB'],
+    ];
+    foreach ($pemakai as $p) {
+      $check = DB::connection('SML')->select("select top 1 1 as ada from {$p[0]} where {$p[1]} = :kode", ['kode' => $req->kode]);
+      if ($check) {
+        return 'Data digunakan di ' . $p[2];
+      }
+    }
     $delete = DB::connection('SML')->update('delete from DBCUSTSUPP where KODECUSTSUPP = :kode' , ['kode' => $req->kode ]);
     return $delete;
   }

@@ -65,9 +65,9 @@
                     <div class="po-toolbar">
                         <div class="po-filter-wrap">
                             <label>Periode</label>
-                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
                             <span class="po-filter-sep">s/d</span>
-                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off">
                         </div>
 
                         <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
@@ -461,6 +461,7 @@
                             <tr>
                                 <th scope="col">Kode Barang</th>
                                 <th scope="col">Nama Barang</th>
+                                <th scope="col">Part Number</th>
                             </tr>
                         </thead>
 
@@ -495,7 +496,7 @@
                 <input type="hidden" name="noUrut" id="input_detail_koreksi_noUrut" value="" />
 
                 <!-- No Bukti -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="row align-items-center">
                         <label class="col-sm-4 col-form-label">No Bukti</label>
                         <div class="col-sm-8">
@@ -506,12 +507,25 @@
                 </div>
 
                 <!-- Tanggal -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="row align-items-center">
                         <label class="col-sm-4 col-form-label">Tanggal</label>
                         <div class="col-sm-8">
                             <input type="date" class="form-control" id="input_detail_koreksi_tanggal"
                                 value="{!! date('Y-m-d') !!}" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gudang -->
+                <div class="col-md-4">
+                    <div class="row align-items-center">
+                        <label class="col-sm-4 col-form-label font-weight-bold">Gudang</label>
+                        <div class="col-sm-8">
+                            {{-- Diisi refreshTableDetailKoreksi(); disabled seperti No Bukti/Tanggal (Detail read-only). --}}
+                            <select id="input_detail_koreksi_gudang" class="form-control" disabled>
+                                <option value="0" selected disabled>-- Pilih Gudang --</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -552,7 +566,6 @@
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
     <script type="text/javascript">
         let listBarang = []
-        let barangCacheAll = null
         let listLokasi = []
 
         let listItemForm = []
@@ -804,7 +817,7 @@
                 // Sudah otorisasi — Batal Otorisasi + Print
                 tombolAksi +=
                     '<button type="button" class="btn btn-danger btn-sm" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    nobukti + '\', \'' + r.IsOtorisasi1 + '\')"><i class="bi bi-key"></i></button>' +
                     '<button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {
@@ -877,6 +890,12 @@
                 return;
             }
             awal.dataset.rtBound = '1';
+
+            // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+            // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+            // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+            awal.value = awal.defaultValue;
+            akhir.value = akhir.defaultValue;
 
             let onUbah = function() {
                 if (!awal.value || !akhir.value) {
@@ -1085,12 +1104,11 @@
             // display:block, jadi di sinilah lebar kolom boleh dihitung.
             $('#formAddListItem').on('shown.bs.modal', function() {
                 if (barangTablePending !== null) {
-                    initBarangTable(barangTablePending, barangSearchPending)
+                    initBarangTable(barangTablePending, barangSearchPending, barangPesanPending)
                 } else if (barangTableDT) {
                     resetBarangTableWidths()
                     barangTableDT.columns.adjust()
-                    barangTableDT.search(barangSearchPending || '').draw()
-                    barangSearchPending = null
+                    $('#tabel_add_list_item_filter input').trigger('focus')
                 }
             });
 
@@ -2118,7 +2136,11 @@
         var barangTableDT = null;
         var barangTablePending = null;
         var barangSearchPending = null;
+        var barangPesanPending = null;
         var barangLookupBusy = false;
+        // Nomor urut pencarian Enter di picker - jawaban server yang datang terlambat (dari
+        // Enter sebelumnya) diabaikan supaya tidak menimpa hasil pencarian terbaru.
+        var barangCariSeq = 0;
 
         // destroy() TIDAK membersihkan style="width:...px" yang ditulis DataTables
         // ke tiap <th> (lihat _fnDestroy, DataTables 1.10.18 — cuma table.style.width
@@ -2133,39 +2155,58 @@
             $t.find('thead th').css('width', '');
         }
 
-        function initBarangTable(list, searchTerm) {
+        // pesanKosong: teks saat tabel tanpa data. Default = petunjuk "ketik lalu Enter" (picker
+        // baru dibuka, belum mencari); 'Tidak ada data' saat server tidak menemukan apa pun.
+        function initBarangTable(list, searchTerm, pesanKosong) {
             // DataTables menghitung lebar kolom dari container saat init, dan
             // Bootstrap 4 baru memasang display:block setelah transisi backdrop
-            // selesai. Kalau init dipanggil tepat setelah .modal('toggle') (kasus
-            // cache hit di buttonAddListBarang), modal masih hidden → lebar diukur
-            // di container 0px. Antre saja, biar dieksekusi di shown.bs.modal.
+            // selesai. Kalau init dipanggil tepat setelah .modal('show'), modal
+            // masih hidden → lebar diukur di container 0px. Antre saja, biar
+            // dieksekusi di shown.bs.modal.
             if (!$('#formAddListItem').is(':visible')) {
                 barangTablePending = list;
                 barangSearchPending = searchTerm || '';
+                barangPesanPending = pesanKosong || null;
                 return;
             }
             barangTablePending = null;
+            barangPesanPending = null;
 
             if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
                 $('#tabel_add_list_item').DataTable().clear().destroy();
             }
             resetBarangTableWidths();
+            // Dropdown "Tampilkan" (DataTables length menu) 10/25/50/100/Semua, sama seperti
+            // picker Kas/Bank (kasInitPicker() di public/js/kas.js). Kembali ke 10 tiap kali
+            // picker dibuka, karena tabelnya di-destroy dan di-init ulang di sini.
             barangTableDT = $('#tabel_add_list_item').DataTable({
                 data: list,
                 deferRender: true,
                 paging: true,
-                pageLength: 25,
-                lengthChange: false,
+                pageLength: 10,
+                lengthChange: true,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'Semua']],
+                // Hanya tabel yang di-scroll; info + tombol halaman terkunci di bawahnya
+                // (.rt-picker-scroll / .rt-picker-bawah di public/css/report-table.css).
+                dom: 'lfr<"rt-picker-scroll"t><"rt-picker-bawah"ip>',
                 searching: true,
                 order: [],
                 language: {
-                    emptyTable: 'Tidak ada data'
+                    lengthMenu: 'Tampilkan _MENU_',
+                    emptyTable: pesanKosong || 'Ketik kode / nama barang di kotak Search, lalu tekan Enter',
+                    zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
                 },
                 columns: [{
                         data: 'KODEBRG'
                     },
                     {
                         data: 'NAMABRG'
+                    },
+                    {
+                        // PartNumber boleh NULL di DBBARANG - defaultContent mencegah
+                        // peringatan DataTables "Requested unknown parameter".
+                        data: 'PartNumber',
+                        defaultContent: ''
                     }
                 ],
                 createdRow: function(row, data, dataIndex) {
@@ -2178,6 +2219,13 @@
             // picker terbuka langsung menyaring — lihat resolveBarang()/openBarangPicker().
             barangTableDT.search(searchTerm || '').draw();
             barangSearchPending = null;
+
+            // Kotak Search DataTables sekaligus kotak cari server: Enter -> cariBarangPicker().
+            // Sambil mengetik, DataTables tetap hanya menyaring baris yang sedang tampil.
+            $('#tabel_add_list_item_filter input')
+                .off('keypress.barang')
+                .on('keypress.barang', cariBarangPicker)
+                .trigger('focus');
         }
 
         function fetchBarangList(search, callback) {
@@ -2189,7 +2237,6 @@
                     search
                 },
                 success: function(res) {
-                    listBarang = res
                     if (callback) callback(res)
                 },
                 error: function(err) {
@@ -2199,34 +2246,51 @@
             })
         }
 
+        // Enter di kotak Search picker -> cari ke server, sama seperti searchBarangAll() di
+        // purchasing/pembelianpermintaannonagen.blade.php. Search kosong + Enter -> tabel
+        // dikosongkan lagi (kembali ke petunjuk "ketik lalu Enter").
+        function cariBarangPicker(e) {
+            if (e.which !== 13) {
+                return
+            }
+            e.preventDefault()
 
+            let term = $(e.target).val().trim()
+            let seq = ++barangCariSeq
 
-        // Buka picker dengan seluruh katalog (barangCacheAll, dicache) dan dorong `term`
-        // ke kotak search DataTables-nya. listBarang HARUS ditunjuk ke array yang sama
-        // yang dioper ke initBarangTable() — createdRow menempelkan index array itu ke
-        // onclick, jadi buttonAddAddInsertItem(index) salah baris kalau keduanya beda.
-        function openBarangPicker(term) {
-            $("#formAddListItem").modal('show')
-
-            if (barangCacheAll) {
-                listBarang = barangCacheAll
-                initBarangTable(listBarang, term)
+            listBarang = []
+            if (!term) {
+                initBarangTable([], '')
                 return
             }
 
-            initBarangTable([], term)
-
-            fetchBarangList('', function(res) {
-                barangCacheAll = res
+            initBarangTable([], term, 'Mencari...')
+            fetchBarangList(term, function(res) {
+                if (seq !== barangCariSeq) {
+                    return
+                }
                 listBarang = res
-                initBarangTable(listBarang, term)
+                initBarangTable(listBarang, term, 'Tidak ada data')
             })
         }
 
+        // Buka picker. Tanpa `hasil`: tabel kosong, menunggu user mengetik di kotak Search
+        // lalu Enter (cariBarangPicker). Dengan `hasil` (hasil cari server milik resolveBarang()):
+        // langsung tampil dengan `term` di kotak Search. listBarang HARUS ditunjuk ke array
+        // yang sama yang dioper ke initBarangTable() — createdRow menempelkan index array itu
+        // ke onclick, jadi buttonAddAddInsertItem(index) salah baris kalau keduanya beda.
+        function openBarangPicker(term, hasil) {
+            barangCariSeq++
+            listBarang = hasil || []
+            $("#formAddListItem").modal('show')
+            initBarangTable(listBarang, term || '', hasil ? 'Tidak ada data' : null)
+        }
+
         // Titik masuk tunggal buat Enter dan tombol plus di Kode Barang (Add Item).
-        // Kode yang PERSIS cocok langsung mengisi form tanpa membuka modal; selain itu
-        // (kode sebagian, nama, atau kosong) modal dibuka dengan `term` sudah terisi di
-        // kotak search-nya. Form Edit sengaja tidak memakai ini — Kode Barang di sana disabled.
+        // Kosong -> picker dibuka kosong, menunggu Enter di kotak Search-nya. Terisi -> cari
+        // ke server; kode yang PERSIS cocok langsung mengisi form tanpa membuka modal, selain
+        // itu (kode sebagian / nama) picker dibuka dengan hasil pencarian itu dan `term` di
+        // kotak Search-nya. Form Edit sengaja tidak memakai ini — Kode Barang di sana disabled.
         function resolveBarang(term) {
             term = (term || '').trim()
 
@@ -2244,16 +2308,6 @@
                 return list.find(b => String(b.KODEBRG || '').trim().toLowerCase() === needle)
             }
 
-            if (barangCacheAll) {
-                let hit = findExact(barangCacheAll)
-                if (hit) {
-                    applyBarangToForm(hit)
-                } else {
-                    openBarangPicker(term)
-                }
-                return
-            }
-
             barangLookupBusy = true
             $.ajax({
                 url: "{!! url('permintaanpemakaianlistbarang') !!}",
@@ -2268,7 +2322,7 @@
                     if (hit) {
                         applyBarangToForm(hit)
                     } else {
-                        openBarangPicker(term)
+                        openBarangPicker(term, res)
                     }
                 },
                 error: function(err) {
@@ -2463,6 +2517,14 @@
                     console.log(date1)
                     // console.log($("#input_detail_koreksi_tanggal").val())
                     $('#input_detail_koreksi_tanggal').val(date1)
+
+                    // Gudang header - satu opsi terpilih dari baris pertama, sama seperti
+                    // buttonKoreksi() mengisi #input_add_gudang. Detail hanya tampilan, jadi
+                    // tidak perlu memuat seluruh daftar gudang.
+                    document.getElementById("input_detail_koreksi_gudang").innerHTML = res[0].KodeGdg ?
+                        `<option value='${res[0].KodeGdg}' selected>${res[0].KodeGdg} - ${res[0].Namagdg || ''}</option>` :
+                        `<option value="0" selected disabled>-- Pilih Gudang --</option>`
+
                     res.forEach((item, i) => {
                         tableRow += `
         <tr class="data-row">

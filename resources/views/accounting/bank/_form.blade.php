@@ -304,6 +304,28 @@
                                             </div>
                                         </div>
 
+                                        {{-- No Titipan: hanya BBK + Lawan 113400. Bisa diketik lalu Enter, atau
+                                             browse lewat tombol cari - lihat buttonAddListTitipan() di
+                                             public/js/bank.js. Tampil/sembunyi lewat resetTitipan(). --}}
+                                        <div class="row kas-row-tight" id="rowNoTitipan" style="display:none">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>No Titipan</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-9">
+                                                <div class="input-group form-group">
+                                                    <input id="AddAddNoTitipan" type="text" class="form-control"
+                                                        onkeypress="onKeyPressNoTitipan(event)">
+                                                    <input id="AddAddUrutTitipan" type="hidden">
+                                                    <button id="buttonAddListTitipan" type="button"
+                                                        onclick="buttonAddListTitipan()" class="btn btn-chip-biru"><i
+                                                            class="bi bi-search"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="row kas-row-tight" id="rowCustsupp">
                                             <div class="col-md-3">
                                                 <div class="form-group">
@@ -484,9 +506,10 @@
                                         class="form-control">
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mt-2" style="margin-top: 0" id="contentContainer">
-                            <div class="col-md-12 text-right mt-4">
+                            {{-- Batal/Simpan sebaris dengan Ket. Det, rata kanan. id="contentContainer"
+                                 wajib dipertahankan: gaya .btn-pill-* di tableMaster2.css hanya berlaku
+                                 di dalam #contentContainer. --}}
+                            <div class="col-md-5 text-right form-group" id="contentContainer">
                                 <button type="button" class="btn btn-danger btn-action-danger btn-pill-primary"
                                     onclick="buttonAddBatal()">Batal</button>
 
@@ -494,12 +517,8 @@
                                     class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
 
                                 <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()"
-                                    class="btn btn-primary btn-action-primary btn-pill-primary">Submit Edit</button>
-
-
-                                <!-- <button id="buttonSubmitAddEdit" type="button" onclick="submitAddEdit()" class="btn btn-primary" >Edit</button> -->
+                                    class="btn btn-primary btn-action-primary btn-pill-primary">Simpan</button>
                             </div>
-
                         </div>
 
                     </div>

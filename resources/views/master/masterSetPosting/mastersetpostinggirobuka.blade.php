@@ -1,11 +1,11 @@
-@extends('newmaster')
+@extends('newmasterTest')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Master Posting Giro Buka')
 @section('content')
 @include('master/partials/sidebarPosting')
 
- <link rel="stylesheet" href="{{ asset('css/tableMaster2.css') }}?v={{ filemtime(public_path('css/tableMaster2.css')) }}">
 
 
 <style>
@@ -44,27 +44,30 @@
     <button class="btn btn-action-primary" onclick="buttonAdd()">+ Add Posting Giro Buka</button>
   </div> --}}
 
-  <div id="contentContainer" class="container-fluid">
+  <div id="contentContainer" class="container-fluid po-list-page">
 
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-    @include('master.partials.headerTableMaster')
+    <div class="card">
+    <div class="card-body" style="padding:0;">
 
-    <div class="table-outer">
-      <div class="table-wrap">
-        <table class="tb" id="tabel">
+  @include('master.partials.toolbarMaster')
+  <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+
+    <table id="tabel" class="data-table po-aksi-hover">
           <thead>
             <tr>
-              <th scope="col">Actions</th>
-              <th scope="col">Perkiraan</th>
-              <th scope="col">Keterangan</th>
+              <th style="padding: 4px 12px;" scope="col">Actions</th>
+              <th style="padding: 4px 12px;" scope="col">Perkiraan</th>
+              <th style="padding: 4px 12px;" scope="col">Keterangan</th>
             </tr>
           </thead>
-          <tbody id="tabel_data" class="text-right">
+          <tbody id="tabel_data" class="text-left">
           </tbody>
         </table>
-      </div>
+
     </div>
+  </div>
 
   </div>
 
@@ -75,7 +78,8 @@
 @endsection
 
 @section('js')
-<script src="{{ asset('js/masterTable.js') }}"></script>
+<script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
 let dataRefresh = []
@@ -84,7 +88,7 @@ function loadAll () {
   console.log('asd')
   let _token = $("#_token").val();
 
-  document.getElementById('breadcrumb').innerHTML = "Master Posting Giro Buka";
+  // document.getElementById('breadcrumb').innerHTML = "Master Posting Giro Buka"; // dimatikan: judul sekarang di bar atas (page-title)
 
   $('#tabel').DataTable().destroy();
 
@@ -122,9 +126,10 @@ function loadAll () {
         "lengthChange": false,
         "paging": true,
         "searching": true,
-        "dom": 'tip',
+        "dom": MasterList.dom, "order": [], "language": MasterList.bahasa,
         "pageLength": currentLength
       });
+      MasterList.selesai('#tabel')
 
 }
 
@@ -134,7 +139,8 @@ function buttonAdd () {
   
   isiButton = `
          
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit Add</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
         `
 
   document.getElementById('buttonTipeModal').innerHTML = isiButton;
@@ -149,7 +155,8 @@ function buttonEdit (kode) {
 
   isiButton = `
          
-        <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit Edit</button>
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
         `
 
   document.getElementById('buttonTipeModal').innerHTML = isiButton;
@@ -311,20 +318,14 @@ function loadSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
   });
 
   document.getElementById("tabel_dataAktivaSelectPerkiraan").innerHTML = rowTable;
-  $("#tabelAktivaSelectPerkiraan").DataTable({
-    "lengthChange": false,
-    "paging": false,
-  });
+  pickerKasInit('tabelAktivaSelectPerkiraan')
 }
 
 function buttonPilihPerkiraan(selectedPerkiraan) {
@@ -361,20 +362,14 @@ function loadEditSelectPerkiraan() {
   dataRefresh.forEach((item, i) => {
     let temp = "";
 
-    rowTable += `<tr>
-      <td class="text-center">
-        <button class="btn-action-md btn-action-primary" type="button" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')"><i class="bi bi-plus-square"></i></button>
-      </td>
+    rowTable += `<tr class="pick-row" onclick="buttonEditPilihPerkiraan('${item.Perkiraan}')">
       <td>${item.Perkiraan}</td>
       <td>${item.Keterangan}</td>
     </tr>`;
   });
 
   document.getElementById("tabel_dataEditAktivaSelectPerkiraan").innerHTML = rowTable;
-  $("#tabelEditAktivaSelectPerkiraan").DataTable({
-    "lengthChange": true,
-    "paging": true,
-  });
+  pickerKasInit('tabelEditAktivaSelectPerkiraan')
 }
 
 function buttonEditPilihPerkiraan(selectedPerkiraan) {

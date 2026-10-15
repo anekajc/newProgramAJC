@@ -26,4 +26,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 test.sql
-
+newProgramAJC.code-workspace
+.env
+.sql

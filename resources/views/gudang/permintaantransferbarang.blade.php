@@ -28,12 +28,12 @@
 
     <style>
         /* Tabel item form Add/Edit/Detail (#tabel_add) — tampilannya disamakan dengan tabel daftar
-           #tabel di #page1: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
-           kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
-           hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
-           po-table-header.css; blok itu sendiri tidak dipakai di sini karena #page2 bukan
-           .po-list-page. Padding sel isi sengaja tidak ditulis: `table tbody td { padding: 0 10px
-           !important }` di newmaster.css berlaku sama seperti di #tabel (baris rapat). */
+               #tabel di #page1: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
+               kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
+               hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
+               po-table-header.css; blok itu sendiri tidak dipakai di sini karena #page2 bukan
+               .po-list-page. Padding sel isi sengaja tidak ditulis: `table tbody td { padding: 0 10px
+               !important }` di newmaster.css berlaku sama seperti di #tabel (baris rapat). */
         #page2 .po-item-card {
             background: var(--white, #fff);
             border: 1.5px solid var(--border, #e5e7eb);
@@ -82,6 +82,16 @@
         }
     </style>
 
+
+    <style>
+        /* newmaster.css memaku `#formBsGrid .form-control` setinggi 38px, sehingga atribut rows pada
+           textarea (Keterangan rows=5, alamat Gudang rows=3) tidak berefek dan kotaknya hanya satu
+           baris. Textarea dikembalikan ke tinggi aslinya — pengecualian yang sama seperti di
+           accounting/memorialkoreksi.blade.php. */
+        #formBsGrid textarea.form-control {
+            height: auto;
+        }
+    </style>
 
     <style>
         .rodokNdukurTitik {
@@ -236,9 +246,9 @@
                     <div class="po-toolbar">
                         <div class="po-filter-wrap">
                             <label>Periode</label>
-                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
                             <span class="po-filter-sep">s/d</span>
-                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off">
                         </div>
 
                         <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
@@ -365,7 +375,7 @@
         </div>
 
         <div id="modalBodyAddMain" class="">
-            <div class="modal-body" id="">
+            <div class="modal-body" id="formBsGrid">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="row">
@@ -407,7 +417,7 @@
                     <div class="col-md-3">
                         <div class="row">
 
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label>Gudang Asal</label>
                                 </div>
@@ -439,7 +449,7 @@
                     <div class="col-md-3">
                         <div class="row">
 
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label>Gudang Tujuan</label>
                                 </div>
@@ -732,7 +742,7 @@
                 </div>
             </div>
 
-            <!-- ADD add -->
+            <!-- Form add / edit -->
             <div id="addAddItem" class="container-fluid showhide">
                 <div class="row">
                     <div class="col-4">
@@ -746,7 +756,6 @@
                         <div class="row">
 
                             <div class="col-md-6">
-
                                 <div class="row">
                                     <div class="col-3" style="margin-top:-10px;">
                                         <div class="form-group">
@@ -764,7 +773,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Nama Produk -->
                                 <div class="row">
                                     <div class="col-3" style="margin-top:-10px;">
                                         <div class="form-group">
@@ -778,42 +786,39 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
-                            {{-- <div class="col-md-6" style="margin-left:-50px;"> --}}
-
-                            <div class="row" style="margin-top:-15px;">
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Quantity</label>
+                            <div class="col-md-6" style="margin-top:-15px;">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Quantity</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control text-right" id="input_add_add_qty"
+                                                value="0.00" tabindex="6" oninput="formatAngkaKetik(this)"
+                                                onblur="formatAngkaInput(this)">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <input type="number" class="form-control text-right" id="input_add_add_qty"
-                                            value="0.00" tabindex="6">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Satuan</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Satuan</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <select id="input_add_add_nosat"
-                                            class="form-control text-center form-select-lg mb-3" tabindex="9">
-                                            <option value=0 selected>Tidak</option>
-                                        </select>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <select id="input_add_add_nosat"
+                                                class="form-control text-center form-select-lg mb-3" tabindex="9">
+                                                <option value=0 selected>Tidak</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            {{-- onchange="onChangeInputAddAddHarga()" --}}
-
-
-                            {{-- </div> --}}
-
                         </div>
                     </div>
                 </div>
@@ -1482,16 +1487,16 @@
                 <!-- </div> -->
                 <!-- <hr/> -->
                 <!-- <div class="row ">
-        <div class="col-md-12 text-left">
-          <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 text-left">
+              <div class="row">
+                <div class="col-md-12">
 
-            </div>
-          </div>
-        <button type="button" class="btn btn-primary" onclick="buttonAddMainHeader()" class="btn btn-secondary"  >Header</button>
-        <button type="button" class="btn btn-primary" onclick="buttonAddMainItems()" class="btn btn-secondary"  >Items</button>
-    </div>
-    </div> -->
+                </div>
+              </div>
+            <button type="button" class="btn btn-primary" onclick="buttonAddMainHeader()" class="btn btn-secondary"  >Header</button>
+            <button type="button" class="btn btn-primary" onclick="buttonAddMainItems()" class="btn btn-secondary"  >Items</button>
+        </div>
+        </div> -->
                 <hr />
                 <div class="row ">
                     <div class="col-md-12 mt-2 text-left">
@@ -1550,10 +1555,10 @@
                                 </div>
 
                                 <!-- <div class="col-md-12">
-            <div class="form-group">
+                <div class="form-group">
 
-            </div>
-          </div> -->
+                </div>
+              </div> -->
                                 <div class="col-md-12" style="margin-top:-15px;">
                                     <div class="form-group">
                                         <input type="hidden" class="form-control" id="input_detail_kodelokasipenerima">
@@ -1565,25 +1570,25 @@
                             </div>
 
                             <!-- <div class="row">
-            <div class="col-9">
-              <div class="form-group">
-                <label>PIC</label>
-              </div>
-            </div>
-            <div class="col-3 text-right">
-              <div class="form-group">
-            <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
-            </div>
+                <div class="col-9">
+                  <div class="form-group">
+                    <label>PIC</label>
+                  </div>
+                </div>
+                <div class="col-3 text-right">
+                  <div class="form-group">
+                <button onclick="buttonAddListPIC()" id="buttonAddListPIC"  class="btn btn-primary btn-sm text-right"><i class="bi bi-plus"></i></button>
+                </div>
 
-          </div>
-          </div> -->
+              </div>
+              </div> -->
                             <div class="row">
 
                                 <!-- <div class="col-md-12">
-            <div class="form-group">
+                <div class="form-group">
 
-            </div>
-          </div> -->
+                </div>
+              </div> -->
 
                             </div>
 
@@ -1607,7 +1612,7 @@
 
                                 <!-- <div class="col-md-12">
 
-          </div> -->
+              </div> -->
 
                             </div>
 
@@ -1680,14 +1685,14 @@
 
                                 <!-- <div class="col-md-12">
 
-          </div> -->
+              </div> -->
 
                             </div>
 
                         </div>
                         <!-- <div class="col-md-12 mt-2 text-right" style="margin-bottom: 20px">
-        <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
-    </div> -->
+            <button type="button" class="btn btn-primary" id="buttonSubmitSaveHeader" onclick="submitSaveHeader()" class="btn btn-secondary"  >Save Header</button>
+        </div> -->
 
                         <div class="col-md-3">
                             <div class="row">
@@ -1751,11 +1756,11 @@
 
                                                 <!-- <div class="col-4">
 
-              <div class="form-group">
+                  <div class="form-group">
 
-              </div>
+                  </div>
 
-              </div> -->
+                  </div> -->
                                                 <div class="col-md-12" style="margin-top:-10px;">
                                                     <div class="input-group form-group">
                                                         <input type="hidden" class="form-control"
@@ -1818,11 +1823,11 @@
 
                                 </div>
                                 <!-- <div class="col-md-12">
-        <div class="form-group">
-          <input type="hidden" class="form-control" id="input_detail_kodesales" >
-          <input type="text" class="form-control" id="input_detail_namasales"  disabled>
-        </div>
-      </div> -->
+            <div class="form-group">
+              <input type="hidden" class="form-control" id="input_detail_kodesales" >
+              <input type="text" class="form-control" id="input_detail_namasales"  disabled>
+            </div>
+          </div> -->
                             </div>
 
                         </div>
@@ -2207,7 +2212,7 @@
                 // Sudah otorisasi (Detail + Batal Otorisasi + Print)
                 tombolAksi +=
                     '<button type="button" class="btn btn-danger btn-sm" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
                     '<button type="button" class="btn btn-info btn-sm" title="Print" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {
@@ -2280,6 +2285,12 @@
                 return;
             }
             awal.dataset.rtBound = '1';
+
+            // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+            // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+            // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+            awal.value = awal.defaultValue;
+            akhir.value = akhir.defaultValue;
 
             let onUbah = function() {
                 if (!awal.value || !akhir.value) {
@@ -2529,7 +2540,7 @@
                             if ($.fn.DataTable.isDataTable("#tabel_add_list_barangall")) {
                                 table = $("#tabel_add_list_barangall").DataTable();
                                 table.clear().rows.add($("#tabel_data_add_list_barangall tr"))
-                                .draw();
+                                    .draw();
                             } else {
                                 $("#tabel_add_list_barangall").DataTable({
                                     lengthChange: false,
@@ -2589,7 +2600,7 @@
             }
 
 
-            alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+            var dlgBatalOtorisasi = alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
                 function(evt, value) {
                     // alertify.success("You entered: " + value);
                     let xpket = value;
@@ -2626,9 +2637,7 @@
                     console.log('no')
                     alertify.error("Action cancelled");
                 });
-
-
-
+                dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
         function onChangeKeterangan() {
@@ -2830,7 +2839,7 @@
             // let Sat_1 =  $("#input_add_add_nosat").val()
             // let Sat_2 =  $("#input_add_add_nosat").val()
             // let Qnt =  $("#input_add_add_nosat").val()
-            let QNt2 = parseInt($("#input_add_add_qty").val())
+            let QNt2 = unformatAngka($("#input_add_add_qty").val())
             let NoSat = parseInt($("#input_add_add_nosat").val())
             //IDUSER dari controller
             //noPenyerahan kosong
@@ -2952,7 +2961,7 @@
             // let Sat_1 =  $("#input_add_add_nosat").val()
             // let Sat_2 =  $("#input_add_add_nosat").val()
             // let Qnt =  $("#input_add_add_nosat").val()
-            let QNt2 = parseInt($("#input_add_add_qty").val())
+            let QNt2 = unformatAngka($("#input_add_add_qty").val())
             let NoSat = parseInt($("#input_add_add_nosat").val())
             //IDUSER dari controller
             //noPenyerahan kosong
@@ -3217,7 +3226,7 @@
             // Use tempAddEdit instead of dataTableAdd:
             document.getElementById("input_add_add_kodebarang").value = tempAddEdit.KODEBRG
             document.getElementById("input_add_add_namabarang").value = tempAddEdit.NamaBrg
-            document.getElementById("input_add_add_qty").value = tempAddEdit.QNT
+            document.getElementById("input_add_add_qty").value = formatAngka((parseFloat(tempAddEdit.QNT) || 0).toFixed(2))
             document.getElementById("input_add_urut").value = tempAddEdit.URUT
             document.getElementById("input_add_add_nosat").innerHTML = selectOption
 
@@ -4686,6 +4695,7 @@
 
             if (refreshLawan !== false) {
                 muatDropdownGudangTujuan();
+                simpanGudang('asal');
             }
         }
 
@@ -4696,7 +4706,65 @@
 
             if (refreshLawan !== false) {
                 muatDropdownGudangAsal();
+                simpanGudang('tujuan');
             }
+        }
+
+        // Simpan Gudang Asal/Tujuan begitu user mengganti pilihan — sama seperti Keterangan
+        // (onChangeKeterangan), hanya di mode Edit. Mode Add sebelum item pertama: header belum ada,
+        // gudang ikut terkirim bersama item pertama (submitAddAdd), lalu form pindah ke mode Edit.
+        // Gudang disimpan per baris item (dbPRTransferDet), jadi semua item dokumen ikut pindah.
+        // Kalau ditolak (kosong / Asal = Tujuan / gagal), pilihan dikembalikan ke nilai tersimpan.
+        function simpanGudang(jenis) {
+            if (tipeform != 'edit') return;
+
+            let header = window.dataHeaderAdd;
+            if (!header) return;
+
+            let isAsal = jenis === 'asal';
+            let selectId = isAsal ? 'input_add_kodeGudangAsal' : 'input_add_kodeGudangTujuan';
+            let label = isAsal ? 'Gudang Asal' : 'Gudang Tujuan';
+            let kode = ($('#' + selectId).val() || '').trim();
+            let kodeLawan = ($(isAsal ? '#input_add_kodeGudangTujuan' : '#input_add_kodeGudangAsal').val() || '').trim();
+            let tersimpan = ((isAsal ? header.gdgAsal : header.gdgTujuan) || '').trim();
+
+            if (kode === tersimpan) return;
+
+            const kembalikan = (pesan) => {
+                alertify.warning(pesan);
+                pilihGudangDropdown(selectId, tersimpan, isAsal ? header.NamaGgdAsal : header.NamaGgdTujuan);
+                if (isAsal) onChangeGudangAsal(false);
+                else onChangeGudangTujuan(false);
+            };
+
+            if (!kode) return kembalikan(label + ' tidak boleh kosong');
+            if (kode === kodeLawan) return kembalikan('Gudang Asal dan Gudang Tujuan tidak boleh sama');
+
+            $.ajax({
+                url: "{!! url('prtonchangegudang') !!}",
+                type: "post",
+                data: {
+                    _token: $("#_token").val(),
+                    nobukti: $("#input_add_nobukti").val(),
+                    jenis,
+                    kode
+                },
+                success: function(res) {
+                    if (Number(res) > 0) {
+                        if (isAsal) header.gdgAsal = kode;
+                        else header.gdgTujuan = kode;
+                        alertify.success(label + ' tersimpan');
+                    } else {
+                        console.log(res);
+                        kembalikan('Gagal menyimpan ' + label);
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    kembalikan(err.status === 400 && err.responseText ? err.responseText :
+                        'Terjadi kesalahan silahkan refresh browser');
+                }
+            });
         }
 
         function buttonAddPickAlamatKirim(index) {
@@ -4871,6 +4939,12 @@
             document.getElementById("input_add_kodeGudangTujuan").value = ''
             document.getElementById("input_add_namaGudangTujuan").value = ''
             document.getElementById("input_add_keterangan").value = ''
+            // Tanggal harus kembali ke hari ini — kalau tidak, tanggal dokumen terakhir yang dibuka
+            // lewat Detail/Edit (refreshDataTableAdd) ikut terbawa ke form Tambah.
+            let hariIni = new Date()
+            document.getElementById("input_add_tanggal").value = hariIni.getFullYear() + '-' +
+                String(hariIni.getMonth() + 1).padStart(2, '0') + '-' +
+                String(hariIni.getDate()).padStart(2, '0')
             muatDropdownGudangAsal()
             muatDropdownGudangTujuan()
         }
@@ -5003,15 +5077,11 @@
         }
 
 
+        // Detail hanya-baca (field dikunci, kolom Actions disembunyikan), jadi dokumen yang sudah
+        // diotorisasi tetap boleh dilihat — cek "Sudah diotorisasi" hanya ada di buttonEdit().
         function buttonDetail(NOBUKTI) {
             tipeform = 'detail'
-            console.log('buttonEdit', NOBUKTI)
-
-            lockFormAdd()
-
-            $('.showhide').hide();
-            // $('.showhidemodalbodyaddmain').hide();
-            $('#buttonSubmitSaveHeader').show();
+            console.log('buttonDetail', NOBUKTI)
 
             let akses = $("#akses_iskoreksi").val();
 
@@ -5019,33 +5089,18 @@
                 alertify.warning('No access')
                 return
             }
-            let _token = $("#_token").val()
-            let oto = 1
 
-            $.ajax({
-                url: "{!! url('prtcekotorisasi') !!}",
-                type: "post",
-                async: false,
-                data: {
-                    _token,
-                    nobukti: NOBUKTI
-                },
-                success: function(res) {
-                    console.log(res)
-                    oto = res[0].isOtorisasi
-                },
-                error: function(err) {
-                    console.log(err)
-                    console.log(err.status)
-                    console.log(err.statusText)
-                    alertify.warning('Terjadi kesalahan silahkan refresh browser')
-                }
-            })
+            lockFormAdd()
 
-            if (oto == 1) {
-                alertify.warning("Sudah diotorisasi")
-                return
-            }
+            $('.showhide').hide();
+            // $('.showhidemodalbodyaddmain').hide();
+            $('#buttonSubmitSaveHeader').show();
+
+            // Opsi dropdown Gudang Asal/Tujuan harus sudah ada sebelum refreshDataTableAdd() memilih
+            // kode gudang dokumen — tanpa ini <select> masih kosong (belum pernah dimuat kalau user
+            // belum membuka Tambah/Edit) sehingga pilihan gudang tidak tampil. Sama seperti buttonEdit().
+            muatDropdownGudangAsal()
+            muatDropdownGudangTujuan()
 
             $('.showhidemodalbodyadd').hide();
             // $('#modalBodyAddListPelanggan').show();
@@ -5074,6 +5129,22 @@
         }
 
 
+
+        // Pilih kode gudang dokumen di dropdown Gudang Asal/Tujuan. Dicocokkan setelah di-trim
+        // (kolom kode gudang bisa berupa char ber-spasi), dan kalau kodenya tidak ada di daftar opsi
+        // (mis. terfilter oleh exclude Asal<->Tujuan) opsinya ditambahkan supaya tetap tampil —
+        // mengisi .value langsung dengan kode yang tidak punya <option> membuat select jadi kosong.
+        function pilihGudangDropdown(selectId, kode, label) {
+            let selectEl = document.getElementById(selectId);
+            kode = (kode || '').trim();
+
+            let opt = Array.from(selectEl.options).find(o => o.value.trim() === kode);
+            if (!opt && kode) {
+                opt = new Option(label || kode, kode);
+                selectEl.appendChild(opt);
+            }
+            selectEl.value = opt ? opt.value : '';
+        }
 
         function refreshDataTableAdd(NOBUKTI) {
 
@@ -5125,9 +5196,9 @@
               <td class="text-center tdAction">
                 ${tipeform == 'edit' ?
                 `<div class="">
-                      <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
-                      <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
-                    </div>`
+                          <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
+                          <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>
+                        </div>`
                 : `-`
                 }
               </td>
@@ -5145,11 +5216,12 @@
                             document.getElementById("input_add_nourut").value = dataHeaderAdd.NOURUT
                             document.getElementById("input_add_tanggal").value = formatDate(dataHeaderAdd
                                 .TANGGAL)
-                            document.getElementById("input_add_kodeGudangAsal").value = dataHeaderAdd.gdgAsal
+                            pilihGudangDropdown("input_add_kodeGudangAsal", dataHeaderAdd.gdgAsal,
+                                dataHeaderAdd.NamaGgdAsal)
                             document.getElementById("input_add_namaGudangAsal").value = dataHeaderAdd
                                 .AlamatGdgAsal || dataHeaderAdd.NamaGgdAsal
-                            document.getElementById("input_add_kodeGudangTujuan").value = dataHeaderAdd
-                                .gdgTujuan
+                            pilihGudangDropdown("input_add_kodeGudangTujuan", dataHeaderAdd.gdgTujuan,
+                                dataHeaderAdd.NamaGgdTujuan)
                             document.getElementById("input_add_namaGudangTujuan").value = dataHeaderAdd
                                 .AlamatGdgTujuan || dataHeaderAdd.NamaGgdTujuan
                             document.getElementById("input_add_keterangan").value = dataHeaderAdd.Keterangan
@@ -5180,7 +5252,7 @@
             console.log(dataTableAdd[i])
             let dataDelete = dataTableAdd[i]
 
-            alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus item ' + dataDelete.NamaBrg + ' ?',
+            var dlgHapusItem = alertify.confirm('Hapus Item', 'Apakah yakin ingin menghapus item ' + dataDelete.NamaBrg + ' ?',
                 function() {
 
                     let _token = $("#_token").val();
@@ -5236,7 +5308,7 @@
                 function() {
                     console.log('no')
                 });
-
+            dlgHapusItem.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
         function formatDate(date) {
@@ -5268,6 +5340,46 @@
             temp1 += '.' + tempAngka[1]
             return temp1
         };
+
+        function unformatAngka(angka) {
+            if (!angka) return 0
+            return parseFloat(String(angka).replace(/,/g, '')) || 0
+        }
+
+        function formatAngkaInput(el) {
+            el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+        }
+
+        // Dipasang di oninput supaya separator ribuan langsung muncul sambil mengetik, tidak
+        // menunggu pindah fokus (onblur formatAngkaInput() tetap menormalkan ke 2 desimal). Sama
+        // seperti formatAngkaKetik() di accounting/memorialkoreksi.blade.php.
+        function formatAngkaKetik(el) {
+            let posDariKanan = el.value.length - el.selectionStart
+            let minus = el.value.trim().startsWith('-') ? '-' : ''
+            let raw = el.value.replace(/[^0-9.]/g, '')
+
+            let titikIndex = raw.indexOf('.')
+            let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+            let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+            bulat = bulat.replace(/^0+(?=\d)/, '')
+            if (bulat === '') {
+                bulat = '0'
+            }
+
+            let bulatFormatted = ''
+            for (let i = 0; i < bulat.length; i++) {
+                if (i != 0 && (bulat.length - i) % 3 == 0) {
+                    bulatFormatted += ','
+                }
+                bulatFormatted += bulat[i]
+            }
+
+            el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+            let posBaru = Math.max(0, el.value.length - posDariKanan)
+            el.setSelectionRange(posBaru, posBaru)
+        }
     </script>
 
 @endsection

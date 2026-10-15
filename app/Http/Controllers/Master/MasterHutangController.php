@@ -86,6 +86,11 @@ class MasterHutangController extends Controller
   }
 
   public function spAdd (Request $req) {
+    $check = DB::connection('SML')->select("select top 1 1 as ada from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode and Tipe = 'HT' and TipeTrans = 'AWL'",
+      ['noFaktur' => $req->noFaktur, 'kode' => $req->kodeSupplier]);
+    if ($check) {
+      return 'No. Faktur ini sudah ada';
+    }
     // $check = DB::connection('SML')->select('SELECT * FROM dbHUTPIUT where KODEVALAS = :kode' , ['kode' => $req->kode]);
     // //
     // // if ($check) {
@@ -125,8 +130,26 @@ class MasterHutangController extends Controller
     //if ($check) {
       //return 'ga bisa hapus';
     //}
-    $delete = DB::connection('SML')->update('delete from DBHUTPIUT where NoFaktur = :noFaktur' , ['noFaktur' => $req->noFaktur ]);
-    return $delete;
+    // Dulu: "delete from DBHUTPIUT where NoFaktur = :noFaktur" - ikut menghapus baris pelunasan dan
+    // baris lain yang kebetulan bernomor faktur sama. Sekarang hanya baris saldo awal (AWL) milik
+    // menu ini, dan ditolak kalau faktur itu sudah punya transaksi lain.
+    $awal = DB::connection('SML')->select("select KodeCustSupp from DBHUTPIUT where NoFaktur = :noFaktur and Tipe = 'HT' and TipeTrans = 'AWL'
+      and (:kode = '' or KodeCustSupp = :kode2)", ['noFaktur' => $req->noFaktur, 'kode' => (string) $req->kodeCustSupp, 'kode2' => (string) $req->kodeCustSupp]);
+    if (!$awal) {
+      return 'Data saldo awal tidak ditemukan';
+    }
+    if (count($awal) > 1) {
+      return 'No. Faktur ini dipakai lebih dari satu, silakan refresh halaman lalu hapus dari barisnya';
+    }
+    $kode = $awal[0]->KodeCustSupp;
+    $lain = DB::connection('SML')->select("select top 1 1 as ada from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode
+      and Tipe = 'HT' and isnull(TipeTrans,'') <> 'AWL'", ['noFaktur' => $req->noFaktur, 'kode' => $kode]);
+    if ($lain) {
+      return 'Faktur ini sudah punya transaksi (pelunasan dll), tidak bisa dihapus';
+    }
+    DB::connection('SML')->update("delete from DBHUTPIUT where NoFaktur = :noFaktur and KodeCustSupp = :kode and Tipe = 'HT' and TipeTrans = 'AWL'",
+      ['noFaktur' => $req->noFaktur, 'kode' => $kode]);
+    return 1;
   }
 
   public function spEdit (Request $req) {
@@ -139,7 +162,10 @@ class MasterHutangController extends Controller
                 Kredit = :kreditRp,
                 KreditD = :kredit,
                 POCUST = :noPo
-            WHERE NoFaktur = :noFaktur',
+            WHERE NoFaktur = :noFaktur and Tipe = \'HT\' and TipeTrans = \'AWL\'
+              and (:kodeCustSupp = \'\' or KodeCustSupp = :kodeCustSupp2)',
+            // Dulu WHERE hanya NoFaktur - ikut mengubah baris pelunasan & baris lain dengan nomor
+            // faktur yang sama. Sekarang hanya baris saldo awal (AWL) hutang ini.
             [
                 'tanggalFaktur' => $req->tanggalFaktur,
                 'jatuhTempo' => $req->jatuhTempo,
@@ -148,7 +174,9 @@ class MasterHutangController extends Controller
                 'kredit' => $req->kredit,
                 'kreditRp' => $req->kreditRp,
                 'noPo' => $req->noPo,
-                'noFaktur' => $req->noFaktur
+                'noFaktur' => $req->noFaktur,
+                'kodeCustSupp' => (string) $req->kodeCustSupp,
+                'kodeCustSupp2' => (string) $req->kodeCustSupp
             ]
         );
 
@@ -172,8 +200,10 @@ class MasterHutangController extends Controller
             INNER JOIN DBPOSTHUTPIUT a ON a.Perkiraan = b.Perkiraan
             WHERE a.Kode = \'HT\'
         ) b ON b.perkiraan = d.perkiraan
-        WHERE a.NoFaktur = :kode
-        ORDER BY c.kodecustsupp', ['kode' => $req->kode]);
+        WHERE a.NoFaktur = :kode and a.TipeTrans = \'AWL\'
+          and (:kodeCustSupp = \'\' or c.KodeCustSupp = :kodeCustSupp2)
+        ORDER BY c.kodecustsupp', ['kode' => $req->kode, 'kodeCustSupp' => (string) $req->kodeCustSupp, 'kodeCustSupp2' => (string) $req->kodeCustSupp]);
+    // TipeTrans AWL + kode supplier: dulu hanya NoFaktur, sehingga res[0] bisa baris pelunasan.
     return $detail;
   }
 

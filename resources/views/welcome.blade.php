@@ -10,7 +10,7 @@
 
   <title>AnekaJC - Login</title>
 
-    <link rel="stylesheet" href="{!! URL::asset('css/loginpage.css') !!}">
+    <link rel="stylesheet" href="{!! URL::asset('css/loginpage.css') !!}?v={{ filemtime(public_path('css/loginpage.css')) }}">
 
 </head>
 
@@ -48,7 +48,7 @@
       <p class="form-title">Login</p>
       <p class="form-subtitle">Masukan Username dan Password</p>
 
-      <form action="{{ url('checkLogin') }}" method="post">
+      <form action="{{ url('checkLogin') }}" method="post" id="login-form">
         {{-- onsubmit="return checkOnline()" --}}
 
         <input type="hidden" name="_token" id="_token" value="{{ csrf_token() }}" />
@@ -63,9 +63,13 @@
 
         <div class="form-group">
           <label for="password">Password</label>
-          <div class="input-wrapper">
+          <div class="input-wrapper has-toggle">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <input type="password" id="password" name="password" placeholder="Password" />
+            <button type="button" class="toggle-password" id="toggle-password" aria-label="Tampilkan password" aria-pressed="false">
+              <svg class="icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="icon-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
           </div>
         </div>
 
@@ -96,6 +100,26 @@
         type    : "GET",
         async   : false
       });
+    });
+
+    // Show / hide password
+    $('#toggle-password').on('click', function () {
+      var $input  = $('#password');
+      var visible = $input.attr('type') === 'password';
+      $input.attr('type', visible ? 'text' : 'password');
+      $(this).toggleClass('is-visible', visible)
+             .attr('aria-pressed', visible)
+             .attr('aria-label', visible ? 'Sembunyikan password' : 'Tampilkan password');
+    });
+
+    // Loading state: prevent double taps while the request is in flight
+    var $loginBtn = $('#login-form-submit');
+    $('#login-form').on('submit', function () {
+      $loginBtn.prop('disabled', true).text('Memproses...');
+    });
+    // Restore the button if the page is restored from the back/forward cache
+    $(window).on('pageshow', function () {
+      $loginBtn.prop('disabled', false).text('Sign in');
     });
 
     function checkOnline() {

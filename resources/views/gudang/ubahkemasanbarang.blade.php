@@ -11,8 +11,7 @@
          report-table.css dimuat di sini (dulu dari layout gudang) untuk modal picker Barang
          (.rt-picker-v2) dan modal filter (.rt-filter). Tabel item #tabelitem tidak lagi memakai
          .tb-report — tampilannya ditulis di blok CSS #tabelitem di bawah. --}}
-    <link rel="stylesheet"
-        href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
     {{-- Dimuat ULANG setelah report-table.css supaya .po-* / .rt-* versi po-table-header.css menang
          saat spesifisitas seri. --}}
     <link rel="stylesheet"
@@ -22,22 +21,30 @@
 
     <style>
         /* Kotak cari di modal picker Barang: pencarian jalan lewat AJAX (bukan search bawaan
-                   DataTables, lihat searchBarangModal()), jadi dirapikan di sini. Skin modalnya sendiri
-                   (.rt-picker-v2) ada di report-table.css. */
+                       DataTables, lihat searchBarangModal()), jadi dirapikan di sini. Skin modalnya sendiri
+                       (.rt-picker-v2) ada di report-table.css. */
         #modalPickBarang .barang-search {
             width: 260px;
             max-width: 100%;
             margin-left: auto;
         }
 
+        /* newmaster.css memaku `#formBsGrid .form-control` setinggi 38px, sehingga atribut rows pada
+           textarea (Keterangan rows=5, alamat Gudang rows=3) tidak berefek dan kotaknya hanya satu
+           baris. Textarea dikembalikan ke tinggi aslinya — pengecualian yang sama seperti di
+           accounting/memorialkoreksi.blade.php. */
+        #formBsGrid textarea.form-control {
+            height: auto;
+        }
+
         /* Tabel item form Add/Edit/Detail (#tabelitem) — tampilannya disamakan dengan tabel daftar
-           #tabel di #pageHome: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
-           kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
-           hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
-           po-table-header.css (sama seperti #tabel_add di permintaantransferbarang.blade.php); blok
-           itu sendiri tidak dipakai di sini karena #pageForm bukan .po-list-page. Padding sel isi
-           sengaja tidak ditulis: `table tbody td { padding: 0 10px !important }` di newmaster.css
-           berlaku sama seperti di #tabel (baris rapat). */
+               #tabel di #pageHome: kartu berbingkai (sama seperti .card di layout newmasterTest), judul
+               kolom abu huruf besar yang menempel (sticky) di kotak scroll, garis baris tipis, dan warna
+               hover. Nilai disalin dari blok .po-list-page + #tabel th.rt-th .th-inner di
+               po-table-header.css (sama seperti #tabel_add di permintaantransferbarang.blade.php); blok
+               itu sendiri tidak dipakai di sini karena #pageForm bukan .po-list-page. Padding sel isi
+               sengaja tidak ditulis: `table tbody td { padding: 0 10px !important }` di newmaster.css
+               berlaku sama seperti di #tabel (baris rapat). */
         #pageForm .po-item-card {
             background: var(--white, #fff);
             border: 1.5px solid var(--border, #e5e7eb);
@@ -115,9 +122,9 @@
                     <div class="po-toolbar">
                         <div class="po-filter-wrap">
                             <label>Periode</label>
-                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
                             <span class="po-filter-sep">s/d</span>
-                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}">
+                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off">
                         </div>
 
                         <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
@@ -270,12 +277,12 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-1" >
+                            <div class="col-md-1">
                                 <div class="form-group">
                                     <label>Tanggal</label>
                                 </div>
                             </div>
-                            <div class="col-md-2" >
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <input type="date" class="form-control text-center" id="input_tanggal"
                                         value="{!! date('Y-m-d') !!}" disabled>
@@ -316,8 +323,8 @@
                         <table id="tabelitem" class="data-table">
                             <thead id="tabelitem_header">
                                 <tr>
-                                    <th>Kode</th>
-                                    <th>Deskripsi</th>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
                                     <th class="text-center">Sat</th>
                                     <th class="num">Qty Asal</th>
                                     <th class="num">Qty Jadi</th>
@@ -376,8 +383,7 @@
                                                         id="inputitem_kodebrg" placeholder="Kode Barang"
                                                         onkeypress="if (event.key === 'Enter') { event.preventDefault(); resolveBarang($('#inputitem_kodebrg').val()); }">
                                                     <button type="button" id="btnitem_kodebrg"
-                                                        class="btn btn-chip-biru "
-                                                        onclick="browseBarang()">
+                                                        class="btn btn-chip-biru " onclick="browseBarang()">
                                                         <i class="bi bi-search"></i>
                                                     </button>
                                                 </div>
@@ -416,8 +422,9 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="input-group form-group">
-                                                    <input type="number" class="form-control text-right"
-                                                        id="inputitem_qtyasal" onblur="onChangeQtyAsal()">
+                                                    <input type="text" class="form-control text-right"
+                                                        id="inputitem_qtyasal" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this); onChangeQtyAsal()">
                                                     <input type="number" class="form-control" id="inputitem_qtylama"
                                                         hidden>
                                                 </div>
@@ -446,8 +453,9 @@
                                             </div>
                                             <div class="col-md-3" style="margin-top:-10px">
                                                 <div class="input-group form-group">
-                                                    <input type="number" class="form-control text-right"
-                                                        id="inputitem_qtyjadi" onblur="onChangeQtyJadi()">
+                                                    <input type="text" class="form-control text-right"
+                                                        id="inputitem_qtyjadi" oninput="formatAngkaKetik(this)"
+                                                        onblur="formatAngkaInput(this); onChangeQtyJadi()">
                                                 </div>
                                             </div>
 
@@ -585,6 +593,10 @@
             g_tipeformitemEdit = "edit",
             g_tipeformitemDelete = "delete";
         var gtipeformitem = g_tipeformitemNone;
+
+        // Keterangan terakhir yang tersimpan di DB (diisi refreshForm) — onChangeKeterangan() hanya
+        // menyimpan kalau isi textarea berbeda dari nilai ini.
+        var g_noteTersimpan = "";
 
         const g_modalNone = "";
         var gmodemodal = g_modalNone;
@@ -794,7 +806,7 @@
 
         if (typeof cekNotZero !== 'function') {
             window.cekNotZero = function(inputId) {
-                return Number($('#' + inputId).val()) !== 0;
+                return Number(String($('#' + inputId).val()).replace(/,/g, '')) !== 0;
             };
         }
 
@@ -1056,15 +1068,16 @@
                 // Sudah otorisasi — Batal Otorisasi + Print
                 tombolAksi +=
                     '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key-fill"></i></button>' +
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
                     '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' +
                     nobukti + '\')"><i class="bi bi-printer"></i></button>';
             } else {
                 // Belum otorisasi — Edit + Otorisasi
-                tombolAksi += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' +
-                    nobukti + '\')"><i class="bi bi-pen"></i></button>' +
+                tombolAksi +=
                     '<button class="btn btn-info btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' +
-                    nobukti + '\')"><i class="bi bi-key"></i></button>';
+                    nobukti + '\')"><i class="bi bi-key"></i></button>' +
+                    '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' +
+                    nobukti + '\')"><i class="bi bi-pen"></i></button>';
             }
 
             return '<div class="po-aksi-wrap">' + tombolAksi + '</div>';
@@ -1134,6 +1147,12 @@
                 return;
             }
             awal.dataset.rtBound = '1';
+
+            // Refresh biasa (F5) membuat browser mengembalikan tanggal terakhir yang dipilih tanpa
+            // memicu change, padahal data awal dirender server untuk rentang bawaan (atribut value) —
+            // kembalikan ke nilai bawaan supaya filter dan isi tabel selalu cocok.
+            awal.value = awal.defaultValue;
+            akhir.value = akhir.defaultValue;
 
             let onUbah = function() {
                 if (!awal.value || !akhir.value) {
@@ -2083,11 +2102,11 @@
                 <td class="text-right">${item.HrgAdi ? formatCurrency(item.HrgAdi) : '0.00'}</td>
                 ${gtipeform == g_tipeformDetail ? `` :
                 `<td>
-                              <div class="action-buttons">
-                                <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonItemEdit(${i})"><i class="bi bi-pen"></i></button>
-                                <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonItemDelete(${i})"><i class="bi bi-trash"></i></button>
-                              </div>
-                            </td>`}
+                                  <div class="action-buttons">
+                                    <button class="btn btn-action-sm btn-action-success" type="button" onclick="buttonItemEdit(${i})"><i class="bi bi-pen"></i></button>
+                                    <button class="btn btn-action-sm btn-action-danger" type="button" onclick="buttonItemDelete(${i})"><i class="bi bi-trash"></i></button>
+                                  </div>
+                                </td>`}
               </tr>`;
                             });
 
@@ -2095,7 +2114,8 @@
                             $("#input_nourut").val(dataHeader.NOURUT);
                             $("#input_tanggal").val(doSetFormatDate(dataHeader.tanggal, "-"));
                             $("#input_gudang").val(dataHeader.Kodegdg);
-                            $("#input_keterangan").val(dataHeader.note);
+                            g_noteTersimpan = nullToEmpty(dataHeader.note);
+                            $("#input_keterangan").val(g_noteTersimpan);
 
                             dataBrowse['gudang'] = dataHeader.Kodegdg;
                         }
@@ -2113,8 +2133,8 @@
 
             let rowHeader = `
     <tr>
-      <th>Kode</th>
-      <th>Deskripsi</th>
+      <th>Kode Barang</th>
+      <th>Nama Barang</th>
       <th class="text-center">Sat</th>
       <th class="num">Qty Asal</th>
       <th class="num">Qty Jadi</th>
@@ -2165,6 +2185,7 @@
             $("#input_nourut").val("");
             $("#input_gudang").val("");
             $("#input_keterangan").val("");
+            g_noteTersimpan = "";
         }
 
         function buttonEdit(_nb) {
@@ -2261,12 +2282,49 @@
             dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
 
+        // Mode Add: keterangan ikut terkirim bersama item pertama (cart["note"] di cekValidate), dan
+        // setelah item pertama tersimpan successAdd() memindah form ke mode Edit. Mode Edit: header
+        // sudah ada di DBUBAHKEMASAN, jadi keterangan disimpan langsung saat textarea kehilangan fokus.
         function onChangeKeterangan() {
             if (gtipeform != g_tipeformEdit) return;
 
             let nb = $("#input_nobukti").val();
             let value = $("#input_keterangan").val();
-            doOnChangeHeader(nb, "NOTE", value, "kmbjonchangeheader");
+            if (value === g_noteTersimpan) return;
+
+            doOnChangeHeader(nb, "NOTE", value, "kmbjonchangeheader", function() {
+                g_noteTersimpan = value;
+                alertify.success("Keterangan tersimpan");
+            });
+        }
+
+        // Update satu kolom header lewat endpoint onChangeHeader (controller hanya menerima kolom
+        // yang ada di allow-list-nya). Respon = jumlah baris ter-update.
+        function doOnChangeHeader(_nobukti, _field, _value, _urlName, _onSuccess) {
+            if (!_nobukti) return;
+
+            $.ajax({
+                url: "{!! url('') !!}/" + _urlName,
+                type: "post",
+                data: {
+                    _token: $("#_token").val(),
+                    nobukti: _nobukti,
+                    field: _field,
+                    value: _value
+                },
+                success: function(res) {
+                    if (Number(res) > 0) {
+                        if (_onSuccess) _onSuccess(res);
+                    } else {
+                        console.log(res);
+                        alertify.warning("Gagal menyimpan, No Bukti " + _nobukti + " tidak ditemukan");
+                    }
+                },
+                error: function(err) {
+                    console.log(err);
+                    alertify.warning("Terjadi kesalahan, silahkan refresh browser");
+                }
+            });
         }
 
         function onChangeQtyAsal() {
@@ -2621,8 +2679,8 @@
                 }
             });
 
-            $("#inputitem_qtyasal").val(parseFloat(_qtyasal).toFixed(2));
-            $("#inputitem_qtyjadi").val(parseFloat(_qtyjadi).toFixed(2));
+            $("#inputitem_qtyasal").val(formatAngka((parseFloat(_qtyasal) || 0).toFixed(2)));
+            $("#inputitem_qtyjadi").val(formatAngka((parseFloat(_qtyjadi) || 0).toFixed(2)));
             $("#inputitem_qtylama").val(parseFloat(_qtyasal).toFixed(2));
 
             onChangeQtyAsal();
@@ -2701,7 +2759,7 @@
             let stock = getStockAkhir(cart["nosat"], cart["tanggal"], cart["kodegdg"], cart["kodebrg"]);
 
             let qtylama = Number($("#inputitem_qtylama").val());
-            if (Number($("#inputitem_qtyasal").val()) <= (Number(stock) + qtylama)) {
+            if (unformatAngka($("#inputitem_qtyasal").val()) <= (Number(stock) + qtylama)) {
                 cart["qntdb"] = setEmptyNumberToZero("inputitem_qtyjadi");
                 cart["qntcr"] = setEmptyNumberToZero("inputitem_qtyasal");
             } else {
