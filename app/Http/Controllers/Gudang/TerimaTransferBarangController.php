@@ -155,6 +155,9 @@ class TerimaTransferBarangController extends Controller
         B.GdgTujuan,
         D.Nama+' ('+B.GdgAsal+')' NamagdgAsal,
         E.Nama+' ('+B.GdgTujuan+')' NamagdgTujuan,
+        D.Alamat AlamatGdgAsal,
+        E.Alamat AlamatGdgTujuan,
+        X.NOTE,
         0.00 GSM,
         case
             when B.nosat=1 then B.QNT  - ISNULL(F.Qnt,0)
@@ -221,6 +224,8 @@ order by B.Urut
         B.GdgTujuan,
         D.Nama + ' (' + B.GdgAsal + ')' AS NamagdgAsal,
         E.Nama + ' (' + B.GdgTujuan + ')' AS NamagdgTujuan,
+        D.Alamat AS AlamatGdgAsal,
+        E.Alamat AS AlamatGdgTujuan,
         0.00 AS GSM,
         CASE
             WHEN B.nosat = 1 THEN B.QNT - ISNULL(F.Qnt, 0)
@@ -318,6 +323,7 @@ public function spAdd (Request $req)
     $username = \Auth::user()->username;
 
     try {
+        $inserted = 0;
         foreach ($tempData as $d) {
             if (!empty($d['checked']) && $d['checked'] == true) {
                 DB::connection('SML')->statement('exec SP_InsertTERIMATRANSFERweb ?,?,?,?,?,?,?,?', [
@@ -330,7 +336,16 @@ public function spAdd (Request $req)
                     $d['inputQnt'],
                     $d['URUT'],
                 ]);
+                $inserted++;
             }
+        }
+
+        // SP tidak menerima parameter keterangan — isi NOTE header dokumen terima setelah SP membuatnya.
+        if ($inserted > 0) {
+            DB::connection('SML')->update('update DBTRANSFER set NOTE = :note where NOBUKTI = :nobukti', [
+                'note' => $req->note ?? '',
+                'nobukti' => $req->nobukti,
+            ]);
         }
 
         return response()->json([
@@ -456,11 +471,16 @@ public function spAdd (Request $req)
   }
 
   public function onChangeHeader (Request $req) {
-    $query = 'update dbserahsample set ' . $req->field . ' = :value where nobukti = :nobukti';
+    // Nama kolom masuk ke SQL apa adanya (tidak bisa jadi parameter) — batasi ke kolom yang memang
+    // bisa diubah dari form (Keterangan).
+    $allowedFields = ['NOTE'];
+    if (!in_array($req->field, $allowedFields, true)) {
+      return response("Field tidak valid", 400);
+    }
 
-    $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
+    $query = 'update DBTRANSFER set ' . $req->field . ' = :value where nobukti = :nobukti';
+    $res = DB::connection('SML')->update($query, ["value" => $req->value ?? "", "nobukti" => $req->nobukti]);
     return $res;
-
   }
 
 }
