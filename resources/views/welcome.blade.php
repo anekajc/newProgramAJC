@@ -19,11 +19,12 @@
 
     <!-- Left: Branding Panel -->
     <div class="left-panel">
-      {{-- Ikon memakai Logo NPWP 1 dari menu Set Nomor Transaksi, sama seperti sidebar newmasterTest.
+      {{-- Ikon memakai Logo NPWP 1 dari menu Set Nomor Transaksi, sama seperti sidebar newmasterTest
+           (storage/app/gambar-perusahaan/logoperusahaan/npwp1.*, cadangan file lama di resources).
            Route /setnomortransaksilogo wajib login, jadi di halaman login gambarnya di-embed sebagai
            data URI. Belum ada logo = ikon grid lama. --}}
       @php
-        $fileLogoLogin = collect(glob(resource_path('views/berkas/img/logoperusahaan/npwp1.*')) ?: [])->first();
+        $fileLogoLogin = \App\Http\Controllers\Berkas\SetNomorTransaksiController::fileLogoSidebar();
         $srcLogoLogin  = '';
         if ($fileLogoLogin) {
           $mimeLogoLogin = [
