@@ -19,13 +19,49 @@
 
     <!-- Left: Branding Panel -->
     <div class="left-panel">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-      </div>
-      <p class="brand-name">SPL</p>
+      {{-- Ikon memakai Logo NPWP 1 dari menu Set Nomor Transaksi, sama seperti sidebar newmasterTest.
+           Route /setnomortransaksilogo wajib login, jadi di halaman login gambarnya di-embed sebagai
+           data URI. Belum ada logo = ikon grid lama. --}}
+      @php
+        $fileLogoLogin = collect(glob(resource_path('views/berkas/img/logoperusahaan/npwp1.*')) ?: [])->first();
+        $srcLogoLogin  = '';
+        if ($fileLogoLogin) {
+          $mimeLogoLogin = [
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'bmp'  => 'image/bmp',
+            'webp' => 'image/webp',
+          ][strtolower(pathinfo($fileLogoLogin, PATHINFO_EXTENSION))] ?? null;
+          $isiLogoLogin = $mimeLogoLogin ? @file_get_contents($fileLogoLogin) : false;
+          if ($isiLogoLogin !== false && $isiLogoLogin !== null) {
+            $srcLogoLogin = 'data:' . $mimeLogoLogin . ';base64,' . base64_encode($isiLogoLogin);
+          }
+        }
+      @endphp
+      @if ($srcLogoLogin !== '')
+        <div class="brand-icon" style="background:#fff; overflow:hidden;">
+          <img src="{{ $srcLogoLogin }}" alt="Logo" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+      @else
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+      @endif
+      {{-- Nama mengikuti Inisial Perusahaan di menu Set Nomor Transaksi (DBNOMOR.ALIAS).
+           Kalau query gagal / ALIAS kosong, nama dikosongkan. --}}
+      @php
+        try {
+          $inisialPerusahaan = trim((string) (\DB::connection('SML')->select('select top 1 ALIAS from DBNOMOR')[0]->ALIAS ?? ''));
+        } catch (\Throwable $e) {
+          $inisialPerusahaan = '';
+        }
+      @endphp
+      <p class="brand-name">{{ $inisialPerusahaan }}</p>
       <p class="brand-subtitle">ERP</p>
       {{-- <div class="feature-list">
         <div class="feature-item">
