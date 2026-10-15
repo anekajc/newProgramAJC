@@ -953,7 +953,9 @@ select Perkiraan,Keterangan from dbPerkiraan where  tipe=1
   }
 
   public function spTempHutPiut (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
+    // Tanggal baris pelunasan = hari ini, jam 00:00:00 (tanpa jam) - sp_TransaksiKasBankDPH yang
+    // membaca dbTempHutPiut tidak menerima Tanggal ber-jam. Dipakai Bank juga (kassptemphutpiut).
+    $tanggal = date('Y-m-d 00:00:00');
  $data = $req->data;
     $username = \Auth::user()->username;
     if ($req->choice == 'I' ) {
