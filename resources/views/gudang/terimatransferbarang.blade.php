@@ -147,6 +147,14 @@
     transition: background-color 0.3s, box-shadow 0.3s;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
   }
+
+  /* newmaster.css memaku `#formBsGrid .form-control` setinggi 38px, sehingga atribut rows pada
+     textarea (alamat Gudang rows=3, Keterangan rows=5/3) tidak berefek dan kotaknya hanya satu
+     baris. Textarea dikembalikan ke tinggi aslinya — sama seperti di
+     gudang/permintaantransferbarang.blade.php. */
+  #formBsGrid textarea.form-control {
+    height: auto;
+  }
 </style>
 @endsection
 @section('content')
@@ -296,37 +304,92 @@
 
   <div class="container-fluid">
     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
+    {{-- Header mengikuti struktur gudang/permintaantransferbarang.blade.php: No Bukti/Tanggal | Gudang Asal |
+         Gudang Tujuan | Keterangan. Gudang read-only (ditentukan oleh transfer yang diterima, diisi di
+         buttonAdd() dari getDetail); Keterangan disimpan ke DBTRANSFER.NOTE dokumen terima lewat spAdd. --}}
     <div class="modal-body" id="formBsGrid">
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-3">
-              <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>No Bukti</label>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nobukti" placeholder="" disabled>
-                </div>
-              </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>Tanggal</label>
-                </div>
-              </div>
-              <div class="col-md-8">
-                <div class="form-group">
-                  <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}"  >
-                </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
               </div>
             </div>
+
+            <div class="col-6" style="margin-top:8px;">
+              <div class="form-group">
+                <label>Tanggal</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="date" class="form-control text-left" id="input_add_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label>Gudang Asal</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_add_gudangAsal" placeholder="" disabled>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_add_alamatGudangAsal" disabled></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-12">
+              <div class="form-group">
+                <label>Gudang Tujuan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control text-left" id="input_add_gudangTujuan" placeholder="" disabled>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_add_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_add_keterangan"></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -380,75 +443,94 @@
     {{-- <input type="hidden" name="noUrut" id="input_koreksi_nourut" value="" /> --}}
     <div class="row">
         <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan (editable,
+             disimpan lewat onChangeHeader saat blur). --}}
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_koreksi_nobukti" placeholder="" disabled>
               </div>
             </div>
 
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_koreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                <input type="date" class="form-control text-left" id="input_koreksi_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Tengah -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_gudangasal_nama" type="text" class="form-control text-left" placeholder="" disabled>
               </div>
             </div>
-
-            <div class="col-md-4" style="margin-top:-10px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=3 placeholder="" class="form-control text-left" id="input_koreksi_keterangan"  onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangAsal" disabled></textarea>
               </div>
             </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_gudangtujuan_nama" type="text" class="form-control text-left" placeholder="" disabled>
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_koreksi_keterangan" onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+              </div>
+            </div>
+          </div>
         </div>
+    </div>
 
         <div class="container-fluid mt-4" style="padding:0; margin:0;">
           <div class="dph-table-outer">
@@ -474,42 +556,43 @@
             </div>
           </div>
         </div>
-    <div id="formKoreksiEdit" class="container-fluid showhideitem">
-    <div class="row">
+    <div id="formKoreksiEdit" class="container-fluid showhideitem mt-4">
+    <div class="row mb-3">
       <div class="col-4">
         <h4 id="h4KoreksiEditItem" style="margin-left:-15px;">Edit Item</h4>
       </div>
     </div>
 
+    {{-- Jarak antar baris (mb-3) + label sejajar tengah dengan input (align-items-center, label mb-0). --}}
     <div class="row" id="formBsGrid">
       <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label>Kode Barang</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Kode Barang</label>
           </div>
           <div class="col-md-4">
             <input id="KoreksiEditKodeBrg" type="text" class="form-control text-center" disabled>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label>Nama Barang</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Nama Barang</label>
           </div>
-          <div class="col-md-8">
+          <div class="col-md-4">
             <input id="KoreksiEditNamaBrg" type="text" class="form-control text-center" disabled>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label>Quantity</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Quantity</label>
           </div>
           <div class="col-md-3">
             <input id="KoreksiEditInputQty" type="number" step="0.01" class="form-control text-right" value="0.00">
           </div>
-          <div class="col-md-2" style="margin-top:5px;">
-            <label>Satuan</label>
+          <div class="col-md-2" >
+            <label class="mb-0">Satuan</label>
           </div>
           <div class="col-md-3">
             <input id="KoreksiEditInputSat" type="text" class="form-control text-center" disabled>
@@ -517,21 +600,21 @@
         </div>
       </div>
       <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label>Gudang Asal</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Gudang Asal</label>
           </div>
-          <div class="col-md-8">
+          <div class="col-md-4">
             <input id="KoreksiEditGudangAsal" type="text" class="form-control text-center" disabled>
             <input type="hidden" id="input_gudang_asal">
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
-            <label>Gudang Tujuan</label>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-3" >
+            <label class="mb-0">Gudang Tujuan</label>
           </div>
-          <div class="col-md-8">
+          <div class="col-md-4">
             <input id="KoreksiEditGudangTujuan" type="text" class="form-control text-center" disabled>
             <input type="hidden" id="input_gudang_tujuan">
           </div>
@@ -658,80 +741,98 @@
     </div>
   </div>
 
+  {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+       No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
   <div class="modal-body" id="formBsGrid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_detailkoreksi_nobukti" placeholder="" disabled>
               </div>
             </div>
 
-            <div class="col-md-4" style="margin-top:-12px;">
+            <div class="col-6" style="margin-top:8px;">
               <div class="form-group">
                 <label>Tanggal</label>
               </div>
             </div>
-            <div class="col-md-8" style="margin-top:-12px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal"
+                  value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Tengah -->
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detailkoreksi_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detailkoreksi_gudangasal" type="hidden">
               </div>
             </div>
-
-            <div class="col-md-4" style="margin-top:-10px;">
+            <div class="col-md-12">
               <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea  style="width: 100%; resize: none" rows=3 placeholder="" class="form-control text-left" id="input_detailkoreksi_keterangan" disabled></textarea>
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangAsal" disabled></textarea>
               </div>
             </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detailkoreksi_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detailkoreksi_gudangtujuan" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_detailkoreksi_keterangan" disabled></textarea>
+              </div>
+            </div>
+          </div>
         </div>
+    </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
           <div class="dph-table-outer">
@@ -772,54 +873,94 @@
   <div class="modal-body" id="formBsGrid">
     <div class="row">
         <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        <!-- Kiri -->
-        <div class="col-md-4">
+        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
+             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-6">
               <div class="form-group">
                 <label>No Bukti</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
               </div>
             </div>
+
+            <div class="col-6" style="margin-top:8px;">
+              <div class="form-group">
+                <label>Tanggal</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="date" class="form-control text-left" id="input_detail_tanggal" disabled>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Tengah -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Asal</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detail_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detail_gudangasal" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                  class="form-control text-left align-items-center" id="input_detail_alamatGudangAsal" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Kanan -->
-        <div class="col-md-4">
+
+        <div class="col-md-3">
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-12">
               <div class="form-group">
                 <label>Gudang Tujuan</label>
               </div>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="form-group">
                 <input id="input_detail_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
                 <input id="input_detail_gudangtujuan" type="hidden">
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                  class="form-control text-left align-items-center" id="input_detail_alamatGudangTujuan" disabled></textarea>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label>Keterangan</label>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
+                  class="form-control" id="input_detail_keterangan" disabled></textarea>
+              </div>
+            </div>
+          </div>
         </div>
+    </div>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
           <div class="dph-table-outer">
             <div class="dph-table-wrap">
@@ -1445,9 +1586,11 @@ function refreshDataTableKoreksi (nobukti) {
       }
       $("#input_koreksi_tanggal").val(tanggal);
       $("#input_koreksi_nobukti").val(header.NOBUKTI);
-      $("#input_koreksi_catatan").val(header.KETERANGAN);
-      $("#input_koreksi_gudangtujuan_nama").val(header.GdgTujuan);
-      $("#input_gudangasal_nama").val(header.GdgAsal);
+      $("#input_gudangasal_nama").val(header.NamagdgAsal || '');
+      $("#input_gudangtujuan_nama").val(header.NamagdgTujuan || '');
+      $("#input_koreksi_alamatGudangAsal").val(header.AlamatGdgAsal || '');
+      $("#input_koreksi_alamatGudangTujuan").val(header.AlamatGdgTujuan || '');
+      $("#input_koreksi_keterangan").val(header.NOTE || '');
 
       buttonKoreksiItemBatal();
     },
@@ -1695,9 +1838,11 @@ function buttonKoreksi (nobukti) {
 
       // Isi Form Header
       $("#input_koreksi_nobukti").val(data.NOBUKTI);
-      $("#input_gudangasal_nama").val(data.GdgAsal);
-      $("#input_gudangtujuan_nama").val(data.GdgTujuan);
-      $("#input_koreksi_keterangan").val(data.NOTE);
+      $("#input_gudangasal_nama").val(data.NamagdgAsal || '');
+      $("#input_gudangtujuan_nama").val(data.NamagdgTujuan || '');
+      $("#input_koreksi_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_koreksi_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_koreksi_keterangan").val(data.NOTE || '');
 
       const tanggal = data.TANGGAL ? data.TANGGAL.split(" ")[0] : "";
       $("#input_koreksi_tanggal").val(tanggal);
@@ -1754,9 +1899,13 @@ function buttonDetailKoreksi (nobukti) {
       const data = res[0];
 
       $("#input_detailkoreksi_nobukti").val(data.NOBUKTI);
-      $("#input_detailkoreksi_gudangasalnama").val(data.GdgAsal);
-      $("#input_detailkoreksi_gudangtujuannama").val(data.GdgTujuan);
-      $("#input_detailkoreksi_keterangan").val(data.KETERANGAN);
+      $("#input_detailkoreksi_gudangasal").val(data.GdgAsal || '');
+      $("#input_detailkoreksi_gudangtujuan").val(data.GdgTujuan || '');
+      $("#input_detailkoreksi_gudangasalnama").val(data.NamagdgAsal || '');
+      $("#input_detailkoreksi_gudangtujuannama").val(data.NamagdgTujuan || '');
+      $("#input_detailkoreksi_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_detailkoreksi_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_detailkoreksi_keterangan").val(data.NOTE || '');
 
       const tanggal = data.TANGGAL ? data.TANGGAL.split(" ")[0] : "";
       $("#input_detailkoreksi_tanggal").val(tanggal);
@@ -1816,8 +1965,14 @@ function buttonDetailTransferBarang (nobukti) {
       const data = res[0];
 
       $("#input_detail_nobukti").val(data.NOBUKTI);
+      $("#input_detail_gudangasal").val(data.GdgAsal || '');
+      $("#input_detail_gudangtujuan").val(data.GdgTujuan || '');
       $("#input_detail_gudangasalnama").val(data.NamagdgAsal || '');
       $("#input_detail_gudangtujuannama").val(data.NamagdgTujuan || '');
+      $("#input_detail_alamatGudangAsal").val(data.AlamatGdgAsal || '');
+      $("#input_detail_alamatGudangTujuan").val(data.AlamatGdgTujuan || '');
+      $("#input_detail_keterangan").val(data.NOTE || '');
+      $("#input_detail_tanggal").val(data.TANGGAL ? data.TANGGAL.split(" ")[0] : '');
 
       $('.mainpage').hide();
       $('#page5').show();
@@ -1942,6 +2097,14 @@ function buttonAdd (nobukti) {
       }
 
       dataTableAdd = res;
+
+      // Header: gudang asal/tujuan sama untuk semua item satu transfer — ambil dari baris pertama.
+      $("#input_add_gudangAsal").val(res[0].NamagdgAsal || '');
+      $("#input_add_alamatGudangAsal").val(res[0].AlamatGdgAsal || '');
+      $("#input_add_gudangTujuan").val(res[0].NamagdgTujuan || '');
+      $("#input_add_alamatGudangTujuan").val(res[0].AlamatGdgTujuan || '');
+      $("#input_add_keterangan").val('');
+
       let rowTable = "";
 
       res.forEach((item, i) => {
@@ -1997,6 +2160,7 @@ function submitAdd () {
   const nobukti = $("#input_add_nobukti").val();
   const nourut = $("#input_add_nourut").val();
   const tanggal = $("#input_add_tanggal").val();
+  const note = $("#input_add_keterangan").val();
 
   $(".add_checkbox:checked").each(function() {
     const i = $(this).data("index");
@@ -2044,7 +2208,8 @@ function submitAdd () {
       tempData,
       tanggal,
       nobukti,
-      nourut
+      nourut,
+      note
     },
     success: function(res) {
       console.log('submitAdd response', res);
