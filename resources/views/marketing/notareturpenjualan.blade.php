@@ -2650,27 +2650,15 @@
         </div>
       </div>
 
-
-
         <div class="container-fluid" style="margin-top: -10px;">
-
-
-
 
           <div class="row justify-content-end">
 
-
-
-
       </div>
-
-
 
         </div>
 
-
       </div>
-
 
     </div>
     </div>
