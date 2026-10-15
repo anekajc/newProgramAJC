@@ -2,6 +2,10 @@
 @section('page-title', 'Pembelian Closing PR')
 
 @section('css')
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /pembelianclosingpr itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi), disamakan
      dengan resources/views/purchasing/purchaseOrder.blade.php. Aturannya di-scope ke
      #tabel/#tabel2/#rtBar - id tabel di halaman ini sudah cocok apa adanya. --}}
@@ -299,6 +303,45 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 @keyframes clPutarLoading {
   to { transform: rotate(360deg); }
 }
+
+/* Tombol modal alasan: gaya chip soft seperti menu purchasing yang baru. */
+.btn-chip-biru {
+  background-color: #e8edff;
+  border-color: #cfdcff;
+  color: #2563eb;
+}
+
+.btn-chip-biru:hover,
+.btn-chip-biru:focus {
+  background-color: #dce6ff;
+  border-color: #b9c9ff;
+  color: #1d4ed8;
+}
+
+.btn-chip-biru:active {
+  background-color: #cfdcff !important;
+  border-color: #a8bdff !important;
+  color: #1d4ed8 !important;
+}
+
+.btn-chip-merah {
+  background-color: #fdeaea;
+  border-color: #f7cfcf;
+  color: #dc2626;
+}
+
+.btn-chip-merah:hover,
+.btn-chip-merah:focus {
+  background-color: #fbdcdc;
+  border-color: #f2bcbc;
+  color: #b91c1c;
+}
+
+.btn-chip-merah:active {
+  background-color: #f8cfcf !important;
+  border-color: #eda9a9 !important;
+  color: #b91c1c !important;
+}
 </style>
 @endsection
 
@@ -454,8 +497,8 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" onclick="clCloseForm()" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="button" class="btn btn-primary" onclick="clSubmitLock()">Kunci</button>
+            <button type="button" onclick="clCloseForm()" class="btn btn-chip-merah" data-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-chip-biru" onclick="clSubmitLock()">Kunci</button>
           </div>
         </div>
       </div>

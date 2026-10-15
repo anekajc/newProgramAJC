@@ -6,6 +6,10 @@
 
 
 @section('css')
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /pembelianpermintaannonagen itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
 <style>
   /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
      #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
@@ -1982,7 +1986,8 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
         }
         renderTabelPR()
       } else {
-        alertify.warning('Gagal otorisasi');
+        alertify.warning(res && res.pesan ? res.pesan : 'Gagal otorisasi');
+        loadAll();
       }
     },
     error: function (err) {
@@ -2014,7 +2019,7 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
 
      if (xpket==''){
           alertify.warning('Keterangan harus diisi.');
-          $.abort();
+          return false;
         }
     let _token = $("#_token").val();
 
@@ -2040,7 +2045,8 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
             }
             renderTabelPR()
           } else {
-            alertify.warning('Gagal batal otorisasi');
+            alertify.warning(res && res.pesan ? res.pesan : 'Gagal batal otorisasi');
+            loadAll();
           }
         },
         error: function (err) {
@@ -2105,17 +2111,17 @@ function submitAddEdit () {
     qnt1 = qnt * tempEdit.ISI1;
     satuan = tempEdit.SAT1;
     // isi = parseFloat(String(tempEdit.ISI1).replace(/\./g,''));
-       isi = (Number((tempEdit.ISI1).replace(/,/g, '')))
+       isi = Number(String(tempEdit.ISI1 ?? 0).replace(/,/g, '')) || 0
     } else if (nosat === 2) {
         qnt1 = qnt * tempEdit.ISI2;
         satuan = tempEdit.SAT2;
         // isi = parseFloat(String(tempEdit.ISI2).replace(/\./g,''));
-         isi = (Number((tempEdit.ISI2).replace(/,/g, '')))
+         isi = Number(String(tempEdit.ISI2 ?? 0).replace(/,/g, '')) || 0
     } else if (nosat === 3) {
         qnt1 = qnt * tempEdit.ISI3;
         satuan = tempEdit.SAT3;
         // isi = parseFloat(String(tempEdit.ISI3).replace(/\./g,''));
-         isi = (Number((tempEdit.ISI3).replace(/,/g, '')))
+         isi = Number(String(tempEdit.ISI3 ?? 0).replace(/,/g, '')) || 0
     } else {
         alertify.warning("Satuan tidak valid");
         return;
@@ -2163,6 +2169,10 @@ function submitAddEdit () {
         },
         success: function(res) {
             console.log('respoedit', res);
+            if (res && res.pesan) {
+              alertify.warning(res.pesan);
+              return;
+            }
             loadAll();
             $('.showhide').hide();
             refreshDataTableAdd(nobukti);
@@ -2190,13 +2200,13 @@ function buttonAddEditItem (index) {
   // Isi dropdown satuan
   let selectOption = '<option value=0 selected>Pilih Satuan</option>';
   if (tempEdit.SAT1) {
-    selectOption += `<option value=1>${tempEdit.SAT1} - ${Number(String(tempEdit.ISI1||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    selectOption += `<option value=1>${tempEdit.SAT1} - ${Number(String(tempEdit.ISI1||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   if (tempEdit.SAT2) {
-    selectOption += `<option value=2>${tempEdit.SAT2} - ${Number(String(tempEdit.ISI2||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    selectOption += `<option value=2>${tempEdit.SAT2} - ${Number(String(tempEdit.ISI2||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   if (tempEdit.SAT3) {
-    selectOption += `<option value=3>${tempEdit.SAT3} - ${Number(String(tempEdit.ISI3||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    selectOption += `<option value=3>${tempEdit.SAT3} - ${Number(String(tempEdit.ISI3||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   document.getElementById("input_add_add_satuan").innerHTML = selectOption;
 
@@ -2220,8 +2230,29 @@ function buttonAddEditItem (index) {
 
 function buttonEdit (nobukti) {
 
+let pcekglobal = 0
+  $.ajax({
+    url: "{!! url('ceklockperiode') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+      if (res.length ) {
+        pcekglobal = 1
+      }
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    }
 
+  })
 
+if (pcekglobal) {
+  alertify.warning("Periode sudah dikunci")
+  return
+}
 
   tipeform = 'edit'
   let akses = $("#akses_iskoreksi").val();
@@ -2265,6 +2296,11 @@ function buttonEdit (nobukti) {
     //seharusnya ini pakai data table add
       dataTableAdd = res
   }})
+  if (!dataTableAdd.length) {
+    alertify.warning('Data tidak ditemukan, silakan refresh')
+    loadAll()
+    return
+  }
   let rowTable = ``
   dataTableAdd.forEach((item, i) => {
     rowTable += `<tr>
@@ -2364,6 +2400,10 @@ function buttonAddDeleteItem (index) {
             jmlrecord,
           },
           success: function(res) {
+            if (res && res.pesan) {
+              alertify.warning(res.pesan);
+              return;
+            }
             alertify.success("Item sudah di delete");
             refreshDataTableAdd(nobukti)
             loadAll()
@@ -2378,6 +2418,7 @@ function buttonAddDeleteItem (index) {
 
 
 function buttonDetail (nobukti) {
+  let adaData = false
   $.ajax({
     url: "{!! url('pembelianpermintaannonagenlistdepartemen') !!}",
     type: "get",
@@ -2404,6 +2445,12 @@ function buttonDetail (nobukti) {
       nobukti
     },
     success: function(res) {
+      if (!res.length) {
+        alertify.warning('Data tidak ditemukan, silakan refresh')
+        loadAll()
+        return
+      }
+      adaData = true
 
       let rowTable = ``
       res.forEach((item, i) => {
@@ -2427,6 +2474,7 @@ function buttonDetail (nobukti) {
       // document.getElementById("input_detail_tanggal").value  = res[0].Tanggal
 
   }})
+  if (!adaData) { return }
   $("#page3").show();
   $("#page1").hide();
 }
@@ -2653,9 +2701,9 @@ function buttonAddAddInsertItem (i) {
   $('#input_add_add_keterangannama').val(item.NAMABRG);
 
   let satuanOptions = '';
-  if (item.SAT1) satuanOptions += `<option value="${item.SAT1}">${item.SAT1} - ${Number(String(item.ISI1||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
-  if (item.SAT2) satuanOptions += `<option value="${item.SAT2}">${item.SAT2} - ${Number(String(item.ISI2||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
-  if (item.SAT3) satuanOptions += `<option value="${item.SAT3}">${item.SAT3} - ${Number(String(item.ISI3||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+  if (item.SAT1) satuanOptions += `<option value="${item.SAT1}">${item.SAT1} - ${Number(String(item.ISI1||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
+  if (item.SAT2) satuanOptions += `<option value="${item.SAT2}">${item.SAT2} - ${Number(String(item.ISI2||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
+  if (item.SAT3) satuanOptions += `<option value="${item.SAT3}">${item.SAT3} - ${Number(String(item.ISI3||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   $('#input_add_add_satuan').html(satuanOptions);
 
   $('#formAddListItem').modal('hide');
@@ -2711,15 +2759,15 @@ function buttonAddAddInsertItem (i) {
     let nosat = 0;
     if (satuan === barang.SAT1) {
         // isi = parseFloat(String(barang.ISI1).replace(/\./g,''));
-         isi = (Number((barang.ISI1).replace(/,/g, '')))
+         isi = Number(String(barang.ISI1 ?? 0).replace(/,/g, '')) || 0
         nosat = 1;
     } else if (satuan === barang.SAT2) {
         // isi = parseFloat(String(barang.ISI2).replace(/\./g,''));
-         isi = (Number((barang.ISI2).replace(/,/g, '')))
+         isi = Number(String(barang.ISI2 ?? 0).replace(/,/g, '')) || 0
         nosat = 2;
     } else if (satuan === barang.SAT3) {
         // isi = parseFloat(String(barang.ISI3).replace(/\./g,''));
-        isi = (Number((barang.ISI3).replace(/,/g, '')))
+        isi = Number(String(barang.ISI3 ?? 0).replace(/,/g, '')) || 0
         nosat = 3;
     } else {
         alertify.warning("Satuan tidak valid");
@@ -2796,6 +2844,8 @@ function buttonAddAddInsertItem (i) {
               else if (res == 2) {
                 setNewNoBukti()
                 alertify.warning('Nobukti telah direfresh silahkan submit ulang')
+              } else {
+                alertify.warning(res && res.pesan ? res.pesan : 'Gagal menambah item');
               }
             },
             error: function (err) {
@@ -2877,13 +2927,13 @@ function buttonAddAddItem () {
   let satuanOptions = `<option value="" selected disabled>Pilih Satuan</option>`;
 
   if (tempAdd.SAT1) {
-    satuanOptions += `<option value="${tempAdd.SAT1}">[1] ${tempAdd.SAT1} - ${Number(String(tempAdd.ISI1||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    satuanOptions += `<option value="${tempAdd.SAT1}">[1] ${tempAdd.SAT1} - ${Number(String(tempAdd.ISI1||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   if (tempAdd.SAT2) {
-    satuanOptions += `<option value="${tempAdd.SAT2}">[2] ${tempAdd.SAT2} - ${Number(String(tempAdd.ISI2||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    satuanOptions += `<option value="${tempAdd.SAT2}">[2] ${tempAdd.SAT2} - ${Number(String(tempAdd.ISI2||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   if (tempAdd.SAT3) {
-    satuanOptions += `<option value="${tempAdd.SAT3}">[3] ${tempAdd.SAT3} - ${Number(String(tempAdd.ISI3||0).replace(/\./g,'')).toLocaleString('id-ID')}</option>`;
+    satuanOptions += `<option value="${tempAdd.SAT3}">[3] ${tempAdd.SAT3} - ${Number(String(tempAdd.ISI3||0).replace(/,/g,'')).toLocaleString('id-ID')}</option>`;
   }
   document.getElementById("input_add_add_satuan").innerHTML = satuanOptions;
 
@@ -2933,6 +2983,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
         $('#page3').hide();
         $('#page2').hide();
         $('#page1').show();
+        prAturTinggiTabel()
         return
       }
 
