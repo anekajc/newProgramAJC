@@ -12,19 +12,6 @@
 <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
 <style>
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
-.status-badge-belum { color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0; }
-
 #tabel thead th,
 #tabel_add thead th,
 #tabel_detail thead th,
@@ -50,6 +37,9 @@
   white-space: nowrap;
 }
 
+.pick-row { cursor: pointer; }
+.pick-row:hover { background-color: #f5f3ff !important; }
+
 {{-- Wadah tombol Aksi (action-buttons-wrap, bukan .po-aksi-wrap bawaan po-table-header.css)
      tetap butuh flex manual -- selector .po-list-page tidak menjangkau nama class ini. --}}
 #tabel td:first-child {
@@ -71,6 +61,34 @@
   visibility: visible;
   transform: translateX(0);
 }
+
+{{-- Tombol Edit/Hapus di tabel item form Tambah (#tabel_add) -- warna pastel bulat,
+     sama seperti #addTable di beritaacaraopname.blade.php/opnamebarang.blade.php. --}}
+#tabel_add td:last-child {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+#tabel_add td:last-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+#tabel_add td:last-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+#tabel_add td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabel_add td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 </style>
 @endsection
 @section('content')
@@ -103,6 +121,12 @@
              kolom Status dan filter Status di toolbar (client-side), sama seperti merge
              di gudangpermintaansample.blade.php/gudangpenyerahansample.blade.php. --}}
         <div class="po-toolbar">
+          <div class="po-filter-wrap">
+            <label>Periode</label>
+            <input type="date" onchange="rsFilterChanged()" class="po-filter-inp" id="rsTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+            <span class="po-filter-sep">s/d</span>
+            <input type="date" onchange="rsFilterChanged()" class="po-filter-inp" id="rsTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+          </div>
           <input type="search" id="rsSearch1" class="po-search-inp" placeholder="Cari data">
           <div class="po-len-wrap">
             <label for="rsLen1">Tampilkan</label>
@@ -118,7 +142,7 @@
             <i class="bi bi-funnel"></i> Filter
           </button>
           <div class="po-toolbar-act">
-            <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Add Penyerahan</button>
+            <button id="AddVisibility" class="btn btn-chip-biru" onclick="buttonAdd()">Tambah</button>
           </div>
         </div>
 
@@ -230,20 +254,6 @@
       </div>
     </div>
     </div>
-    <div class="row ">
-      <div class="col-md-12 text-right">
-      <button type="button" class="btn btn-chip-biru" style="
-      height: 30px;  
-      padding: 4px 12px; 
-      border-radius: 20px; 
-      font-size: 0.75rem; 
-      font-weight: 600; 
-      text-transform: uppercase; 
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonAddAddItem()">Tambah Item</button>
-      </div>
-    </div>
 
     <div class="container-fluid mt-4">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
@@ -280,8 +290,24 @@
                   </td>
               </tr>
               </tbody>
-            </table>          
+            </table>   
+            
+    </div>      
+     
           </div>
+    <div class="row ">
+      <div class="col-md-12 text-right">
+      <button type="button" class="btn btn-chip-biru" style="
+      height: 30px;  
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="buttonAddAddItem()">Tambah Item</button>
+      </div>
           {{-- <div class="text-right">
             <button type="button" class="btn btn-primary" style="
             height: 30px; 
@@ -543,7 +569,6 @@
                 <table id="tabel_add_list_serahsample" class="table table-bordered table-striped" style="width:100%;">
                   <thead class="text-center bg-primary text-white">
                     <tr>
-                      <th style="width:50px;">Actions</th>
                       <th style="width:160px;">No Penyerahan</th>
                       <th style="width:90px;">Tanggal</th>
                       <th style="width:50px;">Kode Customer</th>
@@ -555,19 +580,7 @@
                     </tr>
                   </thead>
                   <tbody id="tabel_data_add_list_serahsample" class="text-left">
-                    <tr>
-                      <td class="text-center">
-                        <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus"></i></button>
-                      </td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                    </tr>
+                    <!-- Diisi lewat JS -->
                   </tbody>
                 </table>
               </div>
@@ -606,19 +619,12 @@
                 <table id="tabel_add_list_sales" class="table table-bordered table-striped">
                   <thead class="text-center bg-primary text-white">
                     <tr>
-                      <th>Actions</th>
                       <th>NIK</th>
                       <th>Nama</th>
                     </tr>
                   </thead>
                   <tbody id="tabel_data_add_list_sales" class="text-left">
-                    <tr>
-                      <td class="text-center">
-                        <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus"></i></button>
-                      </td>
-                      <td>-</td>
-                      <td>-</td>
-                    </tr>
+                    <!-- Diisi lewat JS -->
                   </tbody>
                 </table>
               </div>
@@ -658,7 +664,6 @@
               <table id="tabel_add_list_item" class="table table-bordered table-striped">
                 <thead class="text-center bg-primary text-white">
                   <tr>
-                    <th scope="col">Actions</th>
                     <th scope="col">Kode Barang</th>
                     <th scope="col">Nama Barang</th>
                     <th scope="col">Qty</th>
@@ -797,9 +802,9 @@
      Kas, pola yang sama persis dengan koreksistock.blade.php/perintahopname.blade.php. --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#formAddListItem').addClass('picker-kas')
-  jQuery('#formAddListItem .d-flex.justify-content-end .btn').filter(function () {
-    return jQuery.trim(jQuery(this).text()) === 'Close'
+  jQuery('#modalAddListSerahSample, #modalAddListSales, #formAddListItem').addClass('picker-kas')
+  jQuery('#modalAddListSerahSample .d-flex.justify-content-end .btn, #modalAddListSales .d-flex.justify-content-end .btn, #formAddListItem .d-flex.justify-content-end .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Close' || jQuery.trim(jQuery(this).text()) === 'Batal'
   }).addClass('picker-kas-batal')
 })
 </script>
@@ -861,7 +866,7 @@ function rsDefaultCart () {
     ['NoBukti',      'No. Bukti', 1, 'varchar', 0, 0],
     ['Tanggal',      'Tanggal',   1, 'date',    0, 0],
     ['IDUser',       'User',      1, 'varchar', 0, 0],
-    ['IsOtorisasi1', 'Status',    1, 'bool',    0, 0],
+    ['IsOtorisasi1', 'Otorisasi',    1, 'bool',    0, 0],
     ['OtoUser1',     'User Oto',  1, 'varchar', 0, 0],
     ['TglOto1',      'Tgl Oto',   1, 'date',    0, 0],
   ]
@@ -1001,12 +1006,12 @@ function rsValueCell (row, col) {
   let raw = rsPickCI(row, col[0]);
   let type = col[3];
 
-  {{-- Kolom Status (IsOtorisasi1) dirender sebagai badge hijau (Sudah Otorisasi) atau
-       amber (Belum Otorisasi), bukan ikon check/x bool biasa. --}}
+  {{-- Kolom Status (IsOtorisasi1) -- ikon check/silang hijau/merah biasa, sama seperti
+       kolom Otorisasi bool di perintahopname.blade.php/beritaacaraopname.blade.php. --}}
   if (col[0] === 'IsOtorisasi1') {
     return Number(raw) === 1
-      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
@@ -1040,8 +1045,17 @@ function rsTabelActionsCell (row) {
 
 function rsFilterRows (rows) {
   let status = $('#rsStatus').val()
+  let awal = $('#rsTanggalAwal').val()
+  let akhir = $('#rsTanggalAkhir').val()
   return (rows || []).filter(function (row) {
     if (status !== '' && String(Number(rsPickCI(row, 'IsOtorisasi1'))) !== status) { return false }
+    if (awal || akhir) {
+      let tgl = rsPickCI(row, 'Tanggal')
+      if (!tgl) { return false }
+      let t = String(tgl).slice(0, 10)
+      if (awal && t < awal) { return false }
+      if (akhir && t > akhir) { return false }
+    }
     return true
   })
 }
@@ -1836,7 +1850,7 @@ function buttonBatalOtorisasi (nobukti) {
     return;
   }
 
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  alertify.prompt("Batal Otorisasi","Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -1892,9 +1906,7 @@ function buttonAddListSerahSample () {
   $('#input_urut_ref').val(''); 
   $('#tabel_data_add_list_serahsample').html('');
 
-  $('#tabel_add_list_serahsample').DataTable().destroy();
-
-  // exclude 
+  // exclude
   let excludeToSend = excludeSerahSamples.filter(e => !(e.nobukti === nobukti && e.urut === urut));
 
   $.ajax({
@@ -1912,13 +1924,7 @@ function buttonAddListSerahSample () {
       if (res && res.length > 0) {
         res.forEach((item) => {
           rowTable += `
-            <tr>
-              <td class="text-center">
-                <button class="btn btn-primary btn-sm" type="button"
-                  onclick="buttonPickSerahSample('${item.NOBUKTI}', '${item.Urut}', '${item.Kodebrg}', '${item.GdgAsal}', '${item.NamaGgdAsal ?? ''}')">
-                  <i class="bi bi-plus"></i>
-                </button>
-              </td>
+            <tr class="pick-row" onclick="buttonPickSerahSample('${item.NOBUKTI}', '${item.Urut}', '${item.Kodebrg}', '${item.GdgAsal}', '${item.NamaGgdAsal ?? ''}')">
               <td>${item.NOBUKTI}</td>
               <td>${item.TANGGAL ? item.TANGGAL.substring(0, 10) : '-'}</td>
               <td>${item.KODECUSTSUPP ?? ''}</td>
@@ -1933,10 +1939,7 @@ function buttonAddListSerahSample () {
 
       $('#tabel_data_add_list_serahsample').html(rowTable);
 
-      $('#tabel_add_list_serahsample').DataTable({
-        "lengthChange": false,
-        "paging": false,
-      });
+      pickerKasInit('tabel_add_list_serahsample');
 
       $('#modalAddListSerahSample').modal('show');
     },
@@ -2014,7 +2017,6 @@ function loadBarangSerahSample (nobukti, urut, kodebrg) {
 
 function buttonAddListSales () {
   console.log('buttonAddListSales');
-  $('#tabel_add_list_sales').DataTable().destroy();
 
   $.ajax({
     url: "{{ url('returpenyerahansamplelistsales') }}",
@@ -2026,29 +2028,14 @@ function buttonAddListSales () {
       let rowTable = ``;
       res.forEach((item, i) => {
         rowTable += `
-          <tr>
-            <td class="text-center">
-              <button class="btn btn-primary btn-sm" type="button"
-                onclick="buttonAddPickSales('${item.namaSls}', '${item.KodeSls}')">
-                <i class="bi bi-plus"></i>
-              </button>
-            </td>
+          <tr class="pick-row" onclick="buttonAddPickSales('${item.namaSls}', '${item.KodeSls}')">
             <td>${item.NIK}</td>
             <td>${item.namaSls}</td>
           </tr>`;
       });
 
-      if (!res.length) {
-        rowTable = `<tr><td class="text-center" colspan="4">Tidak ada data</td></tr>`;
-      }
-
       document.getElementById("tabel_data_add_list_sales").innerHTML = rowTable;
-      $("#tabel_add_list_sales").DataTable({
-        "lengthChange": false,
-        "paging": false,
-        "order": [[2, "asc"]],
-        "columnDefs": [{ targets: [0], orderable: false }],
-      });
+      pickerKasInit('tabel_add_list_sales', { order: [[1, 'asc']] });
 
       $('#modalAddListSales').modal('show');
     },
@@ -2588,13 +2575,7 @@ function buttonAddListKodeBarang () {
       if (res && res.length > 0) {
         res.forEach((item, i) => {
           rowTable += `
-            <tr>
-              <td class="text-center">
-                <button class="btn btn-primary btn-sm" type="button"
-                  onclick="buttonPickBarang(${i})">
-                  <i class="bi bi-plus"></i>
-                </button>
-              </td>
+            <tr class="pick-row" onclick="buttonPickBarang(${i})">
               <td>${item.Kodebrg}</td>
               <td>${item.NamaBrg}</td>
               <td>${item.QntSisa ?? ""}</td>
@@ -2695,13 +2676,7 @@ function searchBarangAll (e) {
         if (res && res.length > 0) {
           res.forEach((item, i) => {
             rowTable += `
-              <tr>
-                <td class="text-center">
-                  <button class="btn btn-primary btn-sm" type="button"
-                    onclick="buttonPickBarang(${i})">
-                    <i class="bi bi-plus"></i>
-                  </button>
-                </td>
+              <tr class="pick-row" onclick="buttonPickBarang(${i})">
                 <td>${item.Kodebrg}</td>
                 <td>${item.NamaBrg}</td>
                 <td>${item.QntSisa ?? ""}</td>

@@ -501,20 +501,6 @@
         </div>
         </div>
     </div>
-    <div class="row ">
-      <div class="col-md-12 text-right">
-      <button type="button" class="btn btn-chip-biru" style="
-      height: 30px;  
-      padding: 4px 12px; 
-      border-radius: 20px; 
-      font-size: 0.75rem; 
-      font-weight: 600; 
-      text-transform: uppercase; 
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonAddAddItem()" class="btn btn-secondary">Tambah Item</button>
-      </div>
-    </div>
 
     <!-- ADD SUBGROUP -->
     <div class="container-fluid mt-4">
@@ -569,6 +555,20 @@
             onclick="submitAdd()">Submit</button>
         </div> --}}
             <!-- <button onclick="buttonSubKategori()">tes</button> -->
+    <div class="row ">
+      <div class="col-md-12 text-right">
+      <button type="button" class="btn btn-chip-biru" style="
+      height: 30px;  
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="buttonAddAddItem()" class="btn btn-secondary">Tambah Item</button>
+      </div>
+    </div>
     </div>
     <div id="addAddItem" class="container-fluid showhide">
       <div id='formBsGrid'>
@@ -3472,7 +3472,7 @@ function lockFormAdd (){
 function unlockFormAdd () {
   document.getElementById("input_add_tanggal").disabled = false
   document.getElementById("input_refpr").disabled = false
-  // document.getElementById("input_gudang").disabled = false
+  document.getElementById("input_gudang").disabled = false
   // document.getElementById("input_customer_nama").disabled = false
 }
 </script>

@@ -91,7 +91,7 @@
   }
 
   function doShowBrowseMaster(_res) {
-    if (bm_filterOnShow) { $('#tabelbrowsemaster').DataTable().destroy(); }
+    if ($.fn.DataTable.isDataTable('#tabelbrowsemaster')) { $('#tabelbrowsemaster').DataTable().destroy(); }
 
     // PERSIAPKAN KOLOM TABLE BROWSE MASTER
     let cart_browseHeader = _res.kolom;

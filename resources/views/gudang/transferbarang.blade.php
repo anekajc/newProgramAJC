@@ -742,7 +742,7 @@
               <label style="visibility:hidden;">Keterangan</label>
             </div>
           </div>
-          <div class="col-md-12" style="margin-top:-15px;">
+          <div class="col-md-12" style="margin-top:-46px;">
             <div class="form-group">
               <textarea style="width: 100%; height:120px !important; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
             </div>
@@ -815,7 +815,7 @@
                       <label>Keterangan</label>
                     </div>
                     <div class="col-md-12">
-                      <div class="form-group" style="margin-top: 14px">
+                      <div class="form-group" style="margin-top: -46px">
                         <textarea type="text" style="width: 100%; resize: none" rows=4  class="form-control" id="input_add_keterangan" onblur="onChangeCatatan()"></textarea>
                       </div>
                     </div>
@@ -4956,9 +4956,6 @@ function reinitTabel3 () {
   }
 }
 
-// #tabel2 (Transaksi Transfer Barang) & #tabel3 (Outstanding) berbagi SATU sumber data
-// (tbRawListTransfer, dari fetchHeaderList()/trfbrgloadall) -- dipilah lagi di client
-// lewat dua fungsi ini, bukan dua panggilan server terpisah.
 function tbFilterListTransferOtorisasi (list) {
   let sel = document.getElementById('tbFilterOtorisasi')
   let val = sel ? sel.value : ''
@@ -4966,8 +4963,6 @@ function tbFilterListTransferOtorisasi (list) {
   return (list || []).filter(function (r) { return String(Number(tbPickCI(r, 'NeedOtorisasi'))) === val })
 }
 
-// Dipanggil tombol "Terapkan" di #modalFilterTransaksi -- filter ulang di client saja,
-// tidak perlu memanggil server lagi. Port dari pola prjUpdateFilterBadge()/buttonFilterPRJ().
 function tbResetFilterFields () {
   $('#tbFilterOtorisasi').val('')
 }
@@ -6276,7 +6271,10 @@ function cleanFormAddAdd () {
 
 function lockFormAdd () {
   document.getElementById("input_add_keterangan").disabled = true;
+  document.getElementById("input_add_kodeGudangAsal").disabled = true;
+  document.getElementById("input_add_kodeGudangTujuan").disabled = true;
   document.getElementById("buttonSimpanData").hidden = true;
+  document.getElementById("buttonSimpanEdit").hidden = true;
 }
 
 function buttonShowHideHeader () 
@@ -6302,6 +6300,8 @@ function buttonShowHideHeaderDetail () {
 
 function unlockFormAdd () {
   document.getElementById("input_add_keterangan").disabled = false;
+  document.getElementById("input_add_kodeGudangAsal").disabled = false;
+  document.getElementById("input_add_kodeGudangTujuan").disabled = false;
   document.getElementById("buttonSimpanData").hidden = false;
   // document.getElementById("input_add_tipeppn").disabled = false
   // document.getElementById("input_add_pembayaran").disabled = false

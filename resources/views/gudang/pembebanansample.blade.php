@@ -82,6 +82,12 @@
         <div class="card">
           <div class="card-body" style="padding:0;">
             <div class="po-toolbar">
+              <div class="po-filter-wrap">
+                <label>Periode</label>
+                <input type="date" onchange="bbsFilterChanged()" class="po-filter-inp" id="bbsTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+                <span class="po-filter-sep">s/d</span>
+                <input type="date" onchange="bbsFilterChanged()" class="po-filter-inp" id="bbsTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+              </div>
               <input type="search" id="bbsSearch1" class="po-search-inp" placeholder="Cari data">
               <div class="po-len-wrap">
                 <label for="bbsLen1">Tampilkan</label>
@@ -776,8 +782,17 @@
 
   function bbsFilterRows (rows) {
     let status = $('#bbsStatus').val();
+    let awal = $('#bbsTanggalAwal').val();
+    let akhir = $('#bbsTanggalAkhir').val();
     return (rows || []).filter(function (row) {
       if (status !== '' && String(Number(bbsPickCI(row, 'IsOtorisasi1'))) !== status) { return false; }
+      if (awal || akhir) {
+        let tgl = bbsPickCI(row, 'Tanggal');
+        if (!tgl) { return false; }
+        let t = String(tgl).slice(0, 10);
+        if (awal && t < awal) { return false; }
+        if (akhir && t > akhir) { return false; }
+      }
       return true;
     });
   }

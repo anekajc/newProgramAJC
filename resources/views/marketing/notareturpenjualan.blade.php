@@ -3852,14 +3852,15 @@ function refreshDataTableKoreksi (nobukti , noretur) {
       document.getElementById("input_add_kurs").value = dataTableKoreksi[0].KURS ? parseFloat(dataTableKoreksi[0].KURS).toFixed(2) : '1.00'
       document.getElementById("input_add_tipeppn").value = dataTableKoreksi[0].PPN
       document.getElementById("input_add_tipebayar").value = dataTableKoreksi[0].TIPEBAYAR
-
+      
       document.getElementById("input_add_headerdiscp").value = '0.00'
       document.getElementById("input_add_headerdiscrp").value = '0.00'
-      document.getElementById("input_add_headerdpp").value =  formatAngka(parseFloat(dataTableKoreksi[0].NDPP).toFixed(2))
-      document.getElementById("input_add_headerppn").value = formatAngka(parseFloat(dataTableKoreksi[0].NPPN).toFixed(2))
-      document.getElementById("input_add_headergrandtotal").value = formatAngka(parseFloat(dataTableKoreksi[0].NNET).toFixed(2))
+      let xHeaderDpp = parseFloat(dataTableKoreksi[0].xTotalNDPPRp) || 0
+      let xHeaderPpn = xHeaderDpp * 0.11
+      document.getElementById("input_add_headerdpp").value = formatAngka(xHeaderDpp.toFixed(2))
+      document.getElementById("input_add_headerppn").value = formatAngka(xHeaderPpn.toFixed(2))
+      document.getElementById("input_add_headergrandtotal").value = formatAngka((xHeaderDpp + xHeaderPpn).toFixed(2))
       document.getElementById("input_add_catatan").value = dataTableKoreksi[0].Catatan
-
 
       document.getElementById("input_add_hari").value = dataTableKoreksi[0].HARI
       document.getElementById("input_add_namasales").value = dataTableKoreksi[0].NamaSls
@@ -3886,7 +3887,6 @@ function refreshDataTableKoreksi (nobukti , noretur) {
             <td>${item.Satuan}</td>
             <td class="text-right">${formatAngka(parseFloat(item.Harga).toFixed(2))}</td>
 
-
             <td class="text-right">${formatAngka(parseFloat(item.DiscRp).toFixed(2))}</td>
             <td class="text-right">${formatAngka(parseFloat(item.SUBTOTALRp).toFixed(2))}</td>
             ${actionsCol}
@@ -3904,8 +3904,6 @@ function refreshDataTableKoreksi (nobukti , noretur) {
       document.getElementById("addTableData").innerHTML = rowTable
 
       document.getElementById("input_add_tipebayar").value = dataTableKoreksi[0].TIPEBAYAR
-
-
 
 
     },

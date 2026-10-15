@@ -298,8 +298,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" onclick="buttonCloseForm()" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitLock()">Kunci</button>
+        <button type="button" onclick="buttonCloseForm()" class="btn btn-danger" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-chip-biru" onclick="submitLock()">Kunci</button>
       </div>
     </div>
   </div>
