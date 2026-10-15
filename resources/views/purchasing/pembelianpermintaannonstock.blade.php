@@ -6,6 +6,10 @@
 
 
 @section('css')
+{{-- js/canvas/functions.js (dimuat layout) mencari plugin di path relatif "js/" - dari URL
+     /pembelianpermintaannonstock itu jadi 404 (plugins.easing.js). scwJsPath adalah variabel resmi template
+     Canvas untuk menunjuk folder plugin-nya; didefinisikan di sini supaya layout tidak diubah. --}}
+<script>var scwJsPath = "{!! URL::asset('js/canvas') !!}";</script>
 <style>
   /* Form Add/Edit/Detail/Otorisasi dibungkus div#formBsGrid supaya input memakai gaya
      #formBsGrid di public/css/newmaster.css (tinggi 38px, sudut 8px, border halus, abu-abu saat
@@ -1624,7 +1628,8 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
         alertify.success('Berhasil otorisasi');
         loadAll();
       } else {
-        alertify.warning('Gagal otorisasi');
+        alertify.warning(res && res.pesan ? res.pesan : 'Gagal otorisasi');
+        loadAll();
       }
     },
     error: function (err) {
@@ -1654,7 +1659,7 @@ function buttonBatalOtorisasi (nobukti, isOtorisasi) {
     let xpket = value;
         if (xpket==''){
           alertify.warning('Keterangan harus diisi.');
-          $.abort();
+          return false;
         }
 
       let _token = $("#_token").val();
@@ -1674,7 +1679,8 @@ function buttonBatalOtorisasi (nobukti, isOtorisasi) {
             alertify.success('Berhasil batal otorisasi');
             loadAll();
           } else {
-            alertify.warning('Gagal batal otorisasi');
+            alertify.warning(res && res.pesan ? res.pesan : 'Gagal batal otorisasi');
+            loadAll();
           }
         },
         error: function (err) {
@@ -1766,6 +1772,10 @@ function submitAddEdit () {
         },
         success: function(res) {
             console.log('respoedit', res);
+            if (res && res.pesan) {
+              alertify.warning(res.pesan);
+              return;
+            }
             loadAll();
             $('.showhide').hide();
             refreshDataTableAdd(nobukti);
@@ -1880,6 +1890,11 @@ if (pcekglobal) {
     //seharusnya ini pakai data table add
       dataTableAdd = res
   }})
+  if (!dataTableAdd.length) {
+    alertify.warning('Data tidak ditemukan, silakan refresh')
+    loadAll()
+    return
+  }
   let rowTable = ``
   dataTableAdd.forEach((item, i) => {
     rowTable += `<tr >
@@ -1976,6 +1991,10 @@ function buttonAddDeleteItem (index) {
             jmlrecord,
           },
           success: function(res) {
+            if (res && res.pesan) {
+              alertify.warning(res.pesan);
+              return;
+            }
             alertify.success("Item sudah di delete");
             refreshDataTableAdd(nobukti)
             loadAll()
@@ -1989,6 +2008,7 @@ function buttonAddDeleteItem (index) {
 
 
 function buttonDetail (nobukti) {
+  let adaData = false
   $.ajax({
     url: "{!! url('pembelianpermintaannonstocklistdepartemen') !!}",
     type: "get",
@@ -2015,6 +2035,12 @@ function buttonDetail (nobukti) {
       nobukti
     },
     success: function(res) {
+      if (!res.length) {
+        alertify.warning('Data tidak ditemukan, silakan refresh')
+        loadAll()
+        return
+      }
+      adaData = true
 
       let rowTable = ``
       res.forEach((item, i) => {
@@ -2038,6 +2064,7 @@ function buttonDetail (nobukti) {
       // document.getElementById("input_detail_tanggal").value  = res[0].Tanggal
 
   }})
+  if (!adaData) { return }
   $("#page3").show();
   $("#page1").hide();
 }
@@ -2161,6 +2188,7 @@ function buttonCloseForm () {
   $('#page2').hide();
   $('#page3').hide();
   $('#page1').show();
+  prAturTinggiTabel()
 }
 
 function buttonAddListKodeBarang () {
@@ -2379,6 +2407,8 @@ function submitAddAdd () {
       } else if (res == 2) {
         setNewNoBukti();
         alertify.warning('Nobukti telah direfresh, silakan submit ulang');
+      } else {
+        alertify.warning(res && res.pesan ? res.pesan : 'Gagal menambah item');
       }
     },
     error: function (err) {
@@ -2448,7 +2478,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
 
   if (!NOBUKTI) {
     let rowTable = `<tr>
-      <td class="text-center" colspan="8">Belum ada barang</td>
+      <td class="text-center" colspan="5">Belum ada barang</td>
     </tr>`
     document.getElementById("tabel_data_add").innerHTML = rowTable
     return
@@ -2472,6 +2502,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
         $('#page3').hide();
         $('#page2').hide();
         $('#page1').show();
+        prAturTinggiTabel()
         return
       }
 
@@ -2494,7 +2525,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
       });
 
       if (!dataTableAdd.length) {
-        rowTable = '<tr><td colspan="6" class="text-center">Belum ada item</td></tr>';
+        rowTable = '<tr><td colspan="5" class="text-center">Belum ada item</td></tr>';
       }
 
       document.getElementById("tabel_data_add").innerHTML = rowTable
