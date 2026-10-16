@@ -121,21 +121,6 @@
 #tabel_add td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 #tabel_add td:last-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
 
-{{-- Badge kolom Status (IsOtorisasi1) di tabel PRK gabungan -- hijau untuk Sudah
-     Otorisasi, amber untuk Belum Otorisasi. --}}
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
-.status-badge-belum { color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0; }
-
 {{-- Tabel statis (bukan #tabel/#tabel2) yang dulu pakai thead bg-primary text-white --
      diganti abu-abu + teks gelap, sesuai UI baru yang sama di semua halaman. --}}
 #tabel_add thead th,
@@ -1336,12 +1321,12 @@ function gkValueCell (row, col) {
   let raw = gkPickCI(row, col[0]);
   let type = col[3];
 
-  {{-- Kolom Status (IsOtorisasi1) dirender sebagai badge hijau (Sudah Otorisasi) atau
-       amber (Belum Otorisasi), bukan ikon check/x bool biasa. --}}
+  {{-- Kolom Status (IsOtorisasi1) -- ikon check/silang hijau/merah biasa, sama seperti
+       kolom Otorisasi bool di perintahopname.blade.php/beritaacaraopname.blade.php. --}}
   if (col[0] === 'IsOtorisasi1') {
     return Number(raw) === 1
-      ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-      : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+      ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+      : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
