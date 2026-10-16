@@ -2823,14 +2823,6 @@ window.doSimpanHeader = function (href, mode) {
   })
 }
 
-// Dipakai tombol "Reset kolom" di bar (muncul otomatis karena fungsi ini ada
-// -- lihat report-table.js). Harus async:false karena report-table.js
-// langsung menggambar ulang setelahnya.
-//
-// Beda dari punya PO: getheadertable tidak punya pembuat default sisi server
-// untuk href ini (lihat soDefaultCart() di atas), jadi kalau responsnya
-// kosong kita jatuh ke default JS sendiri alih-alih membiarkan kolomnya
-// kosong seperti yang terjadi di PO saat ini untuk href 'purchaseorder'.
 window.doSetHeader = function (mode, reset) {
   let urut = mode === 2 ? 2 : 1
 

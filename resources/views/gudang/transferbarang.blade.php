@@ -9,12 +9,6 @@
 
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 
-  {{-- Blok CSS lokal halaman ini -- disalin verbatim dari @section('css') so.blade.php
-       (custom-tabs/tab-card, #page1 .card override layout .card global, po-len-wrap/
-       po-len-inp, tombol aksi bulat kecil pastel + action-buttons-wrap hover-reveal di
-       kolom pertama, header/row tabel), hanya id tabelnya yang disesuaikan (#tabel_oto
-       milik SO -> #tabel3 di sini, yang juga tidak punya kolom Actions). Tidak ada CSS
-       baru -- report-table.js/po-table-header.css sudah menyediakan sisanya. --}}
   <style>
   {{-- po-table-header.css cuma punya .sp-badge.is-active/is-inactive/is-user/is-supervisor
        -- kolom Status di tab Transfer Barang butuh state ketiga ("Batal"), jadi warnanya

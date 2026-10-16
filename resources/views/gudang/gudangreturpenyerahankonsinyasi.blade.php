@@ -233,20 +233,6 @@
       </div>
     </div>
     </div>
-    <div class="row ">
-      <div class="col-md-12 text-right">
-      <button type="button" class="btn btn-chip-biru" style="
-      height: 30px;  
-      padding: 4px 12px; 
-      border-radius: 20px; 
-      font-size: 0.75rem; 
-      font-weight: 600; 
-      text-transform: uppercase; 
-      transition: background-color 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-      onclick="buttonAddAddItem()">Tambah Item</button>
-      </div>
-    </div>
 
     <div class="container-fluid mt-4">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
@@ -299,6 +285,20 @@
             onclick="submitAdd()">Submit</button>
         </div> --}}
             <!-- <button onclick="buttonSubKategori()">tes</button> -->
+    <div class="row ">
+      <div class="col-md-12 text-right">
+      <button type="button" class="btn btn-chip-biru" style="
+      height: 30px;  
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      text-transform: uppercase; 
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+      onclick="buttonAddAddItem()">Tambah Item</button>
+      </div>
+    </div>
     </div>
     <!-- ADD SUBGROUP -->
     <div id="addAddItem" class="container-fluid showhide">
