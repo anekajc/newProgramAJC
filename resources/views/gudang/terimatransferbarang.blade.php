@@ -155,6 +155,65 @@
   #formBsGrid textarea.form-control {
     height: auto;
   }
+
+  /* Header form page2/3/4/5: grid 4 kolom supaya baris sejajar.
+       baris 1: No Bukti | Gudang Asal | Gudang Tujuan | Keterangan
+       baris 2: Tanggal  | Alamat      | Alamat        | (Keterangan memanjang 2 baris)
+     Label langsung di atas field (tanpa .form-group) supaya jaraknya rapat. */
+  .ttb-header {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+      "nobukti asal       tujuan       ket"
+      "tanggal alamatasal alamattujuan ket";
+    column-gap: 24px;
+    row-gap: 16px;
+    align-items: start;
+  }
+  .ttb-header .ttb-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .ttb-header .ttb-field > label {
+    margin: 0 0 6px;
+  }
+  .ttb-f-nobukti      { grid-area: nobukti; }
+  .ttb-f-tanggal      { grid-area: tanggal; }
+  .ttb-f-asal         { grid-area: asal; }
+  .ttb-f-alamatasal   { grid-area: alamatasal; }
+  .ttb-f-tujuan       { grid-area: tujuan; }
+  .ttb-f-alamattujuan { grid-area: alamattujuan; }
+  .ttb-header .ttb-f-ket {
+    grid-area: ket;
+    align-self: stretch;
+  }
+  #formBsGrid .ttb-header .ttb-f-ket textarea.form-control {
+    flex: 1 1 auto;
+  }
+  /* Alamat (tanpa label) mengisi tinggi baris 2 yang ditentukan blok Tanggal (label + input), supaya
+     atas & bawahnya sejajar dengan Tanggal. Textarea absolute supaya rows=3 tidak ikut memperbesar baris. */
+  .ttb-header .ttb-f-alamatasal,
+  .ttb-header .ttb-f-alamattujuan {
+    align-self: stretch;
+    position: relative;
+  }
+  #formBsGrid .ttb-header .ttb-f-alamatasal textarea.form-control,
+  #formBsGrid .ttb-header .ttb-f-alamattujuan textarea.form-control {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+  @media (max-width: 767.98px) {
+    .ttb-header {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "nobukti" "tanggal" "asal" "alamatasal" "tujuan" "alamattujuan" "ket";
+    }
+    #formBsGrid .ttb-header .ttb-f-alamatasal textarea.form-control,
+    #formBsGrid .ttb-header .ttb-f-alamattujuan textarea.form-control {
+      position: static;
+    }
+  }
 </style>
 @endsection
 @section('content')
@@ -304,94 +363,39 @@
 
   <div class="container-fluid">
     <input type="hidden" name="noUrut" id="input_add_nourut" value="" />
-    {{-- Header mengikuti struktur gudang/permintaantransferbarang.blade.php: No Bukti/Tanggal | Gudang Asal |
-         Gudang Tujuan | Keterangan. Gudang read-only (ditentukan oleh transfer yang diterima, diisi di
-         buttonAdd() dari getDetail); Keterangan disimpan ke DBTRANSFER.NOTE dokumen terima lewat spAdd. --}}
     <div class="modal-body" id="formBsGrid">
-      <div class="row">
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-
-            <div class="col-6" style="margin-top:8px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_add_tanggal"
-                  value="{!! date('Y-m-d') !!}" disabled>
-              </div>
-            </div>
-          </div>
+      {{-- Header: grid 4 kolom (lihat .ttb-header) — sama di page2/3/4/5. Gudang read-only (ditentukan
+           oleh transfer yang diterima, diisi di buttonAdd() dari getDetail); Keterangan disimpan ke
+           DBTRANSFER.NOTE dokumen terima lewat spAdd. --}}
+      <div class="ttb-header">
+        <div class="ttb-field ttb-f-nobukti">
+          <label>No Bukti</label>
+          <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
         </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Asal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_add_gudangAsal" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
-                  class="form-control text-left align-items-center" id="input_add_alamatGudangAsal" disabled></textarea>
-              </div>
-            </div>
-          </div>
+        <div class="ttb-field ttb-f-tanggal">
+          <label>Tanggal</label>
+          <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
         </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_add_gudangTujuan" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
-                  class="form-control text-left align-items-center" id="input_add_alamatGudangTujuan" disabled></textarea>
-              </div>
-            </div>
-          </div>
+        <div class="ttb-field ttb-f-asal">
+          <label>Gudang Asal</label>
+          <input type="text" class="form-control text-left" id="input_add_gudangAsal" placeholder="" disabled>
         </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
-                  class="form-control" id="input_add_keterangan"></textarea>
-              </div>
-            </div>
-          </div>
+        <div class="ttb-field ttb-f-alamatasal">
+          <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+            class="form-control text-left" id="input_add_alamatGudangAsal" disabled></textarea>
+        </div>
+        <div class="ttb-field ttb-f-tujuan">
+          <label>Gudang Tujuan</label>
+          <input type="text" class="form-control text-left" id="input_add_gudangTujuan" placeholder="" disabled>
+        </div>
+        <div class="ttb-field ttb-f-alamattujuan">
+          <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+            class="form-control text-left" id="input_add_alamatGudangTujuan" disabled></textarea>
+        </div>
+        <div class="ttb-field ttb-f-ket">
+          <label>Keterangan</label>
+          <textarea style="width: 100%; resize: none;" rows=3 placeholder="Keterangan"
+            class="form-control" id="input_add_keterangan"></textarea>
         </div>
       </div>
     </div>
@@ -441,95 +445,39 @@
 
   <div class="modal-body" id="formBsGrid">
     {{-- <input type="hidden" name="noUrut" id="input_koreksi_nourut" value="" /> --}}
-    <div class="row">
-        <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
-        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
-             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan (editable,
-             disimpan lewat onChangeHeader saat blur). --}}
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_koreksi_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-
-            <div class="col-6" style="margin-top:8px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_koreksi_tanggal"
-                  value="{!! date('Y-m-d') !!}" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Asal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_gudangasal_nama" type="text" class="form-control text-left" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
-                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangAsal" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_gudangtujuan_nama" type="text" class="form-control text-left" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
-                  class="form-control text-left align-items-center" id="input_koreksi_alamatGudangTujuan" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
-                  class="form-control" id="input_koreksi_keterangan" onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
+    {{-- Header: grid 4 kolom (lihat .ttb-header) — sama di page2/3/4/5. Keterangan editable,
+         disimpan lewat onChangeHeader saat blur. --}}
+    <div class="ttb-header">
+      <input type="hidden" class="form-control" id="input_koreksi_nourut" placeholder="No Urut" disabled>
+      <div class="ttb-field ttb-f-nobukti">
+        <label>No Bukti</label>
+        <input type="text" class="form-control text-left" id="input_koreksi_nobukti" placeholder="" disabled>
+      </div>
+      <div class="ttb-field ttb-f-tanggal">
+        <label>Tanggal</label>
+        <input type="date" class="form-control text-left" id="input_koreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+      </div>
+      <div class="ttb-field ttb-f-asal">
+        <label>Gudang Asal</label>
+        <input type="text" class="form-control text-left" id="input_gudangasal_nama" placeholder="" disabled>
+      </div>
+      <div class="ttb-field ttb-f-alamatasal">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+          class="form-control text-left" id="input_koreksi_alamatGudangAsal" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-tujuan">
+        <label>Gudang Tujuan</label>
+        <input type="text" class="form-control text-left" id="input_gudangtujuan_nama" placeholder="" disabled>
+      </div>
+      <div class="ttb-field ttb-f-alamattujuan">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+          class="form-control text-left" id="input_koreksi_alamatGudangTujuan" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-ket">
+        <label>Keterangan</label>
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Keterangan"
+          class="form-control" id="input_koreksi_keterangan" onblur="onChangeHeader('NOTE' , 'input_koreksi_keterangan')"></textarea>
+      </div>
     </div>
 
         <div class="container-fluid mt-4" style="padding:0; margin:0;">
@@ -741,97 +689,41 @@
     </div>
   </div>
 
-  {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
-       No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
   <div class="modal-body" id="formBsGrid">
-    <div class="row">
-        <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_detailkoreksi_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-
-            <div class="col-6" style="margin-top:8px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal"
-                  value="{!! date('Y-m-d') !!}" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Asal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_detailkoreksi_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
-                <input id="input_detailkoreksi_gudangasal" type="hidden">
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
-                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangAsal" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_detailkoreksi_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
-                <input id="input_detailkoreksi_gudangtujuan" type="hidden">
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
-                  class="form-control text-left align-items-center" id="input_detailkoreksi_alamatGudangTujuan" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
-                  class="form-control" id="input_detailkoreksi_keterangan" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
+    {{-- Header: grid 4 kolom (lihat .ttb-header) — sama di page2/3/4/5. Semua read-only. --}}
+    <div class="ttb-header">
+      <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
+      <div class="ttb-field ttb-f-nobukti">
+        <label>No Bukti</label>
+        <input type="text" class="form-control text-left" id="input_detailkoreksi_nobukti" placeholder="" disabled>
+      </div>
+      <div class="ttb-field ttb-f-tanggal">
+        <label>Tanggal</label>
+        <input type="date" class="form-control text-left" id="input_detailkoreksi_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+      </div>
+      <div class="ttb-field ttb-f-asal">
+        <label>Gudang Asal</label>
+        <input type="text" class="form-control text-left" id="input_detailkoreksi_gudangasalnama" placeholder="" disabled>
+        <input type="hidden" id="input_detailkoreksi_gudangasal">
+      </div>
+      <div class="ttb-field ttb-f-alamatasal">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+          class="form-control text-left" id="input_detailkoreksi_alamatGudangAsal" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-tujuan">
+        <label>Gudang Tujuan</label>
+        <input type="text" class="form-control text-left" id="input_detailkoreksi_gudangtujuannama" placeholder="" disabled>
+        <input type="hidden" id="input_detailkoreksi_gudangtujuan">
+      </div>
+      <div class="ttb-field ttb-f-alamattujuan">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+          class="form-control text-left" id="input_detailkoreksi_alamatGudangTujuan" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-ket">
+        <label>Keterangan</label>
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Keterangan"
+          class="form-control" id="input_detailkoreksi_keterangan" disabled></textarea>
+      </div>
     </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
@@ -871,95 +763,40 @@
   </div>
 
   <div class="modal-body" id="formBsGrid">
-    <div class="row">
-        <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
-        {{-- Header mengikuti struktur halaman add (page2) / gudang/permintaantransferbarang.blade.php:
-             No Bukti/Tanggal | Gudang Asal + alamat | Gudang Tujuan + alamat | Keterangan. Semua read-only. --}}
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-
-            <div class="col-6" style="margin-top:8px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input type="date" class="form-control text-left" id="input_detail_tanggal" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Asal</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_detail_gudangasalnama" type="text" class="form-control text-left" placeholder="" disabled>
-                <input id="input_detail_gudangasal" type="hidden">
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
-                  class="form-control text-left align-items-center" id="input_detail_alamatGudangAsal" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <input id="input_detail_gudangtujuannama" type="text" class="form-control text-left" placeholder="" disabled>
-                <input id="input_detail_gudangtujuan" type="hidden">
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
-                  class="form-control text-left align-items-center" id="input_detail_alamatGudangTujuan" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-            <div class="col-6">
-              <div class="form-group">
-                <label>Keterangan</label>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none;" rows=5 placeholder="Keterangan"
-                  class="form-control" id="input_detail_keterangan" disabled></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
+    {{-- Header: grid 4 kolom (lihat .ttb-header) — sama di page2/3/4/5. Semua read-only. --}}
+    <div class="ttb-header">
+      <input type="hidden" class="form-control" id="input_detailkoreksi_nourut" placeholder="No Urut" disabled>
+      <div class="ttb-field ttb-f-nobukti">
+        <label>No Bukti</label>
+        <input type="text" class="form-control text-left" id="input_detail_nobukti" placeholder="" disabled>
+      </div>
+      <div class="ttb-field ttb-f-tanggal">
+        <label>Tanggal</label>
+        <input type="date" class="form-control text-left" id="input_detail_tanggal" disabled>
+      </div>
+      <div class="ttb-field ttb-f-asal">
+        <label>Gudang Asal</label>
+        <input type="text" class="form-control text-left" id="input_detail_gudangasalnama" placeholder="" disabled>
+        <input type="hidden" id="input_detail_gudangasal">
+      </div>
+      <div class="ttb-field ttb-f-alamatasal">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+          class="form-control text-left" id="input_detail_alamatGudangAsal" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-tujuan">
+        <label>Gudang Tujuan</label>
+        <input type="text" class="form-control text-left" id="input_detail_gudangtujuannama" placeholder="" disabled>
+        <input type="hidden" id="input_detail_gudangtujuan">
+      </div>
+      <div class="ttb-field ttb-f-alamattujuan">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+          class="form-control text-left" id="input_detail_alamatGudangTujuan" disabled></textarea>
+      </div>
+      <div class="ttb-field ttb-f-ket">
+        <label>Keterangan</label>
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Keterangan"
+          class="form-control" id="input_detail_keterangan" disabled></textarea>
+      </div>
     </div>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
           <div class="dph-table-outer">

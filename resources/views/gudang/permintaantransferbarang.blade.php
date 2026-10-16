@@ -91,6 +91,65 @@
         #formBsGrid textarea.form-control {
             height: auto;
         }
+
+        /* Header form: grid 4 kolom supaya baris sejajar — sama seperti gudang/terimatransferbarang.blade.php.
+             baris 1: No Bukti | Gudang Asal | Gudang Tujuan | Keterangan
+             baris 2: Tanggal  | Alamat      | Alamat        | (Keterangan memanjang 2 baris)
+           Label langsung di atas field (tanpa .form-group) supaya jaraknya rapat. */
+        .ttb-header {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-areas:
+                "nobukti asal       tujuan       ket"
+                "tanggal alamatasal alamattujuan ket";
+            column-gap: 24px;
+            row-gap: 16px;
+            align-items: start;
+        }
+        .ttb-header .ttb-field {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .ttb-header .ttb-field > label {
+            margin: 0 0 6px;
+        }
+        .ttb-f-nobukti      { grid-area: nobukti; }
+        .ttb-f-tanggal      { grid-area: tanggal; }
+        .ttb-f-asal         { grid-area: asal; }
+        .ttb-f-alamatasal   { grid-area: alamatasal; }
+        .ttb-f-tujuan       { grid-area: tujuan; }
+        .ttb-f-alamattujuan { grid-area: alamattujuan; }
+        .ttb-header .ttb-f-ket {
+            grid-area: ket;
+            align-self: stretch;
+        }
+        #formBsGrid .ttb-header .ttb-f-ket textarea.form-control {
+            flex: 1 1 auto;
+        }
+        /* Alamat (tanpa label) mengisi tinggi baris 2 yang ditentukan blok Tanggal (label + input), supaya
+           atas & bawahnya sejajar dengan Tanggal. Textarea absolute supaya rows=3 tidak ikut memperbesar baris. */
+        .ttb-header .ttb-f-alamatasal,
+        .ttb-header .ttb-f-alamattujuan {
+            align-self: stretch;
+            position: relative;
+        }
+        #formBsGrid .ttb-header .ttb-f-alamatasal textarea.form-control,
+        #formBsGrid .ttb-header .ttb-f-alamattujuan textarea.form-control {
+            position: absolute;
+            inset: 0;
+            height: auto;
+        }
+        @media (max-width: 767.98px) {
+            .ttb-header {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas: "nobukti" "tanggal" "asal" "alamatasal" "tujuan" "alamattujuan" "ket";
+            }
+            #formBsGrid .ttb-header .ttb-f-alamatasal textarea.form-control,
+            #formBsGrid .ttb-header .ttb-f-alamattujuan textarea.form-control {
+                position: static;
+            }
+        }
     </style>
 
     <style>
@@ -376,119 +435,46 @@
 
         <div id="modalBodyAddMain" class="">
             <div class="modal-body" id="formBsGrid">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="row">
-                            <input type="hidden" class="form-control" id="input_add_nourut" placeholder="No Urut"
-                                disabled>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label>No Bukti</label>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <input type="text" class="form-control text-left" id="input_add_nobukti"
-                                        placeholder="" disabled>
-                                </div>
-                            </div>
-                            <div class="col-md-8" style="margin-top:-12px;" hidden>
-                                <div class="form-group">
-                                    <input type="text" class="form-control text-left" id="input_add_urut"
-                                        placeholder="" readonly>
-                                </div>
-                            </div>
-
-                            <div class="col-6" style="margin-top:8px;">
-                                <div class="form-group">
-                                    <label>Tanggal</label>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <input type="date" class="form-control text-left" id="input_add_tanggal"
-                                        value="{!! date('Y-m-d') !!}" disabled>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="row">
-
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label>Gudang Asal</label>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    {{-- Gudang Asal: dropdown select, dilebarkan jadi col-md-12 (satu baris
-                     penuh di bawah label) supaya kode+nama gudang yang terpilih tidak
-                     terpotong, disamakan dengan pola #input_add_kodealamatkirim di
-                     gudang/purchaseOrder.blade.php. Opsi dimuat lewat
-                     muatDropdownGudangAsal() (endpoint prtlistgudangasal), otomatis
-                     exclude Gudang Tujuan yang sedang dipilih supaya asal != tujuan. --}}
-                                    <select class="form-control text-left" id="input_add_kodeGudangAsal"
-                                        onchange="onChangeGudangAsal()">
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-group">
-
-                                    <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
-                                        class="form-control text-left align-items-center" id="input_add_namaGudangAsal" disabled></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="row">
-
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label>Gudang Tujuan</label>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-
-                                    <select class="form-control text-left" id="input_add_kodeGudangTujuan"
-                                        onchange="onChangeGudangTujuan()">
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-group">
-
-                                    <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
-                                        class="form-control text-left align-items-center" id="input_add_namaGudangTujuan" disabled></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label>Keterangan</label>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <textarea style="width: 100%; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan"
-                                        class="form-control" id="input_add_keterangan"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                {{-- Header: grid 4 kolom (lihat .ttb-header), sama seperti gudang/terimatransferbarang.blade.php.
+                     baris 1: No Bukti | Gudang Asal | Gudang Tujuan | Keterangan
+                     baris 2: Tanggal  | Alamat      | Alamat        | (Keterangan memanjang 2 baris)
+                     Gudang Asal/Tujuan: dropdown, opsi dimuat lewat muatDropdownGudangAsal()/muatDropdownGudangTujuan()
+                     (endpoint prtlistgudangasal/tujuan), otomatis exclude gudang lawan supaya asal != tujuan.
+                     Alamat ada di #input_add_namaGudangAsal/Tujuan (nama id lama dipertahankan untuk JS). --}}
+                <div class="ttb-header">
+                  <input type="hidden" class="form-control" id="input_add_nourut" placeholder="No Urut" disabled>
+                  <input type="hidden" class="form-control text-left" id="input_add_urut" placeholder="" readonly>
+                  <div class="ttb-field ttb-f-nobukti">
+                    <label>No Bukti</label>
+                    <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
+                  </div>
+                  <div class="ttb-field ttb-f-tanggal">
+                    <label>Tanggal</label>
+                    <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
+                  </div>
+                  <div class="ttb-field ttb-f-asal">
+                    <label>Gudang Asal</label>
+                    <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="onChangeGudangAsal()">
+                    </select>
+                  </div>
+                  <div class="ttb-field ttb-f-alamatasal">
+                    <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Asal"
+                      class="form-control text-left" id="input_add_namaGudangAsal" disabled></textarea>
+                  </div>
+                  <div class="ttb-field ttb-f-tujuan">
+                    <label>Gudang Tujuan</label>
+                    <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="onChangeGudangTujuan()">
+                    </select>
+                  </div>
+                  <div class="ttb-field ttb-f-alamattujuan">
+                    <textarea style="width: 100%; resize: none;" rows=3 placeholder="Alamat Gudang Tujuan"
+                      class="form-control text-left" id="input_add_namaGudangTujuan" disabled></textarea>
+                  </div>
+                  <div class="ttb-field ttb-f-ket">
+                    <label>Keterangan</label>
+                    <textarea style="width: 100%; resize: none;" rows=3 onblur="onChangeKeterangan()" placeholder="Keterangan"
+                      class="form-control" id="input_add_keterangan"></textarea>
+                  </div>
                 </div>
 
                 <div class="row ">
