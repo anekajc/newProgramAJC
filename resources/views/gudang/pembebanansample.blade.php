@@ -9,6 +9,7 @@
 @section('css')
 
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 
 {{-- Port 1:1 ke UI SO -- @extends newmasterTest (bukan lagi gudang.newmaster). BBS
      Belum Otorisasi + Sudah Otorisasi digabung jadi satu tabel (#tabel) dengan kolom
@@ -33,6 +34,9 @@
 }
 .status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
 .status-badge-belum { color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0; }
+
+.pick-row { cursor: pointer; }
+.pick-row:hover { background-color: #f5f3ff !important; }
 
 {{-- Tabel item form Add/Edit/Detail (#tabelitem) -- bungkus kartu berbingkai + thead
      abu-abu, sama seperti #tabelitem di ubahkemasanbarang.blade.php. --}}
@@ -163,7 +167,7 @@
       </div>
 
       <div id="modalBodyAddMain" class="">
-        <div class="modal-body" style="margin-top:-60px;">
+        <div id='formBsGrid' class="modal-body" style="margin-top:-60px;">
           <div class="row">
 
             <input type="hidden" class="form-control" id="input_nourut">
@@ -204,8 +208,8 @@
                 <div class="col-md-2">
                   <div class="input-group form-group">
                     <input type="text" class="form-control lockableModeDetail" id="input_noserahsample" onkeypress="doBrowseDirectFilter('NoSerahSample', '{!! $noserahsample !!}', 'input_noserahsample')" disabled>
-                    <button id="buttonbrowse_noserahsample" onclick="doBrowseMaster('NoSerahSample', '{!! $noserahsample !!}')" class="btn btn-primary btn-sm text-right lockableHeader lockableModeDetail">
-                      <i class="bi bi-plus"></i>
+                    <button id="buttonbrowse_noserahsample" onclick="buttonOpenNoSerahSample()" class="btn btn-chip-biru btn-sm text-right lockableHeader lockableModeDetail">
+                      <i class="bi bi-search"></i>
                     </button>
                   </div>
                 </div>
@@ -286,7 +290,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <div id='formBsGrid' class="row">
             <div class="col-md-12">
               <div class="row">
 
@@ -306,7 +310,7 @@
                         <div class="col-md-4">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="inputitem_kodebrg" disabled>
-                            <button onclick="doBrowseMaster('Barang', '{!! $barang !!}')" id="btnitem_kodebrg" class="btn btn-primary btn-sm text-right lockableItemModeEdit">
+                            <button onclick="buttonOpenPickBarang()" id="btnitem_kodebrg" class="btn btn-primary btn-sm text-right lockableItemModeEdit">
                               <i class="bi bi-plus"></i>
                             </button>
                           </div>
@@ -347,7 +351,7 @@
                         <div class="col-md-9">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="inputitem_gudang" disabled>
-                            <button onclick="doBrowseMaster('Gudang', '{!! $gudang !!}')" class="btn btn-primary btn-sm text-right">
+                            <button onclick="buttonOpenPickGudang()" class="btn btn-primary btn-sm text-right">
                               <i class="bi bi-plus"></i>
                             </button>
                           </div>
@@ -391,7 +395,7 @@
           <div class="row mt-2">
             <div class="col-md-12 text-right" id="contentContainer">
               <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger" onclick="closeFormItem()">Batal</button>
-              <button type="button" id="buttonSubmitItem" class="btn btn-primary btn-pill-primary btn-action-primary" onclick="submitItem()">Submit</button>
+              <button type="button" id="buttonSubmitItem" class="btn btn-primary btn-pill-primary btn-action-primary" onclick="submitItem()">Simpan</button>
             </div>
 
           </div>
@@ -399,14 +403,149 @@
       </div>
 </div>
 
+{{-- Start Modal List No Serah Sample -- picker SO 1:1 (pick-row + pickerKasInit),
+     menggantikan popup generik doBrowseMaster khusus untuk field ini. Pola/markup
+     sama seperti modalAddListSerahSample di gudangreturpenyerahansample.blade.php,
+     data tetap dari endpoint lama (bbslistnoserahsample / listNoSerahSample()). --}}
+<div class="modal fade" id="modalNoSerahSample" role="dialog" aria-labelledby="labelNoSerahSample" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width:95%;">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="labelNoSerahSample">No Serah Sample</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="margin-top:-30px;">
+        <div class="container-fluid px-3 mt-4">
+          <div class="row">
+            <div class="table-responsive" style="overflow-x:auto;">
+              <table id="tabel_list_noserahsample" class="table table-bordered table-striped" style="width:100%;">
+                <thead class="text-center bg-primary text-white">
+                  <tr>
+                    <th>No. Bukti</th>
+                    <th>Tanggal</th>
+                    <th>Kode Sales</th>
+                    <th>Nama Sales</th>
+                    <th>Kode Customer</th>
+                    <th>Nama Customer</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_list_noserahsample" class="text-left">
+                  <!-- Diisi lewat JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{{-- End Modal List No Serah Sample --}}
+
+{{-- Start Modal List Barang -- picker SO 1:1, menggantikan popup generik doBrowseMaster
+     khusus untuk field ini. Data dari endpoint lama (bbslistbarang / listBarang()),
+     tapi sekarang noserahsample dikirim langsung sebagai parameter AJAX (sebelumnya
+     cuma dibaca lewat bm_params yang tidak pernah didefinisikan di mana pun, jadi
+     listBarang() selalu menerima noserahsample kosong dan query SQL-nya
+     "AND A.NOBUKTI = :noserahsample" tidak pernah match apa pun -- itu sebabnya form
+     cari Kode Barang tidak pernah menampilkan data). --}}
+<div class="modal fade" id="modalPickBarang" role="dialog" aria-labelledby="labelPickBarang" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width:95%;">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="labelPickBarang">Barang</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="margin-top:-30px;">
+        <div class="container-fluid px-3 mt-4">
+          <div class="row">
+            <div class="table-responsive" style="overflow-x:auto;">
+              <table id="tabel_pick_barang" class="table table-bordered table-striped" style="width:100%;">
+                <thead class="text-center bg-primary text-white">
+                  <tr>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Qty Sisa</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_pick_barang" class="text-left">
+                  <!-- Diisi lewat JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{{-- End Modal List Barang --}}
+
+{{-- Start Modal List Gudang -- picker SO 1:1, menggantikan popup generik doBrowseMaster
+     khusus untuk field ini. Data tetap dari endpoint lama (bbslistgudang / listGudang()). --}}
+<div class="modal fade" id="modalPickGudang" role="dialog" aria-labelledby="labelPickGudang" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width:95%;">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="labelPickGudang">Gudang</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="margin-top:-30px;">
+        <div class="container-fluid px-3 mt-4">
+          <div class="row">
+            <div class="table-responsive" style="overflow-x:auto;">
+              <table id="tabel_pick_gudang" class="table table-bordered table-striped" style="width:100%;">
+                <thead class="text-center bg-primary text-white">
+                  <tr>
+                    <th>Kode Gudang</th>
+                    <th>Nama Gudang</th>
+                    <th>Alamat</th>
+                  </tr>
+                </thead>
+                <tbody id="tabel_data_pick_gudang" class="text-left">
+                  <!-- Diisi lewat JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{{-- End Modal List Gudang --}}
+
 @include('gudang.modalbrowsemaster')
 
 @endsection
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/ajc-func-core.js') !!}"></script>
 <script src="{!! URL::asset('js/ajc-browsemaster.js') !!}"></script>
+{{-- Modal pemilih No Serah Sample (#modalNoSerahSample) disamakan persis dengan modal
+     pemilih menu Kas, pola yang sama persis dengan gudangreturpenyerahansample.blade.php. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#modalNoSerahSample, #modalPickBarang, #modalPickGudang').addClass('picker-kas')
+})
+</script>
 <script>
   const BASE_URL = "{{ url('/') }}";
 
@@ -1876,6 +2015,54 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   dataBrowse['customer'] = _kodeCust;
 }
 
+{{-- Picker SO 1:1 utk No Serah Sample -- data dari endpoint lama (listNoSerahSample(),
+     dipakai juga oleh popup generik doBrowseMaster), tapi dirender sbg modal/tabel
+     pick-row sendiri, sama seperti modalAddListSerahSample di
+     gudangreturpenyerahansample.blade.php. Pick-nya reuse buttonBrowsePickNoSerahSample()
+     di atas supaya logic pengisian field header tetap satu sumber. --}}
+function buttonOpenNoSerahSample () {
+  console.log('buttonOpenNoSerahSample');
+
+  $('#tabel_data_list_noserahsample').html('');
+
+  $.ajax({
+    url: "{!! $noserahsample !!}",
+    type: "get",
+    data: {},
+    success: function (res) {
+      let list = res.table || [];
+      let rowTable = '';
+
+      list.forEach((item) => {
+        rowTable += `
+          <tr class="pick-row" onclick="buttonPickNoSerahSample('${item.Nobukti}', '${item.KodeSls ?? ''}', '${item.NamaSales ?? ''}', '${item.KODECUSTSUPP ?? ''}', '${item.NAMACUSTSUPP ?? ''}')">
+            <td>${item.Nobukti}</td>
+            <td>${item.Tanggal ? item.Tanggal.substring(0, 10) : '-'}</td>
+            <td>${item.KodeSls ?? ''}</td>
+            <td>${item.NamaSales ?? ''}</td>
+            <td>${item.KODECUSTSUPP ?? ''}</td>
+            <td>${item.NAMACUSTSUPP ?? ''}</td>
+          </tr>`;
+      });
+
+      $('#tabel_data_list_noserahsample').html(rowTable);
+
+      pickerKasInit('tabel_list_noserahsample');
+
+      $('#modalNoSerahSample').modal('show');
+    },
+    error: function (err) {
+      console.error('AJAX Error:', err);
+      alertify.warning('Terjadi kesalahan saat mengambil data.');
+    }
+  });
+}
+
+function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
+  buttonBrowsePickNoSerahSample(nb, kodeSls, namaSls, kodeCust, namaCust);
+  $('#modalNoSerahSample').modal('hide');
+}
+
 
   // function buttonBrowsePickNoSerahSample(_nb) {
   //   $("#input_noserahsample").val(_nb);
@@ -1890,11 +2077,6 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function buttonBrowsePickCustomer(_kode) {
     $("#input_customer").val(_kode);
     dataBrowse['customer'] = _kode;
-  }
-
-  function doBrowseBarang() {
-    bm_params['noserahsample'] = $("#input_noserahsample").val();
-    return true;
   }
 
   function buttonBrowsePickBarang(_kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
@@ -1931,6 +2113,100 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function buttonBrowsePickGudang(_kode) {
     $("#inputitem_gudang").val(_kode);
     dataBrowse['gudang'] = _kode;
+  }
+
+  {{-- Picker SO 1:1 utk Kode Barang -- data dari endpoint lama (listBarang(), dipakai
+       juga oleh popup generik doBrowseMaster), tapi sekarang noserahsample dikirim
+       langsung sbg parameter AJAX (fix dari bug "form cari Kode Barang tidak pernah
+       menampilkan data" -- lihat komentar di atas modal #modalPickBarang). Pick-nya
+       reuse buttonBrowsePickBarang() supaya logic pengisian field item tetap satu
+       sumber. --}}
+  function buttonOpenPickBarang () {
+    console.log('buttonOpenPickBarang');
+
+    const noserahsample = $("#input_noserahsample").val();
+
+    if (!noserahsample) {
+      alertify.warning("Silakan pilih No Serah Sample terlebih dahulu.");
+      return;
+    }
+
+    $('#tabel_data_pick_barang').html('');
+
+    $.ajax({
+      url: "{!! $barang !!}",
+      type: "get",
+      data: { noserahsample },
+      success: function (res) {
+        let list = res.table || [];
+        let rowTable = '';
+
+        list.forEach((item) => {
+          rowTable += `
+            <tr class="pick-row" onclick="buttonPickItemBarang('${item.KODEBRG}', '${item.NAMABRG ?? ''}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${item.sat1 ?? ''}', '${item.sat2 ?? ''}', '${item.sat3 ?? ''}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
+              <td>${item.KODEBRG}</td>
+              <td>${item.NAMABRG}</td>
+              <td>${item.QNTSISA ?? ''}</td>
+            </tr>`;
+        });
+
+        $('#tabel_data_pick_barang').html(rowTable);
+
+        pickerKasInit('tabel_pick_barang');
+
+        $('#modalPickBarang').modal('show');
+      },
+      error: function (err) {
+        console.error("AJAX Error:", err);
+        alertify.warning('Terjadi kesalahan saat mengambil data.');
+      }
+    });
+  }
+
+  function buttonPickItemBarang (kode, nama, qnt, urut, sat1, sat2, sat3, isi1, isi2, isi3) {
+    buttonBrowsePickBarang(kode, nama, qnt, urut, sat1, sat2, sat3, isi1, isi2, isi3);
+    $('#modalPickBarang').modal('hide');
+  }
+
+  {{-- Picker SO 1:1 utk Gudang -- data tetap dari endpoint lama (listGudang()). --}}
+  function buttonOpenPickGudang () {
+    console.log('buttonOpenPickGudang');
+
+    $('#tabel_data_pick_gudang').html('');
+
+    $.ajax({
+      url: "{!! $gudang !!}",
+      type: "get",
+      data: {},
+      success: function (res) {
+        let list = res.table || [];
+        let rowTable = '';
+
+        list.forEach((item) => {
+          rowTable += `
+            <tr class="pick-row" onclick="buttonPickItemGudang('${item.KodeGdg}')">
+              <td>${item.KodeGdg}</td>
+              <td>${item.Nama ?? ''}</td>
+              <td>${item.Alamat ?? ''}</td>
+            </tr>`;
+        });
+
+        $('#tabel_data_pick_gudang').html(rowTable);
+
+        pickerKasInit('tabel_pick_gudang');
+
+        $('#modalPickGudang').modal('show');
+      },
+      error: function (err) {
+        console.error("AJAX Error:", err);
+        alertify.warning('Terjadi kesalahan saat mengambil data.');
+      }
+    });
+  }
+
+  function buttonPickItemGudang (kode) {
+    buttonBrowsePickGudang(kode);
+    $('#modalPickGudang').modal('hide');
   }
 
   function showSatuanBarang(_nosat, _kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {

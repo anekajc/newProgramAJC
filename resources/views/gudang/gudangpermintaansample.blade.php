@@ -427,17 +427,18 @@
                 </div>
             </div>
             <div class="mb-2 row">
-            <label class="col-sm-4 col-form-label">Sales</label>
+                <label class="col-sm-4 col-form-label">Customer</label>
                 <div class="col-sm-8">
                     <div class="input-group">
-                        <input id="input_sales_nama" type="text" class="form-control text-center" placeholder="Sales" disabled>
-                        <input id="input_sales" type="hidden">
-                        <button type="button" onclick="buttonAddListSales()" class="btn btn-chip-biru btn-sm">
-                            <i class="bi bi-search"></i>
+                        <input id="input_customer_nama" type="text" class="form-control text-center" placeholder="Customer" disabled>
+                        <input id="input_customer" type="hidden">
+                        <button id="btn_customer" type="button" onclick="buttonAddListCustomer()" class="btn btn-chip-biru btn-sm">
+                          <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </div>
             </div>
+            
             <div class="mb-2 row">
                 <label class="col-sm-4 col-form-label">Keterangan</label>
                 <div class="col-sm-8">
@@ -449,13 +450,13 @@
         <!-- Tengah -->
         <div class="col-md-4">
             <div class="mb-2 row">
-                <label class="col-sm-4 col-form-label">Customer</label>
+            <label class="col-sm-4 col-form-label">Sales</label>
                 <div class="col-sm-8">
                     <div class="input-group">
-                        <input id="input_customer_nama" type="text" class="form-control text-center" placeholder="Customer" disabled>
-                        <input id="input_customer" type="hidden">
-                        <button id="btn_customer" type="button" onclick="buttonAddListCustomer()" class="btn btn-chip-biru btn-sm">
-                          <i class="bi bi-search"></i>
+                        <input id="input_sales_nama" type="text" class="form-control text-center" placeholder="Sales" disabled>
+                        <input id="input_sales" type="hidden">
+                        <button type="button" onclick="buttonAddListSales()" class="btn btn-chip-biru btn-sm">
+                            <i class="bi bi-search"></i>
                         </button>
                     </div>
                 </div>
@@ -613,7 +614,7 @@
               </div>
               </div>
               <div class="col-md-3">
-                <input id="input_add_add_qnt" type="number" value=0.00 class="form-control text-right">
+                <input id="input_add_add_qnt" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" value="0,00" class="form-control text-right">
               </div>
               <div class="col-md-2" style="margin-top:5px;">
                 <label for="input_add_add_satuan">Satuan</label>
@@ -655,7 +656,7 @@
                 font-size: 0.75rem; 
                 font-weight: 600; 
                 text-transform: uppercase; 
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()" style="display: none;">Submit Edit</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()" style="display: none;">Simpan</button>
               </div>
             </div>
           </div>
@@ -1065,6 +1066,24 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script type="text/javascript">
 
+function parseAngka (str) {
+  if (str === undefined || str === null || str === '') { return 0; }
+  let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+function formatAngkaDisplay (n, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function formatAngkaInput (e) {
+  let el = e.target;
+  let parts = el.value.replace(/[^\d,]/g, '').split(',');
+  let intPart = parts[0].replace(/^0+(?=\d)/, '');
+  let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+  let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+  el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+}
+
 /* ============ Header tabel interaktif (window.ReportTable) ============
  * Port 1:1 dari pola opCart/opAktifkanTabel milik perintahopname.blade.php. PRS
  * Belum Otorisasi + PRS Sudah Otorisasi digabung jadi satu tabel (#tabel), dengan
@@ -1094,15 +1113,15 @@ function gpDefaultCart (urut) {
     return [
       ['NoBukti',      'No. Bukti',      1, 'varchar', 0, 0],
       ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-      ['KodeCustSupp', 'Kode CustSupp',  1, 'varchar', 0, 0],
+      ['KodeCustSupp', 'Kode Cust Supp',  1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Customer',  1, 'varchar', 0, 0],
       ['kodebrg',      'Kode Barang',    1, 'varchar', 0, 0],
       ['namabrg',      'Nama Barang',    1, 'varchar', 0, 0],
       ['namasls',      'Sales',          1, 'varchar', 0, 0],
-      ['QNT',          'Qnt',            1, 'float',   0, 2],
-      ['SAT',          'Sat',            1, 'varchar', 0, 0],
-      ['QNTSSKONSI',   'Qnt SS Konsi',   1, 'float',   0, 2],
-      ['QNTSISA',      'Qnt Sisa',       1, 'float',   0, 2],
+      ['QNT',          'Qty',            1, 'float',   0, 2],
+      ['SAT',          'Satuan',            1, 'varchar', 0, 0],
+      ['QNTSSKONSI',   'Qty SS Konsi',   1, 'float',   0, 2],
+      ['QNTSISA',      'Qty Sisa',       1, 'float',   0, 2],
     ]
   }
   {{-- PRS Belum + Sudah Otorisasi digabung -- kolom Status (IsOtorisasi1) dirender
@@ -2599,7 +2618,7 @@ function submitAddEdit () {
     let kodebarang = $("#input_add_add_kodebarang").val();
     let keterangannama = $("#input_add_add_keterangannama").val();
     let satuan = $("#input_add_add_satuan").val();
-    let qnt = parseFloat($("#input_add_add_qnt").val()) || 0;
+    let qnt = parseAngka($("#input_add_add_qnt").val());
     let keterangan = $("#input_keterangan").val() || '';
 
     if (!kodebarang || !satuan || qnt <= 0) {
@@ -2737,7 +2756,7 @@ function buttonAddEditItem (index) {
   // Isi input
   document.getElementById("input_add_add_kodebarang").value = tempEdit.KODEBRG;
   document.getElementById("input_add_add_keterangannama").value = tempEdit.NamaBrg;
-  document.getElementById("input_add_add_qnt").value = parseFloat(tempEdit.QNT).toFixed(2);
+  document.getElementById("input_add_add_qnt").value = formatAngkaDisplay(tempEdit.QNT);
   document.getElementById("input_add_add_satuan").value = String(tempEdit.NoSat);
 
   // Tampilkan mode edit
@@ -3176,7 +3195,7 @@ function buttonAddAddInsertItem (i) {
   let kodebarang = $("#input_add_add_kodebarang").val();
   let keterangannama = $("#input_add_add_keterangannama").val();
   let satuan = $("#input_add_add_satuan").val();
-  let qnt = parseFloat($("#input_add_add_qnt").val()) || 0;
+  let qnt = parseAngka($("#input_add_add_qnt").val());
   let keterangan = $("#input_keterangan").val() || '';
 
   console.log({
@@ -3338,7 +3357,7 @@ function buttonAddAddItem () {
   document.getElementById("input_add_add_kodebarang").disabled = false;
   document.getElementById("input_add_add_kodebarang").value = ""
   document.getElementById("input_add_add_keterangannama").value = ""
-  document.getElementById("input_add_add_qnt").value = "0.00"
+  document.getElementById("input_add_add_qnt").value = "0,00"
   // Menentukan isi dropdown berdasarkan tempAdd
   let satuanOptions = `<option value="" selected disabled>Pilih Satuan</option>`;
   
@@ -3445,7 +3464,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
 function cleanFormAddAdd (){
   document.getElementById("input_add_add_kodebarang").value = ''
   document.getElementById("input_add_add_keterangannama").value = ''
-  document.getElementById("input_add_add_qnt").value = '0.00'
+  document.getElementById("input_add_add_qnt").value = '0,00'
   document.getElementById("input_add_add_satuan").innerHTML = '<option value=0 selected>Pilih Satuan</option>'
 }
 
