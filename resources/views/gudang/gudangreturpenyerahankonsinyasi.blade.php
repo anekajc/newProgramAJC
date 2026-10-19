@@ -106,6 +106,12 @@
              kolom Status dan filter Status di toolbar (client-side), sama seperti merge
              di gudangpermintaansample.blade.php/gudangpenyerahansample.blade.php. --}}
         <div class="po-toolbar">
+          <div class="po-filter-wrap">
+            <label>Periode</label>
+            <input type="date" onchange="rkFilterChanged()" class="po-filter-inp" id="rkTanggalAwal" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->startOfMonth()->format('Y-m-d') !!}">
+            <span class="po-filter-sep">s/d</span>
+            <input type="date" onchange="rkFilterChanged()" class="po-filter-inp" id="rkTanggalAkhir" value="{!! \Carbon\Carbon::createFromDate((int) $periode->tahun, (int) $periode->bulan, 1)->endOfMonth()->format('Y-m-d') !!}">
+          </div>
           <input type="search" id="rkSearch1" class="po-search-inp" placeholder="Cari data">
           <div class="po-len-wrap">
             <label for="rkLen1">Tampilkan</label>
@@ -1022,8 +1028,17 @@ function rkTabelActionsCell (row) {
 
 function rkFilterRows (rows) {
   let status = $('#rkStatus').val()
+  let awal = $('#rkTanggalAwal').val()
+  let akhir = $('#rkTanggalAkhir').val()
   return (rows || []).filter(function (row) {
     if (status !== '' && String(Number(rkPickCI(row, 'IsOtorisasi1'))) !== status) { return false }
+    if (awal || akhir) {
+      let tgl = rkPickCI(row, 'Tanggal')
+      if (!tgl) { return false }
+      let t = String(tgl).slice(0, 10)
+      if (awal && t < awal) { return false }
+      if (akhir && t > akhir) { return false }
+    }
     return true
   })
 }

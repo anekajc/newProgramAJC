@@ -372,6 +372,86 @@
     }
   </style>
 {{-- end tampilan search modal barang all --}}
+
+{{-- Header form Add/Edit/Detail (#formBsGrid di page2) -- disamakan tampilan dan ukurannya
+     dengan .ttb-header milik gudang/terimatransferbarang.blade.php: label langsung di atas
+     field (bukan kolom label sempit terpisah seperti sebelumnya, yang bikin "Gdg Asal"
+     terpotong jadi dua baris), grid 4 kolom x 2 baris supaya baris Tanggal/Nama Gudang
+     Asal/Nama Gudang Tujuan sejajar. Beda dari terimatransferbarang: Gdg Asal/Tujuan di sini
+     tetap <select> (bukan input disabled) karena pada mode Tambah gudangnya memang harus
+     bisa dipilih user -- lockFormAdd()/unlockFormAdd() yang menonaktifkannya pada mode
+     Detail/Edit. --}}
+<style>
+  #formBsGrid .tb-header {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+      "nobukti asal       tujuan       ket"
+      "tanggal alamatasal alamattujuan ket";
+    column-gap: 24px;
+    row-gap: 16px;
+    align-items: start;
+  }
+  #formBsGrid .tb-header .tb-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  #formBsGrid .tb-header .tb-field > label {
+    margin: 0 0 6px;
+  }
+  #formBsGrid .tb-f-nobukti      { grid-area: nobukti; }
+  #formBsGrid .tb-f-tanggal      { grid-area: tanggal; }
+  #formBsGrid .tb-f-asal         { grid-area: asal; }
+  #formBsGrid .tb-f-alamatasal   { grid-area: alamatasal; }
+  #formBsGrid .tb-f-tujuan       { grid-area: tujuan; }
+  #formBsGrid .tb-f-alamattujuan { grid-area: alamattujuan; }
+  #formBsGrid .tb-header .tb-f-ket {
+    grid-area: ket;
+    align-self: stretch;
+  }
+  #formBsGrid .tb-header .tb-f-ket textarea.form-control {
+    flex: 1 1 auto;
+    height: 100% !important;
+  }
+  #formBsGrid .tb-header .tb-f-alamatasal,
+  #formBsGrid .tb-header .tb-f-alamattujuan {
+    align-self: stretch;
+    position: relative;
+  }
+  #formBsGrid .tb-header .tb-f-alamatasal textarea.form-control,
+  #formBsGrid .tb-header .tb-f-alamattujuan textarea.form-control {
+    position: absolute;
+    inset: 0;
+    height: auto !important;
+  }
+  @media (max-width: 767.98px) {
+    #formBsGrid .tb-header {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "nobukti" "tanggal" "asal" "alamatasal" "tujuan" "alamattujuan" "ket";
+    }
+    #formBsGrid .tb-header .tb-f-alamatasal textarea.form-control,
+    #formBsGrid .tb-header .tb-f-alamattujuan textarea.form-control {
+      position: static;
+    }
+  }
+
+  /* Varian tanpa baris Tanggal (buttonDetailAdd's page4) -- baris 2 grid tidak punya
+     field apapun di kolom nobukti, jadi tingginya tidak lagi ditentukan oleh input
+     Tanggal seperti di page2. Textarea alamat jadi tidak boleh lagi position:absolute
+     + height:auto (sempat overlap ke <hr>/tabel di bawahnya) -- dikunci ke tinggi
+     tetap 55px, persis seperti hasil uji lewat inspect element. */
+  #formBsGrid .tb-header.tb-header-notanggal .tb-f-alamatasal,
+  #formBsGrid .tb-header.tb-header-notanggal .tb-f-alamattujuan {
+    position: static;
+  }
+  #formBsGrid .tb-header.tb-header-notanggal .tb-f-alamatasal textarea.form-control,
+  #formBsGrid .tb-header.tb-header-notanggal .tb-f-alamattujuan textarea.form-control {
+    position: static;
+    height: 55px !important;
+  }
+</style>
+{{-- end header form Add/Edit/Detail --}}
 @endsection
 @section('content')
 
@@ -636,115 +716,44 @@
 
   <div id="modalBodyAddMain" class="">
     <div id='formBsGrid' class="modal-body">
-      <div class="row"> 
-        <div class="col-md-3">
-          <div class="row">
+      <input type="text" class="form-control text-center" id="input_add_nourut" placeholder="" readonly hidden>
+      <input type="text" class="form-control text-center" id="input_add_urut" placeholder="" readonly hidden>
 
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-center" id="input_add_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-
-            <div class="col-md-4" style="margin-top:-12px;">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-12px;">
-              <div class="form-group">
-                <input type="date" class="form-control text-center" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
-              </div>
-            </div>
-
-            <div class="col-md-4" style="margin-top:-12px;" hidden>
-              <div class="form-group">
-                <label>No Urut</label>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-12px;"hidden>
-              <div class="form-group">
-                <input type="text" class="form-control text-center" id="input_add_nourut" placeholder="" readonly>
-              </div>
-            </div>
-            <div class="col-md-8" style="margin-top:-12px;" hidden>
-              <div class="form-group">
-                <input type="text" class="form-control text-center" id="input_add_urut" placeholder="" readonly>
-              </div>
-            </div>
-            
-          </div>
+      <div class="tb-header">
+        <div class="tb-field tb-f-nobukti">
+          <label>No Bukti</label>
+          <input type="text" class="form-control text-left" id="input_add_nobukti" placeholder="" disabled>
         </div>
-
-        <div class="col-md-3">
-          <div class="row">
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Gdg Asal</label>
-              </div>
-            </div>
-            <div class="col-md-9">
-              <div class="input-group mb-3">
-                <select class="form-control text-center" id="input_add_kodeGudangAsal" onchange="tbOnChangeGudang('Asal')">
-                  <option value="">-</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-12" style="margin-top:-22px;">
-              <div class="form-group">
-                <textarea style="width: 100%; height:75px !important; resize: none;" rows=3 placeholder="Gudang Asal" class="form-control text-center align-items-center" id="input_add_namaGudangAsal"  disabled></textarea>
-              </div>
-            </div>
-          </div>
+        <div class="tb-field tb-f-tanggal">
+          <label>Tanggal</label>
+          <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
         </div>
-
-        <div class="col-md-3">
-          <div class="row">
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Gdg Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-9" >
-              <div class="input-group mb-3">
-                <select class="form-control text-center" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
-                  <option value="">-</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-12" style="margin-top:-22px;">
-              <div class="form-group">
-                <textarea style="width: 100%; height:75px !important; resize: none;" rows=3 placeholder="Gudang Tujuan" class="form-control text-center align-items-center" id="input_add_namaGudangTujuan"  disabled></textarea>
-              </div>
-            </div>
-          </div>
+        <div class="tb-field tb-f-asal">
+          <label>Gdg Asal</label>
+          <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="tbOnChangeGudang('Asal')">
+            <option value="">-</option>
+          </select>
         </div>
-
-      <div class="col-md-3">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group">
-              <label style="visibility:hidden;">Keterangan</label>
-            </div>
-          </div>
-          <div class="col-md-12" style="margin-top:-46px;">
-            <div class="form-group">
-              <textarea style="width: 100%; height:120px !important; resize: none;" rows=5 onblur="onChangeKeterangan()" placeholder="Keterangan" class="form-control" id="input_add_keterangan"></textarea>
-            </div>
-          </div>
+        <div class="tb-field tb-f-alamatasal">
+          <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Asal"
+            class="form-control text-left" id="input_add_namaGudangAsal" disabled></textarea>
+        </div>
+        <div class="tb-field tb-f-tujuan">
+          <label>Gdg Tujuan</label>
+          <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
+            <option value="">-</option>
+          </select>
+        </div>
+        <div class="tb-field tb-f-alamattujuan">
+          <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Tujuan"
+            class="form-control text-left" id="input_add_namaGudangTujuan" disabled></textarea>
+        </div>
+        <div class="tb-field tb-f-ket">
+          <label>Keterangan</label>
+          <textarea style="width: 100%; resize: none;" rows=3 onblur="onChangeKeterangan()" placeholder="Keterangan"
+            class="form-control" id="input_add_keterangan"></textarea>
         </div>
       </div>
-
-    </div>
 
           <hr/>
           <div class="row" hidden>
@@ -2521,83 +2530,32 @@
   </div>
 
   <div id='formBsGrid' class="container-fluid">
-    <div class="row"> 
-        <div class="col-md-3">
-          <div class="row">
-
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-md-8">
-              <div class="form-group">
-                <input type="text" class="form-control text-left" id="detail_nobukti" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-md-3" style="margin-top:-10px;">
-              <div class="form-group">
-                <label>Gdg Asal</label>
-              </div>
-            </div>
-            <div class="col-md-9" style="margin-top:-10px;">
-              <div class="input-group mb-3">
-                <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangAsal" disabled>
-                {{-- <button class="btn btn-chip-biru btn-sm rounded-end shadow-sm" id="buttonAddListGudangAsal" onclick="buttonAddListGudangAsal()">
-                  <i class="bi bi-plus"></i>
-                </button> --}}
-              </div>
-            </div>
-            <div class="col-md-12" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none; height:75px !important;" rows=3 placeholder="Gudang Asal" class="form-control text-left align-items-center" id="detail_namaGudangAsal"  disabled></textarea>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <div class="row">
-
-            <div class="col-md-3">
-              <div class="form-group">
-                <label>Gdg Tujuan</label>
-              </div>
-            </div>
-            <div class="col-md-9">
-              <div class="input-group mb-3">
-                <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangTujuan" disabled>
-                {{-- <button class="btn btn-chip-biru btn-sm rounded-end shadow-sm" id="buttonAddListGudangTujuan" onclick="buttonAddListGudangTujuan()">
-                  <i class="bi bi-plus"></i>
-                </button> --}}
-              </div>
-            </div>
-
-            <div class="col-md-12" style="margin-top:-10px;">
-              <div class="form-group">
-                <textarea style="width: 100%; resize: none; height:75px !important;" rows=3 placeholder="Gudang Tujuan" class="form-control text-left align-items-center" id="detail_namaGudangTujuan"  disabled></textarea>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      <div class="col-md-3">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group">
-              <label style="visibility:hidden;">Keterangan</label>
-            </div>
-          </div>
-          <div class="col-md-12" style="margin-top:-10px;">
-            <div class="form-group">
-              <textarea style="width: 100%; resize: none; height:75px !important;" rows=3 placeholder="Keterangan" class="form-control" id="detail_keterangan" disabled></textarea>
-            </div>
-          </div>
-        </div>
+    <div class="tb-header tb-header-notanggal">
+      <div class="tb-field tb-f-nobukti">
+        <label>No Bukti</label>
+        <input type="text" class="form-control text-left" id="detail_nobukti" placeholder="" disabled>
       </div>
-
+      <div class="tb-field tb-f-asal">
+        <label>Gdg Asal</label>
+        <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangAsal" disabled>
+      </div>
+      <div class="tb-field tb-f-alamatasal">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Asal"
+          class="form-control text-left" id="detail_namaGudangAsal" disabled></textarea>
+      </div>
+      <div class="tb-field tb-f-tujuan">
+        <label>Gdg Tujuan</label>
+        <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangTujuan" disabled>
+      </div>
+      <div class="tb-field tb-f-alamattujuan">
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Gudang Tujuan"
+          class="form-control text-left" id="detail_namaGudangTujuan" disabled></textarea>
+      </div>
+      <div class="tb-field tb-f-ket">
+        <label>Keterangan</label>
+        <textarea style="width: 100%; resize: none;" rows=3 placeholder="Keterangan"
+          class="form-control" id="detail_keterangan" disabled></textarea>
+      </div>
     </div>
     <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">

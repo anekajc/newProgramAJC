@@ -357,7 +357,7 @@
       <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-bottom:30px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
@@ -450,7 +450,7 @@
     </div>
     <div class="row mt-2" style="margin-top: 0">
       <div class="col-md-12 text-right mt-4">
-        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-primary" style="height: 30px;
+        <button id="buttonSubmitAdd" type="button" onclick="submitAdd()" class="btn btn-chip-biru" style="height: 30px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
@@ -582,7 +582,7 @@
             <label class="form-label fw-bold">Quantity</label>
           </div>
           <div class="col-md-3">
-            <input id="KoreksiEditInputQty" type="number" step="0.01" class="form-control text-right" value="0.00">
+            <input id="KoreksiEditInputQty" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" class="form-control text-right" value="0,00">
           </div>
           <div class="col-md-2" style="margin-top:5px;">
             <label class="form-label fw-bold">Satuan</label>
@@ -954,6 +954,24 @@
 let dataTableAdd = []
 let dataTableKoreksi = []
 let barangKoreksiEdit = {}
+
+function parseAngka (str) {
+  if (str === undefined || str === null || str === '') { return 0; }
+  let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+  return isNaN(n) ? 0 : n;
+}
+function formatAngkaDisplay (n, decimals) {
+  decimals = decimals === undefined ? 2 : decimals;
+  return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function formatAngkaInput (e) {
+  let el = e.target;
+  let parts = el.value.replace(/[^\d,]/g, '').split(',');
+  let intPart = parts[0].replace(/^0+(?=\d)/, '');
+  let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+  let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+  el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+}
 
 /* ============ Header tabel interaktif (window.ReportTable) ============
  * Port 1:1 dari pola opCart/opAktifkanTabel milik perintahopname.blade.php. SSP
@@ -1489,7 +1507,7 @@ function buttonKoreksiEditItem (i) {
   document.getElementById("KoreksiEditKodeBrg").value = barang.KODEBRG;
   document.getElementById("KoreksiEditNamaBrg").value = barang.NAMABRG;
 
-  document.getElementById("KoreksiEditInputQty").value = barang.QNT ? parseFloat(barang.QNT).toFixed(2) : "0.00";
+  document.getElementById("KoreksiEditInputQty").value = formatAngkaDisplay(barang.QNT || 0);
   document.getElementById("KoreksiEditInputSat").value = barang.NOSAT == 1 ? barang.SAT_1 : barang.SAT_2;
 
   document.getElementById("KoreksiEditGudangAsal").value = barang.NAMA_GDGASAL;
@@ -1757,11 +1775,7 @@ function submitKoreksiEdit () {
   let barang = barangKoreksiEdit;
   let choice = "U";
 
-  let qnt = parseFloat($("#KoreksiEditInputQty").val());
-  if (isNaN(qnt)) {
-    alertify.warning("Qty tidak valid");
-    return;
-  }
+  let qnt = parseAngka($("#KoreksiEditInputQty").val());
 
   if (qnt < 0) {
     alertify.warning("Qty tidak boleh kurang dari 0");
@@ -2013,12 +2027,8 @@ function buttonDetailAdd (nobukti) {
         let kodeBrg = item.KODEBRG || "";
         let namaBrg = item.NAMABRG || "";
         let satuan = item.SAT_1 || "";
-        let qntStock =
-          item.QNTSTOCK !== undefined
-            ? parseFloat(item.QNTSTOCK).toFixed(2)
-            : "0.00";
-        let qnt =
-          item.QNT !== undefined ? parseFloat(item.QNT).toFixed(2) : "0.00";
+        let qntStock = formatAngkaDisplay(item.QNTSTOCK || 0);
+        let qnt = formatAngkaDisplay(item.QNT || 0);
 
         // struktur tabel sama seperti buttonAdd tapi tanpa input/checkbox
         rowTable += `
@@ -2771,8 +2781,8 @@ function buttonAdd (nobukti) {
         let kodeBrg = item.KODEBRG;
         let namaBrg = item.NAMABRG;
         let satuan = item.SAT_1;
-        let qntStock = item.QNTSTOCK !== undefined ? parseFloat(item.QNTSTOCK).toFixed(2) : '0.00';
-        let qnt = item.QNT !== undefined ? parseFloat(item.QNT).toFixed(2) : '0.00';
+        let qntStock = formatAngkaDisplay(item.QNTSTOCK || 0);
+        let qnt = formatAngkaDisplay(item.QNT || 0);
 
         rowTable += `
           <tr>
@@ -2782,7 +2792,7 @@ function buttonAdd (nobukti) {
             <td>${kodeBrg}</td>
             <td>${namaBrg}</td>
             <td class="text-right">
-              <input id="input_add_qnt${i}" style="width: 100px;" class="text-right" type="number" min="0" value="${qnt}">
+              <input id="input_add_qnt${i}" style="width: 100px;" class="text-right" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" value="${qnt}">
             </td>
             <td>${satuan}</td>
             <td class="text-right">${qntStock}</td>
@@ -2826,7 +2836,7 @@ function submitAdd () {
   dataTableAdd.forEach((item, i) => {
     const checkbox = document.getElementById(`add_checkbox${i}`);
     if (checkbox && checkbox.checked) {
-      const inputQty = $(`#input_add_qnt${i}`).val();
+      const inputQty = parseAngka($(`#input_add_qnt${i}`).val());
 
       if (inputQty < 0) {
         checkMinus = true;
