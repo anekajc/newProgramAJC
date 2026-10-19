@@ -486,10 +486,8 @@
               <table id="koreksiTable" class="dph-tb">
                 <thead>
                   <tr>
-                    <th scope="col">Kode Barang</th>
-                    <th scope="col">Nama Barang</th>
-                    <th scope="col">Gudang Asal</th>
-                    <th scope="col">Gudang Tujuan</th>
+                    <th scope="col" class="text-left">Kode Barang</th>
+                    <th scope="col" class="text-left">Nama Barang</th>
                     <th scope="col" class="num">Qty</th>
                     <th scope="col" class="text-center">Sat</th>
                     <th scope="col" class="text-center">Actions</th>
@@ -497,7 +495,7 @@
                 </thead>
                 <tbody id="koreksiTableData">
                   <tr>
-                    <td colspan=7 class="text-center">Belum ada data</td>
+                    <td colspan=5 class="text-center">Belum ada data</td>
                   </tr>
                 </tbody>
               </table>
@@ -537,34 +535,13 @@
             <label class="mb-0">Quantity</label>
           </div>
           <div class="col-md-3">
-            <input id="KoreksiEditInputQty" type="number" step="0.01" class="form-control text-right" value="0.00">
+            <input id="KoreksiEditInputQty" type="text" class="form-control text-right" value="0.00" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
           </div>
           <div class="col-md-2" >
             <label class="mb-0">Satuan</label>
           </div>
           <div class="col-md-3">
             <input id="KoreksiEditInputSat" type="text" class="form-control text-center" disabled>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="row mb-3 align-items-center">
-          <div class="col-md-3" >
-            <label class="mb-0">Gudang Asal</label>
-          </div>
-          <div class="col-md-4">
-            <input id="KoreksiEditGudangAsal" type="text" class="form-control text-center" disabled>
-            <input type="hidden" id="input_gudang_asal">
-          </div>
-        </div>
-
-        <div class="row mb-3 align-items-center">
-          <div class="col-md-3" >
-            <label class="mb-0">Gudang Tujuan</label>
-          </div>
-          <div class="col-md-4">
-            <input id="KoreksiEditGudangTujuan" type="text" class="form-control text-center" disabled>
-            <input type="hidden" id="input_gudang_tujuan">
           </div>
         </div>
       </div>
@@ -725,7 +702,6 @@
           class="form-control" id="input_detailkoreksi_keterangan" disabled></textarea>
       </div>
     </div>
-    <hr/>
         <div class="container-fluid mt-4" style="overflow-x: auto; padding:0; margin:0;">
           <div class="dph-table-outer">
             <div class="dph-table-wrap">
@@ -734,15 +710,13 @@
                   <tr>
                     <th scope="col">Kode Barang</th>
                     <th scope="col">Nama Barang</th>
-                    <th scope="col">Gudang Asal</th>
-                    <th scope="col">Gudang Tujuan</th>
                     <th scope="col" class="num">Qty</th>
                     <th scope="col">Sat</th>
                   </tr>
                 </thead>
                 <tbody id="detailKoreksiTableData">
                   <tr>
-                    <td colspan=6 class="text-center">Belum ada data</td>
+                    <td colspan=4 class="text-center">Belum ada data</td>
                   </tr>
                 </tbody>
               </table>
@@ -1362,14 +1336,8 @@ function buttonKoreksiEditItem (i) {
   document.getElementById("KoreksiEditKodeBrg").value = barang.KODEBRG;
   document.getElementById("KoreksiEditNamaBrg").value = barang.NAMABRG;
 
-  document.getElementById("KoreksiEditInputQty").value = barang.QNT ? parseFloat(barang.QNT).toFixed(2) : "0.00";
+  document.getElementById("KoreksiEditInputQty").value = formatAngka((parseFloat(barang.QNT) || 0).toFixed(2));
   document.getElementById("KoreksiEditInputSat").value = barang.NOSAT == 1 ? barang.SAT_1 : barang.SAT_2;
-
-  document.getElementById("KoreksiEditGudangAsal").value = barang.GdgAsal;
-  document.getElementById("input_gudang_asal").value = barang.GdgAsal;
-
-  document.getElementById("KoreksiEditGudangTujuan").value = barang.GdgTujuan;
-  document.getElementById("input_gudang_tujuan").value = barang.GdgTujuan;
 
   $('#formKoreksiEdit').show();
 }
@@ -1402,8 +1370,6 @@ function refreshDataTableKoreksi (nobukti) {
         rowTable += `<tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GdgAsal}</td>
-          <td>${item.GdgTujuan}</td>
           <td class="text-right">${item.QNT ? parseFloat(item.QNT).toLocaleString() : '0.00'}</td>
           <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
@@ -1518,11 +1484,7 @@ function submitKoreksiEdit () {
   let barang = barangKoreksiEdit;
   let choice = "U";
 
-  let qntInput = parseFloat($("#KoreksiEditInputQty").val());
-  if (isNaN(qntInput)) {
-    alertify.warning("Qty tidak valid");
-    return;
-  }
+  let qntInput = unformatAngka($("#KoreksiEditInputQty").val());
 
   if (qntInput < 0) {
     alertify.warning("Qty tidak boleh kurang dari 0");
@@ -1541,8 +1503,8 @@ function submitKoreksiEdit () {
   let kodebrg = barang.KODEBRG;
   let namabrg = barang.NAMABRG;
 
-  let kodegdgasal = $("#input_gudang_asal").val();
-  let kodegdgtujuan = $("#input_gudang_tujuan").val();
+  let kodegdgasal = barang.GdgAsal;
+  let kodegdgtujuan = barang.GdgTujuan;
 
   let nosat = barang.NOSAT;
   let isi = parseFloat(barang.ISI) || 1;
@@ -1659,8 +1621,6 @@ function buttonKoreksi (nobukti) {
         rowTable += `<tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GdgAsal}</td>
-          <td>${item.GdgTujuan}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
@@ -1723,8 +1683,6 @@ function buttonDetailKoreksi (nobukti) {
         rowTable += `<tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GdgAsal}</td>
-          <td>${item.GdgTujuan}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td>${item.SAT_1}</td>
         </tr>`;
@@ -1963,7 +1921,7 @@ function buttonAdd (nobukti) {
             <td class="text-right">${qnt}</td>
             <td class="text-center">
               <input
-                class="input_add_qnt  text-right" data-index="${i}" type="number" min="0" value="" placeholder="0">
+                class="input_add_qnt  text-right" data-index="${i}" type="text" value="" placeholder="0" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
             </td>
           </tr>`;
       });
@@ -2002,7 +1960,7 @@ function submitAdd () {
   $(".add_checkbox:checked").each(function() {
     const i = $(this).data("index");
     const item = dataTableAdd[i];
-    const inputQty = parseFloat($(`.input_add_qnt[data-index='${i}']`).val() || 0);
+    const inputQty = unformatAngka($(`.input_add_qnt[data-index='${i}']`).val());
     const maxQty   = parseFloat(item.Qntx || 0);
 
     if (inputQty < 0) {
@@ -2107,6 +2065,74 @@ function formatDate(date , pemisah = '-') {
     return [year, month, day].join(pemisah);
 }
 
+function formatAngka(angkaString) {
+  let tempAngka = angkaString.split('.')
+
+  if (tempAngka[0][0] == '-') {
+    let temp2 = ''
+
+    let tempAngka1 = tempAngka[0].split('-')
+    for (let i = 0; i < tempAngka1[1].length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        temp2 = ',' + temp2
+      }
+      temp2 = tempAngka1[1][tempAngka1[1].length - i - 1] + temp2
+    }
+    temp2 += '.' + tempAngka[1]
+    temp2 = '-' + temp2
+
+    return temp2
+  }
+  let temp1 = ''
+  for (let i = 0; i < tempAngka[0].length; i++) {
+    if (i != 0 && i % 3 == 0) {
+      temp1 = ',' + temp1
+    }
+    temp1 = tempAngka[0][tempAngka[0].length - i - 1] + temp1
+  }
+  temp1 += '.' + tempAngka[1]
+  return temp1
+}
+
+function unformatAngka(angka) {
+  if (!angka) return 0
+  return parseFloat(String(angka).replace(/,/g, '')) || 0
+}
+
+function formatAngkaInput(el) {
+  el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+}
+
+// Dipasang di oninput supaya separator ribuan langsung muncul sambil mengetik, tidak
+// menunggu pindah fokus (onblur formatAngkaInput() tetap jalan untuk menormalkan ke 2
+// desimal). Sama seperti formatAngkaKetik() di accounting/memorialkoreksi.blade.php.
+function formatAngkaKetik(el) {
+  let posDariKanan = el.value.length - el.selectionStart
+  let minus = el.value.trim().startsWith('-') ? '-' : ''
+  let raw = el.value.replace(/[^0-9.]/g, '')
+
+  let titikIndex = raw.indexOf('.')
+  let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+  let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+  bulat = bulat.replace(/^0+(?=\d)/, '')
+  if (bulat === '') {
+    bulat = '0'
+  }
+
+  let bulatFormatted = ''
+  for (let i = 0; i < bulat.length; i++) {
+    if (i != 0 && (bulat.length - i) % 3 == 0) {
+      bulatFormatted += ','
+    }
+    bulatFormatted += bulat[i]
+  }
+
+  el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+  let posBaru = Math.max(0, el.value.length - posDariKanan)
+  el.setSelectionRange(posBaru, posBaru)
+}
 
 </script>
 
