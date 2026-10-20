@@ -20,7 +20,7 @@ class NewPOBeliAccController extends Controller
 {
   use PenjagaTransaksi;
 
- 
+
 
   // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Purchase Order).
   private function periodeRange ($periode) {
@@ -154,7 +154,7 @@ public function onChangeHeader (Request $req) {
     }
     $nilai = (float) str_replace(',', '', (string) $req->value);
     $res = DB::connection('SML')->update("update dbbeli set $kolom = :value where nobukti = :nobukti", ["value" => $nilai , "nobukti" => $req->nobukti]);
-    // exec sp_UpdateBeli '+QuotedStr(NoBukti.Text)+',:0 
+    // exec sp_UpdateBeli '+QuotedStr(NoBukti.Text)+',:0
     $values = [ $req->nobukti,11];
     DB::connection('SML')->statement('exec sp_UpdateBeli ?,?', $values);
     return $res;
@@ -192,7 +192,7 @@ public function spUpdateSO (Request $req) {
       if (!$update) {
         return $this->tolak('Pembelian ' . $nobukti . ' sudah diotorisasi oleh ' . $beli->otouser1 . '.');
       }
-    
+
      $values = [
       '',
       'dbbeli',
@@ -204,9 +204,9 @@ public function spUpdateSO (Request $req) {
     DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
     DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
 
-    
-    
-    
+
+
+
       return $update;
 
     }
@@ -237,7 +237,7 @@ public function spUpdateSO (Request $req) {
           return $this->tolak('Pembelian ' . $nobukti . ' sudah dipakai di ' . $pakai . ', otorisasi tidak bisa dibatalkan.');
         }
         $update = DB::connection('SML')->update("update dbbeli set IsOtorisasi1 = 0 , OtoUser1 = '' , TglOto1 = NULL, MaxOL = -1 where nobukti = :nobukti", [  'nobukti' => $nobukti ] );
-       
+
          $values = [
       '',
       'dbbeli',
@@ -248,7 +248,7 @@ public function spUpdateSO (Request $req) {
     ];
     DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
     DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-       
+
         return $update;
 
       }

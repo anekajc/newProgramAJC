@@ -234,7 +234,7 @@
       border-color: #a8bdff !important;
       color: #1d4ed8 !important;
     }
-    
+
 /* ---------- Perataan kotak centang untuk semua tabel di halaman ini ----------
    Dikumpulkan di satu tempat supaya tabel utama maupun tabel di dalam modal
    berperilaku sama. Dua hal yang dibereskan:
@@ -1162,9 +1162,9 @@ td input[type="checkbox"] {
 
 
 
-  
-  
-  
+
+
+
     <!-- TAB KANAN detail INFORMASI (dulu modal #IdetailPembelian) -->
 <div id="page4" class="container-fluid" style="display: none; background: #fff; padding-top: 15px; padding-bottom: 15px;">
 <div id="formBsGrid">
@@ -1895,7 +1895,7 @@ td input[type="checkbox"] {
 
 
 
-     
+
 
 
 function detailPembelian1(index) {
@@ -1955,7 +1955,7 @@ function detailPembelian1(index) {
           <td>${detail_row.Satuan}</td>
           <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
           <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>` 
+          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
 
         });
 
@@ -1982,7 +1982,7 @@ function detailPembelian1(index) {
 
         document.getElementById("IdetailNoPO").value = table_pembelian_row_detail[0].NoPO
         document.getElementById("IdetailFakturSupp").value = table_pembelian_row_detail[0].FAKTURSUPP
-        
+
         document.getElementById("IdetailPembeliankurs").value = table_pembelian_row_detail[0].KURS
 
         document.getElementById("IdetailPembeliantipeppn").value = table_pembelian_row_detail[0].PPN
@@ -1994,8 +1994,8 @@ function detailPembelian1(index) {
         document.getElementById("IdetailNoUangMuka").value = table_pembelian_row_detail[0].NOUMK
 
         document.getElementById("IdetailNuangmuka").value = formatAngkaX(table_pembelian_row_detail[0].NuangMuka)
-      
-        
+
+
         document.getElementById("IdetailPembelianJthTempo").value = formatDate(table_pembelian_row_detail[0].JthTempo)
 
         document.getElementById("Idetailgudang").value = table_pembelian_row_detail[0].NAMAGUDANG
@@ -2013,7 +2013,7 @@ function detailPembelian1(index) {
 
 
 
-        
+
         $("#IdetailDate").val(date1);
         $("#btnotokanan").hide();
         pbaShowPage('page4')
@@ -2175,7 +2175,7 @@ function detailPembelian1(index) {
             <td>${detail_row.Satuan}</td>
             <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
           <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>` 
+          <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
 
           });
 
@@ -2188,7 +2188,7 @@ function detailPembelian1(index) {
           if (table_pembelian_row_detail[0].KETERANGAN) {
             keterangan = table_pembelian_row_detail[0].KETERANGAN
           }
-          
+
 
              document.getElementById("IdetailPembelianNobukti").value = table_pembelian_row_detail[0].NoBukti;
         document.getElementById("IdetailPembelianKodeSupp").value = table_pembelian_row_detail[0].KODESUPP;
@@ -2202,7 +2202,7 @@ function detailPembelian1(index) {
 
         document.getElementById("IdetailNoPO").value = table_pembelian_row_detail[0].NoPO
         document.getElementById("IdetailFakturSupp").value = table_pembelian_row_detail[0].FAKTURSUPP
-        
+
         document.getElementById("IdetailPembeliankurs").value = table_pembelian_row_detail[0].KURS
 
         document.getElementById("IdetailPembeliantipeppn").value = table_pembelian_row_detail[0].PPN
@@ -2212,7 +2212,7 @@ function detailPembelian1(index) {
         document.getElementById("IdetailNoUangMuka").value = table_pembelian_row_detail[0].NOUMK
 
         document.getElementById("IdetailNuangmuka").value = formatAngkaX(table_pembelian_row_detail[0].NuangMuka)
-      
+
 
         document.getElementById("Idetailgudang").value = table_pembelian_row_detail[0].NAMAGUDANG
         document.getElementById("IdetailFakturSupp").value = table_pembelian_row_detail[0].FAKTURSUPP
@@ -2225,7 +2225,7 @@ function detailPembelian1(index) {
         document.getElementById("Iinput_det_discrp").value = formatAngkaX(table_pembelian_row_detail[0].TotDiskon)
         document.getElementById("Iinput_det_dpp").value = formatAngkaX(table_pembelian_row_detail[0].TotDPP)
         document.getElementById("Iinput_det_ppn").value = formatAngkaX(table_pembelian_row_detail[0].TotPPN)
-        document.getElementById("Iinput_det_grandtotal").value = formatAngkaX(table_pembelian_row_detail[0].TotNet ) 
+        document.getElementById("Iinput_det_grandtotal").value = formatAngkaX(table_pembelian_row_detail[0].TotNet )
 
 
 
@@ -3219,7 +3219,7 @@ function formatAngkaX (angka) {
 
       }
 
- 
+
 function onChangeHeader (field, value) {
 
   let _token  = $("#_token").val()
@@ -3329,9 +3329,9 @@ function refreshUpdateHeader () {
 
 
             dataLPB =  edit_pembelian_row_data[0]
-           
+
             dataEditPembelianEdit = edit_pembelian_row_data
-           
+
             let date = new Date(edit_pembelian_row_data[0].TANGGAL);
             var day = ("0" + date.getDate()).slice(-2);
             var month = ("0" + (date.getMonth() + 1)).slice(-2);
@@ -3342,7 +3342,7 @@ function refreshUpdateHeader () {
             edit_pembelian_row_data.forEach((r, i) => {
               console.log('r===' ,r ,'ASD')
               console.log('SDW')
-             
+
               let satuan = ""
               if (r.Satuan) {
                 satuan = r.Satuan
@@ -3350,7 +3350,7 @@ function refreshUpdateHeader () {
               table_row_edit_pembelian += `<tr>
               <td>${r.KodeBrg}</td>
               <td>${r.namabrgx}</td>
-              
+
               <td class="text-right">${r.Qnt ? formatAngkaX(r.Qnt) : '0.00' }</td>
               <td class="text-right">${r.QNTPO ? formatAngkaX(r.QNTPO) : '0.00' }</td>
               <td>${satuan}</td>
@@ -3358,7 +3358,7 @@ function refreshUpdateHeader () {
             <td class="text-right">${r.DiscRp1 ? formatAngkaX(r.DiscRp1) : '0.00' }</td>
             <td class="text-right">${r.TotalIDR ? formatAngkaX(r.TotalIDR) : '0.00' }</td>
               <td class="text-center"><button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button><button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button></td></tr>`
-                  
+
             });
 
             document.getElementById("EditNobukti").value = edit_pembelian_row_data[0].NoBukti
@@ -3449,7 +3449,7 @@ function onchangekurs () {
     let value = $("#editPembeliankurs").val()
     console.log(value)
     onChangeHeader('kurs' , value)
-   
+
     // refreshUpdateHeader()
     let nobukti = $("#EditNobukti").val()
     refreshDataTableAdd(nobukti)
@@ -3527,7 +3527,7 @@ function onChangeInputAddDiscRp () {
 //           <td>${detail_row.Satuan}</td>
 //           <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
 //           <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-//           <td class="text-right">${detail_row.NNET ? formatAngkaX(detail_row.NNET) : '0.00' }</td></tr>` 
+//           <td class="text-right">${detail_row.NNET ? formatAngkaX(detail_row.NNET) : '0.00' }</td></tr>`
 
 //         });
 
@@ -3554,7 +3554,7 @@ function onChangeInputAddDiscRp () {
 
 //         document.getElementById("IdetailNoPO").value = table_pembelian_row_detail[0].NoPO
 //         document.getElementById("IdetailFakturSupp").value = table_pembelian_row_detail[0].FAKTURSUPP
-        
+
 //         document.getElementById("IdetailPembeliankurs").value = table_pembelian_row_detail[0].KURS
 
 //         document.getElementById("IdetailPembeliantipeppn").value = table_pembelian_row_detail[0].PPN
@@ -3566,7 +3566,7 @@ function onChangeInputAddDiscRp () {
 //         document.getElementById("IdetailNoUangMuka").value = table_pembelian_row_detail[0].NOUMK
 
 //         document.getElementById("IdetailNuangmuka").value = parseFloat(table_pembelian_row_detail[0].NuangMuka || 0).toFixed(2)
-      
+
 
 //         document.getElementById("Idetailgudang").value = table_pembelian_row_detail[0].NAMAGUDANG
 //         document.getElementById("IdetailFakturSupp").value = table_pembelian_row_detail[0].FAKTURSUPP
@@ -3578,7 +3578,7 @@ function onChangeInputAddDiscRp () {
 //         document.getElementById("Iinput_det_dpp").value = table_pembelian_row_detail[0].TotDPP
 //         document.getElementById("Iinput_det_ppn").value = table_pembelian_row_detail[0].TotPPN
 //         document.getElementById("Iinput_det_grandtotal").value = table_pembelian_row_detail[0].TotNet
-      
+
 
 //     },
 //        error: function (err) {
@@ -3590,13 +3590,13 @@ function onChangeInputAddDiscRp () {
 //   })
 
 
-        
 
 
 
-       
 
-// }  
+
+
+// }
 
       function changeSelectBarang () {
         // sp_BeliGudang
@@ -3708,7 +3708,7 @@ if (pcekglobal) {
               table_row_edit_pembelian += `<tr>
               <td>${r.KodeBrg}</td>
               <td>${r.namabrgx}</td>
-              
+
               <td class="text-right">${r.Qnt ? formatAngkaX(r.Qnt) : '0.00' }</td>
               <td class="text-right">${r.QNTPO ? formatAngkaX(r.QNTPO) : '0.00' }</td>
               <td>${satuan}</td>
@@ -3717,10 +3717,10 @@ if (pcekglobal) {
             <td class="text-right">${r.TotalIDR ? formatAngkaX(r.TotalIDR) : '0.00' }</td>
               <td class="text-center">
               <button class="btn btn-success btn-sm" type="button" onclick="showPembelianEdit(${i})"><i class="bi bi-pen"></i></button>
-              
+
               </td>
               </tr>`
-                  
+
             });
 
 // <button style="" class="btn btn-danger btn-sm" type="button" onclick="submitPembelianDelete(${i})" ><i class="bi bi-trash"></i></button> Ini tombol delete, di comment di sini
@@ -3841,11 +3841,11 @@ if (pcekglobal) {
         table_row_detail += `<tr><td>${detail_row.KodeBrg}</td>
         <td>${detail_row.namabrgx}</td>
         <td class="text-right">${detail_row.Qnt ? formatAngkaX(detail_row.Qnt) : '0.00' }</td>
-        <td class="text-right">${detail_row.QNTPO ? formatAngkaX(detail_row.QNTPO) : '0.00' }</td>    
+        <td class="text-right">${detail_row.QNTPO ? formatAngkaX(detail_row.QNTPO) : '0.00' }</td>
         <td>${detail_row.Satuan}</td>
         <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
         <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-        <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`   
+        <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
         });
 
 
@@ -3860,7 +3860,7 @@ if (pcekglobal) {
 
         document.getElementById("detailNoPO").value = detail_row_data[0].NoPO
         document.getElementById("detailFakturSupp").value = detail_row_data[0].FAKTURSUPP
-       
+
         document.getElementById("detailPembeliankurs").value = detail_row_data[0].KURS
 
         document.getElementById("detailPembeliantipeppn").value = detail_row_data[0].PPN
@@ -3874,9 +3874,9 @@ if (pcekglobal) {
         document.getElementById("detailNoUangMuka").value = detail_row_data[0].NOUMK
 
         document.getElementById("detailNuangmuka").value = formatAngkaX(detail_row_data[0].NuangMuka)
-      
+
         document.getElementById("detailgudang").value = detail_row_data[0].NAMAGUDANG
-      
+
         document.getElementById("detailDate").value = formatDate(detail_row_data[0].TANGGAL)
         // Total = jumlah Subtotal (TotalIDR) seluruh item.
         document.getElementById("input_det_total").value = formatAngkaX(detail_row_data.reduce((jml, r) => jml + (parseFloat(r.TotalIDR) || 0), 0))
@@ -3884,7 +3884,7 @@ if (pcekglobal) {
         document.getElementById("input_det_discrp").value = formatAngkaX(detail_row_data[0].TotDiskon)
         document.getElementById("input_det_dpp").value = formatAngkaX(detail_row_data[0].TotDPP)
         document.getElementById("input_det_ppn").value = formatAngkaX(detail_row_data[0].TotPPN)
-        document.getElementById("input_det_grandtotal").value = formatAngkaX(detail_row_data[0].TotNet ) 
+        document.getElementById("input_det_grandtotal").value = formatAngkaX(detail_row_data[0].TotNet )
 
         $("#btnotokiri").show();
 
@@ -4008,7 +4008,7 @@ if (pcekglobal) {
 
 
 
-// Kiri Detail informasi 
+// Kiri Detail informasi
 
       function buttonDetail (nobukti, pjasa) {
         console.log(nobukti,  "<<< detail")
@@ -4065,8 +4065,8 @@ if (pcekglobal) {
 
 
          detail_row_data.forEach((detail_row, i) => {
-      
-        
+
+
         table_row_detail += `<tr><td>${detail_row.KodeBrg}</td>
         <td>${detail_row.namabrgx}</td>
         <td class="text-right">${detail_row.Qnt ? formatAngkaX(detail_row.Qnt) : '0.00' }</td>
@@ -4077,8 +4077,8 @@ if (pcekglobal) {
         <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
 
 
-         
-        
+
+
          });
 
 
@@ -4094,7 +4094,7 @@ if (pcekglobal) {
 
         document.getElementById("detailNoPO").value = detail_row_data[0].NoPO
         document.getElementById("detailFakturSupp").value = detail_row_data[0].FAKTURSUPP
-       
+
         document.getElementById("detailPembeliankurs").value = detail_row_data[0].KURS
 
         document.getElementById("detailPembeliantipeppn").value = detail_row_data[0].PPN
@@ -4559,13 +4559,13 @@ let _token = $('#_token').val()
 
       console.log(dataPrint);
       console.log(dataSO);
-      
+
     }
   })
 
   let arrayDataPrint = []
 
-  for (let i = 0; i < dataPrint.length; i+=7) 
+  for (let i = 0; i < dataPrint.length; i+=7)
   {
     let tempArray = dataPrint.slice(i,i+7)
     arrayDataPrint.push(tempArray)
@@ -5039,11 +5039,11 @@ let _token = $('#_token').val()
                         <div class="pb-1" style="width: 65%">${dataPrint[0].namaexp}</div>
                       </div>
                     </div>
-                
 
-                
+
+
                   <div style="width:40%;">
-                  
+
                   <div style="display: flex; font-size: 12px;">
                     <div class="pb-1" style="width: 30%">No. FB</div>
                     <div class="pb-1" style="width: 5%">:</div>
@@ -5089,7 +5089,7 @@ let _token = $('#_token').val()
   let subTotal = 0
   let ppnTotal = 0
   let totalTotal = 0
-  
+
   let tempPrintStr = ``
   tempPrintStr += `<html>
   <head>
@@ -5315,13 +5315,13 @@ let _token = $('#_token').val()
 
       console.log(dataPrint);
       console.log(dataSO);
-      
+
     }
   })
 
   let arrayDataPrint = []
 
-  for (let i = 0; i < dataPrint.length; i+=7) 
+  for (let i = 0; i < dataPrint.length; i+=7)
   {
     let tempArray = dataPrint.slice(i,i+7)
     arrayDataPrint.push(tempArray)
@@ -5842,7 +5842,7 @@ let _token = $('#_token').val()
   let subTotal = 0
   let ppnTotal = 0
   let totalTotal = 0
-  
+
   let tempPrintStr = ``
   tempPrintStr += `<html>
   <head>
@@ -6057,12 +6057,12 @@ let _token = $('#_token').val()
 
       console.log(dataPrint);
       console.log(dataPrint.detail);
-      
+
     }
   })
 
   let arrayDataPrint = []
-  for (let i = 0; i < dataPrint.length; i+=7) 
+  for (let i = 0; i < dataPrint.length; i+=7)
   {
     let tempArray = dataPrint.slice(i,i+7)
     arrayDataPrint.push(tempArray)
@@ -6090,7 +6090,7 @@ let _token = $('#_token').val()
   const now = new Date()
   const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric'});
   const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  
+
   css = `<style type="text/css">
     body {
       font-family: sans-serif;
@@ -6562,8 +6562,8 @@ let _token = $('#_token').val()
               </div>
             </div>
 
-          </div> 
-  
+          </div>
+
           <table
             class="detail-spb-table"
             style="width: 95%; font-family: sans-serif; display: table; font-size: 10px; border: 1px solid #3c3c3c;">
@@ -6588,7 +6588,7 @@ let _token = $('#_token').val()
   let subTotal = 0
   let ppnTotal = 0
   let totalTotal = 0
-  
+
   let tempPrintStr = ``
   tempPrintStr += `<html>
   <head>
@@ -6754,7 +6754,7 @@ tempPrintStr += `
     w.print()
     w.close()
   }
-    
+
 
     </script>
 
