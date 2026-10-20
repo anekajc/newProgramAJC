@@ -98,8 +98,7 @@ class TransferBarangController extends Controller
   // status terima difilter lewat kolom IsTerima (dari pTERIMA), sama seperti pola
   // di ubahkemasanbarang (filter Otorisasi) dan terimatransferbarang (filter Status Terima).
   private function fetchHeaderList($date1, $date2) {
-    $query = "
-      SELECT
+    $query = "SELECT
           B.NOBUKTI,
           X.TANGGAL,
           X.NOTE,
@@ -122,22 +121,27 @@ class TransferBarangController extends Controller
           COUNT(*) AS JmlItem,
           CASE
               WHEN COUNT(*) = SUM(CASE WHEN ISNULL(B.isbatal, 0) = 1 THEN 1 ELSE 0 END) THEN 'Batal'
-              WHEN ISNULL(X.IsOtorisasi1, 0) = 1 THEN 'Sudah'
-              ELSE 'Belum'
-          END AS Status
+              WHEN  SUM(b.QNT) = isnull(xx.qntterima,0) THEN 'Sudah'
+              when  isnull(xx.qntterima,0) < SUM(b.QNT)  and isnull(xx.qntterima,0)<>0 then 'sebagian'
+              when  isnull(xx.qntterima,0)=0 then 'belum'
+          END AS Status,
+          SUM(b.QNT) Qnttransfer,SUM(b.QNT2) qnt2transfer,xx.qntterima,xx.qnt2terima
       FROM dbTransferDet B
       LEFT JOIN dbBarang C ON C.KodeBrg = B.KodeBrg
       LEFT JOIN dbGudang D ON D.Kodegdg = B.GdgAsal
       LEFT JOIN dbGudang E ON E.Kodegdg = B.GdgTujuan
       LEFT JOIN DBTRANSFER X ON B.NOBUKTI = X.NOBUKTI
+      left outer join (select NOPRTRANSFER,SUM(QNT) qntterima,SUM(QNT2) qnt2terima
+					   from DBTRANSFERDET 
+					   group by NOPRTRANSFER
+						)xx on b.NOBUKTI=xx.NOPRTRANSFER 
       WHERE
           CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
       GROUP BY
           B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA,
           X.IsOtorisasi1, X.OtoUser1, X.TglOto1,
-          X.IsOtorisasi2, X.IsOtorisasi3, X.IsOtorisasi4, X.IsOtorisasi5, X.MaxOL
-      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC
-    ";
+          X.IsOtorisasi2, X.IsOtorisasi3, X.IsOtorisasi4, X.IsOtorisasi5, X.MaxOL,xx.qntterima,xx.qnt2terima
+      ORDER BY X.TANGGAL DESC, B.NOBUKTI DESC";
     // ISNULL(B.isbatal, 0) = 0 dihapus dari WHERE -- transaksi yang SEMUA itemnya batal
     // sekarang tetap muncul (ditandai Status='Batal'), bukan hilang sama sekali seperti
     // sebelumnya. Status dihitung per-header: 'Batal' kalau seluruh baris item-nya batal,
