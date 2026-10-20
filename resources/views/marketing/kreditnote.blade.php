@@ -292,9 +292,6 @@
             </div>
           </div>
         </div>
-
-
-
           </div>
         </div>
         <div class="col-md-3">
@@ -315,25 +312,8 @@
           </div>
         </div>
 
-
-
-
-
           </div>
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       </div>
 
@@ -356,8 +336,8 @@
         </div> -->
           <div class="col-md-8">
             <div class="form-group input-group">
-              <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="" disabled>
-              <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="buttonAddListCustomer()"><i class="bi bi-search"></i></button>
+              <input type="text" class="form-control" id="input_add_kodecustomer" placeholder="Kode Customer">
+              <button class="btn btn-chip-biru btn-sm btn-icon-search" id="buttonAddListCustomer" onclick="performSearchCustomer()"><i class="bi bi-search"></i></button>
             </div>
           </div>
           </div>
@@ -1711,9 +1691,6 @@ $(document).ready(function(){
             "paging": false ,
         });
 
-
-
-
   //   formAddListItem
 });
 
@@ -1905,8 +1882,6 @@ function submitAddEdit () {
       }
       if (res == 1) {
 
-
-
         // tipeform = 'edit'
         // lockFormAdd()
         $('.showhideitem').hide();
@@ -1915,10 +1890,8 @@ function submitAddEdit () {
         loadAll()
         refreshDataTable(nobukti)
 
-
         alertify.success('Berhasil Edit Invoice')
       }
-
 
     },
     error: function (err) {
@@ -2032,7 +2005,7 @@ function buttonAddPickInvoice () {
     alertify.warning("Tanggal server belum terambil, silahkan tutup form lalu tekan Tambah lagi");
     return
   }
-  if (!kodecustsupp || !nobukti) {
+  if (!kodecustsupp || !nobukti || !$("#input_add_namacustomer").val()) {
     alertify.warning("Pilih customer terlebih dahulu");
     return
   }
@@ -2122,6 +2095,7 @@ function buttonAddPickInvoice () {
             loadAll()
             // buttonCloseForm()
             tipeform = 'edit'
+            document.getElementById("input_add_kodecustomer").disabled = true
             document.getElementById("buttonAddListCustomer").disabled = true
             document.getElementById("input_add_tanggal").disabled = true
 
@@ -2161,7 +2135,7 @@ function buttonAddListInvoice () {
   let _token = $("#_token").val();
   let kodecustsupp = $("#input_add_kodecustomer").val();
 
-  if (!kodecustsupp  ) {
+  if (!kodecustsupp || !$("#input_add_namacustomer").val()) {
     alertify.warning("Pilih customer terlebih dahulu")
     return
   }
@@ -2322,7 +2296,7 @@ function buttonAddListNoInvoice () {
   let _token = $("#_token").val();
   let kodecustsupp = $("#input_add_kodecustomer").val();
 
-  if (!kodecustsupp) {
+  if (!kodecustsupp || !$("#input_add_namacustomer").val()) {
     alertify.warning("Pilih customer terlebih dahulu")
     return
   }
@@ -2416,7 +2390,7 @@ function knBukaPickerCustomer () {
   $('#form').modal('show')
 }
 
-function knIsiPickerCustomer (rows) {
+function knIsiPickerCustomer (rows, keyword) {
   let sel = '#tabel_add_list_customer'
   if ($.fn.DataTable.isDataTable(sel)) { $(sel).DataTable().clear().destroy() }
   $(sel + ' tbody').empty()
@@ -2430,6 +2404,7 @@ function knIsiPickerCustomer (rows) {
     columns: [kolom('KODECUSTSUPP'), kolom('NAMACUSTSUPP'), kolom('ALAMAT1'), kolom('NamaKota')],
     deferRender: true,
     order: [[0, 'asc']],
+    search: { search: keyword || '' },
     createdRow: function (tr) { tr.classList.add('pick-row') }
   })
 
@@ -2440,11 +2415,11 @@ function knIsiPickerCustomer (rows) {
   })
 }
 
-function buttonAddListCustomer () {
+function buttonAddListCustomer (keyword) {
   // Sudah ada di cache: modal langsung tampil berisi data, tanpa animasi memuat.
   if (knCacheCustomer) {
     knNomorBrowse++
-    knIsiPickerCustomer(knCacheCustomer)
+    knIsiPickerCustomer(knCacheCustomer, keyword)
     knModalMemuat('modalAddListCustomer', false)
     knBukaPickerCustomer()
     return
@@ -2455,7 +2430,7 @@ function buttonAddListCustomer () {
   knModalMemuat('modalAddListCustomer', true)
   knMuatCustomer().then(function (rows) {
     if (nomor !== knNomorBrowse) { return }
-    knIsiPickerCustomer(rows)
+    knIsiPickerCustomer(rows, keyword)
     knModalMemuat('modalAddListCustomer', false)
   }, function (err) {
     if (nomor !== knNomorBrowse) { return }
@@ -2465,6 +2440,27 @@ function buttonAddListCustomer () {
     alertify.warning('Terjadi kesalahan silahkan refresh browser')
   })
 }
+
+// Kode customer bisa diketik seperti menu Purchase Order: Enter / tombol browse membuka
+// modal pemilih yang langsung terfilter dengan teks ketikan.
+function performSearchCustomer () {
+  buttonAddListCustomer(document.getElementById('input_add_kodecustomer').value.trim())
+}
+
+$(function () {
+  document.getElementById('input_add_kodecustomer').addEventListener('keypress', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      performSearchCustomer()
+    }
+  })
+
+  // Kode diubah dengan mengetik = customer yang tadi dipilih tidak berlaku lagi.
+  document.getElementById('input_add_kodecustomer').addEventListener('input', function () {
+    document.getElementById('input_add_namacustomer').value = ''
+    document.getElementById('input_add_alamatcustomer').value = ''
+  })
+})
 
 // Modal ditutup (Batal / X / klik luar) = browse yang masih memuat dibatalkan.
 $(function () {
@@ -2626,6 +2622,7 @@ function unlockFormAdd () {
   document.getElementById("input_add_tanggal").disabled = false
 
 
+  document.getElementById("input_add_kodecustomer").disabled = false
   document.getElementById("buttonAddListCustomer").disabled = false
   document.getElementById("buttonAddListNoInvoice").disabled = false
 
@@ -2636,6 +2633,7 @@ function lockFormAdd () {
   document.getElementById("input_add_tanggal").disabled = true
 
 
+  document.getElementById("input_add_kodecustomer").disabled = true
   document.getElementById("buttonAddListCustomer").disabled = true
   document.getElementById("buttonAddListNoInvoice").disabled = true
 
@@ -2962,6 +2960,7 @@ if (pcekglobal) {
 
   tipeform = 'edit'
   cleanFormAdd()
+  document.getElementById("input_add_kodecustomer").disabled = true
   document.getElementById("buttonAddListCustomer").disabled = true
   document.getElementById("input_add_tanggal").disabled = true
 
@@ -3020,6 +3019,7 @@ if (pcekglobal) {
   }
   // Tanggal selalu disabled: KN baru memakai tanggal server.
   document.getElementById("input_add_tanggal").disabled = true
+  document.getElementById("input_add_kodecustomer").disabled = false
   document.getElementById("buttonAddListCustomer").disabled = false
   document.getElementById("addTableData").innerHTML = `<tr><td colspan=9 class="text-center">Belum ada data</td></tr>`
   tipeform = 'add'
