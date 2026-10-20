@@ -212,6 +212,13 @@ AND a.KODESUPP=:nobukti
         $tempValues = [$norpb, $nourut,$date,$data[0]['Kodegdg'], $noout,"","",0,0, $username];
         DB::connection('SML')->statement('exec sp_InsertOutRbeli ?,?,?,?,?,?,?,?,?,?', $tempValues);
 
+        // sp_InsertOutRbeli tetap membuat header walaupun tidak ada barang yang masuk ke
+        // dbRBeliDet - hasilnya dokumen retur kosong (tombol Detail tidak menampilkan apa pun).
+        $jmlDetail = DB::connection('SML')->select('select count(*) n from dbRBeliDet where NOBUKTI = ?', [$norpb]);
+        if (!$jmlDetail || (int) $jmlDetail[0]->n === 0) {
+          throw new \RuntimeException('DETAIL_KOSONG');
+        }
+
         // sp_InsertOutRbeli mengisi header dbRBeli dari "top 1" LPB milik PRB tanpa melihat
         // supplier - kalau satu PRB berisi item dari beberapa supplier/LPB, header retur bisa
         // jatuh ke supplier lain (lalu terbawa ke Invoice Retur Beli). Header disamakan dengan
@@ -232,6 +239,9 @@ AND a.KODESUPP=:nobukti
     } catch (\RuntimeException $e) {
       if ($e->getMessage() === 'STOK_TIDAK_CUKUP') {
         return 3;
+      }
+      if ($e->getMessage() === 'DETAIL_KOSONG') {
+        return $this->tolak('Tidak ada barang yang tersimpan untuk retur ini, penyimpanan dibatalkan. Tutup form lalu buka lagi.');
       }
       if (strpos($e->getMessage(), 'SISA_PRB|') === 0) {
         [, $kodebrg, $sisa] = explode('|', $e->getMessage());
