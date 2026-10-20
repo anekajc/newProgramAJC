@@ -89,6 +89,8 @@ class NewPOBeliAccController extends Controller
       $r->{'Jenis'} = ($r->TipeBayar == 1)
         ? ($pjasa == 1 ? 'Jasa Kredit' : 'Kredit')
         : ($pjasa == 1 ? 'Jasa Tunai'  : 'Tunai');
+      $r->{'Hutang'} = $r->hutang ?? null;
+      $r->{'Stock'} = ($pjasa == 1) ? 'Non Stock' : 'Stock';
       $r->{'No Bukti'}      = $r->NoBukti;
       $r->{'Tanggal'}       = $r->TglBeli ? date('Y-m-d', strtotime($r->TglBeli)) : null;
       $r->{'Nama Supplier'} = $r->NAMACUSTSUPP;
@@ -99,6 +101,8 @@ class NewPOBeliAccController extends Controller
       $r->{'DPP'}           = $r->TotDPP;
       $r->{'PPN'}           = $r->TotPPN;
       $r->{'Total'}         = $r->TotNet;
+      // 'Lunas'/'Belum' dari kolom hutang fnc_masterbeli.
+      $r->{'Lunas'}         = $r->hutang ?? null;
       return $r;
     };
 
