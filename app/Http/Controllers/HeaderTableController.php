@@ -1030,7 +1030,6 @@ class HeaderTableController extends Controller
         // Nama field HARUS sama persis dengan alias kolom di NewPOBeliAccController@loadAll.
         $default = [
           'Jenis'         => 0,
-          'Hutang'        => 0,
           'Stock'         => 0,
           'No Bukti'      => 0,
           'Tanggal'       => 2,
