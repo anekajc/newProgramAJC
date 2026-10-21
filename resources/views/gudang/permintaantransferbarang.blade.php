@@ -2586,7 +2586,7 @@
             }
 
 
-            var dlgBatalOtorisasi = alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+            var dlgBatalOtorisasi = alertify.prompt('Batal Otorisasi', "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
                 function(evt, value) {
                     // alertify.success("You entered: " + value);
                     let xpket = value;
