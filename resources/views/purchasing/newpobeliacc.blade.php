@@ -1544,6 +1544,12 @@ td input[type="checkbox"] {
         if (col.tipe === 2) {
           return nilai ? formatDate(nilai) : ""
         }
+        // Kolom Hutang tampil sebagai status: Lunas hijau, selain itu (Belum) merah.
+        if (col.field === 'Hutang' && nilai !== null && nilai !== undefined && nilai !== '') {
+          return String(nilai).trim().toLowerCase() === 'lunas'
+            ? `<span class="badge rounded-pill text-bg-success">${nilai}</span>`
+            : `<span class="badge rounded-pill text-bg-danger">${nilai}</span>`
+        }
         return (nilai === null || nilai === undefined) ? "" : nilai
       }
 
