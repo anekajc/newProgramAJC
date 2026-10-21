@@ -984,28 +984,40 @@ class HeaderTableController extends Controller
         $headerisshown = json_decode($headertable[0]->isshown);
         $isparsed = 0;
 
-        // Kolom Hutang sudah digantikan Lunas (isinya sama). Susunan kolom tersimpan yang
-        // masih memuatnya dibuang kolomnya, supaya tidak tampil dua kali.
+        // Kolom status hutang ('Lunas'/'Belum') sekarang bernama Hutang. Susunan kolom
+        // tersimpan bisa masih memuat kolom lama - Hutang versi awal (field-nya sudah tidak
+        // ada, jadi tampil kosong) dan/atau Lunas. Semuanya diringkas jadi SATU kolom Hutang
+        // di posisi kemunculan pertamanya; sisanya dibuang. Array tipe (desimal) tersimpan
+        // ikut dibuang di indeks yang sama supaya desimal kolom sesudahnya tidak bergeser.
         if (is_array($headertablevalue)) {
+          $tipeTersimpan = json_decode($headertable[0]->tipe);
+          $adaHutang = false;
           foreach (array_keys($headertablevalue) as $i) {
-            if (strtolower($headertablevalue[$i]) === 'hutang') {
+            if (!in_array(strtolower(trim((string) $headertablevalue[$i])), ['hutang', 'lunas'])) { continue; }
+            if (!$adaHutang) {
+              $adaHutang = true;
+              $headertablevalue[$i]    = 'Hutang';
+              $headertableheader[$i]   = 'Hutang';
+              $headerisshown[$i]       = 1;
+              $isnumberheadertable[$i] = 0;
+            } else {
               unset($headertablevalue[$i], $headertableheader[$i], $headerisshown[$i], $isnumberheadertable[$i]);
+              if (is_array($tipeTersimpan)) { unset($tipeTersimpan[$i]); }
             }
           }
           $headertablevalue    = array_values($headertablevalue);
           $headertableheader   = array_values($headertableheader);
           $headerisshown       = array_values($headerisshown);
           $isnumberheadertable = array_values($isnumberheadertable);
-        }
+          if (is_array($tipeTersimpan)) { $headertable[0]->tipe = json_encode(array_values($tipeTersimpan)); }
 
-        // Kolom Lunas ditambahkan belakangan (lihat $default di bawah). Susunan kolom yang
-        // sudah tersimpan milik user tidak memuatnya, jadi ditambahkan di ujung kanan supaya
-        // tetap muncul tanpa perlu mereset dbheadertable tiap user.
-        if (is_array($headertablevalue) && !in_array('Lunas', $headertablevalue)) {
-          $headertablevalue[]    = 'Lunas';
-          $headertableheader[]   = 'Lunas';
-          $headerisshown[]       = 1;
-          $isnumberheadertable[] = 0;
+          // Susunan lama yang belum memuat kolom ini sama sekali: tambahkan di ujung kanan.
+          if (!$adaHutang) {
+            $headertablevalue[]    = 'Hutang';
+            $headertableheader[]   = 'Hutang';
+            $headerisshown[]       = 1;
+            $isnumberheadertable[] = 0;
+          }
         }
       } else {
         $isparsed = 1;
@@ -1026,7 +1038,7 @@ class HeaderTableController extends Controller
           'DPP'           => 1,
           'PPN'           => 1,
           'Total'         => 1,
-          'Lunas'         => 0,
+          'Hutang'        => 0,
         ];
         foreach ($default as $key => $tipe) {
           array_push($headertablevalue, $key);
