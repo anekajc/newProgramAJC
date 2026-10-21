@@ -1423,6 +1423,7 @@ td input[type="checkbox"] {
   @endsection
 
   @section('js')
+<script>window.RT_LABEL_PAJAK = true</script>
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
     <script type="text/javascript">
 
@@ -1544,13 +1545,17 @@ td input[type="checkbox"] {
         if (col.tipe === 2) {
           return nilai ? formatDate(nilai) : ""
         }
-        // Kolom Hutang tampil sebagai status: Lunas hijau, selain itu (Belum) merah.
-        if (col.field === 'Hutang' && nilai !== null && nilai !== undefined && nilai !== '') {
-          return String(nilai).trim().toLowerCase() === 'lunas'
-            ? `<span class="badge rounded-pill text-bg-success">${nilai}</span>`
-            : `<span class="badge rounded-pill text-bg-danger">${nilai}</span>`
-        }
         return (nilai === null || nilai === undefined) ? "" : nilai
+      }
+
+      // Kolom Hutang ('Lunas'/'Belum') - badge disamakan dengan kolom Status tab Purchase
+      // Order (poBadgeStatus di purchaseorder.blade.php, .sp-badge di po-table-header.css):
+      // Lunas hijau, selain itu merah.
+      function pbaBadgeHutang (item) {
+        let nilai = item.Hutang
+        if (nilai === null || nilai === undefined || nilai === '') { return '' }
+        let kelas = String(nilai).trim().toLowerCase() === 'lunas' ? 'is-active' : 'is-inactive'
+        return `<span class="sp-badge ${kelas}">${nilai}</span>`
       }
 
       function pbaHeadHtml (cols) {
@@ -1781,6 +1786,7 @@ td input[type="checkbox"] {
         if (baris) {
           baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
           baris.insertAdjacentHTML('beforeend', `
+            <th style="padding: 4px 12px;" scope="col">Hutang</th>
             <th style="padding: 4px 12px;" scope="col">Oto</th>
             <th style="padding: 4px 12px;" scope="col">User Oto</th>
             <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
@@ -1822,6 +1828,7 @@ td input[type="checkbox"] {
             }
           });
           rowTable += `
+            <td class="text-center">${pbaBadgeHutang(item)}</td>
             ${isOtorisasi ?
                 '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
               :
