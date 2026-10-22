@@ -480,10 +480,10 @@
               <tr>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
-                <th scope="col">Customer</th>
-                <th scope="col">Lokasi Cust</th>
-                <th scope="col">Qty</th>
+                <th scope="col">Gudang Asal</th>
+                <th scope="col">Gudang Tujuan</th>
                 <th scope="col">Sat</th>
+                <th scope="col">Qty</th>
                 <th scope="col">Actions</th>
               </tr>
             </thead>
@@ -850,8 +850,8 @@
               <tr>
                 <th scope="col">Kode Barang</th>
                 <th scope="col">Nama Barang</th>
-                <th scope="col">Customer</th>
-                <th scope="col">Lokasi cust</th>
+                <th scope="col">Gudang Asal</th>
+                <th scope="col">Gudang Tujuan</th>
                 <th scope="col">Qty</th>
                 <th scope="col">Sat</th>
               </tr>
@@ -2666,10 +2666,11 @@ function buttonEdit (nobukti) {
           <tr>
             <td>${item.KODEBRG}</td>
             <td>${item.NamaBrg}</td>
-            <td>${item.NamaCustSupp}</td>
-            <td>${item.gdgTujuan} - ${item.lokasi}</td>
-            <td>${parseFloat(item.QNT).toLocaleString()}</td>
+            <td>${item.gdgAsal} - ${item.NamaGgdAsal || ''}</td>
+            <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
+
             <td>${item.SAT_1}</td>
+            <td>${parseFloat(item.QNT).toLocaleString()}</td>
             <td class="text-center">
               <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})" title="Edit"><i class="bi bi-pen"></i></button>
               <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})" title="Hapus"><i class="bi bi-trash"></i></button>
@@ -2783,11 +2784,11 @@ function buttonDetail (nobukti) {
         rowTable += `<tr>
         <td>${item.KODEBRG}</td>
         <td>${item.NamaBrg}</td>
-        <td>${item.NamaCustSupp}</td>
-        <td>${item.gdgTujuan} - ${item.lokasi}</td>
+        <td>${item.gdgAsal} - ${item.NamaGgdAsal || ''}</td>
+        <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
 
-        <td>${parseFloat(item.QNT).toLocaleString()}</td>
         <td>${item.SAT_1}</td>
+        <td>${parseFloat(item.QNT).toLocaleString()}</td>
         </tr>`
       });
 

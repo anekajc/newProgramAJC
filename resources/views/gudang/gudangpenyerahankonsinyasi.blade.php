@@ -1351,10 +1351,12 @@ $(document).ready(function(){
   $('#nav-home-tab').on('shown.bs.tab', function () {
     skAktifkanTabel(1);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+    if (skPerluGambar.tabel) { reinitTabel(); skPerluGambar.tabel = false; }
   });
   $('#nav-profile-tab').on('shown.bs.tab', function () {
     skAktifkanTabel(2);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+    if (skPerluGambar.tabel2) { reinitTabel2(); skPerluGambar.tabel2 = false; }
   });
 });
 
@@ -2077,11 +2079,20 @@ function loadAll () {
       lastTabelRows = res.tempOutstanding
       lastTabel2Rows = [].concat(res.tempPenerimaan, res.tempPenerimaan2)
 
-      if ($('#page1').is(':visible')) {
+      {{-- #page1 bisa terlihat tapi tab "Serah Konsinyasi" (#profile) belum aktif
+           (mis. user kembali dari Tambah lewat tab "Permintaan Konsinyasi") --
+           reinitTabel2() yang tetap dipaksa jalan di situ meng-init DataTables di
+           atas pane yang hidden (sama kasusnya dengan #page1 sendiri hidden), jadi
+           visibilitas dicek per-pane (#home/#profile), bukan cuma per-page. --}}
+      if ($('#home').is(':visible')) {
         reinitTabel()
-        reinitTabel2()
       } else {
         skPerluGambar.tabel = true
+      }
+
+      if ($('#profile').is(':visible')) {
+        reinitTabel2()
+      } else {
         skPerluGambar.tabel2 = true
       }
     }

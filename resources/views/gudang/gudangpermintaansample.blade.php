@@ -1022,8 +1022,8 @@
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Gudang Asal</th>
                   <th scope="col">Gudang Tujuan</th>
-                  <th scope="col">Qty</th>
                   <th scope="col">Satuan</th>
+                  <th scope="col">Qty</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_detail" class="text-left" >
@@ -1363,6 +1363,16 @@ function renderTabel2Rows (rows) {
 let lastTabelRows = []
 let lastTabel2Rows = []
 let gpPanjangHalaman = { 1 : 10, 3 : 10 }
+
+// loadAll() dipanggil dari dalam aksi (Tambah/Hapus/Otorisasi) yang masih berada di
+// page2/3 (page1 tersembunyi) -- reinitTabel()/reinitTabel2() yang langsung
+// menginisialisasi DataTables di atas tabel yang hidden membuat instance-nya korup
+// (lebar kolom 0/salah), dan korupsi itu bertahan sampai halaman di-refresh manual,
+// termasuk mempengaruhi klik Otorisasi berikutnya walau saat itu page1 sudah
+// terlihat. Redraw ditunda lewat flag ini sampai page1 benar-benar tampil lagi
+// (lihat buttonCloseForm()), sama seperti pola psPerluGambar di
+// gudangpenyerahansample.blade.php/skPerluGambar di gudangpenyerahankonsinyasi.blade.php.
+let gpPerluGambar = { tabel: false, tabel2: false }
 
 function gpIkatSearch (urut) {
   let ids = { 1 : ['gpSearch1', 'tabel'], 3 : ['gpSearch3', 'tabel2'] }
@@ -1749,8 +1759,14 @@ function loadAll () {
     success: function (res) {
       lastTabelRows = [].concat(res.belum_otorisasi, res.sudah_otorisasi)
       lastTabel2Rows = res.outstanding
-      reinitTabel()
-      reinitTabel2()
+
+      if ($('#page1').is(':visible')) {
+        reinitTabel()
+        reinitTabel2()
+      } else {
+        gpPerluGambar.tabel = true
+        gpPerluGambar.tabel2 = true
+      }
     },
     error: function (xhr, status, error) {
       alert("Gagal load data: " + error);
@@ -3050,7 +3066,7 @@ function buttonCloseForm () {
   $('#page2').hide();
   $('#page3').hide();
   $('#page1').show();
-  // loadAll();
+  loadAll();
 }
 
 function buttonAddListKodeBarang () {
