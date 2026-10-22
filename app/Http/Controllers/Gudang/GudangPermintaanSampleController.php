@@ -13,8 +13,6 @@ use App\Model\DBFLMENU;
 use Illuminate\Support\Facades\Auth;
 
 
-
-
 // use App\Http\Controllers\NewMenuController;
 
 class GudangPermintaanSampleController extends Controller

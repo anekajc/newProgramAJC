@@ -519,13 +519,13 @@
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Gudang Asal</th>
                   <th scope="col">Gudang Tujuan</th>
-                  <th scope="col">Qty</th>
                   <th scope="col">Sat</th>
+                  <th scope="col">Qty</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
-                <tr > 
+                <tr> 
                   <td></td>
                   <td></td>
                   <td></td>
@@ -1022,8 +1022,8 @@
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Gudang Asal</th>
                   <th scope="col">Gudang Tujuan</th>
-                  <th scope="col">Satuan</th>
                   <th scope="col">Qty</th>
+                  <th scope="col">Satuan</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_detail" class="text-left" >
@@ -1113,13 +1113,13 @@ function gpDefaultCart (urut) {
     return [
       ['NoBukti',      'No. Bukti',      1, 'varchar', 0, 0],
       ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-      ['KodeCustSupp', 'Kode Cust Supp',  1, 'varchar', 0, 0],
+      ['KodeCustSupp', 'Kode Cust Supp', 1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Customer',  1, 'varchar', 0, 0],
       ['kodebrg',      'Kode Barang',    1, 'varchar', 0, 0],
       ['namabrg',      'Nama Barang',    1, 'varchar', 0, 0],
       ['namasls',      'Sales',          1, 'varchar', 0, 0],
       ['QNT',          'Qty',            1, 'float',   0, 2],
-      ['SAT',          'Satuan',            1, 'varchar', 0, 0],
+      ['SAT',          'Satuan',         1, 'varchar', 0, 0],
       ['QNTSSKONSI',   'Qty SS Konsi',   1, 'float',   0, 2],
       ['QNTSISA',      'Qty Sisa',       1, 'float',   0, 2],
     ]
@@ -1133,7 +1133,7 @@ function gpDefaultCart (urut) {
     ['NamaCustSupp', 'Customer',    1, 'varchar', 0, 0],
     ['NAMASLS',      'Sales',       1, 'varchar', 0, 0],
     ['RefPR',        'Ref PR',      1, 'varchar', 0, 0],
-    ['IsOtorisasi1', 'Status',      1, 'bool',    0, 0],
+    ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'User Oto',    1, 'varchar', 0, 0],
     ['TglOto1',      'Tanggal Oto', 1, 'date',    0, 0],
   ]
@@ -2832,8 +2832,8 @@ function buttonEdit (nobukti) {
             <td>${item.NamaBrg}</td>
             <td>${item.gdgAsal} - ${item.NamaGgdAsal}</td>
             <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
-            <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
             <td>${item.SAT_1}</td>
+            <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
             <td class="text-center">
               <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})" title="Edit"><i class="bi bi-pen"></i></button>
               <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})" title="Hapus"><i class="bi bi-trash"></i></button>
@@ -2951,8 +2951,8 @@ function buttonDetail (nobukti) {
         <td>${item.NamaBrg}</td>
         <td>${item.gdgAsal} - ${item.NamaGgdAsal}</td>
         <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
-        <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
         <td>${item.SAT_1}</td>
+        <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
         </tr>`
       });
 

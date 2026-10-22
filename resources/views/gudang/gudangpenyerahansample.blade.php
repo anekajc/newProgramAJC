@@ -829,7 +829,7 @@
       <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-bottom:20px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
@@ -882,7 +882,7 @@
             </div>
             </div>
           </div>
-          {{-- <div class="col-md-3">
+          <div class="col-md-3">
             <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -891,11 +891,11 @@
             </div>
             <div class="col-md-8">
               <div class="form-group">
-                <input type="date" class="form-control text-center" id="detail_tanggal" value="{!! date('Y-m-d') !!}"  >
+                <input type="date" class="form-control text-center" id="detail_tanggal" value="{!! date('Y-m-d') !!}" disabled>
               </div>
             </div>
           </div>
-          </div> --}}
+          </div>
         </div>
       </div>
     </div>
@@ -1242,6 +1242,15 @@ let lastTabelRows = []
 let lastTabel2Rows = []
 let psPanjangHalaman = { 1 : 10, 2 : 10 }
 
+// loadAll() dipanggil dari dalam aksi (Tambah/Hapus/Otorisasi) yang masih berada di
+// page2/3/4/5 (page1 tersembunyi) -- reinitTabel()/reinitTabel2() yang langsung
+// menginisialisasi DataTables di atas tabel yang hidden membuat instance-nya korup
+// (lebar kolom 0/salah), dan korupsi itu bertahan sampai halaman di-refresh manual,
+// termasuk mempengaruhi klik Otorisasi berikutnya walau saat itu page1 sudah
+// terlihat. Redraw ditunda lewat flag ini sampai page1 benar-benar tampil lagi
+// (lihat buttonCloseForm()), sama seperti pola tbPerluGambar di transferbarang.blade.php.
+let psPerluGambar = { tabel: false, tabel2: false }
+
 function psIkatSearch (urut) {
   let ids = { 1 : ['psSearch1', 'tabel'], 2 : ['psSearch2', 'tabel2'] }
   let input = document.getElementById(ids[urut][0])
@@ -1533,8 +1542,8 @@ function refreshDataTableKoreksi (nobukti) {
         <tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${item.QNT ? parseFloat(item.QNT).toLocaleString() : '0.00'}</td>
           <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
@@ -1882,8 +1891,8 @@ function buttonKoreksi (nobukti) {
         rowTable += `<tr> 
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td>${item.SAT_1}</td>
           <td class="text-center">
@@ -1945,8 +1954,8 @@ function buttonDetailKoreksi (nobukti) {
         rowTable += `<tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td>${item.SAT_1}</td>
         </tr>`;
@@ -2003,7 +2012,8 @@ function buttonDetailAdd (nobukti) {
         $("#detail_sales_nama").val(firstItem.NamaSls || "");
         $("#detail_sales").val(firstItem.KodeSls || "");
         $("#detail_keterangan").val(firstItem.Note || "");
-        $("#detail_tanggal").val(firstItem.TANGGAL || "");
+        let detailTanggal = psPickCI(firstItem, 'TANGGAL');
+        $("#detail_tanggal").val(detailTanggal ? String(detailTanggal).slice(0, 10) : "");
       }
 
       let rowTable = "";
@@ -2050,8 +2060,14 @@ function loadAll () {
     success: function (res) {
       lastTabelRows = res.tempOutstanding
       lastTabel2Rows = [].concat(res.tempPenerimaan, res.tempPenerimaan2)
-      reinitTabel()
-      reinitTabel2()
+
+      if ($('#page1').is(':visible')) {
+        reinitTabel()
+        reinitTabel2()
+      } else {
+        psPerluGambar.tabel = true
+        psPerluGambar.tabel2 = true
+      }
     }
   });
 }

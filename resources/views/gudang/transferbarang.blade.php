@@ -747,7 +747,7 @@
           <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
         </div>
         <div class="tb-field tb-f-asal">
-          <label>Gdg Asal</label>
+          <label>Gudang Asal</label>
           <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="tbOnChangeGudang('Asal')">
             <option value="">-</option>
           </select>
@@ -757,7 +757,7 @@
             class="form-control text-left" id="input_add_namaGudangAsal" disabled></textarea>
         </div>
         <div class="tb-field tb-f-tujuan">
-          <label>Gdg Tujuan</label>
+          <label>Gudang Tujuan</label>
           <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
             <option value="">-</option>
           </select>
@@ -2553,8 +2553,12 @@
         <label>No Bukti</label>
         <input type="text" class="form-control text-left" id="detail_nobukti" placeholder="" disabled>
       </div>
+      <div class="tb-field tb-f-tanggal">
+        <label>Tanggal</label>
+        <input type="date" class="form-control text-left" id="detail_tanggal" disabled>
+      </div>
       <div class="tb-field tb-f-asal">
-        <label>Gdg Asal</label>
+        <label>Gudang Asal</label>
         <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangAsal" disabled>
       </div>
       <div class="tb-field tb-f-alamatasal">
@@ -2562,7 +2566,7 @@
           class="form-control text-left" id="detail_namaGudangAsal" disabled></textarea>
       </div>
       <div class="tb-field tb-f-tujuan">
-        <label>Gdg Tujuan</label>
+        <label>Gudang Tujuan</label>
         <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangTujuan" disabled>
       </div>
       <div class="tb-field tb-f-alamattujuan">
@@ -2949,27 +2953,34 @@ function deleteTransfer () {
 }
 
 function deleteTransferData (nobukti) {
-  
-  let _token  = $("#_token").val()
 
-  console.log(nobukti)
-  $.ajax({
-    url: "{!! url('trfbrgdeletetransfer') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      nobukti
+  alertify.confirm('Hapus Data', 'Hapus Data ' + nobukti + '?',
+    function () {
+      let _token  = $("#_token").val()
+
+      console.log(nobukti)
+      $.ajax({
+        url: "{!! url('trfbrgdeletetransfer') !!}",
+        type: "post",
+        async: false,
+        data: {
+          _token,
+          nobukti
+        },
+        success: function(res) {
+          alertify.success(`Transfer Telah Dihapus`)
+          loadAll();
+
+        },error: function (err) {
+          console.log(err)
+          alertify.warning('Terjadi kesalahan silahkan refresh browser')
+        }
+      })
     },
-    success: function(res) {
-      alertify.success(`Transfer Telah Dihapus`)
-      loadAll();
-
-    },error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    function () {
+      console.log('Hapus data dibatalkan')
     }
-  })
+  );
 }
 
 function deleteTransferSimpanData () {
@@ -6279,9 +6290,9 @@ function buttonShowHideHeaderDetail () {
 }
 
 function unlockFormAdd () {
-  document.getElementById("input_add_keterangan").disabled = false;
-  document.getElementById("input_add_kodeGudangAsal").disabled = false;
-  document.getElementById("input_add_kodeGudangTujuan").disabled = false;
+  document.getElementById("input_add_keterangan").disabled = true;
+  document.getElementById("input_add_kodeGudangAsal").disabled = true;
+  document.getElementById("input_add_kodeGudangTujuan").disabled = true;
   document.getElementById("buttonSimpanData").hidden = false;
   // document.getElementById("input_add_tipeppn").disabled = false
   // document.getElementById("input_add_pembayaran").disabled = false
@@ -6569,8 +6580,8 @@ function changeQnt (urut, kodebrg, gudangAsal) {
       $('#divhargaterakhir').hide();
       $('#divStockProyeksi').hide();
 
-      alertify.success('Berhasil mengganti QNT (Urut ' + urut + ')'); 
-      console.log(' QNT tersimpan:', QNT, QNT2);
+      alertify.success('Berhasil mengganti QTY (Urut ' + urut + ')'); 
+      console.log(' QTY tersimpan:', QNT, QNT2);
     },
     error: function (err) {
       console.log(err);
@@ -7303,6 +7314,7 @@ function refreshDataTableDetailAdd (NOBUKTI) {
       const list = res.list ?? [];
 
       $("#detail_nobukti").val(header.nobukti ?? '');
+      $("#detail_tanggal").val(header.Tanggal ? formatDate(header.Tanggal) : '');
       $("#detail_kodeGudangAsal").val(header.GDGASAL ?? '');
       $("#detail_kodeGudangTujuan").val(list[0]?.GdgTujuan ?? '');
       tbIsiDetailGudang();

@@ -662,6 +662,7 @@ if ($choice =='D'){
 {
     $choice = $req->choice;
     $nobukti = $req->nobukti;
+    $xurut = (int) $req->urut;
     $username = \Auth::user()->username;
 
     $values = [
