@@ -23,6 +23,7 @@ dulu justru disalin dari DBSMLNEW, jadi sudah ada di sini.
 | 05 | `marketing/05_index_dbspbdet_noso.sql` | Index `dbSPBDet (NoSo, UrutSo)` | Menu SO tetap jalan tetapi lebih lambat |
 | 06 | `marketing/06_kreditnote_perkhp_dan_akun_bk.sql` | Default `''` untuk `DBKreditNoteDET.perkHP` + DBPOSTHUTPIUT Kode `BK` = 41200 | Item Kredit Note tidak tersimpan, akun debet jurnal KN kosong |
 | 07 | `marketing/07_perbaiki_data_prj_lama.sql` | Perbaiki QNT1/QNT2 PRJ lama `SML/PRJ/00001/0416` dan `SML/PRJ/00001/0916` | PRJ 0416 terus tampil di Outstanding PRJ padahal tidak bisa diproses |
+| 23 | `marketing/23_vwposthutpiut_kreditnote_valas.sql` | `vwPostHutPiut` bagian Kredit Note: nilai valas masuk `KreditD` (dulu `DebetD`) | KN valas yang diotorisasi malah menambah saldo valas piutang di DBHUTPIUT |
 
 ## Yang tidak perlu diubah
 
