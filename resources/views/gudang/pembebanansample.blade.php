@@ -22,18 +22,6 @@
      doBrowseMaster/ajc-func-core.js milik halaman ini tidak diubah sama sekali, murni
      port tampilan. --}}
 <style>
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
-.status-badge-belum { color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0; }
 
 .pick-row { cursor: pointer; }
 .pick-row:hover { background-color: #f5f3ff !important; }
@@ -57,6 +45,34 @@
   border-bottom: 1px solid #e7e9ee;
   border-top: none;
 }
+
+{{-- Tombol Edit/Hapus di tabel item (#tabelitem) -- warna pastel bulat, sama seperti
+     #tabel_add di gudangreturpenyerahansample.blade.php. --}}
+#tabelitem td:last-child {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+#tabelitem td:last-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+#tabelitem td:last-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+#tabelitem td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabelitem td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 </style>
 @endsection
 
@@ -350,10 +366,9 @@
                         </div>
                         <div class="col-md-9">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="inputitem_gudang" disabled>
-                            <button onclick="buttonOpenPickGudang()" class="btn btn-chip-biru btn-sm text-right">
-                              <i class="bi bi-search"></i>
-                            </button>
+                            <select class="form-control" id="inputitem_gudang" onchange="onChangeItemGudang()">
+                              <option value="">- Pilih Gudang -</option>
+                            </select>
                           </div>
                         </div>
                       </div>
@@ -491,45 +506,6 @@
 </div>
 {{-- End Modal List Barang --}}
 
-{{-- Start Modal List Gudang -- picker SO 1:1, menggantikan popup generik doBrowseMaster
-     khusus untuk field ini. Data tetap dari endpoint lama (bbslistgudang / listGudang()). --}}
-<div class="modal fade" id="modalPickGudang" role="dialog" aria-labelledby="labelPickGudang" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width:95%;">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="labelPickGudang">Gudang</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body" style="margin-top:-30px;">
-        <div class="container-fluid px-3 mt-4">
-          <div class="row">
-            <div class="table-responsive" style="overflow-x:auto;">
-              <table id="tabel_pick_gudang" class="table table-bordered table-striped" style="width:100%;">
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th>Kode Gudang</th>
-                    <th>Nama Gudang</th>
-                    <th>Alamat</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data_pick_gudang" class="text-left">
-                  <!-- Diisi lewat JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-{{-- End Modal List Gudang --}}
-
 @include('gudang.modalbrowsemaster')
 
 @endsection
@@ -543,7 +519,7 @@
      pemilih menu Kas, pola yang sama persis dengan gudangreturpenyerahansample.blade.php. --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#modalNoSerahSample, #modalPickBarang, #modalPickGudang').addClass('picker-kas')
+  jQuery('#modalNoSerahSample, #modalPickBarang').addClass('picker-kas')
 })
 </script>
 <script>
@@ -768,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ['KodeCustSupp', 'Kode Cust',     1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
       ['IDUSER',       'User',          1, 'varchar', 0, 0],
-      ['IsOtorisasi1', 'Status',        1, 'bool',    0, 0],
+      ['IsOtorisasi1', 'Otorisasi',     1, 'bool',    0, 0],
       ['OtoUser1',     'User Oto',      1, 'varchar', 0, 0],
       ['TglOto1',      'Tgl Oto',       1, 'date',    0, 0],
     ]
@@ -897,12 +873,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let raw = bbsPickCI(row, col[0]);
     let type = col[3];
 
-    {{-- Status (IsOtorisasi1) -- badge "Sudah/Belum Otorisasi", bukan ikon check/x bool
-         biasa. --}}
+    {{-- Otorisasi (IsOtorisasi1) dirender sebagai ikon check/x hijau-merah, sama seperti
+         kolom otorisasi di halaman gudang lain. --}}
     if (col[0] === 'IsOtorisasi1') {
       return Number(raw) === 1
-        ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-        : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+        ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
     }
     if (type === 'date') {
       if (!raw) { return '<td></td>'; }
@@ -1040,6 +1016,8 @@ document.addEventListener('DOMContentLoaded', function () {
     reinitTabel();
 
     bbsInitReportTableSekali();
+
+    loadGudangOptions();
   });
 
   function loadAll() {
@@ -2205,47 +2183,33 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
     $('#modalPickBarang').modal('hide');
   }
 
-  {{-- Picker SO 1:1 utk Gudang -- data tetap dari endpoint lama (listGudang()). --}}
-  function buttonOpenPickGudang () {
-    console.log('buttonOpenPickGudang');
-
-    $('#tabel_data_pick_gudang').html('');
-
+  {{-- Gudang sekarang <select> biasa (bukan picker modal lagi), sama seperti
+       gudangpermintaansample.blade.php/gudangpermintaankonsinyasi.blade.php. Data tetap
+       dari endpoint lama (listGudang()). --}}
+  function loadGudangOptions () {
     $.ajax({
       url: "{!! $gudang !!}",
       type: "get",
       data: {},
       success: function (res) {
         let list = res.table || [];
-        let rowTable = '';
+        let options = '<option value="">- Pilih Gudang -</option>';
 
         list.forEach((item) => {
-          let kodeGdgEsc = String(item.KodeGdg ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-
-          rowTable += `
-            <tr class="pick-row" onclick="buttonPickItemGudang('${kodeGdgEsc}')">
-              <td>${item.KodeGdg}</td>
-              <td>${item.Nama ?? ''}</td>
-              <td>${item.Alamat ?? ''}</td>
-            </tr>`;
+          options += `<option value="${item.KodeGdg}">${item.KodeGdg} - ${item.Nama ?? ''}</option>`;
         });
 
-        $('#tabel_data_pick_gudang').html(rowTable);
-
-        pickerKasInit('tabel_pick_gudang');
-
-        $('#modalPickGudang').modal('show');
+        document.getElementById("inputitem_gudang").innerHTML = options;
       },
       error: function (err) {
         console.error("AJAX Error:", err);
-        alertify.warning('Terjadi kesalahan saat mengambil data.');
+        alertify.warning('Terjadi kesalahan saat mengambil data gudang.');
       }
     });
   }
 
-  function buttonPickItemGudang (kode) {
-    buttonBrowsePickGudang(kode);
-    $('#modalPickGudang').modal('hide');
+  function onChangeItemGudang () {
+    buttonBrowsePickGudang($("#inputitem_gudang").val());
   }
 
   function showSatuanBarang(_nosat, _kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
@@ -2355,6 +2319,78 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
 
     return cart;
 }
+
+  {{-- doSubmitItem() dipanggil submitItem() tapi tidak pernah didefinisikan di halaman
+       ini -- bikin "Simpan" selalu gagal dengan ReferenceError. Disalin dari pola yang
+       sama di ubahkemasanbarang.blade.php, disesuaikan ke nama field/fungsi yang sudah
+       ada di halaman ini (cekValidate(), successAdd/successEdit/successDelete,
+       doGenerateNoBukti() -- semuanya sudah ada, cuma doSubmitItem()-nya yang hilang). --}}
+  let g_submittingItem = false;
+
+  function doSubmitItem (_type, _urlName, _kode, _isRetry = false) {
+    if (g_submittingItem) return;
+
+    let choice;
+    if (gtipeformitem === g_tipeformitemAdd) choice = "I";
+    else if (gtipeformitem === g_tipeformitemEdit) choice = "U";
+    else if (gtipeformitem === g_tipeformitemDelete) choice = "D";
+    else return alertify.warning("Mode item tidak dikenali, silakan refresh browser");
+
+    if (!cekNotEmpty("input_nobukti")) {
+      return alertify.warning("No Bukti belum terbentuk, silakan tutup form lalu klik Tambah lagi");
+    }
+
+    let cart = cekValidate(choice);
+    if (typeof cart !== "object" || cart === null) {
+      return alertify.warning(cart ? String(cart) : "Data tidak valid");
+    }
+
+    let _nobukti = cart["nobukti"];
+    let _token = $("#_token").val();
+
+    const release = () => {
+      g_submittingItem = false;
+      $("#buttonSubmitItem").prop("disabled", false);
+    };
+
+    g_submittingItem = true;
+    $("#buttonSubmitItem").prop("disabled", true);
+
+    $.ajax({
+      url: "{!! url('') !!}/" + _urlName,
+      type: "post",
+      data: {
+        _token,
+        data: cart,
+        urut: cart["urut"]
+      },
+      success: function (res) {
+        release();
+
+        if (res === "T") {
+          if (choice === "I") successAdd(_nobukti);
+          else if (choice === "U") successEdit(_nobukti);
+          else successDelete(_nobukti);
+          return;
+        }
+
+        if (res === "D;;trans" && !_isRetry) {
+          let nb = doGenerateNoBukti(_kode);
+          $("#input_nobukti").val(nb.Nobukti);
+          $("#input_nourut").val(nb.Nourut);
+          return doSubmitItem(_type, _urlName, _kode, true);
+        }
+
+        console.log(res);
+        alertify.warning("Gagal menyimpan item, silakan coba lagi");
+      },
+      error: function (err) {
+        release();
+        console.log(err);
+        alertify.warning("Terjadi kesalahan, silahkan refresh browser");
+      }
+    });
+  }
 
   function submitItem () {
     doSubmitItem("item", "bbsspadd", "BBS");
