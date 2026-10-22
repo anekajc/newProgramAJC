@@ -167,7 +167,7 @@
       </div>
 
       <div id="modalBodyAddMain" class="">
-        <div id='formBsGrid' class="modal-body" style="margin-top:-60px;">
+        <div id='formBsGrid' class="modal-body">
           <div class="row">
 
             <input type="hidden" class="form-control" id="input_nourut">
@@ -277,7 +277,7 @@
 
         <div class="row ">
           <div class="col-md-12 mt-2 text-right" id="contentContainer">
-            <button type="button" class="btn btn-primary btn-pill-primary btn-action-primary hideableModeDetail" onclick="buttonItemAdd()">+ Tambah Item</button>
+            <button type="button" class="btn btn-primary btn-pill-primary btn-action-primary hideableModeDetail" onclick="buttonItemAdd()">Tambah Item</button>
           </div>
         </div>
 
@@ -307,11 +307,11 @@
                             <label>Kode Barang</label>
                           </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="inputitem_kodebrg" disabled>
-                            <button onclick="buttonOpenPickBarang()" id="btnitem_kodebrg" class="btn btn-primary btn-sm text-right lockableItemModeEdit">
-                              <i class="bi bi-plus"></i>
+                            <button onclick="buttonOpenPickBarang()" id="btnitem_kodebrg" class="btn btn-chip-biru btn-sm text-right lockableItemModeEdit">
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -351,8 +351,8 @@
                         <div class="col-md-9">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="inputitem_gudang" disabled>
-                            <button onclick="buttonOpenPickGudang()" class="btn btn-primary btn-sm text-right">
-                              <i class="bi bi-plus"></i>
+                            <button onclick="buttonOpenPickGudang()" class="btn btn-chip-biru btn-sm text-right">
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -366,7 +366,7 @@
                         </div>
                         <div class="col-md-3">
                           <div class="input-group form-group">
-                            <input type="number" class="form-control" id="inputitem_quantity">
+                            <input type="text" inputmode="decimal" oninput="formatAngkaInput(event)" class="form-control text-right" id="inputitem_quantity" value="0,00">
                           </div>
                         </div>
 
@@ -557,10 +557,28 @@ document.addEventListener('DOMContentLoaded', function () {
   var   gtipeformitem = g_tipeformitemNone;
 
   const g_modalNone = "";
-  var   gmodemodal = g_modalNone;
+  var   g_modeModal = g_modalNone;
 
   var dataItem = [];
   var dataBrowse = [];
+
+  function parseAngka (str) {
+    if (str === undefined || str === null || str === '') { return 0; }
+    let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+  }
+  function formatAngkaDisplay (n, decimals) {
+    decimals = decimals === undefined ? 2 : decimals;
+    return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+  function formatAngkaInput (e) {
+    let el = e.target;
+    let parts = el.value.replace(/[^\d,]/g, '').split(',');
+    let intPart = parts[0].replace(/^0+(?=\d)/, '');
+    let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+    let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+    el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+  }
 
   {{-- Polyfill helper doX/cekX yang dipanggil halaman ini tapi tidak ada di
        ajc-func-core.js (cuma messageRequired/nullToEmpty yang ada di sana) --
@@ -1996,7 +2014,7 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
     $("#inputitem_namabrg").val("");
     $("#inputitem_urutserahsample").val("");
     $("#inputitem_gudang").val("");
-    $("#inputitem_quantity").val(0);
+    $("#inputitem_quantity").val('0,00');
     $('#inputitem_satuan').empty();
     $('#inputitem_satuan').prop("disabled", true);
   }
@@ -2033,9 +2051,18 @@ function buttonOpenNoSerahSample () {
       let list = res.table || [];
       let rowTable = '';
 
+      {{-- NamaSales/NAMACUSTSUPP bisa mengandung apostrof, yang kalau ditaruh mentah
+           di dalam atribut onclick='...' bikin string literalnya pecah -> SyntaxError
+           saat baris diklik. Di-escape dulu sebelum diselipkan ke onclick. --}}
       list.forEach((item) => {
+        let nobuktiEsc = String(item.Nobukti ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let kodeSlsEsc = String(item.KodeSls ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let namaSlsEsc = String(item.NamaSales ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let kodeCustEsc = String(item.KODECUSTSUPP ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let namaCustEsc = String(item.NAMACUSTSUPP ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
         rowTable += `
-          <tr class="pick-row" onclick="buttonPickNoSerahSample('${item.Nobukti}', '${item.KodeSls ?? ''}', '${item.NamaSales ?? ''}', '${item.KODECUSTSUPP ?? ''}', '${item.NAMACUSTSUPP ?? ''}')">
+          <tr class="pick-row" onclick="buttonPickNoSerahSample('${nobuktiEsc}', '${kodeSlsEsc}', '${namaSlsEsc}', '${kodeCustEsc}', '${namaCustEsc}')">
             <td>${item.Nobukti}</td>
             <td>${item.Tanggal ? item.Tanggal.substring(0, 10) : '-'}</td>
             <td>${item.KodeSls ?? ''}</td>
@@ -2082,7 +2109,7 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
   function buttonBrowsePickBarang(_kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
     $("#inputitem_kodebrg").val(_kode);
     $("#inputitem_namabrg").val(_nama);
-    $("#inputitem_quantity").val(_qnt);
+    $("#inputitem_quantity").val(formatAngkaDisplay(_qnt));
 
     let satuanSelect = $("#inputitem_satuan");
     satuanSelect.empty(); // Clear previous options
@@ -2141,9 +2168,19 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
         let list = res.table || [];
         let rowTable = '';
 
+        {{-- NAMABRG bisa mengandung apostrof (mis. nama barang dengan ukuran/merk
+             berformat "X'"), yang kalau ditaruh mentah di dalam atribut onclick='...'
+             bikin string literalnya pecah di tengah jalan -> SyntaxError saat baris
+             diklik. Di-escape dulu sebelum diselipkan ke onclick. --}}
         list.forEach((item) => {
+          let kodeEsc = String(item.KODEBRG ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let namaEsc = String(item.NAMABRG ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat1Esc = String(item.sat1 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat2Esc = String(item.sat2 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat3Esc = String(item.sat3 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
           rowTable += `
-            <tr class="pick-row" onclick="buttonPickItemBarang('${item.KODEBRG}', '${item.NAMABRG ?? ''}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${item.sat1 ?? ''}', '${item.sat2 ?? ''}', '${item.sat3 ?? ''}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
+            <tr class="pick-row" onclick="buttonPickItemBarang('${kodeEsc}', '${namaEsc}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${sat1Esc}', '${sat2Esc}', '${sat3Esc}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
               <td>${item.QNTSISA ?? ''}</td>
@@ -2183,8 +2220,10 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
         let rowTable = '';
 
         list.forEach((item) => {
+          let kodeGdgEsc = String(item.KodeGdg ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
           rowTable += `
-            <tr class="pick-row" onclick="buttonPickItemGudang('${item.KodeGdg}')">
+            <tr class="pick-row" onclick="buttonPickItemGudang('${kodeGdgEsc}')">
               <td>${item.KodeGdg}</td>
               <td>${item.Nama ?? ''}</td>
               <td>${item.Alamat ?? ''}</td>
@@ -2300,8 +2339,9 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
 
     let stock = getStockSerahSample($("#input_noserahsample").val(), $("#inputitem_urutserahsample").val());
 
-    if (Number($("#inputitem_quantity").val()) <= Number(stock)) {
-      cart["qnt"]           = $("#inputitem_quantity").val();
+    let inputQuantity = parseAngka($("#inputitem_quantity").val());
+    if (inputQuantity <= Number(stock)) {
+      cart["qnt"]           = inputQuantity;
     } else {
       return "Qty Barang " + cart["kodebrg"] + " melebihi quantity sample";
     }

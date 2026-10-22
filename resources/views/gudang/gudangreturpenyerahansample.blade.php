@@ -320,8 +320,8 @@
           </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="row">
-                <div class="col-md-3" style="margin-top:5px;">
+              <div class="row mb-1 align-items-center">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>No. Serah Sample</label>
                   </div>
@@ -336,8 +336,8 @@
                   <input type="hidden" id="input_urut_ref">
                 </div>
               </div>
-              <div class="row" style="margin-top:-15px;">
-                <div class="col-md-3" style="margin-top:5px;">
+              <div class="row mb-1 align-items-center">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>Gudang</label>
                   </div>
@@ -347,21 +347,21 @@
                   <input type="hidden" id="input_add_add_namagudang">
                 </div>
               </div>
-              <div class="row" style="margin-top:-15px;">
-                <div class="col-md-3" style="margin-top:5px;">
+              <div class="row mb-1 align-items-center">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>Kode Barang</label>
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <div class="input-group mb-4">
+                  <div class="input-group">
                     <input id="input_add_add_kodebarang" type="text" class="form-control text-center" placeholder="Kode Barang" disabled>
                     {{-- <button type="button" id="buttonAddListKodeBarang" onclick="buttonAddListKodeBarang()" class="btn btn-primary btn-sm rounded-end shadow-sm"><i class="bi bi-plus"></i></button> --}}
                   </div>
                 </div>
               </div>
-              <div class="row" style="margin-top:-20px;">
-                <div class="col-md-3" style="margin-top:5px;">
+              <div class="row mb-1 align-items-center">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>Nama Barang</label>
                   </div>
@@ -370,8 +370,8 @@
                   <input id="input_add_add_keterangannama" type="text" class="form-control text-center" disabled>
                 </div>
               </div>
-              <div class="row" style="margin-top:-15px;">
-                <div class="col-md-3" style="margin-top:5px;">
+              <div class="row mb-1 align-items-center">
+                <div class="col-md-3">
                   <div class="form-group">
                     <label>Quantity</label>
                   </div>
@@ -379,7 +379,7 @@
                 <div class="col-md-3">
                   <input id="input_add_add_qnt" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" value="0,00" class="form-control text-right">
                 </div>
-                <div class="col-md-2" style="margin-top:5px;">
+                <div class="col-md-2">
                   <label for="input_add_add_satuan">Satuan</label>
                 </div>
                 <div class="col-md-3">
@@ -410,7 +410,7 @@
                 font-size: 0.75rem;
                 font-weight: 600;
                 text-transform: uppercase;
-                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Submit Add</button>
+                transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Simpan</button>
 
               <button type="button" id="submitAddEdit" class="btn btn-chip-biru btn-lg" style="
                 height: 30px;
