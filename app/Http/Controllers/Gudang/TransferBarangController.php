@@ -104,7 +104,7 @@ class TransferBarangController extends Controller
           X.NOTE,
           MIN(D.Nama + ' (' + B.GdgAsal + ')') AS NamagdgAsal,
           MIN(E.Nama + ' (' + B.GdgTujuan + ')') AS NamagdgTujuan,
-          ISNULL(X.pTERIMA, 0) AS IsTerima,
+          X.pTERIMA as IsTerima,
           ISNULL(X.IsOtorisasi1, 0) AS IsOtorisasi1,
           X.OtoUser1,
           X.TglOto1,
@@ -137,6 +137,7 @@ class TransferBarangController extends Controller
 						)xx on b.NOBUKTI=xx.NOPRTRANSFER 
       WHERE
           CAST(X.TANGGAL AS DATE) BETWEEN :date1 AND :date2
+          AND X.pTERIMA IS NULL
       GROUP BY
           B.NOBUKTI, X.TANGGAL, X.NOTE, X.pTERIMA,
           X.IsOtorisasi1, X.OtoUser1, X.TglOto1,

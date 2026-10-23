@@ -206,7 +206,7 @@
         <div class="card-body">
           <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
             <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Permintaan Konsinyasi</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">OutStanding</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Outstanding</a>
           </div>
         </div>
       </div>
@@ -852,8 +852,8 @@
                 <th scope="col">Nama Barang</th>
                 <th scope="col">Gudang Asal</th>
                 <th scope="col">Gudang Tujuan</th>
-                <th scope="col">Qty</th>
                 <th scope="col">Sat</th>
+                <th scope="col">Qty</th>
               </tr>
             </thead>
             <tbody id="tabel_data_detail" class="text-left">
@@ -907,15 +907,6 @@ let tempEditEdit = {}
 let tipeform = ''
 let tipeformitem = ''
 
-/* ============ Header tabel interaktif (window.ReportTable) ============
- * Port 1:1 dari pola gpCart/gpAktifkanTabel milik gudangpermintaansample.blade.php.
- * PRK Belum + Sudah Otorisasi digabung jadi satu tabel (#tabel, urut 1), dengan kolom
- * Status dan filter Status di toolbar. Tab OutStanding (#tabel2, urut 2) tetap data
- * item-level terpisah, tidak digabung. Baris di urut 1 masih berbentuk GROUP (array
- * item per NOBUKTI, bukan objek datar) -- sama seperti versi lama halaman ini
- * (res.belum_otorisasi.forEach((Group) => { const item = Group[0] ... })) dan sama
- * seperti gpFilterRows/gpTabelActionsCell di gudangpermintaansample, jadi
- * renderTabelRows()/gkFilterRows() selalu ambil group[0] dulu sebelum baca field. */
 let gkCart = { 1 : [], 2 : [] }
 let gkActiveUrut = 0
 const GK_HREF = 'gudangpermintaankonsinyasi'
@@ -957,7 +948,8 @@ function gkDefaultCart (urut) {
     ['NamaCustSupp', 'Customer',    1, 'varchar', 0, 0],
     ['NAMASLS',      'Sales',       1, 'varchar', 0, 0],
     ['RefPR',        'Ref PR',      1, 'varchar', 0, 0],
-    ['IsOtorisasi1', 'Status',      1, 'bool',    0, 0],
+    ['Statkirim',    'Status',      1, 'bool',    0, 0],
+    ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'User Oto',    1, 'varchar', 0, 0],
     ['TglOto1',      'Tanggal Oto', 1, 'date',    0, 0],
   ]
@@ -1113,6 +1105,15 @@ function gkValueCell (row, col) {
     return Number(raw) === 1
       ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
       : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  {{-- Statkirim (Belum/Sebagian/Sudah, dari loadAll()'s CASE expression) -- badge
+       titik+pill .sp-badge bawaan po-table-header.css, sama seperti kolom
+       Status di perintahopname.blade.php/beritaacaraopname.blade.php (hijau
+       utk Sudah, amber utk Sebagian, merah utk Belum). --}}
+  if (col[0] === 'Statkirim') {
+    let s = String(raw || '').trim().toLowerCase();
+    let kelas = s === 'sudah' ? 'is-active' : (s === 'sebagian' ? 'is-supervisor' : 'is-inactive');
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }

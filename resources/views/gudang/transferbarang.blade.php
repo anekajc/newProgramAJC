@@ -7142,9 +7142,9 @@ function refreshDataTableEdit (NOBUKTI) {
           { width: "15%", targets: 0 },
           { width: "35%", targets: 1 },
           { width: "10%", targets: 2 },
-          { width: "10%", targets: 3, className: "text-end" },
-          { width: "10%", targets: 4, className: "text-end" },
-          { width: "20%", targets: 5, orderable: false, className: "text-end" },
+          { width: "10%", targets: 3, className: "text-right" },
+          { width: "10%", targets: 4, className: "text-right" },
+          { width: "20%", targets: 5, orderable: false, className: "text-right" },
         ]
       });
 
@@ -7222,7 +7222,7 @@ function refreshDataTableDetail (NOBUKTI) {
                   style="white-space:nowrap; text-align:right; vertical-align:middle;">
                   ${sisa}
               </td>
-              <td style="white-space:nowrap; text-align:center; vertical-align:middle;">
+              <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
                 <input
                   type="text"
                   class="form-control text-right"
@@ -7266,9 +7266,9 @@ function refreshDataTableDetail (NOBUKTI) {
           { width: "15%", targets: 0 },
           { width: "35%", targets: 1 },
           { width: "10%", targets: 2 },
-          { width: "10%", targets: 3, className: "text-end" },
-          { width: "10%", targets: 4, className: "text-end" },
-          { width: "20%", targets: 5, orderable: false, className: "text-end" },
+          { width: "10%", targets: 3, className: "text-right" },
+          { width: "10%", targets: 4, className: "text-right" },
+          { width: "20%", targets: 5, orderable: false, className: "text-right" },
         ]
       });
 
