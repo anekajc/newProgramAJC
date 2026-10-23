@@ -764,20 +764,23 @@
           <input id="AddEditNoInv" type="text" class="form-control" disabled>
         </div>
       </div>
-      {{-- Nilai Inv & Nilai Inv (Rp) dipindah sebaris dengan No Inv supaya form lebih pendek
-           dan tombol Simpan/Batal terlihat tanpa scroll. --}}
-      <div class="col-auto" style="width:140px; margin-top:5px; white-space:nowrap;">
+      {{-- Nilai Inv & Nilai Inv (Rp) sebaris dengan No Inv supaya form lebih pendek dan
+           tombol Simpan/Batal terlihat tanpa scroll. Spacer menggeser Nilai Inv ke kolom
+           ke-3 (setelah ujung kanan Ket.), Nilai Inv (Rp) di kolom ke-4. Spacer fleksibel
+           (basis 0, maks 360px) supaya di layar sempit menyusut, bukan membuat baris turun. --}}
+      <div class="col-auto" style="flex:1 1 0; max-width:360px; padding:0;"></div>
+      <div class="col-auto" style="width:120px; margin-top:5px; white-space:nowrap;">
         <div class="form-group"><label>Nilai Inv</label></div>
       </div>
-      <div class="col-auto" style="width:220px;">
+      <div class="col-auto" style="width:200px;">
         <div class="form-group">
           <input id="AddEditNilaiInv" type="text" value="0.00" class="form-control text-right" disabled>
         </div>
       </div>
-      <div class="col-auto" style="width:140px; margin-top:5px; white-space:nowrap;">
+      <div class="col-auto" style="width:120px; margin-top:5px; white-space:nowrap;">
         <div class="form-group"><label>Nilai Inv (Rp)</label></div>
       </div>
-      <div class="col-auto" style="width:220px;">
+      <div class="col-auto" style="width:200px;">
         <div class="form-group">
           <input id="AddEditNilaiInvRp" type="text" value="0.00" class="form-control text-right" disabled>
         </div>
