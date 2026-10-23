@@ -1133,6 +1133,7 @@ function gpDefaultCart (urut) {
     ['NamaCustSupp', 'Customer',    1, 'varchar', 0, 0],
     ['NAMASLS',      'Sales',       1, 'varchar', 0, 0],
     ['RefPR',        'Ref PR',      1, 'varchar', 0, 0],
+    ['Statkirim',    'Status',      1, 'bool',    0, 0],
     ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'User Oto',    1, 'varchar', 0, 0],
     ['TglOto1',      'Tanggal Oto', 1, 'date',    0, 0],
@@ -1289,6 +1290,15 @@ function gpValueCell (row, col) {
     return Number(raw) === 1
       ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
       : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
+  }
+  {{-- Statkirim (Belum/Sebagian/Sudah, dari loadAll()'s CASE expression) -- badge
+       titik+pill .sp-badge bawaan po-table-header.css, sama seperti kolom
+       Status di perintahopname.blade.php/beritaacaraopname.blade.php (hijau
+       utk Sudah, amber utk Sebagian, merah utk Belum). --}}
+  if (col[0] === 'Statkirim') {
+    let s = String(raw || '').trim().toLowerCase();
+    let kelas = s === 'sudah' ? 'is-active' : (s === 'sebagian' ? 'is-supervisor' : 'is-inactive');
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
   }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
