@@ -346,6 +346,7 @@
                                 <th style="padding: 4px 12px;" scope="col">No Bukti</th>
                                 <th style="padding: 4px 12px;" scope="col">Tanggal</th>
                                 <th style="padding: 4px 12px;" scope="col">Keterangan</th>
+                                <th style="padding: 4px 12px;" scope="col">Status</th>
                                 <th style="padding: 4px 12px;" scope="col">Oto</th>
                                 <th style="padding: 4px 12px;" scope="col">User Oto</th>
                                 <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
@@ -2036,11 +2037,10 @@
             return null;
         }
 
-        let lastRows = (function() {
-            let belum = @json($tempOutstanding);
-            let sudah = @json($tempOutstanding2);
-            return belum.concat(sudah);
-        })();
+        // let lastRows = (function() {
+        //     let data = @json($tempOutstanding);
+        // })();
+        let dataBarang = @json($tempOutstanding);
         let globalOtorisasi = "2"; // filter modal: 2=Semua, 1=Sudah Otorisasi, 0=Belum Otorisasi
         let pageSize = 10; // dipakai sebagai pageLength DataTables di renderTabel()
 
@@ -2056,7 +2056,8 @@
             gcart_header = [
                 ['nobukti', 'No Bukti', 1, 'varchar', 0, 0],
                 ['Tanggal', 'Tanggal', 1, 'date', 0, 0],
-                ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0]
+                ['Keterangan', 'Keterangan', 1, 'varchar', 0, 0],
+                ['statrans', 'Status', 1, 'varchar', 0, 0]
             ];
         }
 
@@ -2342,7 +2343,7 @@
             }
 
             // Cari/paging/sorting dipegang DataTables — di sini cuma filter Otorisasi dari modal.
-            const rows = filterByOtorisasi(lastRows, globalOtorisasi);
+            const rows = filterByOtorisasi(dataBarang, globalOtorisasi);
 
             let html = '';
             rows.forEach(function(r) {
@@ -2350,6 +2351,11 @@
                 html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
                 html += cols.map(function(c) {
                     const v = pickCI(r, c[0]);
+                    if (c[0] === 'statrans') {
+                        return String(nullToEmpty(v)).toLowerCase() === 'sudah' ?
+                            '<td><span class="sp-badge is-active">Sudah</span></td>' :
+                            '<td><span class="sp-badge is-inactive">Belum</span></td>';
+                    }
                     if (c[3] === 'date') {
                         return '<td>' + (v ? doSetFormatDate(v, '/') : '') + '</td>';
                     }
@@ -2427,7 +2433,6 @@
         let dataAddAddListItem = []
 
         let dataRefreshOutstanding = []
-        let dataRefreshOutstanding2 = []
         let dataRefreshPenerimaan = []
         let listAlamatKirim = []
 
@@ -2444,6 +2449,11 @@
 
         $(document).ready(function() {
             doSetHeader(g_modeReport);
+            // Susunan kolom tersimpan per user (doLoadHeader) dan dibuat sebelum kolom Status ada —
+            // tambahkan kalau belum ada. Kalau sudah ada (termasuk yang disembunyikan), dibiarkan.
+            if (!gcart_header.some(c => c[0] === 'statrans')) {
+                gcart_header.push(['statrans', 'Status', 1, 'varchar', 0, 0]);
+            }
             ReportTable.init({
                 table: '#tabel',
                 bar: '#rtBar',
@@ -3761,9 +3771,6 @@
         }
 
         function loadAll() {
-            let dataBelum = [],
-                dataSudah = [];
-
             $.ajax({
                 url: "{!! url('prtloadall') !!}",
                 type: "get",
@@ -3773,8 +3780,7 @@
                     date2: $('#inputDate2').val()
                 },
                 success: function(res) {
-                    dataBelum = res.tempOutstanding || [];
-                    dataSudah = res.tempOutstanding2 || [];
+                    dataBarang = res.tempOutstanding || [];
                 },
                 error: function(err) {
                     console.log(err);
@@ -3782,7 +3788,6 @@
                 }
             });
 
-            lastRows = dataBelum.concat(dataSudah);
             renderTabel();
 
             console.log('load all selesai');
