@@ -159,7 +159,7 @@
             </div>
 
             <div id="rtBarTabel"></div>
-            <table id="tabel" class="data-table">
+            <table id="tabel" class="data-table po-aksi-hover">
               <thead style="white-space:nowrap;"></thead>
               <tbody id="tabel_data" class="text-left"></tbody>
             </table>
@@ -901,13 +901,13 @@ document.addEventListener('DOMContentLoaded', function () {
     let nobukti = bbsPickCI(row, 'NoBukti');
     let sudah = Number(bbsPickCI(row, 'IsOtorisasi1')) === 1;
     let html = '<td class="text-center">';
-    html += '<button class="btn btn-warning btn-sm" type="button" title="Details" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
+    html += '<button class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
     if (sudah) {
-      html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key-fill"></i></button>';
+      html += '<button class="btn btn-danger btn-sm" type="button" title="Batal Otorisasi" onclick="buttonBatalOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
       html += '<button class="btn btn-primary btn-sm" type="button" title="Print" onclick="submitPrint(\'' + nobukti + '\')"><i class="bi bi-printer"></i></button>';
     } else {
-      html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pencil-fill"></i></button>';
-      html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key-fill"></i></button>';
+      html += '<button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEdit(\'' + nobukti + '\')"><i class="bi bi-pen"></i></button>';
+      html += '<button class="btn btn-primary btn-sm" type="button" title="Otorisasi" onclick="buttonOtorisasi(\'' + nobukti + '\')"><i class="bi bi-key"></i></button>';
     }
     html += '</td>';
     return html;
@@ -2161,7 +2161,7 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
             <tr class="pick-row" onclick="buttonPickItemBarang('${kodeEsc}', '${namaEsc}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${sat1Esc}', '${sat2Esc}', '${sat3Esc}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
-              <td>${item.QNTSISA ?? ''}</td>
+              <td>${formatAngkaDisplay(item.QNTSISA ?? 0, 2)}</td>
             </tr>`;
         });
 

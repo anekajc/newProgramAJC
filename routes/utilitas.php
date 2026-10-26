@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Utilitas\HitungUlangStockController;
 use App\Http\Controllers\Utilitas\PostingController;
 use App\Http\Controllers\Utilitas\TutupBukuController;
+use App\Http\Controllers\Utilitas\AktivitasPemakaiController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/hitungulangstock', [HitungUlangStockController::class, 'index']);
@@ -19,4 +20,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/tutupbukuhitungulangneraca', [TutupBukuController::class, 'prosesHitungUlangNeraca']);
     Route::post('/tutupbukuhpprugilaba', [TutupBukuController::class, 'prosesHppRugiLaba']);
     Route::post('/tutupbukudashboard', [TutupBukuController::class, 'prosesDashboard']);
+
+    Route::get('/aktivitaspemakai', [AktivitasPemakaiController::class, 'index']);
+    Route::get('/aktivitaspemakailistselect', [AktivitasPemakaiController::class, 'listSelect']);
+    Route::get('/aktivitaspemakailoadall', [AktivitasPemakaiController::class, 'loadAll']);
 });
