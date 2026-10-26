@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Master\MasterAktivaController;
 use App\Http\Controllers\Master\MasterAreaController;
+use App\Http\Controllers\Master\MasterBcEntitasController;
+use App\Http\Controllers\Master\MasterBcReferensiController;
 use App\Http\Controllers\Master\MasterBarangController;
 use App\Http\Controllers\Master\MasterBarangJasaController;
 use App\Http\Controllers\Master\MasterCostingController;
@@ -81,6 +83,29 @@ Route::post('/mastervalasspadd', [MasterValasController::class, 'spAdd'])->middl
 Route::post('/mastervalasspedit', [MasterValasController::class, 'spEdit'])->middleware('auth');
 Route::post('/mastervalasspdelete', [MasterValasController::class, 'spDelete'])->middleware('auth');
 Route::get('/mastervalasspdetail', [MasterValasController::class, 'spDetail'])->middleware('auth');
+
+// MASTER ENTITAS BEA CUKAI ==========================================================
+Route::get('/masterbcentitas', [MasterBcEntitasController::class, 'index'])->middleware('auth');
+Route::get('/masterbcentitasloadall', [MasterBcEntitasController::class, 'loadAll'])->middleware('auth');
+Route::post('/masterbcentitasspadd', [MasterBcEntitasController::class, 'spAdd'])->middleware('auth');
+Route::post('/masterbcentitasspedit', [MasterBcEntitasController::class, 'spEdit'])->middleware('auth');
+Route::post('/masterbcentitasspdelete', [MasterBcEntitasController::class, 'spDelete'])->middleware('auth');
+Route::get('/masterbcentitasspdetail', [MasterBcEntitasController::class, 'spDetail'])->middleware('auth');
+
+// MASTER REFERENSI BEA CUKAI (satu controller, satu menu per master) ==========================
+Route::get('/masterbcnegara', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'negara')->middleware('auth');
+Route::get('/masterbcpelabuhan', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'pelabuhan')->middleware('auth');
+Route::get('/masterbckontainer', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'kontainer')->middleware('auth');
+Route::get('/masterbcpostarif', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'postarif')->middleware('auth');
+Route::get('/masterbckategoribarang', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'kategoribarang')->middleware('auth');
+Route::get('/masterbcjenisdokumen', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'jenisdokumen')->middleware('auth');
+Route::get('/masterbcjeniskemasan', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'jeniskemasan')->middleware('auth');
+Route::get('/masterbcjenissatuan', [MasterBcReferensiController::class, 'index'])->defaults('jenis', 'jenissatuan')->middleware('auth');
+Route::get('/masterbcreferensiloadall', [MasterBcReferensiController::class, 'loadAll'])->middleware('auth');
+Route::post('/masterbcreferensispadd', [MasterBcReferensiController::class, 'spAdd'])->middleware('auth');
+Route::post('/masterbcreferensispedit', [MasterBcReferensiController::class, 'spEdit'])->middleware('auth');
+Route::post('/masterbcreferensispdelete', [MasterBcReferensiController::class, 'spDelete'])->middleware('auth');
+Route::get('/masterbcreferensispdetail', [MasterBcReferensiController::class, 'spDetail'])->middleware('auth');
 
 // MASTER DAFTAR DEVISI ==========================================================
 Route::get('/masterdaftardevisi', [MasterDaftarDevisiController::class, 'index'])->middleware('auth');

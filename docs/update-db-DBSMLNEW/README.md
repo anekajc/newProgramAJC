@@ -23,6 +23,8 @@ dulu justru disalin dari DBSMLNEW, jadi sudah ada di sini.
 | 05 | `marketing/05_index_dbspbdet_noso.sql` | Index `dbSPBDet (NoSo, UrutSo)` | Menu SO tetap jalan tetapi lebih lambat |
 | 06 | `marketing/06_kreditnote_perkhp_dan_akun_bk.sql` | Default `''` untuk `DBKreditNoteDET.perkHP` + DBPOSTHUTPIUT Kode `BK` = 41200 | Item Kredit Note tidak tersimpan, akun debet jurnal KN kosong |
 | 07 | `marketing/07_perbaiki_data_prj_lama.sql` | Perbaiki QNT1/QNT2 PRJ lama `SML/PRJ/00001/0416` dan `SML/PRJ/00001/0916` | PRJ 0416 terus tampil di Outstanding PRJ padahal tidak bisa diproses |
+| 08 | `beacukai/08_hak_akses_sa_bc.sql` | User SA akses penuh menu Dokumen BC 2.6.1 (`documentbc261`), Master Entitas BC (`masterbcentitas`) dan 8 master referensi BC (`masterbcnegara`, `masterbcpelabuhan`, `masterbckontainer`, `masterbcpostarif`, `masterbckategoribarang`, `masterbcjenisdokumen`, `masterbcjeniskemasan`, `masterbcjenissatuan`). Jalankan **setelah** baris DBMENUWEB menu-menu itu dibuat | SA diarahkan ke /home saat membuka menu-menu itu |
+| 09 | `beacukai/09_tabel_documentbc261.sql` | Tabel baru `DOCUMENTBC261` + 6 tabel anak (barang, bahan baku, kemasan, kontainer, jaminan, dokumen) dan `CEISATOKEN` (token login CEISA per user). Master BC (`NEGARA`, `ENTITAS`, `JENISSATUAN`, dll.) dibuat terpisah | Menu Dokumen BC 2.6.1 error (tabel tidak ada); Login BC gagal |
 | 23 | `marketing/23_vwposthutpiut_kreditnote_valas.sql` | `vwPostHutPiut` bagian Kredit Note: nilai valas masuk `KreditD` (dulu `DebetD`) | KN valas yang diotorisasi malah menambah saldo valas piutang di DBHUTPIUT |
 
 ## Yang tidak perlu diubah
