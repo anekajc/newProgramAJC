@@ -519,13 +519,13 @@
                   <th scope="col">Nama Barang</th>
                   <th scope="col">Gudang Asal</th>
                   <th scope="col">Gudang Tujuan</th>
-                  <th scope="col">Qty</th>
                   <th scope="col">Sat</th>
+                  <th scope="col">Qty</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
-                <tr > 
+                <tr> 
                   <td></td>
                   <td></td>
                   <td></td>
@@ -1113,13 +1113,13 @@ function gpDefaultCart (urut) {
     return [
       ['NoBukti',      'No. Bukti',      1, 'varchar', 0, 0],
       ['Tanggal',      'Tanggal',        1, 'date',    0, 0],
-      ['KodeCustSupp', 'Kode Cust Supp',  1, 'varchar', 0, 0],
+      ['KodeCustSupp', 'Kode Cust Supp', 1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Customer',  1, 'varchar', 0, 0],
       ['kodebrg',      'Kode Barang',    1, 'varchar', 0, 0],
       ['namabrg',      'Nama Barang',    1, 'varchar', 0, 0],
       ['namasls',      'Sales',          1, 'varchar', 0, 0],
       ['QNT',          'Qty',            1, 'float',   0, 2],
-      ['SAT',          'Satuan',            1, 'varchar', 0, 0],
+      ['SAT',          'Satuan',         1, 'varchar', 0, 0],
       ['QNTSSKONSI',   'Qty SS Konsi',   1, 'float',   0, 2],
       ['QNTSISA',      'Qty Sisa',       1, 'float',   0, 2],
     ]
@@ -1133,7 +1133,8 @@ function gpDefaultCart (urut) {
     ['NamaCustSupp', 'Customer',    1, 'varchar', 0, 0],
     ['NAMASLS',      'Sales',       1, 'varchar', 0, 0],
     ['RefPR',        'Ref PR',      1, 'varchar', 0, 0],
-    ['IsOtorisasi1', 'Status',      1, 'bool',    0, 0],
+    ['Statkirim',    'Status',      1, 'bool',    0, 0],
+    ['IsOtorisasi1', 'Otorisasi',   1, 'bool',    0, 0],
     ['OtoUser1',     'User Oto',    1, 'varchar', 0, 0],
     ['TglOto1',      'Tanggal Oto', 1, 'date',    0, 0],
   ]
@@ -1290,6 +1291,15 @@ function gpValueCell (row, col) {
       ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
       : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
   }
+  {{-- Statkirim (Belum/Sebagian/Sudah, dari loadAll()'s CASE expression) -- badge
+       titik+pill .sp-badge bawaan po-table-header.css, sama seperti kolom
+       Status di perintahopname.blade.php/beritaacaraopname.blade.php (hijau
+       utk Sudah, amber utk Sebagian, merah utk Belum). --}}
+  if (col[0] === 'Statkirim') {
+    let s = String(raw || '').trim().toLowerCase();
+    let kelas = s === 'sudah' ? 'is-active' : (s === 'sebagian' ? 'is-supervisor' : 'is-inactive');
+    return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>';
+  }
   if (type === 'date') {
     if (!raw) { return '<td></td>'; }
     return '<td>' + formatDate(raw, '/') + '</td>';
@@ -1363,6 +1373,16 @@ function renderTabel2Rows (rows) {
 let lastTabelRows = []
 let lastTabel2Rows = []
 let gpPanjangHalaman = { 1 : 10, 3 : 10 }
+
+// loadAll() dipanggil dari dalam aksi (Tambah/Hapus/Otorisasi) yang masih berada di
+// page2/3 (page1 tersembunyi) -- reinitTabel()/reinitTabel2() yang langsung
+// menginisialisasi DataTables di atas tabel yang hidden membuat instance-nya korup
+// (lebar kolom 0/salah), dan korupsi itu bertahan sampai halaman di-refresh manual,
+// termasuk mempengaruhi klik Otorisasi berikutnya walau saat itu page1 sudah
+// terlihat. Redraw ditunda lewat flag ini sampai page1 benar-benar tampil lagi
+// (lihat buttonCloseForm()), sama seperti pola psPerluGambar di
+// gudangpenyerahansample.blade.php/skPerluGambar di gudangpenyerahankonsinyasi.blade.php.
+let gpPerluGambar = { tabel: false, tabel2: false }
 
 function gpIkatSearch (urut) {
   let ids = { 1 : ['gpSearch1', 'tabel'], 3 : ['gpSearch3', 'tabel2'] }
@@ -1749,8 +1769,14 @@ function loadAll () {
     success: function (res) {
       lastTabelRows = [].concat(res.belum_otorisasi, res.sudah_otorisasi)
       lastTabel2Rows = res.outstanding
-      reinitTabel()
-      reinitTabel2()
+
+      if ($('#page1').is(':visible')) {
+        reinitTabel()
+        reinitTabel2()
+      } else {
+        gpPerluGambar.tabel = true
+        gpPerluGambar.tabel2 = true
+      }
     },
     error: function (xhr, status, error) {
       alert("Gagal load data: " + error);
@@ -2832,8 +2858,8 @@ function buttonEdit (nobukti) {
             <td>${item.NamaBrg}</td>
             <td>${item.gdgAsal} - ${item.NamaGgdAsal}</td>
             <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
-            <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
             <td>${item.SAT_1}</td>
+            <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
             <td class="text-center">
               <button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})" title="Edit"><i class="bi bi-pen"></i></button>
               <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})" title="Hapus"><i class="bi bi-trash"></i></button>
@@ -2951,8 +2977,8 @@ function buttonDetail (nobukti) {
         <td>${item.NamaBrg}</td>
         <td>${item.gdgAsal} - ${item.NamaGgdAsal}</td>
         <td>${item.gdgTujuan} - ${item.NamaGgdTujuan}</td>
-        <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
         <td>${item.SAT_1}</td>
+        <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
         </tr>`
       });
 
@@ -3050,7 +3076,7 @@ function buttonCloseForm () {
   $('#page2').hide();
   $('#page3').hide();
   $('#page1').show();
-  // loadAll();
+  loadAll();
 }
 
 function buttonAddListKodeBarang () {

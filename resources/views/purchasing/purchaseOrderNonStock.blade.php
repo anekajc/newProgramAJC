@@ -1377,13 +1377,14 @@
                 <tr>
                   <th style="padding: 4px 12px;" scope="col">Kode Barang</th>
                   <th style="padding: 4px 12px;" scope="col">Nama Barang</th>
+                  <th style="padding: 4px 12px;" scope="col">Nama Alias</th>
                   <th style="padding: 4px 12px;" scope="col">Qty</th>
                   <th style="padding: 4px 12px;" scope="col">Sat</th>
                   <th style="padding: 4px 12px;" scope="col">Harga</th>
                   <th style="padding: 4px 12px;" scope="col">Diskon</th>
                   <th style="padding: 4px 12px;" scope="col">Sub Total</th>
                   <th style="padding: 4px 12px;" scope="col">No. PR</th>
-                  <th style="padding: 4px 12px;" scope="col">Actions</th>
+                  <th style="padding: 4px 12px;" scope="col" id="th_add_actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_add" class="text-left" >
@@ -1480,7 +1481,7 @@
                   </div>
 
                   <div class="form-row align-items-center mb-2">
-                    <label class="col-md-3 mb-0">Nama Barang</label>
+                    <label class="col-md-3 mb-0">Nama Alias</label>
                     <div class="col-md-9">
                       <input type="text" class="form-control" id="input_add_add_namabarang">
                     </div>
@@ -2764,7 +2765,7 @@
           <th style="padding: 4px 12px;" scope="col">Sat</th>
           <th style="padding: 4px 12px;" scope="col">Harga</th>
           <th style="padding: 4px 12px;" scope="col">Diskon</th>
-          <th style="padding: 4px 12px;" scope="col">NDPP</th>
+          <th style="padding: 4px 12px;" scope="col">DPP</th>
           <!-- <th scope="col">Actions</th> -->
 
         </tr>
@@ -2897,6 +2898,7 @@
 {{-- window.ReportTable: header tabel interaktif (drag kolom, roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 {{-- Modal pemilih (purchasing/modals/modalPONonStockAdd, #form) disamakan persis dengan modal
@@ -3000,8 +3002,11 @@ $(document).ready(function(){
 
 });
 
-function buttonOtorisasi (nobukti) {
-  console.log(nobukti)
+// isoto1 = status otorisasi level 1 dokumen (0/1). Wajib dikirim sebagai isoto1oto, sama seperti
+// purchaseOrder.blade.php: POController@updateOtorisasi memakainya di jalur Direktur - tanpa itu
+// server membalas 3 tanpa mengubah apa pun.
+function buttonOtorisasi (nobukti, isoto1 = 0) {
+  console.log(nobukti, isoto1)
 
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
@@ -3017,13 +3022,21 @@ function buttonOtorisasi (nobukti) {
     async: false,
     data: {
       _token,
-      nobukti
-
+      nobukti,
+      isoto1oto: Number(isoto1) ? 1 : 0
     },
     success: function(res) {
       if (res && res.pesan) {
         alertify.warning(res.pesan)
         loadAll()
+        return
+      }
+      if (res == 2) {
+        alertify.warning("Melebihi plafon")
+        return
+      }
+      if (res == 3) {
+        alertify.warning("Diperlukan otorisasi 1 terlebih dahulu")
         return
       }
       alertify.success('Berhasil update otorisasi')
@@ -3048,8 +3061,14 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-  alertify.confirm('Batal Otorisasi', 'Batal Otorisasi SO ' + nobukti + ' ?',
-      function() {
+  alertify.prompt('Batal Otorisasi', "Masukkan keterangan batal otorisasi nomor  " + nobukti, "",
+      function(evt, value) {
+        let xpket = String(value || '').trim()
+
+        if (!xpket) {
+          alertify.warning('Keterangan harus diisi.')
+          return false
+        }
         let _token = $("#_token").val();
 
         $.ajax({
@@ -3058,8 +3077,8 @@ function buttonBatalOtorisasi (nobukti) {
           async: false,
           data: {
             _token,
-            nobukti
-
+            nobukti,
+            pket : xpket
           },
           success: function(res) {
             if (res && res.pesan) {
@@ -4154,7 +4173,7 @@ function buttonAddAddPickBarangFOCPlus (index , pEdit = 0) {
   cekSatuanBarang(tempAddAdd.Kodebrg)
 
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.Kodebrg
-  document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
+  document.getElementById("input_add_add_namabarang").value = ''
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
   document.getElementById("input_add_add_noPPL").value = ''
   document.getElementById("input_add_add_urutPPL").value = 0
@@ -4392,7 +4411,8 @@ function buttonAddEditItem (i) {
 
   document.getElementById("input_add_add_foc").value = tempAddEdit.PFOC
   document.getElementById("input_add_add_kodebarang").value = tempAddEdit.KodeBrg
-  document.getElementById("input_add_add_namabarang").value = tempAddEdit.NamaBrg
+  document.getElementById("input_add_add_namabarangasli").value = tempAddEdit.NamaBrgAsli
+  document.getElementById("input_add_add_namabarang").value = tempAddEdit.NamaAlias
   document.getElementById("input_add_add_discpersen1").value = Number(tempAddEdit.DiscP1) ?  tempAddEdit.DiscP1 : '0.00'
   document.getElementById("input_add_add_discpersen2").value = Number(tempAddEdit.Discp2) ?  tempAddEdit.Discp2 : '0.00'
   document.getElementById("input_add_add_discpersen3").value = Number(tempAddEdit.Discp3) ?  tempAddEdit.Discp3 : '0.00'
@@ -4559,7 +4579,6 @@ function poKunciIdentitasBarang (kunci) {
   document.getElementById('input_add_add_outstanding').disabled = kunci
   document.getElementById('input_add_add_kodebarang').disabled = kunci
   document.getElementById('buttonBrowseBarangItem').disabled = kunci
-  document.getElementById('input_add_add_namabarang').disabled = kunci
 }
 
 // Cari indeks baris di dataAddAddListItem yang cocok dengan keyword yang diketik user di
@@ -6072,12 +6091,19 @@ function renderTabelPO (pakaiCache) {
     render : function (data, type, item) {
       let tombolAksiPO = `<button class="btn btn-warning btn-sm" type="button" data-toggle="tooltip" title="Detail" onclick="buttonDetail('${item.NoBukti}')"><i class="bi bi-info"></i></button>`
       if (Number(item.IsOtorisasi1)) {
+        // Level 1 sudah terisi tapi level otorisasinya belum lengkap (mis. PO > 200 jt yang
+        // diotorisasi Dept. Head) - tombol Otorisasi tetap tampil supaya Direktur bisa mengisi
+        // level 2. Edit tetap tidak ditampilkan.
+        if (Number(item.NeedOtorisasi)) {
+          tombolAksiPO += `
+          <button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Otorisasi Level 2" onclick="buttonOtorisasi('${item.NoBukti}', 1)"><i class="bi bi-key"></i></button>`
+        }
         tombolAksiPO += `
           <button class="btn btn-danger btn-sm" type="button" data-toggle="tooltip" title="Batal Otorisasi" onclick="buttonBatalOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
           <button class="btn btn-primary btn-sm" type="button" data-toggle="tooltip" title="Print" onclick="submitPrintcopy('${item.NoBukti}')"><i class="bi bi-printer"></i></button>`
       } else {
         tombolAksiPO += `
-          <button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
+          <button class="btn btn-info btn-sm" type="button" data-toggle="tooltip" title="Otorisasi" onclick="buttonOtorisasi('${item.NoBukti}', 0)"><i class="bi bi-key"></i></button>
           <button class="btn btn-success btn-sm" type="button" data-toggle="tooltip" title="Edit" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pen"></i></button>`
       }
       return tombolAksiPO
@@ -6455,7 +6481,7 @@ function buttonAddAddPickBarangAll (kodebrg) {
 
       tempAddAdd = res.barang[0]
       document.getElementById("input_add_add_kodebarang").value = tempAddAdd.Kodebrg
-      document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
+      document.getElementById("input_add_add_namabarang").value = ''
       document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
       document.getElementById("input_add_add_disc").value = '0.00'
       document.getElementById("input_add_add_discrp").value = '0.00'
@@ -6561,7 +6587,7 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
   cekSatuanBarang(tempAddAdd.KodeBrg)
 
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
-  document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
+  document.getElementById("input_add_add_namabarang").value = ''
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
   document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.SisaPPL).toFixed(2))
   document.getElementById("input_add_add_noPPL").value = tempAddAdd.NoBukti
@@ -6657,7 +6683,7 @@ function buttonAddAddPickBarangJasa (index , pEdit = 0) {
   cekSatuanBarang(tempAddAdd.KodeBrg)
 
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
-  document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
+  document.getElementById("input_add_add_namabarang").value = ''
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
   // Barang dari master (Non PR) tidak punya kuantitas outstanding seperti barang dari
   // PR - qty dimulai kosong, diisi manual oleh user.
@@ -6752,7 +6778,7 @@ function buttonAddAddPickBarangJasaPPL (index , pEdit = 0) {
   cekSatuanBarang(tempAddAdd.KodeBrg)
 
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
-  document.getElementById("input_add_add_namabarang").value = tempAddAdd.NamaBrg
+  document.getElementById("input_add_add_namabarang").value = ''
   document.getElementById("input_add_add_namabarangasli").value = tempAddAdd.NamaBrg
   document.getElementById("input_add_add_qty").value = formatAngka(parseFloat(tempAddAdd.Qnt).toFixed(2))
   urutPPLTemp = tempAddAdd.Urut
@@ -7448,11 +7474,13 @@ function buttonDetailKerja (NOBUKTI) {
 function refreshDataTableAdd (NOBUKTI) {
 
   console.log('refreshDataTableAdd' , NOBUKTI)
+  // Mode detail hanya melihat - kolom Actions disembunyikan (header + sel).
+  document.getElementById("th_add_actions").style.display = tipeform == 'detail' ? 'none' : ''
   if (!NOBUKTI) {
 
     // if(!dataTableAdd.length) {
       let rowTable = `<tr>
-      <td class="text-center" colspan="9">Belum ada barang</td>
+      <td class="text-center" colspan="10">Belum ada barang</td>
       </tr>`
     // }
     document.getElementById("tabel_data_add").innerHTML = rowTable
@@ -7490,13 +7518,14 @@ function refreshDataTableAdd (NOBUKTI) {
             `<tr>
               <td>${item.KodeBrg}</td>
               <td>${item.NamaBrg}</td>
+              <td>${item.NamaAlias || ''}</td>
               <td class="text-right">${item.Qnt ? formatAngka(item.Qnt) : '0.00'}</td>
               <td class="text-center">${item.Satuan}</td>
               <td class="text-right">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
               <td class="text-right">${item.DISCTOT ? formatAngka(parseFloat(item.DISCTOT).toFixed(2)) : '0.00'}</td>
               <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
               <td>${item.NoPPL ? item.NoPPL : ''}</td>
-              <td class="text-center">
+              <td class="text-center" style="${tipeform == 'detail' ? 'display:none' : ''}">
                 ${tipeform == 'edit' ?
                 `<button class="btn btn-success btn-sm" type="button" onclick="buttonAddEditItem(${i})"><i class="bi bi-pen"></i></button>
                 <button class="btn btn-danger btn-sm" type="button" onclick="buttonAddDeleteItem(${i})"><i class="bi bi-trash"></i></button>`
@@ -7508,7 +7537,7 @@ function refreshDataTableAdd (NOBUKTI) {
 
           if(!dataTableAdd.length) {
             rowTable = `<tr>
-            <td class="text-center" colspan="9">Belum ada barang</td>
+            <td class="text-center" colspan="10">Belum ada barang</td>
             </tr>`
           }
           document.getElementById("tabel_data_add").innerHTML = rowTable

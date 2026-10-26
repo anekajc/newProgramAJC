@@ -60,7 +60,10 @@ class KreditNoteController extends Controller
   private function queryKreditNote ($tglawal, $tglakhir, $filterkn) {
     return DB::connection("SML")->select("
       select * from (
-        select a.* , b.NAMACUSTSUPP from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
+        select a.* , b.NAMACUSTSUPP, isnull(d.NilaiRp,0) NILAIKN
+        from dbkreditnote a join DBCUSTSUPP b on a.KodeSupp = b.KODECUSTSUPP
+        left outer join (select NoBukti, Sum(NilaiRp) NilaiRp from dbKreditNoteDet group by NoBukti) d
+               on d.NoBukti = a.NoBukti
         where a.Tanggal between ? and ?
       ) x
       where (? = 0)
@@ -141,6 +144,13 @@ order by a.urut" , ["nobukti" => $req->nobukti, "nobukti2" => $req->nobukti]);
     return '';
   }
 
+  // Input angka di form tampil dengan separator ribuan (koma); dibersihkan lagi di sini -
+  // (float) '1,000.00' terbaca 1, sehingga cekNilai bisa salah menilai.
+  private function angka ($nilai) {
+    $bersih = str_replace(',', '', trim((string) $nilai));
+    return is_numeric($bersih) ? (float) $bersih : 0;
+  }
+
   private function tanggalServer () {
     return DB::connection('SML')->select("select convert(varchar(10), getdate(), 23) tanggal")[0]->tanggal;
   }
@@ -191,22 +201,29 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
   public function listInvoice (Request $req) {
 
     // Isi vwHutPiut ditulis langsung dengan filter customer di tabel dasar: di view kolomnya
-    // upper(KodeCustSupp) sehingga index tidak terpakai (customer besar 0,7 - 11 dtk). Hasil
-    // dicek identik dengan query lama (EXCEPT dua arah).
-    $listData = DB::connection('SML')->select("
-    select Cast(1 as Bit) Pilih,Convert(Numeric(18,2),0) Nilai, a.Valas KodeVls, a.Kurs, a.NoFaktur,Min(a.Tanggal) Tanggal, Min(a.JatuhTempo) JatuhTempo,
-           SUM(a.Saldo) Saldo, SUM(A.SaldoD) SaldoD
-    from DBHUTPIUT a
-    Left Outer Join dbInvoicePL b on a.NoFaktur=b.NoBukti
-    Left Outer join DBSO C on b.NoSPP=C.NOBUKTI
-    Left outer join DBKEBUNCUSTSUPP d on c.KODECUST=d.KODECUSTSUPP
-      and d.KODEKEBUN=case when isnull(A.Kodekebun,'')='' then ISnull(C.KODEKEBUN,'') else ISnull(A.Kodekebun,'') End
-    left outer join DBPICCUSTSUPP E ON C.KodePF=E.KODEPIC AND C.KODECUST=e.KODECUSTSUPP
-    where a.KodeCustSupp = cast(:kodecustsupp as varchar(15)) and a.Tipe='PT'
-      and not exists (select 1 from dbKreditNoteDet k where k.NoInv=a.NoFaktur)
-    Group by a.NoFaktur,a.Valas, a.Kurs
-    Having SUM(a.Saldo)<>0 or SUM(A.SaldoD)<>0
-    Order by a.Nofaktur
+    // upper(KodeCustSupp) sehingga index tidak terpakai. Join view (invoice PL/SO/kebun/PIC)
+    // tidak dipakai kolomnya, jadi dilepas.
+    // Hanya invoice yang belum lunas. Saldo dijumlah per NoFaktur saja (sama dengan
+    // infoInvoice/cekNilai): dulu per NoFaktur+Valas+Kurs, sehingga pelunasan valas dengan
+    // kurs lain dan baris selisih kurs jadi kelompok sendiri dan invoice lunas tetap tampil.
+    // Lunas dinilai per mata uang invoice (IDR: Saldo, valas: SaldoD). Sisa < 1 (hanya selisih
+    // pembulatan di belakang koma, mis. 0,07) dianggap lunas, keputusan user 22 Okt 2026.
+    $listData = DB::connection('SML')->select("declare @awal Varchar(15)
+    Select @Awal= cast(:kodecustsupp as varchar(15))
+    select Cast(1 as Bit) Pilih,Convert(Numeric(18,2),0) Nilai, isnull(v.Valas,'IDR') KodeVls, isnull(v.Kurs,1) Kurs, s.NoFaktur, s.Tanggal, s.JatuhTempo,
+           s.Saldo, s.SaldoD
+    from (select a.NoFaktur, Min(a.Tanggal) Tanggal, Min(a.JatuhTempo) JatuhTempo, SUM(a.Saldo) Saldo, SUM(a.SaldoD) SaldoD,
+                 nullif(max(case when isnull(a.Valas,'') not in ('','IDR') then a.Valas else '' end),'') ValasAsing
+          from DBHUTPIUT a
+          where a.KodeCustSupp=@Awal and a.Tipe='PT'
+            and not exists (select 1 from dbKreditNoteDet k where k.NoInv=a.NoFaktur)
+          Group by a.NoFaktur) s
+    outer apply (select top 1 h.Valas, h.Kurs from DBHUTPIUT h
+                 where h.NoFaktur=s.NoFaktur and h.KodeCustSupp=@Awal and h.Tipe='PT'
+                   and isnull(h.Valas,'IDR')=isnull(s.ValasAsing,'IDR')
+                 order by h.Tanggal, h.Urut) v
+    where case when s.ValasAsing is null then s.Saldo else s.SaldoD end >= 1
+    Order by s.Nofaktur
 " , ["kodecustsupp" => (string) $req->kodecustsupp]);
     return $listData;
 
@@ -303,7 +320,7 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
           return ["status" => 0, "pesan" => "Invoice " . $noinv . " sudah dipakai di KN " . $dipakai[0]->NoBukti];
         }
         $infoInv[$noinv] = $this->infoInvoice($noinv);
-        $salah = $this->cekNilai($noinv, $d['KodeVls'] ?? '', $d['inputNilai'] ?? 0, $d['inputKurs'] ?? 0, $infoInv[$noinv]);
+        $salah = $this->cekNilai($noinv, $d['KodeVls'] ?? '', $this->angka($d['inputNilai'] ?? 0), $this->angka($d['inputKurs'] ?? 0), $infoInv[$noinv]);
         if ($salah !== '') {
           return ["status" => 0, "pesan" => $salah];
         }
@@ -343,10 +360,10 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
           0,
           $d['NoFaktur'],
           $req->kodecustsupp,
-          $d['inputNilai'],
+          $this->angka($d['inputNilai'] ?? 0),
           $d['KodeVls'],
-          $d['inputKurs'],
-          $d['inputNilaiRp'],
+          $this->angka($d['inputKurs'] ?? 0),
+          $this->angka($d['inputNilaiRp'] ?? 0),
           $req->nourut
 
 
@@ -383,7 +400,7 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
       return ["status" => 0, "pesan" => "Item KN tidak ditemukan, mungkin sudah dihapus"];
     }
     if ($req->choice == 'U') {
-      $salah = $this->cekNilai($item[0]->NoInv, $item[0]->KodeVLS, $req->nilai, $req->kurs, $this->infoInvoice($item[0]->NoInv));
+      $salah = $this->cekNilai($item[0]->NoInv, $item[0]->KodeVLS, $this->angka($req->nilai), $this->angka($req->kurs), $this->infoInvoice($item[0]->NoInv));
       if ($salah !== '') {
         return ["status" => 0, "pesan" => $salah];
       }
@@ -399,10 +416,10 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
       // Rp dihitung ulang dengan rumus yang sama seperti di browser (nilai x kurs).
       $item[0]->NoInv,
       $req->kodecustsupp,
-      $req->nilai ?: 0,
+      $this->angka($req->nilai),
       $item[0]->KodeVLS,
-      $req->kurs ?: 0,
-      round((float) $req->nilai * (float) $req->kurs, 2),
+      $this->angka($req->kurs),
+      round($this->angka($req->nilai) * $this->angka($req->kurs), 2),
 
     ]);
 

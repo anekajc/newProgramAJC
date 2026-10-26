@@ -2890,6 +2890,7 @@
      default. Without this tag, tulisTheadHeaderIP() below no-ops on every call
      (its own guard is `if (!thead || !window.ReportTable) return`), which is
      why the column headers never appeared. --}}
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{{ asset('js/report-table.js') }}"></script>
 <script type="text/javascript">
 
@@ -3146,13 +3147,20 @@ function ipInitReportTableSekali () {
   });
 }
 
-function tulisTheadHeaderIP (tableSel, cols) {
+// tambahan = <th> kolom tetap (di luar susunan kolom roda gigi), mis. kolom
+// Piutang tab Invoice; posisi = banyaknya kolom cols di sebelah kirinya.
+function tulisTheadHeaderIP (tableSel, cols, tambahan, posisi) {
   let thead = document.querySelector(tableSel + ' thead')
   if (!thead || !window.ReportTable) { return; }
   let headRowHtml = ReportTable.headHtml(cols)
     .replace('<tr>', '<tr><th style="padding: 4px 12px;">Actions</th>');
   thead.setAttribute('style', 'white-space:nowrap;');
   thead.innerHTML = headRowHtml;
+  if (tambahan) {
+    // th ke-0 = Actions, jadi kolom cols ke-(posisi-1) ada di th ke-posisi.
+    let ths = thead.querySelectorAll('tr > th');
+    ths[Math.min(posisi, ths.length - 1)].insertAdjacentHTML('afterend', tambahan);
+  }
 }
 
 // Isi sel per kolom untuk render DataTables (mode data). col[5] (desimal)
@@ -3175,6 +3183,16 @@ function ipNilaiSel (row, col) {
       : '<i class="bi bi-x text-danger" style="-webkit-text-stroke-width: 2px;"></i>';
   }
   return (raw !== undefined && raw !== null) ? raw : '';
+}
+
+// Kolom Piutang ('Lunas'/'Belum') - badge disamakan dengan kolom Hutang menu
+// Penerimaan ACC (pbaBadgeHutang di newpobeliacc.blade.php, .sp-badge di
+// po-table-header.css): Lunas hijau, selain itu merah.
+function ipBadgePiutang (row) {
+  let nilai = ipPickCI(row, 'Piutang');
+  if (nilai === null || nilai === undefined || nilai === '') { return ''; }
+  let kelas = String(nilai).trim().toLowerCase() === 'lunas' ? 'is-active' : 'is-inactive';
+  return '<span class="sp-badge ' + kelas + '">' + nilai + '</span>';
 }
 
 function ipKelasSel (col) {
@@ -3263,7 +3281,12 @@ function ipGambarTabel (urut, rows) {
 
   if ($.fn.DataTable.isDataTable(id)) { $(id).DataTable().clear().destroy(); }
   $(id + ' tbody').empty()
-  tulisTheadHeaderIP(id, cols)
+  // Tab Invoice: kolom Piutang kolom tetap (tidak bisa digeser/disembunyikan),
+  // sama seperti kolom Hutang menu Penerimaan ACC. Letaknya tepat di kanan kolom
+  // Total; kalau Total disembunyikan lewat roda gigi, di ujung kanan.
+  let posPiutang = cols.findIndex(function (c) { return String(c[0]).toLowerCase() === 'totnet'; }) + 1
+  if (posPiutang === 0) { posPiutang = cols.length }
+  tulisTheadHeaderIP(id, cols, urut === 2 ? '<th style="padding: 4px 12px;">Piutang</th>' : '', posPiutang)
 
   let columns = [{
     data : null, orderable : false, className : 'text-center',
@@ -3275,6 +3298,13 @@ function ipGambarTabel (urut, rows) {
       render : function (d, t, row) { return ipNilaiSel(row, col) }
     })
   })
+  if (urut === 2) {
+    // +1 karena columns[0] = Actions.
+    columns.splice(posPiutang + 1, 0, {
+      data : null, className : 'text-center',
+      render : function (d, t, row) { return ipBadgePiutang(row) }
+    })
+  }
 
   let sumber = urut === 2 ? {
     serverSide : true,

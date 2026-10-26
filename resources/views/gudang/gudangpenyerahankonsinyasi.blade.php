@@ -462,13 +462,14 @@
 </div>
 
 
-<div id="page3" style="display: none" class="mainpage container-fluid" >
+<div id="page3" style="display: none" class="mainpage container-fluid">
+
   <div class="row">
     <div class="col-8 text-left">
       <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-bottom:20px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
@@ -559,8 +560,8 @@
 
     <div id='formBsGrid' class="row">
       <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
+        <div class="row mb-1 align-items-center">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Kode Barang</label>
           </div>
           <div class="col-md-4">
@@ -568,8 +569,8 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
+        <div class="row mb-1 align-items-center">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Nama Barang</label>
           </div>
           <div class="col-md-8">
@@ -577,14 +578,14 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
+        <div class="row mb-1 align-items-center">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Quantity</label>
           </div>
           <div class="col-md-3">
             <input id="KoreksiEditInputQty" type="text" inputmode="decimal" oninput="formatAngkaInput(event)" class="form-control text-right" value="0,00">
           </div>
-          <div class="col-md-2" style="margin-top:5px;">
+          <div class="col-md-2">
             <label class="form-label fw-bold">Satuan</label>
           </div>
           <div class="col-md-3">
@@ -592,9 +593,9 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
+      <div class="col-md-6" hidden>
+        <div class="row mb-1 align-items-center">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Gudang Asal</label>
           </div>
           <div class="col-md-8">
@@ -603,8 +604,8 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-md-3" style="margin-top:5px;">
+        <div class="row mb-1 align-items-center">
+          <div class="col-md-3">
             <label class="form-label fw-bold">Gudang Tujuan</label>
           </div>
           <div class="col-md-8">
@@ -635,7 +636,7 @@
           font-weight: 600; 
           text-transform: uppercase; 
           transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Submit Edit</button>
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Simpan</button>
       </div>
     </div>
   </div>
@@ -747,7 +748,7 @@
       <h2></h2>
     </div>
     <div class="col-4 text-right">
-      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-top:5px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
+      <button type="button" class="btn btn-danger btn-lg " style="height: 30px; margin-bottom:20px; border-radius: 20px; font-size: 0.75rem;font-weight: 600; text-transform: uppercase " onclick="buttonCloseForm()">CLOSE</button>
     </div>
   </div>
 
@@ -1006,7 +1007,7 @@ function skDefaultCart (urut) {
       ['NAMASLS',      'Sales',        1, 'varchar', 0, 0],
       ['IDUSER',       'User',         1, 'varchar', 0, 0],
       ['RefPR',        'No. Ref',      1, 'varchar', 0, 0],
-      ['IsOtorisasi1', 'Status',       1, 'bool',    0, 0],
+      ['IsOtorisasi1', 'Otorisasi',    1, 'bool',    0, 0],
       ['OtoUser1',     'User Oto',     1, 'varchar', 0, 0],
       ['TglOto1',      'Tgl Oto',      1, 'date',    0, 0],
     ]
@@ -1257,6 +1258,16 @@ let lastTabelRows = []
 let lastTabel2Rows = []
 let skPanjangHalaman = { 1 : 10, 2 : 10 }
 
+// loadAll() dipanggil dari dalam aksi (Tambah/Hapus/Otorisasi) yang masih berada di
+// page2/3/4/5 (page1 tersembunyi) -- reinitTabel()/reinitTabel2() yang langsung
+// menginisialisasi DataTables di atas tabel yang hidden membuat instance-nya korup
+// (lebar kolom 0/salah), dan korupsi itu bertahan sampai halaman di-refresh manual,
+// termasuk mempengaruhi klik Otorisasi berikutnya walau saat itu page1 sudah
+// terlihat. Redraw ditunda lewat flag ini sampai page1 benar-benar tampil lagi
+// (lihat buttonCloseForm()), sama seperti pola psPerluGambar di
+// gudangpenyerahansample.blade.php/tbPerluGambar di transferbarang.blade.php.
+let skPerluGambar = { tabel: false, tabel2: false }
+
 function skIkatSearch (urut) {
   let ids = { 1 : ['skSearch1', 'tabel'], 2 : ['skSearch2', 'tabel2'] }
   let input = document.getElementById(ids[urut][0])
@@ -1340,10 +1351,12 @@ $(document).ready(function(){
   $('#nav-home-tab').on('shown.bs.tab', function () {
     skAktifkanTabel(1);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+    if (skPerluGambar.tabel) { reinitTabel(); skPerluGambar.tabel = false; }
   });
   $('#nav-profile-tab').on('shown.bs.tab', function () {
     skAktifkanTabel(2);
     if (typeof ReportTable !== 'undefined') { ReportTable.refresh(); }
+    if (skPerluGambar.tabel2) { reinitTabel2(); skPerluGambar.tabel2 = false; }
   });
 });
 
@@ -1548,8 +1561,8 @@ function refreshDataTableKoreksi (nobukti) {
         <tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${item.QNT ? parseFloat(item.QNT).toLocaleString() : '0.00'}</td>
           <td class="text-center">${item.SAT_1}</td>
           <td class="text-center">
@@ -1897,8 +1910,8 @@ function buttonKoreksi (nobukti) {
         rowTable += `<tr> 
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td>${item.SAT_1}</td>
           <td class="text-center">
@@ -1960,8 +1973,8 @@ function buttonDetailKoreksi (nobukti) {
         rowTable += `<tr>
           <td>${item.KODEBRG}</td>
           <td>${item.NAMABRG}</td>
-          <td>${item.GDGASAL}</td>
-          <td>${item.GDGTUJUAN}</td>
+          <td>${item.GDGASAL} - ${item.NAMA_GDGASAL}</td>
+          <td>${item.GDGTUJUAN} - ${item.NAMA_GDGTUJUAN}</td>
           <td class="text-right">${parseFloat(item.QNT).toLocaleString()}</td>
           <td>${item.SAT_1}</td>
         </tr>`;
@@ -2065,8 +2078,23 @@ function loadAll () {
     success: function (res) {
       lastTabelRows = res.tempOutstanding
       lastTabel2Rows = [].concat(res.tempPenerimaan, res.tempPenerimaan2)
-      reinitTabel()
-      reinitTabel2()
+
+      {{-- #page1 bisa terlihat tapi tab "Serah Konsinyasi" (#profile) belum aktif
+           (mis. user kembali dari Tambah lewat tab "Permintaan Konsinyasi") --
+           reinitTabel2() yang tetap dipaksa jalan di situ meng-init DataTables di
+           atas pane yang hidden (sama kasusnya dengan #page1 sendiri hidden), jadi
+           visibilitas dicek per-pane (#home/#profile), bukan cuma per-page. --}}
+      if ($('#home').is(':visible')) {
+        reinitTabel()
+      } else {
+        skPerluGambar.tabel = true
+      }
+
+      if ($('#profile').is(':visible')) {
+        reinitTabel2()
+      } else {
+        skPerluGambar.tabel2 = true
+      }
     }
   });
 }

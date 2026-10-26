@@ -23,6 +23,13 @@ class PembelianPermintaanDebetNoteController extends Controller
     return [ date('Y-m-01', $stamp), date('Y-m-t', $stamp) ];
   }
 
+  // Input angka di form tampil dengan separator ribuan (koma); dibersihkan lagi di sini
+  // supaya '1,000.00' tidak gagal dikonversi ke Numeric oleh Sp_DebetNote.
+  private function angka ($nilai) {
+    $bersih = str_replace(',', '', trim((string) $nilai));
+    return is_numeric($bersih) ? (float) $bersih : 0;
+  }
+
   public function index(Request $req) {
     $kodemenu = '0307';
     $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
@@ -141,16 +148,28 @@ class PembelianPermintaanDebetNoteController extends Controller
 
   public function listInvoice (Request $req) {
 
+    // Hanya invoice yang belum lunas. Saldo dijumlah per NoFaktur saja: dulu dikelompokkan
+    // per NoFaktur+Valas+Kurs, sehingga pelunasan valas dengan kurs lain (dan baris selisih
+    // kurs IDR) jadi kelompok sendiri dan invoice lunas tetap tampil (mis. supplier K015).
+    // Lunas dinilai per mata uang invoice (IDR: Saldo, valas: SaldoD). Sisa < 1 (hanya selisih
+    // pembulatan di belakang koma, mis. 0,07) dianggap lunas, keputusan user 22 Okt 2026.
+    // Valas/Kurs diambil dari baris pertama invoice dengan valas tsb.
     $listData = DB::connection('SML')->select("declare @awal Varchar(15)
     Select @Awal= :kodecustsupp
-    select Cast(1 as Bit) Pilih,Convert(Numeric(18,2),0) Nilai, a.Valas KodeVls, a.Kurs, a.NoFaktur,Min(a.Tanggal) Tanggal, Min(a.JatuhTempo) JatuhTempo,
-           SUM(a.Saldo) Saldo, SUM(A.SaldoD) SaldoD
-    from dbo.vwHutPiut a
-         left outer join (select NoInv from dbdebetNoteDet) b on b.NoInv=a.NoFaktur
-    where a.KodeCustSupp=@Awal and B.NoInv is null and a.Tipe='HT'
-    Group by a.NoFaktur,a.Valas, a.Kurs
-    Having SUM(a.Saldo)<>0 or SUM(A.SaldoD)<>0
-    Order by a.Nofaktur" , ["kodecustsupp" => $req->kodecustsupp]);
+    select Cast(1 as Bit) Pilih,Convert(Numeric(18,2),0) Nilai, isnull(v.Valas,'IDR') KodeVls, isnull(v.Kurs,1) Kurs, s.NoFaktur, s.Tanggal, s.JatuhTempo,
+           s.Saldo, s.SaldoD
+    from (select a.NoFaktur, Min(a.Tanggal) Tanggal, Min(a.JatuhTempo) JatuhTempo, SUM(a.Saldo) Saldo, SUM(a.SaldoD) SaldoD,
+                 nullif(max(case when isnull(a.Valas,'') not in ('','IDR') then a.Valas else '' end),'') ValasAsing
+          from DBHUTPIUT a
+          where a.KodeCustSupp=@Awal and a.Tipe='HT'
+            and not exists (select 1 from dbdebetNoteDet b where b.NoInv=a.NoFaktur)
+          Group by a.NoFaktur) s
+    outer apply (select top 1 h.Valas, h.Kurs from DBHUTPIUT h
+                 where h.NoFaktur=s.NoFaktur and h.KodeCustSupp=@Awal and h.Tipe='HT'
+                   and isnull(h.Valas,'IDR')=isnull(s.ValasAsing,'IDR')
+                 order by h.Tanggal, h.Urut) v
+    where case when s.ValasAsing is null then s.Saldo else s.SaldoD end >= 1
+    Order by s.Nofaktur" ,["kodecustsupp" => $req->kodecustsupp]);
     return $listData;
 
   }
@@ -174,8 +193,21 @@ public function updateOtorisasi(Request $req) {
             "nobukti" => $req->nobukti
         ]
     );
+    // Dulu otorisasi hanya mengubah flag, DN tidak pernah masuk DBHUTPIUT/jurnal. Posting sama
+    // seperti Kredit Note & desktop: vwPostHutPiut hanya mengambil DN yang IsOtorisasi1 = 1.
+    if ($res > 0) {
+      $this->postingDN($req->nobukti, 1);
+    }
     return response()->json(['success' => $res > 0]);
 }
+
+  // TipeProses 1 = posting DBHUTPIUT (NOINVOICE 'DN', NOPAJAK = no DN) + DBJurnalOto, 0 = hapus posting.
+  private function postingDN ($nobukti, $tipeProses) {
+    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+    $values = ['', 'DBDEBETNOTE', $periode->bulan, $periode->tahun, $nobukti, $tipeProses];
+    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
+    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
+  }
 
 
 public function updateBatalOtorisasi(Request $req) {
@@ -208,6 +240,9 @@ public function updateBatalOtorisasi(Request $req) {
             "nobukti" => $req->nobukti
         ]
     );
+    if ($res > 0) {
+      $this->postingDN($req->nobukti, 0);
+    }
 
     app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'DN', $req->nobukti, $req->pket, 0, 'dbdebetnote');
     return $res;
@@ -255,10 +290,10 @@ public function updateBatalOtorisasi(Request $req) {
             0,
             $d['NoFaktur'],
             $req->kodecustsupp,
-            $d['inputNilai'],
+            $this->angka($d['inputNilai'] ?? 0),
             $d['KodeVls'],
-            $d['inputKurs'],
-            $d['inputNilaiRp'],
+            $this->angka($d['inputKurs'] ?? 0),
+            $this->angka($d['inputNilaiRp'] ?? 0),
             $req->nourut
           ]);
 
@@ -297,10 +332,10 @@ public function updateBatalOtorisasi(Request $req) {
       $req->urut,
       $req->noinvoice,
       $req->kodecustsupp,
-      $req->nilai,
+      $this->angka($req->nilai),
       $req->kodevls,
-      $req->kurs,
-      $req->nilairp,
+      $this->angka($req->kurs),
+      $this->angka($req->nilairp),
       $req->nourut,
     ]);
 

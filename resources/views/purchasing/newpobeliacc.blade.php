@@ -749,7 +749,7 @@ td input[type="checkbox"] {
             <div class="col-md-3">
               <div class="form-group">
                 <label>Qty</label>
-                <input id="editPembelianInputAddQty" type="number" value="0.00" class="form-control">
+                <input id="editPembelianInputAddQty" type="text" inputmode="decimal" value="0.00" class="form-control text-right" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)">
               </div>
             </div>
           </div>
@@ -812,7 +812,7 @@ td input[type="checkbox"] {
               </div>
               <div class="pba-f">
                 <label>Qty</label>
-                <input id="editPembelianInputEditQty" type="number" value="0.00" class="form-control">
+                <input id="editPembelianInputEditQty" type="text" inputmode="decimal" value="0.00" class="form-control text-right" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)">
               </div>
             </div>
 
@@ -1423,6 +1423,7 @@ td input[type="checkbox"] {
   @endsection
 
   @section('js')
+<script>window.RT_LABEL_PAJAK = true</script>
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
     <script type="text/javascript">
 
@@ -1545,6 +1546,16 @@ td input[type="checkbox"] {
           return nilai ? formatDate(nilai) : ""
         }
         return (nilai === null || nilai === undefined) ? "" : nilai
+      }
+
+      // Kolom Hutang ('Lunas'/'Belum') - badge disamakan dengan kolom Status tab Purchase
+      // Order (poBadgeStatus di purchaseorder.blade.php, .sp-badge di po-table-header.css):
+      // Lunas hijau, selain itu merah.
+      function pbaBadgeHutang (item) {
+        let nilai = item.Hutang
+        if (nilai === null || nilai === undefined || nilai === '') { return '' }
+        let kelas = String(nilai).trim().toLowerCase() === 'lunas' ? 'is-active' : 'is-inactive'
+        return `<span class="sp-badge ${kelas}">${nilai}</span>`
       }
 
       function pbaHeadHtml (cols) {
@@ -1775,6 +1786,7 @@ td input[type="checkbox"] {
         if (baris) {
           baris.insertAdjacentHTML('afterbegin', '<th style="padding: 4px 12px;" scope="col">Actions</th>')
           baris.insertAdjacentHTML('beforeend', `
+            <th style="padding: 4px 12px;" scope="col">Hutang</th>
             <th style="padding: 4px 12px;" scope="col">Oto</th>
             <th style="padding: 4px 12px;" scope="col">User Oto</th>
             <th style="padding: 4px 12px;" scope="col">Tgl Oto</th>
@@ -1816,6 +1828,7 @@ td input[type="checkbox"] {
             }
           });
           rowTable += `
+            <td class="text-center">${pbaBadgeHutang(item)}</td>
             ${isOtorisasi ?
                 '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
               :
@@ -2081,7 +2094,7 @@ function detailPembelian1(index) {
           console.log(nobukti, otorisasi)
 
           // Keterangan batal otorisasi wajib diisi untuk semua jenis (dulu hanya di menu Acc Tunai newSML).
-          alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+          alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
             function(evt, value) {
               if (value.trim() == '') {
                 alertify.warning('Keterangan harus diisi.');
@@ -2330,6 +2343,7 @@ function detailPembelian1(index) {
         document.getElementById("editPembelianInputEditDisc").value = dataEditPembelianEdit[indexBarang].DiscP1
         document.getElementById("editPembelianInputEditDiscRp").value = dataEditPembelianEdit[indexBarang].DiscTot
         document.getElementById("editPembelianInputEditHarga").value = dataEditPembelianEdit[indexBarang].Harga
+        formatRibuan(document.getElementById("editPembelianInputEditQty"))
         formatRibuan(document.getElementById("editPembelianInputEditDiscRp"))
         formatRibuan(document.getElementById("editPembelianInputEditHarga"))
 
@@ -2375,6 +2389,21 @@ function detailPembelian1(index) {
           pos++
         }
         el.setSelectionRange(pos, pos)
+      }
+
+      // Disc Rp per unit = Harga x Disc % / 100 (sama dengan DISCTOT di dbBeliDET)
+      function onChangeInputAddAddDisc() {
+        let harga = Number($("#editPembelianInputEditHarga").val().replace(/,/g, '')) || 0
+        let disc = Number($("#editPembelianInputEditDisc").val()) || 0
+        let elDiscRp = document.getElementById("editPembelianInputEditDiscRp")
+        elDiscRp.value = (harga * disc / 100).toFixed(2)
+        formatRibuan(elDiscRp)
+      }
+
+      function onChangeInputAddAddDiscRp() {
+        let harga = Number($("#editPembelianInputEditHarga").val().replace(/,/g, '')) || 0
+        let discRp = Number($("#editPembelianInputEditDiscRp").val().replace(/,/g, '')) || 0
+        document.getElementById("editPembelianInputEditDisc").value = harga ? (discRp / harga * 100).toFixed(2) : "0.00"
       }
 
       function loadAll1 () {
@@ -2925,7 +2954,7 @@ function formatAngkaX (angka) {
         let _token = $("#_token").val();
         let choice = "U"
         let dataLPBEdit = dataEditPembelianEdit[indexEditPembelianEdit]
-        let reqQtyTerima = $("#editPembelianInputEditQty").val();
+        let reqQtyTerima = $("#editPembelianInputEditQty").val().replace(/,/g, '');
         let reqDisc = $("#editPembelianInputEditDisc").val();
         let reqHarga = $("#editPembelianInputEditHarga").val().replace(/,/g, '');
         let reqDiscRp = $("#editPembelianInputEditDiscRp").val().replace(/,/g, '');
@@ -3097,7 +3126,7 @@ function formatAngkaX (angka) {
           // console.log(dataEditPembelianAddIndex)
           let data = dataEditPembelianAdd[dataEditPembelianAddIndex]
           console.log(data)
-          let reqQtyTerima = $("#editPembelianInputAddQty").val()
+          let reqQtyTerima = $("#editPembelianInputAddQty").val().replace(/,/g, '')
           if (Number(reqQtyTerima) > Number(data.OSPO)) {
             alertify.warning("Qty melebihi Qty OS");
             console.log('error')
@@ -4015,7 +4044,7 @@ if (pcekglobal) {
             pjasa: DataPjasa
           },
           success: function(res) {
-              console.log('======xxxxx==========')
+            console.log('======xxxxx==========')
             console.log(res)
 
             detail_row_data = res

@@ -11,11 +11,17 @@
 
   <style>
   {{-- po-table-header.css cuma punya .sp-badge.is-active/is-inactive/is-user/is-supervisor
-       -- kolom Status di tab Transfer Barang butuh state ketiga ("Batal"), jadi warnanya
-       (abu-abu) ditambah khusus di sini, bukan di file CSS bersama. --}}
+       -- kolom Status di tab Transfer Barang butuh state ketiga dan keempat ("Batal" abu-abu,
+       "Sebagian" kuning/amber var(--sp-amber)), jadi warnanya ditambah khusus di sini,
+       bukan di file CSS bersama. --}}
   .sp-badge.is-batal {
     background: #f3f4f6;
     color: #6b7280;
+  }
+
+  .sp-badge.is-partial {
+    background: var(--sp-amber-bg);
+    color: var(--sp-amber);
   }
 
   .toolbar {
@@ -519,13 +525,25 @@
             <div class="modal-body">
               <div class="rt-section">
                 <div class="rt-group-label">Status</div>
-                <div>
-                  <label class="rt-field-label" for="tbFilterOtorisasi">Otorisasi</label>
-                  <select class="rt-native" id="tbFilterOtorisasi">
-                    <option value="">Semua</option>
-                    <option value="0">Sudah Otorisasi</option>
-                    <option value="1">Belum Otorisasi</option>
-                  </select>
+                <div class="rt-grid-2">
+                  <div>
+                    <label class="rt-field-label" for="tbFilterOtorisasi">Otorisasi</label>
+                    <select class="rt-native" id="tbFilterOtorisasi">
+                      <option value="">Semua</option>
+                      <option value="0">Sudah Otorisasi</option>
+                      <option value="1">Belum Otorisasi</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="rt-field-label" for="tbFilterStatus">Status Transfer</label>
+                    <select class="rt-native" id="tbFilterStatus">
+                      <option value="">Semua Status</option>
+                      <option value="Belum">Belum</option>
+                      <option value="Sebagian">Sebagian</option>
+                      <option value="Sudah">Sudah</option>
+                      <option value="Batal">Batal</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -729,7 +747,7 @@
           <input type="date" class="form-control text-left" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" disabled>
         </div>
         <div class="tb-field tb-f-asal">
-          <label>Gdg Asal</label>
+          <label>Gudang Asal</label>
           <select class="form-control text-left" id="input_add_kodeGudangAsal" onchange="tbOnChangeGudang('Asal')">
             <option value="">-</option>
           </select>
@@ -739,7 +757,7 @@
             class="form-control text-left" id="input_add_namaGudangAsal" disabled></textarea>
         </div>
         <div class="tb-field tb-f-tujuan">
-          <label>Gdg Tujuan</label>
+          <label>Gudang Tujuan</label>
           <select class="form-control text-left" id="input_add_kodeGudangTujuan" onchange="tbOnChangeGudang('Tujuan')">
             <option value="">-</option>
           </select>
@@ -2535,8 +2553,12 @@
         <label>No Bukti</label>
         <input type="text" class="form-control text-left" id="detail_nobukti" placeholder="" disabled>
       </div>
+      <div class="tb-field tb-f-tanggal">
+        <label>Tanggal</label>
+        <input type="date" class="form-control text-left" id="detail_tanggal" disabled>
+      </div>
       <div class="tb-field tb-f-asal">
-        <label>Gdg Asal</label>
+        <label>Gudang Asal</label>
         <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangAsal" disabled>
       </div>
       <div class="tb-field tb-f-alamatasal">
@@ -2544,7 +2566,7 @@
           class="form-control text-left" id="detail_namaGudangAsal" disabled></textarea>
       </div>
       <div class="tb-field tb-f-tujuan">
-        <label>Gdg Tujuan</label>
+        <label>Gudang Tujuan</label>
         <input type="text" class="form-control text-left" value='-' id="detail_kodeGudangTujuan" disabled>
       </div>
       <div class="tb-field tb-f-alamattujuan">
@@ -2931,27 +2953,34 @@ function deleteTransfer () {
 }
 
 function deleteTransferData (nobukti) {
-  
-  let _token  = $("#_token").val()
 
-  console.log(nobukti)
-  $.ajax({
-    url: "{!! url('trfbrgdeletetransfer') !!}",
-    type: "post",
-    async: false,
-    data: {
-      _token,
-      nobukti
+  alertify.confirm('Hapus Data', 'Hapus Data ' + nobukti + '?',
+    function () {
+      let _token  = $("#_token").val()
+
+      console.log(nobukti)
+      $.ajax({
+        url: "{!! url('trfbrgdeletetransfer') !!}",
+        type: "post",
+        async: false,
+        data: {
+          _token,
+          nobukti
+        },
+        success: function(res) {
+          alertify.success(`Transfer Telah Dihapus`)
+          loadAll();
+
+        },error: function (err) {
+          console.log(err)
+          alertify.warning('Terjadi kesalahan silahkan refresh browser')
+        }
+      })
     },
-    success: function(res) {
-      alertify.success(`Transfer Telah Dihapus`)
-      loadAll();
-
-    },error: function (err) {
-      console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+    function () {
+      console.log('Hapus data dibatalkan')
     }
-  })
+  );
 }
 
 function deleteTransferSimpanData () {
@@ -4703,14 +4732,15 @@ function tbValueCell(row, col) {
   let raw = tbPickCI(row, col[0])
   let type = col[3]
 
-  {{-- Status (varchar "Belum"/"Sudah"/"Batal") -- badge titik+pill .sp-badge, sama
-       seperti kolom Status di perintahopname.blade.php/beritaacaraopname.blade.php
-       (hijau untuk Sudah, merah untuk Belum). "Batal" dipetakan ke .is-batal (abu-abu,
-       ditambahkan khusus di sini karena po-table-header.css cuma punya is-active/
-       is-inactive/is-user/is-supervisor). --}}
+  {{-- Status (varchar "belum"/"sebagian"/"Sudah"/"Batal", dari fetchHeaderList()) -- badge
+       titik+pill .sp-badge, sama seperti kolom Status di
+       perintahopname.blade.php/beritaacaraopname.blade.php (hijau utk Sudah, merah utk
+       Belum). "Batal" dipetakan ke .is-batal (abu-abu) dan "Sebagian" ke .is-partial
+       (amber) -- keduanya ditambah khusus di sini karena po-table-header.css cuma punya
+       is-active/is-inactive/is-user/is-supervisor. --}}
   if (col[0] === 'Status') {
     let s = String(raw || '').trim().toLowerCase()
-    let kelas = s === 'sudah' ? 'is-active' : (s === 'batal' ? 'is-batal' : 'is-inactive')
+    let kelas = s === 'sudah' ? 'is-active' : (s === 'batal' ? 'is-batal' : (s === 'sebagian' ? 'is-partial' : 'is-inactive'))
     return '<td><span class="sp-badge ' + kelas + '">' + (raw || '') + '</span></td>'
   }
   if (type === 'date') {
@@ -4909,18 +4939,27 @@ function reinitTabel3 () {
 }
 
 function tbFilterListTransferOtorisasi (list) {
-  let sel = document.getElementById('tbFilterOtorisasi')
-  let val = sel ? sel.value : ''
-  if (val === '') { return list || [] }
-  return (list || []).filter(function (r) { return String(Number(tbPickCI(r, 'NeedOtorisasi'))) === val })
+  let selOto = document.getElementById('tbFilterOtorisasi')
+  let valOto = selOto ? selOto.value : ''
+  let selStatus = document.getElementById('tbFilterStatus')
+  let valStatus = selStatus ? selStatus.value : ''
+
+  return (list || []).filter(function (r) {
+    if (valOto !== '' && String(Number(tbPickCI(r, 'NeedOtorisasi'))) !== valOto) { return false }
+    if (valStatus !== '' && String(tbPickCI(r, 'Status') || '').toLowerCase() !== valStatus.toLowerCase()) { return false }
+    return true
+  })
 }
 
 function tbResetFilterFields () {
   $('#tbFilterOtorisasi').val('')
+  $('#tbFilterStatus').val('')
 }
 
 function tbUpdateFilterBadge () {
-  let aktif = $('#tbFilterOtorisasi').val() !== '' ? 1 : 0
+  let aktif = 0
+  if ($('#tbFilterOtorisasi').val() !== '') { aktif++ }
+  if ($('#tbFilterStatus').val() !== '') { aktif++ }
   $('#tbFilterBadge').text(aktif + ' aktif')
 }
 
@@ -6251,9 +6290,9 @@ function buttonShowHideHeaderDetail () {
 }
 
 function unlockFormAdd () {
-  document.getElementById("input_add_keterangan").disabled = false;
-  document.getElementById("input_add_kodeGudangAsal").disabled = false;
-  document.getElementById("input_add_kodeGudangTujuan").disabled = false;
+  document.getElementById("input_add_keterangan").disabled = true;
+  document.getElementById("input_add_kodeGudangAsal").disabled = true;
+  document.getElementById("input_add_kodeGudangTujuan").disabled = true;
   document.getElementById("buttonSimpanData").hidden = false;
   // document.getElementById("input_add_tipeppn").disabled = false
   // document.getElementById("input_add_pembayaran").disabled = false
@@ -6541,8 +6580,8 @@ function changeQnt (urut, kodebrg, gudangAsal) {
       $('#divhargaterakhir').hide();
       $('#divStockProyeksi').hide();
 
-      alertify.success('Berhasil mengganti QNT (Urut ' + urut + ')'); 
-      console.log(' QNT tersimpan:', QNT, QNT2);
+      alertify.success('Berhasil mengganti QTY (Urut ' + urut + ')'); 
+      console.log(' QTY tersimpan:', QNT, QNT2);
     },
     error: function (err) {
       console.log(err);
@@ -7103,9 +7142,9 @@ function refreshDataTableEdit (NOBUKTI) {
           { width: "15%", targets: 0 },
           { width: "35%", targets: 1 },
           { width: "10%", targets: 2 },
-          { width: "10%", targets: 3, className: "text-end" },
-          { width: "10%", targets: 4, className: "text-end" },
-          { width: "20%", targets: 5, orderable: false, className: "text-end" },
+          { width: "10%", targets: 3, className: "text-right" },
+          { width: "10%", targets: 4, className: "text-right" },
+          { width: "20%", targets: 5, orderable: false, className: "text-right" },
         ]
       });
 
@@ -7183,7 +7222,7 @@ function refreshDataTableDetail (NOBUKTI) {
                   style="white-space:nowrap; text-align:right; vertical-align:middle;">
                   ${sisa}
               </td>
-              <td style="white-space:nowrap; text-align:center; vertical-align:middle;">
+              <td style="white-space:nowrap; vertical-align:middle; display:flex; justify-content:flex-end; align-items:center;">
                 <input
                   type="text"
                   class="form-control text-right"
@@ -7227,9 +7266,9 @@ function refreshDataTableDetail (NOBUKTI) {
           { width: "15%", targets: 0 },
           { width: "35%", targets: 1 },
           { width: "10%", targets: 2 },
-          { width: "10%", targets: 3, className: "text-end" },
-          { width: "10%", targets: 4, className: "text-end" },
-          { width: "20%", targets: 5, orderable: false, className: "text-end" },
+          { width: "10%", targets: 3, className: "text-right" },
+          { width: "10%", targets: 4, className: "text-right" },
+          { width: "20%", targets: 5, orderable: false, className: "text-right" },
         ]
       });
 
@@ -7275,6 +7314,7 @@ function refreshDataTableDetailAdd (NOBUKTI) {
       const list = res.list ?? [];
 
       $("#detail_nobukti").val(header.nobukti ?? '');
+      $("#detail_tanggal").val(header.Tanggal ? formatDate(header.Tanggal) : '');
       $("#detail_kodeGudangAsal").val(header.GDGASAL ?? '');
       $("#detail_kodeGudangTujuan").val(list[0]?.GdgTujuan ?? '');
       tbIsiDetailGudang();

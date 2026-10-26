@@ -890,6 +890,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
 @endsection
 
 @section('js')
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
@@ -2056,7 +2057,7 @@ function buttonBatalOtorisasi (nobukti) {
 
 
 
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;

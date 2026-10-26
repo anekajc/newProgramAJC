@@ -22,18 +22,6 @@
      doBrowseMaster/ajc-func-core.js milik halaman ini tidak diubah sama sekali, murni
      port tampilan. --}}
 <style>
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  white-space: nowrap;
-}
-.status-badge-sudah { color: #16a34a; border: 1px solid #cdebd7; background: #e7f7ed; }
-.status-badge-belum { color: #b45309; border: 1px solid #fbe3bd; background: #fef3e0; }
 
 .pick-row { cursor: pointer; }
 .pick-row:hover { background-color: #f5f3ff !important; }
@@ -57,6 +45,34 @@
   border-bottom: 1px solid #e7e9ee;
   border-top: none;
 }
+
+{{-- Tombol Edit/Hapus di tabel item (#tabelitem) -- warna pastel bulat, sama seperti
+     #tabel_add di gudangreturpenyerahansample.blade.php. --}}
+#tabelitem td:last-child {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+#tabelitem td:last-child .btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 13px;
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: all .12s ease;
+}
+#tabelitem td:last-child .btn:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+#tabelitem td:last-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+#tabelitem td:last-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
 </style>
 @endsection
 
@@ -167,7 +183,7 @@
       </div>
 
       <div id="modalBodyAddMain" class="">
-        <div id='formBsGrid' class="modal-body" style="margin-top:-60px;">
+        <div id='formBsGrid' class="modal-body">
           <div class="row">
 
             <input type="hidden" class="form-control" id="input_nourut">
@@ -277,7 +293,7 @@
 
         <div class="row ">
           <div class="col-md-12 mt-2 text-right" id="contentContainer">
-            <button type="button" class="btn btn-primary btn-pill-primary btn-action-primary hideableModeDetail" onclick="buttonItemAdd()">+ Tambah Item</button>
+            <button type="button" class="btn btn-primary btn-pill-primary btn-action-primary hideableModeDetail" onclick="buttonItemAdd()">Tambah Item</button>
           </div>
         </div>
 
@@ -307,11 +323,11 @@
                             <label>Kode Barang</label>
                           </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                           <div class="input-group form-group">
                             <input type="text" class="form-control" id="inputitem_kodebrg" disabled>
-                            <button onclick="buttonOpenPickBarang()" id="btnitem_kodebrg" class="btn btn-primary btn-sm text-right lockableItemModeEdit">
-                              <i class="bi bi-plus"></i>
+                            <button onclick="buttonOpenPickBarang()" id="btnitem_kodebrg" class="btn btn-chip-biru btn-sm text-right lockableItemModeEdit">
+                              <i class="bi bi-search"></i>
                             </button>
                           </div>
                         </div>
@@ -350,10 +366,9 @@
                         </div>
                         <div class="col-md-9">
                           <div class="input-group form-group">
-                            <input type="text" class="form-control" id="inputitem_gudang" disabled>
-                            <button onclick="buttonOpenPickGudang()" class="btn btn-primary btn-sm text-right">
-                              <i class="bi bi-plus"></i>
-                            </button>
+                            <select class="form-control" id="inputitem_gudang" onchange="onChangeItemGudang()">
+                              <option value="">- Pilih Gudang -</option>
+                            </select>
                           </div>
                         </div>
                       </div>
@@ -366,7 +381,7 @@
                         </div>
                         <div class="col-md-3">
                           <div class="input-group form-group">
-                            <input type="number" class="form-control" id="inputitem_quantity">
+                            <input type="text" inputmode="decimal" oninput="formatAngkaInput(event)" class="form-control text-right" id="inputitem_quantity" value="0,00">
                           </div>
                         </div>
 
@@ -491,45 +506,6 @@
 </div>
 {{-- End Modal List Barang --}}
 
-{{-- Start Modal List Gudang -- picker SO 1:1, menggantikan popup generik doBrowseMaster
-     khusus untuk field ini. Data tetap dari endpoint lama (bbslistgudang / listGudang()). --}}
-<div class="modal fade" id="modalPickGudang" role="dialog" aria-labelledby="labelPickGudang" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width:95%;">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="labelPickGudang">Gudang</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body" style="margin-top:-30px;">
-        <div class="container-fluid px-3 mt-4">
-          <div class="row">
-            <div class="table-responsive" style="overflow-x:auto;">
-              <table id="tabel_pick_gudang" class="table table-bordered table-striped" style="width:100%;">
-                <thead class="text-center bg-primary text-white">
-                  <tr>
-                    <th>Kode Gudang</th>
-                    <th>Nama Gudang</th>
-                    <th>Alamat</th>
-                  </tr>
-                </thead>
-                <tbody id="tabel_data_pick_gudang" class="text-left">
-                  <!-- Diisi lewat JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-{{-- End Modal List Gudang --}}
-
 @include('gudang.modalbrowsemaster')
 
 @endsection
@@ -543,7 +519,7 @@
      pemilih menu Kas, pola yang sama persis dengan gudangreturpenyerahansample.blade.php. --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#modalNoSerahSample, #modalPickBarang, #modalPickGudang').addClass('picker-kas')
+  jQuery('#modalNoSerahSample, #modalPickBarang').addClass('picker-kas')
 })
 </script>
 <script>
@@ -557,10 +533,28 @@ document.addEventListener('DOMContentLoaded', function () {
   var   gtipeformitem = g_tipeformitemNone;
 
   const g_modalNone = "";
-  var   gmodemodal = g_modalNone;
+  var   g_modeModal = g_modalNone;
 
   var dataItem = [];
   var dataBrowse = [];
+
+  function parseAngka (str) {
+    if (str === undefined || str === null || str === '') { return 0; }
+    let n = Number(String(str).replace(/\./g, '').replace(',', '.'));
+    return isNaN(n) ? 0 : n;
+  }
+  function formatAngkaDisplay (n, decimals) {
+    decimals = decimals === undefined ? 2 : decimals;
+    return Number(n || 0).toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  }
+  function formatAngkaInput (e) {
+    let el = e.target;
+    let parts = el.value.replace(/[^\d,]/g, '').split(',');
+    let intPart = parts[0].replace(/^0+(?=\d)/, '');
+    let decPart = parts.length > 1 ? parts.slice(1).join('').slice(0, 2) : null;
+    let formattedInt = intPart ? Number(intPart).toLocaleString('id-ID') : '';
+    el.value = decPart !== null ? formattedInt + ',' + decPart : formattedInt;
+  }
 
   {{-- Polyfill helper doX/cekX yang dipanggil halaman ini tapi tidak ada di
        ajc-func-core.js (cuma messageRequired/nullToEmpty yang ada di sana) --
@@ -750,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ['KodeCustSupp', 'Kode Cust',     1, 'varchar', 0, 0],
       ['NAMACUSTSUPP', 'Nama Customer', 1, 'varchar', 0, 0],
       ['IDUSER',       'User',          1, 'varchar', 0, 0],
-      ['IsOtorisasi1', 'Status',        1, 'bool',    0, 0],
+      ['IsOtorisasi1', 'Otorisasi',     1, 'bool',    0, 0],
       ['OtoUser1',     'User Oto',      1, 'varchar', 0, 0],
       ['TglOto1',      'Tgl Oto',       1, 'date',    0, 0],
     ]
@@ -879,12 +873,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let raw = bbsPickCI(row, col[0]);
     let type = col[3];
 
-    {{-- Status (IsOtorisasi1) -- badge "Sudah/Belum Otorisasi", bukan ikon check/x bool
-         biasa. --}}
+    {{-- Otorisasi (IsOtorisasi1) dirender sebagai ikon check/x hijau-merah, sama seperti
+         kolom otorisasi di halaman gudang lain. --}}
     if (col[0] === 'IsOtorisasi1') {
       return Number(raw) === 1
-        ? '<td class="text-center"><span class="status-badge status-badge-sudah">Sudah Otorisasi</span></td>'
-        : '<td class="text-center"><span class="status-badge status-badge-belum">Belum Otorisasi</span></td>';
+        ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"></i></td>'
+        : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"></i></td>';
     }
     if (type === 'date') {
       if (!raw) { return '<td></td>'; }
@@ -1022,6 +1016,8 @@ document.addEventListener('DOMContentLoaded', function () {
     reinitTabel();
 
     bbsInitReportTableSekali();
+
+    loadGudangOptions();
   });
 
   function loadAll() {
@@ -1996,7 +1992,7 @@ alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
     $("#inputitem_namabrg").val("");
     $("#inputitem_urutserahsample").val("");
     $("#inputitem_gudang").val("");
-    $("#inputitem_quantity").val(0);
+    $("#inputitem_quantity").val('0,00');
     $('#inputitem_satuan').empty();
     $('#inputitem_satuan').prop("disabled", true);
   }
@@ -2033,9 +2029,18 @@ function buttonOpenNoSerahSample () {
       let list = res.table || [];
       let rowTable = '';
 
+      {{-- NamaSales/NAMACUSTSUPP bisa mengandung apostrof, yang kalau ditaruh mentah
+           di dalam atribut onclick='...' bikin string literalnya pecah -> SyntaxError
+           saat baris diklik. Di-escape dulu sebelum diselipkan ke onclick. --}}
       list.forEach((item) => {
+        let nobuktiEsc = String(item.Nobukti ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let kodeSlsEsc = String(item.KodeSls ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let namaSlsEsc = String(item.NamaSales ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let kodeCustEsc = String(item.KODECUSTSUPP ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        let namaCustEsc = String(item.NAMACUSTSUPP ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
         rowTable += `
-          <tr class="pick-row" onclick="buttonPickNoSerahSample('${item.Nobukti}', '${item.KodeSls ?? ''}', '${item.NamaSales ?? ''}', '${item.KODECUSTSUPP ?? ''}', '${item.NAMACUSTSUPP ?? ''}')">
+          <tr class="pick-row" onclick="buttonPickNoSerahSample('${nobuktiEsc}', '${kodeSlsEsc}', '${namaSlsEsc}', '${kodeCustEsc}', '${namaCustEsc}')">
             <td>${item.Nobukti}</td>
             <td>${item.Tanggal ? item.Tanggal.substring(0, 10) : '-'}</td>
             <td>${item.KodeSls ?? ''}</td>
@@ -2082,7 +2087,7 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
   function buttonBrowsePickBarang(_kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
     $("#inputitem_kodebrg").val(_kode);
     $("#inputitem_namabrg").val(_nama);
-    $("#inputitem_quantity").val(_qnt);
+    $("#inputitem_quantity").val(formatAngkaDisplay(_qnt));
 
     let satuanSelect = $("#inputitem_satuan");
     satuanSelect.empty(); // Clear previous options
@@ -2141,9 +2146,19 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
         let list = res.table || [];
         let rowTable = '';
 
+        {{-- NAMABRG bisa mengandung apostrof (mis. nama barang dengan ukuran/merk
+             berformat "X'"), yang kalau ditaruh mentah di dalam atribut onclick='...'
+             bikin string literalnya pecah di tengah jalan -> SyntaxError saat baris
+             diklik. Di-escape dulu sebelum diselipkan ke onclick. --}}
         list.forEach((item) => {
+          let kodeEsc = String(item.KODEBRG ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let namaEsc = String(item.NAMABRG ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat1Esc = String(item.sat1 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat2Esc = String(item.sat2 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          let sat3Esc = String(item.sat3 ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
           rowTable += `
-            <tr class="pick-row" onclick="buttonPickItemBarang('${item.KODEBRG}', '${item.NAMABRG ?? ''}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${item.sat1 ?? ''}', '${item.sat2 ?? ''}', '${item.sat3 ?? ''}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
+            <tr class="pick-row" onclick="buttonPickItemBarang('${kodeEsc}', '${namaEsc}', ${item.QNTSISA ?? 0}, ${item.URUT ?? 0}, '${sat1Esc}', '${sat2Esc}', '${sat3Esc}', ${item.isi1 ?? 0}, ${item.isi2 ?? 0}, ${item.isi3 ?? 0})">
               <td>${item.KODEBRG}</td>
               <td>${item.NAMABRG}</td>
               <td>${item.QNTSISA ?? ''}</td>
@@ -2168,45 +2183,33 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
     $('#modalPickBarang').modal('hide');
   }
 
-  {{-- Picker SO 1:1 utk Gudang -- data tetap dari endpoint lama (listGudang()). --}}
-  function buttonOpenPickGudang () {
-    console.log('buttonOpenPickGudang');
-
-    $('#tabel_data_pick_gudang').html('');
-
+  {{-- Gudang sekarang <select> biasa (bukan picker modal lagi), sama seperti
+       gudangpermintaansample.blade.php/gudangpermintaankonsinyasi.blade.php. Data tetap
+       dari endpoint lama (listGudang()). --}}
+  function loadGudangOptions () {
     $.ajax({
       url: "{!! $gudang !!}",
       type: "get",
       data: {},
       success: function (res) {
         let list = res.table || [];
-        let rowTable = '';
+        let options = '<option value="">- Pilih Gudang -</option>';
 
         list.forEach((item) => {
-          rowTable += `
-            <tr class="pick-row" onclick="buttonPickItemGudang('${item.KodeGdg}')">
-              <td>${item.KodeGdg}</td>
-              <td>${item.Nama ?? ''}</td>
-              <td>${item.Alamat ?? ''}</td>
-            </tr>`;
+          options += `<option value="${item.KodeGdg}">${item.KodeGdg} - ${item.Nama ?? ''}</option>`;
         });
 
-        $('#tabel_data_pick_gudang').html(rowTable);
-
-        pickerKasInit('tabel_pick_gudang');
-
-        $('#modalPickGudang').modal('show');
+        document.getElementById("inputitem_gudang").innerHTML = options;
       },
       error: function (err) {
         console.error("AJAX Error:", err);
-        alertify.warning('Terjadi kesalahan saat mengambil data.');
+        alertify.warning('Terjadi kesalahan saat mengambil data gudang.');
       }
     });
   }
 
-  function buttonPickItemGudang (kode) {
-    buttonBrowsePickGudang(kode);
-    $('#modalPickGudang').modal('hide');
+  function onChangeItemGudang () {
+    buttonBrowsePickGudang($("#inputitem_gudang").val());
   }
 
   function showSatuanBarang(_nosat, _kode, _nama, _qnt, _urut, _sat1, _sat2, _sat3, _isi1, _isi2, _isi3) {
@@ -2300,8 +2303,9 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
 
     let stock = getStockSerahSample($("#input_noserahsample").val(), $("#inputitem_urutserahsample").val());
 
-    if (Number($("#inputitem_quantity").val()) <= Number(stock)) {
-      cart["qnt"]           = $("#inputitem_quantity").val();
+    let inputQuantity = parseAngka($("#inputitem_quantity").val());
+    if (inputQuantity <= Number(stock)) {
+      cart["qnt"]           = inputQuantity;
     } else {
       return "Qty Barang " + cart["kodebrg"] + " melebihi quantity sample";
     }
@@ -2315,6 +2319,78 @@ function buttonPickNoSerahSample (nb, kodeSls, namaSls, kodeCust, namaCust) {
 
     return cart;
 }
+
+  {{-- doSubmitItem() dipanggil submitItem() tapi tidak pernah didefinisikan di halaman
+       ini -- bikin "Simpan" selalu gagal dengan ReferenceError. Disalin dari pola yang
+       sama di ubahkemasanbarang.blade.php, disesuaikan ke nama field/fungsi yang sudah
+       ada di halaman ini (cekValidate(), successAdd/successEdit/successDelete,
+       doGenerateNoBukti() -- semuanya sudah ada, cuma doSubmitItem()-nya yang hilang). --}}
+  let g_submittingItem = false;
+
+  function doSubmitItem (_type, _urlName, _kode, _isRetry = false) {
+    if (g_submittingItem) return;
+
+    let choice;
+    if (gtipeformitem === g_tipeformitemAdd) choice = "I";
+    else if (gtipeformitem === g_tipeformitemEdit) choice = "U";
+    else if (gtipeformitem === g_tipeformitemDelete) choice = "D";
+    else return alertify.warning("Mode item tidak dikenali, silakan refresh browser");
+
+    if (!cekNotEmpty("input_nobukti")) {
+      return alertify.warning("No Bukti belum terbentuk, silakan tutup form lalu klik Tambah lagi");
+    }
+
+    let cart = cekValidate(choice);
+    if (typeof cart !== "object" || cart === null) {
+      return alertify.warning(cart ? String(cart) : "Data tidak valid");
+    }
+
+    let _nobukti = cart["nobukti"];
+    let _token = $("#_token").val();
+
+    const release = () => {
+      g_submittingItem = false;
+      $("#buttonSubmitItem").prop("disabled", false);
+    };
+
+    g_submittingItem = true;
+    $("#buttonSubmitItem").prop("disabled", true);
+
+    $.ajax({
+      url: "{!! url('') !!}/" + _urlName,
+      type: "post",
+      data: {
+        _token,
+        data: cart,
+        urut: cart["urut"]
+      },
+      success: function (res) {
+        release();
+
+        if (res === "T") {
+          if (choice === "I") successAdd(_nobukti);
+          else if (choice === "U") successEdit(_nobukti);
+          else successDelete(_nobukti);
+          return;
+        }
+
+        if (res === "D;;trans" && !_isRetry) {
+          let nb = doGenerateNoBukti(_kode);
+          $("#input_nobukti").val(nb.Nobukti);
+          $("#input_nourut").val(nb.Nourut);
+          return doSubmitItem(_type, _urlName, _kode, true);
+        }
+
+        console.log(res);
+        alertify.warning("Gagal menyimpan item, silakan coba lagi");
+      },
+      error: function (err) {
+        release();
+        console.log(err);
+        alertify.warning("Terjadi kesalahan, silahkan refresh browser");
+      }
+    });
+  }
 
   function submitItem () {
     doSubmitItem("item", "bbsspadd", "BBS");

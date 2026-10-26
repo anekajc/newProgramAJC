@@ -1803,6 +1803,7 @@ td input[type="checkbox"] {
 @section('js')
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
      "Reset kolom"), disamakan dengan newpo.blade.php. --}}
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
   <script type="text/javascript">
 
@@ -2233,7 +2234,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
           return;
         }
 
-        alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+        alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
           function (evt, value) {
             let xpket = value;
 
@@ -2473,7 +2474,7 @@ console.log('vvvvvvvvvvvvvvvvvv')
 
     // Field dari vwBrowsOutBeli/vwTransInvoice tidak semuanya ramah dibaca - label yang
     // tampil ke user dipasang di sini, bukan lewat DBHEADERTABLEALIAS (kosong untuk href ini).
-    const IPB_LABEL_1 = { NoBukti: 'No. Bukti', TANGGAL: 'Tanggal', KODECUSTSUPP: 'Kode Supp', NAMACUSTSUPP: 'Nama Supplier', NoPO: 'No. PO', TNDPP: 'DPP', TNPPN: 'PPN', TSUBTOTAL: 'Total' }
+    const IPB_LABEL_1 = { NoBukti: 'No. Bukti', TANGGAL: 'Tanggal', KODECUSTSUPP: 'Kode Supp', NAMACUSTSUPP: 'Nama Supplier', NoPO: 'No. PO', TNDPP: 'DPP', TNPPN: 'PPN', TSUBTOTAL: 'Sub Total' }
     const IPB_LABEL_2 = { NoBukti: 'No. Bukti', Tanggal: 'Tanggal', KODECUSTSUPP: 'Kode Supp', NamaCustSupp: 'Nama Supplier', NoPO: 'No. PO', TotDPPRp: 'DPP', TotPPNRp: 'PPN', TotNetRp: 'Total', OtoUser1: 'User Oto 1', TglOto1: 'Tgl Oto 1' }
 
     window.g_href = IPB_HREF
@@ -4598,7 +4599,7 @@ if (pcekglobal) {
         <td>${detail_row.Satuan}</td>
         <td class="text-right">${detail_row.Harga ? formatAngkaX(detail_row.Harga) : '0.00' }</td>
         <td class="text-right">${detail_row.DiscRp1 ? formatAngkaX(detail_row.DiscRp1) : '0.00' }</td>
-        <td class="text-right">${detail_row.NNET ? formatAngkaX(detail_row.NNET) : '0.00' }</td></tr>`
+        <td class="text-right">${detail_row.TotalIDR ? formatAngkaX(detail_row.TotalIDR) : '0.00' }</td></tr>`
 
 
 
@@ -4643,11 +4644,16 @@ if (pcekglobal) {
           $('#detailPembelianJthTempoout').val(ipbTanggalYMD(new Date(detail_row_data[0].TglJatuhTempo)))
         }
 
-        document.getElementById("input_det_discout").value = detail_row_data[0].disc ?? 0
-        document.getElementById("input_det_discrpout").value = detail_row_data[0].DISCRP ?? 0
-        document.getElementById("input_det_dppout").value = detail_row_data[0].TotDPP ?? 0
-        document.getElementById("input_det_ppnout").value = detail_row_data[0].TotPPN ?? 0
-        document.getElementById("input_det_grandtotalout").value = detail_row_data[0].TotNet ?? 0
+        // Header dbBeli milik LPB tidak pernah diisi total (NILAIDPP/NILAIPPN/NILAINET selalu 0) -
+        // nilai sebenarnya ada di baris dbBeliDet, jadi DPP/PPN/Grand Total dijumlah dari detail.
+        let detTotDPP = detail_row_data.reduce((jml, r) => jml + (parseFloat(r.NDPP) || 0), 0)
+        let detTotPPN = detail_row_data.reduce((jml, r) => jml + (parseFloat(r.NPPN) || 0), 0)
+        // input Disc % / DiscRp bertipe number - nilainya tanpa pemisah ribuan
+        document.getElementById("input_det_discout").value = (parseFloat(detail_row_data[0].disc) || 0).toFixed(2)
+        document.getElementById("input_det_discrpout").value = (parseFloat(detail_row_data[0].DISCRP) || 0).toFixed(2)
+        document.getElementById("input_det_dppout").value = formatAngkaX(detTotDPP)
+        document.getElementById("input_det_ppnout").value = formatAngkaX(detTotPPN)
+        document.getElementById("input_det_grandtotalout").value = formatAngkaX(detTotDPP + detTotPPN)
         $('#detailDateout').val(date1)
 
         document.getElementById("detailTableDataout").innerHTML = table_row_detail

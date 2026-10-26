@@ -2332,7 +2332,7 @@
           <th style="padding: 4px 12px;" scope="col">Sat</th>
           <th style="padding: 4px 12px;" scope="col">Harga</th>
           <th style="padding: 4px 12px;" scope="col">Diskon</th>
-          <th style="padding: 4px 12px;" scope="col">NDPP</th>
+          <th style="padding: 4px 12px;" scope="col">DPP</th>
           <!-- <th scope="col">Actions</th> -->
 
         </tr>
@@ -2509,6 +2509,7 @@
 @section('js')
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + tombol
      "Reset kolom"), disamakan dengan newpo.blade.php / uangmukabeli.blade.php. --}}
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
 <script type="text/javascript">
@@ -2589,7 +2590,7 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-  alertify.prompt("Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -2644,6 +2645,13 @@ function onChangeCatatan () {
 
   let nobukti = $("#input_add_nobukti").val()
   if (!nobukti) {
+    return
+  }
+
+  // Add baru: header dbPRRBeli baru dibuat saat item pertama disimpan (submitAddAdd
+  // ikut mengirim Keterangan), jadi sebelum ada item tidak ada yang perlu di-update.
+  // Dulu tetap dikirim sehingga muncul "Perintah retur ... tidak ditemukan".
+  if (!dataTableAdd.length) {
     return
   }
 
@@ -6442,8 +6450,9 @@ if (isEmpty(kodeBeli)){
 
       renderModalPickTable(
         ['Kode Barang', 'Nama Barang'],
-        dataRefresh.map(item => [item.KODEBRG, item.NAMABRG]),
-        dataRefresh.map(item => () => buttonSelectBarang(item.KODEBRG, item.NAMABRG, item.QntTerima, item.SATUAN, item.NOSAT, item.ISI1, item.ISI2, item.URUT, '0'))
+        // prblistbarangJualDanBeli mengembalikan NamaBrg / UrutPbl / UrutPrj (bukan NAMABRG / URUT).
+        dataRefresh.map(item => [item.KODEBRG, item.NamaBrg]),
+        dataRefresh.map(item => () => buttonSelectBarang(item.KODEBRG, item.NamaBrg, item.QntTerima, item.SATUAN, item.NOSAT, item.ISI1, item.ISI2, item.UrutPbl, item.UrutPrj))
       );
     },
   });

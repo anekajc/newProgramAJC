@@ -333,6 +333,7 @@ public function SerahSample (Request $req)
         WHERE A.Qnt - ISNULL(D.Qnt, 0) > 0
           AND ISNULL(B.IsOtorisasi1, 0) = 1
           AND ISNULL(B.pkonsi, 0) = 0
+          AND ISNULL(A.ISBATAL, 0) = 0
     ";
 
     $bindings = [];

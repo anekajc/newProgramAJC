@@ -2705,6 +2705,7 @@
 
 @section('js')
 @include('marketing.partials.tampilan-purchasing-js')
+<script>window.RT_LABEL_PAJAK = true</script>
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
@@ -2763,9 +2764,9 @@ function nrpDefaultCart (urut) {
     ['NAMACUSTSUPP', 'Customer',   1, 'varchar', 0, 0],
     ['NoInvoice',    'No Invoice', 1, 'varchar', 0, 0],
     ['NORPJ',        'No Retur',   1, 'varchar', 0, 0],
-    ['TotDPPRp',     'DPP Rp',     1, 'float',   0, 2],
-    ['TotPPNRp',     'PPN Rp',     1, 'float',   0, 2],
-    ['TotNetRp',     'Total Rp',   1, 'float',   0, 2],
+    ['TotDPPRp',     'DPP',     1, 'float',   0, 2],
+    ['TotPPNRp',     'PPN',     1, 'float',   0, 2],
+    ['TotNetRp',     'Total',   1, 'float',   0, 2],
     ['IDUser',       'User',       1, 'varchar', 0, 0],
     ['OtoUser1',     'User Oto1',  1, 'varchar', 0, 0],
     ['TglOto1',      'Tgl Oto1',   1, 'date',    0, 0],
