@@ -1295,7 +1295,7 @@ function buttonPerkiraanSubGroup (kodeBiaya) {
   });
   document.getElementById("tabel_dataBiayaPenyusutan").innerHTML = rowTable;
 
-  pickerKasInit('tabelAddBiayaPenyusutan')
+  pickerKasInit('tabelAddBiayaPenyusutan', { ordering: false })
 }
 
 function buttonPilihBiayaPenyusutan (perkiraan, keterangan, kodeBiaya) {
