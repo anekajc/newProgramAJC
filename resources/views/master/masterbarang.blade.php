@@ -105,6 +105,15 @@
                     <option selected disabled value="">Pilih Merk</option>
                   </select>
 
+          <label for="input_add_importLokal">Import/Lokal</label>
+          <select id="input_add_importLokal" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Impor</option>
+                    <option value="1">Lokal</option>
+                  </select>
+
+          <label for="input_add_isbeli">Beli</label>
+          <div class="bs-check"><input type="checkbox" id="input_add_isbeli" name="" value="" checked></div>
+
           <label for="input_add_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_add_kodebarang" disabled >
 
@@ -281,6 +290,15 @@
           <select disabled id="input_edit_kodemerk" onchange="changeInputMerk()" class="form-control" aria-label="Default select example">
                     <option selected disabled value="">Pilih Merk</option>
                   </select>
+
+          <label for="input_edit_importLokal">Import/Lokal</label>
+          <select id="input_edit_importLokal" class="form-control" aria-label="Default select example">
+                    <option selected value="0">Impor</option>
+                    <option value="1">Lokal</option>
+                  </select>
+
+          <label for="input_edit_isbeli">Beli</label>
+          <div class="bs-check"><input type="checkbox" id="input_edit_isbeli" name="" value=""></div>
 
           <label for="input_edit_kodebarang">Kode Barang</label>
           <input type="text" class="form-control" id="input_edit_kodebarang" disabled >
@@ -615,6 +633,8 @@ function loadAll () {
 }
 
 function buttonAdd () {
+  document.getElementById("input_add_importLokal").value = '0'
+  document.getElementById("input_add_isbeli").checked = true
   document.getElementById("input_add_kodebarang").value= ''
   document.getElementById("input_add_namabarang").value= ''
   document.getElementById("input_add_namabarang2").value= ''
@@ -935,11 +955,18 @@ function buttonEdit (kodebarang) {
     document.getElementById("input_edit_lokasi").value = res[0].Mlokasi
     document.getElementById("input_edit_kodesku").value = res[0].SKU
     document.getElementById("input_edit_kodemerk").value = res[0].KodeMerk
+    document.getElementById("input_edit_importLokal").value = Number(res[0].isLokal) ? '1' : '0'
 
     if (Number(res[0].pAgen)) {
       document.getElementById("input_edit_isagen").checked = true
     } else {
       document.getElementById("input_edit_isagen").checked = false
+    }
+
+    if (Number(res[0].isBeli)) {
+      document.getElementById("input_edit_isbeli").checked = true
+    } else {
+      document.getElementById("input_edit_isbeli").checked = false
     }
 
     if (Number(res[0].pKontrak)) {
@@ -1346,6 +1373,11 @@ function submitAdd () {
   if (document.getElementById("input_add_isagen").checked) {
     isagen= 1
   }
+  let isbeli = 0
+  if (document.getElementById("input_add_isbeli").checked) {
+    isbeli = 1
+  }
+  let islokal = Number($("#input_add_importLokal").val());
   let iskontrak = 0
   if (document.getElementById("input_add_iskontrak").checked) {
     iskontrak= 1
@@ -1452,6 +1484,8 @@ function submitAdd () {
     data: {
       _token : _token,
       isagen: Number(isagen),
+      isbeli: Number(isbeli),
+      islokal: Number(islokal),
       kodegroup,
       kodeheadgroup,
       kodesubgroup,
@@ -1512,6 +1546,11 @@ function submitEdit () {
   if (document.getElementById("input_edit_isagen").checked) {
     isagen= 1
   }
+  let isbeli = 0
+  if (document.getElementById("input_edit_isbeli").checked) {
+    isbeli = 1
+  }
+  let islokal = Number($("#input_edit_importLokal").val());
   let iskontrak = 0
   if (document.getElementById("input_edit_iskontrak").checked) {
     iskontrak= 1
@@ -1618,6 +1657,8 @@ function submitEdit () {
     data: {
       _token : _token,
       isagen: Number(isagen),
+      isbeli: Number(isbeli),
+      islokal: Number(islokal),
       kodegroup,
       kodeheadgroup,
       kodesubgroup,

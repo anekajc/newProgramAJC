@@ -36,6 +36,10 @@ use App\Http\Controllers\Master\MasterSopirController;
 use App\Http\Controllers\Master\MasterSupplierBankController;
 use App\Http\Controllers\Master\MasterSupplierController;
 use App\Http\Controllers\Master\MasterValasController;
+use App\Http\Controllers\Master\MasterMesinController;
+use App\Http\Controllers\Master\MasterProsesController;
+use App\Http\Controllers\Master\MasterBahanBakuController;
+use App\Http\Controllers\Master\MasterWIPController;
 use App\Http\Controllers\Master\NewMasterPerkiraanController;
 use App\Http\Controllers\Master\MasterSetPosting\MasterSetPostingAktivaController;
 use App\Http\Controllers\Master\MasterSetPosting\MasterSetPostingAkumulasiController;
@@ -89,6 +93,22 @@ Route::post('/masterdaftardevisispadd', [MasterDaftarDevisiController::class, 's
 Route::post('/masterdaftardevisispedit', [MasterDaftarDevisiController::class, 'spEdit'])->middleware('auth');
 Route::post('/masterdaftardevisispdelete', [MasterDaftarDevisiController::class, 'spDelete'])->middleware('auth');
 Route::get('/masterdaftardevisispdetail', [MasterDaftarDevisiController::class, 'spDetail'])->middleware('auth');
+
+// MASTER PROSES ==========================================================
+Route::get('/masterproses', [MasterProsesController::class, 'index'])->middleware('auth');
+Route::get('/masterprosesloadall', [MasterProsesController::class, 'loadAll'])->middleware('auth');
+Route::post('/masterprosesspadd', [MasterProsesController::class, 'spAdd'])->middleware('auth');
+Route::post('/masterprosesspedit', [MasterProsesController::class, 'spEdit'])->middleware('auth');
+Route::post('/masterprosesspdelete', [MasterProsesController::class, 'spDelete'])->middleware('auth');
+Route::get('/masterprosesspdetail', [MasterProsesController::class, 'spDetail'])->middleware('auth');
+
+// MASTER MESIN ==========================================================
+Route::get('/mastermesin', [MasterMesinController::class, 'index'])->middleware('auth');
+Route::get('/mastermesinloadall', [MasterMesinController::class, 'loadAll'])->middleware('auth');
+Route::post('/mastermesinspadd', [MasterMesinController::class, 'spAdd'])->middleware('auth');
+Route::post('/mastermesinspedit', [MasterMesinController::class, 'spEdit'])->middleware('auth');
+Route::post('/mastermesinspdelete', [MasterMesinController::class, 'spDelete'])->middleware('auth');
+Route::get('/mastermesinspdetail', [MasterMesinController::class, 'spDetail'])->middleware('auth');
 
 // MASTER PERKIRAAN ======================================================
 Route::get('/newperkiraan', [NewMasterPerkiraanController::class, 'index'])->middleware('auth');
@@ -477,6 +497,41 @@ Route::get('/masterbarangjasaspdetail' , [MasterBarangJasaController::class, 'sp
 Route::post('/masterbarangjasaspedit' , [MasterBarangJasaController::class, 'spEdit'])->middleware('auth');
 Route::post('/masterbarangjasaspdelete' , [MasterBarangJasaController::class, 'spDelete'])->middleware('auth');
 Route::get('/masterbarangjasaloadall', [MasterBarangJasaController::class, 'loadAll'])->middleware('auth');
+
+// MASTER BAHAN BAKU ====================================================================
+Route::get('/masterbahanbaku' ,[MasterBahanBakuController::class, 'index'])->middleware('auth');
+Route::get('/masterbahanbakulistselect' , [MasterBahanBakuController::class, 'spListSelect'])->middleware('auth');
+Route::post('/masterbahanbakuspcheckdbbarang' , [MasterBahanBakuController::class, 'spCheckDBBarang'])->middleware('auth');
+Route::post('/masterbahanbakuspadd' ,[MasterBahanBakuController::class, 'spAdd'])->middleware('auth');
+Route::get('/masterbahanbakuspdetail' , [MasterBahanBakuController::class, 'spDetail'])->middleware('auth');
+Route::post('/masterbahanbakuspedit' ,[MasterBahanBakuController::class, 'spEdit'])->middleware('auth');
+Route::get('/masterbahanbakuloadall' , [MasterBahanBakuController::class, 'loadAll'])->middleware('auth');
+Route::get('/masterbahanbakulistsupplier' , [MasterBahanBakuController::class, 'spListSupplier'])->middleware('auth');
+Route::get('/masterbahanbakuspdetailharga' ,[MasterBahanBakuController::class, 'spDetailHarga'])->middleware('auth');
+Route::post('/masterbahanbakuspaddharga' ,[MasterBahanBakuController::class, 'spAddHarga'])->middleware('auth');
+Route::get('/masterbahanbakuspdetailhargadetail' ,[MasterBahanBakuController::class, 'spDetailHargaDetail'])->middleware('auth');
+Route::post('/masterbahanbakuspeditharga' ,[MasterBahanBakuController::class, 'spEditHarga'])->middleware('auth');
+Route::post('/masterbahanbakuspdelete' , [MasterBahanBakuController::class, 'spDelete'])->middleware('auth');
+Route::post('/masterbahanbakuspdeleteharga' , [MasterBahanBakuController::class, 'spDeleteHarga'])->middleware('auth');
+Route::get('/masterbahanbakulistsatuan' , [MasterBahanBakuController::class, 'spListSatuan'])->middleware('auth');
+
+
+// MASTER WIP ====================================================================
+Route::get('/masterwip' ,[MasterWIPController::class, 'index'])->middleware('auth');
+Route::get('/masterwiplistselect' , [MasterWIPController::class, 'spListSelect'])->middleware('auth');
+Route::post('/masterwipspcheckdbbarang' , [MasterWIPController::class, 'spCheckDBBarang'])->middleware('auth');
+Route::post('/masterwipspadd' ,[MasterWIPController::class, 'spAdd'])->middleware('auth');
+Route::get('/masterwipspdetail' , [MasterWIPController::class, 'spDetail'])->middleware('auth');
+Route::post('/masterwipspedit' ,[MasterWIPController::class, 'spEdit'])->middleware('auth');
+Route::get('/masterwiploadall' , [MasterWIPController::class, 'loadAll'])->middleware('auth');
+Route::get('/masterwiplistsupplier' , [MasterWIPController::class, 'spListSupplier'])->middleware('auth');
+Route::get('/masterwipspdetailharga' ,[MasterWIPController::class, 'spDetailHarga'])->middleware('auth');
+Route::post('/masterwipspaddharga' ,[MasterWIPController::class, 'spAddHarga'])->middleware('auth');
+Route::get('/masterwipspdetailhargadetail' ,[MasterWIPController::class, 'spDetailHargaDetail'])->middleware('auth');
+Route::post('/masterwipspeditharga' ,[MasterWIPController::class, 'spEditHarga'])->middleware('auth');
+Route::post('/masterwipspdelete' , [MasterWIPController::class, 'spDelete'])->middleware('auth');
+Route::post('/masterwipspdeleteharga' , [MasterWIPController::class, 'spDeleteHarga'])->middleware('auth');
+Route::get('/masterwiplistsatuan' , [MasterWIPController::class, 'spListSatuan'])->middleware('auth');
 
 // MASTER LOKASI BARANG ==========================================================
 Route::get('/masterlokasibarang', [MasterLokasiBarangController::class, 'index'])->middleware('auth');
