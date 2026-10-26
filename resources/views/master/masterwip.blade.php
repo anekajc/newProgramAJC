@@ -119,8 +119,8 @@
 
           <label for="input_add_kodesku">Kode SKU</label>
           <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-leftt" id="input_add_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div>
+            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="" hidden>
+                <span class="text-left" hidden>Kontrak</span></div></div>
 
           <label for="input_add_namabarang">Nama Barang</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang" ></div>
@@ -307,8 +307,8 @@
 
           <label for="input_edit_kodesku">Kode SKU</label>
           <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-left" id="input_edit_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div>
+            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="" hidden>
+                <span class="text-left" hidden>Kontrak</span></div></div>
 
           <label for="input_edit_namabarang">Nama Barang</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang" ></div>

@@ -23,7 +23,6 @@ class MasterHeadGroupController extends Controller
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
     $listData = DB::connection('SML')->select('SELECT * FROM DBHDGROUP');
 
-
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0(2);
 
     return view('master.masterheadgroup' , [
@@ -44,8 +43,6 @@ class MasterHeadGroupController extends Controller
     $listData = VWPerkiraan::all();
     return $listData;
   }
-
-
 
   public function loadAll () {
     $listData = DB::connection('SML')->select('SELECT * FROM DBHDGROUP');

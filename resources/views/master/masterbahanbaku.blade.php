@@ -120,8 +120,8 @@
 
           <label for="input_add_kodesku">Kode SKU</label>
           <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-leftt" id="input_add_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div>
+            <div class="bs-check"><input type="checkbox" id="input_add_iskontrak" name="" value="" hidden>
+                <span class="text-left" hidden>Kontrak</span></div></div>
 
           <label for="input_add_namabarang">Nama Barang</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_add_namabarang" ></div>
@@ -266,8 +266,8 @@
           <div class="bs-form">
           <label for="input_edit_kodegroup">Group</label>
           <div class="d-flex align-items-center" style="gap:8px">
-            <input type="text" class="form-control" id="input_edit_kodegroup" value='BJ' disabled style="flex:0 0 70px">
-            <input type="text" class="form-control" value='Barang Jadi' disabled>
+            <input type="text" class="form-control" id="input_edit_kodegroup" value='' disabled style="flex:0 0 70px">
+            <input type="text" class="form-control" id="input_edit_namakodegroup" value='' disabled>
           </div>
           <label for="input_edit_isagen"></label>
           <div class="bs-check"><input type="checkbox" id="input_edit_isagen" name="" value="" hidden></div>
@@ -306,8 +306,8 @@
 
           <label for="input_edit_kodesku">Kode SKU</label>
           <div class="d-flex align-items-center" style="gap:8px"><input type="text" class="form-control text-left" id="input_edit_kodesku" >
-            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="">
-                <span class="text-left">Kontrak</span></div></div>
+            <div class="bs-check"><input type="checkbox" id="input_edit_iskontrak" name="" value="" hidden>
+                <span class="text-left" hidden>Kontrak</span></div></div>
 
           <label for="input_edit_namabarang">Nama Barang</label>
           <div class="bs-full"><input type="text" class="form-control" id="input_edit_namabarang" ></div>
@@ -733,7 +733,7 @@ function buttonAdd () {
 
 function changeInputKodeGroup () {
   let valueGroup = $("#input_add_kodegroup").val();
-  document.getElementById("namaKodeGroup").value = valueGroup == 'BP' ? 'Bahan Backing' : 'Bahan Baku'
+  document.getElementById("namaKodeGroup").value = valueGroup == 'BP' ? 'Bahan Packing' : 'Bahan Baku'
 }
 
 function changeInputHeadGroup () {
@@ -936,6 +936,8 @@ function buttonEdit (kodebarang) {
 
     console.log(res)
 
+    document.getElementById("input_edit_kodegroup").value = res[0].KODEGRP
+    document.getElementById("input_edit_namakodegroup").value = res[0].KODEGRP === 'BP' ? 'Bahan Backing' : 'Bahan Baku'
     document.getElementById("input_edit_kodebarang").value = res[0].KODEBRG
     document.getElementById("input_edit_namabarang").value = res[0].NAMABRG
     document.getElementById("input_edit_namabarang2").value = res[0].NamaBrg2
