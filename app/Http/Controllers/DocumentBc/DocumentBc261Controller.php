@@ -161,8 +161,6 @@ class DocumentBc261Controller extends Controller
         'jenisJaminan' => ['1' => 'Tunai', '2' => 'Bank Garansi', '3' => 'Customs Bond', '4' => 'Tertulis/CG', '5' => 'STTJ',
             '6' => 'Pusat', '7' => 'Indonesia EximBank', '8' => 'Perusahaan Penjaminan'],
         'jenisMuatan' => ['4' => 'Empty', '7' => 'LCL', '8' => 'FCL'],
-        'tipeKontainer' => ['1' => 'General/Dry Cargo', '2' => 'Tunnel Type', '3' => 'Open Top Steel', '4' => 'Flat Rack',
-            '5' => 'Reefer', '6' => 'Barge Container', '7' => 'Bulk Container', '8' => 'Isotank', '99' => 'Lain-lain'],
         'dokumenAsal' => ['23' => 'BC 2.3', '27' => 'BC 2.7', '40' => 'BC 4.0'],
     ];
 
@@ -192,7 +190,8 @@ class DocumentBc261Controller extends Controller
             'kode' => self::KODE,
             'entitas' => $this->daftarEntitas(),
             'valuta' => DB::connection('SML')->select('SELECT KODEVLS AS kode, NAMAVLS AS nama FROM dbVALAS ORDER BY KODEVLS'),
-            'kontainer' => $this->daftarKontainer(),
+            'ukuranKontainer' => $this->daftarKontainer('ukuran_kontainer', 'KODEUKURANKONTAINER', 'NAMAUKURANKONTAINER'),
+            'tipeKontainer' => $this->daftarKontainer('tipe_kontainer', 'KODETIPEKONTAINER', 'NAMATIPEKONTAINER'),
             'lookup' => [
                 'negara' => DB::connection('SML')->select('SELECT KODENEGARA AS kode, NAMANEGARA AS nama FROM '.config('beacukai.tables.negara').' ORDER BY KODENEGARA'),
                 'satuan' => $this->daftarKode('satuan'),
@@ -466,14 +465,15 @@ class DocumentBc261Controller extends Controller
         return DB::connection('SML')->select("SELECT {$cfg['kode']} AS kode, {$nama} AS nama FROM {$cfg['table']} ORDER BY {$cfg['kode']}");
     }
 
-    private function daftarKontainer(): array
+    // Master Ukuran / Tipe Kontainer (tabel terpisah): [kode, nama] untuk combobox Peti Kemas.
+    private function daftarKontainer(string $key, string $kode, string $nama): array
     {
-        $tabel = config('beacukai.tables.kontainer');
+        $tabel = config("beacukai.tables.{$key}");
         if (! $tabel) {
             return [];
         }
 
-        return DB::connection('SML')->select("SELECT id, KODEUKURANKONTAINER AS ukuran, KODETIPEKONTAINER AS tipe FROM {$tabel} ORDER BY KODEUKURANKONTAINER, KODETIPEKONTAINER");
+        return DB::connection('SML')->select("SELECT {$kode} AS kode, {$nama} AS nama FROM {$tabel} ORDER BY {$kode}");
     }
 
     private function daftarEntitas(): array

@@ -1,0 +1,1762 @@
+@extends('newmasterTest')
+@section('buttons')
+@endsection
+@section('page-title', 'Dokumen BC 4.0')
+
+{{-- Dokumen BC 4.0 (pemasukan barang dari dalam negeri ke kawasan berikat) - spesifikasi di
+     docs/documentbc40_plan.md. Halaman = salinan pola documentbc23.blade.php (list #pageHome + form
+     full page #pageForm, mesin kolom gcart_header, tab form). SEMUA dokumen dibuat dari PO pemasok
+     dalam negeri di tab Outstanding (difilter rentang tanggal PO, karena jumlah PO dalam negeri
+     puluhan ribu). Nilai barang dalam Rupiah (Harga Penyerahan), tanpa CIF / incoterm / peti kemas.
+     Kemasan dan pengangkut hanya satu per dokumen (isian header); koleksi anak hanya barang dan
+     dokumen, diedit di memori (state) dan baru dikirim ke server saat Simpan dokumen. Bootstrap 4 only. --}}
+@section('css')
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+    <style>
+        /* Label BC lebih panjang dari form master biasa: kolom label dilebarkan, label boleh turun baris. */
+        @media (min-width: 576px) {
+            body #formBsGrid .bs-form { grid-template-columns: 170px minmax(0, 1fr) 170px minmax(0, 1fr); }
+            body #formBsGrid .bs-form.bs-form-1 { grid-template-columns: 170px minmax(0, 1fr); }
+        }
+        body #formBsGrid .bs-form label { white-space: normal; line-height: 1.3; }
+
+        .custom-tabs {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 2px;
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            padding: 3px;
+        }
+
+        .custom-tabs .nav-link {
+            display: inline-block !important;
+            padding: 5px 16px !important;
+            font-size: 0.75rem !important;
+            border: none;
+            border-radius: 17px;
+            color: #495057;
+            background: transparent;
+            font-weight: 600;
+            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .custom-tabs .nav-link:hover {
+            background: transparent;
+            color: #007bff;
+        }
+
+        .custom-tabs .nav-link.active {
+            background: #007bff;
+            border-color: #007bff;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+        }
+
+        #homeTabs {
+            margin: 8px 12px;
+        }
+
+        #pageForm .tab-content {
+            padding: 14px 4px 4px;
+        }
+
+        .bc-judul {
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #495057;
+            margin: 14px 0 8px;
+        }
+
+        .bc-judul:first-child {
+            margin-top: 0;
+        }
+
+        .bc-toolbar-koleksi {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .bc-info {
+            font-size: .75rem;
+            color: #6c757d;
+        }
+
+        .bc-kosong td {
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .bc-ringkas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .bc-ringkas div {
+            background: #f8f9fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: .8rem;
+        }
+
+        .bc-ringkas b {
+            display: block;
+            font-size: .95rem;
+            text-align: right;
+        }
+
+        #btnLoginBc.is-login {
+            background: #e7f7ed;
+            border-color: #b7e4c7;
+            color: #16a34a;
+        }
+
+        #previewIsi {
+            max-height: 65vh;
+            overflow: auto;
+            font-size: 11.5px;
+            background: #f8f9fb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 0;
+            white-space: pre;
+        }
+
+        /* Modal pemilih HS dibuka di atas modal barang. */
+        #mdlHs {
+            z-index: 1070;
+        }
+
+        .modal-backdrop.bc-backdrop-atas {
+            z-index: 1065;
+        }
+
+        #tblHs tbody tr {
+            cursor: pointer;
+        }
+    </style>
+@endsection
+
+@section('content')
+    <div id="contentContainer" class="container-fluid">
+        <input type="hidden" id="akses_istambah" value="{!! (int) ($akses->ISTAMBAH ?? 0) !!}" />
+        <input type="hidden" id="akses_iskoreksi" value="{!! (int) ($akses->ISKOREKSI ?? 0) !!}" />
+        <input type="hidden" id="akses_ishapus" value="{!! (int) ($akses->ISHAPUS ?? 0) !!}" />
+        <input type="hidden" id="akses_isexport" value="{!! (int) ($akses->ISEXPORT ?? 0) !!}" />
+        <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
+
+        <div id="pageHome" class="container-fluid po-list-page">
+            <div class="card">
+                <div class="card-body" style="padding:0;">
+
+                    <div class="po-toolbar">
+                        {{-- Periode berlaku untuk Outstanding (tanggal PO) dan Transaksi (tanggal AJU). --}}
+                        <div class="po-filter-wrap">
+                            <label>Periode</label>
+                            <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
+                            <span class="po-filter-sep">s/d</span>
+                            <input type="date" class="po-filter-inp" id="inputDate2" value="{!! $date2 !!}" autocomplete="off">
+                        </div>
+
+                        <input class="po-search-inp" type="search" id="searchBox2" placeholder="Cari data">
+
+                        <div class="po-len-wrap">
+                            <label for="tampilLen">Tampilkan</label>
+                            <select class="po-len-inp" id="tampilLen">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="-1">Semua</option>
+                            </select>
+                        </div>
+
+                        <button class="po-btn-filter" type="button" id="btnRefresh" onclick="refreshSemua()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+
+                        {{-- Token CEISA per user; teks tombol berubah jadi hitung mundur masa berlaku token. --}}
+                        <button class="po-btn-filter" type="button" id="btnLoginBc" onclick="bukaLoginBc()">
+                            <i class="bi bi-box-arrow-in-right"></i> <span id="btnLoginBcTeks">Login BC</span>
+                        </button>
+                    </div>
+
+                    <div class="nav nav-tabs border-0 custom-tabs" id="homeTabs" role="tablist">
+                        <a class="nav-item nav-link active" data-toggle="tab" href="#tabOutstanding" role="tab">Outstanding (PO)</a>
+                        <a class="nav-item nav-link" data-toggle="tab" href="#tabTransaksiList" role="tab">Transaksi</a>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tabOutstanding" role="tabpanel">
+                            <table id="tabel2" class="data-table po-aksi-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                        <th style="padding: 4px 12px;" scope="col">Rev. Doc. (No. PO)</th>
+                                        <th style="padding: 4px 12px;" scope="col">Tanggal</th>
+                                        <th style="padding: 4px 12px;" scope="col">Pemasok</th>
+                                        <th style="padding: 4px 12px;" scope="col">Valuta</th>
+                                        <th style="padding: 4px 12px;" scope="col" class="text-right">Jumlah Baris</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel2_data" class="text-left"></tbody>
+                            </table>
+                            <div class="po-rt-hint">
+                                <i class="bi bi-info-circle"></i>
+                                PO pemasok dalam negeri pada rentang Periode di atas yang belum dibuatkan BC 4.0 (tidak batal,
+                                sudah otorisasi, punya baris barang). Klik <i class="bi bi-plus-lg"></i> untuk membuat BC 4.0 dari PO.
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tabTransaksiList" role="tabpanel">
+                            <div id="rtBar"></div>
+
+                            <table id="tabel" class="data-table po-aksi-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel_data" class="text-left"></tbody>
+                            </table>
+
+                            <div class="po-rt-hint">
+                                <i class="bi bi-info-circle"></i>
+                                Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                                untuk menyembunyikan kolom.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Daftar isian combobox (diambil dari master; tetap bisa diketik bebas). --}}
+    <datalist id="dlSatuan">
+        @foreach ($lookup['satuan'] as $r)
+            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
+        @endforeach
+    </datalist>
+    <datalist id="dlKemasan">
+        @foreach ($lookup['kemasan'] as $r)
+            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
+        @endforeach
+    </datalist>
+    <datalist id="dlJenisDokumen">
+        @foreach ($lookup['jenisDokumen'] as $r)
+            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
+        @endforeach
+    </datalist>
+
+    <!-- start pageForm (Tambah / Edit / Detail, full page) -->
+    <div id="pageForm" class="container-fluid po-form-page" style="display:none">
+        <div id="formBsGrid">
+            <div class="row" style="padding: 1rem 0">
+                <div class="col-6 text-left">
+                    <h5 id="formJudul" style="margin:0"></h5>
+                </div>
+                <div class="col-6 text-right" id="contentContainer">
+                    <button type="button" class="btn btn-danger btn-pill-primary btn-action-danger"
+                        onclick="buttonCloseForm()">Close</button>
+                    <button type="button" class="btn btn-primary btn-pill-primary btn-action-primary bc-edit"
+                        onclick="submitDokumen()">Simpan</button>
+                </div>
+            </div>
+
+            <div class="nav nav-tabs border-0 custom-tabs" id="bcTabs" role="tablist">
+                <a class="nav-item nav-link active" data-toggle="tab" href="#tabHeader" role="tab">Header</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabEntitas" role="tab">Entitas</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabDokumen" role="tab">Dokumen</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabPengangkut" role="tab">Pengangkut</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabKemasan" role="tab">Kemasan</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabPerdagangan" role="tab">Perdagangan</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabBarang" role="tab">Barang</a>
+                <a class="nav-item nav-link" data-toggle="tab" href="#tabPernyataan" role="tab">Pernyataan</a>
+            </div>
+
+            <div class="tab-content">
+
+                {{-- HEADER --}}
+                <div class="tab-pane fade show active" id="tabHeader" role="tabpanel">
+                    <div class="bs-form">
+                        <label for="h_revDoc">Rev. Doc. (No. PO)</label>
+                        <input type="text" class="form-control bc-tetap" id="h_revDoc" disabled>
+
+                        <label for="h_nomorAju">Nomor Pengajuan</label>
+                        <input type="text" class="form-control" id="h_nomorAju" data-h="nomorAju" maxlength="100" style="text-transform: uppercase">
+
+                        <label for="h_kodeKantor">A. Kantor Pabean</label>
+                        <input type="text" class="form-control" id="h_kodeKantor" data-h="kodeKantor" maxlength="20">
+
+                        <label for="h_kodeJenisTpb">B. Jenis TPB</label>
+                        <input type="text" class="form-control" id="h_kodeJenisTpb" data-h="kodeJenisTpb" maxlength="20">
+
+                        <label for="h_kodeTujuanPengirim" class="bs-wrap">C. Tujuan Pengiriman</label>
+                        <select class="form-control" id="h_kodeTujuanPengirim" data-h="kodeTujuanPengirim">
+                            @foreach ($kode['tujuanPengirim'] as $k => $v)
+                                <option value="{{ $k }}">{{ $k }} - {{ $v }}</option>
+                            @endforeach
+                        </select>
+
+                        <label for="h_nomorDokumenPabean" class="bs-wrap">F. Nomor Pendaftaran</label>
+                        <input type="text" class="form-control" id="h_nomorDokumenPabean" data-h="nomorDokumenPabean" maxlength="50">
+
+                        <label for="h_tanggalAju">F. Tanggal AJU</label>
+                        <input type="date" class="form-control" id="h_tanggalAju" data-h="tanggalAju">
+                    </div>
+                    <div class="bc-info mt-2">Nomor Pengajuan disimpan huruf besar. Jenis Transaksi = Penyerahan BKP. Nomor Pendaftaran hanya catatan internal (tidak dikirim); Tanggal AJU dikirim ke CEISA.</div>
+                </div>
+
+                {{-- ENTITAS - data yang DIKIRIM ke CEISA diambil dari master entitas yang dipilih. --}}
+                <div class="tab-pane fade" id="tabEntitas" role="tabpanel">
+                    @foreach ([1 => 'Pengusaha TPB', 3 => 'Pengirim Barang', 2 => 'Pemilik Barang'] as $n => $judul)
+                        <div class="bc-judul">{{ $judul }}</div>
+                        <div class="bs-form">
+                            <label for="h_selectEntitas{{ $n }}">Entitas</label>
+                            <select class="form-control bc-entitas" id="h_selectEntitas{{ $n }}" data-h="selectEntitas{{ $n }}" data-n="{{ $n }}">
+                                <option value="">- Pilih Entitas -</option>
+                                @foreach ($entitas as $e)
+                                    <option value="{{ $e->id }}">{{ $e->namaEntitas }}</option>
+                                @endforeach
+                            </select>
+
+                            <label for="h_nomorIdentitasEntitas{{ $n }}">NPWP</label>
+                            <input type="text" class="form-control" id="h_nomorIdentitasEntitas{{ $n }}" data-h="nomorIdentitasEntitas{{ $n }}" maxlength="50">
+
+                            <label for="h_alamatEntitas{{ $n }}">Alamat</label>
+                            <div class="bs-full">
+                                <input type="hidden" id="h_namaEntitas{{ $n }}" data-h="namaEntitas{{ $n }}">
+                                <textarea class="form-control" id="h_alamatEntitas{{ $n }}" data-h="alamatEntitas{{ $n }}" rows="2" maxlength="1000"></textarea>
+                            </div>
+
+                            @if ($n === 1)
+                                <label for="h_nomorIjinEntitas1" class="bs-wrap">Nomor Izin TPB</label>
+                                <input type="text" class="form-control" id="h_nomorIjinEntitas1" data-h="nomorIjinEntitas1" maxlength="50">
+                            @endif
+                        </div>
+                    @endforeach
+                    <div class="bc-info mt-2">Pemasok PO dipilih otomatis sebagai Pengirim Barang bila ada entitas dengan nama yang sama; bila tidak, pilih manual (pemasok harus ada di master Entitas).</div>
+                </div>
+
+                {{-- DOKUMEN --}}
+                <div class="tab-pane fade" id="tabDokumen" role="tabpanel">
+                    <div class="bc-toolbar-koleksi">
+                        <span class="bc-info" id="infoDokumen"></span>
+                        <button type="button" class="btn btn-chip-biru btn-sm bc-edit" onclick="bukaModal('dokumen', null)">Tambah Dokumen</button>
+                    </div>
+                    <div class="tb-report">
+                        <div class="table-outer">
+                            <div class="table-wrap" style="max-height:50vh;">
+                                <table class="tb">
+                                    <thead>
+                                        <tr><th>No</th><th>Jenis Dokumen</th><th>Nomor Dokumen</th><th>Tanggal</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody id="tblDokumen"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bc-info mt-2">Dokumen Pelengkap Pabean. Semua jenis dokumen boleh dipilih dan semua baris bisa dihapus.</div>
+                </div>
+
+                {{-- PENGANGKUT --}}
+                <div class="tab-pane fade" id="tabPengangkut" role="tabpanel">
+                    <div class="bs-form">
+                        <label for="h_namaPengangkut" class="bs-wrap">16. Jenis Sarana Pengangkut</label>
+                        <input type="text" class="form-control" id="h_namaPengangkut" data-h="namaPengangkut" maxlength="20" placeholder="mis. TRUCK">
+
+                        <label for="h_nomorPengangkut" class="bs-wrap">17. No. Polisi</label>
+                        <input type="text" class="form-control" id="h_nomorPengangkut" data-h="nomorPengangkut" maxlength="50">
+                    </div>
+                </div>
+
+                {{-- KEMASAN (satu per dokumen) --}}
+                <div class="tab-pane fade" id="tabKemasan" role="tabpanel">
+                    <div class="bs-form">
+                        <label for="h_kodeJenisKemasan" class="bs-wrap">22. Jenis Kemasan</label>
+                        <input type="text" class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+
+                        <label for="h_merkKemasan">23. Merek</label>
+                        <input type="text" class="form-control" id="h_merkKemasan" data-h="merkKemasan" maxlength="50">
+
+                        <label for="h_jumlahKemasan" class="bs-wrap">24. Jumlah Kemasan</label>
+                        <input type="number" step="1" class="form-control text-right" id="h_jumlahKemasan" data-h="jumlahKemasan">
+                    </div>
+                    <div class="bc-info mt-2">Kemasan dikirim ke CEISA bila Jenis atau Jumlah Kemasan terisi. BC 4.0 tidak punya peti kemas.</div>
+                </div>
+
+                {{-- PERDAGANGAN --}}
+                <div class="tab-pane fade" id="tabPerdagangan" role="tabpanel">
+                    <div class="bs-form">
+                        <label for="h_hargaPenyerahan" class="bs-wrap">18. Harga Penyerahan (Rp)</label>
+                        <input type="number" step="any" class="form-control text-right bc-tetap" id="h_hargaPenyerahan" data-h="hargaPenyerahan" disabled>
+
+                        <label for="h_nilaiJasa" class="bs-wrap">19. Nilai Penggantian Jasa</label>
+                        <input type="number" step="any" class="form-control text-right" id="h_nilaiJasa" data-h="nilaiJasa">
+
+                        <label for="h_uangMuka">20. Nilai Uang Muka</label>
+                        <input type="number" step="any" class="form-control text-right" id="h_uangMuka" data-h="uangMuka">
+
+                        <label for="h_volume">24. Volume (m3)</label>
+                        <input type="number" step="any" class="form-control text-right bc-tetap" id="h_volume" data-h="volume" disabled>
+
+                        <label for="h_bruto">25. Berat Kotor (Kg)</label>
+                        <input type="number" step="any" class="form-control text-right" id="h_bruto" data-h="bruto">
+
+                        <label for="h_netto">26. Berat Bersih (Kg)</label>
+                        <input type="number" step="any" class="form-control text-right bc-tetap" id="h_netto" data-h="netto" disabled>
+                    </div>
+                    <div class="bc-info mt-2">Harga Penyerahan, Volume dan Berat Bersih = jumlah dari semua barang.</div>
+                </div>
+
+                {{-- BARANG --}}
+                <div class="tab-pane fade" id="tabBarang" role="tabpanel">
+                    <div class="bc-toolbar-koleksi">
+                        <span class="bc-info" id="infoBarang"></span>
+                        <button type="button" class="btn btn-chip-biru btn-sm bc-edit" onclick="bukaModal('barang', null)">Tambah Barang</button>
+                    </div>
+                    <div class="tb-report">
+                        <div class="table-outer">
+                            <div class="table-wrap" style="max-height:45vh;">
+                                <table class="tb" id="tblBarang">
+                                    <thead>
+                                        <tr><th>No</th><th>Kode Barang</th><th>Uraian</th><th>Pos Tarif</th><th>Jumlah</th><th>Satuan</th><th>Kemasan</th><th>Netto</th><th>Volume</th><th>Harga Penyerahan</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody id="tblBarangData"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bc-judul">PPN</div>
+                    <div class="bc-ringkas">
+                        <div>31. Dilunasi<b>-</b></div>
+                        <div>32. Dibebaskan<b>-</b></div>
+                        <div>33. Tidak Dipungut<b id="pgTidak">0</b></div>
+                    </div>
+                    <div class="bc-info mt-2">33. Tidak Dipungut = jumlah Harga Penyerahan x 0,89 (faktor tetap seperti program lama). Hitungan layar saja, tidak disimpan dan tidak dikirim.</div>
+                </div>
+
+                {{-- PERNYATAAN --}}
+                <div class="tab-pane fade" id="tabPernyataan" role="tabpanel">
+                    <div class="bs-form">
+                        <label for="h_kotaTtd">Kota</label>
+                        <input type="text" class="form-control" id="h_kotaTtd" data-h="kotaTtd" maxlength="100">
+
+                        <label for="h_tanggalTtd">Tanggal</label>
+                        <input type="date" class="form-control" id="h_tanggalTtd" data-h="tanggalTtd">
+
+                        <label for="h_namaTtd">Nama</label>
+                        <input type="text" class="form-control" id="h_namaTtd" data-h="namaTtd" maxlength="100">
+
+                        <label for="h_jabatanTtd">Jabatan</label>
+                        <input type="text" class="form-control" id="h_jabatanTtd" data-h="jabatanTtd" maxlength="50">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End pageForm -->
+
+    {{-- ===================== MODAL (di luar .tb-report) ===================== --}}
+
+    <!-- modal isi PO (Detail Outstanding) -->
+    <div class="modal fade" id="mdlPo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="poJudul">PO</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bc-info mb-2" id="poInfo"></div>
+                    <div class="tb-report">
+                        <div class="table-outer">
+                            <div class="table-wrap" style="max-height:50vh;">
+                                <table class="tb">
+                                    <thead>
+                                        <tr><th>No</th><th>Kode Barang</th><th>Uraian</th><th>Jumlah</th><th>Satuan</th><th>Harga Penyerahan (Rp)</th><th>Netto</th></tr>
+                                    </thead>
+                                    <tbody id="tblPo"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal barang -->
+    <div class="modal fade" id="mdlBarang" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title bc-modal-judul">Barang</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div id="formBsGrid">
+                    <div class="modal-body">
+                        <div class="bs-form">
+                            <label>Seri Barang</label>
+                            <input type="text" class="form-control bc-tetap" data-f="seriBarang" disabled>
+
+                            <label>Pos Tarif / HS</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="f_barang_posTarif" data-f="posTarif" maxlength="50">
+                                <button type="button" class="btn btn-chip-biru bc-edit" onclick="bukaHs('#f_barang_posTarif')"><i class="bi bi-search"></i></button>
+                            </div>
+
+                            <label>Kode Barang</label>
+                            <input type="text" class="form-control" data-f="kodeBarang" maxlength="25">
+
+                            <label>Uraian</label>
+                            <input type="text" class="form-control" data-f="uraian" maxlength="100">
+
+                            <label>Jumlah Satuan</label>
+                            <input type="number" step="any" class="form-control text-right" data-f="jumlahSatuan">
+
+                            <label>Satuan</label>
+                            <input type="text" class="form-control" data-f="kodeSatuanBarang" list="dlSatuan" maxlength="20">
+
+                            <label class="bs-wrap">Jumlah Kemasan</label>
+                            <input type="number" step="1" class="form-control text-right" data-f="jumlahKemasan">
+
+                            <label class="bs-wrap">Jenis Kemasan</label>
+                            <input type="text" class="form-control" data-f="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+
+                            <label>Netto (Kg)</label>
+                            <input type="number" step="any" class="form-control text-right" data-f="netto">
+
+                            <label>Volume (m3)</label>
+                            <input type="number" step="any" class="form-control text-right" data-f="volume">
+
+                            <label class="bs-wrap">Harga Penyerahan (Rp)</label>
+                            <input type="number" step="any" class="form-control text-right" data-f="hargaPenyerahan">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-sm btn-chip-biru bc-edit" onclick="simpanModal('barang')">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal dokumen -->
+    <div class="modal fade" id="mdlDokumen" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title bc-modal-judul">Dokumen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div id="formBsGrid">
+                    <div class="modal-body">
+                        <div class="bs-form bs-form-1">
+                            <label class="bs-wrap">Jenis Dokumen</label>
+                            <input type="text" class="form-control" data-f="kodeDokumen" list="dlJenisDokumen" maxlength="20">
+
+                            <label>Nomor</label>
+                            <input type="text" class="form-control" data-f="nomorDokumen" maxlength="100">
+
+                            <label>Tanggal</label>
+                            <input type="date" class="form-control" data-f="tanggalDokumen">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-sm btn-chip-biru bc-edit" onclick="simpanModal('dokumen')">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal pemilih HS -->
+    <div class="modal fade rt-picker-v2" id="mdlHs" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pilih Pos Tarif / HS</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <input type="search" class="form-control mb-2" id="hsCari" placeholder="Cari pos tarif" autocomplete="off">
+                    <table id="tblHs" class="table table-bordered table-striped">
+                        <thead>
+                            <tr><th>Pos Tarif</th></tr>
+                        </thead>
+                        <tbody id="tblHsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal login CEISA -->
+    <div class="modal fade" id="mdlLoginBc" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 420px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login CEISA</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div id="formBsGrid">
+                    <div class="modal-body">
+                        <div class="bs-form bs-form-1">
+                            <label for="loginBcUser">Username</label>
+                            <input type="text" class="form-control" id="loginBcUser" autocomplete="username">
+
+                            <label for="loginBcPass">Password</label>
+                            <input type="password" class="form-control" id="loginBcPass" autocomplete="current-password">
+                        </div>
+                        <div class="bc-info mt-2" id="loginBcStatus"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-sm btn-chip-biru" id="btnLoginBcKirim" onclick="submitLoginBc()">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal preview JSON -->
+    <div class="modal fade" id="mdlPreview" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Preview JSON CEISA</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="previewIsi"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-sm btn-chip-biru" onclick="salinPreview()">Salin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('js')
+    <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+    <script type="text/javascript">
+        const KODE_KANTOR = @json($kodeKantor);
+        const ENTITAS = @json($entitas);
+
+        const AKSES = {
+            tambah: Number($('#akses_istambah').val()) === 1,
+            koreksi: Number($('#akses_iskoreksi').val()) === 1,
+            hapus: Number($('#akses_ishapus').val()) === 1,
+            kirim: Number($('#akses_isexport').val()) === 1,
+        };
+
+        /* ============================================================================
+         * Daftar transaksi - mesin kolom gcart_header disalin dari
+         * gudang/permintaanpemakaian.blade.php (docs/new-slider-table-guide.md).
+         * ========================================================================= */
+        let lastRows = [];
+        let outRows = [];
+        let pageSize = 10;
+        let fokusId = '';
+
+        var g_href = 'documentbc40';
+        var g_modeReport = '1';
+        var gcart_header = [];
+        var gsum_issubtotal = 0;
+        var gsum_isgrandtotal = 0;
+        var gct_desimal_max = 4;
+
+        function setDefaultHeader() {
+            // [ field, label, visible, type, total, decimals ]
+            gcart_header = [
+                ['revDoc', 'Rev. Doc.', 1, 'varchar', 0, 0],
+                ['nomorAju', 'Nomor AJU', 1, 'varchar', 0, 0],
+                ['tanggalAju', 'Tanggal AJU', 1, 'date', 0, 0],
+                ['namaEntitas3', 'Pengirim Barang', 1, 'varchar', 0, 0],
+                ['sent', 'Status', 1, 'varchar', 0, 0],
+                ['tglKirim', 'Tgl Kirim', 1, 'date', 0, 0]
+            ];
+        }
+
+        function doSetHeader(_modereport, _isReset = false) {
+            let _strHeader = (!_isReset) ? doLoadHeader(g_href, _modereport) : "";
+
+            if (_strHeader != "") {
+                gcart_header = doGetHeader(_strHeader);
+            } else if ($.isFunction(window.setDefaultHeader)) {
+                setDefaultHeader();
+                doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+            }
+        }
+
+        function doLoadHeader(_href, _mode) {
+            let _header = "";
+
+            $.ajax({
+                url: "{!! url('globalfunctions_doLoadHeader') !!}",
+                type: "get",
+                async: false,
+                data: {
+                    href: _href,
+                    mode: _mode
+                },
+                success: function(res) {
+                    _header = (res.length > 0) ? res[0].header : "";
+                    if (res.length > 0) {
+                        gsum_issubtotal = Number(res[0].issubtotal);
+                        gsum_isgrandtotal = Number(res[0].isgrandtotal);
+                    }
+                }
+            })
+
+            return _header;
+        }
+
+        function doGetHeader(_strHeader) {
+            let _cart = [];
+
+            _strHeader.split("||").forEach((item, i) => {
+                let temp = [];
+                temp.push(item.split(";;")[0]);
+                temp.push(item.split(";;")[1]);
+                temp.push(Number(item.split(";;")[2]));
+                temp.push(item.split(";;")[3]);
+                temp.push(Number(item.split(";;")[4]));
+                temp.push(Number(item.split(";;")[5]));
+                _cart.push(temp);
+            });
+
+            return _cart;
+        }
+
+        function doSimpanHeader(_href, _mode, _cart, _issubtotal, _isgrandtotal) {
+            let _strHeader = "";
+
+            _cart.forEach((item, i) => {
+                if (i != 0) {
+                    _strHeader += '||';
+                }
+                _strHeader += item[0] + ';;' + item[1] + ';;' + item[2] + ';;' + item[3] + ';;' + item[4] + ';;' +
+                    item[5];
+            });
+
+            $.ajax({
+                url: "{!! url('globalfunctions_doSimpanHeader') !!}",
+                type: "get",
+                async: false,
+                data: {
+                    href: _href,
+                    mode: _mode,
+                    header: _strHeader,
+                    issubtotal: _issubtotal,
+                    isgrandtotal: _isgrandtotal
+                },
+                success: function(res) {
+                    // nothing to do
+                }
+            })
+        }
+
+        function doMoveHeader(_from, _to) {
+            if (_from < 0 || _to < 0 || _from === _to) {
+                return;
+            }
+            if (_from >= gcart_header.length || _to >= gcart_header.length) {
+                return;
+            }
+
+            let _moved = gcart_header.splice(_from, 1)[0];
+            gcart_header.splice(_to, 0, _moved);
+
+            doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+        }
+
+        function doButtonVisibility(_id) {
+            gcart_header[_id][2] = (Number(gcart_header[_id][2]) === 1) ? 0 : 1;
+
+            doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+        }
+
+        function doSetDesimal(_index, _step) {
+            let _next = Number(gcart_header[_index][5]) + _step;
+            if (_next < 0 || _next > gct_desimal_max) {
+                return;
+            }
+
+            gcart_header[_index][5] = _next;
+            doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+        }
+
+        function doButtonTotal(_index) {
+            gcart_header[_index][4] = (Number(gcart_header[_index][4]) === 1) ? 0 : 1;
+
+            doSimpanHeader(g_href, g_modeReport, gcart_header, gsum_issubtotal, gsum_isgrandtotal);
+        }
+
+        /* ---------------------------------------------------------------- util */
+        function esc(v) {
+            return $('<div>').text(v === null || v === undefined ? '' : String(v)).html();
+        }
+
+        function angka(v) {
+            let n = Number(String(v === null || v === undefined || v === '' ? 0 : v).replace(/,/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
+
+        function fmtNum(v) {
+            return angka(v).toLocaleString('en-US', { maximumFractionDigits: 4 });
+        }
+
+        function fmtYMD(v) {
+            if (!v) {
+                return '';
+            }
+            let t = String(v).substring(0, 10).split('-');
+            return t.length === 3 ? t[0] + '/' + t[1] + '/' + t[2] : '';
+        }
+
+        function hariIni() {
+            const d = new Date();
+            const dua = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + dua(d.getMonth() + 1) + '-' + dua(d.getDate());
+        }
+
+        function pesanError(err, bawaan) {
+            return (err && err.responseJSON && err.responseJSON.message) ? err.responseJSON.message : bawaan;
+        }
+
+        /* ---------------------------------------------------------------- list */
+        function tabelAktif() {
+            return $('#tabTransaksiList').hasClass('active') ? '#tabel' : '#tabel2';
+        }
+
+        function aksiButtonsHtml(r) {
+            const id = Number(r.id);
+            const sent = Number(r.sent) === 1;
+            let html = '<button type="button" class="btn btn-warning btn-sm" title="Detail" onclick="buttonDetail(' + id + ')"><i class="bi bi-info"></i></button>';
+
+            // Dokumen yang sudah terkirim tidak bisa diedit/dihapus (masih bisa dikirim ulang).
+            if (!sent && AKSES.koreksi) {
+                html += '<button type="button" class="btn btn-success btn-sm" title="Edit" onclick="buttonEdit(' + id + ')"><i class="bi bi-pen"></i></button>';
+            }
+            if (!sent && AKSES.hapus) {
+                html += '<button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="buttonDelete(' + id + ')"><i class="bi bi-trash"></i></button>';
+            }
+            if (AKSES.kirim) {
+                html += '<button type="button" class="btn btn-primary btn-sm" title="' + (sent ? 'Kirim Ulang ke CEISA' : 'Kirim ke CEISA') +
+                    '" onclick="buttonKirim(' + id + ')"><i class="bi bi-send"></i></button>';
+                html += '<button type="button" class="btn btn-info btn-sm" title="Preview JSON" onclick="buttonPreview(' + id + ')"><i class="bi bi-code-slash"></i></button>';
+            }
+
+            return '<div class="po-aksi-wrap">' + html + '</div>';
+        }
+
+        function rtPindahBar(idBar, idTabel) {
+            let bar = document.getElementById(idBar);
+            let tabel = document.getElementById(idTabel);
+            if (!bar || !tabel) {
+                return;
+            }
+
+            let acuan = tabel;
+            if ($.fn.DataTable.isDataTable('#' + idTabel)) {
+                acuan = document.getElementById(idTabel + '_wrapper') || tabel;
+            }
+
+            if (acuan.previousElementSibling !== bar) {
+                acuan.parentNode.insertBefore(bar, acuan);
+            }
+        }
+
+        // Kotak cari dan "Tampilkan" milik toolbar bersama; berlaku untuk tabel pada tab yang aktif.
+        function ikatSearch() {
+            let input = document.getElementById('searchBox2');
+            if (!input || input.dataset.rtBound) {
+                return;
+            }
+            input.dataset.rtBound = '1';
+
+            input.addEventListener('input', function() {
+                terapkanCari();
+            });
+        }
+
+        function terapkanCari() {
+            const input = document.getElementById('searchBox2');
+            const t = tabelAktif();
+            if (input && $.fn.DataTable.isDataTable(t)) {
+                $(t).DataTable().search(input.value).draw();
+            }
+        }
+
+        function ikatPanjangHalaman() {
+            let sel = document.getElementById('tampilLen');
+            if (!sel || sel.dataset.rtBound) {
+                return;
+            }
+            sel.dataset.rtBound = '1';
+            sel.value = String(pageSize);
+
+            sel.addEventListener('change', function() {
+                let n = Number(sel.value);
+                pageSize = (n === -1 || n > 0) ? n : 10;
+                ['#tabel2', '#tabel'].forEach(function(t) {
+                    if ($.fn.DataTable.isDataTable(t)) {
+                        $(t).DataTable().page.len(pageSize).draw();
+                    }
+                });
+            });
+        }
+
+        // Periode berlaku untuk kedua tab: Outstanding (tanggal PO) dan Transaksi (tanggal AJU).
+        function ikatPeriode() {
+            let awal = document.getElementById('inputDate1');
+            let akhir = document.getElementById('inputDate2');
+            if (!awal || !akhir || awal.dataset.rtBound) {
+                return;
+            }
+            awal.dataset.rtBound = '1';
+
+            let onUbah = function() {
+                if (!awal.value || !akhir.value) {
+                    return;
+                }
+                if (awal.value > akhir.value) {
+                    alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
+                    return;
+                }
+                refreshSemua();
+            };
+            awal.addEventListener('change', onUbah);
+            akhir.addEventListener('change', onUbah);
+        }
+
+        function pindahKeHalamanBaris(id) {
+            let dt = $('#tabel').DataTable();
+            let panjang = dt.page.len();
+            if (!id || panjang === -1) {
+                return;
+            }
+
+            let idx = dt.rows({
+                    order: 'current',
+                    search: 'applied'
+                }).nodes().toArray()
+                .findIndex(function(tr) {
+                    return tr.getAttribute('data-id') === String(id);
+                });
+            if (idx < 0) {
+                return;
+            }
+
+            dt.page(Math.floor(idx / panjang)).draw('page');
+        }
+
+        function aturTinggiTabel() {
+            let page = document.getElementById('pageHome');
+            if (!page || page.offsetParent === null) {
+                return;
+            }
+
+            let area = document.getElementById('content');
+            let wrap = document.querySelector('#pageHome .tab-pane.active .po-table-wrap');
+            if (!area || !wrap) {
+                return;
+            }
+
+            wrap.style.maxHeight = 'none';
+
+            let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0;
+            let batasBawah = area.getBoundingClientRect().bottom - padBawah;
+            let kotak = wrap.getBoundingClientRect();
+            let bawah = page.getBoundingClientRect().bottom - kotak.bottom;
+
+            let sisa = batasBawah - kotak.top - bawah - 4;
+            wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px';
+        }
+
+        function opsiTabel() {
+            return {
+                lengthChange: false,
+                pageLength: pageSize,
+                order: [],
+                columnDefs: [{
+                    targets: [0],
+                    orderable: false
+                }],
+                dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    emptyTable: 'Tidak ada data',
+                    zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+                }
+            };
+        }
+
+        /* ---- Outstanding (PO) ---- */
+        function renderOutstanding() {
+            if ($.fn.DataTable.isDataTable('#tabel2')) {
+                $('#tabel2').DataTable().destroy();
+            }
+
+            let html = '';
+            outRows.forEach(function(r) {
+                let aksi = '<button type="button" class="btn btn-warning btn-sm" title="Detail PO" onclick="buttonDetailPo(\'' + esc(r.nobukti) + '\')"><i class="bi bi-info"></i></button>';
+                if (AKSES.tambah) {
+                    aksi += '<button type="button" class="btn btn-success btn-sm" title="Buat BC 4.0" onclick="buttonAddDariPo(\'' + esc(r.nobukti) + '\')"><i class="bi bi-plus-lg"></i></button>';
+                }
+                html += '<tr><td class="text-center"><div class="po-aksi-wrap">' + aksi + '</div></td><td>' + esc(r.nobukti) + '</td><td>' +
+                    fmtYMD(r.tanggal) + '</td><td>' + esc(r.kodeSupp + ' - ' + r.namaSupp) + '</td><td>' +
+                    esc(r.kodeValuta) + '</td><td class="text-right">' + fmtNum(r.jumlahBaris) + '</td></tr>';
+            });
+            document.getElementById('tabel2_data').innerHTML = html;
+            $('#tabel2').DataTable(opsiTabel());
+            terapkanCari();
+            aturTinggiTabel();
+        }
+
+        function reloadOutstanding() {
+            $.ajax({
+                url: "{!! url('documentbc40loadoutstanding') !!}",
+                type: "get",
+                data: {
+                    date1: $('#inputDate1').val(),
+                    date2: $('#inputDate2').val()
+                },
+                success: function(res) {
+                    outRows = res || [];
+                    renderOutstanding();
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal memuat daftar PO'));
+                }
+            });
+        }
+
+        /* ---- Transaksi ---- */
+        function renderTabel() {
+            const cols = gcart_header.filter(c => c[2] === 1);
+
+            if ($.fn.DataTable.isDataTable('#tabel')) {
+                $('#tabel').DataTable().destroy();
+            }
+
+            const thead = document.querySelector('#tabel thead');
+            thead.innerHTML = ReportTable.headHtml(cols).replace('<tr>',
+                '<tr><th style="padding: 4px 12px;" scope="col">Actions</th>');
+
+            let html = '';
+            lastRows.forEach(function(r) {
+                html += '<tr data-id="' + Number(r.id) + '">';
+                html += '<td class="text-center">' + aksiButtonsHtml(r) + '</td>';
+                html += cols.map(function(c) {
+                    const v = r[c[0]];
+                    if (c[0] === 'sent') {
+                        return Number(v) === 1 ?
+                            '<td><span class="sp-badge is-active">SENT &#10003;</span></td>' :
+                            '<td><span class="sp-badge is-inactive">Belum</span></td>';
+                    }
+                    if (c[3] === 'date') {
+                        return '<td>' + fmtYMD(v) + '</td>';
+                    }
+                    return '<td>' + esc(v) + '</td>';
+                }).join('');
+                html += '</tr>';
+            });
+
+            document.getElementById('tabel_data').innerHTML = html;
+
+            $('#tabel').DataTable(opsiTabel());
+
+            rtPindahBar('rtBar', 'tabel');
+            terapkanCari();
+
+            if (fokusId) {
+                pindahKeHalamanBaris(fokusId);
+                fokusId = '';
+            }
+
+            aturTinggiTabel();
+        }
+
+        function reloadData(_fokusId) {
+            $.ajax({
+                url: "{!! url('documentbc40loadall') !!}",
+                type: "get",
+                data: {
+                    date1: $('#inputDate1').val(),
+                    date2: $('#inputDate2').val()
+                },
+                success: function(res) {
+                    lastRows = res || [];
+                    fokusId = _fokusId || '';
+                    renderTabel();
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal memuat daftar dokumen'));
+                }
+            });
+        }
+
+        function refreshSemua() {
+            reloadOutstanding();
+            reloadData();
+        }
+
+        // Tab beranda: cari/tampilkan berlaku ke tabel pada tab yang aktif.
+        $(document).on('shown.bs.tab', '#homeTabs a[data-toggle="tab"]', function() {
+            const t = tabelAktif();
+            if ($.fn.DataTable.isDataTable(t)) {
+                $(t).DataTable().columns.adjust();
+            }
+            terapkanCari();
+            aturTinggiTabel();
+        });
+
+        function showPage(id) {
+            $('#pageHome, #pageForm').hide();
+            $('#' + id).show();
+        }
+
+        function buttonCloseForm() {
+            showPage('pageHome');
+            aturTinggiTabel();
+        }
+
+        /* ============================================================================
+         * Form dokumen: header (input [data-h]) + koleksi anak di `state`.
+         * ========================================================================= */
+        let mode = 'add'; // add | edit | detail
+        let docId = null;
+        let nobuktiSumber = '';
+        let state = {};
+        let editIdx = {}; // index baris yang sedang diedit di modal per koleksi (null = baru)
+
+        function stateKosong() {
+            return { barang: [], dokumen: [] };
+        }
+
+        function isiEntitas(n, id) {
+            const e = ENTITAS.find(x => String(x.id) === String(id)) || null;
+            $('#h_nomorIdentitasEntitas' + n).val(e ? (e.nomorIdentitas || '') : '');
+            $('#h_namaEntitas' + n).val(e ? (e.namaEntitas || '') : '');
+            $('#h_alamatEntitas' + n).val(e ? (e.alamatEntitas || '') : '');
+            if (Number(n) === 1) {
+                $('#h_nomorIjinEntitas1').val(e ? (e.nomorIjinEntitas || '') : '');
+            }
+        }
+
+        $(document).on('change', '.bc-entitas', function() {
+            isiEntitas($(this).data('n'), $(this).val());
+        });
+
+        // Harga Penyerahan, Netto dan Volume header = jumlah semua barang; 33. Tidak Dipungut = harga x 0,89.
+        function hitungSemua() {
+            let harga = 0;
+            let netto = 0;
+            let volume = 0;
+            state.barang.forEach(function(r) {
+                harga += angka(r.hargaPenyerahan);
+                netto += angka(r.netto);
+                volume += angka(r.volume);
+            });
+            const bulat = v => Math.round(v * 10000) / 10000;
+            $('#h_hargaPenyerahan').val(bulat(harga));
+            $('#h_netto').val(bulat(netto));
+            $('#h_volume').val(bulat(volume));
+            renderBarang();
+        }
+
+        // Tambah: header kembali ke nilai awal (bukan dikosongkan semua), koleksi dikosongkan.
+        function resetHeader() {
+            $('[data-h]').each(function() {
+                if (this.tagName === 'SELECT') {
+                    this.selectedIndex = 0;
+                } else {
+                    $(this).val('');
+                }
+            });
+            $('#h_kodeKantor').val(KODE_KANTOR);
+            $('#h_kodeJenisTpb').val('1');
+            $('#h_tanggalAju').val(hariIni());
+            $('#h_tanggalTtd').val(hariIni());
+            $('#h_uangMuka').val(0);
+            [1, 2, 3].forEach(n => isiEntitas(n, ''));
+        }
+
+        function isiHeader(d) {
+            $('[data-h]').each(function() {
+                const v = d[$(this).data('h')];
+                $(this).val(v === null || v === undefined ? '' : String(v));
+            });
+        }
+
+        // Detail = read-only (semua isian dimatikan, tombol ubah disembunyikan).
+        function aturMode() {
+            const baca = mode === 'detail';
+            $('#pageForm').find('input, select, textarea').not('.bc-tetap').prop('disabled', baca);
+            $('#pageForm .bc-edit').toggle(!baca);
+            const judul = {
+                add: 'Tambah Dokumen BC 4.0',
+                edit: 'Edit Dokumen BC 4.0',
+                detail: 'Detail Dokumen BC 4.0'
+            }[mode];
+            $('#formJudul').text(judul + (nobuktiSumber ? ' - PO ' + nobuktiSumber : ''));
+            $('#h_revDoc').val(nobuktiSumber);
+        }
+
+        function bukaForm() {
+            renderSemua();
+            aturMode();
+            $('#bcTabs a:first').tab('show');
+            showPage('pageForm');
+        }
+
+        // Tambah dokumen dari PO: barang diisi dari DBPODET, pemasok jadi Pengirim Barang, sisanya diisi user.
+        function buttonAddDariPo(nobukti) {
+            if (!AKSES.tambah) {
+                alertify.warning('No access');
+                return;
+            }
+            $.ajax({
+                url: "{!! url('documentbc40spsumber') !!}",
+                type: "get",
+                data: { nobukti },
+                success: function(res) {
+                    if (res.po.dipakai) {
+                        alertify.warning('PO ' + esc(nobukti) + ' sudah dibuatkan BC 4.0.');
+                        reloadOutstanding();
+                        return;
+                    }
+                    if (!res.barang.length) {
+                        alertify.warning('PO ' + esc(nobukti) + ' tidak punya baris barang.');
+                        return;
+                    }
+                    mode = 'add';
+                    docId = null;
+                    nobuktiSumber = res.po.nobukti;
+                    state = stateKosong();
+                    resetHeader();
+                    if (res.header.selectEntitas3) {
+                        $('#h_selectEntitas3').val(String(res.header.selectEntitas3));
+                        isiEntitas(3, res.header.selectEntitas3);
+                    }
+                    state.barang = res.barang.map(function(b, i) {
+                        return Object.assign({ seriBarang: i + 1, posTarif: '', jumlahKemasan: 0, kodeJenisKemasan: '' }, b);
+                    });
+                    bukaForm();
+                    hitungSemua();
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal memuat PO'));
+                }
+            });
+        }
+
+        // Detail PO (baca saja) dari Outstanding.
+        function buttonDetailPo(nobukti) {
+            $.ajax({
+                url: "{!! url('documentbc40spsumber') !!}",
+                type: "get",
+                data: { nobukti },
+                success: function(res) {
+                    const po = res.po;
+                    $('#poJudul').text('PO ' + po.nobukti);
+                    $('#poInfo').text(fmtYMD(po.tanggal) + ' - ' + po.kodeSupp + ' ' + po.namaSupp + ' - ' +
+                        po.kodeValuta + (po.keterangan ? ' - ' + po.keterangan : ''));
+                    const html = res.barang.map(function(b, i) {
+                        return '<tr><td>' + (i + 1) + '</td><td>' + esc(b.kodeBarang) + '</td><td>' + esc(b.uraian) + '</td><td class="text-right">' +
+                            fmtNum(b.jumlahSatuan) + '</td><td>' + esc(b.kodeSatuanBarang) + '</td><td class="text-right">' + fmtNum(b.hargaPenyerahan) +
+                            '</td><td class="text-right">' + fmtNum(b.netto) + '</td></tr>';
+                    }).join('');
+                    $('#tblPo').html(html || barisKosong(7));
+                    $('#mdlPo').modal('show');
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal memuat PO'));
+                }
+            });
+        }
+
+        function muatDokumen(id, _mode) {
+            $.ajax({
+                url: "{!! url('documentbc40spdetail') !!}",
+                type: "get",
+                data: { id },
+                success: function(res) {
+                    if (Number(res.sent) === 1 && _mode === 'edit') {
+                        alertify.warning('Dokumen sudah dikirim ke CEISA, tidak bisa diubah');
+                        _mode = 'detail';
+                    }
+                    mode = _mode;
+                    docId = Number(res.id);
+                    nobuktiSumber = res.nobukti;
+                    state = stateKosong();
+                    Object.keys(state).forEach(function(k) {
+                        state[k] = res[k] || [];
+                    });
+                    isiHeader(res);
+                    bukaForm();
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal memuat dokumen'));
+                }
+            });
+        }
+
+        function buttonDetail(id) {
+            muatDokumen(id, 'detail');
+        }
+
+        function buttonEdit(id) {
+            if (!AKSES.koreksi) {
+                alertify.warning('No access');
+                return;
+            }
+            muatDokumen(id, 'edit');
+        }
+
+        function buttonDelete(id) {
+            if (!AKSES.hapus) {
+                alertify.warning('No access');
+                return;
+            }
+            const r = lastRows.find(x => Number(x.id) === Number(id)) || {};
+            alertify.confirm('Hapus Dokumen', 'Apakah yakin ingin menghapus dokumen BC 4.0 ' + esc(r.nomorAju || r.revDoc || ('#' + id)) + ' ? PO-nya kembali ke Outstanding.',
+                function() {
+                    $.ajax({
+                        url: "{!! url('documentbc40spdelete') !!}",
+                        type: "post",
+                        data: {
+                            _token: $('#_token').val(),
+                            id
+                        },
+                        success: function(res) {
+                            alertify.success(res.message);
+                            refreshSemua();
+                        },
+                        error: function(err) {
+                            alertify.error(pesanError(err, 'Gagal menghapus dokumen'));
+                        }
+                    });
+                },
+                function() {});
+        }
+
+        function submitDokumen() {
+            if (mode === 'detail') {
+                return;
+            }
+            if (!state.barang.length) {
+                alertify.error('Barang belum ada (minimal 1 baris).');
+                return;
+            }
+
+            const header = {};
+            $('[data-h]').each(function() {
+                header[$(this).data('h')] = $(this).val();
+            });
+            // Harga Penyerahan, Netto dan Volume header = jumlah barang (kolom itu dimatikan, tetap dikirim).
+            const data = { header, nobukti: nobuktiSumber };
+            if (mode === 'edit') {
+                data.id = docId;
+            }
+            Object.keys(state).forEach(function(k) {
+                data[k] = state[k];
+            });
+
+            $.ajax({
+                url: mode === 'edit' ? "{!! url('documentbc40spedit') !!}" : "{!! url('documentbc40spadd') !!}",
+                type: "post",
+                data: {
+                    _token: $('#_token').val(),
+                    data: JSON.stringify(data)
+                },
+                success: function(res) {
+                    alertify.success(res.message);
+                    buttonCloseForm();
+                    reloadOutstanding();
+                    $('#homeTabs a[href="#tabTransaksiList"]').tab('show');
+                    reloadData(res.id);
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Gagal menyimpan dokumen'));
+                }
+            });
+        }
+
+        /* ============================================================================
+         * Koleksi anak - semua di memori; nomor baris = posisi (seri diisi ulang server).
+         * ========================================================================= */
+        const MODAL = {
+            barang: '#mdlBarang',
+            dokumen: '#mdlDokumen',
+        };
+
+        // Tombol baris tabel item: markup & kelas sama dengan baris item di gudang/permintaanpemakaian
+        // (.btn-action-sm + .btn-action-success / -danger, gayanya dari po-table-header.css di .po-form-page).
+        function aksiBaris(nama, idx) {
+            if (mode === 'detail') {
+                return '<div class="text-center text-nowrap"><button type="button" class="btn-action-sm btn-action-warning" title="Lihat" onclick="event.stopPropagation(); bukaModal(\'' +
+                    nama + '\', ' + idx + ')"><i class="bi bi-info"></i></button></div>';
+            }
+            return '<div class="text-center text-nowrap">' +
+                '<button type="button" class="btn-action-sm btn-action-success" title="Edit" onclick="event.stopPropagation(); bukaModal(\'' + nama + '\', ' + idx + ')"><i class="bi bi-pen"></i></button>' +
+                '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' +
+                '</div>';
+        }
+
+        function barisKosong(kolom, teks) {
+            return '<tr class="bc-kosong"><td colspan="' + kolom + '">' + esc(teks || 'Belum ada data') + '</td></tr>';
+        }
+
+        function renderDokumen() {
+            let html = state.dokumen.map(function(r, i) {
+                return '<tr><td>' + (i + 1) + '</td><td>' + esc(r.kodeDokumen) + '</td><td>' + esc(r.nomorDokumen) +
+                    '</td><td>' + fmtYMD(r.tanggalDokumen) + '</td><td>' + aksiBaris('dokumen', i) + '</td></tr>';
+            }).join('');
+            $('#tblDokumen').html(html || barisKosong(5));
+            $('#infoDokumen').text(state.dokumen.length + ' dokumen');
+        }
+
+        function renderBarang() {
+            let html = state.barang.map(function(r, i) {
+                return '<tr><td>' + (i + 1) + '</td><td>' + esc(r.kodeBarang) + '</td><td>' + esc(r.uraian) + '</td><td>' + esc(r.posTarif) +
+                    '</td><td class="text-right">' + fmtNum(r.jumlahSatuan) + '</td><td>' + esc(r.kodeSatuanBarang) +
+                    '</td><td>' + (angka(r.jumlahKemasan) ? fmtNum(r.jumlahKemasan) + ' ' + esc(r.kodeJenisKemasan) : '') +
+                    '</td><td class="text-right">' + fmtNum(r.netto) + '</td><td class="text-right">' + fmtNum(r.volume) +
+                    '</td><td class="text-right">' + fmtNum(r.hargaPenyerahan) + '</td><td>' + aksiBaris('barang', i) + '</td></tr>';
+            }).join('');
+            $('#tblBarangData').html(html || barisKosong(11));
+            $('#infoBarang').text(state.barang.length + ' barang');
+
+            const harga = state.barang.reduce((s, r) => s + angka(r.hargaPenyerahan), 0);
+            $('#pgTidak').text(fmtNum(harga * 0.89));
+        }
+
+        function renderSemua() {
+            renderDokumen();
+            renderBarang();
+        }
+
+        function judulModal(nama, idx) {
+            const label = { barang: 'Barang', dokumen: 'Dokumen' };
+            return (mode === 'detail' ? '' : (idx === null ? 'Tambah ' : 'Edit ')) + label[nama];
+        }
+
+        function nilaiAwal(nama) {
+            if (nama === 'barang') {
+                return { seriBarang: state.barang.length + 1, jumlahKemasan: 0, hargaPenyerahan: 0, volume: 0 };
+            }
+            return { tanggalDokumen: hariIni() };
+        }
+
+        function bukaModal(nama, idx) {
+            if (mode === 'detail' && idx === null) {
+                return;
+            }
+            const modal = $(MODAL[nama]);
+            editIdx[nama] = idx;
+
+            const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
+            modal.find('[data-f]').each(function() {
+                const v = row[$(this).data('f')];
+                $(this).val(v === null || v === undefined ? '' : String(v));
+            });
+            if (nama === 'barang') {
+                modal.find('[data-f="seriBarang"]').val(idx === null ? state.barang.length + 1 : idx + 1);
+            }
+
+            const baca = mode === 'detail';
+            modal.find('input, select, textarea').not('.bc-tetap').not('[type=hidden]').prop('disabled', baca);
+            modal.find('.bc-edit').toggle(!baca);
+            modal.find('.bc-modal-judul').text(judulModal(nama, idx));
+            modal.modal('show');
+        }
+
+        function bacaModal(nama) {
+            const row = {};
+            $(MODAL[nama]).find('[data-f]').each(function() {
+                row[$(this).data('f')] = $(this).val();
+            });
+            return row;
+        }
+
+        // Simpan baris ke memori.
+        function simpanModal(nama) {
+            const row = bacaModal(nama);
+            const idx = editIdx[nama];
+
+            if (idx === null || idx === undefined) {
+                state[nama].push(row);
+            } else {
+                state[nama][idx] = Object.assign({}, state[nama][idx], row);
+            }
+            seriUlang(nama);
+            $(MODAL[nama]).modal('hide');
+
+            if (nama === 'barang') {
+                hitungSemua();
+            } else {
+                renderSemua();
+            }
+        }
+
+        function seriUlang(nama) {
+            const kunci = { barang: 'seriBarang', dokumen: 'seriDokumen' }[nama];
+            if (kunci) {
+                state[nama].forEach((r, i) => r[kunci] = i + 1);
+            }
+        }
+
+        function hapusBaris(nama, idx) {
+            state[nama].splice(idx, 1);
+            seriUlang(nama);
+            if (nama === 'barang') {
+                hitungSemua();
+            } else {
+                renderSemua();
+            }
+        }
+
+        /* ---------------------------------------------------------------- pemilih HS */
+        let hsTarget = null;
+        let hsTunda = null;
+
+        function bukaHs(target) {
+            hsTarget = target;
+            $('#hsCari').val($(target).val());
+            cariHs();
+            $('#mdlHs').modal('show');
+        }
+
+        function cariHs() {
+            $.ajax({
+                url: "{!! url('documentbc40lisths') !!}",
+                type: "get",
+                data: { search: $('#hsCari').val() },
+                success: function(res) {
+                    let html = (res || []).map(function(r) {
+                        return '<tr data-hs="' + esc(r.posTarif) + '"><td>' + esc(r.posTarif) + '</td></tr>';
+                    }).join('');
+                    $('#tblHsData').html(html || '<tr class="bc-kosong"><td>Tidak ada data - pos tarif tetap bisa diketik langsung.</td></tr>');
+                }
+            });
+        }
+
+        $(document).on('input', '#hsCari', function() {
+            clearTimeout(hsTunda);
+            hsTunda = setTimeout(cariHs, 300);
+        });
+
+        $(document).on('click', '#tblHsData tr[data-hs]', function() {
+            $(hsTarget).val($(this).data('hs'));
+            $('#mdlHs').modal('hide');
+        });
+
+        // Backdrop modal HS di atas modal barang yang masih terbuka.
+        $(document).on('shown.bs.modal', '#mdlHs', function() {
+            $('.modal-backdrop').last().addClass('bc-backdrop-atas');
+            $('#hsCari').trigger('focus');
+        });
+
+        $(document).on('hidden.bs.modal', '#mdlHs', function() {
+            if ($('.modal.show').length) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+        /* ---------------------------------------------------------------- CEISA */
+        let bcExpires = null;
+        let bcTimer = null;
+
+        function setLoginBc(expiresAt) {
+            bcExpires = expiresAt ? new Date(expiresAt).getTime() : null;
+            clearInterval(bcTimer);
+            tickLoginBc();
+            if (bcExpires) {
+                bcTimer = setInterval(tickLoginBc, 1000);
+            }
+        }
+
+        function tickLoginBc() {
+            const sisa = bcExpires ? bcExpires - Date.now() : 0;
+            if (sisa <= 0) {
+                clearInterval(bcTimer);
+                bcExpires = null;
+                $('#btnLoginBc').removeClass('is-login');
+                $('#btnLoginBcTeks').text('Login BC');
+                return;
+            }
+            const detik = Math.floor(sisa / 1000);
+            const j = Math.floor(detik / 3600);
+            const m = Math.floor((detik % 3600) / 60);
+            const s = detik % 60;
+            const dua = n => String(n).padStart(2, '0');
+            $('#btnLoginBc').addClass('is-login');
+            $('#btnLoginBcTeks').text('BC ' + (j ? j + ':' : '') + dua(m) + ':' + dua(s));
+        }
+
+        function cekStatusBc() {
+            $.ajax({
+                url: "{!! url('bcceisastatus') !!}",
+                type: "get",
+                success: function(res) {
+                    setLoginBc(res && res.loggedIn ? res.expiresAt : null);
+                }
+            });
+        }
+
+        function bukaLoginBc() {
+            $('#loginBcPass').val('');
+            $('#loginBcStatus').text(bcExpires ? 'Sudah login - login ulang untuk memperpanjang token.' : '');
+            $('#mdlLoginBc').modal('show');
+        }
+
+        $(document).on('shown.bs.modal', '#mdlLoginBc', function() {
+            $('#loginBcUser').val() ? $('#loginBcPass').trigger('focus') : $('#loginBcUser').trigger('focus');
+        });
+
+        $(document).on('keydown', '#loginBcPass', function(e) {
+            if (e.key === 'Enter') {
+                submitLoginBc();
+            }
+        });
+
+        function submitLoginBc() {
+            const tombol = $('#btnLoginBcKirim').prop('disabled', true);
+            $.ajax({
+                url: "{!! url('bcceisalogin') !!}",
+                type: "post",
+                data: {
+                    _token: $('#_token').val(),
+                    username: $('#loginBcUser').val(),
+                    password: $('#loginBcPass').val()
+                },
+                success: function(res) {
+                    $('#loginBcPass').val('');
+                    $('#mdlLoginBc').modal('hide');
+                    setLoginBc(res.expiresAt);
+                    alertify.success(res.message);
+                },
+                error: function(err) {
+                    alertify.error(pesanError(err, 'Login gagal.'));
+                },
+                complete: function() {
+                    tombol.prop('disabled', false);
+                }
+            });
+        }
+
+        function tampilGagalKirim(err) {
+            const res = err.responseJSON || {};
+            if (err.status === 401) {
+                setLoginBc(null);
+            }
+            const baris = [res.message || 'Pengiriman gagal.'].concat(Array.isArray(res.details) ? res.details : []);
+            alertify.error(baris.map(esc).join('<br>'), 15);
+        }
+
+        function buttonKirim(id) {
+            if (!AKSES.kirim) {
+                alertify.warning('No access');
+                return;
+            }
+            if (!bcExpires) {
+                alertify.warning('Silakan Login BC terlebih dahulu.');
+                bukaLoginBc();
+                return;
+            }
+            const r = lastRows.find(x => Number(x.id) === Number(id)) || {};
+            const ulang = Number(r.sent) === 1;
+            alertify.confirm(ulang ? 'Kirim Ulang ke CEISA' : 'Kirim ke CEISA',
+                (ulang ? 'Dokumen ini sudah pernah terkirim. Kirim ulang ' : 'Kirim dokumen ') + esc(r.nomorAju || r.revDoc || ('#' + id)) + ' ke CEISA?',
+                function() {
+                    $.ajax({
+                        url: "{!! url('documentbc40spkirim') !!}",
+                        type: "post",
+                        data: {
+                            _token: $('#_token').val(),
+                            id
+                        },
+                        success: function(res) {
+                            alertify.success(esc(res.message));
+                            reloadData(id);
+                        },
+                        error: tampilGagalKirim
+                    });
+                },
+                function() {});
+        }
+
+        function buttonPreview(id) {
+            $.ajax({
+                url: "{!! url('documentbc40sppreview') !!}",
+                type: "get",
+                dataType: "text",
+                data: { id },
+                success: function(res) {
+                    $('#previewIsi').text(res);
+                    $('#mdlPreview').modal('show');
+                },
+                error: function(err) {
+                    let pesan = 'Gagal menyusun JSON';
+                    try {
+                        pesan = JSON.parse(err.responseText).message || pesan;
+                    } catch (e) {}
+                    alertify.error(esc(pesan));
+                }
+            });
+        }
+
+        function salinPreview() {
+            const teks = $('#previewIsi').text();
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(teks).then(() => alertify.success('JSON disalin'));
+            }
+        }
+
+        $(document).ready(function() {
+            doSetHeader(g_modeReport);
+            ReportTable.init({
+                table: '#tabel',
+                bar: '#rtBar',
+                onChange: renderTabel
+            });
+            ikatSearch();
+            ikatPanjangHalaman();
+            ikatPeriode();
+            renderTabel();
+            reloadOutstanding();
+            reloadData();
+            cekStatusBc();
+        });
+    </script>
+@endsection

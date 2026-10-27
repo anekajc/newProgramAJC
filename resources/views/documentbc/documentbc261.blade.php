@@ -17,6 +17,14 @@
     <link rel="stylesheet"
         href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
     <style>
+        /* Label BC lebih panjang dari form master biasa (mis. "Tujuan Pengiriman", "Nomor Kontainer"):
+           kolom label dilebarkan, isian dipersempit, dan label boleh turun baris - tidak terpotong. */
+        @media (min-width: 576px) {
+            body #formBsGrid .bs-form { grid-template-columns: 170px minmax(0, 1fr) 170px minmax(0, 1fr); }
+            body #formBsGrid .bs-form.bs-form-1 { grid-template-columns: 170px minmax(0, 1fr); }
+        }
+        body #formBsGrid .bs-form label { white-space: normal; line-height: 1.3; }
+
         .custom-tabs {
             display: inline-flex;
             flex-wrap: wrap;
@@ -708,14 +716,15 @@
                 </div>
                 <div id="formBsGrid">
                     <div class="modal-body">
-                        <input type="hidden" data-f="kodeUkuranKontainer">
-                        <input type="hidden" data-f="kodeTipeKontainer">
                         <div class="bs-form bs-form-1">
                             <label class="bs-wrap">Nomor Kontainer</label>
                             <input type="text" class="form-control" data-f="nomorKontainer" maxlength="20">
 
-                            <label class="bs-wrap">Ukuran / Tipe</label>
-                            <select class="form-control" id="f_kontainerPilih" onchange="pilihKontainer()"></select>
+                            <label class="bs-wrap">Ukuran</label>
+                            <select class="form-control" data-f="kodeUkuranKontainer"></select>
+
+                            <label class="bs-wrap">Tipe</label>
+                            <select class="form-control" data-f="kodeTipeKontainer"></select>
 
                             <label class="bs-wrap">Jenis Muatan</label>
                             <select class="form-control" data-f="kodeJenisKontainer">
@@ -889,7 +898,11 @@
     <script type="text/javascript">
         const KODE_KANTOR = @json($kodeKantor);
         const ENTITAS = @json($entitas);
-        const KONTAINER = @json($kontainer);
+        // Master Ukuran / Tipe Kontainer: [{kode, nama}]; yang dikirim ke CEISA hanya kodenya.
+        const UKURAN_KONTAINER = @json($ukuranKontainer);
+        const TIPE_KONTAINER = @json($tipeKontainer);
+        const NAMA_UKURAN = Object.fromEntries(UKURAN_KONTAINER.map(k => [k.kode, k.nama]));
+        const NAMA_TIPE = Object.fromEntries(TIPE_KONTAINER.map(k => [k.kode, k.nama]));
         const KODE = @json($kode);
 
         const AKSES = {
@@ -1493,14 +1506,16 @@
             dokumen: '#mdlDokumen',
         };
 
+        // Tombol baris tabel item: markup & kelas sama dengan baris item di gudang/permintaanpemakaian
+        // (.btn-action-sm + .btn-action-success / -danger, gayanya dari po-table-header.css di .po-form-page).
         function aksiBaris(nama, idx) {
             if (mode === 'detail') {
-                return '<div class="po-aksi-wrap"><button type="button" class="btn btn-warning btn-sm" title="Lihat" onclick="event.stopPropagation(); bukaModal(\'' +
+                return '<div class="text-center text-nowrap"><button type="button" class="btn-action-sm btn-action-warning" title="Lihat" onclick="event.stopPropagation(); bukaModal(\'' +
                     nama + '\', ' + idx + ')"><i class="bi bi-info"></i></button></div>';
             }
-            return '<div class="po-aksi-wrap">' +
-                '<button type="button" class="btn btn-success btn-sm" title="Edit" onclick="event.stopPropagation(); bukaModal(\'' + nama + '\', ' + idx + ')"><i class="bi bi-pen"></i></button>' +
-                '<button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' +
+            return '<div class="text-center text-nowrap">' +
+                '<button type="button" class="btn-action-sm btn-action-success" title="Edit" onclick="event.stopPropagation(); bukaModal(\'' + nama + '\', ' + idx + ')"><i class="bi bi-pen"></i></button>' +
+                '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' +
                 '</div>';
         }
 
@@ -1533,8 +1548,8 @@
 
         function renderKontainer() {
             let html = state.kontainer.map(function(r, i) {
-                return '<tr><td>' + (i + 1) + '</td><td>' + esc(r.nomorKontainer) + '</td><td>' + esc(r.kodeUkuranKontainer) +
-                    '</td><td>' + esc(namaKode(KODE.tipeKontainer, r.kodeTipeKontainer)) + '</td><td>' + esc(namaKode(KODE.jenisMuatan, r.kodeJenisKontainer)) +
+                return '<tr><td>' + (i + 1) + '</td><td>' + esc(r.nomorKontainer) + '</td><td>' + esc(namaKode(NAMA_UKURAN, r.kodeUkuranKontainer)) +
+                    '</td><td>' + esc(namaKode(NAMA_TIPE, r.kodeTipeKontainer)) + '</td><td>' + esc(namaKode(KODE.jenisMuatan, r.kodeJenisKontainer)) +
                     '</td><td>' + aksiBaris('kontainer', i) + '</td></tr>';
             }).join('');
             $('#tblKontainer').html(html || barisKosong(6));
@@ -1603,27 +1618,20 @@
             renderBarang();
         }
 
-        function opsiKontainer(ukuran, tipe) {
+        // Isi select Ukuran / Tipe dari master ("kode - nama"). Kode lama yang sudah tidak ada di master
+        // tetap ditampilkan supaya tidak hilang saat dokumen lama disimpan ulang.
+        function opsiKontainer(selector, daftar, nilai) {
             let html = '<option value="">- Pilih -</option>';
             let ada = false;
-            KONTAINER.forEach(function(k) {
-                const cocok = String(k.ukuran) === String(ukuran) && String(k.tipe) === String(tipe);
+            daftar.forEach(function(k) {
+                const cocok = String(k.kode) === String(nilai);
                 ada = ada || cocok;
-                html += '<option value="' + esc(k.id) + '" data-ukuran="' + esc(k.ukuran) + '" data-tipe="' + esc(k.tipe) + '"' + (cocok ? ' selected' : '') + '>' +
-                    esc(k.ukuran + ' - ' + namaKode(KODE.tipeKontainer, k.tipe)) + '</option>';
+                html += '<option value="' + esc(k.kode) + '"' + (cocok ? ' selected' : '') + '>' + esc(k.kode + ' - ' + k.nama) + '</option>';
             });
-            // Kombinasi lama yang tidak ada lagi di master tetap ditampilkan supaya tidak hilang saat disimpan.
-            if (!ada && (ukuran || tipe)) {
-                html += '<option value="lama" data-ukuran="' + esc(ukuran) + '" data-tipe="' + esc(tipe) + '" selected>' +
-                    esc(ukuran + ' - ' + namaKode(KODE.tipeKontainer, tipe)) + '</option>';
+            if (!ada && nilai) {
+                html += '<option value="' + esc(nilai) + '" selected>' + esc(nilai) + '</option>';
             }
-            $('#f_kontainerPilih').html(html);
-        }
-
-        function pilihKontainer() {
-            const opt = $('#f_kontainerPilih option:selected');
-            $('#mdlKontainer [data-f="kodeUkuranKontainer"]').val(opt.data('ukuran') !== undefined ? String(opt.data('ukuran')) : '');
-            $('#mdlKontainer [data-f="kodeTipeKontainer"]').val(opt.data('tipe') !== undefined ? String(opt.data('tipe')) : '');
+            $(selector).html(html);
         }
 
         function judulModal(nama, idx) {
@@ -1672,7 +1680,8 @@
                 modal.find('[data-f="seriBarang"]').val(idx + 1);
             }
             if (nama === 'kontainer') {
-                opsiKontainer(row.kodeUkuranKontainer || '', row.kodeTipeKontainer || '');
+                opsiKontainer('#mdlKontainer [data-f="kodeUkuranKontainer"]', UKURAN_KONTAINER, row.kodeUkuranKontainer || '');
+                opsiKontainer('#mdlKontainer [data-f="kodeTipeKontainer"]', TIPE_KONTAINER, row.kodeTipeKontainer || '');
             }
 
             const baca = mode === 'detail';
@@ -1703,6 +1712,10 @@
         // Simpan baris ke memori. lanjut = tombol "Tambah" bahan baku: simpan lalu buka baris baru.
         function simpanModal(nama, lanjut) {
             const row = bacaModal(nama);
+            if (nama === 'kontainer' && (!row.kodeUkuranKontainer || !row.kodeTipeKontainer)) {
+                alertify.error('Ukuran dan Tipe kontainer harus dipilih.');
+                return;
+            }
             const idx = editIdx[nama];
             if (idx === null || idx === undefined) {
                 state[nama].push(row);

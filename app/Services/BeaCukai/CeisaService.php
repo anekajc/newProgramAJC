@@ -82,13 +82,15 @@ class CeisaService
      * Kirim JSON dokumen yang SUDAH di-encode (urutan key harus dipertahankan, jadi tidak boleh
      * di-encode ulang oleh Guzzle).
      *
+     * @param  int|null  $timeout  detik; kosong = config('beacukai.ceisa.timeout') (BC 2.3 memakai 60)
+     *
      * @throws ConnectionException
      */
-    public function send(string $token, string $json): Response
+    public function send(string $token, string $json, ?int $timeout = null): Response
     {
         return Http::withToken($token)
             ->withHeaders(self::HEADERS)
-            ->timeout(config('beacukai.ceisa.timeout', 30))
+            ->timeout($timeout ?? config('beacukai.ceisa.timeout', 30))
             ->withBody($json, 'application/json')
             ->post(config('beacukai.ceisa.document_url'));
     }

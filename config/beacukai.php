@@ -11,6 +11,10 @@ return [
     // isian awal kodeKantor header dan kodeKantorAsal bahan baku.
     'kode_kantor' => env('BC_KODE_KANTOR', '071100'),
 
+    // KPPBC tempat bongkar BC 2.3. Bawaan Villiger: 070100 (KPPBC TMP Tanjung Perak). Isian awal
+    // kodeKantorBongkar.
+    'kode_kantor_bongkar' => env('BC_KODE_KANTOR_BONGKAR', '070100'),
+
     'ceisa' => [
         'login_url' => env('BC_CEISA_LOGIN_URL', 'https://apis-gw.beacukai.go.id/nle-oauth/v1/user/login'),
         'document_url' => env('BC_CEISA_DOCUMENT_URL', 'https://apis-gw.beacukai.go.id/openapi/document'),
@@ -31,7 +35,9 @@ return [
         // POSTARIFHS tidak punya kolom uraian; berisi tarif BM / PPN / PPh per pos tarif.
         'hs' => ['table' => 'POSTARIFHS', 'kode' => 'POSTARIF', 'nama' => null],
         'pelabuhan' => ['table' => 'PELABUHAN', 'kode' => 'KODEPELABUHAN', 'nama' => 'NAMAPELABUHAN'],
-        'kontainer' => 'KONTAINER',
+        // Master Kontainer dipisah: ukuran dan tipe masing-masing satu tabel (kode + nama).
+        'ukuran_kontainer' => 'UKURANKONTAINER',
+        'tipe_kontainer' => 'TIPEKONTAINER',
 
         // Token CEISA per user (satu tabel untuk semua dokumen BC).
         'token' => 'CEISATOKEN',
@@ -44,6 +50,19 @@ return [
         'bc261_kontainer' => 'DOCUMENTBC261KONTAINER',
         'bc261_jaminan' => 'DOCUMENTBC261JAMINAN',
         'bc261_dokumen' => 'DOCUMENTBC261DOKUMEN',
+
+        // BC 2.3: header (kemasan, kontainer, pengangkut jadi kolom) + barang + dokumen
+        // (docs/update-db-DBSMLNEW/beacukai/11_tabel_documentbc23.sql). Sumber barang = DBPO / DBPODET.
+        'bc23' => 'DOCUMENTBC23',
+        'bc23_barang' => 'DOCUMENTBC23BARANG',
+        'bc23_dokumen' => 'DOCUMENTBC23DOKUMEN',
+
+        // BC 4.0: header (kemasan + pengangkut jadi kolom) + barang + dokumen
+        // (docs/update-db-DBSMLNEW/beacukai/12_tabel_documentbc40.sql). Sumber barang = DBPO / DBPODET
+        // pemasok dalam negeri.
+        'bc40' => 'DOCUMENTBC40',
+        'bc40_barang' => 'DOCUMENTBC40BARANG',
+        'bc40_dokumen' => 'DOCUMENTBC40DOKUMEN',
     ],
 
 ];
