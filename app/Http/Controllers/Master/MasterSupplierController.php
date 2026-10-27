@@ -37,6 +37,12 @@ class MasterSupplierController extends Controller
 
   }
 
+  public function spListNegara () {
+    $listData = DB::connection('SML')->select('SELECT * FROM NEGARA ORDER BY NAMANEGARA');
+    return $listData;
+
+  }
+
 public function loadAll()
 {
     // Only ~2,100 active suppliers total, so this loads the full set once and

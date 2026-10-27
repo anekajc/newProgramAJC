@@ -5,9 +5,6 @@
 @section('page-title', 'Master Supplier')
 @section('content')
 
-
-
-
   {{-- <div class="sp-breadcrumb">
     <span>Beranda</span>
     <span class="sp-sep">›</span>
@@ -114,7 +111,9 @@
           <input type="text" class="form-control" id="input_add_kodepos" placeholder="Kode Pos">
 
           <label for="input_add_negara">Negara</label>
-          <input type="text" class="form-control" id="input_add_negara" placeholder="Negara">
+          <select id="input_add_negara" class="form-control" aria-label="Default select example">
+                    <option selected value="">Pilih Negara</option>
+                  </select>
           <label for="input_add_telp">Telp</label>
           <input type="text" class="form-control" id="input_add_telp" placeholder="No Telp">
 
@@ -124,16 +123,16 @@
           <input type="number" class="form-control text-right" id="input_add_haripiutang" value=0>
         </div>
 
-            <!--DUA--><input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax"><div class="bs-form bs-form-3">
+            <input type="hidden" class="form-control" id="input_add_fax" placeholder="No Fax"><div class="bs-form bs-form-3">
           <label for="input_add_pph21">Pph21</label>
-          <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
+            <input type="number" class="form-control text-right" id="input_add_pph21" value=0.00>
           <label for="input_add_pph23">Pph23</label>
-          <input type="number" class="form-control text-right" id="input_add_pph23" value=2>
+            <input type="number" class="form-control text-right" id="input_add_pph23" value=2>
           <label for="input_add_isaktif">Status</label>
           <select id="input_add_isaktif" class="form-control" aria-label="Default select example">
-                    <option selected value=1>Aktif</option>
-                    <option value=0>Tidak Aktif</option>
-                  </select>
+            <option selected value=1>Aktif</option>
+            <option value=0>Tidak Aktif</option>
+          </select>
         </div>
 
             <div class="bs-form">
@@ -244,7 +243,9 @@
           <input type="text" class="form-control" id="input_edit_kodepos" placeholder="Kode Pos">
 
           <label for="input_edit_negara">Negara</label>
-          <input type="text" class="form-control" id="input_edit_negara" placeholder="Negara">
+          <select id="input_edit_negara" class="form-control" aria-label="Default select example">
+                    <option selected value="">Pilih Negara</option>
+                  </select>
           <label for="input_edit_telp">Telp</label>
           <input type="text" class="form-control" id="input_edit_telp" placeholder="No Telp">
 
@@ -594,6 +595,25 @@ function buttonAdd () {
       document.getElementById("input_add_kota").innerHTML = rowTable
     }})
 
+  $.ajax({
+    url: "{!! url('mastersupplierlistnegara') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+
+      console.log(res)
+      let rowTable = `<option selected value="" disabled>Pilih Negara</option>`
+      res.forEach((item, i) => {
+        rowTable += `
+          <option value="${item.KODENEGARA}">${item.NAMANEGARA}</option>
+        `
+      });
+
+      document.getElementById("input_add_negara").innerHTML = rowTable
+    }})
+
 
   $("#form").modal('toggle')
 
@@ -621,6 +641,25 @@ function buttonEdit (kode) {
       });
 
       document.getElementById("input_edit_kota").innerHTML = rowTable
+    }})
+
+  $.ajax({
+    url: "{!! url('mastersupplierlistnegara') !!}",
+    type: "get",
+    async: false,
+    data: {
+    },
+    success: function(res) {
+
+      console.log(res)
+      let rowTable = `<option selected value="" disabled>Pilih Negara</option>`
+      res.forEach((item, i) => {
+        rowTable += `
+          <option value="${item.NAMANEGARA}">${item.NAMANEGARA}</option>
+        `
+      });
+
+      document.getElementById("input_edit_negara").innerHTML = rowTable
     }})
 
   $.ajax({
