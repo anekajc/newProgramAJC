@@ -45,15 +45,29 @@ class MasterBcReferensiController extends Controller
         ],
         'pakai' => [],
       ],
-      'kontainer' => [
-        'judul' => 'Kontainer',
-        'tabel' => $t['kontainer'],
+      // Halaman Kontainer (masterbckontainer) memuat dua tabel: Ukuran dan Tipe (lihat $grup).
+      'ukurankontainer' => [
+        'judul' => 'Ukuran Kontainer',
+        'href' => 'masterbckontainer',
+        'tabel' => $t['ukuran_kontainer'],
         'kolom' => [
-          ['KODEUKURANKONTAINER', 'Ukuran Kontainer', 'teks', 20, true],
-          ['KODETIPEKONTAINER', 'Tipe Kontainer', 'teks', 20, true],
+          ['KODEUKURANKONTAINER', 'Kode Ukuran', 'teks', 20, true],
+          ['NAMAUKURANKONTAINER', 'Nama Ukuran', 'teks', 100, false],
         ],
         'pakai' => [
-          ['bc261_kontainer', ['KODEUKURANKONTAINER' => 'KODEUKURANKONTAINER', 'KODETIPEKONTAINER' => 'KODETIPEKONTAINER'], 'Peti Kemas Dokumen BC 2.6.1'],
+          ['bc261_kontainer', ['KODEUKURANKONTAINER' => 'KODEUKURANKONTAINER'], 'Peti Kemas Dokumen BC 2.6.1'],
+        ],
+      ],
+      'tipekontainer' => [
+        'judul' => 'Tipe Kontainer',
+        'href' => 'masterbckontainer',
+        'tabel' => $t['tipe_kontainer'],
+        'kolom' => [
+          ['KODETIPEKONTAINER', 'Kode Tipe', 'teks', 20, true],
+          ['NAMATIPEKONTAINER', 'Nama Tipe', 'teks', 100, false],
+        ],
+        'pakai' => [
+          ['bc261_kontainer', ['KODETIPEKONTAINER' => 'KODETIPEKONTAINER'], 'Peti Kemas Dokumen BC 2.6.1'],
         ],
       ],
       'postarif' => [
@@ -123,10 +137,16 @@ class MasterBcReferensiController extends Controller
       abort(404);
     }
     $def['jenis'] = $jenis;
-    $def['href'] = 'masterbc' . $jenis;
-    // Master yang semua kolomnya kode (Kontainer) tidak punya isian yang bisa diedit.
+    $def['href'] = $def['href'] ?? 'masterbc' . $jenis;
+    // Master yang semua kolomnya kode tidak punya isian yang bisa diedit.
     $def['bisaEdit'] = collect($def['kolom'])->contains(fn ($k) => !$k[4]);
     return $def;
+  }
+
+  // Halaman dengan lebih dari satu tabel: jenis halaman => jenis tabel-tabelnya (urut tampil).
+  // Tabel-tabel itu memakai href (hak akses) halaman yang sama.
+  private function grup ($jenis) {
+    return ['kontainer' => ['ukurankontainer', 'tipekontainer']][$jenis] ?? [$jenis];
   }
 
   // Cek hak akses tombol (ISTAMBAH / ISKOREKSI / ISHAPUS) - pesan string bila ditolak.
@@ -140,7 +160,7 @@ class MasterBcReferensiController extends Controller
 
   public function index(Request $req, $jenis) {
 
-    $def = $this->definisi($jenis);
+    $defs = array_map(fn ($j) => $this->definisi($j), $this->grup($jenis));
     $periode = NewPeriode::where('user_id' , \Auth::User()->username)->first();
 
     $akses = app('App\Http\Controllers\GlobalController')->getAkses('' , $req->path());
@@ -153,7 +173,8 @@ class MasterBcReferensiController extends Controller
     return view('master.masterbcreferensi' , [
       "menul0" => $menul0,
       "periode" => $periode,
-      "def" => $def,
+      "defs" => $defs,
+      "judul" => count($defs) > 1 ? ucfirst($jenis) : $defs[0]['judul'],
       "akses" => $akses
     ]);
 

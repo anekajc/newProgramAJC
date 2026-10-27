@@ -224,7 +224,7 @@ Nothing else is pre-filled: header, entitas, kemasan and the other tabs stay at 
     - **Rev. Doc.** = the source's doc_number if linked, otherwise `nomorAju`.
     - **Nomor AJU**.
     - **Status**: `sent = 1` → green "SENT ✓"; otherwise a **Send Data** button. The button
-      must not trigger row selection.
+      must not trigger row selection, and it must work after a list refresh too (§11 Q-o).
 - Row selection: click highlights the row (yellow). Clicking the **selected Outstanding row
   again unselects it**. Selecting in one tab clears the selection in the other.
 - Button visibility: on Outstanding, Edit and Delete are hidden. On Transaction they are
@@ -846,6 +846,7 @@ seri 7, selectEntitas3 (Penerima Barang) → seri 8.
 | Q-l | Detail on the Transaction tab opens the form in **editable** mode. | Make it read-only. |
 | Q-m | The header `tanggalAju` column exists (NOT NULL), but the save path never sets it. Send uses `tanggalTtd`. | Drop the column, or set it explicitly. |
 | Q-n | Transaction list has no period filter. Outstanding has no BC-type filter (it's commented out). | Decide whether the new ERP needs either filter. |
+| Q-o | The **Send Data** button only works on the server-rendered list. The JS list refresh (after save/delete/send) re-creates the button **without a click handler**, so it does nothing until the page is reloaded. | Always wire the button (e.g. a delegated click handler on the table). Don't copy this one. |
 
 ---
 
