@@ -1762,7 +1762,7 @@
             </div>
             <!-- <div class="col-4 text-right">
 
-            <button type="button" onclick="buttonAddListBarang('edit')" class="btn btn-primary" >+</button>
+            <button type="button" onclick="buttonAddListBarang('edit')" class="btn btn-primary"><i class="bi bi-plus"></i></button>
           </div> -->
           <div class="col-8">
             <input id="AddEditKodeBrg" type="text" class="form-control" disabled>

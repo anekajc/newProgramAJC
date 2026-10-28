@@ -466,7 +466,7 @@
 <div id="page3" style="display: none" class="mainpage container-fluid" >
 <div id="formBsGrid">
 
-  <div class="row">
+  <div class="row mb-4">
     <div class="col-8 text-left">
       {{-- <h2>Koreksi SPR</h2> --}}
     </div>
@@ -812,7 +812,7 @@
         </div>
 
         <div class="input-group col-md-4">
-          <input id="KoreksiEditInputQty" type="number" value='0.00' class="form-control text-right" style="width: 75%">
+          <input id="KoreksiEditInputQty" type="text" inputmode="decimal" value='0.00' class="form-control text-right" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)" style="width: 75%">
 
           <input id="KoreksiEditInputSat" type="text" value='PCS' class="form-control text-center" disabled style="width: 25%">
 
@@ -834,7 +834,7 @@
         </div>
 
         <div class="input-group col-md-4">
-          <input id="KoreksiEditInputQtyReject" type="number" value='0.00' class="form-control text-right" style="width: 75%">
+          <input id="KoreksiEditInputQtyReject" type="text" inputmode="decimal" value='0.00' class="form-control text-right" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)" style="width: 75%">
 
           <input id="KoreksiEditInputSatReject" type="text" value='PCS' class="form-control text-center" disabled style="width: 25%">
 
@@ -865,7 +865,7 @@
         </div>
         <!-- <div class="col-4 text-right">
 
-            <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary" >+</button>
+            <button type="button" onclick="buttonKoreksiListGudang()" class="btn btn-primary"><i class="bi bi-plus"></i></button>
           </div> -->
         <div class="col-md-4">
           <select id="KoreksiEditReturSupp" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -1222,6 +1222,57 @@
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script type="text/javascript">
 
+// Separator ribuan (koma) untuk input Qty - pola sama dengan retursuratjalan.blade.php.
+// Angka dari server -> teks ber-separator 2 desimal (null/kosong = 0.00).
+function angkaTampil (nilai) {
+  let n = Number(String(nilai == null || nilai === '' ? 0 : nilai).replace(/,/g, ''))
+  if (isNaN(n)) return String(nilai)
+  let parts = n.toFixed(2).split('.')
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return parts.join('.')
+}
+
+// Nilai input ber-separator dibersihkan dulu sebelum dihitung / dikirim ke server -
+// parseFloat('1,500.00') hanya terbaca 1.
+function bersihkanAngka (nilai) {
+  return parseFloat(String(nilai == null ? '' : nilai).replace(/,/g, '')) || 0
+}
+
+function formatRibuan (el) {
+  let raw = String(el.value).replace(/,/g, '')
+  if (raw === '' || isNaN(Number(raw))) return
+  el.value = angkaTampil(raw)
+}
+
+// Posisi kursor dihitung dari jumlah karakter bermakna (angka, titik desimal, minus) di depannya.
+function formatRibuanLive (el) {
+  let cursorPos = el.selectionStart
+  let sebelum = el.value.slice(0, cursorPos).replace(/[^0-9.\-]/g, '')
+
+  let raw = el.value.replace(/[^0-9.\-]/g, '')
+  let negatif = raw.charAt(0) === '-'
+  raw = raw.replace(/-/g, '')
+  if (raw === '' && !negatif) { el.value = ''; return }
+
+  let titik = raw.indexOf('.')
+  let bulat = titik >= 0 ? raw.slice(0, titik) : raw
+  let desimal = titik >= 0 ? raw.slice(titik + 1).replace(/\./g, '').slice(0, 2) : null
+  bulat = bulat.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  el.value = (negatif ? '-' : '') + bulat + (desimal !== null ? '.' + desimal : '')
+
+  let jumlahTitik = (sebelum.match(/\./g) || []).length
+  let jumlahMinus = (sebelum.match(/-/g) || []).length
+  let target = sebelum.length - Math.max(0, jumlahTitik - 1) - Math.max(0, jumlahMinus - (negatif ? 1 : 0))
+
+  let pos = 0, hitung = 0
+  while (pos < el.value.length && hitung < target) {
+    if (el.value[pos] !== ',') hitung++
+    pos++
+  }
+  el.setSelectionRange(pos, pos)
+}
+
+
 
 
 let dataTableAdd = []
@@ -1428,7 +1479,7 @@ function tabelActionsCell (row) {
   let ppn = rpgPickCI(row, 'PPN');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button class="btn btn-warning btn-sm" title="Detail" type="button" onclick="buttonDetail(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" title="Buat Retur" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus-lg"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" title="Buat Retur" type="button" onclick="buttonAdd(\'' + nobukti + '\' , \'' + (namacustsupp || '').replace(/'/g, "\\'") + '\' , ' + Number(ppn || 0) + ')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -1650,8 +1701,8 @@ function buttonKoreksiEditItem (i) {
   console.log(barang)
   document.getElementById("KoreksiEditKodeBrg").value = barang.KodeBrg
   document.getElementById("KoreksiEditNamaBrg").value = barang.NAMABRG
-  document.getElementById("KoreksiEditInputQty").value = barang.QNT ? parseFloat(barang.QNT).toFixed(2) : '0.00'
-  document.getElementById("KoreksiEditInputQtyReject").value = barang.QNTREJECT ? parseFloat(barang.QNTREJECT).toFixed(2) : '0.00'
+  document.getElementById("KoreksiEditInputQty").value = angkaTampil(barang.QNT)
+  document.getElementById("KoreksiEditInputQtyReject").value = angkaTampil(barang.QNTREJECT)
   document.getElementById("KoreksiEditInputSat").value = barang.NOSAT == 1 ? barang.SAT_1 : barang.SAT_2
   document.getElementById("KoreksiEditInputSatReject").value = barang.NOSAT == 1 ? barang.SAT_1 : barang.SAT_2
   document.getElementById("KoreksiEditReturSupp").value = barang.FlagKembali
@@ -1962,8 +2013,8 @@ function submitKoreksiEdit () {
   let _token  = $("#_token").val()
   let barang = barangKoreksiEdit
   let choice = "U"
-  let qntTerima = $("#KoreksiEditInputQty").val()
-  let qntReject = $("#KoreksiEditInputQtyReject").val()
+  let qntTerima = bersihkanAngka($("#KoreksiEditInputQty").val())
+  let qntReject = bersihkanAngka($("#KoreksiEditInputQtyReject").val())
   let retursupp = $("#KoreksiEditReturSupp").val()
 
   let nobukti = barang.NoBukti
@@ -2441,15 +2492,15 @@ if (pcekglobal) {
             // outstanding), sedangkan "Qty Terima" adalah bagian yang sudah diterima
             // (QNT - QntSisa) -- sebelumnya QntSisa malah ditaruh langsung di kolom
             // "Qty Terima" dan "Qty PR Jual" menampilkan QNT mentah, jadi tidak sinkron.
-            let qntPrJualCol = mode === 'detail' ? qntsisa : qnt
-            let qntSudahTerima = mode === 'detail' ? (parseFloat(qnt) - parseFloat(qntsisa)).toFixed(2) : qntsisa
+            let qntPrJualCol = angkaTampil(mode === 'detail' ? qntsisa : qnt)
+            let qntSudahTerima = angkaTampil(mode === 'detail' ? (parseFloat(qnt) - parseFloat(qntsisa)).toFixed(2) : qntsisa)
             let terimaCol = mode === 'detail' ? '' : `<td class="text-center"><input class="" type="checkbox" value="" id="add_checkbox${i}"></td>`
             let qntTerimaCol = mode === 'detail'
               ? `<td class="text-right">${qntSudahTerima}</td>`
-              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="number" min=0 value=${qntsisa}></td>`
+              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntTerima${i}" style="width: 100px;" class="text-right" type="text" inputmode="decimal" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)" value="${angkaTampil(qntsisa)}"></td>`
             let qntRejectCol = mode === 'detail'
               ? `<td class="text-right">0.00</td>`
-              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="number" min=0 value='0.00'></td>`
+              : `<td class="text-center"><input onchange="checkRejectVsTerima(${i})" id="input_add_qntReject${i}" style="width: 100px;" class="text-right" type="text" inputmode="decimal" oninput="formatRibuanLive(this)" onblur="formatRibuan(this)" value='0.00'></td>`
             rowTable += `<tr>
             ${terimaCol}
             <td>${item.KODEBRG}</td>
@@ -2521,8 +2572,8 @@ function buttonDetail (nobukti, namacustsupp, ppn) {
 // Terima. Dipasang di onchange kedua input (Terima & Reject) supaya
 // pengecekan jalan begitu salah satu nilainya diubah, bukan menunggu submit.
 function checkRejectVsTerima (i) {
-  let terima = Number($(`#input_add_qntTerima${i}`).val()) || 0
-  let reject = Number($(`#input_add_qntReject${i}`).val()) || 0
+  let terima = bersihkanAngka($(`#input_add_qntTerima${i}`).val())
+  let reject = bersihkanAngka($(`#input_add_qntReject${i}`).val())
   if (reject > terima) {
     alertify.warning("QTY Reject tidak boleh melebihi qty terima")
   }
@@ -2560,11 +2611,11 @@ function submitAdd () {
 
   dataTableAdd.forEach((item, i) => {
     if (document.getElementById(`add_checkbox${i}`).checked) {
-      let checkQntTerima = $(`#input_add_qntTerima${i}`).val();
-      dataTableAdd[i].inputQntTerima = $(`#input_add_qntTerima${i}`).val();
+      let checkQntTerima = bersihkanAngka($(`#input_add_qntTerima${i}`).val());
+      dataTableAdd[i].inputQntTerima = checkQntTerima;
 
-        let checkQntReject = $(`#input_add_qntReject${i}`).val();
-        dataTableAdd[i].inputQntReject = $(`#input_add_qntReject${i}`).val();
+        let checkQntReject = bersihkanAngka($(`#input_add_qntReject${i}`).val());
+        dataTableAdd[i].inputQntReject = checkQntReject;
         if (Number(checkQntTerima)  > Number(dataTableAdd[i].QntSisa)) {
           checkQnt = 1
         }

@@ -216,10 +216,10 @@
           <div class="po-toolbar">
             <div class="po-filter-wrap">
               <label>Periode</label>
-              {{-- Kosong = semua SO outstanding (seperti programajcSML); isi untuk menyaring per tanggal SO. --}}
-              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalawal_umj1" value="" title="Kosongkan untuk menampilkan semua SO outstanding">
+              {{-- Default bulan periode; kosongkan kedua tanggal untuk menampilkan semua SO outstanding. --}}
+              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalawal_umj1" value="{!! $tglawal !!}" title="Kosongkan untuk menampilkan semua SO outstanding">
               <span class="po-filter-sep">s/d</span>
-              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalakhir_umj1" value="" title="Kosongkan untuk menampilkan semua SO outstanding">
+              <input type="date" onchange="onChangePeriodeUMJ1()" class="po-filter-inp" id="input_tanggalakhir_umj1" value="{!! $tglakhir !!}" title="Kosongkan untuk menampilkan semua SO outstanding">
             </div>
             <input type="search" id="umjSearch1" class="po-search-inp" placeholder="Cari data">
             <div class="po-len-wrap"><label for="umjLen1">Tampilkan</label>
@@ -417,7 +417,7 @@
         </div>
         <div class="form-field">
           <label>DPP</label>
-          <input type="text" class="form-control text-right" id="input_add_dppx" onblur="onChangeDPP()" value="0.00">
+          <input type="text" class="form-control text-right input-partial-number" data-a-sign="" data-a-dec="." data-a-sep="," id="input_add_dppx" onblur="onChangeDPP()" value="0.00">
         </div>
         <div class="form-field">
           <label>PPN</label>
@@ -775,7 +775,7 @@ function tabelActionsCell (row) {
   let nobukti = umjPickCI(row, 'NoBukti');
   let html = '<td class="text-center"><div class="action-buttons-wrap">';
   html += '<button title="Detail" class="btn btn-warning btn-sm" type="button" onclick="buttonDetail(\'' + nobukti + '\')"><i class="bi bi-info"></i></button>';
-  html += '<button class="btn btn-success btn-sm" title="Buat Uang Muka" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus-lg"></i></button>';
+  html += '<button class="btn btn-primary btn-sm" title="Buat Uang Muka" type="button" onclick="buttonAdd(\'' + nobukti + '\')"><i class="bi bi-plus"></i></button>';
   html += '</div></td>';
   return html;
 }
@@ -940,6 +940,10 @@ function onChangePeriodeUMJ1 () {
   }
   buttonFilterUMJ1()
 }
+
+jQuery(function($) {
+  $('.input-partial-number').autoNumeric('init', { minimumValue : '0' });
+});
 
 $(document).ready(function(){
       umjAktifkanTabel(1); window.doSetHeader(1, false);
@@ -1175,6 +1179,7 @@ function buttonDetail (NOBUKTI) {
 
       document.getElementById("input_detail_noso").value = NOBUKTI
       document.getElementById("input_detail_customer").value = tempAdd.NamaCust
+      document.getElementById("input_detail_tanggal").value = tempAdd.Tanggal ? String(tempAdd.Tanggal).substring(0, 10) : formatDate(new Date())
 
       document.getElementById("input_detail_valas").value = tempAdd.kodevls
       document.getElementById("input_detail_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
@@ -1494,7 +1499,7 @@ function buttonDetailKoreksi (NOBUKTI, NOSO) {
       document.getElementById("input_detail_noso").value = NOSO
       document.getElementById("input_detail_nobukti").value = NOBUKTI
       document.getElementById("input_detail_customer").value = tempAdd.NamaCust
-      document.getElementById("input_detail_tanggal").value = formatDate(new Date(tempDetail.TANGGAL))
+      document.getElementById("input_detail_tanggal").value = tempDetail.TANGGAL ? String(tempDetail.TANGGAL).substring(0, 10) : ''
       document.getElementById("input_detail_valas").value = tempAdd.kodevls
       document.getElementById("input_detail_kurs").value = tempAdd.kurs ? formatAngka(parseFloat(tempAdd.kurs).toFixed(2)) : '0.00'
       document.getElementById("input_detail_dpp").value = tempAdd.TotDPP ? formatAngka(parseFloat(tempAdd.TotDPP).toFixed(2)) : '0.00'

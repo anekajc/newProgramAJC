@@ -603,6 +603,7 @@ Route::get('/masterkotaloadall' , [MasterKotaController::class, 'loadAll'])->mid
 //MASTER SUPPLIER ========================================================
 Route::get('/mastersupplier' , [MasterSupplierController::class, 'index'])->middleware('auth');
 Route::get('/mastersupplierlistkota' , [MasterSupplierController::class, 'spListKota'])->middleware('auth');
+Route::get('/mastersupplierlistnegara' , [MasterSupplierController::class, 'spListNegara'])->middleware('auth');
 Route::post('/mastersupplierspadd' , [MasterSupplierController::class, 'spAdd'])->middleware('auth');
 Route::post('/mastersupplierspdetail' , [MasterSupplierController::class, 'spDetail'])->middleware('auth');
 Route::post('/mastersupplierspdelete' , [MasterSupplierController::class, 'spDelete'])->middleware('auth');

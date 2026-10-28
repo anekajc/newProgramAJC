@@ -979,8 +979,8 @@ td input[type="checkbox"] {
                       <tr>
 
                          <td class="text-center">
-                            <button class="btn btn-success btn-sm" type="button" title="Details" onclick="buttonAdd('{{ $OutPR->Nobukti }}')">
-                              <i class="bi bi-plus-lg"></i>
+                            <button class="btn btn-primary btn-sm" type="button" title="Details" onclick="buttonAdd('{{ $OutPR->Nobukti }}')">
+                              <i class="bi bi-plus"></i>
                             </button>
                         </td>
                         <td style='white-space:nowrap;'>{{ $OutPR->Nobukti }}</td>
@@ -7535,6 +7535,9 @@ function buttonCloseForm () {
   $('#page2').hide();
   $('#page1').show();
 
+  // Perubahan header di form (mis. PPN Exclude -> Include) langsung tersimpan ke DB
+  // lewat onChangeHeader(), jadi tabel depan perlu dimuat ulang saat form ditutup.
+  loadAll();
 }
 
 function buttonCloseFormDetail () {
