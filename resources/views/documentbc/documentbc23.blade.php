@@ -16,6 +16,8 @@
         href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
     <link rel="stylesheet"
         href="{!! URL::asset('css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+    <link rel="stylesheet"
+        href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
     <style>
         /* Label BC lebih panjang dari form master biasa: kolom label dilebarkan, label boleh turun baris. */
         @media (min-width: 576px) {
@@ -244,10 +246,6 @@
                                 <option value="-1">Semua</option>
                             </select>
                         </div>
-
-                        <button class="po-btn-filter" type="button" id="btnRefresh" onclick="refreshSemua()">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
 
                         {{-- Token CEISA per user; teks tombol berubah jadi hitung mundur masa berlaku token. --}}
                         <button class="po-btn-filter" type="button" id="btnLoginBc" onclick="bukaLoginBc()">
@@ -513,7 +511,7 @@
                     <div class="bc-judul">30. Kemasan</div>
                     <div class="bs-form">
                         <label for="h_jumlahKemasan">Jumlah</label>
-                        <input type="number" step="1" class="form-control text-right" id="h_jumlahKemasan" data-h="jumlahKemasan">
+                        <input type="text" inputmode="numeric" class="form-control text-right bc-ribuan bc-int" id="h_jumlahKemasan" data-h="jumlahKemasan">
 
                         <label for="h_kodeJenisKemasan" class="bs-wrap">Jenis Kemasan</label>
                         <select class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan"></select>
@@ -551,19 +549,19 @@
                         <input type="text" class="form-control" id="h_kodeValuta" data-h="kodeValuta" list="dlValuta" maxlength="20">
 
                         <label for="h_ndpbm">24. NDPBM</label>
-                        <input type="number" step="any" class="form-control text-right" id="h_ndpbm" data-h="ndpbm" oninput="hitungSemua()">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_ndpbm" data-h="ndpbm" oninput="hitungSemua()">
 
                         <label for="h_kodeIncoterm">Incoterm</label>
                         <input type="text" class="form-control" id="h_kodeIncoterm" data-h="kodeIncoterm" list="dlIncoterm" maxlength="20">
 
                         <label for="h_fob">25. FOB</label>
-                        <input type="number" step="any" class="form-control text-right" id="h_fob" data-h="fob">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_fob" data-h="fob">
 
                         <label for="h_freight">26. Freight</label>
-                        <input type="number" step="any" class="form-control text-right" id="h_freight" data-h="freight">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_freight" data-h="freight">
 
                         <label for="h_asuransi">27. Asuransi</label>
-                        <input type="number" step="any" class="form-control text-right" id="h_asuransi" data-h="asuransi">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_asuransi" data-h="asuransi">
 
                         <label for="h_kodeAsuransi" class="bs-wrap">Jenis Asuransi</label>
                         <select class="form-control" id="h_kodeAsuransi" data-h="kodeAsuransi">
@@ -573,16 +571,16 @@
                         </select>
 
                         <label for="h_cif">28. Nilai CIF</label>
-                        <input type="number" step="any" class="form-control text-right bc-tetap" id="h_cif" data-h="cif" disabled>
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" id="h_cif" data-h="cif" disabled>
 
                         <label for="h_cifRupiah">CIF Rupiah</label>
                         <input type="text" class="form-control text-right bc-tetap" id="h_cifRupiah" disabled>
 
                         <label for="h_bruto">31. Bruto (Kg)</label>
-                        <input type="number" step="any" class="form-control text-right" id="h_bruto" data-h="bruto">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_bruto" data-h="bruto">
 
                         <label for="h_netto">32. Netto (Kg)</label>
-                        <input type="number" step="any" class="form-control text-right bc-tetap" id="h_netto" data-h="netto" disabled>
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" id="h_netto" data-h="netto" disabled>
                     </div>
                     <div class="bc-info mt-2">NDPBM terisi dari master valuta (DBVALAS) bila kode valuta ada di sana; bisa diubah. CIF dan Netto = jumlah dari semua barang.</div>
                 </div>
@@ -698,19 +696,19 @@
                             <input type="text" class="form-control" data-f="uraian" maxlength="100">
 
                             <label>Jumlah Satuan</label>
-                            <input type="number" step="any" class="form-control text-right" data-f="jumlahSatuan">
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="jumlahSatuan">
 
                             <label>Satuan</label>
                             <input type="text" class="form-control" data-f="kodeSatuanBarang" list="dlSatuan" maxlength="20">
 
                             <label>Netto (Kg)</label>
-                            <input type="number" step="any" class="form-control text-right" data-f="netto">
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="netto">
 
                             <label>CIF (valuta)</label>
-                            <input type="number" step="any" class="form-control text-right" data-f="cif">
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cif">
 
                             <label>CIF Rupiah</label>
-                            <input type="number" step="any" class="form-control text-right bc-tetap" data-f="cifRupiah" disabled>
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="cifRupiah" disabled>
 
                             <label class="bs-wrap">Kategori Barang</label>
                             <input type="text" class="form-control" data-f="kodeKategoriBarang" list="dlKategori" maxlength="20">
@@ -719,13 +717,13 @@
                             <input type="text" class="form-control" data-f="kodeNegaraAsal" list="dlNegara" maxlength="5">
 
                             <label>BM (%)</label>
-                            <input type="number" step="any" class="form-control text-right bc-tetap" data-f="persenBM" disabled>
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="persenBM" disabled>
 
                             <label>PPN (%)</label>
-                            <input type="number" step="any" class="form-control text-right bc-tetap" data-f="persenPPN" disabled>
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="persenPPN" disabled>
 
                             <label>PPh (%)</label>
-                            <input type="number" step="any" class="form-control text-right bc-tetap" data-f="persenPPh" disabled>
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="persenPPh" disabled>
                         </div>
                         <div class="bc-info mt-2">BM / PPN / PPh terisi otomatis saat Pos Tarif dipilih dari daftar HS. CIF Rupiah = CIF x NDPBM header.</div>
                     </div>
@@ -769,21 +767,31 @@
     </div>
 
     <!-- modal pemilih HS -->
-    <div class="modal fade rt-picker-v2" id="mdlHs" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    {{-- Tampilan sama dengan modal pemilih menu Kas (public/css/picker-kas.css + picker-kas.js):
+         baris = .pick-row (klik baris = pilih), kotak Search DataTables dipakai untuk mencari ke server. --}}
+    <div class="modal fade rt-picker-v2 picker-kas" id="mdlHs" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Pilih Pos Tarif / HS</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <input type="search" class="form-control mb-2" id="hsCari" placeholder="Cari pos tarif" autocomplete="off">
-                    <table id="tblHs" class="table table-bordered table-striped">
-                        <thead>
-                            <tr><th>Pos Tarif</th><th class="text-right">BM (%)</th><th class="text-right">PPN (%)</th><th class="text-right">PPh (%)</th></tr>
-                        </thead>
-                        <tbody id="tblHsData"></tbody>
-                    </table>
+                    <div class="container-fluid mt-4">
+                        <div class="row">
+                            <div class="col-12" style="overflow:auto; margin-top:0px;">
+                                <table id="tblHs" class="dph-tb">
+                                    <thead>
+                                        <tr><th scope="col">Pos Tarif</th><th scope="col">BM (%)</th><th scope="col">PPN (%)</th><th scope="col">PPh (%)</th></tr>
+                                    </thead>
+                                    <tbody id="tblHsData" class="text-left"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-pill-secondary picker-kas-batal" data-dismiss="modal">Batal</button>
                 </div>
             </div>
         </div>
@@ -839,6 +847,7 @@
 
 @section('js')
     <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
+    <script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
     <script type="text/javascript">
         const KODE_KANTOR = @json($kodeKantor);
         const KODE_KANTOR_BONGKAR = @json($kodeKantorBongkar);
@@ -1008,6 +1017,50 @@
         function esc(v) {
             return $('<div>').text(v === null || v === undefined ? '' : String(v)).html();
         }
+
+        // Pemisah ribuan untuk semua input angka (class bc-ribuan; bc-int = bilangan bulat). Nilai di
+        // field berformat "1,234.5"; disimpan/dikirim tanpa koma (lihat header di simpan() dan bacaModal()).
+        function formatRibuan(v, bulatSaja) {
+            if (v === null || v === undefined) {
+                return '';
+            }
+            const raw = String(v).replace(/[^0-9.]/g, '');
+            if (raw === '') {
+                return '';
+            }
+            const titik = raw.indexOf('.');
+            let bulat = titik === -1 ? raw : raw.slice(0, titik);
+            bulat = bulat.replace(/^0+(?=\d)/, '');
+            if (bulat === '') {
+                bulat = '0';
+            }
+            bulat = bulat.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            if (bulatSaja || titik === -1) {
+                return bulat;
+            }
+            return bulat + '.' + raw.slice(titik + 1).replace(/\./g, '');
+        }
+
+        // Format ulang isi satu input bc-ribuan, posisi kursor dijaga dari kanan.
+        function formatRibuanKetik(el) {
+            const aktif = document.activeElement === el;
+            const posDariKanan = aktif && el.selectionStart !== null ? el.value.length - el.selectionStart : 0;
+            el.value = formatRibuan(el.value, el.classList.contains('bc-int'));
+            if (aktif) {
+                const pos = Math.max(0, el.value.length - posDariKanan);
+                el.setSelectionRange(pos, pos);
+            }
+        }
+
+        // Isi input bc-ribuan lewat kode (nilai mentah -> tampil berformat).
+        function setRibuan(selector, v) {
+            const el = $(selector).get(0);
+            el.value = formatRibuan(v, el.classList.contains('bc-int'));
+        }
+
+        $(document).on('input', '.bc-ribuan', function() {
+            formatRibuanKetik(this);
+        });
 
         function angka(v) {
             let n = Number(String(v === null || v === undefined || v === '' ? 0 : v).replace(/,/g, ''));
@@ -1324,11 +1377,6 @@
             });
         }
 
-        function refreshSemua() {
-            reloadOutstanding();
-            reloadData();
-        }
-
         // Tab beranda: periode hanya untuk Transaksi; cari/tampilkan berlaku ke tabel tab aktif.
         $(document).on('shown.bs.tab', '#homeTabs a[data-toggle="tab"]', function() {
             $('#wrapPeriode').toggle($('#tabTransaksiList').hasClass('active'));
@@ -1387,7 +1435,7 @@
         $(document).on('change', '#h_kodeValuta', function() {
             const v = VALUTA.find(x => String(x.kode).toLowerCase() === String($(this).val()).trim().toLowerCase());
             if (v && angka(v.kurs) > 0) {
-                $('#h_ndpbm').val(angka(v.kurs));
+                setRibuan('#h_ndpbm', angka(v.kurs));
                 hitungSemua();
             }
         });
@@ -1420,8 +1468,8 @@
                 cif += angka(r.cif);
                 netto += angka(r.netto);
             });
-            $('#h_cif').val(Math.round(cif * 10000) / 10000);
-            $('#h_netto').val(Math.round(netto * 10000) / 10000);
+            setRibuan('#h_cif', Math.round(cif * 10000) / 10000);
+            setRibuan('#h_netto', Math.round(netto * 10000) / 10000);
             tampilCifRupiah();
             renderBarang();
         }
@@ -1475,6 +1523,9 @@
             $('[data-h]').each(function() {
                 const v = d[$(this).data('h')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
+                if ($(this).hasClass('bc-ribuan')) {
+                    formatRibuanKetik(this);
+                }
             });
             tampilCifRupiah(); // Q-t: CIF Rupiah langsung terhitung saat dokumen dibuka
         }
@@ -1526,7 +1577,7 @@
                     state = stateKosong();
                     resetHeader();
                     $('#h_kodeValuta').val(res.header.kodeValuta);
-                    $('#h_ndpbm').val(res.header.ndpbm || '');
+                    setRibuan('#h_ndpbm', res.header.ndpbm || '');
                     if (res.header.selectEntitas2) {
                         $('#h_selectEntitas2').val(String(res.header.selectEntitas2));
                         isiEntitas(2, res.header.selectEntitas2);
@@ -1623,7 +1674,8 @@
                         },
                         success: function(res) {
                             alertify.success(res.message);
-                            refreshSemua();
+                            reloadOutstanding();
+                            reloadData();
                         },
                         error: function(err) {
                             alertify.error(pesanError(err, 'Gagal menghapus dokumen'));
@@ -1648,7 +1700,7 @@
 
             const header = {};
             $('[data-h]').each(function() {
-                header[$(this).data('h')] = $(this).val();
+                header[$(this).data('h')] = $(this).hasClass('bc-ribuan') ? $(this).val().replace(/,/g, '') : $(this).val();
             });
             // Netto dan CIF header = jumlah barang (kolom itu dimatikan, tetap dikirim).
             const data = { header, nobukti: nobuktiSumber };
@@ -1762,6 +1814,9 @@
             modal.find('[data-f]').each(function() {
                 const v = row[$(this).data('f')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
+                if ($(this).hasClass('bc-ribuan')) {
+                    formatRibuanKetik(this);
+                }
             });
             if (nama === 'barang') {
                 modal.find('[data-f="seriBarang"]').val(idx === null ? state.barang.length + 1 : idx + 1);
@@ -1777,7 +1832,7 @@
         function bacaModal(nama) {
             const row = {};
             $(MODAL[nama]).find('[data-f]').each(function() {
-                row[$(this).data('f')] = $(this).val();
+                row[$(this).data('f')] = $(this).hasClass('bc-ribuan') ? $(this).val().replace(/,/g, '') : $(this).val();
             });
             return row;
         }
@@ -1826,7 +1881,7 @@
 
         // CIF barang diubah di modal: CIF Rupiah ikut berubah (pratinjau).
         $(document).on('input', '#mdlBarang [data-f="cif"]', function() {
-            $('#mdlBarang [data-f="cifRupiah"]').val(angka($(this).val()) * angka($('#h_ndpbm').val()));
+            setRibuan('#mdlBarang [data-f="cifRupiah"]', angka($(this).val()) * angka($('#h_ndpbm').val()));
         });
 
         // Pos tarif diketik manual (bukan dipilih dari daftar): tarif lama dikosongkan supaya tidak basi.
@@ -1837,10 +1892,46 @@
         /* ---------------------------------------------------------------- pemilih HS */
         let hsTarget = null;
         let hsTunda = null;
+        let hsDt = null;
+
+        // Tabel pemilih HS = DataTables bergaya Kas (pickerKasInit). Pencarian dilakukan di server
+        // (POSTARIFHS besar), jadi pencarian bawaan DataTables diganti: kotak Search memanggil cariHs().
+        function initHs() {
+            const sel = (kunci, render) => ({ data: kunci, render: (d, t) => t === 'display' ? render(d) : d });
+            hsDt = pickerKasInit('tblHs', {
+                order: [],
+                columns: [
+                    sel('posTarif', esc),
+                    sel('persenBM', fmtNum),
+                    sel('persenPPN', fmtNum),
+                    sel('persenPPh', fmtNum)
+                ],
+                createdRow: function(tr, r) {
+                    $(tr).addClass('pick-row').attr({
+                        'data-hs': r.posTarif,
+                        'data-bm': angka(r.persenBM),
+                        'data-ppn': angka(r.persenPPN),
+                        'data-pph': angka(r.persenPPh)
+                    });
+                },
+                language: {
+                    lengthMenu: 'Tampilkan _MENU_',
+                    emptyTable: 'Tidak ada data - pos tarif tetap bisa diketik langsung (tarif 0).',
+                    zeroRecords: 'Tidak ada data'
+                }
+            });
+            $('#tblHs_filter input').off('.DT').on('input', function() {
+                clearTimeout(hsTunda);
+                hsTunda = setTimeout(cariHs, 300);
+            });
+        }
 
         function bukaHs(target) {
             hsTarget = target;
-            $('#hsCari').val($(target).val());
+            if (!hsDt) {
+                initHs();
+            }
+            $('#tblHs_filter input').val($(target).val());
             cariHs();
             $('#mdlHs').modal('show');
         }
@@ -1849,36 +1940,26 @@
             $.ajax({
                 url: "{!! url('documentbc23lisths') !!}",
                 type: "get",
-                data: { search: $('#hsCari').val() },
+                data: { search: $('#tblHs_filter input').val() },
                 success: function(res) {
-                    let html = (res || []).map(function(r) {
-                        return '<tr data-hs="' + esc(r.posTarif) + '" data-bm="' + angka(r.persenBM) + '" data-ppn="' + angka(r.persenPPN) +
-                            '" data-pph="' + angka(r.persenPPh) + '"><td>' + esc(r.posTarif) + '</td><td class="text-right">' + fmtNum(r.persenBM) +
-                            '</td><td class="text-right">' + fmtNum(r.persenPPN) + '</td><td class="text-right">' + fmtNum(r.persenPPh) + '</td></tr>';
-                    }).join('');
-                    $('#tblHsData').html(html || '<tr class="bc-kosong"><td colspan="4">Tidak ada data - pos tarif tetap bisa diketik langsung (tarif 0).</td></tr>');
+                    hsDt.clear().rows.add(res || []).draw();
                 }
             });
         }
 
-        $(document).on('input', '#hsCari', function() {
-            clearTimeout(hsTunda);
-            hsTunda = setTimeout(cariHs, 300);
-        });
-
         // Memilih HS mengisi pos tarif + tarif BM / PPN / PPh barang (nilai pajak dihitung saat disimpan).
         $(document).on('click', '#tblHsData tr[data-hs]', function() {
             $(hsTarget).val($(this).data('hs'));
-            $('#mdlBarang [data-f="persenBM"]').val($(this).data('bm'));
-            $('#mdlBarang [data-f="persenPPN"]').val($(this).data('ppn'));
-            $('#mdlBarang [data-f="persenPPh"]').val($(this).data('pph'));
+            setRibuan('#mdlBarang [data-f="persenBM"]', $(this).data('bm'));
+            setRibuan('#mdlBarang [data-f="persenPPN"]', $(this).data('ppn'));
+            setRibuan('#mdlBarang [data-f="persenPPh"]', $(this).data('pph'));
             $('#mdlHs').modal('hide');
         });
 
         // Backdrop modal HS di atas modal barang yang masih terbuka.
         $(document).on('shown.bs.modal', '#mdlHs', function() {
             $('.modal-backdrop').last().addClass('bc-backdrop-atas');
-            $('#hsCari').trigger('focus');
+            $('#tblHs_filter input').trigger('focus');
         });
 
         $(document).on('hidden.bs.modal', '#mdlHs', function() {

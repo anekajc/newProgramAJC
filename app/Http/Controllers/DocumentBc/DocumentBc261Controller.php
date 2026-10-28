@@ -79,7 +79,6 @@ class DocumentBc261Controller extends Controller
             'cifRupiah' => ['CIFRUPIAH', 'dec'],
             'ndpbm' => ['NDPBM', 'dec'],
             'kodeNegaraAsal' => ['KODENEGARAASAL', 'str'],
-            'kodeKategoriBarang' => ['KODEKATEGORIBARANG', 'strn'],
             'keteranganDokumen' => ['KETERANGANDOKUMEN', 'str'],
             'persenBM' => ['PERSENBM', 'dec'],
             'persenPPN' => ['PERSENPPN', 'dec'],
@@ -197,7 +196,6 @@ class DocumentBc261Controller extends Controller
                 'satuan' => $this->daftarKode('satuan'),
                 'kemasan' => $this->daftarKode('kemasan'),
                 'jenisDokumen' => $this->daftarKode('jenis_dokumen'),
-                'kategoriBarang' => $this->daftarKode('kategori_barang'),
             ],
         ]);
     }
@@ -209,7 +207,7 @@ class DocumentBc261Controller extends Controller
         $date2 = $this->tanggal($req->date2) ?? date('Y-m-t');
 
         return DB::connection('SML')->select('
-            SELECT ID AS id, NOMORAJU AS revDoc, NOMORAJU AS nomorAju, TANGGALTTD AS tanggalTtd,
+            SELECT ID AS id, NOMORAJU AS nomorAju, TANGGALTTD AS tanggalTtd,
                    NAMAENTITAS3 AS namaEntitas3, ISNULL(SENT, 0) AS sent, TGLKIRIM AS tglKirim
             FROM '.$this->tabel('bc261').'
             WHERE ISNULL(TANGGALTTD, CAST(TGLBUAT AS date)) BETWEEN :date1 AND :date2
