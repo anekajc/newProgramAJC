@@ -133,14 +133,10 @@ class DocumentBc40Controller extends Controller
         ]);
     }
 
-    // Outstanding: PO pemasok dalam negeri yang belum punya BC 4.0, dalam rentang tanggal PO.
-    // Karena jumlah PO dalam negeri puluhan ribu, rentang tanggal wajib (bawaan = periode kerja).
+    // Outstanding: semua PO pemasok dalam negeri yang belum punya BC 4.0 (tanpa filter periode, sama seperti BC 2.3).
     // DBPO / DBPODET hanya dibaca. PO tanpa baris barang (hanya jasa) tidak ditampilkan.
-    public function loadOutstanding(Request $req)
+    public function loadOutstanding()
     {
-        $date1 = $this->tanggal($req->date1) ?? date('Y-m-01');
-        $date2 = $this->tanggal($req->date2) ?? date('Y-m-t');
-
         return DB::connection('SML')->select('
             SELECT a.NOBUKTI AS nobukti, a.TANGGAL AS tanggal, a.KODESUPP AS kodeSupp, b.NAMACUSTSUPP AS namaSupp,
                    a.KODEVLS AS kodeValuta,
@@ -150,10 +146,9 @@ class DocumentBc40Controller extends Controller
             WHERE b.NEGARA = \'INDONESIA\'
               AND ISNULL(a.IsBatal, 0) = 0
               AND a.IsOtorisasi1 = 1
-              AND CAST(a.TANGGAL AS date) BETWEEN :date1 AND :date2
               AND EXISTS (SELECT 1 FROM DBPODET d WHERE d.NOBUKTI = a.NOBUKTI AND ISNULL(d.Isbatal, 0) = 0 AND ISNULL(d.Isjasa, 0) = 0)
               AND NOT EXISTS (SELECT 1 FROM '.$this->tabel('bc40').' x WHERE x.NOBUKTI = a.NOBUKTI)
-            ORDER BY a.TANGGAL DESC, a.NOBUKTI DESC', ['date1' => $date1, 'date2' => $date2]);
+            ORDER BY a.TANGGAL DESC, a.NOBUKTI DESC');
     }
 
     // Daftar transaksi: rentang tanggal pada TANGGALAJU (dokumen tanpa tanggal AJU memakai tanggal buat).

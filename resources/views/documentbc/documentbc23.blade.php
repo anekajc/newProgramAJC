@@ -149,6 +149,65 @@
         #tblHs tbody tr {
             cursor: pointer;
         }
+
+        /* Lapisan "Memuat data..." di atas area tabel - tampilannya sama dengan purchasing/purchaseOrder
+           (.po-loading-chip + .po-loading-spin). 45% pertama animasi masih transparan, jadi respons yang
+           cepat selesai sebelum lapisan sempat terlihat (tidak berkedip). */
+        #tabOutstanding,
+        #tabTransaksiList {
+            position: relative;
+        }
+
+        .tab-pane.bc-pane-memuat {
+            min-height: 140px;
+        }
+
+        .bc-memuat {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, .62);
+            z-index: 40;
+            animation: bcMunculMemuat .34s ease-out both;
+        }
+
+        @keyframes bcMunculMemuat {
+            0%, 45% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .po-loading-chip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            white-space: nowrap;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: rgba(31, 36, 48, .92);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+        }
+
+        .po-loading-spin {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: bcPutarMemuat .6s linear infinite;
+        }
+
+        @keyframes bcPutarMemuat {
+            to { transform: rotate(360deg); }
+        }
     </style>
 @endsection
 
@@ -265,16 +324,6 @@
             <option value="{{ $r->kode }}">{{ $r->nama }}</option>
         @endforeach
     </datalist>
-    <datalist id="dlKemasan">
-        @foreach ($lookup['kemasan'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
-    <datalist id="dlJenisDokumen">
-        @foreach ($lookup['jenisDokumen'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
     <datalist id="dlKategori">
         @foreach ($lookup['kategoriBarang'] as $r)
             <option value="{{ $r->kode }}">{{ $r->nama }}</option>
@@ -290,9 +339,6 @@
             <option value="{{ $v }}"></option>
         @endforeach
     </datalist>
-    {{-- Dokumen ke-1 dibatasi 380 (Invoice), dokumen ke-2 dibatasi 705 / 740 (BL / AWB). --}}
-    <datalist id="dlDok1"><option value="380">Invoice</option></datalist>
-    <datalist id="dlDok2"><option value="705">Bill of Lading</option><option value="740">Air Waybill</option></datalist>
 
     <!-- start pageForm (Tambah / Edit / Detail, full page) -->
     <div id="pageForm" class="container-fluid po-form-page" style="display:none">
@@ -439,19 +485,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bc-info mt-2">Dokumen ke-1 harus 380 (Invoice) dan dokumen ke-2 harus 705 / 740 (BL / AWB); kedua baris itu tidak bisa dihapus. Baris berikutnya bebas.</div>
-
-                    <div class="bc-judul">Pintasan Invoice / SK / BL-AWB</div>
-                    <div class="bs-form">
-                        @foreach (['inv' => 'Invoice (380)', 'sk' => 'Surat Keputusan (999)', 'bl' => 'BL / AWB (705 / 740)'] as $k => $label)
-                            <label for="p_nomor_{{ $k }}" class="bs-wrap">{{ $label }} - Nomor</label>
-                            <input type="text" class="form-control bc-tetap" id="p_nomor_{{ $k }}" disabled>
-
-                            <label for="p_tgl_{{ $k }}" class="bs-wrap">{{ $label }} - Tanggal</label>
-                            <input type="date" class="form-control bc-pintas" id="p_tgl_{{ $k }}" data-k="{{ $k }}">
-                        @endforeach
-                    </div>
-                    <div class="bc-info mt-2">Nomor mengikuti baris dokumen pertama dengan kode yang sama (baca saja); tanggal bisa diubah dari sini.</div>
                 </div>
 
                 {{-- PENGANGKUT --}}
@@ -483,7 +516,7 @@
                         <input type="number" step="1" class="form-control text-right" id="h_jumlahKemasan" data-h="jumlahKemasan">
 
                         <label for="h_kodeJenisKemasan" class="bs-wrap">Jenis Kemasan</label>
-                        <input type="text" class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+                        <select class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan"></select>
 
                         <label for="h_merkKemasan">Merk</label>
                         <input type="text" class="form-control" id="h_merkKemasan" data-h="merkKemasan" maxlength="100">
@@ -717,7 +750,7 @@
                     <div class="modal-body">
                         <div class="bs-form bs-form-1">
                             <label class="bs-wrap">Jenis Dokumen</label>
-                            <input type="text" class="form-control" data-f="kodeDokumen" id="f_dokumen_kode" list="dlJenisDokumen" maxlength="20">
+                            <select class="form-control" data-f="kodeDokumen" id="f_dokumen_kode"></select>
 
                             <label>Nomor</label>
                             <input type="text" class="form-control" data-f="nomorDokumen" maxlength="100">
@@ -725,7 +758,6 @@
                             <label>Tanggal</label>
                             <input type="date" class="form-control" data-f="tanggalDokumen">
                         </div>
-                        <div class="bc-info mt-2" id="infoBatasDokumen"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -816,6 +848,10 @@
         // Master Ukuran / Tipe Kontainer: [{kode, nama}]; yang dikirim ke CEISA hanya kodenya.
         const UKURAN_KONTAINER = @json($ukuranKontainer);
         const TIPE_KONTAINER = @json($tipeKontainer);
+        // Master Jenis Kemasan (JENISKEMASAN): [{kode, nama}]
+        const JENIS_KEMASAN = @json($lookup['kemasan']);
+        // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
+        const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
         const KODE = @json($kode);
 
         const AKSES = {
@@ -1188,7 +1224,21 @@
             aturTinggiTabel();
         }
 
+        // Lapisan "Memuat data..." di atas tab selama datanya diambil dan tabelnya digambar.
+        // Dihitung per tab supaya dua pemuatan yang tumpang tindih tidak saling mematikan lapisan.
+        const memuatJml = {};
+
+        function tampilMemuat(idPane, tampil) {
+            memuatJml[idPane] = Math.max(0, (memuatJml[idPane] || 0) + (tampil ? 1 : -1));
+            $(idPane).children('.bc-memuat').remove();
+            $(idPane).toggleClass('bc-pane-memuat', memuatJml[idPane] > 0);
+            if (memuatJml[idPane] > 0) {
+                $(idPane).append('<div class="bc-memuat"><span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span></div>');
+            }
+        }
+
         function reloadOutstanding() {
+            tampilMemuat('#tabOutstanding', true);
             $.ajax({
                 url: "{!! url('documentbc23loadoutstanding') !!}",
                 type: "get",
@@ -1198,6 +1248,9 @@
                 },
                 error: function(err) {
                     alertify.error(pesanError(err, 'Gagal memuat daftar PO'));
+                },
+                complete: function() {
+                    tampilMemuat('#tabOutstanding', false);
                 }
             });
         }
@@ -1249,6 +1302,7 @@
         }
 
         function reloadData(_fokusId) {
+            tampilMemuat('#tabTransaksiList', true);
             $.ajax({
                 url: "{!! url('documentbc23loadall') !!}",
                 type: "get",
@@ -1263,6 +1317,9 @@
                 },
                 error: function(err) {
                     alertify.error(pesanError(err, 'Gagal memuat daftar dokumen'));
+                },
+                complete: function() {
+                    tampilMemuat('#tabTransaksiList', false);
                 }
             });
         }
@@ -1376,7 +1433,7 @@
 
         // Isi select Ukuran / Tipe dari master ("kode - nama"). Kode lama yang sudah tidak ada di master
         // tetap ditampilkan supaya tidak hilang saat dokumen lama disimpan ulang.
-        function opsiKontainer(selector, daftar, nilai) {
+        function opsiMaster(selector, daftar, nilai) {
             let html = '<option value="">- Pilih -</option>';
             let ada = false;
             daftar.forEach(function(k) {
@@ -1399,8 +1456,9 @@
                     $(this).val('');
                 }
             });
-            opsiKontainer('#h_kodeUkuranKontainer', UKURAN_KONTAINER, '');
-            opsiKontainer('#h_kodeTipeKontainer', TIPE_KONTAINER, '');
+            opsiMaster('#h_kodeUkuranKontainer', UKURAN_KONTAINER, '');
+            opsiMaster('#h_kodeTipeKontainer', TIPE_KONTAINER, '');
+            opsiMaster('#h_kodeJenisKemasan', JENIS_KEMASAN, '');
             $('#h_kodeKantor').val(KODE_KANTOR);
             $('#h_kodeKantorBongkar').val(KODE_KANTOR_BONGKAR);
             $('#h_kodeCaraAngkut').val('1');
@@ -1411,8 +1469,9 @@
         }
 
         function isiHeader(d) {
-            opsiKontainer('#h_kodeUkuranKontainer', UKURAN_KONTAINER, d.kodeUkuranKontainer);
-            opsiKontainer('#h_kodeTipeKontainer', TIPE_KONTAINER, d.kodeTipeKontainer);
+            opsiMaster('#h_kodeUkuranKontainer', UKURAN_KONTAINER, d.kodeUkuranKontainer);
+            opsiMaster('#h_kodeTipeKontainer', TIPE_KONTAINER, d.kodeTipeKontainer);
+            opsiMaster('#h_kodeJenisKemasan', JENIS_KEMASAN, d.kodeJenisKemasan);
             $('[data-h]').each(function() {
                 const v = d[$(this).data('h')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
@@ -1628,12 +1687,6 @@
             dokumen: '#mdlDokumen',
         };
 
-        // Dokumen ke-1 / ke-2 dibatasi jenisnya dan tidak bisa dihapus.
-        const BATAS_DOKUMEN = [
-            { kode: ['380'], teks: 'Dokumen ke-1 harus 380 (Invoice).', list: 'dlDok1' },
-            { kode: ['705', '740'], teks: 'Dokumen ke-2 harus 705 atau 740 (BL / AWB).', list: 'dlDok2' },
-        ];
-
         // Tombol baris tabel item: markup & kelas sama dengan baris item di gudang/permintaanpemakaian
         // (.btn-action-sm + .btn-action-success / -danger, gayanya dari po-table-header.css di .po-form-page).
         function aksiBaris(nama, idx) {
@@ -1641,10 +1694,9 @@
                 return '<div class="text-center text-nowrap"><button type="button" class="btn-action-sm btn-action-warning" title="Lihat" onclick="event.stopPropagation(); bukaModal(\'' +
                     nama + '\', ' + idx + ')"><i class="bi bi-info"></i></button></div>';
             }
-            const bolehHapus = !(nama === 'dokumen' && idx < BATAS_DOKUMEN.length);
             return '<div class="text-center text-nowrap">' +
                 '<button type="button" class="btn-action-sm btn-action-success" title="Edit" onclick="event.stopPropagation(); bukaModal(\'' + nama + '\', ' + idx + ')"><i class="bi bi-pen"></i></button>' +
-                (bolehHapus ? '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' : '') +
+                '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' +
                 '</div>';
         }
 
@@ -1659,31 +1711,7 @@
             }).join('');
             $('#tblDokumen').html(html || barisKosong(5));
             $('#infoDokumen').text(state.dokumen.length + ' dokumen');
-            renderPintasan();
         }
-
-        // §4.4: Invoice (380), SK (999), BL/AWB (705/740) mengikuti baris dokumen pertama dengan kode itu.
-        const PINTASAN = { inv: ['380'], sk: ['999'], bl: ['705', '740'] };
-
-        function barisPintasan(k) {
-            return state.dokumen.find(r => PINTASAN[k].includes(String(r.kodeDokumen)));
-        }
-
-        function renderPintasan() {
-            Object.keys(PINTASAN).forEach(function(k) {
-                const r = barisPintasan(k);
-                $('#p_nomor_' + k).val(r ? (r.nomorDokumen || '') : '');
-                $('#p_tgl_' + k).val(r ? (r.tanggalDokumen || '') : '').prop('disabled', !r || mode === 'detail');
-            });
-        }
-
-        $(document).on('change', '.bc-pintas', function() {
-            const r = barisPintasan($(this).data('k'));
-            if (r) {
-                r.tanggalDokumen = $(this).val();
-                renderDokumen();
-            }
-        });
 
         function renderBarang() {
             let html = state.barang.map(function(r, i) {
@@ -1728,18 +1756,15 @@
             editIdx[nama] = idx;
 
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
+            if (nama === 'dokumen') {
+                opsiMaster('#f_dokumen_kode', JENIS_DOKUMEN, row.kodeDokumen || '');
+            }
             modal.find('[data-f]').each(function() {
                 const v = row[$(this).data('f')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
             });
             if (nama === 'barang') {
                 modal.find('[data-f="seriBarang"]').val(idx === null ? state.barang.length + 1 : idx + 1);
-            }
-            if (nama === 'dokumen') {
-                const pos = idx === null ? state.dokumen.length : idx;
-                const batas = BATAS_DOKUMEN[pos];
-                $('#f_dokumen_kode').attr('list', batas ? batas.list : 'dlJenisDokumen');
-                $('#infoBatasDokumen').text(batas ? batas.teks : '');
             }
 
             const baca = mode === 'detail';
@@ -1762,13 +1787,9 @@
             const row = bacaModal(nama);
             const idx = editIdx[nama];
 
-            if (nama === 'dokumen') {
-                const pos = (idx === null || idx === undefined) ? state.dokumen.length : idx;
-                const batas = BATAS_DOKUMEN[pos];
-                if (batas && !batas.kode.includes(String(row.kodeDokumen).trim())) {
-                    alertify.error(batas.teks);
-                    return;
-                }
+            if (nama === 'dokumen' && !row.kodeDokumen) {
+                alertify.error('Jenis dokumen harus dipilih.');
+                return;
             }
 
             if (idx === null || idx === undefined) {
@@ -1794,10 +1815,6 @@
         }
 
         function hapusBaris(nama, idx) {
-            if (nama === 'dokumen' && idx < BATAS_DOKUMEN.length) {
-                alertify.warning('Dokumen ke-' + (idx + 1) + ' tidak bisa dihapus.');
-                return;
-            }
             state[nama].splice(idx, 1);
             seriUlang(nama);
             if (nama === 'barang') {

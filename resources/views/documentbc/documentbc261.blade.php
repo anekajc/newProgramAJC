@@ -134,6 +134,64 @@
         #tblHs tbody tr {
             cursor: pointer;
         }
+
+        /* Lapisan "Memuat data..." di atas area tabel - tampilannya sama dengan purchasing/purchaseOrder
+           (.po-loading-chip + .po-loading-spin). 45% pertama animasi masih transparan, jadi respons yang
+           cepat selesai sebelum lapisan sempat terlihat (tidak berkedip). */
+        #areaTabel {
+            position: relative;
+        }
+
+        #areaTabel.bc-pane-memuat {
+            min-height: 140px;
+        }
+
+        .bc-memuat {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, .62);
+            z-index: 40;
+            animation: bcMunculMemuat .34s ease-out both;
+        }
+
+        @keyframes bcMunculMemuat {
+            0%, 45% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .po-loading-chip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            white-space: nowrap;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: rgba(31, 36, 48, .92);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+        }
+
+        .po-loading-spin {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: bcPutarMemuat .6s linear infinite;
+        }
+
+        @keyframes bcPutarMemuat {
+            to { transform: rotate(360deg); }
+        }
     </style>
 @endsection
 
@@ -182,21 +240,24 @@
                         @endif
                     </div>
 
-                    <div id="rtBar"></div>
+                    {{-- #areaTabel = acuan lapisan "Memuat data..." (tampilMemuat). --}}
+                    <div id="areaTabel">
+                        <div id="rtBar"></div>
 
-                    <table id="tabel" class="data-table po-aksi-hover">
-                        <thead>
-                            <tr>
-                                <th style="padding: 4px 12px;" scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel_data" class="text-left"></tbody>
-                    </table>
+                        <table id="tabel" class="data-table po-aksi-hover">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 4px 12px;" scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabel_data" class="text-left"></tbody>
+                        </table>
 
-                    <div class="po-rt-hint">
-                        <i class="bi bi-info-circle"></i>
-                        Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
-                        untuk menyembunyikan kolom.
+                        <div class="po-rt-hint">
+                            <i class="bi bi-info-circle"></i>
+                            Seret judul kolom untuk mengubah urutannya. Klik <i class="bi bi-gear"></i> pada judul kolom
+                            untuk menyembunyikan kolom.
+                        </div>
                     </div>
 
                 </div>
@@ -212,16 +273,6 @@
     </datalist>
     <datalist id="dlSatuan">
         @foreach ($lookup['satuan'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
-    <datalist id="dlKemasan">
-        @foreach ($lookup['kemasan'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
-    <datalist id="dlJenisDokumen">
-        @foreach ($lookup['jenisDokumen'] as $r)
             <option value="{{ $r->kode }}">{{ $r->nama }}</option>
         @endforeach
     </datalist>
@@ -554,7 +605,7 @@
                             <input type="number" step="any" class="form-control text-right" data-f="jumlahKemasan">
 
                             <label class="bs-wrap">Jenis Kemasan</label>
-                            <input type="text" class="form-control" data-f="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+                            <select class="form-control" data-f="kodeJenisKemasan"></select>
 
                             <label>Netto (Kg)</label>
                             <input type="number" step="any" class="form-control text-right" data-f="netto">
@@ -691,7 +742,7 @@
                             <input type="number" step="1" class="form-control text-right" data-f="jumlahKemasan">
 
                             <label class="bs-wrap">Jenis Kemasan</label>
-                            <input type="text" class="form-control" data-f="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+                            <select class="form-control" data-f="kodeJenisKemasan"></select>
 
                             <label>Merk</label>
                             <input type="text" class="form-control" data-f="merkKemasan" maxlength="100">
@@ -806,7 +857,7 @@
                     <div class="modal-body">
                         <div class="bs-form bs-form-1">
                             <label class="bs-wrap">Jenis Dokumen</label>
-                            <input type="text" class="form-control" data-f="kodeDokumen" list="dlJenisDokumen" maxlength="20">
+                            <select class="form-control" data-f="kodeDokumen" id="f_dokumen_kode"></select>
 
                             <label>Nomor</label>
                             <input type="text" class="form-control" data-f="nomorDokumen" maxlength="50">
@@ -903,6 +954,10 @@
         const TIPE_KONTAINER = @json($tipeKontainer);
         const NAMA_UKURAN = Object.fromEntries(UKURAN_KONTAINER.map(k => [k.kode, k.nama]));
         const NAMA_TIPE = Object.fromEntries(TIPE_KONTAINER.map(k => [k.kode, k.nama]));
+        // Master Jenis Kemasan (JENISKEMASAN): [{kode, nama}]
+        const JENIS_KEMASAN = @json($lookup['kemasan']);
+        // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
+        const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
         const KODE = @json($kode);
 
         const AKSES = {
@@ -1277,7 +1332,21 @@
             aturTinggiTabel();
         }
 
+        // Lapisan "Memuat data..." di atas area tabel selama datanya diambil dan tabelnya digambar.
+        // Dihitung supaya dua pemuatan yang tumpang tindih tidak saling mematikan lapisan.
+        let memuatJml = 0;
+
+        function tampilMemuat(tampil) {
+            memuatJml = Math.max(0, memuatJml + (tampil ? 1 : -1));
+            $('#areaTabel').children('.bc-memuat').remove();
+            $('#areaTabel').toggleClass('bc-pane-memuat', memuatJml > 0);
+            if (memuatJml > 0) {
+                $('#areaTabel').append('<div class="bc-memuat"><span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span></div>');
+            }
+        }
+
         function reloadData(_fokusId) {
+            tampilMemuat(true);
             $.ajax({
                 url: "{!! url('documentbc261loadall') !!}",
                 type: "get",
@@ -1292,6 +1361,9 @@
                 },
                 error: function(err) {
                     alertify.error(pesanError(err, 'Gagal memuat daftar dokumen'));
+                },
+                complete: function() {
+                    tampilMemuat(false);
                 }
             });
         }
@@ -1618,9 +1690,9 @@
             renderBarang();
         }
 
-        // Isi select Ukuran / Tipe dari master ("kode - nama"). Kode lama yang sudah tidak ada di master
-        // tetap ditampilkan supaya tidak hilang saat dokumen lama disimpan ulang.
-        function opsiKontainer(selector, daftar, nilai) {
+        // Isi select Ukuran / Tipe / Jenis Kemasan dari master ("kode - nama"). Kode lama yang sudah tidak ada
+        // di master tetap ditampilkan supaya tidak hilang saat dokumen lama disimpan ulang.
+        function opsiMaster(selector, daftar, nilai) {
             let html = '<option value="">- Pilih -</option>';
             let ada = false;
             daftar.forEach(function(k) {
@@ -1672,6 +1744,10 @@
             }
 
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
+            opsiMaster(modal.find('[data-f="kodeJenisKemasan"]'), JENIS_KEMASAN, row.kodeJenisKemasan || '');
+            if (nama === 'dokumen') {
+                opsiMaster('#f_dokumen_kode', JENIS_DOKUMEN, row.kodeDokumen || '');
+            }
             modal.find('[data-f]').each(function() {
                 const v = row[$(this).data('f')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
@@ -1680,8 +1756,8 @@
                 modal.find('[data-f="seriBarang"]').val(idx + 1);
             }
             if (nama === 'kontainer') {
-                opsiKontainer('#mdlKontainer [data-f="kodeUkuranKontainer"]', UKURAN_KONTAINER, row.kodeUkuranKontainer || '');
-                opsiKontainer('#mdlKontainer [data-f="kodeTipeKontainer"]', TIPE_KONTAINER, row.kodeTipeKontainer || '');
+                opsiMaster('#mdlKontainer [data-f="kodeUkuranKontainer"]', UKURAN_KONTAINER, row.kodeUkuranKontainer || '');
+                opsiMaster('#mdlKontainer [data-f="kodeTipeKontainer"]', TIPE_KONTAINER, row.kodeTipeKontainer || '');
             }
 
             const baca = mode === 'detail';
@@ -1714,6 +1790,10 @@
             const row = bacaModal(nama);
             if (nama === 'kontainer' && (!row.kodeUkuranKontainer || !row.kodeTipeKontainer)) {
                 alertify.error('Ukuran dan Tipe kontainer harus dipilih.');
+                return;
+            }
+            if (nama === 'dokumen' && !row.kodeDokumen) {
+                alertify.error('Jenis dokumen harus dipilih.');
                 return;
             }
             const idx = editIdx[nama];

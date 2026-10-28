@@ -150,6 +150,65 @@
         #tblHs tbody tr {
             cursor: pointer;
         }
+
+        /* Lapisan "Memuat data..." di atas area tabel - tampilannya sama dengan purchasing/purchaseOrder
+           (.po-loading-chip + .po-loading-spin). 45% pertama animasi masih transparan, jadi respons yang
+           cepat selesai sebelum lapisan sempat terlihat (tidak berkedip). */
+        #tabOutstanding,
+        #tabTransaksiList {
+            position: relative;
+        }
+
+        .tab-pane.bc-pane-memuat {
+            min-height: 140px;
+        }
+
+        .bc-memuat {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, .62);
+            z-index: 40;
+            animation: bcMunculMemuat .34s ease-out both;
+        }
+
+        @keyframes bcMunculMemuat {
+            0%, 45% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .po-loading-chip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            white-space: nowrap;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: rgba(31, 36, 48, .92);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+        }
+
+        .po-loading-spin {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: bcPutarMemuat .6s linear infinite;
+        }
+
+        @keyframes bcPutarMemuat {
+            to { transform: rotate(360deg); }
+        }
     </style>
 @endsection
 
@@ -166,8 +225,8 @@
                 <div class="card-body" style="padding:0;">
 
                     <div class="po-toolbar">
-                        {{-- Periode berlaku untuk Outstanding (tanggal PO) dan Transaksi (tanggal AJU). --}}
-                        <div class="po-filter-wrap">
+                        {{-- Periode hanya berlaku untuk tab Transaksi (Outstanding tidak difilter periode). --}}
+                        <div class="po-filter-wrap" id="wrapPeriode" style="display:none">
                             <label>Periode</label>
                             <input type="date" class="po-filter-inp" id="inputDate1" value="{!! $date1 !!}" autocomplete="off">
                             <span class="po-filter-sep">s/d</span>
@@ -219,7 +278,7 @@
                             </table>
                             <div class="po-rt-hint">
                                 <i class="bi bi-info-circle"></i>
-                                PO pemasok dalam negeri pada rentang Periode di atas yang belum dibuatkan BC 4.0 (tidak batal,
+                                PO pemasok dalam negeri yang belum dibuatkan BC 4.0 (tidak batal,
                                 sudah otorisasi, punya baris barang). Klik <i class="bi bi-plus-lg"></i> untuk membuat BC 4.0 dari PO.
                             </div>
                         </div>
@@ -252,16 +311,6 @@
     {{-- Daftar isian combobox (diambil dari master; tetap bisa diketik bebas). --}}
     <datalist id="dlSatuan">
         @foreach ($lookup['satuan'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
-    <datalist id="dlKemasan">
-        @foreach ($lookup['kemasan'] as $r)
-            <option value="{{ $r->kode }}">{{ $r->nama }}</option>
-        @endforeach
-    </datalist>
-    <datalist id="dlJenisDokumen">
-        @foreach ($lookup['jenisDokumen'] as $r)
             <option value="{{ $r->kode }}">{{ $r->nama }}</option>
         @endforeach
     </datalist>
@@ -392,7 +441,7 @@
                 <div class="tab-pane fade" id="tabKemasan" role="tabpanel">
                     <div class="bs-form">
                         <label for="h_kodeJenisKemasan" class="bs-wrap">22. Jenis Kemasan</label>
-                        <input type="text" class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+                        <select class="form-control" id="h_kodeJenisKemasan" data-h="kodeJenisKemasan"></select>
 
                         <label for="h_merkKemasan">23. Merek</label>
                         <input type="text" class="form-control" id="h_merkKemasan" data-h="merkKemasan" maxlength="50">
@@ -545,7 +594,7 @@
                             <input type="number" step="1" class="form-control text-right" data-f="jumlahKemasan">
 
                             <label class="bs-wrap">Jenis Kemasan</label>
-                            <input type="text" class="form-control" data-f="kodeJenisKemasan" list="dlKemasan" maxlength="20">
+                            <select class="form-control" data-f="kodeJenisKemasan"></select>
 
                             <label>Netto (Kg)</label>
                             <input type="number" step="any" class="form-control text-right" data-f="netto">
@@ -578,7 +627,7 @@
                     <div class="modal-body">
                         <div class="bs-form bs-form-1">
                             <label class="bs-wrap">Jenis Dokumen</label>
-                            <input type="text" class="form-control" data-f="kodeDokumen" list="dlJenisDokumen" maxlength="20">
+                            <select class="form-control" data-f="kodeDokumen" id="f_dokumen_kode"></select>
 
                             <label>Nomor</label>
                             <input type="text" class="form-control" data-f="nomorDokumen" maxlength="100">
@@ -670,6 +719,10 @@
     <script type="text/javascript">
         const KODE_KANTOR = @json($kodeKantor);
         const ENTITAS = @json($entitas);
+        // Master Jenis Kemasan (JENISKEMASAN): [{kode, nama}]
+        const JENIS_KEMASAN = @json($lookup['kemasan']);
+        // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
+        const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
 
         const AKSES = {
             tambah: Number($('#akses_istambah').val()) === 1,
@@ -936,7 +989,7 @@
             });
         }
 
-        // Periode berlaku untuk kedua tab: Outstanding (tanggal PO) dan Transaksi (tanggal AJU).
+        // Periode hanya berlaku untuk tab Transaksi (tanggal AJU).
         function ikatPeriode() {
             let awal = document.getElementById('inputDate1');
             let akhir = document.getElementById('inputDate2');
@@ -953,7 +1006,7 @@
                     alertify.warning('Tanggal awal tidak boleh melebihi tanggal akhir');
                     return;
                 }
-                refreshSemua();
+                reloadData();
             };
             awal.addEventListener('change', onUbah);
             akhir.addEventListener('change', onUbah);
@@ -1042,20 +1095,33 @@
             aturTinggiTabel();
         }
 
+        // Lapisan "Memuat data..." di atas tab selama datanya diambil dan tabelnya digambar.
+        // Dihitung per tab supaya dua pemuatan yang tumpang tindih tidak saling mematikan lapisan.
+        const memuatJml = {};
+
+        function tampilMemuat(idPane, tampil) {
+            memuatJml[idPane] = Math.max(0, (memuatJml[idPane] || 0) + (tampil ? 1 : -1));
+            $(idPane).children('.bc-memuat').remove();
+            $(idPane).toggleClass('bc-pane-memuat', memuatJml[idPane] > 0);
+            if (memuatJml[idPane] > 0) {
+                $(idPane).append('<div class="bc-memuat"><span class="po-loading-chip"><span class="po-loading-spin"></span>Memuat data...</span></div>');
+            }
+        }
+
         function reloadOutstanding() {
+            tampilMemuat('#tabOutstanding', true);
             $.ajax({
                 url: "{!! url('documentbc40loadoutstanding') !!}",
                 type: "get",
-                data: {
-                    date1: $('#inputDate1').val(),
-                    date2: $('#inputDate2').val()
-                },
                 success: function(res) {
                     outRows = res || [];
                     renderOutstanding();
                 },
                 error: function(err) {
                     alertify.error(pesanError(err, 'Gagal memuat daftar PO'));
+                },
+                complete: function() {
+                    tampilMemuat('#tabOutstanding', false);
                 }
             });
         }
@@ -1107,6 +1173,7 @@
         }
 
         function reloadData(_fokusId) {
+            tampilMemuat('#tabTransaksiList', true);
             $.ajax({
                 url: "{!! url('documentbc40loadall') !!}",
                 type: "get",
@@ -1121,6 +1188,9 @@
                 },
                 error: function(err) {
                     alertify.error(pesanError(err, 'Gagal memuat daftar dokumen'));
+                },
+                complete: function() {
+                    tampilMemuat('#tabTransaksiList', false);
                 }
             });
         }
@@ -1130,8 +1200,9 @@
             reloadData();
         }
 
-        // Tab beranda: cari/tampilkan berlaku ke tabel pada tab yang aktif.
+        // Tab beranda: periode hanya untuk Transaksi; cari/tampilkan berlaku ke tabel tab aktif.
         $(document).on('shown.bs.tab', '#homeTabs a[data-toggle="tab"]', function() {
+            $('#wrapPeriode').toggle($('#tabTransaksiList').hasClass('active'));
             const t = tabelAktif();
             if ($.fn.DataTable.isDataTable(t)) {
                 $(t).DataTable().columns.adjust();
@@ -1194,6 +1265,22 @@
             renderBarang();
         }
 
+        // Isi select dari master ("kode - nama"). Kode lama yang sudah tidak ada di master
+        // tetap ditampilkan supaya tidak hilang saat dokumen lama disimpan ulang.
+        function opsiMaster(selector, daftar, nilai) {
+            let html = '<option value="">- Pilih -</option>';
+            let ada = false;
+            daftar.forEach(function(k) {
+                const cocok = String(k.kode) === String(nilai);
+                ada = ada || cocok;
+                html += '<option value="' + esc(k.kode) + '"' + (cocok ? ' selected' : '') + '>' + esc(k.kode + ' - ' + k.nama) + '</option>';
+            });
+            if (!ada && nilai) {
+                html += '<option value="' + esc(nilai) + '" selected>' + esc(nilai) + '</option>';
+            }
+            $(selector).html(html);
+        }
+
         // Tambah: header kembali ke nilai awal (bukan dikosongkan semua), koleksi dikosongkan.
         function resetHeader() {
             $('[data-h]').each(function() {
@@ -1203,6 +1290,7 @@
                     $(this).val('');
                 }
             });
+            opsiMaster('#h_kodeJenisKemasan', JENIS_KEMASAN, '');
             $('#h_kodeKantor').val(KODE_KANTOR);
             $('#h_kodeJenisTpb').val('1');
             $('#h_tanggalAju').val(hariIni());
@@ -1212,6 +1300,7 @@
         }
 
         function isiHeader(d) {
+            opsiMaster('#h_kodeJenisKemasan', JENIS_KEMASAN, d.kodeJenisKemasan);
             $('[data-h]').each(function() {
                 const v = d[$(this).data('h')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
@@ -1486,6 +1575,10 @@
             editIdx[nama] = idx;
 
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
+            opsiMaster(modal.find('[data-f="kodeJenisKemasan"]'), JENIS_KEMASAN, row.kodeJenisKemasan || '');
+            if (nama === 'dokumen') {
+                opsiMaster('#f_dokumen_kode', JENIS_DOKUMEN, row.kodeDokumen || '');
+            }
             modal.find('[data-f]').each(function() {
                 const v = row[$(this).data('f')];
                 $(this).val(v === null || v === undefined ? '' : String(v));
@@ -1513,6 +1606,11 @@
         function simpanModal(nama) {
             const row = bacaModal(nama);
             const idx = editIdx[nama];
+
+            if (nama === 'dokumen' && !row.kodeDokumen) {
+                alertify.error('Jenis dokumen harus dipilih.');
+                return;
+            }
 
             if (idx === null || idx === undefined) {
                 state[nama].push(row);
