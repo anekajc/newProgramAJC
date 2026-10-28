@@ -82,6 +82,7 @@ require __DIR__.'/marketing.php';
 require __DIR__.'/gudang.php';
 require __DIR__.'/purchasing.php';
 require __DIR__.'/master.php';
+require __DIR__.'/produksi.php';
 Route::middleware('auth')->group(function () {
     require __DIR__.'/report.php';
 });

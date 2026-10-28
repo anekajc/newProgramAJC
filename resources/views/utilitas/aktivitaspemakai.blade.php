@@ -138,6 +138,7 @@ function akRenderTabel (rows) {
     columns: [
       { data: 'Tanggal', title: 'Tanggal', render: function (d) { return akFormatTanggal(d); } },
       { data: 'Pemakai', title: 'Pemakai', defaultContent: '' },
+      { data: 'Aktivitas', title: 'Aktivitas', defaultContent: '' },
       { data: 'Sumber', title: 'Transaksi', defaultContent: '', render: function (d) { return AK_LABEL_SUMBER[d] || d; } },
       { data: 'NoBukti', title: 'No. Bukti', defaultContent: '' },
       { data: 'Keterangan', title: 'Keterangan', defaultContent: '' },
