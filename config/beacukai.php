@@ -23,6 +23,16 @@ return [
         'default_expires_in' => 600,
     ],
 
+    // Konstanta payload BC 2.5 (docs/documentbc25_plan.md §9, quirk Q-d). Tebakan Villiger yang BELUM
+    // dibuktikan oleh uji CEISA: kodeFasilitasTarif 1 = dibayar (3 ditangguhkan, 5 dibebaskan, 6 tidak
+    // dipungut), kodeJenisTarif 1 = advalorum. Cocokkan dengan balasan CEISA pertama; ubah di sini bila perlu.
+    'bc25' => [
+        'kode_fasilitas_tarif' => env('BC25_KODE_FASILITAS_TARIF', '1'),
+        'tarif_fasilitas' => (int) env('BC25_TARIF_FASILITAS', 0),
+        'kode_jenis_tarif' => env('BC25_KODE_JENIS_TARIF', '1'),
+        'kode_lokasi_bayar' => env('BC25_KODE_LOKASI_BAYAR', '1'),
+    ],
+
     'tables' => [
         'entitas' => 'ENTITAS',
         'negara' => 'NEGARA',
@@ -50,6 +60,24 @@ return [
         'bc261_kontainer' => 'DOCUMENTBC261KONTAINER',
         'bc261_jaminan' => 'DOCUMENTBC261JAMINAN',
         'bc261_dokumen' => 'DOCUMENTBC261DOKUMEN',
+
+        // BC 2.6.2: header + 6 koleksi anak (docs/update-db-DBSMLNEW/beacukai/13_tabel_documentbc262.sql).
+        // Sumber (Outstanding) = BC 2.6.1 yang sudah terkirim (SENT = 1) dan belum punya BC 2.6.2.
+        'bc262' => 'DOCUMENTBC262',
+        'bc262_barang' => 'DOCUMENTBC262BARANG',
+        'bc262_bahanbaku' => 'DOCUMENTBC262BAHANBAKU',
+        'bc262_kemasan' => 'DOCUMENTBC262KEMASAN',
+        'bc262_kontainer' => 'DOCUMENTBC262KONTAINER',
+        'bc262_jaminan' => 'DOCUMENTBC262JAMINAN',
+        'bc262_dokumen' => 'DOCUMENTBC262DOKUMEN',
+
+        // BC 2.5: header + 5 koleksi anak, berdiri sendiri (docs/update-db-DBSMLNEW/beacukai/14_tabel_documentbc25.sql).
+        'bc25' => 'DOCUMENTBC25',
+        'bc25_barang' => 'DOCUMENTBC25BARANG',
+        'bc25_bahanbaku' => 'DOCUMENTBC25BAHANBAKU',
+        'bc25_kemasan' => 'DOCUMENTBC25KEMASAN',
+        'bc25_kontainer' => 'DOCUMENTBC25KONTAINER',
+        'bc25_dokumen' => 'DOCUMENTBC25DOKUMEN',
 
         // BC 2.3: header (kemasan, kontainer, pengangkut jadi kolom) + barang + dokumen
         // (docs/update-db-DBSMLNEW/beacukai/11_tabel_documentbc23.sql). Sumber barang = DBPO / DBPODET.

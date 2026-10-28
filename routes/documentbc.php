@@ -2,14 +2,14 @@
 
 use App\Http\Controllers\DocumentBc\CeisaAuthController;
 use App\Http\Controllers\DocumentBc\DocumentBc23Controller;
+use App\Http\Controllers\DocumentBc\DocumentBc25Controller;
 use App\Http\Controllers\DocumentBc\DocumentBc261Controller;
+use App\Http\Controllers\DocumentBc\DocumentBc262Controller;
 use App\Http\Controllers\DocumentBc\DocumentBc40Controller;
 use Illuminate\Support\Facades\Route;
 
-// Controller BC 2.5 / 4.1 / 2.6.2 masih kosong (belum ada index), route-nya
+// Controller BC 4.1 masih kosong (belum ada index), route-nya
 // diaktifkan lagi saat modulnya dibuat.
-// use App\Http\Controllers\DocumentBc\DocumentBc25Controller;
-// use App\Http\Controllers\DocumentBc\DocumentBc262Controller;
 // use App\Http\Controllers\DocumentBc\DocumentBc41Controller;
 
 Route::middleware('auth')->group(function () {
@@ -27,7 +27,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/documentbc23sppreview', [DocumentBc23Controller::class, 'spPreview']);
 
     // Documentbc 25
-    // Route::get('/documentbc25', [DocumentBc25Controller::class, 'index']);
+    Route::get('/documentbc25', [DocumentBc25Controller::class, 'index']);
+    Route::get('/documentbc25loadall', [DocumentBc25Controller::class, 'loadAll']);
+    Route::get('/documentbc25lisths', [DocumentBc25Controller::class, 'listHs']);
+    Route::get('/documentbc25spdetail', [DocumentBc25Controller::class, 'spDetail']);
+    Route::post('/documentbc25spadd', [DocumentBc25Controller::class, 'spAdd']);
+    Route::post('/documentbc25spedit', [DocumentBc25Controller::class, 'spEdit']);
+    Route::post('/documentbc25spdelete', [DocumentBc25Controller::class, 'spDelete']);
+    Route::post('/documentbc25spkirim', [DocumentBc25Controller::class, 'spKirim']);
+    Route::get('/documentbc25sppreview', [DocumentBc25Controller::class, 'spPreview']);
 
     // Documentbc 40
     Route::get('/documentbc40', [DocumentBc40Controller::class, 'index']);
@@ -61,6 +69,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/documentbc261sppreview', [DocumentBc261Controller::class, 'spPreview']);
 
     // Documentbc262
-    // Route::get('/documentbc262', [DocumentBc262Controller::class, 'index']);
+    Route::get('/documentbc262', [DocumentBc262Controller::class, 'index']);
+    Route::get('/documentbc262loadoutstanding', [DocumentBc262Controller::class, 'loadOutstanding']);
+    Route::get('/documentbc262loadall', [DocumentBc262Controller::class, 'loadAll']);
+    Route::get('/documentbc262lisths', [DocumentBc262Controller::class, 'listHs']);
+    Route::get('/documentbc262spdetail', [DocumentBc262Controller::class, 'spDetail']);
+    Route::post('/documentbc262spadd', [DocumentBc262Controller::class, 'spAdd']);
+    Route::post('/documentbc262spedit', [DocumentBc262Controller::class, 'spEdit']);
+    Route::post('/documentbc262spdelete', [DocumentBc262Controller::class, 'spDelete']);
+    Route::post('/documentbc262spkirim', [DocumentBc262Controller::class, 'spKirim']);
+    Route::get('/documentbc262sppreview', [DocumentBc262Controller::class, 'spPreview']);
 
 });
