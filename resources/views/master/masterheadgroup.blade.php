@@ -143,7 +143,6 @@
 </div>
 <!-- End modal edit-->
 
-
 <!-- start modal subgroup -->
 <div class="modal fade"  id="formSubGroup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered"  role="document" >
@@ -726,8 +725,7 @@ function submitEditSubGroup () {
 
 function buttonAddSubGroup () {
   $('.showhide').hide();
-  console.log('buttonAddSubGroup')
-
+  
   document.getElementById("input_subgroup_add_kodesubgroup").value = ''
   document.getElementById("input_subgroup_add_namasubgroup").value = ''
   document.getElementById("input_add_perkPers").value = ''

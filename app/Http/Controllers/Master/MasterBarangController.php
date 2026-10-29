@@ -141,6 +141,13 @@ join DBMERK f on a.KodeMerk = f.KODEMERK where a.KODEGRP = 'BJ'");
         });
     }
 
+    // Filter Lokal/Impor (toolbar Filter) -- isLokal: 1 = Lokal, 0 = Impor. String kosong
+    // (opsi "Semua") berarti tidak difilter.
+    $lokalImpor = $request->input('lokalimpor');
+    if ($lokalImpor !== null && $lokalImpor !== '') {
+        $query->where('a.isLokal', (int) $lokalImpor);
+    }
+
     // apply pagination
     $start = (int) $request->input('start', 0);
     $length = (int) $request->input('length', 10);
