@@ -29,7 +29,17 @@
   <div class="card">
     <div class="card-body" style="padding:0;">
 
-  @include('master.partials.toolbarMaster')
+  @include('master.partials.toolbarMaster', [
+    'filterJudul' => 'Filter Barang',
+    'filterIsi' => '
+      <label for="filterLokalImpor">Lokal / Impor</label>
+      <select id="filterLokalImpor" class="form-control">
+        <option value="">Semua</option>
+        <option value="1">Lokal</option>
+        <option value="0">Impor</option>
+      </select>
+    ',
+  ])
 
   <table id="tabel" class="data-table po-aksi-hover">
         <thead id="tabel_header" class="text-center">
@@ -607,6 +617,7 @@ function loadAll () {
     ajax: {
       url: "{!! url('masterbarangloadall') !!}",
       type: "GET",
+      data: function (d) { d.lokalimpor = $('#filterLokalImpor').val(); }
     },
     columns: MasterList.kolomServer(cols, function (data, type, row) {
       return `

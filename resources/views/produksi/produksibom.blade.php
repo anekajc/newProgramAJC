@@ -14,6 +14,8 @@
     href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <link rel="stylesheet"
     href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet"
+    href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
 <style>
 
   /* Halaman ini harus muat 1 layar (tidak discroll) -- #content adalah wrapper layout
@@ -90,6 +92,22 @@
   }
 
   #tabel tbody tr.pb-row-selected {
+    background: #fff3b0 !important;
+  }
+
+  {{-- Grid "Daftar Proses" di modal Tambah/Edit BOM (modalProduksiBOM.blade.php) -- baris
+       bisa diklik untuk menentukan KodePrs aktif dipakai Tambah Detail BOM
+       (pbModalPilihProses()), styling disorot sama dengan panel kiri/kanan di halaman
+       utama (.pb-row-selected). --}}
+  #tabel_proses_modal tbody tr.pb-modal-pilih-proses {
+    cursor: pointer;
+  }
+
+  #tabel_proses_modal tbody tr:hover {
+    background: #f8f9fc;
+  }
+
+  #tabel_proses_modal tbody tr.pb-row-selected {
     background: #fff3b0 !important;
   }
 
@@ -288,10 +306,11 @@
                 <tr>
                   <th>Kode BOM</th>
                   <th>Default</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_bom">
-                <tr><td colspan="2" class="text-center text-muted">Pilih barang di sebelah kiri</td></tr>
+                <tr><td colspan="3" class="text-center text-muted">Pilih barang di sebelah kiri</td></tr>
               </tbody>
             </table>
           </div>
@@ -310,7 +329,7 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_proses">
-                <tr><td colspan="2" class="text-center text-muted">Pilih BOM di atas</td></tr>
+                <tr><td colspan="3" class="text-center text-muted">Pilih BOM di atas</td></tr>
               </tbody>
             </table>
           </div>
@@ -347,12 +366,78 @@
 </div>
 
 @endsection
+@include('produksi.modalProduksiBOM')
 
 @section('js')
 <script src="{!! URL::asset('js/report-table.js') !!}?v={{ @filemtime(base_path('public/js/report-table.js')) ?: '1' }}"></script>
 <script src="{!! URL::asset('js/master-list.js') !!}?v={{ @filemtime(base_path('public/js/master-list.js')) ?: '1' }}"></script>
+<script src="{!! URL::asset('js/picker-kas.js') !!}?v={{ @filemtime(base_path('public/js/picker-kas.js')) ?: '1' }}"></script>
+
+{{-- Modal pemilih Kode Proses/Kode Barang (modalProduksiBOM.blade.php) disamakan persis
+     dengan modal pemilih menu Kas/SO/PO -- class picker-kas dipasang dari sini (bukan di
+     markup modalnya), pola sama dengan so.blade.php/purchaseOrder.blade.php, lihat
+     public/css/picker-kas.css. --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  jQuery('#formKodeProses, #formKodeBarangDetail').addClass('picker-kas')
+  jQuery('#formKodeProses .modal-footer .btn, #formKodeBarangDetail .modal-footer .btn').filter(function () {
+    return jQuery.trim(jQuery(this).text()) === 'Batal'
+  }).addClass('picker-kas-batal')
+})
+</script>
 
 <script type="text/javascript">
+
+// Separator ribuan buat Numerator/Denominator/Loss Ratio (tabel & input Tambah/Edit Detail
+// BOM) -- disalin dari public/js/kas.js (formatAngka/unformatAngka/formatAngkaInput/
+// formatAngkaKetik), bukan punya file util bersama jadi disalin per halaman sama seperti
+// kas.js/bank.js. formatAngkaKetik() dipasang di oninput supaya separator langsung muncul
+// sambil mengetik; formatAngkaInput() di onblur buat menormalkan ke 2 desimal.
+function formatAngka (angkaString) {
+  let tempAngka = angkaString.split('.')
+  let temp1 = ''
+  for (let i = 0; i < tempAngka[0].length; i++) {
+    if (i != 0 && i % 3 == 0) {
+      temp1 = ',' + temp1
+    }
+    temp1 = tempAngka[0][tempAngka[0].length - i - 1] + temp1
+  }
+  temp1 += '.' + tempAngka[1]
+  return temp1
+}
+
+function unformatAngka (angka) {
+  if (!angka) return 0
+  return parseFloat(String(angka).replace(/,/g, '')) || 0
+}
+
+function formatAngkaInput (el) {
+  el.value = formatAngka(unformatAngka(el.value).toFixed(2))
+}
+
+function formatAngkaKetik (el) {
+  let posDariKanan = el.value.length - el.selectionStart
+  let minus = el.value.trim().startsWith('-') ? '-' : ''
+  let raw = el.value.replace(/[^0-9.]/g, '')
+
+  let titikIndex = raw.indexOf('.')
+  let bulat = titikIndex === -1 ? raw : raw.slice(0, titikIndex)
+  let desimal = titikIndex === -1 ? '' : raw.slice(titikIndex + 1).replace(/\./g, '').slice(0, 2)
+
+  bulat = bulat.replace(/^0+(?=\d)/, '')
+  if (bulat === '') { bulat = '0' }
+
+  let bulatFormatted = ''
+  for (let i = 0; i < bulat.length; i++) {
+    if (i != 0 && (bulat.length - i) % 3 == 0) { bulatFormatted += ',' }
+    bulatFormatted += bulat[i]
+  }
+
+  el.value = minus + bulatFormatted + (titikIndex !== -1 ? '.' + desimal : '')
+
+  let posBaru = Math.max(0, el.value.length - posDariKanan)
+  el.setSelectionRange(posBaru, posBaru)
+}
 
 let pbKodeBarangAktif = null
 let pbKodeBomAktif = null
@@ -365,6 +450,8 @@ function loadAll () {
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
   }
+
+  document.getElementById('AddVisibility').hidden = true;
 
   $('#tabel').DataTable(MasterList.opsi({
     processing: true,
@@ -382,8 +469,7 @@ function loadAll () {
         render: function (data, type, row) {
           return `
             <div class="action-buttons-wrap">
-              <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KodeBrg}')"><i class="bi bi-pen"></i></button>
-              <button title="Cetak" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${row.KodeBrg}')"><i class="bi bi-printer"></i></button>
+              <button title="Tambah" class="btn-action-sm btn-action-primary" type="button" onclick="buttonAdd('${row.KodeBrg}')"><i class="bi bi-plus"></i></button>
             </div>
           `;
         }
@@ -391,6 +477,9 @@ function loadAll () {
       { data: 'KodeBrg' },
       { data: 'NamaBrg' },
     ],
+    
+              // <button title="Koreksi" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.KodeBrg}')"><i class="bi bi-pen"></i></button>
+              // <button title="Cetak" class="btn-action-sm btn-action-primary" type="button" onclick="submitPrint('${row.KodeBrg}')"><i class="bi bi-printer"></i></button>
     // MasterList.aturTinggi() tetap menulis max-height INLINE yang rumusnya tidak cocok
     // untuk layout dua kolom ini, tapi sudah dikalahkan oleh `max-height: none !important`
     // di CSS -- tinggi po-table-wrap yang sebenarnya ikut tinggi .card-body (lihat
@@ -524,8 +613,8 @@ function pbPilihBarang (kodebrg, namabrg) {
 
   document.getElementById('pbJudulBarang').textContent = kodebrg + ' - ' + namabrg
   document.getElementById('pbJudulBom').textContent = '-'
-  document.getElementById('tabel_data_proses').innerHTML = '<tr><td colspan="2" class="text-center text-muted">Pilih BOM di atas</td></tr>'
-  document.getElementById('tabel_data_detail').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Pilih BOM di atas</td></tr>'
+  document.getElementById('tabel_data_proses').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Pilih BOM di atas</td></tr>'
+  document.getElementById('tabel_data_detail').innerHTML = '<tr><td colspan="7" class="text-center text-muted">Pilih BOM di atas</td></tr>'
 
   $.ajax({
     url: "{!! url('produksibomlistbom') !!}",
@@ -538,11 +627,14 @@ function pbPilihBarang (kodebrg, namabrg) {
           <tr class="pb-pilih-bom" data-kodebom="${item.KodeBOM}" onclick="pbPilihBom('${item.KodeBOM}', this)">
             <td>${item.KodeBOM}</td>
             <td class="text-center">${Number(item.IsDefault) ? '<i class="bi bi-check2 text-success"></i>' : ''}</td>
+            <td class="text-center">
+              <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="event.stopPropagation(); buttonEditBom('${item.KodeBOM}', ${Number(item.IsDefault)})"><i class="bi bi-pen"></i></button>
+            </td>
           </tr>
         `
       });
       if (!res.length) {
-        rowTable = '<tr><td colspan="2" class="text-center text-muted">Belum ada BOM untuk barang ini</td></tr>'
+        rowTable = '<tr><td colspan="3" class="text-center text-muted">Belum ada BOM untuk barang ini</td></tr>'
       }
       document.getElementById('tabel_data_bom').innerHTML = rowTable
     },
@@ -560,7 +652,7 @@ function pbPilihBom (kodebom, tr) {
   if (tr) { $(tr).addClass('pb-row-selected') }
 
   document.getElementById('pbJudulBom').textContent = kodebom
-  document.getElementById('tabel_data_detail').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Pilih proses di atas</td></tr>'
+  document.getElementById('tabel_data_detail').innerHTML = '<tr><td colspan="7" class="text-center text-muted">Pilih proses di atas</td></tr>'
 
   $.ajax({
     url: "{!! url('produksibomlistproses') !!}",
@@ -569,7 +661,8 @@ function pbPilihBom (kodebom, tr) {
     success: function (res) {
       let rowTable = ''
       res.forEach((item) => {
-        rowTable += `
+        rowTable +=
+        `
           <tr class="pb-pilih-proses" onclick="pbPilihProses('${kodebom}', '${item.KodePrs}', this)">
             <td>${item.Urut}</td>
             <td>${item.KodePrs}</td>
@@ -577,7 +670,7 @@ function pbPilihBom (kodebom, tr) {
         `
       });
       if (!res.length) {
-        rowTable = '<tr><td colspan="2" class="text-center text-muted">Belum ada proses</td></tr>'
+        rowTable = '<tr><td colspan="3" class="text-center text-muted">Belum ada proses</td></tr>'
       }
       document.getElementById('tabel_data_proses').innerHTML = rowTable
     },
@@ -607,14 +700,14 @@ function pbPilihProses (kodebom, kodeprs, tr) {
             <td>${item.KodeBrg ?? ''}</td>
             <td>${item.NAMABRG ?? ''}</td>
             <td>${item.SAT1 ?? ''}</td>
-            <td>${item.Numerator ?? ''}</td>
-            <td>${item.Denominator ?? ''}</td>
-            <td>${item.LossRatio ?? ''}</td>
+            <td>${formatAngka(Number(item.Numerator ?? 0).toFixed(2))}</td>
+            <td>${formatAngka(Number(item.Denominator ?? 0).toFixed(2))}</td>
+            <td>${formatAngka(Number(item.LossRatio ?? 0).toFixed(2))}</td>
           </tr>
         `
       });
       if (!res.length) {
-        rowTable = '<tr><td colspan="6" class="text-center text-muted">Belum ada detail</td></tr>'
+        rowTable = '<tr><td colspan="7" class="text-center text-muted">Belum ada detail</td></tr>'
       }
       document.getElementById('tabel_data_detail').innerHTML = rowTable
     },
@@ -624,13 +717,101 @@ function pbPilihProses (kodebom, kodeprs, tr) {
   });
 }
 
-// Placeholder -- Tambah/Koreksi/Cetak belum ada endpoint-nya, menyusul.
-function buttonAdd () {
-  alertify.message('Tambah BOM belum tersedia')
+// Tambah BOM -- dipicu tombol "+" di kolom Actions tabel kiri, langsung bawa KodeBrg baris
+// yang diklik (row.KodeBrg lewat render() di loadAll()) -- TIDAK lagi butuh baris itu
+// diklik/dipilih dulu (pbKodeBarangAktif cuma dipakai panel kanan lewat pbPilihBarang(),
+// klik baris dan klik tombol Tambah ini dua aksi independen sekarang). Kode BOM dihitung
+// server (produksibomnextkodebom), pola <KodeBrg>-NN, NN = NoUrut terbesar yang sudah
+// dipakai barang ini di DBBOM + 1 (lihat ProduksiBomController::nextKodeBom()).
+function buttonAdd (kodebrg) {
+  if (!kodebrg) { return }
+
+  $('.showhide').hide();
+
+  $.ajax({
+    url: "{!! url('produksibomnextkodebom') !!}",
+    type: "get",
+    data: { kodebrg: kodebrg },
+    success: function (res) {
+      document.getElementById('formAddBOMTitle').textContent = 'Tambah BOM'
+      document.getElementById('input_BOM_kodeBOM').value = res.kodebom
+      document.getElementById('input_BOM_noUrut').value = res.urut
+      document.getElementById('input_BOM_default').checked = false
+      document.getElementById('tabel_data_proses_modal').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Belum ada proses</td></tr>'
+      document.getElementById('tabel_data_detailbom').innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada detail</td></tr>'
+      $('#formAddBOM').modal('show')
+    },
+    error: function () {
+      alertify.error('Gagal menghitung Kode BOM')
+    }
+  });
+}
+
+// Edit BOM -- dipicu tombol Edit di baris "Daftar BOM" (tabel_data_bom). Kode BOM sudah
+// ada (tidak dihitung ulang lewat produksibomnextkodebom), NoUrut diambil dari 2 digit
+// terakhir KodeBOM-nya sendiri (pola <KodeBrg>-NN, sama seperti dibentuk di buttonAdd()).
+// Modal yang dibuka SAMA dengan Tambah (#formAddBOM) -- isi grid Daftar Proses & Detail
+// BOM di dalamnya langsung dimuat ulang dari KodeBOM ini (pbRefreshTabelProses()/
+// pbRefreshTabelDetailBom(), keduanya di modalProduksiBOM.blade.php).
+function buttonEditBom (kodebom, isdefault) {
+  $('.showhide').hide();
+
+  document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
+  document.getElementById('input_BOM_kodeBOM').value = kodebom
+  document.getElementById('input_BOM_noUrut').value = kodebom.split('-').pop()
+  document.getElementById('input_BOM_default').checked = !!Number(isdefault)
+
+  $('#formAddBOM').modal('show')
+  pbRefreshTabelProses()
+  pbRefreshTabelDetailBom()
+}
+
+// Tombol "+" di panel "Daftar Proses" halaman utama (bukan dari dalam modal) -- buka
+// #formAddBOM (modal yang sama dengan Edit BOM) lalu langsung sorot baris KodePrs yang
+// barusan diklik di sini dan buka sub-form "Tambah Detail BOM"-nya, supaya user tidak perlu
+// klik ulang baris yang sama di dalam modal. Lihat pbRefreshTabelProses(autoPilihKodePrs)
+// dan buttonDetailBom() di modalProduksiBOM.blade.php.
+function buttonTambahDetail (kodebom, kodeprs) {
+  $('.showhide').hide();
+
+  document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
+  document.getElementById('input_BOM_kodeBOM').value = kodebom
+  document.getElementById('input_BOM_noUrut').value = kodebom.split('-').pop()
+  document.getElementById('input_BOM_default').checked = false
+
+  $('#formAddBOM').modal('show')
+  pbRefreshTabelProses(kodeprs)
+  // Detail BOM grid difilter ke proses ini lewat pbModalPilihProses(kodeprs) yang dipanggil
+  // di dalam pbRefreshTabelProses()'s autoPilihKodePrs branch -- tidak perlu dipanggil
+  // terpisah di sini (kalau dipanggil tanpa kodeprs juga, bisa balapan dengan hasil yang
+  // difilter dan menimpanya dengan tampilan lintas proses).
 }
 
 function buttonEdit (kodebrg) {
   alertify.message('Koreksi BOM belum tersedia')
+}
+
+// Placeholder -- tombol Hapus proses/Edit-Hapus detail di panel "Daftar Proses"/"Detail
+// BOM" halaman utama. Belum ada aksinya, menyusul.
+function buttonEditProses (kodebom, kodeprs) {
+  alertify.message('Edit Proses belum tersedia')
+}
+
+function buttonDeleteProses (kodebom, kodeprs) {
+  alertify.message('Hapus Proses belum tersedia')
+}
+
+// buttonEditDetailBom()/buttonHapusDetailBom() (Edit/Hapus Detail BOM, sp_BOM Choice='U'/'D')
+// didefinisikan di modalProduksiBOM.blade.php -- dipanggil langsung dari tombol pen/trash di
+// panel "Detail BOM" halaman utama ini (lihat pbPilihProses() di atas).
+
+// Dipanggil modalProduksiBOM.blade.php setelah Tambah/Edit/Hapus Detail BOM berhasil, supaya
+// panel "Detail BOM" halaman utama ini (kalau sedang menampilkan KodeBOM+KodePrs yang sama)
+// ikut ter-refresh, bukan cuma grid Detail BOM di dalam modal.
+function pbRefreshDetailJikaAktif () {
+  if (pbKodeBomAktif && pbKodePrsAktif) {
+    pbPilihProses(pbKodeBomAktif, pbKodePrsAktif)
+  }
 }
 
 function submitPrint (kodebrg) {
