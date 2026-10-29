@@ -58,32 +58,44 @@
     color: #2563eb;
   }
 
+  {{-- Disamakan gayanya dengan .data-table PO (gray thead, garis tipis per baris, tanpa
+       kotak per sel -- lihat purchaseOrder.blade.php's #tabel_add/.data-table), tapi padding
+       dibikin lebih rapat (6px/10px, bukan 11-12px) karena 3 panel kanan ini jauh lebih
+       sempit dari tabel PO -- bukan sekadar pakai class data-table apa adanya. Dipakai juga
+       di modalProduksiBOM.blade.php (grid Daftar Proses/Detail BOM) supaya satu gaya. --}}
   .pb-sub-table {
     width: 100%;
     margin: 0;
+    border-collapse: collapse;
+    font-size: 13px;
   }
 
   .pb-sub-table th,
   .pb-sub-table td {
-    padding: 8px 16px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--rt-border-soft, #EDEEF3);
+    padding: 6px 10px;
+    border-bottom: 1px solid #f3f4f6;
   }
 
   .pb-sub-table th {
     text-align: left;
-    color: #7B8194;
-    font-weight: 700;
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: .04em;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  .pb-sub-table tbody tr:hover {
-    background: #f8f9fc;
+  .pb-sub-table tbody tr:last-child td {
+    border-bottom: none;
   }
 
-  .pb-sub-table tbody tr.pb-row-selected {
+  .pb-sub-table tbody tr:hover td {
+    background: #f9fafb;
+  }
+
+  .pb-sub-table tbody tr.pb-row-selected td {
     background: #fff3b0;
   }
 
