@@ -107,7 +107,9 @@
         <div class="container-fluid mt-4">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <table id="tabel_proses_modal" class="table table-bordered table-striped"  >
+            {{-- .pb-sub-table -- didefinisikan di <style> produksibom.blade.php (gaya PO:
+                 thead abu-abu, garis tipis per baris, bukan kotak Bootstrap bawaan). --}}
+            <table id="tabel_proses_modal" class="pb-sub-table"  >
               <thead class="text-center">
                 <tr id='theadCustom'>
                   <th scope="col">Urut</th>
@@ -157,7 +159,6 @@
 
     <div id="addDetailBom" class="container-fluid showhide">
         <div id="formBsGridDetail" class="form-card mt-3">
-          <div class="form-card-title" id="formAddDetailBomTitle">Tambah Detail BOM</div>
           <div class="bs-form bs-form-lebar">
             {{-- Urut kosong = Tambah (Choice 'I'); terisi = Edit baris itu (Choice 'U'), lihat
                  buttonEditDetailBom()/submitAddDetailBom() di @section('js' ) bawah. --}}
@@ -174,13 +175,16 @@
               </div>
 
               <label for="input_BOM_detKodeBarang" class="col-sm-2 col-form-label">Kode Barang</label>
-              <div class="col-sm-2">
+              <div class="col-sm-3">
                 <div class="input-group">
                   <input type="text" class="form-control" id="input_BOM_detKodeBarang">
                   <div class="input-group-append">
                     <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKodeBarangDetail()" title="Cari Kode Barang"><i class="bi bi-search"></i></button>
                   </div>
                 </div>
+              </div>
+              <div class="col-sm-3">
+                <input type="text" class="form-control" id="input_BOM_namaBarang">
               </div>
 
             </div>
@@ -198,14 +202,12 @@
               <div class="col-sm-2">
                 <input type="text" inputmode="decimal" class="form-control" id="input_BOM_detDenominator" value="0.00" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
               </div>
-            </div>
-
-            <div class="form-group row">
               <label for="input_BOM_detLossRatio" class="col-sm-2 col-form-label">Loss Ratio</label>
               <div class="col-sm-2">
                 <input type="text" inputmode="decimal" class="form-control" id="input_BOM_detLossRatio" value="0.00" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
               </div>
             </div>
+
           </div>
 
           <div class="text-right mt-3">
@@ -220,7 +222,7 @@
         <div class="container-fluid mt-4">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
           <div class="row">
-            <table id="tabel_detailbom" class="table table-bordered table-striped"  >
+            <table id="tabel_detailbom" class="pb-sub-table"  >
               <thead class="text-center">
                 <tr id='theadCustom'>
                   <th scope="col">Kode Barang</th>
@@ -564,7 +566,6 @@ function buttonDetailBom () {
 
   $('.showhide').hide();
 
-  document.getElementById('formAddDetailBomTitle').textContent = 'Tambah Detail BOM'
   document.getElementById('input_BOM_detUrut').value = ''
   document.getElementById('input_BOM_detKodeProses').value = pbModalKodePrsAktif
   document.getElementById('input_BOM_detKodeBarang').value = ''
@@ -701,6 +702,7 @@ $(document).on('keyup', '#input_BOM_detKodeBarang', function (e) {
 
 function buttonPilihKodeBarangDetail (kodebrg, namabrg) {
   document.getElementById('input_BOM_detKodeBarang').value = kodebrg
+  document.getElementById('input_BOM_namaBarang').value = namabrg
   $('#formKodeBarangDetail').modal('hide')
 }
 
@@ -745,7 +747,7 @@ function submitAddDetailBom () {
     },
     success: function () {
       alertify.success(choice === 'U' ? 'Detail BOM berhasil diubah' : 'Detail BOM berhasil ditambahkan')
-      $('.showhide').hide()
+      // $('.showhide').hide()
       pbRefreshTabelDetailBom(kodeprs)
       pbRefreshDetailJikaAktif()
     },
