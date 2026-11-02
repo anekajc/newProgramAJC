@@ -54,9 +54,22 @@ class CeisaService
         $expiresIn = is_numeric($expiresIn) ? (int) $expiresIn : (int) config('beacukai.ceisa.default_expires_in', 600);
         $expiresAt = Carbon::now('UTC')->addSeconds($expiresIn);
 
-        $this->simpanToken($userId, (string) $token, $expiresAt);
+        $this->simpanToken($userId, (string) $token, $expiresAt, trim($username));
 
         return [200, ['message' => 'Login berhasil.', 'expiresAt' => $expiresAt->toIso8601String()]];
+    }
+
+    // Username CEISA dari login terakhir $userId (walau token sudah kedaluwarsa), atau null bila belum pernah login
+    // sejak kolom USERNAMECEISA ada. Dikirim sebagai userPortal (BC 4.1) dan idPengguna (BC 2.5).
+    public function username(string $userId): ?string
+    {
+        if (! $this->punyaKolomUsername()) {
+            return null;
+        }
+        $row = DB::connection('SML')->selectOne('SELECT USERNAMECEISA FROM '.$this->tabel().' WHERE USERID = ?', [$userId]);
+        $nama = $row ? trim((string) $row->USERNAMECEISA) : '';
+
+        return $nama === '' ? null : $nama;
     }
 
     // Status token untuk tombol "Login BC": ['loggedIn' => bool, 'expiresAt' => ISO8601 (bila login)].
@@ -192,15 +205,27 @@ class CeisaService
         return ['token' => $row->BEARERTOKEN, 'expiresAt' => $expiresAt];
     }
 
+    // Kolom USERNAMECEISA ditambahkan script 18; sebelum script itu dijalankan, login (dipakai SEMUA modul BC)
+    // tetap jalan tanpa menyimpan username.
+    private function punyaKolomUsername(): bool
+    {
+        static $ada = [];
+        $tabel = $this->tabel();
+        $cari = str_starts_with($tabel, '#') ? "tempdb..{$tabel}" : $tabel; // tabel sementara (#) hanya dipakai uji
+
+        return $ada[$tabel] ??= DB::connection('SML')->selectOne('SELECT COL_LENGTH(?, ?) AS panjang', [$cari, 'USERNAMECEISA'])->panjang !== null;
+    }
+
     // Upsert = hapus + sisipkan dalam satu transaksi (pola OtorisasiRequestController::spSubscribe).
-    private function simpanToken(string $userId, string $token, Carbon $expiresAt): void
+    private function simpanToken(string $userId, string $token, Carbon $expiresAt, string $usernameCeisa): void
     {
         $tabel = $this->tabel();
-        DB::connection('SML')->transaction(function () use ($tabel, $userId, $token, $expiresAt) {
+        $simpanUsername = $this->punyaKolomUsername();
+        DB::connection('SML')->transaction(function () use ($tabel, $userId, $token, $expiresAt, $usernameCeisa, $simpanUsername) {
             DB::connection('SML')->delete("DELETE FROM {$tabel} WHERE USERID = ?", [$userId]);
             DB::connection('SML')->insert(
-                "INSERT INTO {$tabel} (USERID, BEARERTOKEN, EXPIRESAT, TGLBUAT, TGLUBAH) VALUES (?, ?, ?, GETDATE(), GETDATE())",
-                [$userId, $token, $expiresAt->format('Y-m-d H:i:s')]
+                'INSERT INTO '.$tabel.' (USERID, BEARERTOKEN, EXPIRESAT, TGLBUAT, TGLUBAH'.($simpanUsername ? ', USERNAMECEISA' : '').') VALUES (?, ?, ?, GETDATE(), GETDATE()'.($simpanUsername ? ', ?' : '').')',
+                array_merge([$userId, $token, $expiresAt->format('Y-m-d H:i:s')], $simpanUsername ? [$usernameCeisa] : [])
             );
         });
     }

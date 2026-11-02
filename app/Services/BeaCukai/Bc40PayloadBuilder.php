@@ -24,6 +24,14 @@ class Bc40PayloadBuilder
         $barang = array_values($children['barang'] ?? []);
         usort($barang, fn ($a, $b) => ((int) ($a['seriBarang'] ?? 0)) <=> ((int) ($b['seriBarang'] ?? 0)));
 
+        // Total header dibagi ke barang (bukan disalin ke tiap baris): bruto sebanding netto, uang muka dan nilai
+        // jasa sebanding harga penyerahan; baris terakhir menampung sisa pembulatan supaya jumlahnya = header.
+        $netto = array_map(fn ($r) => (float) ($r['netto'] ?? 0), $barang);
+        $harga = array_map(fn ($r) => (float) ($r['hargaPenyerahan'] ?? 0), $barang);
+        $bruto = $this->bagi($this->flt($header['bruto'] ?? null), $netto);
+        $uangMuka = $this->bagi($this->flt($header['uangMuka'] ?? null), $harga);
+        $nilaiJasa = $this->bagi($this->flt($header['nilaiJasa'] ?? null), $harga);
+
         return [
             'asalData' => 'S',
             'asuransi' => 0.0,
@@ -55,7 +63,7 @@ class Bc40PayloadBuilder
                 'kodeJenisPungutan' => 'PPN',
                 'nilaiPungutan' => 0,
             ]],
-            'barang' => array_map(fn ($row) => $this->barang($row, $header), $barang),
+            'barang' => array_map(fn ($row, $i) => $this->barang($row, $bruto[$i], $uangMuka[$i], $nilaiJasa[$i]), $barang, array_keys($barang)),
             'idPengguna' => (string) ($header['idPengguna'] ?? ''),
             'jumlahKontainer' => 0,
             'nik' => '',
@@ -86,11 +94,18 @@ class Bc40PayloadBuilder
         return Bc261PayloadBuilder::orDefault($value, $default);
     }
 
-    // §9.2: entitas diisi "berikutnya yang tidak kosong" ke slot seri 3 → 7 → 9 (Q-d). Di slot seri 3
-    // seriEntitas SEBELUM tanggalIjinEntitas; slot 7 dan 9 punya key yang sama.
+    // Skema resmi BC 4.0: slot tetap, ketiganya wajib - Entitas 1 Pengusaha TPB = seri 3, Entitas 2 Pemilik
+    // Barang = seri 7, Entitas 3 Pengirim Barang = seri 9. Slot yang belum dipilih tetap dikirim (nilai kosong)
+    // dan dicatat sebagai masalah saat kirim. Di slot seri 3 seriEntitas SEBELUM tanggalIjinEntitas; slot 7
+    // dan 9 punya key yang sama.
     private function entitas(array $entitas): array
     {
-        $isi = array_values(array_filter(array_slice($entitas, 0, 3), fn ($e) => ! empty($e)));
+        $isi = [];
+        foreach (range(0, 2) as $i) {
+            if (! empty($entitas[$i])) {
+                $isi[$i] = $entitas[$i];
+            }
+        }
         $e = fn (int $i, string $key, $default = '') => isset($isi[$i]) ? self::orDefault($isi[$i][$key] ?? null, $default) : $default;
         $pihak = fn (int $i, string $kode, int $seri) => [
             'alamatEntitas' => (string) $e($i, 'alamatEntitas'),
@@ -121,19 +136,20 @@ class Bc40PayloadBuilder
         ];
     }
 
-    // §9.3 - tidak ada idDokumen.
+    // §9.3 - tidak ada idDokumen. Nomor / tanggal kosong dikirim "" supaya terdaftar sebagai "wajib diisi".
     private function dokumen(array $row): array
     {
         return [
             'kodeDokumen' => (string) ($row['kodeDokumen'] ?? ''),
-            'nomorDokumen' => $this->strOrNull($row['nomorDokumen'] ?? null),
+            'nomorDokumen' => (string) ($row['nomorDokumen'] ?? ''),
             'seriDokumen' => (int) ($row['seriDokumen'] ?? 0),
-            'tanggalDokumen' => $this->date($row['tanggalDokumen'] ?? null),
+            'tanggalDokumen' => $this->date($row['tanggalDokumen'] ?? null) ?? '',
         ];
     }
 
-    // §9.5: hanya bila jenis kemasan ATAU jumlah kemasan header terisi. Urutan: jumlah, jenis, MERK, seri
-    // (BC 2.3: jumlah, jenis, seri, merk). Nilai apa adanya (raw).
+    // §9.5: hanya bila jenis kemasan ATAU jumlah kemasan header terisi (kemasan wajib saat kirim, dicek
+    // controller). Urutan: jumlah, jenis, MERK, seri (BC 2.3: jumlah, jenis, seri, merk). jumlahKemasan
+    // integer wajib, jadi 0 tetap 0 (bukan null); jumlah 0 ditolak oleh aturan tambahan controller.
     private function kemasan(array $header): array
     {
         $jenis = self::orDefault($header['kodeJenisKemasan'] ?? null, '');
@@ -143,15 +159,17 @@ class Bc40PayloadBuilder
         }
 
         return [[
-            'jumlahKemasan' => $jumlah === 0 ? null : (int) $jumlah,
-            'kodeJenisKemasan' => $this->strOrNull($header['kodeJenisKemasan'] ?? null),
-            'merkKemasan' => $this->strOrNull($header['merkKemasan'] ?? null),
+            'jumlahKemasan' => (int) $jumlah,
+            'kodeJenisKemasan' => (string) $jenis,
+            'merkKemasan' => (string) ($header['merkKemasan'] ?? ''),
             'seriKemasan' => 1,
         ]];
     }
 
-    // §9.4 - 32 key, tanpa idBarang / barangDokumen / persen* / nilaiDiskon / kodeNegaraAsal.
-    private function barang(array $row, array $header): array
+    // Skema resmi: 31 key, tanpa idBarang / barangDokumen / persen* / nilaiDiskon / kodeNegaraAsal dan tanpa
+    // isiPerkemasan (Villiger salah eja, CEISA mengabaikannya; kunci resminya isiPerKemasan, tidak wajib).
+    // $bruto / $uangMuka / $nilaiJasa = bagian barang ini dari total header (lihat build()).
+    private function barang(array $row, float $bruto, float $uangMuka, float $nilaiJasa): array
     {
         $netto = $row['netto'] ?? null;
         $seri = (int) ($row['seriBarang'] ?? 0);
@@ -160,16 +178,14 @@ class Bc40PayloadBuilder
 
         return [
             'asuransi' => 0.0,
-            // Q-g: bruto dan uangMuka / nilaiJasa header disalin ke setiap barang.
-            'bruto' => $this->flt($header['bruto'] ?? null),
+            'bruto' => $bruto,
             'cif' => 0.0,
             'diskon' => 0.0,
             'hargaEkspor' => 0.0,
             'hargaPenyerahan' => $this->flt($harga),
             'hargaSatuan' => 0.0,
-            'isiPerkemasan' => null,
             'jumlahKemasan' => ($row['jumlahKemasan'] ?? null) === null ? null : (int) $row['jumlahKemasan'],
-            'jumlahRealisasi' => $harga, // Q-j: nilai uang di kolom jumlah
+            'jumlahRealisasi' => $this->fltOrNull($row['jumlahSatuan'] ?? null), // jumlah realisasi = jumlah satuan
             'jumlahSatuan' => $this->fltOrNull($row['jumlahSatuan'] ?? null),
             'kodeBarang' => $this->strOrNull($row['kodeBarang'] ?? null),
             'kodeDokumen' => '40',
@@ -177,7 +193,7 @@ class Bc40PayloadBuilder
             'kodeSatuanBarang' => $satuan,
             'merk' => $this->strOrNull($row['merk'] ?? null),
             'netto' => $this->fltOrNull($netto),
-            'nilaiBarang' => 0,
+            'nilaiBarang' => round($harga, 2), // = harga penyerahan (skema: 2 angka di belakang koma)
             'posTarif' => $this->strOrNull($row['posTarif'] ?? null),
             'seriBarang' => $seri,
             'spesifikasiLain' => $this->strOrNull($row['spesifikasiLain'] ?? null),
@@ -189,8 +205,8 @@ class Bc40PayloadBuilder
             'hargaPerolehan' => 0.0,
             'kodeAsalBahanBaku' => '1',
             'ndpbm' => 0.0,
-            'uangMuka' => $this->flt($header['uangMuka'] ?? null),
-            'nilaiJasa' => $this->flt($header['nilaiJasa'] ?? null),
+            'uangMuka' => $uangMuka,
+            'nilaiJasa' => $nilaiJasa,
             // Q-h: tarif PPN 11 ditanam; kodeJenisPungutan key TERAKHIR; seriBarang = seri barangnya;
             // nilaiBayar dari cif barang (selalu 0).
             'barangTarif' => [[
@@ -207,6 +223,31 @@ class Bc40PayloadBuilder
                 'kodeJenisPungutan' => 'PPN',
             ]],
         ];
+    }
+
+    // Membagi $total ke sejumlah baris sebanding $bobot (4 angka di belakang koma); baris terakhir menampung
+    // sisa pembulatan. Jumlah bobot 0 = dibagi rata.
+    private function bagi(float $total, array $bobot): array
+    {
+        $bobot = array_values($bobot);
+        $n = count($bobot);
+        if ($n === 0) {
+            return [];
+        }
+        $jumlah = array_sum($bobot);
+        if ($jumlah <= 0) {
+            $bobot = array_fill(0, $n, 1.0);
+            $jumlah = (float) $n;
+        }
+        $out = [];
+        $sisa = $total;
+        foreach ($bobot as $i => $w) {
+            $bagian = $i === $n - 1 ? round($sisa, 4) : round($total * $w / $jumlah, 4);
+            $out[] = $bagian;
+            $sisa -= $bagian;
+        }
+
+        return $out;
     }
 
     // Selalu float (0.0 bila kosong).

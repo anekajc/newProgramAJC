@@ -366,23 +366,24 @@
                             </select>
 
                             <label for="h_nomorIdentitasEntitas{{ $n }}">NPWP</label>
-                            <input type="text" class="form-control" id="h_nomorIdentitasEntitas{{ $n }}" data-h="nomorIdentitasEntitas{{ $n }}" maxlength="50">
+                            <input type="text" class="form-control" id="h_nomorIdentitasEntitas{{ $n }}" data-h="nomorIdentitasEntitas{{ $n }}" maxlength="50" readonly>
 
                             <label for="h_alamatEntitas{{ $n }}">Alamat</label>
                             <div class="bs-full">
                                 <input type="hidden" id="h_namaEntitas{{ $n }}" data-h="namaEntitas{{ $n }}">
-                                <textarea class="form-control" id="h_alamatEntitas{{ $n }}" data-h="alamatEntitas{{ $n }}" rows="2" maxlength="1000"></textarea>
+                                <textarea class="form-control" id="h_alamatEntitas{{ $n }}" data-h="alamatEntitas{{ $n }}" rows="2" maxlength="1000" readonly></textarea>
                             </div>
 
                             @if ($n === 1)
                                 <label for="h_nomorIjinEntitas1" class="bs-wrap">Nomor Izin TPB</label>
-                                <input type="text" class="form-control" id="h_nomorIjinEntitas1" data-h="nomorIjinEntitas1" maxlength="50">
+                                <input type="text" class="form-control" id="h_nomorIjinEntitas1" data-h="nomorIjinEntitas1" maxlength="50" readonly>
 
                                 <label for="h_tanggalIjinEntitas1" class="bs-wrap">Tanggal Izin TPB</label>
-                                <input type="date" class="form-control" id="h_tanggalIjinEntitas1" data-h="tanggalIjinEntitas1">
+                                <input type="date" class="form-control" id="h_tanggalIjinEntitas1" data-h="tanggalIjinEntitas1" readonly>
                             @endif
                         </div>
                     @endforeach
+                    <div class="bc-info mt-2">Ketiga entitas wajib dipilih saat dikirim ke CEISA. Pengusaha TPB juga butuh NIB, Nomor Izin dan Tanggal Izin dari master Entitas. NPWP, alamat dan izin terisi otomatis dari master saat entitas dipilih (hanya tampilan; ubah lewat master Entitas).</div>
                 </div>
 
                 {{-- DOKUMEN --}}
@@ -403,6 +404,7 @@
                             </div>
                         </div>
                     </div>
+                    <div class="bc-info mt-2">Dokumen tidak wajib ada, tetapi baris yang ada harus lengkap (jenis, nomor, tanggal) saat dikirim.</div>
                 </div>
 
                 {{-- PENGANGKUT --}}
@@ -454,7 +456,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bc-info mt-2">Peti kemas ikut dikirim ke CEISA.</div>
+                    <div class="bc-info mt-2">Kemasan wajib ada saat dikirim ke CEISA (Jenis Kemasan terisi dan Jumlah lebih dari 0). Peti kemas ikut dikirim bila diisi.</div>
                 </div>
 
                 {{-- TRANSAKSI --}}
@@ -464,10 +466,10 @@
                         <input type="text" class="form-control" id="h_kodeValuta" data-h="kodeValuta" list="dlValuta" maxlength="20">
 
                         <label for="h_ndpbm">NDPBM</label>
-                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_ndpbm" data-h="ndpbm" oninput="hitungCifRupiah()">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_ndpbm" data-h="ndpbm" oninput="hitungCifRupiah(); hitungUlangPungutan()">
 
                         <label for="h_cif">CIF</label>
-                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_cif" data-h="cif" oninput="hitungCifRupiah()">
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_cif" data-h="cif" oninput="hitungCifRupiah(); hitungUlangPungutan()">
 
                         <label for="h_cifRupiah">CIF Rupiah</label>
                         <input type="text" class="form-control text-right bc-tetap" id="h_cifRupiah" disabled>
@@ -478,6 +480,7 @@
                         <label for="h_netto">Netto (Kg)</label>
                         <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_netto" data-h="netto">
                     </div>
+                    <div class="bc-info mt-2">Saat dikirim, kode valuta DBVALAS diterjemahkan ke kode ISO (mis. RM menjadi MYR, EURO menjadi EUR; daftarnya di config valuta_iso).</div>
                 </div>
 
                 {{-- BARANG + BAHAN BAKU --}}
@@ -540,32 +543,28 @@
                     </div>
                 </div>
 
-                {{-- PUNGUTAN - diketik manual. Dikirim ke CEISA per jenis (hanya yang > 0); Total hanya penjumlahan. --}}
+                {{-- PUNGUTAN - daftar baris (Jenis Pungutan + Fasilitas Tarif + Nilai Pungutan); tiap baris = satu objek di array pungutan. --}}
                 <div class="tab-pane fade" id="tabPungutan" role="tabpanel">
-                    @foreach ([
-                        'Bea Masuk & Tindakan' => [['nilaiBM', 'BM - Bea Masuk'], ['nilaiBMAD', 'BMAD - Anti Dumping'], ['nilaiBMI', 'BMI - Imbalan'], ['nilaiBMTP', 'BMTP - Tindakan Pengamanan'], ['nilaiBMP', 'BMP - Pembalasan']],
-                        'Cukai' => [['nilaiCukaiEa', 'CEA - Etil Alkohol'], ['nilaiCukaiCmea', 'CMEA - Minuman Etil Alkohol'], ['nilaiCukaiCtem', 'CTEM - Tembakau']],
-                        'Pajak Dalam Rangka Impor' => [['nilaiPPN', 'PPN'], ['nilaiPPNBM', 'PPnBM'], ['nilaiPPh', 'PPh']],
-                    ] as $judul => $daftar)
-                        <div class="bc-judul">{{ $judul }}</div>
-                        <div class="bs-form">
-                            @foreach ($daftar as [$kunci, $label])
-                                <label for="h_{{ $kunci }}" class="bs-wrap">{{ $label }}</label>
-                                <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-pungutan" id="h_{{ $kunci }}" data-h="{{ $kunci }}">
-                            @endforeach
+                    <div class="bc-toolbar-koleksi">
+                        <span class="bc-info" id="infoPungutan"></span>
+                        <button type="button" class="btn btn-chip-biru btn-sm bc-edit" onclick="bukaModal('pungutan', null)">Tambah Pungutan</button>
+                    </div>
+                    <div class="tb-report">
+                        <div class="table-outer">
+                            <div class="table-wrap" style="max-height:50vh;">
+                                <table class="tb">
+                                    <thead>
+                                        <tr><th>No</th><th>Jenis Pungutan</th><th>Fasilitas Tarif</th><th>Nilai Pungutan</th><th>Action</th></tr>
+                                    </thead>
+                                    <tbody id="tblPungutan"></tbody>
+                                </table>
+                            </div>
                         </div>
-                    @endforeach
-
-                    <div class="bc-judul">Total</div>
-                    <div class="bs-form">
-                        <label for="h_nilaiTotalPungutan" class="bs-wrap">Total Pungutan</label>
-                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_nilaiTotalPungutan" data-h="nilaiTotalPungutan">
                     </div>
                     <div class="bc-info mt-2">
-                        Nilai diketik manual (Total terisi otomatis dari penjumlahan, boleh diubah, dan tidak dikirim).
-                        Ke CEISA dikirim satu baris per jenis yang nilainya lebih dari 0 (kode BM, BMAD, BMI, BMTP, BMP, CEA, CMEA, CTEM, PPN, PPNBM, PPH);
-                        nilai BM / PPh / PPN juga dibagi ke tiap barang (sebanding Nilai CIF) untuk tarif barang.
-                        Bila semua 0, dikirim satu baris PPN senilai Nilai CIF barang pertama (seperti program lama).
+                        Pungutan tidak wajib; tanpa baris dikirim daftar kosong. Tiap baris dikirim ke CEISA apa adanya (Jenis, Fasilitas, Nilai).
+                        Nilai Pungutan terisi otomatis = CIF Rupiah (NDPBM x CIF di tab Transaksi), dihitung ulang untuk semua baris setiap CIF atau NDPBM berubah,
+                        dan boleh diubah. Kombinasi Jenis + Fasilitas yang sama hanya boleh satu baris. Total di atas hanya informasi.
                     </div>
                 </div>
 
@@ -647,6 +646,9 @@
                             <label>Kode Barang</label>
                             <input type="text" class="form-control" data-f="kodeBarang" maxlength="20">
 
+                            <label class="bs-wrap">Asal Barang</label>
+                            <select class="form-control" data-f="kodeAsalBarang"></select>
+
                             <label>Uraian</label>
                             <input type="text" class="form-control" data-f="uraian" maxlength="100">
 
@@ -681,11 +683,12 @@
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="cif" disabled>
 
                             <label>Nilai CIF</label>
-                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cifRupiah">
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cifRupiah" oninput="hitungCifBaris(this)">
 
                             <label class="bs-wrap">Negara Asal</label>
                             <select class="form-control" data-f="kodeNegaraAsal"></select>
                         </div>
+                        <div class="bc-info mt-2">CIF = Nilai CIF / NDPBM header (dihitung ulang saat Simpan Dokumen). NDPBM barang mengikuti NDPBM header.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -762,9 +765,6 @@
                             <label class="bs-wrap">Tanggal Daftar Dok Asal</label>
                             <input type="date" class="form-control" data-f="tanggalDaftarDokAsal">
 
-                            <label class="bs-wrap">Nomor AJU Dok Asal</label>
-                            <input type="text" class="form-control" data-f="nomorAjuDokAsal" maxlength="100">
-
                             <label class="bs-wrap">Seri Barang Dok Asal</label>
                             <input type="number" step="1" class="form-control text-right" data-f="seriBarangDokAsal">
 
@@ -783,12 +783,54 @@
                             <label>Nilai Jasa</label>
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="nilaiJasa">
                         </div>
+                        <div class="bc-info mt-2">Nomor AJU Dokumen Asal tidak diketik: saat dikirim diisi otomatis dengan Nomor AJU BC 2.6.1 sumber.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-sm btn-dpp-utama bc-edit bc-baru" onclick="simpanModal('bahanbaku', true)">Tambah</button>
                     <button type="button" class="btn btn-sm btn-chip-biru bc-edit" onclick="simpanModal('bahanbaku', false)">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal pungutan -->
+    <div class="modal fade" id="mdlPungutan" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title bc-modal-judul">Pungutan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div id="formBsGrid">
+                    <div class="modal-body">
+                        <div class="bs-form bs-form-1">
+                            <label class="bs-wrap">Jenis Pungutan</label>
+                            <select class="form-control" data-f="kodeJenisPungutan">
+                                <option value="">- Pilih -</option>
+                                @foreach ($kode['jenisPungutan'] as $k => $v)
+                                    <option value="{{ $k }}">{{ $k }} - {{ $v }}</option>
+                                @endforeach
+                            </select>
+
+                            <label class="bs-wrap">Fasilitas Tarif</label>
+                            <select class="form-control" data-f="kodeFasilitasTarif">
+                                <option value="">- Pilih -</option>
+                                @foreach ($kode['fasilitasTarif'] as $k => $v)
+                                    <option value="{{ $k }}">{{ $k }} - {{ $v }}</option>
+                                @endforeach
+                            </select>
+
+                            <label class="bs-wrap">Nilai Pungutan</label>
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="nilaiPungutan">
+                        </div>
+                        <div class="bc-info mt-2">Nilai terisi dari CIF Rupiah (NDPBM x CIF di tab Transaksi); boleh diubah.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-sm btn-chip-biru bc-edit" onclick="simpanModal('pungutan', false)">Simpan</button>
                 </div>
             </div>
         </div>
@@ -1010,6 +1052,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div id="previewMasalah" class="mb-2"></div>
                     <pre id="previewIsi"></pre>
                 </div>
                 <div class="modal-footer">
@@ -1040,6 +1083,13 @@
         const SATUAN = @json($lookup['satuan']);
         // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
         const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
+        // Asal Barang (kodeAsalBarang CEISA): daftar tetap, tanpa master.
+        const ASAL_BARANG = [
+            { kode: '1', nama: 'Sepenuhnya diperoleh dan/atau diproduksi di luar daerah pabean' },
+            { kode: '2', nama: 'Sepenuhnya diperoleh dan/atau diproduksi di tempat lain dalam daerah pabean' },
+            { kode: '3', nama: 'Kawasan Pabean' },
+            { kode: '4', nama: 'Lainnya' },
+        ];
         const KODE = @json($kode);
 
         const AKSES = {
@@ -1557,7 +1607,7 @@
         let bahanBakuAsal = '0';
 
         function stateKosong() {
-            return { barang: [], bahanbaku: [], kemasan: [], kontainer: [], jaminan: [], dokumen: [] };
+            return { barang: [], bahanbaku: [], kemasan: [], kontainer: [], jaminan: [], dokumen: [], pungutan: [] };
         }
 
         function isiEntitas(n, id) {
@@ -1574,6 +1624,33 @@
         $(document).on('change', '.bc-entitas', function() {
             isiEntitas($(this).data('n'), $(this).val());
         });
+
+        // CIF barang = Nilai CIF (Rupiah) / NDPBM header; kosong bila NDPBM 0. NDPBM barang = NDPBM header.
+        const bulat2 = n => Math.round(n * 100) / 100;
+
+        function cifDariRupiah(nilaiRupiah) {
+            const nd = angka($('#h_ndpbm').val());
+            return nd ? bulat2(angka(nilaiRupiah) / nd) : '';
+        }
+
+        function hitungCifBaris(el) {
+            setRibuan($(el).closest('.modal').find('[data-f="cif"]'), cifDariRupiah($(el).val()));
+        }
+
+        // CIF Rupiah header = NDPBM x CIF (2 desimal); dipakai sebagai nilai awal Nilai Pungutan.
+        function cifRupiahHeader() {
+            return bulat2(angka($('#h_ndpbm').val()) * angka($('#h_cif').val()));
+        }
+
+        // Setiap CIF / NDPBM header berubah, Nilai Pungutan SEMUA baris dihitung ulang (boleh diubah lagi sesudahnya).
+        function hitungUlangPungutan() {
+            if (mode === 'detail' || !state.pungutan) {
+                return;
+            }
+            const nilai = cifRupiahHeader();
+            state.pungutan.forEach(r => r.nilaiPungutan = nilai);
+            renderPungutan();
+        }
 
         function hitungCifRupiah() {
             const nilai = angka($('#h_ndpbm').val()) * angka($('#h_cif').val());
@@ -1596,19 +1673,8 @@
                 $('#h_selectEntitas' + n).val(pertama);
                 isiEntitas(n, pertama);
             });
-            $('.bc-pungutan, #h_nilaiTotalPungutan').val('0');
             hitungCifRupiah();
         }
-
-        function hitungTotalPungutan() {
-            let total = 0;
-            $('.bc-pungutan').each(function() {
-                total += angka($(this).val());
-            });
-            setRibuan('#h_nilaiTotalPungutan', Math.round(total * 100) / 100);
-        }
-
-        $(document).on('input', '.bc-pungutan', hitungTotalPungutan);
 
         function isiHeader(d) {
             $('[data-h]').each(function() {
@@ -1658,13 +1724,13 @@
             'nomorIdentitasEntitas3', 'namaEntitas3', 'alamatEntitas3'
         ];
         const SALIN_ANAK = {
-            barang: ['posTarif', 'kodeBarang', 'uraian', 'merk', 'tipe', 'ukuran', 'spesifikasiLain', 'kodeSatuanBarang', 'jumlahSatuan',
+            barang: ['posTarif', 'kodeBarang', 'kodeAsalBarang', 'uraian', 'merk', 'tipe', 'ukuran', 'spesifikasiLain', 'kodeSatuanBarang', 'jumlahSatuan',
                 'netto', 'cif', 'cifRupiah', 'kodeNegaraAsal', 'jumlahKemasan', 'kodeJenisKemasan',
-                'ndpbm', 'persenBM', 'persenPPN', 'persenPPh', 'keteranganDokumen'
+                'ndpbm'
             ],
             bahanbaku: ['seriBahanBaku', 'kodeAsalBahanBaku', 'posTarif', 'kodeBarang', 'uraianBarang', 'merkBarang', 'tipeBarang', 'ukuranBarang',
                 'spesifikasiLainBarang', 'kodeSatuanBarang', 'jumlahSatuan', 'kodeDokumen', 'kodeKantorAsal', 'nomorDaftarDokAsal',
-                'tanggalDaftarDokAsal', 'nomorAjuDokAsal', 'seriBarangDokAsal', 'cif', 'cifRupiah', 'hargaPenyerahan', 'hargaPerolehan', 'nilaiJasa'
+                'tanggalDaftarDokAsal', 'seriBarangDokAsal', 'cif', 'cifRupiah', 'hargaPenyerahan', 'hargaPerolehan', 'nilaiJasa'
             ],
             kemasan: ['jumlahKemasan', 'kodeJenisKemasan', 'merkKemasan'],
             kontainer: ['nomorKontainer', 'kodeUkuranKontainer', 'kodeJenisKontainer', 'kodeTipeKontainer'],
@@ -1828,6 +1894,12 @@
             if (mode === 'detail') {
                 return;
             }
+            // CIF dan NDPBM barang mengikuti NDPBM header saat ini.
+            state.barang.forEach(function(r) {
+                r.cif = cifDariRupiah(r.cifRupiah);
+                r.ndpbm = angka($('#h_ndpbm').val());
+            });
+
             const header = {};
             $('[data-h]').each(function() {
                 header[$(this).data('h')] = $(this).hasClass('bc-ribuan') ? $(this).val().replace(/,/g, '') : $(this).val();
@@ -1873,6 +1945,7 @@
             kontainer: '#mdlKontainer',
             jaminan: '#mdlJaminan',
             dokumen: '#mdlDokumen',
+            pungutan: '#mdlPungutan',
         };
 
         // Tombol baris tabel item: markup & kelas sama dengan baris item di gudang/permintaanpemakaian
@@ -1935,6 +2008,17 @@
             $('#infoJaminan').text(state.jaminan.length + ' jaminan');
         }
 
+        function renderPungutan() {
+            let html = state.pungutan.map(function(r, i) {
+                return '<tr><td>' + (i + 1) + '</td><td>' + esc(namaKode(KODE.jenisPungutan, r.kodeJenisPungutan)) + '</td><td>' +
+                    esc(namaKode(KODE.fasilitasTarif, r.kodeFasilitasTarif)) + '</td><td class="text-right">' + fmtNum(r.nilaiPungutan) +
+                    '</td><td>' + aksiBaris('pungutan', i) + '</td></tr>';
+            }).join('');
+            $('#tblPungutan').html(html || barisKosong(5));
+            const total = state.pungutan.reduce((j, r) => j + angka(r.nilaiPungutan), 0);
+            $('#infoPungutan').text(state.pungutan.length + ' baris, total ' + fmtNum(Math.round(total * 100) / 100));
+        }
+
         function renderBarang() {
             let html = state.barang.map(function(r, i) {
                 const seri = i + 1;
@@ -1978,6 +2062,7 @@
             renderKemasan();
             renderKontainer();
             renderJaminan();
+            renderPungutan();
             renderBarang();
         }
 
@@ -2004,7 +2089,7 @@
         }
 
         function judulModal(nama, idx) {
-            const label = { barang: 'Barang', kemasan: 'Kemasan', kontainer: 'Peti Kemas', jaminan: 'Jaminan', dokumen: 'Dokumen' };
+            const label = { barang: 'Barang', kemasan: 'Kemasan', kontainer: 'Peti Kemas', jaminan: 'Jaminan', dokumen: 'Dokumen', pungutan: 'Pungutan' };
             if (nama === 'bahanbaku') {
                 const b = state.barang[selBarang - 1] || {};
                 return 'Bahan Baku ' + (bahanBakuAsal === '1' ? 'Lokal' : 'Impor') + ' - Barang ' + (b.kodeBarang || '') + ' - ' + (b.uraian || '');
@@ -2021,6 +2106,9 @@
             }
             if (nama === 'barang') {
                 return { seriBarang: state.barang.length + 1, cif: 0 };
+            }
+            if (nama === 'pungutan') {
+                return { nilaiPungutan: cifRupiahHeader() };
             }
             return {};
         }
@@ -2043,6 +2131,7 @@
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
             opsiMaster(modal.find('[data-f="kodeJenisKemasan"]'), JENIS_KEMASAN, row.kodeJenisKemasan || '');
             if (nama === 'barang') {
+                opsiMaster(modal.find('[data-f="kodeAsalBarang"]'), ASAL_BARANG, row.kodeAsalBarang || '');
                 opsiMaster(modal.find('[data-f="kodeNegaraAsal"]'), NEGARA, row.kodeNegaraAsal || '');
             }
             if (nama === 'barang' || nama === 'bahanbaku') {
@@ -2060,6 +2149,10 @@
             });
             if (nama === 'barang' && idx !== null) {
                 modal.find('[data-f="seriBarang"]').val(idx + 1);
+            }
+            if (nama === 'barang') {
+                // CIF barang selalu mengikuti Nilai CIF dan NDPBM header yang sekarang.
+                setRibuan(modal.find('[data-f="cif"]'), cifDariRupiah(modal.find('[data-f="cifRupiah"]').val()));
             }
             if (nama === 'kontainer') {
                 opsiMaster('#mdlKontainer [data-f="kodeUkuranKontainer"]', UKURAN_KONTAINER, row.kodeUkuranKontainer || '');
@@ -2103,6 +2196,24 @@
                 alertify.error('Jenis dokumen harus dipilih.');
                 return;
             }
+            if (nama === 'pungutan') {
+                if (!row.kodeJenisPungutan || !row.kodeFasilitasTarif) {
+                    alertify.error('Jenis Pungutan dan Fasilitas Tarif harus dipilih.');
+                    return;
+                }
+                if (angka(row.nilaiPungutan) <= 0) {
+                    alertify.error('Nilai Pungutan tidak boleh 0. Isi CIF dan NDPBM dulu (tab Transaksi).');
+                    return;
+                }
+                const sedang = editIdx[nama];
+                const ganda = state.pungutan.some((r, i) => i !== sedang && r.kodeJenisPungutan === row.kodeJenisPungutan &&
+                    r.kodeFasilitasTarif === row.kodeFasilitasTarif);
+                if (ganda) {
+                    alertify.error('Pungutan ' + row.kodeJenisPungutan + ' dengan Fasilitas Tarif ' + row.kodeFasilitasTarif +
+                        ' sudah ada. Satu kombinasi hanya boleh satu baris.');
+                    return;
+                }
+            }
             const idx = editIdx[nama];
             if (idx === null || idx === undefined) {
                 state[nama].push(row);
@@ -2120,7 +2231,7 @@
         }
 
         function seriUlang(nama) {
-            const kunci = { barang: 'seriBarang', kemasan: 'seriKemasan', kontainer: 'seriKontainer', dokumen: 'seriDokumen' }[nama];
+            const kunci = { barang: 'seriBarang', kemasan: 'seriKemasan', kontainer: 'seriKontainer', dokumen: 'seriDokumen', pungutan: 'seriPungutan' }[nama];
             if (kunci) {
                 state[nama].forEach((r, i) => r[kunci] = i + 1);
             }
@@ -2305,6 +2416,12 @@
                 setLoginBc(null);
             }
             const baris = [res.message || 'Pengiriman gagal.'].concat(Array.isArray(res.details) ? res.details : []);
+            if (err.status === 422 && Array.isArray(res.details) && res.details.length) {
+                // Daftar masalah skema CEISA bisa panjang: tampil sebagai dialog (tetap sampai ditutup), satu masalah per baris.
+                alertify.alert('Dokumen belum bisa dikirim', '<div style="max-height:60vh;overflow:auto">' +
+                    esc(res.message) + '<ul class="mt-2 mb-0 pl-3">' + res.details.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul></div>');
+                return;
+            }
             alertify.error(baris.map(esc).join('<br>'), 15);
         }
 
@@ -2344,10 +2461,16 @@
             $.ajax({
                 url: "{!! url('documentbc262sppreview') !!}",
                 type: "get",
-                dataType: "text",
+                dataType: "json",
                 data: { id },
                 success: function(res) {
-                    $('#previewIsi').text(res);
+                    // Hasil pemeriksaan skema CEISA di atas JSON: hijau bila lolos, merah + daftar masalah bila belum.
+                    const masalah = res.masalah || [];
+                    $('#previewMasalah').html(masalah.length ?
+                        '<div class="alert alert-danger mb-0"><strong>Belum bisa dikirim: ' + masalah.length + ' masalah ditemukan.</strong>' +
+                        '<ul class="mb-0 pl-3 mt-1">' + masalah.map(m => '<li>' + esc(m) + '</li>').join('') + '</ul></div>' :
+                        '<div class="alert alert-success mb-0">Lolos pemeriksaan skema CEISA, siap dikirim.</div>');
+                    $('#previewIsi').text(res.json);
                     $('#mdlPreview').modal('show');
                 },
                 error: function(err) {

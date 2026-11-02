@@ -3,10 +3,14 @@
 namespace Tests\Unit;
 
 use App\Services\BeaCukai\Bc23PayloadBuilder;
+use Illuminate\Config\Repository;
+use Illuminate\Container\Container;
 use PHPUnit\Framework\TestCase;
 
-// Payload CEISA BC 2.3 harus sama persis dengan Villiger (urutan key + tipe), lihat
-// docs/documentbc23_plan.md §9-§10. Satu-satunya beda: tanggalTiba dikirim sesuai isian (Q-a).
+// Payload CEISA BC 2.3 mengikuti Villiger (urutan key + tipe), lihat docs/documentbc23_plan.md §9-§10, dengan beda
+// yang disepakati setelah dicek ke skema resmi docs/bc_schema/bc23.json: tanggalTiba sesuai isian (Q-a),
+// jumlahKontainer = jumlah peti kemas, valuta ke kode ISO, nilai root 2 desimal, entitas slot tetap dan key barang
+// di luar skema (nilaiDiskon, volume, nilaiJasa, persen*) tidak dikirim.
 class Bc23PayloadBuilderTest extends TestCase
 {
     private const ROOT_KEYS = [
@@ -23,8 +27,7 @@ class Bc23PayloadBuilderTest extends TestCase
         'isiPerKemasan', 'jumlahKemasan', 'jumlahSatuan', 'kodeBarang', 'kodeDokumen', 'kodeKategoriBarang',
         'kodeJenisKemasan', 'kodeNegaraAsal', 'kodePerhitungan', 'kodeSatuanBarang', 'merk', 'netto', 'nilaiBarang',
         'nilaiTambah', 'posTarif', 'seriBarang', 'spesifikasiLain', 'tipe', 'ukuran', 'uraian', 'ndpbm', 'cifRupiah',
-        'hargaPerolehan', 'kodeAsalBahanBaku', 'barangTarif', 'nilaiDiskon', 'volume', 'nilaiJasa', 'persenBM',
-        'persenPPN', 'persenPPh', 'barangDokumen',
+        'hargaPerolehan', 'kodeAsalBahanBaku', 'barangTarif', 'barangDokumen',
     ];
 
     private function header(array $override = []): array
@@ -179,8 +182,9 @@ class Bc23PayloadBuilderTest extends TestCase
         $this->assertSame(['alamatEntitas', 'kodeEntitas', 'kodeJenisIdentitas', 'namaEntitas', 'nibEntitas', 'nomorIdentitas',
             'nomorIjinEntitas', 'tanggalIjinEntitas', 'seriEntitas'], array_keys($e[0]));
         $this->assertSame(['alamatEntitas', 'kodeEntitas', 'kodeNegara', 'namaEntitas', 'seriEntitas'], array_keys($e[1]));
+        // Pemilik Barang tanpa izin: nomor / tanggal izin tidak dikirim (opsional di skema, "" bukan tanggal valid).
         $this->assertSame(['alamatEntitas', 'kodeEntitas', 'kodeJenisApi', 'kodeJenisIdentitas', 'kodeStatus', 'namaEntitas',
-            'nomorIdentitas', 'nomorIjinEntitas', 'tanggalIjinEntitas', 'seriEntitas'], array_keys($e[2]));
+            'nomorIdentitas', 'seriEntitas'], array_keys($e[2]));
 
         $this->assertSame(['3', '5', '7'], array_column($e, 'kodeEntitas'));
         $this->assertSame([3, 5, 7], array_column($e, 'seriEntitas'));
@@ -191,16 +195,29 @@ class Bc23PayloadBuilderTest extends TestCase
         $this->assertSame('2020-01-02', $e[0]['tanggalIjinEntitas']);
     }
 
-    // Q-d: entitas kosong digeser ("berikutnya yang tidak kosong").
-    public function test_entitas_next_non_empty_shifts_slots(): void
+    // Entitas slot tetap: E1->3, E2->5, E3->7; slot kosong tidak menggeser yang lain.
+    public function test_entitas_fixed_slots_do_not_shift(): void
     {
         $entitas = $this->entitas();
-        $e = (new Bc23PayloadBuilder)->build($this->header(), ['barang' => [$this->barang(1)]], [null, $entitas[1], null])['entitas'];
+        $e = (new Bc23PayloadBuilder)->build($this->header(), ['barang' => [$this->barang(1)]], [null, $entitas[1], $entitas[2]])['entitas'];
 
-        $this->assertSame('PRESTAR SDN BHD', $e[0]['namaEntitas']); // slot seri 3 diisi pemasok
-        $this->assertSame('', $e[1]['namaEntitas']);
-        $this->assertSame('', $e[2]['namaEntitas']);
+        $this->assertSame('', $e[0]['namaEntitas']); // pengusaha kosong tetap di seri 3
         $this->assertSame('6', $e[0]['kodeJenisIdentitas']);
+        $this->assertSame('PRESTAR SDN BHD', $e[1]['namaEntitas']);
+        $this->assertSame('PT PEMILIK', $e[2]['namaEntitas']);
+        $this->assertSame([3, 5, 7], array_column($e, 'seriEntitas'));
+    }
+
+    public function test_pemilik_izin_sent_only_when_filled(): void
+    {
+        $entitas = $this->entitas();
+        $entitas[2]['nomorIjinEntitas'] = 'IZIN-9';
+        $entitas[2]['tanggalIjinEntitas'] = '2021-03-04';
+        $e = (new Bc23PayloadBuilder)->build($this->header(), ['barang' => [$this->barang(1)]], $entitas)['entitas'][2];
+
+        $this->assertSame(['alamatEntitas', 'kodeEntitas', 'kodeJenisApi', 'kodeJenisIdentitas', 'kodeStatus', 'namaEntitas',
+            'nomorIdentitas', 'nomorIjinEntitas', 'tanggalIjinEntitas', 'seriEntitas'], array_keys($e));
+        $this->assertSame('2021-03-04', $e['tanggalIjinEntitas']);
     }
 
     public function test_barang_key_order_and_values(): void
@@ -221,9 +238,9 @@ class Bc23PayloadBuilderTest extends TestCase
         $this->assertSame('0', $b['spesifikasiLain']);
         $this->assertSame(100.4567, $b['netto']); // tidak dibulatkan
         $this->assertSame(5625000.0, $b['cifRupiah']);
-        $this->assertNull($b['volume']);
-        $this->assertNull($b['nilaiJasa']);
-        $this->assertSame(5.0, $b['persenBM']);
+        foreach (['volume', 'nilaiJasa', 'nilaiDiskon', 'persenBM', 'persenPPN', 'persenPPh'] as $diluarSkema) {
+            $this->assertArrayNotHasKey($diluarSkema, $b);
+        }
         $this->assertSame([], $b['barangDokumen']);
         $this->assertSame('0', $b['kodeAsalBahanBaku']);
         $this->assertSame('0', $b['kodePerhitungan']);
@@ -298,7 +315,8 @@ class Bc23PayloadBuilderTest extends TestCase
         $this->assertSame(['seriKontainer', 'kodeTipeKontainer', 'kodeUkuranKontainer', 'nomorKontainer', 'kodeJenisKontainer'], array_keys($k[0]));
         $this->assertSame('40', $k[0]['kodeUkuranKontainer']);
         $this->assertSame(0, $this->build(['nomorKontainer' => 'X', 'kodeUkuranKontainer' => ''])['kontainer'][0]['kodeUkuranKontainer']); // Q-h
-        $this->assertSame(0, $this->build(['nomorKontainer' => 'X'])['jumlahKontainer']);
+        $this->assertSame(1, $this->build(['nomorKontainer' => 'X'])['jumlahKontainer']); // = jumlah peti kemas yang dikirim
+        $this->assertSame(0, $this->build()['jumlahKontainer']);
     }
 
     public function test_string_zero_is_not_empty(): void
@@ -322,6 +340,37 @@ class Bc23PayloadBuilderTest extends TestCase
         $this->assertSame(0.0, $p['barang'][0]['cifRupiah']);
         $this->assertSame(0, $p['barang'][0]['nilaiBarang']);
         $this->assertSame(0, $p['barang'][0]['barangTarif'][0]['jumlahSatuan']);
+    }
+
+    // Skema resmi: cif / fob / freight / asuransi / nilaiBarang kelipatan 0.01.
+    public function test_root_amounts_rounded_to_two_decimals(): void
+    {
+        $p = $this->build(['cif' => 1234.5678, 'fob' => 1000.125, 'freight' => 50.004, 'asuransi' => 10.006], [$this->barang(1, ['cif' => 1234.5678, 'jumlahKemasan' => 10.123])]);
+
+        $this->assertSame(1234.57, $p['cif']);
+        $this->assertSame(1234.57, $p['nilaiBarang']);
+        $this->assertSame(1000.13, $p['fob']);
+        $this->assertSame(50.0, $p['freight']);
+        $this->assertSame(10.01, $p['asuransi']);
+        $this->assertSame(1234.57, $p['barang'][0]['nilaiBarang']);
+        $this->assertSame(1234.57, $p['barang'][0]['nilaiTambah']);
+        $this->assertSame(10.12, $p['barang'][0]['jumlahKemasan']);
+    }
+
+    // Kode DBVALAS yang bukan ISO diterjemahkan lewat config beacukai.valuta_iso; kode lain apa adanya.
+    public function test_valuta_translated_to_iso(): void
+    {
+        $container = Container::getInstance();
+        $container->instance('config', new Repository(['beacukai' => ['valuta_iso' => ['RM' => 'MYR', 'EURO' => 'EUR']]]));
+        try {
+            $this->assertSame('MYR', $this->build(['kodeValuta' => 'RM'])['kodeValuta']);
+            $this->assertSame('MYR', $this->build(['kodeValuta' => 'rm'])['kodeValuta']);
+            $this->assertSame('EUR', $this->build(['kodeValuta' => 'EURO'])['kodeValuta']);
+            $this->assertSame('USD', $this->build(['kodeValuta' => 'USD'])['kodeValuta']);
+            $this->assertSame('', $this->build(['kodeValuta' => ''])['kodeValuta']);
+        } finally {
+            $container->forgetInstance('config');
+        }
     }
 
     public function test_encode_keeps_zero_fractions_and_slashes(): void

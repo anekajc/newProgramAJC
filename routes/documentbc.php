@@ -6,11 +6,8 @@ use App\Http\Controllers\DocumentBc\DocumentBc25Controller;
 use App\Http\Controllers\DocumentBc\DocumentBc261Controller;
 use App\Http\Controllers\DocumentBc\DocumentBc262Controller;
 use App\Http\Controllers\DocumentBc\DocumentBc40Controller;
+use App\Http\Controllers\DocumentBc\DocumentBc41Controller;
 use Illuminate\Support\Facades\Route;
-
-// Controller BC 4.1 masih kosong (belum ada index), route-nya
-// diaktifkan lagi saat modulnya dibuat.
-// use App\Http\Controllers\DocumentBc\DocumentBc41Controller;
 
 Route::middleware('auth')->group(function () {
     // Documentbc 23
@@ -51,7 +48,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/documentbc40sppreview', [DocumentBc40Controller::class, 'spPreview']);
 
     // Documentbc 41
-    // Route::get('/documentbc41', [DocumentBc41Controller::class, 'index']);
+    Route::get('/documentbc41', [DocumentBc41Controller::class, 'index']);
+    Route::get('/documentbc41loadall', [DocumentBc41Controller::class, 'loadAll']);
+    Route::get('/documentbc41lisths', [DocumentBc41Controller::class, 'listHs']);
+    Route::get('/documentbc41spdetail', [DocumentBc41Controller::class, 'spDetail']);
+    Route::post('/documentbc41spadd', [DocumentBc41Controller::class, 'spAdd']);
+    Route::post('/documentbc41spedit', [DocumentBc41Controller::class, 'spEdit']);
+    Route::post('/documentbc41spdelete', [DocumentBc41Controller::class, 'spDelete']);
+    Route::post('/documentbc41spkirim', [DocumentBc41Controller::class, 'spKirim']);
+    Route::get('/documentbc41sppreview', [DocumentBc41Controller::class, 'spPreview']);
 
     // Login CEISA (token per user, dipakai semua dokumen BC)
     Route::get('/bcceisastatus', [CeisaAuthController::class, 'status']);

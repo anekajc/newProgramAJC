@@ -291,7 +291,6 @@
                 <a class="nav-item nav-link" data-toggle="tab" href="#tabKemasan" role="tab">Kemasan</a>
                 <a class="nav-item nav-link" data-toggle="tab" href="#tabTransaksi" role="tab">Transaksi</a>
                 <a class="nav-item nav-link" data-toggle="tab" href="#tabBarang" role="tab">Barang</a>
-                <a class="nav-item nav-link" data-toggle="tab" href="#tabPungutan" role="tab">Pungutan</a>
                 <a class="nav-item nav-link" data-toggle="tab" href="#tabPernyataan" role="tab">Pernyataan</a>
             </div>
 
@@ -507,8 +506,11 @@
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_netto" data-h="netto">
                             <button type="button" class="btn btn-chip-biru bc-edit" onclick="syncNettoBarang()" title="Netto = jumlah netto semua barang">Sync Netto Barang</button>
                         </div>
+
+                        <label for="h_volume">Total Volume</label>
+                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_volume" data-h="volume">
                     </div>
-                    <div class="bc-info mt-2">Nilai Pabean = CIF x NDPBM. DPP = Harga Penyerahan - Uang Muka - Diskon. PPN dan PPnBM = DPP x tarif.</div>
+                    <div class="bc-info mt-2">Nilai Pabean = CIF x NDPBM. DPP = Harga Penyerahan - Uang Muka - Diskon. PPN dan PPnBM = DPP x tarif. Saat dikirim, kode valuta DBVALAS diterjemahkan ke kode ISO (mis. RM menjadi MYR, EURO menjadi EUR; daftarnya di config valuta_iso).</div>
                 </div>
 
                 {{-- BARANG + BAHAN BAKU (satu panel untuk barang terpilih, tanpa asal Impor/Lokal) --}}
@@ -546,34 +548,6 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {{-- PUNGUTAN - diketik manual. Dikirim ke CEISA per jenis (hanya yang tidak nol); Total hanya penjumlahan. --}}
-                <div class="tab-pane fade" id="tabPungutan" role="tabpanel">
-                    @foreach ([
-                        'Bea Masuk & Tindakan' => [['nilaiBM', 'BM - Bea Masuk'], ['nilaiBMAD', 'BMAD - Anti Dumping'], ['nilaiBMI', 'BMI - Imbalan'], ['nilaiBMTP', 'BMTP - Tindakan Pengamanan'], ['nilaiBMP', 'BMP - Pembalasan']],
-                        'Cukai' => [['nilaiCukaiEa', 'CEA - Etil Alkohol'], ['nilaiCukaiCmea', 'CMEA - Minuman Etil Alkohol'], ['nilaiCukaiCtem', 'CTEM - Tembakau']],
-                        'Pajak Dalam Rangka Impor' => [['nilaiPPN', 'PPN'], ['nilaiPPNBM', 'PPnBM'], ['nilaiPPh', 'PPh']],
-                    ] as $judul => $daftar)
-                        <div class="bc-judul">{{ $judul }}</div>
-                        <div class="bs-form">
-                            @foreach ($daftar as [$kunci, $label])
-                                <label for="h_{{ $kunci }}" class="bs-wrap">{{ $label }}</label>
-                                <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-pungutan" id="h_{{ $kunci }}" data-h="{{ $kunci }}">
-                            @endforeach
-                        </div>
-                    @endforeach
-
-                    <div class="bc-judul">Total</div>
-                    <div class="bs-form">
-                        <label for="h_nilaiTotalPungutan" class="bs-wrap">Total Pungutan</label>
-                        <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_nilaiTotalPungutan" data-h="nilaiTotalPungutan">
-                    </div>
-                    <div class="bc-info mt-2">
-                        Nilai diketik manual (Total terisi otomatis dari penjumlahan, boleh diubah, dan tidak dikirim).
-                        Ke CEISA dikirim satu baris per jenis yang nilainya tidak nol (kode BM, BMAD, BMI, BMTP, BMP, CEA, CMEA, CTEM, PPN, PPNBM, PPH);
-                        tarif barang (BM / PPN / PPh) dihitung dari persen tiap barang (terisi dari master HS), bukan dari tab ini.
                     </div>
                 </div>
 
@@ -661,8 +635,17 @@
                             <label>Nilai CIF (Rupiah)</label>
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cifRupiah" oninput="hitungCifBaris(this)">
 
-                            <label class="bs-wrap">Negara Asal</label>
-                            <select class="form-control" data-f="kodeNegaraAsal"></select>
+                            <label class="bs-wrap">Kategori Barang</label>
+                            <select class="form-control" data-f="kodeKategoriBarang"></select>
+
+                            <label class="bs-wrap">Guna Barang</label>
+                            <select class="form-control" data-f="kodeGunaBarang"></select>
+
+                            <label class="bs-wrap">Kondisi Barang</label>
+                            <select class="form-control" data-f="kodeKondisiBarang"></select>
+
+                            <label class="bs-wrap">Dokumen Asal</label>
+                            <select class="form-control" data-f="kodeDokAsal"></select>
 
                             <label>BM (%)</label>
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="persenBM" disabled>
@@ -947,6 +930,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div id="previewMasalah" class="mb-2"></div>
                     <pre id="previewIsi"></pre>
                 </div>
                 <div class="modal-footer">
@@ -971,13 +955,28 @@
         const NAMA_TIPE = Object.fromEntries(TIPE_KONTAINER.map(k => [k.kode, k.nama]));
         // Master Jenis Kemasan (JENISKEMASAN): [{kode, nama}]
         const JENIS_KEMASAN = @json($lookup['kemasan']);
-        // Master Negara (NEGARA): [{kode, nama}] untuk Negara Asal barang
-        const NEGARA = @json($lookup['negara']);
+        // Master Kategori Barang (KATEGORIBARANG): [{kode, nama}]
+        const KATEGORI = @json($lookup['kategori']);
         // Master Jenis Satuan (JENISSATUAN): [{kode, nama}] untuk Satuan barang dan bahan baku
         const SATUAN = @json($lookup['satuan']);
         // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
         const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
         const KODE = @json($kode);
+        // Daftar tetap {kode: nama} -> [{kode, nama}] untuk opsiMaster().
+        const daftarKode = o => Object.keys(o).map(k => ({ kode: k, nama: o[k] }));
+        const GUNA_BARANG = daftarKode(KODE.gunaBarang);
+        const KONDISI_BARANG = daftarKode(KODE.kondisiBarang);
+        const DOKUMEN_ASAL = daftarKode(KODE.dokumenAsal);
+        // Dokumen pertama bersifat tetap (skema resmi CEISA per posisi): baris 1 = Invoice (380), wajib ada dan tidak bisa
+        // dihapus; baris ke-2 dan seterusnya bebas jenisnya.
+        const DOK_POSISI = [
+            [{ kode: '380', nama: 'INVOICE' }],
+        ];
+        function hariIni() {
+            const d = new Date();
+            const dua = n => String(n).padStart(2, '0');
+            return d.getFullYear() + '-' + dua(d.getMonth() + 1) + '-' + dua(d.getDate());
+        }
         // Master valas (DBVALAS): [{kode, nama, kurs}]; kurs dipakai tombol "Kurs terbaru" (IDR selalu 1).
         const VALUTA = @json($valuta);
 
@@ -1528,21 +1527,10 @@
             $('#h_kodeCaraBayar').val('1');
             $('#h_ndpbm').val('1');
             $('#h_tarifPpnPajak').val('11');
-            $('#h_cif, #h_hargaPenyerahan, #h_uangMuka, #h_diskon, #h_tarifPpnbmPajak, #h_bruto, #h_netto').val('0');
-            $('.bc-pungutan, #h_nilaiTotalPungutan').val('0');
+            $('#h_cif, #h_hargaPenyerahan, #h_uangMuka, #h_diskon, #h_tarifPpnbmPajak, #h_bruto, #h_netto, #h_volume').val('0');
             hitungTransaksi();
             $('#errBruto').hide();
         }
-
-        function hitungTotalPungutan() {
-            let total = 0;
-            $('.bc-pungutan').each(function() {
-                total += angka($(this).val());
-            });
-            setRibuan('#h_nilaiTotalPungutan', Math.round(total * 100) / 100);
-        }
-
-        $(document).on('input', '.bc-pungutan', hitungTotalPungutan);
 
         function isiHeader(d) {
             opsiMaster('#h_kodeValuta', VALUTA, d.kodeValuta || 'IDR');
@@ -1587,6 +1575,9 @@
             mode = 'add';
             docId = null;
             state = stateKosong();
+            state.dokumen = DOK_POSISI.map((opsi, i) => ({
+                seriDokumen: i + 1, kodeDokumen: opsi[0].kode, nomorDokumen: '', tanggalDokumen: hariIni()
+            }));
             resetHeader();
             bukaForm();
         }
@@ -1732,9 +1723,10 @@
                 return '<div class="text-center text-nowrap"><button type="button" class="btn-action-sm btn-action-warning" title="Lihat" onclick="event.stopPropagation(); bukaModal(\'' +
                     nama + '\', ' + idx + ')"><i class="bi bi-info"></i></button></div>';
             }
+            const tetap = nama === 'dokumen' && idx < DOK_POSISI.length;
             return '<div class="text-center text-nowrap">' +
                 '<button type="button" class="btn-action-sm btn-action-success" title="Edit" onclick="event.stopPropagation(); bukaModal(\'' + nama + '\', ' + idx + ')"><i class="bi bi-pen"></i></button>' +
-                '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>' +
+                (tetap ? '' : '<button type="button" class="btn-action-sm btn-action-danger" title="Hapus" onclick="event.stopPropagation(); hapusBaris(\'' + nama + '\', ' + idx + ')"><i class="bi bi-trash"></i></button>') +
                 '</div>';
         }
 
@@ -1857,7 +1849,7 @@
                 return { seriBarang: selBarang, seriBahanBaku: seri, kodeKantorAsal: KODE_KANTOR };
             }
             if (nama === 'barang') {
-                return { seriBarang: state.barang.length + 1, cif: 0, persenBM: 0, persenPPN: 0, persenPPh: 0 };
+                return { seriBarang: state.barang.length + 1, cif: 0, persenBM: 0, persenPPN: 0, persenPPh: 0, kodeKondisiBarang: '1', kodeDokAsal: '23' };
             }
             return {};
         }
@@ -1877,13 +1869,22 @@
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
             opsiMaster(modal.find('[data-f="kodeJenisKemasan"]'), JENIS_KEMASAN, row.kodeJenisKemasan || '');
             if (nama === 'barang') {
-                opsiMaster(modal.find('[data-f="kodeNegaraAsal"]'), NEGARA, row.kodeNegaraAsal || '');
+                opsiMaster(modal.find('[data-f="kodeKategoriBarang"]'), KATEGORI, row.kodeKategoriBarang || '');
+                opsiMaster(modal.find('[data-f="kodeGunaBarang"]'), GUNA_BARANG, row.kodeGunaBarang || '');
+                opsiMaster(modal.find('[data-f="kodeKondisiBarang"]'), KONDISI_BARANG, row.kodeKondisiBarang || '1');
+                opsiMaster(modal.find('[data-f="kodeDokAsal"]'), DOKUMEN_ASAL, row.kodeDokAsal || '23');
             }
             if (nama === 'barang' || nama === 'bahanbaku') {
                 opsiMaster(modal.find('[data-f="kodeSatuanBarang"]'), SATUAN, row.kodeSatuanBarang || '');
             }
             if (nama === 'dokumen') {
-                opsiMaster('#f_dokumen_kode', JENIS_DOKUMEN, row.kodeDokumen || '');
+                // Posisi baris menentukan jenis yang boleh dipilih (baris 1 = Invoice 380; selebihnya bebas).
+                const pos = idx === null ? state.dokumen.length : idx;
+                const batas = DOK_POSISI[pos] || null;
+                if (batas && !row.kodeDokumen) {
+                    row.kodeDokumen = batas[0].kode;
+                }
+                opsiMaster('#f_dokumen_kode', batas || JENIS_DOKUMEN, row.kodeDokumen || '');
             }
             modal.find('[data-f]').each(function() {
                 const v = row[$(this).data('f')];
@@ -1960,6 +1961,10 @@
         }
 
         function hapusBaris(nama, idx) {
+            if (nama === 'dokumen' && idx < DOK_POSISI.length) {
+                alertify.warning('Dokumen Invoice wajib ada, tidak bisa dihapus.');
+                return;
+            }
             if (nama === 'barang') {
                 // Hapus barang ikut menghapus bahan bakunya, dan seri barang sesudahnya digeser turun 1.
                 const seri = idx + 1;
@@ -2154,6 +2159,12 @@
                 setLoginBc(null);
             }
             const baris = [res.message || 'Pengiriman gagal.'].concat(Array.isArray(res.details) ? res.details : []);
+            if (err.status === 422 && Array.isArray(res.details) && res.details.length) {
+                // Daftar masalah skema CEISA bisa panjang: tampil sebagai dialog (tetap sampai ditutup), satu masalah per baris.
+                alertify.alert('Dokumen belum bisa dikirim', '<div style="max-height:60vh;overflow:auto">' +
+                    esc(res.message) + '<ul class="mt-2 mb-0 pl-3">' + res.details.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul></div>');
+                return;
+            }
             alertify.error(baris.map(esc).join('<br>'), 15);
         }
 
@@ -2193,10 +2204,16 @@
             $.ajax({
                 url: "{!! url('documentbc25sppreview') !!}",
                 type: "get",
-                dataType: "text",
+                dataType: "json",
                 data: { id },
                 success: function(res) {
-                    $('#previewIsi').text(res);
+                    // Hasil pemeriksaan skema CEISA di atas JSON: hijau bila lolos, merah + daftar masalah bila belum.
+                    const masalah = res.masalah || [];
+                    $('#previewMasalah').html(masalah.length ?
+                        '<div class="alert alert-danger mb-0"><strong>Belum bisa dikirim: ' + masalah.length + ' masalah ditemukan.</strong>' +
+                        '<ul class="mb-0 pl-3 mt-1">' + masalah.map(m => '<li>' + esc(m) + '</li>').join('') + '</ul></div>' :
+                        '<div class="alert alert-success mb-0">Lolos pemeriksaan skema CEISA, siap dikirim.</div>');
+                    $('#previewIsi').text(res.json);
                     $('#mdlPreview').modal('show');
                 },
                 error: function(err) {

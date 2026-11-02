@@ -348,7 +348,7 @@
                         <input type="text" class="form-control bc-tetap" id="h_revDoc" disabled>
 
                         <label for="h_nomorAju">Nomor Pengajuan</label>
-                        <input type="text" class="form-control" id="h_nomorAju" data-h="nomorAju" maxlength="100" style="text-transform: uppercase">
+                        <input type="text" class="form-control" id="h_nomorAju" data-h="nomorAju" maxlength="26" style="text-transform: uppercase">
 
                         <label for="h_kodeKantor">A. Kantor Pabean</label>
                         <input type="text" class="form-control" id="h_kodeKantor" data-h="kodeKantor" maxlength="20">
@@ -369,7 +369,7 @@
                         <label for="h_tanggalAju">F. Tanggal AJU</label>
                         <input type="date" class="form-control" id="h_tanggalAju" data-h="tanggalAju">
                     </div>
-                    <div class="bc-info mt-2">Nomor Pengajuan disimpan huruf besar. Jenis Transaksi = Penyerahan BKP. Nomor Pendaftaran hanya catatan internal (tidak dikirim); Tanggal AJU dikirim ke CEISA.</div>
+                    <div class="bc-info mt-2">Nomor Pengajuan disimpan huruf besar dan harus tepat 26 huruf/angka saat dikirim ke CEISA. Jenis Transaksi = Penyerahan BKP. Nomor Pendaftaran hanya catatan internal (tidak dikirim); Tanggal AJU dikirim ke CEISA.</div>
                 </div>
 
                 {{-- ENTITAS - data yang DIKIRIM ke CEISA diambil dari master entitas yang dipilih. --}}
@@ -400,7 +400,7 @@
                             @endif
                         </div>
                     @endforeach
-                    <div class="bc-info mt-2">Pemasok PO dipilih otomatis sebagai Pengirim Barang bila ada entitas dengan nama yang sama; bila tidak, pilih manual (pemasok harus ada di master Entitas).</div>
+                    <div class="bc-info mt-2">Pemasok PO dipilih otomatis sebagai Pengirim Barang bila ada entitas dengan nama yang sama; bila tidak, pilih manual (pemasok harus ada di master Entitas). Ketiga entitas wajib dipilih saat dikirim; Pengusaha TPB juga butuh Nomor Izin dan Tanggal Izin di master.</div>
                 </div>
 
                 {{-- DOKUMEN --}}
@@ -421,7 +421,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bc-info mt-2">Dokumen Pelengkap Pabean. Semua jenis dokumen boleh dipilih dan semua baris bisa dihapus.</div>
+                    <div class="bc-info mt-2">Dokumen Pelengkap Pabean. Semua jenis dokumen boleh dipilih dan semua baris bisa dihapus. Dokumen tidak wajib ada, tetapi baris yang ada harus lengkap (jenis, nomor, tanggal) saat dikirim.</div>
                 </div>
 
                 {{-- PENGANGKUT --}}
@@ -447,7 +447,7 @@
                         <label for="h_jumlahKemasan" class="bs-wrap">24. Jumlah Kemasan</label>
                         <input type="text" inputmode="numeric" class="form-control text-right bc-ribuan bc-int" id="h_jumlahKemasan" data-h="jumlahKemasan">
                     </div>
-                    <div class="bc-info mt-2">Kemasan dikirim ke CEISA bila Jenis atau Jumlah Kemasan terisi. BC 4.0 tidak punya peti kemas.</div>
+                    <div class="bc-info mt-2">Kemasan wajib diisi saat dikirim ke CEISA (Jenis Kemasan terisi dan Jumlah Kemasan lebih dari 0). BC 4.0 tidak punya peti kemas.</div>
                 </div>
 
                 {{-- PERDAGANGAN --}}
@@ -711,6 +711,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div id="previewMasalah" class="mb-2"></div>
                     <pre id="previewIsi"></pre>
                 </div>
                 <div class="modal-footer">
@@ -1851,6 +1852,12 @@
                 setLoginBc(null);
             }
             const baris = [res.message || 'Pengiriman gagal.'].concat(Array.isArray(res.details) ? res.details : []);
+            if (err.status === 422 && Array.isArray(res.details) && res.details.length) {
+                // Daftar masalah skema CEISA bisa panjang: tampil sebagai dialog (tetap sampai ditutup), satu masalah per baris.
+                alertify.alert('Dokumen belum bisa dikirim', '<div style="max-height:60vh;overflow:auto">' +
+                    esc(res.message) + '<ul class="mt-2 mb-0 pl-3">' + res.details.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul></div>');
+                return;
+            }
             alertify.error(baris.map(esc).join('<br>'), 15);
         }
 
@@ -1890,10 +1897,16 @@
             $.ajax({
                 url: "{!! url('documentbc40sppreview') !!}",
                 type: "get",
-                dataType: "text",
+                dataType: "json",
                 data: { id },
                 success: function(res) {
-                    $('#previewIsi').text(res);
+                    // Hasil pemeriksaan skema CEISA di atas JSON: hijau bila lolos, merah + daftar masalah bila belum.
+                    const masalah = res.masalah || [];
+                    $('#previewMasalah').html(masalah.length ?
+                        '<div class="alert alert-danger mb-0"><strong>Belum bisa dikirim: ' + masalah.length + ' masalah ditemukan.</strong>' +
+                        '<ul class="mb-0 pl-3 mt-1">' + masalah.map(m => '<li>' + esc(m) + '</li>').join('') + '</ul></div>' :
+                        '<div class="alert alert-success mb-0">Lolos pemeriksaan skema CEISA, siap dikirim.</div>');
+                    $('#previewIsi').text(res.json);
                     $('#mdlPreview').modal('show');
                 },
                 error: function(err) {

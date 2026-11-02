@@ -2,6 +2,8 @@
 
 namespace App\Services\BeaCukai;
 
+use App\Services\BeaCukai\Concerns\ValutaIso;
+
 // Penyusun JSON CEISA untuk BC 2.3 - salinan persis pengirim Villiger (docs/documentbc23_plan.md §9).
 // CEISA menolak payload yang urutan key-nya berbeda, jadi setiap objek disusun manual dengan urutan
 // key yang sama dengan tabel di §9. Jangan pakai array_merge/toArray untuk menyusunnya.
@@ -10,11 +12,19 @@ namespace App\Services\BeaCukai;
 // sudah bertipe PHP - desimal float|null, bilangan bulat int|null, tanggal 'Y-m-d'|null, teks string|null.
 // Konversi dari baris SQL Server dikerjakan controller.
 //
-// Beda dengan Villiger (keputusan user, plan §11): tanggalTiba dikirim sesuai isian dokumen (Q-a,
-// tanpa tanggal tetap "2026-06-02"). Selebihnya payload sama persis, termasuk nilai tanam
-// (barangTarif BM 40 / PPh 2.5 / PPN 11, jumlahKontainer 0, dst).
+// Beda dengan Villiger (keputusan user, plan §11 + pengecekan skema resmi docs/bc_schema/bc23.json):
+//   - tanggalTiba dikirim sesuai isian dokumen (Q-a, tanpa tanggal tetap "2026-06-02");
+//   - jumlahKontainer = banyaknya peti kemas yang dikirim (Q-h);
+//   - kodeValuta diterjemahkan ke kode ISO lewat config beacukai.valuta_iso (RM -> MYR, EURO -> EUR);
+//   - cif / fob / freight / asuransi / nilaiBarang dibulatkan 2 desimal (skema: kelipatan 0.01);
+//   - entitas slot tetap E1->seri 3, E2->seri 5, E3->seri 7 (ketiganya wajib; tidak digeser lagi) dan Pemilik
+//     Barang tidak mengirim nomor/tanggal izin yang kosong (opsional di skema, "" bukan tanggal valid);
+//   - key yang tidak ada di skema barang (nilaiDiskon, volume, nilaiJasa, persenBM/PPN/PPh) tidak dikirim.
+// Selebihnya payload sama persis, termasuk nilai tanam (barangTarif BM 40 / PPh 2.5 / PPN 11).
 class Bc23PayloadBuilder
 {
+    use ValutaIso;
+
     /**
      * @param  array  $header  header dokumen (§2.1), termasuk kemasan / kontainer / pengangkut tunggal
      * @param  array  $children  ['barang' => [...], 'dokumen' => [...]]
@@ -24,17 +34,18 @@ class Bc23PayloadBuilder
     {
         $barang = array_values($children['barang'] ?? []);
         usort($barang, fn ($a, $b) => ((int) ($a['seriBarang'] ?? 0)) <=> ((int) ($b['seriBarang'] ?? 0)));
+        $kontainer = $this->kontainer($header);
 
         return [
             'asalData' => 'S',
-            'asuransi' => $this->flt($header['asuransi'] ?? null),
+            'asuransi' => $this->flt2($header['asuransi'] ?? null),
             'bruto' => $this->flt($header['bruto'] ?? null),
-            'cif' => $this->flt($header['cif'] ?? null),
-            'fob' => $this->flt($header['fob'] ?? null),
-            'freight' => $this->flt($header['freight'] ?? null),
+            'cif' => $this->flt2($header['cif'] ?? null),
+            'fob' => $this->flt2($header['fob'] ?? null),
+            'freight' => $this->flt2($header['freight'] ?? null),
             'hargaPenyerahan' => $this->flt($header['hargaPenyerahan'] ?? null),
             'jabatanTtd' => $this->strOrNull($header['jabatanTtd'] ?? null),
-            'jumlahKontainer' => 0, // Q-h: 0 walau ada kontainer
+            'jumlahKontainer' => count($kontainer),
             'kodeAsuransi' => (string) self::orDefault($header['kodeAsuransi'] ?? null, ''),
             'kodeDokumen' => '23',
             'kodeIncoterm' => (string) self::orDefault($header['kodeIncoterm'] ?? null, ''),
@@ -46,13 +57,13 @@ class Bc23PayloadBuilder
             'kodeTps' => (string) self::orDefault($header['kodeTps'] ?? null, ''),
             'kodeTujuanTpb' => (string) self::orDefault($header['kodeTujuanTpb'] ?? null, ''),
             'kodeTutupPu' => '11',
-            'kodeValuta' => (string) self::orDefault($header['kodeValuta'] ?? null, ''),
+            'kodeValuta' => $this->valutaIso((string) self::orDefault($header['kodeValuta'] ?? null, '')),
             'kotaTtd' => $this->strOrNull($header['kotaTtd'] ?? null),
             'namaTtd' => $this->strOrNull($header['namaTtd'] ?? null),
             'ndpbm' => $this->flt($header['ndpbm'] ?? null),
             'netto' => $this->flt($header['netto'] ?? null), // tidak dibulatkan
             'nik' => '0',
-            'nilaiBarang' => $this->flt($header['cif'] ?? null),
+            'nilaiBarang' => $this->flt2($header['cif'] ?? null),
             'nomorAju' => $this->strOrNull($header['nomorAju'] ?? null),
             'nomorBc11' => $this->strOrNull($header['nomorBc11'] ?? null),
             'posBc11' => $this->strOrNull($header['posBc11'] ?? null),
@@ -67,7 +78,7 @@ class Bc23PayloadBuilder
             'barang' => array_map(fn ($row) => $this->barang($row), $barang),
             'entitas' => $this->entitas($entitas),
             'kemasan' => $this->kemasan($header),
-            'kontainer' => $this->kontainer($header),
+            'kontainer' => $kontainer,
             'dokumen' => array_map(fn ($row) => $this->dokumen($row), array_values($children['dokumen'] ?? [])),
             'pengangkut' => [[
                 'kodeBendera' => (string) self::orDefault($header['kodeBendera'] ?? null, ''),
@@ -95,12 +106,30 @@ class Bc23PayloadBuilder
         return Bc261PayloadBuilder::orDefault($value, $default);
     }
 
-    // §9.2: entitas diisi "berikutnya yang tidak kosong" ke slot seri 3 → 5 → 7 (Q-d).
+    // §9.2: slot tetap seri 3 (Pengusaha TPB) -> 5 (Pemasok) -> 7 (Pemilik Barang); ketiganya wajib diisi
+    // (dicek saat kirim), jadi slot kosong tidak lagi menggeser entitas lain. Pemilik Barang hanya mengirim
+    // nomor / tanggal izin bila terisi (opsional di skema; "" bukan tanggal yang valid).
     private function entitas(array $entitas): array
     {
-        $isi = array_values(array_filter(array_slice($entitas, 0, 3), fn ($e) => ! empty($e)));
-        $e = fn (int $i, string $key, $default = '') => isset($isi[$i]) ? self::orDefault($isi[$i][$key] ?? null, $default) : $default;
-        $tgl = fn (int $i) => isset($isi[$i]) ? ($this->date($isi[$i]['tanggalIjinEntitas'] ?? null) ?? '') : '';
+        $e = fn (int $i, string $key, $default = '') => ! empty($entitas[$i]) ? self::orDefault($entitas[$i][$key] ?? null, $default) : $default;
+        $tgl = fn (int $i) => ! empty($entitas[$i]) ? ($this->date($entitas[$i]['tanggalIjinEntitas'] ?? null) ?? '') : '';
+
+        $pemilik = [
+            'alamatEntitas' => (string) $e(2, 'alamatEntitas'),
+            'kodeEntitas' => '7',
+            'kodeJenisApi' => (string) $e(2, 'kodeJenisApi', '02'),
+            'kodeJenisIdentitas' => (string) $e(2, 'kodeJenisIdentitas', '6'),
+            'kodeStatus' => (string) $e(2, 'kodeStatus', '0'),
+            'namaEntitas' => (string) $e(2, 'namaEntitas'),
+            'nomorIdentitas' => (string) $e(2, 'nomorIdentitas'),
+        ];
+        if ((string) $e(2, 'nomorIjinEntitas') !== '') {
+            $pemilik['nomorIjinEntitas'] = (string) $e(2, 'nomorIjinEntitas');
+        }
+        if ($tgl(2) !== '') {
+            $pemilik['tanggalIjinEntitas'] = $tgl(2);
+        }
+        $pemilik['seriEntitas'] = 7;
 
         return [
             [
@@ -121,18 +150,7 @@ class Bc23PayloadBuilder
                 'namaEntitas' => (string) $e(1, 'namaEntitas'),
                 'seriEntitas' => 5,
             ],
-            [
-                'alamatEntitas' => (string) $e(2, 'alamatEntitas'),
-                'kodeEntitas' => '7',
-                'kodeJenisApi' => (string) $e(2, 'kodeJenisApi', '02'),
-                'kodeJenisIdentitas' => (string) $e(2, 'kodeJenisIdentitas', '6'),
-                'kodeStatus' => (string) $e(2, 'kodeStatus', '0'),
-                'namaEntitas' => (string) $e(2, 'namaEntitas'),
-                'nomorIdentitas' => (string) $e(2, 'nomorIdentitas'),
-                'nomorIjinEntitas' => (string) $e(2, 'nomorIjinEntitas'),
-                'tanggalIjinEntitas' => $tgl(2),
-                'seriEntitas' => 7,
-            ],
+            $pemilik,
         ];
     }
 
@@ -181,7 +199,7 @@ class Bc23PayloadBuilder
         ]];
     }
 
-    // §9.4 - 41 key, tidak ada key ganda.
+    // §9.4 - key yang tidak ada di skema resmi barang (nilaiDiskon, volume, nilaiJasa, persen*) tidak dikirim.
     private function barang(array $row): array
     {
         $netto = $row['netto'] ?? null;
@@ -199,7 +217,7 @@ class Bc23PayloadBuilder
             'hargaPenyerahan' => 0,
             'hargaSatuan' => 0,
             'isiPerKemasan' => 0,
-            'jumlahKemasan' => $this->fltOrNull($row['jumlahKemasan'] ?? null),
+            'jumlahKemasan' => $this->round2($row['jumlahKemasan'] ?? null, 0.0),
             'jumlahSatuan' => $this->fltOrNull($row['jumlahSatuan'] ?? null),
             'kodeBarang' => $this->strOrNull($row['kodeBarang'] ?? null),
             'kodeDokumen' => '23',
@@ -210,8 +228,8 @@ class Bc23PayloadBuilder
             'kodeSatuanBarang' => $satuan,
             'merk' => (string) self::orDefault($row['merk'] ?? null, '-'),
             'netto' => $this->fltOrNull($netto), // tidak dibulatkan
-            'nilaiBarang' => $this->num($row['cif'] ?? null, 0),
-            'nilaiTambah' => $this->num($row['cif'] ?? null, 0),
+            'nilaiBarang' => $this->round2($row['cif'] ?? null, 0),
+            'nilaiTambah' => $this->round2($row['cif'] ?? null, 0),
             'posTarif' => $this->strOrNull($row['posTarif'] ?? null),
             'seriBarang' => (int) ($row['seriBarang'] ?? 0),
             'spesifikasiLain' => (string) self::orDefault($row['spesifikasiLain'] ?? null, '0'),
@@ -266,12 +284,6 @@ class Bc23PayloadBuilder
                     'tarifFasilitas' => 100,
                 ],
             ],
-            'nilaiDiskon' => 0,
-            'volume' => null,
-            'nilaiJasa' => null,
-            'persenBM' => $this->fltOrNull($row['persenBM'] ?? null),
-            'persenPPN' => $this->fltOrNull($row['persenPPN'] ?? null),
-            'persenPPh' => $this->fltOrNull($row['persenPPh'] ?? null),
             'barangDokumen' => [],
         ];
     }
@@ -280,6 +292,12 @@ class Bc23PayloadBuilder
     private function flt($value): float
     {
         return (float) self::orDefault($value, 0);
+    }
+
+    // Float dibulatkan 2 desimal (skema: kelipatan 0.01); 0.0 bila kosong.
+    private function flt2($value): float
+    {
+        return round((float) self::orDefault($value, 0), 2);
     }
 
     // Tanpa fallback: null tetap null, selain itu float apa adanya.

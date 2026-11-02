@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DocumentBc;
 
 use App\Http\Controllers\Controller;
 use App\Services\BeaCukai\Bc40PayloadBuilder;
+use App\Services\BeaCukai\CeisaSchemaValidator;
 use App\Services\BeaCukai\CeisaService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -100,7 +101,18 @@ class DocumentBc40Controller extends Controller
     // Waktu tunggu kirim BC 4.0 (BC 2.6.1 memakai 30) - docs/documentbc40_plan.md §8.
     private const TIMEOUT_KIRIM = 60;
 
-    public function __construct(private Bc40PayloadBuilder $builder, private CeisaService $ceisa) {}
+    // Pemeriksaan saat KIRIM terhadap skema resmi docs/bc_schema/bc40.json (bukan saat simpan). Kolom teks di bawah
+    // ini tidak boleh kosong walau skema hanya menuntut tipe string (keputusan user); yang boleh kosong: merk /
+    // tipe / ukuran / spesifikasi lain barang dan merk kemasan.
+    private const WAJIB_ISI = [
+        'kodeKantor', 'kodeJenisTpb', 'kodeTujuanPengiriman', 'kotaTtd', 'namaTtd', 'jabatanTtd',
+        'pengangkut.namaPengangkut', 'pengangkut.nomorPengangkut', 'kemasan.kodeJenisKemasan',
+        'barang.kodeBarang', 'barang.uraian', 'barang.posTarif', 'barang.kodeSatuanBarang', 'barang.kodeJenisKemasan',
+        'entitas.namaEntitas', 'entitas.alamatEntitas', 'entitas.nomorIdentitas', 'entitas.nibEntitas', 'entitas.nomorIjinEntitas',
+        'dokumen.kodeDokumen', 'dokumen.nomorDokumen',
+    ];
+
+    public function __construct(private Bc40PayloadBuilder $builder, private CeisaService $ceisa, private CeisaSchemaValidator $skema) {}
 
     public function index(Request $req)
     {
@@ -384,6 +396,14 @@ class DocumentBc40Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
+        // Dokumen harus lolos skema resmi CEISA dulu; semua masalah ditampilkan sekaligus (bukan saat simpan).
+        if ($masalah = $this->masalahKirim($payload)) {
+            return response()->json([
+                'message' => 'Dokumen belum bisa dikirim: '.count($masalah).' masalah ditemukan. Perbaiki lalu kirim ulang.',
+                'details' => $masalah,
+            ], 422);
+        }
+
         try {
             $res = $this->ceisa->send($token, $this->builder->encode($payload), self::TIMEOUT_KIRIM);
         } catch (ConnectionException $e) {
@@ -436,7 +456,11 @@ class DocumentBc40Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
-        return response($this->builder->encode($payload, true), 200, ['Content-Type' => 'application/json']);
+        // JSON selalu ditampilkan walau dokumen belum lengkap; masalah skema hanya jadi peringatan (tidak memblokir).
+        return response()->json([
+            'json' => $this->builder->encode($payload, true),
+            'masalah' => $this->masalahKirim($payload),
+        ]);
     }
 
     /* ---------------------------------------------------------------- helpers */
@@ -460,6 +484,31 @@ class DocumentBc40Controller extends Controller
         }
 
         return null;
+    }
+
+    // Skema resmi + aturan BC 4.0 di luar skema: minimal 1 barang, kemasan wajib (jenis terisi dan jumlah > 0).
+    // Dokumen pelengkap tidak diwajibkan, tetapi baris yang ada harus lengkap (jenis, nomor, tanggal).
+    private function masalahKirim(array $payload): array
+    {
+        $masalah = $this->skema->masalah('bc40', $payload, [
+            'bagian' => [
+                'barang' => 'Barang', 'barangTarif' => ['Tarif PPN'], 'dokumen' => 'Dokumen', 'kemasan' => 'Kemasan',
+                'entitas' => ['Pengusaha TPB', 'Pemilik Barang', 'Pengirim Barang'], 'pengangkut' => 'Pengangkut', 'pungutan' => 'Pungutan',
+            ],
+            'wajibIsi' => self::WAJIB_ISI,
+            'sisa' => ['barang', 'dokumen'],
+        ]);
+
+        if (! $payload['barang']) {
+            $masalah[] = 'Barang: minimal 1 barang.';
+        }
+        if (! $payload['kemasan']) {
+            $masalah[] = 'Kemasan: wajib diisi (Jenis Kemasan dan Jumlah Kemasan).';
+        } elseif ($payload['kemasan'][0]['jumlahKemasan'] <= 0) {
+            $masalah[] = 'Kemasan > Jumlah Kemasan (jumlahKemasan): harus lebih dari 0';
+        }
+
+        return $masalah;
     }
 
     // Syarat sumber (tanpa cek "sudah dipakai" dan rentang tanggal): pemasok dalam negeri, PO tidak

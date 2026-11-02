@@ -18,7 +18,7 @@ class Bc40PayloadBuilderTest extends TestCase
     ];
 
     private const BARANG_KEYS = [
-        'asuransi', 'bruto', 'cif', 'diskon', 'hargaEkspor', 'hargaPenyerahan', 'hargaSatuan', 'isiPerkemasan',
+        'asuransi', 'bruto', 'cif', 'diskon', 'hargaEkspor', 'hargaPenyerahan', 'hargaSatuan',
         'jumlahKemasan', 'jumlahRealisasi', 'jumlahSatuan', 'kodeBarang', 'kodeDokumen', 'kodeJenisKemasan',
         'kodeSatuanBarang', 'merk', 'netto', 'nilaiBarang', 'posTarif', 'seriBarang', 'spesifikasiLain', 'tipe', 'ukuran',
         'uraian', 'volume', 'cifRupiah', 'hargaPerolehan', 'kodeAsalBahanBaku', 'ndpbm', 'uangMuka', 'nilaiJasa',
@@ -158,16 +158,18 @@ class Bc40PayloadBuilderTest extends TestCase
         $this->assertSame('6', $e[2]['kodeJenisIdentitas']);
     }
 
-    // Q-d: entitas kosong digeser ("berikutnya yang tidak kosong").
-    public function test_entitas_next_non_empty_shifts_slots(): void
+    // Skema resmi: slot tetap (Pengusaha 3, Pemilik 7, Pengirim 9); slot kosong tidak digeser.
+    public function test_entitas_slots_are_fixed_and_empty_slot_stays_blank(): void
     {
         $entitas = $this->entitas();
         $e = (new Bc40PayloadBuilder)->build($this->header(), ['barang' => [$this->barang(1)]], [null, null, $entitas[2]])['entitas'];
 
-        $this->assertSame('PT PENGIRIM', $e[0]['namaEntitas']); // pengirim naik ke slot seri 3
+        $this->assertSame('', $e[0]['namaEntitas']); // Pengusaha tetap kosong, tidak diisi pengirim
+        $this->assertSame('', $e[0]['tanggalIjinEntitas']);
         $this->assertSame('', $e[1]['namaEntitas']);
-        $this->assertSame('', $e[2]['namaEntitas']);
-        $this->assertSame('02', $e[2]['kodeJenisApi']); // slot kosong: nilai bawaan
+        $this->assertSame('PT PENGIRIM', $e[2]['namaEntitas']); // pengirim tetap di slot seri 9
+        $this->assertSame([3, 7, 9], array_column($e, 'seriEntitas'));
+        $this->assertSame('02', $e[1]['kodeJenisApi']); // slot kosong: nilai bawaan
     }
 
     public function test_barang_key_order_and_values(): void
@@ -176,29 +178,67 @@ class Bc40PayloadBuilderTest extends TestCase
 
         $this->assertSame(self::BARANG_KEYS, array_keys($b));
         $this->assertSame(0.0, $b['asuransi']);
-        $this->assertSame(520.0, $b['bruto']); // bruto header di setiap barang (Q-g)
+        $this->assertSame(520.0, $b['bruto']); // satu barang menampung seluruh bruto header
         $this->assertSame(0.0, $b['cif']);
         $this->assertSame(15000000.0, $b['hargaPenyerahan']);
-        $this->assertSame(15000000.0, $b['jumlahRealisasi']); // Q-j
-        $this->assertNull($b['isiPerkemasan']); // "k" huruf kecil
+        $this->assertSame(100.0, $b['jumlahRealisasi']); // jumlah realisasi = jumlah satuan
+        $this->assertArrayNotHasKey('isiPerkemasan', $b);
+        $this->assertArrayNotHasKey('isiPerKemasan', $b);
         $this->assertSame(10, $b['jumlahKemasan']);
         $this->assertSame(100.0, $b['jumlahSatuan']);
         $this->assertSame('40', $b['kodeDokumen']);
         $this->assertSame('', $b['merk']);
         $this->assertSame(500.0, $b['netto']);
-        $this->assertSame(0, $b['nilaiBarang']);
+        $this->assertSame(15000000.0, $b['nilaiBarang']); // = harga penyerahan
         $this->assertSame(0.0, $b['cifRupiah']);
         $this->assertSame('1', $b['kodeAsalBahanBaku']);
         $this->assertSame(0.0, $b['uangMuka']);
         $this->assertSame(0.0, $b['nilaiJasa']);
     }
 
-    public function test_header_uang_muka_and_jasa_copied_to_each_barang(): void
+    public function test_single_barang_takes_whole_header_amounts(): void
     {
         $b = $this->build(['uangMuka' => 2500.0, 'nilaiJasa' => 125.5])['barang'][0];
 
         $this->assertSame(2500.0, $b['uangMuka']);
         $this->assertSame(125.5, $b['nilaiJasa']);
+    }
+
+    // bruto sebanding netto, uang muka / nilai jasa sebanding harga; baris terakhir menampung sisa pembulatan.
+    public function test_header_amounts_are_split_across_barang(): void
+    {
+        $p = $this->build(
+            ['bruto' => 100.0, 'uangMuka' => 1000.0, 'nilaiJasa' => 10.0],
+            [
+                $this->barang(1, ['netto' => 10.0, 'hargaPenyerahan' => 100.0]),
+                $this->barang(2, ['netto' => 10.0, 'hargaPenyerahan' => 100.0]),
+                $this->barang(3, ['netto' => 10.0, 'hargaPenyerahan' => 100.0]),
+            ]
+        )['barang'];
+
+        $this->assertSame([33.3333, 33.3333, 33.3334], array_column($p, 'bruto'));
+        $this->assertSame([333.3333, 333.3333, 333.3334], array_column($p, 'uangMuka'));
+        $this->assertSame([3.3333, 3.3333, 3.3334], array_column($p, 'nilaiJasa'));
+        $this->assertEqualsWithDelta(100.0, array_sum(array_column($p, 'bruto')), 1e-9);
+    }
+
+    public function test_split_follows_weights_and_falls_back_to_equal_when_weights_are_zero(): void
+    {
+        $p = $this->build(
+            ['bruto' => 90.0, 'uangMuka' => 300.0],
+            [
+                $this->barang(1, ['netto' => 10.0, 'hargaPenyerahan' => 100.0]),
+                $this->barang(2, ['netto' => 20.0, 'hargaPenyerahan' => 200.0]),
+            ]
+        )['barang'];
+        $this->assertSame([30.0, 60.0], array_column($p, 'bruto'));
+        $this->assertSame([100.0, 200.0], array_column($p, 'uangMuka'));
+
+        $nol = $this->build(
+            ['bruto' => 10.0],
+            [$this->barang(1, ['netto' => 0.0]), $this->barang(2, ['netto' => 0.0])]
+        )['barang'];
+        $this->assertSame([5.0, 5.0], array_column($nol, 'bruto'));
     }
 
     public function test_barang_tarif_single_ppn_with_last_key(): void
@@ -219,13 +259,14 @@ class Bc40PayloadBuilderTest extends TestCase
         $this->assertSame('3', $tarif['kodeFasilitasTarif']);
     }
 
+    // Nomor / tanggal kosong dikirim "" (bukan null) supaya tercatat "wajib diisi" saat kirim.
     public function test_dokumen_has_no_id_key(): void
     {
         $d = $this->build([], [], [['seriDokumen' => 1, 'kodeDokumen' => '380', 'nomorDokumen' => null, 'tanggalDokumen' => null]])['dokumen'];
 
         $this->assertSame(['kodeDokumen', 'nomorDokumen', 'seriDokumen', 'tanggalDokumen'], array_keys($d[0]));
-        $this->assertNull($d[0]['nomorDokumen']);
-        $this->assertNull($d[0]['tanggalDokumen']);
+        $this->assertSame('', $d[0]['nomorDokumen']);
+        $this->assertSame('', $d[0]['tanggalDokumen']);
     }
 
     public function test_pengangkut_and_pungutan(): void
@@ -244,8 +285,9 @@ class Bc40PayloadBuilderTest extends TestCase
         $k = $this->build(['jumlahKemasan' => 10, 'kodeJenisKemasan' => 'BX', 'merkKemasan' => '-'])['kemasan'];
         $this->assertSame([['jumlahKemasan' => 10, 'kodeJenisKemasan' => 'BX', 'merkKemasan' => '-', 'seriKemasan' => 1]], $k);
 
-        $this->assertCount(1, $this->build(['kodeJenisKemasan' => 'BX'])['kemasan']);
-        $this->assertCount(1, $this->build(['jumlahKemasan' => 3])['kemasan']);
+        // jumlahKemasan integer wajib: 0 tetap 0 (bukan null); jenis kosong tetap "" (dicatat saat kirim).
+        $this->assertSame(0, $this->build(['kodeJenisKemasan' => 'BX'])['kemasan'][0]['jumlahKemasan']);
+        $this->assertSame('', $this->build(['jumlahKemasan' => 3])['kemasan'][0]['kodeJenisKemasan']);
     }
 
     public function test_barang_sorted_by_seri_and_lists_reindexed(): void
@@ -274,7 +316,7 @@ class Bc40PayloadBuilderTest extends TestCase
         $json = (new Bc40PayloadBuilder)->encode($this->build());
 
         $this->assertStringStartsWith('{"asalData":"S","asuransi":0.0,"bruto":520.0,"kodeJenisTpb":"1","hargaPenyerahan":15000000.0,', $json);
-        $this->assertStringContainsString('"isiPerkemasan":null', $json);
+        $this->assertStringNotContainsString('isiPer', $json);
         $this->assertStringContainsString('"vd":0.0', $json);
         $this->assertStringContainsString('"kontainer":[]}', $json);
         $this->assertStringContainsString('"nilaiPungutan":0}', $json);

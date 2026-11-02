@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DocumentBc;
 
 use App\Http\Controllers\Controller;
 use App\Services\BeaCukai\Bc261PayloadBuilder;
+use App\Services\BeaCukai\CeisaSchemaValidator;
 use App\Services\BeaCukai\CeisaService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -64,6 +65,7 @@ class DocumentBc261Controller extends Controller
             'seriBarang' => ['SERIBARANG', 'seri'],
             'posTarif' => ['POSTARIF', 'str'],
             'kodeBarang' => ['KODEBARANG', 'str'],
+            'kodeAsalBarang' => ['KODEASALBARANG', 'strn'],
             'uraian' => ['URAIAN', 'str'],
             'merk' => ['MERK', 'strn'],
             'tipe' => ['TIPE', 'strn'],
@@ -95,7 +97,8 @@ class DocumentBc261Controller extends Controller
             'isiPerKemasan' => ['ISIPERKEMASAN', 'decn'],
             'kodePerhitungan' => ['KODEPERHITUNGAN', 'strn'],
         ]],
-        // netto / ndpbm / seriIjin bahan baku selalu null (tidak ada isiannya) - tidak dipetakan.
+        // netto / ndpbm / seriIjin bahan baku selalu null (tidak ada isiannya) dan Nomor AJU Dok Asal tidak lagi diisi
+        // (kolom NOMORAJUDOKASAL tetap ada di tabel, NULL) - tidak dipetakan.
         'bahanbaku' => ['bc261_bahanbaku', 'ID', [
             'seriBarang' => ['SERIBARANG', 'int'],
             'seriBahanBaku' => ['SERIBAHANBAKU', 'int'],
@@ -113,7 +116,6 @@ class DocumentBc261Controller extends Controller
             'kodeKantorAsal' => ['KODEKANTORASAL', 'str'],
             'nomorDaftarDokAsal' => ['NOMORDAFTARDOKASAL', 'str'],
             'tanggalDaftarDokAsal' => ['TANGGALDAFTARDOKASAL', 'date'],
-            'nomorAjuDokAsal' => ['NOMORAJUDOKASAL', 'strn'],
             'seriBarangDokAsal' => ['SERIBARANGDOKASAL', 'int'],
             'cif' => ['CIF', 'dec'],
             'cifRupiah' => ['CIFRUPIAH', 'dec'],
@@ -155,15 +157,32 @@ class DocumentBc261Controller extends Controller
     // Daftar kode tetap (docs/documentbc261_plan.md Lampiran A).
     private const KODE = [
         'tujuanPengiriman' => ['1' => 'Diperbaiki', '2' => 'Disubkontrakkan', '3' => 'Dipinjamkan', '4' => 'Barang Return', '5' => 'Lainnya'],
+        // Skema resmi bc261.json hanya menerima 1..9 (Villiger juga menawarkan 10-12; ditolak CEISA).
         'caraAngkut' => ['1' => 'Laut', '2' => 'Kereta Api', '3' => 'Darat', '4' => 'Udara', '5' => 'Pos', '6' => 'Multimoda',
-            '7' => 'Instalasi/Pipa', '8' => 'Perairan', '9' => 'Lainnya', '10' => 'Instalasi', '11' => 'Pipa', '12' => 'Transmisi'],
+            '7' => 'Instalasi/Pipa', '8' => 'Perairan', '9' => 'Lainnya'],
         'jenisJaminan' => ['1' => 'Tunai', '2' => 'Bank Garansi', '3' => 'Customs Bond', '4' => 'Tertulis/CG', '5' => 'STTJ',
             '6' => 'Pusat', '7' => 'Indonesia EximBank', '8' => 'Perusahaan Penjaminan'],
         'jenisMuatan' => ['4' => 'Empty', '7' => 'LCL', '8' => 'FCL'],
         'dokumenAsal' => ['23' => 'BC 2.3', '27' => 'BC 2.7', '40' => 'BC 4.0'],
     ];
 
-    public function __construct(private Bc261PayloadBuilder $builder, private CeisaService $ceisa) {}
+    // Pemeriksaan saat KIRIM terhadap skema resmi docs/bc_schema/bc261.json (bukan saat simpan). Kolom teks di bawah
+    // ini tidak boleh kosong walau skema hanya menuntut tipe string (keputusan user). Dokumen dan jaminan boleh tidak
+    // ada, tetapi baris yang ada harus lengkap; merk kemasan, merk / tipe / ukuran bahan baku boleh kosong.
+    private const WAJIB_ISI = [
+        'kodeKantor', 'kodeTujuanPengiriman', 'kodeValuta', 'kotaTtd', 'namaTtd', 'jabatanTtd',
+        'barang.kodeBarang', 'barang.uraian', 'barang.posTarif', 'barang.kodeSatuanBarang', 'barang.kodeJenisKemasan',
+        'barang.kodeAsalBarang', 'barang.kodeNegaraAsal',
+        'barang.bahanBaku.kodeBarang', 'barang.bahanBaku.posTarif', 'barang.bahanBaku.uraianBarang',
+        'barang.bahanBaku.kodeSatuanBarang', 'barang.bahanBaku.kodeDokAsal', 'barang.bahanBaku.kodeKantor',
+        'barang.bahanBaku.nomorDaftarDokAsal',
+        'entitas.namaEntitas', 'entitas.alamatEntitas', 'entitas.nomorIdentitas', 'entitas.nibEntitas', 'entitas.nomorIjinEntitas',
+        'kemasan.kodeJenisKemasan', 'kontainer.nomorKontainer',
+        'dokumen.kodeDokumen', 'dokumen.nomorDokumen',
+        'jaminan.kodeJenisJaminan', 'jaminan.nomorJaminan', 'jaminan.nomorBpj', 'jaminan.penjamin',
+    ];
+
+    public function __construct(private Bc261PayloadBuilder $builder, private CeisaService $ceisa, private CeisaSchemaValidator $skema) {}
 
     public function index(Request $req)
     {
@@ -351,6 +370,14 @@ class DocumentBc261Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
+        // Dokumen harus lolos skema resmi CEISA dulu; semua masalah ditampilkan sekaligus (bukan saat simpan).
+        if ($masalah = $this->masalahKirim($payload)) {
+            return response()->json([
+                'message' => 'Dokumen belum bisa dikirim: '.count($masalah).' masalah ditemukan. Perbaiki lalu kirim ulang.',
+                'details' => $masalah,
+            ], 422);
+        }
+
         try {
             $res = $this->ceisa->send($token, $this->builder->encode($payload));
         } catch (ConnectionException $e) {
@@ -402,10 +429,46 @@ class DocumentBc261Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
-        return response($this->builder->encode($payload, true), 200, ['Content-Type' => 'application/json']);
+        // JSON selalu ditampilkan walau dokumen belum lengkap; masalah skema hanya jadi peringatan (tidak memblokir).
+        return response()->json([
+            'json' => $this->builder->encode($payload, true),
+            'masalah' => $this->masalahKirim($payload),
+        ]);
     }
 
     /* ---------------------------------------------------------------- helpers */
+
+    // Skema resmi + aturan BC 2.6.1 di luar skema: minimal 1 barang, minimal 1 kemasan dengan jumlah > 0, valuta harus
+    // sudah berupa kode ISO 3 huruf (config beacukai.valuta_iso).
+    private function masalahKirim(array $payload): array
+    {
+        $masalah = $this->skema->masalah('bc261', $payload, [
+            'bagian' => [
+                'barang' => 'Barang', 'bahanBaku' => 'Bahan Baku', 'dokumen' => 'Dokumen',
+                'entitas' => ['Pengusaha TPB', 'Pemilik Barang', 'Penerima Barang'], 'jaminan' => 'Jaminan',
+                'kemasan' => 'Kemasan', 'kontainer' => 'Peti Kemas', 'pengangkut' => 'Pengangkut', 'pungutan' => 'Pungutan',
+            ],
+            'wajibIsi' => self::WAJIB_ISI,
+            'sisa' => ['barang', 'dokumen', 'kemasan', 'kontainer', 'jaminan', 'bahanBaku'],
+        ]);
+
+        if (! $payload['barang']) {
+            $masalah[] = 'Barang: minimal 1 barang.';
+        }
+        if (! $payload['kemasan']) {
+            $masalah[] = 'Kemasan: wajib diisi (Jenis Kemasan dan Jumlah Kemasan).';
+        }
+        foreach ($payload['kemasan'] as $i => $kemasan) {
+            if ($kemasan['jumlahKemasan'] <= 0) {
+                $masalah[] = 'Kemasan #'.($i + 1).' > Jumlah Kemasan (jumlahKemasan): harus lebih dari 0';
+            }
+        }
+        if ($payload['kodeValuta'] !== '' && ! preg_match('/^[A-Z]{3}$/', $payload['kodeValuta'])) {
+            $masalah[] = "Valuta ({$payload['kodeValuta']}): belum punya kode ISO 3 huruf; tambahkan padanannya di config/beacukai.php (valuta_iso) atau ganti valuta.";
+        }
+
+        return $masalah;
+    }
 
     private function tabel(string $key): string
     {

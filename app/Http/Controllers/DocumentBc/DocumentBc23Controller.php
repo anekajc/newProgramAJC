@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DocumentBc;
 
 use App\Http\Controllers\Controller;
 use App\Services\BeaCukai\Bc23PayloadBuilder;
+use App\Services\BeaCukai\CeisaSchemaValidator;
 use App\Services\BeaCukai\CeisaService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -140,7 +141,19 @@ class DocumentBc23Controller extends Controller
     // Waktu tunggu kirim BC 2.3 (BC 2.6.1 memakai 30) - docs/documentbc23_plan.md §8.
     private const TIMEOUT_KIRIM = 60;
 
-    public function __construct(private Bc23PayloadBuilder $builder, private CeisaService $ceisa) {}
+    // Pemeriksaan saat KIRIM terhadap skema resmi docs/bc_schema/bc23.json (bukan saat simpan). Kolom teks di
+    // bawah ini tidak boleh kosong walau skema hanya menuntut tipe string (keputusan user); yang boleh kosong:
+    // Pelabuhan Transit, NIB, merk kemasan, nama / nomor / bendera pengangkut.
+    private const WAJIB_ISI = [
+        'kodeKantor', 'kodeKantorBongkar', 'kodePelMuat', 'kodePelBongkar', 'kodeTps', 'kodeTujuanTpb', 'kodeValuta',
+        'kodeIncoterm', 'nomorBc11', 'posBc11', 'subposBc11', 'kotaTtd', 'namaTtd', 'jabatanTtd',
+        'barang.kodeBarang', 'barang.uraian', 'barang.posTarif', 'barang.kodeSatuanBarang', 'barang.kodeJenisKemasan',
+        'barang.kodeKategoriBarang', 'barang.kodeNegaraAsal',
+        'entitas.namaEntitas', 'entitas.alamatEntitas', 'entitas.nomorIdentitas',
+        'dokumen.kodeDokumen', 'dokumen.nomorDokumen',
+    ];
+
+    public function __construct(private Bc23PayloadBuilder $builder, private CeisaService $ceisa, private CeisaSchemaValidator $skema) {}
 
     public function index(Request $req)
     {
@@ -429,9 +442,12 @@ class DocumentBc23Controller extends Controller
         if (! $payload) {
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
-        // Q-a: Villiger selalu mengirim tanggal tiba tetap; di sini harus diisi user.
-        if ($payload['tanggalTiba'] === '') {
-            return response()->json(['message' => 'Tanggal Tiba harus diisi sebelum dikirim ke CEISA.'], 422);
+        // Dokumen harus lolos skema resmi CEISA dulu; semua masalah ditampilkan sekaligus (bukan saat simpan).
+        if ($masalah = $this->masalahKirim($payload)) {
+            return response()->json([
+                'message' => 'Dokumen belum bisa dikirim: '.count($masalah).' masalah ditemukan. Perbaiki lalu kirim ulang.',
+                'details' => $masalah,
+            ], 422);
         }
 
         try {
@@ -475,6 +491,33 @@ class DocumentBc23Controller extends Controller
         ]);
     }
 
+    // Skema resmi + aturan BC 2.3 di luar skema: minimal 1 barang, dokumen minimal Invoice (380) lalu BL/AWB (705/740),
+    // valuta harus sudah berupa kode ISO 3 huruf (config beacukai.valuta_iso).
+    private function masalahKirim(array $payload): array
+    {
+        $masalah = $this->skema->masalah('bc23', $payload, [
+            'bagian' => [
+                'barang' => 'Barang', 'barangTarif' => ['Tarif BM', 'Tarif PPH', 'Tarif PPN'], 'dokumen' => 'Dokumen',
+                'entitas' => ['Importir / Pengusaha TPB', 'Pemasok', 'Pemilik Barang'], 'kemasan' => 'Kemasan',
+                'kontainer' => 'Peti Kemas', 'pengangkut' => 'Pengangkut',
+            ],
+            'wajibIsi' => self::WAJIB_ISI,
+            'sisa' => ['barang', 'dokumen', 'kemasan', 'kontainer'],
+        ]);
+
+        if (! $payload['barang']) {
+            $masalah[] = 'Barang: minimal 1 barang.';
+        }
+        if (count($payload['dokumen']) < 2) {
+            $masalah[] = 'Dokumen: minimal 2 dokumen, Invoice (380) lalu BL/AWB (705 atau 740).';
+        }
+        if ($payload['kodeValuta'] !== '' && ! preg_match('/^[A-Z]{3}$/', $payload['kodeValuta'])) {
+            $masalah[] = "Valuta ({$payload['kodeValuta']}): belum punya kode ISO 3 huruf; tambahkan padanannya di config/beacukai.php (valuta_iso) atau ganti valuta.";
+        }
+
+        return $masalah;
+    }
+
     // JSON yang AKAN dikirim ke CEISA (tanpa mengirim), untuk dicocokkan dengan Villiger.
     public function spPreview(Request $req)
     {
@@ -486,7 +529,11 @@ class DocumentBc23Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
-        return response($this->builder->encode($payload, true), 200, ['Content-Type' => 'application/json']);
+        // JSON selalu ditampilkan walau dokumen belum lengkap; masalah skema hanya jadi peringatan (tidak memblokir).
+        return response()->json([
+            'json' => $this->builder->encode($payload, true),
+            'masalah' => $this->masalahKirim($payload),
+        ]);
     }
 
     /* ---------------------------------------------------------------- helpers */

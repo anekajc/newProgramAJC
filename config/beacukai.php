@@ -15,6 +15,14 @@ return [
     // kodeKantorBongkar.
     'kode_kantor_bongkar' => env('BC_KODE_KANTOR_BONGKAR', '070100'),
 
+    // Kode valuta DBVALAS yang BUKAN kode ISO 4217 => padanan ISO yang diminta CEISA ("Referensi Valuta").
+    // Isi di DBVALAS tidak diubah; terjemahan hanya terjadi saat payload dikirim. Kode 3 huruf lain (USD, SGD,
+    // IDR, ...) dikirim apa adanya. Tambahkan baris di sini bila ada valuta lain yang kodenya bukan ISO.
+    'valuta_iso' => [
+        'RM' => 'MYR',
+        'EURO' => 'EUR',
+    ],
+
     'ceisa' => [
         'login_url' => env('BC_CEISA_LOGIN_URL', 'https://apis-gw.beacukai.go.id/nle-oauth/v1/user/login'),
         'document_url' => env('BC_CEISA_DOCUMENT_URL', 'https://apis-gw.beacukai.go.id/openapi/document'),
@@ -31,6 +39,13 @@ return [
         'tarif_fasilitas' => (int) env('BC25_TARIF_FASILITAS', 0),
         'kode_jenis_tarif' => env('BC25_KODE_JENIS_TARIF', '1'),
         'kode_lokasi_bayar' => env('BC25_KODE_LOKASI_BAYAR', '1'),
+    ],
+
+    // Konstanta payload BC 4.1. Skema resmi tidak punya pungutan / barangTarif, jadi hanya kodeLokasiBayar
+    // (1 = Bank) yang masih dipakai; nilai awalnya tebakan Villiger yang BELUM dibuktikan oleh uji CEISA.
+    // Dipisah dari bc25 supaya koreksi BC 4.1 tidak mengubah BC 2.5.
+    'bc41' => [
+        'kode_lokasi_bayar' => env('BC41_KODE_LOKASI_BAYAR', '1'),
     ],
 
     'tables' => [
@@ -70,6 +85,7 @@ return [
         'bc262_kontainer' => 'DOCUMENTBC262KONTAINER',
         'bc262_jaminan' => 'DOCUMENTBC262JAMINAN',
         'bc262_dokumen' => 'DOCUMENTBC262DOKUMEN',
+        'bc262_pungutan' => 'DOCUMENTBC262PUNGUTAN', // docs/update-db-DBSMLNEW/beacukai/19_tabel_documentbc262_pungutan.sql
 
         // BC 2.5: header + 5 koleksi anak, berdiri sendiri (docs/update-db-DBSMLNEW/beacukai/14_tabel_documentbc25.sql).
         'bc25' => 'DOCUMENTBC25',
@@ -78,6 +94,14 @@ return [
         'bc25_kemasan' => 'DOCUMENTBC25KEMASAN',
         'bc25_kontainer' => 'DOCUMENTBC25KONTAINER',
         'bc25_dokumen' => 'DOCUMENTBC25DOKUMEN',
+
+        // BC 4.1: header + 5 koleksi anak, berdiri sendiri (docs/update-db-DBSMLNEW/beacukai/16_tabel_documentbc41.sql).
+        'bc41' => 'DOCUMENTBC41',
+        'bc41_barang' => 'DOCUMENTBC41BARANG',
+        'bc41_bahanbaku' => 'DOCUMENTBC41BAHANBAKU',
+        'bc41_kemasan' => 'DOCUMENTBC41KEMASAN',
+        'bc41_kontainer' => 'DOCUMENTBC41KONTAINER',
+        'bc41_dokumen' => 'DOCUMENTBC41DOKUMEN',
 
         // BC 2.3: header (kemasan, kontainer, pengangkut jadi kolom) + barang + dokumen
         // (docs/update-db-DBSMLNEW/beacukai/11_tabel_documentbc23.sql). Sumber barang = DBPO / DBPODET.

@@ -1,0 +1,50 @@
+-- 17 - Kolom baru BC 2.5 supaya payload sesuai skema RESMI CEISA (docs/bc_schema/bc25.json). Dibuat 29 Oktober 2026.
+-- DITINJAU dan DIJALANKAN MANUAL oleh user di DBSMLNEW (bukan php artisan migrate).
+--
+--   DOCUMENTBC25.VOLUME              Total volume (root "volume", wajib di skema), diketik user di tab Transaksi
+--   DOCUMENTBC25.NIPERENTITAS3       salinan NIPER master ENTITAS untuk Penerima Barang ("niperEntitas", wajib)
+--   DOCUMENTBC25BARANG.KODEKATEGORIBARANG  Kategori Barang (master KATEGORIBARANG)
+--   DOCUMENTBC25BARANG.KODEGUNABARANG      Guna Barang: 0..4
+--   DOCUMENTBC25BARANG.KODEKONDISIBARANG   Kondisi Barang: 1 Tidak Rusak, 2 Rusak (bawaan 1)
+--   DOCUMENTBC25BARANG.KODEDOKASAL         Dokumen asal barang (bawaan 23)
+--
+-- Dokumen BC 2.5 yang sudah ada: VOLUME = 0, kondisi = '1', dokumen asal = '23', sisanya NULL (user melengkapinya
+-- lewat Edit sebelum dikirim; pemeriksaan skema saat kirim akan mencatat yang kurang).
+--
+-- Tab Pungutan dihapus dari aplikasi (skema resmi tidak punya array pungutan). Kolom NILAIBM ... NILAITOTALPUNGUTAN
+-- di DOCUMENTBC25 (script 14) dan KODENEGARAASAL di DOCUMENTBC25BARANG tidak lagi dipakai aplikasi; dibiarkan
+-- (bernilai bawaan), tidak dihapus di sini. Hapus sendiri bila perlu.
+-- Aman dijalankan ulang (kolom yang sudah ada dilewati).
+
+USE DBSMLNEW
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25', 'VOLUME') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25 ADD VOLUME decimal(19,4) NOT NULL CONSTRAINT DF_DOCUMENTBC25_VOLUME DEFAULT 0;
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25', 'NIPERENTITAS3') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25 ADD NIPERENTITAS3 varchar(50) NULL;
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25BARANG', 'KODEKATEGORIBARANG') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25BARANG ADD KODEKATEGORIBARANG varchar(20) NULL;
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25BARANG', 'KODEGUNABARANG') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25BARANG ADD KODEGUNABARANG varchar(1) NULL;
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25BARANG', 'KODEKONDISIBARANG') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25BARANG ADD KODEKONDISIBARANG varchar(1) NOT NULL CONSTRAINT DF_DOCUMENTBC25BARANG_KONDISI DEFAULT '1';
+GO
+
+IF COL_LENGTH('dbo.DOCUMENTBC25BARANG', 'KODEDOKASAL') IS NULL
+    ALTER TABLE dbo.DOCUMENTBC25BARANG ADD KODEDOKASAL varchar(20) NOT NULL CONSTRAINT DF_DOCUMENTBC25BARANG_DOKASAL DEFAULT '23';
+GO
+
+-- Cek hasil (harus 2 + 4 baris)
+SELECT TABLE_NAME, COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+WHERE (TABLE_NAME = 'DOCUMENTBC25' AND COLUMN_NAME IN ('VOLUME', 'NIPERENTITAS3'))
+   OR (TABLE_NAME = 'DOCUMENTBC25BARANG' AND COLUMN_NAME IN ('KODEKATEGORIBARANG', 'KODEGUNABARANG', 'KODEKONDISIBARANG', 'KODEDOKASAL'))
+ORDER BY TABLE_NAME, COLUMN_NAME;

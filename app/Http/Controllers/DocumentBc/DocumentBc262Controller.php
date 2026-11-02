@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DocumentBc;
 
 use App\Http\Controllers\Controller;
 use App\Services\BeaCukai\Bc262PayloadBuilder;
+use App\Services\BeaCukai\CeisaSchemaValidator;
 use App\Services\BeaCukai\CeisaService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
@@ -38,19 +39,8 @@ class DocumentBc262Controller extends Controller
         'noRegBc' => ['NOREGBC', 'strn'],
         'tglBc' => ['TGLBC', 'date'],
         'arrDate' => ['ARRDATE', 'date'],
-        // Pungutan (tab Pungutan). nilaiTotalPungutan hanya penjumlahan, tidak dikirim.
-        'nilaiBM' => ['NILAIBM', 'dec'],
-        'nilaiBMAD' => ['NILAIBMAD', 'dec'],
-        'nilaiBMI' => ['NILAIBMI', 'dec'],
-        'nilaiBMTP' => ['NILAIBMTP', 'dec'],
-        'nilaiBMP' => ['NILAIBMP', 'dec'],
-        'nilaiCukaiEa' => ['NILAICUKAIEA', 'dec'],
-        'nilaiCukaiCmea' => ['NILAICUKAICMEA', 'dec'],
-        'nilaiCukaiCtem' => ['NILAICUKAICTEM', 'dec'],
-        'nilaiPPN' => ['NILAIPPN', 'dec'],
-        'nilaiPPNBM' => ['NILAIPPNBM', 'dec'],
-        'nilaiPPh' => ['NILAIPPH', 'dec'],
-        'nilaiTotalPungutan' => ['NILAITOTALPUNGUTAN', 'dec'],
+        // Pungutan sekarang koleksi anak (CHILDREN.pungutan); kolom NILAIBM ... NILAITOTALPUNGUTAN di tabel header
+        // tidak dipakai lagi (bawaan 0).
         'nomorIdentitasEntitas1' => ['NOMORIDENTITASENTITAS1', 'strn'],
         'namaEntitas1' => ['NAMAENTITAS1', 'str'],
         'alamatEntitas1' => ['ALAMATENTITAS1', 'str'],
@@ -77,6 +67,7 @@ class DocumentBc262Controller extends Controller
             'seriBarang' => ['SERIBARANG', 'seri'],
             'posTarif' => ['POSTARIF', 'str'],
             'kodeBarang' => ['KODEBARANG', 'str'],
+            'kodeAsalBarang' => ['KODEASALBARANG', 'strn'],
             'uraian' => ['URAIAN', 'str'],
             'merk' => ['MERK', 'strn'],
             'tipe' => ['TIPE', 'strn'],
@@ -123,7 +114,6 @@ class DocumentBc262Controller extends Controller
             'kodeKantorAsal' => ['KODEKANTORASAL', 'str'],
             'nomorDaftarDokAsal' => ['NOMORDAFTARDOKASAL', 'str'],
             'tanggalDaftarDokAsal' => ['TANGGALDAFTARDOKASAL', 'date'],
-            'nomorAjuDokAsal' => ['NOMORAJUDOKASAL', 'strn'],
             'seriBarangDokAsal' => ['SERIBARANGDOKASAL', 'int'],
             'cif' => ['CIF', 'dec'],
             'cifRupiah' => ['CIFRUPIAH', 'dec'],
@@ -160,6 +150,12 @@ class DocumentBc262Controller extends Controller
             'nomorDokumen' => ['NOMORDOKUMEN', 'strn'],
             'tanggalDokumen' => ['TANGGALDOKUMEN', 'date'],
         ]],
+        'pungutan' => ['bc262_pungutan', 'SERIPUNGUTAN', [
+            'seriPungutan' => ['SERIPUNGUTAN', 'seri'],
+            'kodeJenisPungutan' => ['KODEJENISPUNGUTAN', 'str'],
+            'kodeFasilitasTarif' => ['KODEFASILITASTARIF', 'str'],
+            'nilaiPungutan' => ['NILAIPUNGUTAN', 'dec'],
+        ]],
     ];
 
     // Daftar kode tetap (docs/documentbc262_plan.md Lampiran A).
@@ -172,6 +168,32 @@ class DocumentBc262Controller extends Controller
             '6' => 'Pusat', '7' => 'Indonesia EximBank', '8' => 'Perusahaan Penjaminan'],
         'jenisMuatan' => ['4' => 'Empty', '7' => 'LCL', '8' => 'FCL'],
         'dokumenAsal' => ['23' => 'BC 2.3', '27' => 'BC 2.7', '40' => 'BC 4.0'],
+        // Tab Pungutan: daftar tetap dari referensi CEISA (keputusan user).
+        'jenisPungutan' => ['BK' => 'Bea Keluar', 'BM' => 'Bea Masuk', 'BMAD' => 'Bea Masuk Anti Dumping', 'BMI' => 'Bea Masuk Imbalan',
+            'BMKITE' => 'Bea Masuk KITE', 'BMP' => 'Bea Masuk Pembalasan', 'BMTP' => 'Bea Masuk Tindakan Pengamanan', 'CEA' => 'Cukai Etil Alkohol',
+            'CMEA' => 'Cukai Minuman Mengandung Etil Alkohol', 'CTEM' => 'Cukai Tembakau', 'DENDA' => 'Denda Administrasi Pabean',
+            'DS' => 'Dana Sawit', 'PNBP' => 'Penerimaan Negara Bukan Pajak', 'PPH' => 'PPh Impor', 'PPHEKSPOR' => 'PPh Ekspor',
+            'PPN' => 'PPN Impor', 'PPNBM' => 'PPnBM Impor', 'PPNLOKAL' => 'PPN Dalam Negeri / Hasil Tembakau'],
+        'fasilitasTarif' => ['1' => 'DIBAYAR', '2' => 'DITANGGUNG PEMERINTAH', '3' => 'DITANGGUHKAN', '4' => 'BERKALA', '5' => 'DIBEBASKAN',
+            '6' => 'TIDAK DIPUNGUT', '7' => 'SUDAH DILUNASI', '8' => 'DIJAMINKAN', '9' => 'DITUNDA'],
+    ];
+
+    // Pemeriksaan saat KIRIM terhadap skema resmi docs/bc_schema/bc262.json (bukan saat simpan). Kolom teks di bawah
+    // ini tidak boleh kosong walau skema hanya menuntut tipe string (keputusan user). Dokumen dan jaminan boleh tidak
+    // ada, tetapi baris yang ada harus lengkap; merk kemasan, merk / tipe / ukuran bahan baku boleh kosong. Nomor AJU
+    // dokumen asal bahan baku diperiksa terpisah di masalahKirim (diambil dari BC 2.6.1 sumber).
+    private const WAJIB_ISI = [
+        'kodeKantor', 'kodeTujuanPemasukan', 'kodeValuta', 'kotaTtd', 'namaTtd', 'jabatanTtd',
+        'barang.kodeBarang', 'barang.uraian', 'barang.posTarif', 'barang.kodeSatuanBarang', 'barang.kodeJenisKemasan',
+        'barang.kodeAsalBarang', 'barang.kodeNegaraAsal',
+        'barang.bahanBaku.kodeBarang', 'barang.bahanBaku.posTarif', 'barang.bahanBaku.uraianBarang',
+        'barang.bahanBaku.kodeSatuanBarang', 'barang.bahanBaku.kodeDokAsal', 'barang.bahanBaku.kodeKantor',
+        'barang.bahanBaku.nomorDaftarDokAsal',
+        'entitas.namaEntitas', 'entitas.alamatEntitas', 'entitas.nomorIdentitas', 'entitas.nibEntitas', 'entitas.nomorIjinEntitas',
+        'kemasan.kodeJenisKemasan', 'kontainer.nomorKontainer',
+        'dokumen.kodeDokumen', 'dokumen.nomorDokumen',
+        'jaminan.kodeJenisJaminan', 'jaminan.nomorJaminan', 'jaminan.nomorBpj', 'jaminan.penjamin',
+        'pungutan.kodeJenisPungutan', 'pungutan.kodeFasilitasTarif',
     ];
 
     // Salinan data master ENTITAS di dokumen (Q-f): [key camelCase => akhiran kolom]. Kolomnya
@@ -184,7 +206,7 @@ class DocumentBc262Controller extends Controller
         'kodeNegara' => 'KODENEGARAENTITAS',
     ];
 
-    public function __construct(private Bc262PayloadBuilder $builder, private CeisaService $ceisa) {}
+    public function __construct(private Bc262PayloadBuilder $builder, private CeisaService $ceisa, private CeisaSchemaValidator $skema) {}
 
     public function index(Request $req)
     {
@@ -284,6 +306,9 @@ class DocumentBc262Controller extends Controller
 
         $header = $this->normalisasi(self::HEADER, $data['header'] ?? []);
         $children = $this->normalisasiAnak($data);
+        if ($tolak = $this->tolakPungutanGanda($children)) {
+            return $tolak;
+        }
         $idBc261 = $this->bulat($data['document_bc261_id'] ?? null) ?: null;
 
         return DB::connection('SML')->transaction(function () use ($header, $children, $idBc261) {
@@ -325,6 +350,9 @@ class DocumentBc262Controller extends Controller
 
         $header = $this->normalisasi(self::HEADER, $data['header'] ?? []);
         $children = $this->normalisasiAnak($data);
+        if ($tolak = $this->tolakPungutanGanda($children)) {
+            return $tolak;
+        }
 
         return DB::connection('SML')->transaction(function () use ($id, $header, $children) {
             if ($tolak = $this->cekBolehUbah($id)) {
@@ -389,6 +417,14 @@ class DocumentBc262Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
+        // Dokumen harus lolos skema resmi CEISA dulu; semua masalah ditampilkan sekaligus (bukan saat simpan).
+        if ($masalah = $this->masalahKirim($payload)) {
+            return response()->json([
+                'message' => 'Dokumen belum bisa dikirim: '.count($masalah).' masalah ditemukan. Perbaiki lalu kirim ulang.',
+                'details' => $masalah,
+            ], 422);
+        }
+
         try {
             $res = $this->ceisa->send($token, $this->builder->encode($payload));
         } catch (ConnectionException $e) {
@@ -440,10 +476,77 @@ class DocumentBc262Controller extends Controller
             return response()->json(['message' => 'Dokumen tidak ditemukan.'], 404);
         }
 
-        return response($this->builder->encode($payload, true), 200, ['Content-Type' => 'application/json']);
+        // JSON selalu ditampilkan walau dokumen belum lengkap; masalah skema hanya jadi peringatan (tidak memblokir).
+        return response()->json([
+            'json' => $this->builder->encode($payload, true),
+            'masalah' => $this->masalahKirim($payload),
+        ]);
     }
 
     /* ---------------------------------------------------------------- helpers */
+
+    // Skema resmi + aturan BC 2.6.2 di luar skema: minimal 1 barang, minimal 1 kemasan dengan jumlah > 0, valuta harus
+    // sudah berupa kode ISO 3 huruf (config beacukai.valuta_iso), tiap baris pungutan bernilai > 0, dan Nomor AJU
+    // dokumen asal bahan baku (dari BC 2.6.1 sumber) harus ada.
+    private function masalahKirim(array $payload): array
+    {
+        $masalah = $this->skema->masalah('bc262', $payload, [
+            'bagian' => [
+                'barang' => 'Barang', 'bahanBaku' => 'Bahan Baku', 'dokumen' => 'Dokumen',
+                'entitas' => ['Pengusaha TPB', 'Pemilik Barang', 'Pengirim Barang'], 'jaminan' => 'Jaminan',
+                'kemasan' => 'Kemasan', 'kontainer' => 'Peti Kemas', 'pengangkut' => 'Pengangkut', 'pungutan' => 'Pungutan',
+            ],
+            'wajibIsi' => self::WAJIB_ISI,
+            'sisa' => ['barang', 'dokumen', 'kemasan', 'kontainer', 'jaminan', 'bahanBaku', 'pungutan'],
+        ]);
+
+        if (! $payload['barang']) {
+            $masalah[] = 'Barang: minimal 1 barang.';
+        }
+        if (! $payload['kemasan']) {
+            $masalah[] = 'Kemasan: wajib diisi (Jenis Kemasan dan Jumlah Kemasan).';
+        }
+        foreach ($payload['kemasan'] as $i => $kemasan) {
+            if ($kemasan['jumlahKemasan'] <= 0) {
+                $masalah[] = 'Kemasan #'.($i + 1).' > Jumlah Kemasan (jumlahKemasan): harus lebih dari 0';
+            }
+        }
+        foreach ($payload['pungutan'] as $i => $pungutan) {
+            if ($pungutan['nilaiPungutan'] <= 0) {
+                $masalah[] = 'Pungutan #'.($i + 1).' > Nilai Pungutan (nilaiPungutan): harus lebih dari 0';
+            }
+        }
+        if ($payload['kodeValuta'] !== '' && ! preg_match('/^[A-Z]{3}$/', $payload['kodeValuta'])) {
+            $masalah[] = "Valuta ({$payload['kodeValuta']}): belum punya kode ISO 3 huruf; tambahkan padanannya di config/beacukai.php (valuta_iso) atau ganti valuta.";
+        }
+        foreach ($payload['barang'] as $barang) {
+            foreach ($barang['bahanBaku'] as $bahanBaku) {
+                if ($bahanBaku['nomorAjuDokAsal'] === '') {
+                    $masalah[] = 'Bahan Baku: Nomor AJU Dokumen Asal (nomorAjuDokAsal) kosong - diambil dari BC 2.6.1 sumber, sedangkan dokumen ini dibuat tanpa BC 2.6.1 sumber.';
+                    break 2;
+                }
+            }
+        }
+
+        return $masalah;
+    }
+
+    // Dua baris pungutan dengan Jenis dan Fasilitas yang sama ditolak saat simpan (keputusan user).
+    private function tolakPungutanGanda(array $children)
+    {
+        $lihat = [];
+        foreach ($children['pungutan'] as $row) {
+            $kunci = $row['kodeJenisPungutan'].'|'.$row['kodeFasilitasTarif'];
+            if (isset($lihat[$kunci])) {
+                return response()->json([
+                    'message' => "Pungutan {$row['kodeJenisPungutan']} dengan Fasilitas Tarif {$row['kodeFasilitasTarif']} sudah ada. Satu kombinasi hanya boleh satu baris.",
+                ], 422);
+            }
+            $lihat[$kunci] = true;
+        }
+
+        return null;
+    }
 
     private function tabel(string $key): string
     {
@@ -612,7 +715,12 @@ class DocumentBc262Controller extends Controller
         $entitas[2]['nomorIjinEntitas'] = $row['NOMORIJINENTITAS3'] ?? null;
         $entitas[2]['tanggalIjinEntitas'] = isset($row['TANGGALIJINENTITAS3']) ? substr((string) $row['TANGGALIJINENTITAS3'], 0, 10) : null;
 
-        return $this->builder->build($doc['header'], $doc['children'], $entitas);
+        // Nomor AJU dokumen asal bahan baku = nomor AJU BC 2.6.1 sumber ('' bila dokumen berdiri sendiri).
+        $sumber = $h['document_bc261_id']
+            ? DB::connection('SML')->selectOne('SELECT NOMORAJU FROM '.$this->tabel('bc261').' WHERE ID = ?', [$h['document_bc261_id']])
+            : null;
+
+        return $this->builder->build($h + ['nomorAjuSumber' => $sumber ? trim((string) $sumber->NOMORAJU) : ''], $doc['children'], $entitas);
     }
 
     // §5.2 - normalisasi isian dari UI sesuai tipe kolom.

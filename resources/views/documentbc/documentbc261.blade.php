@@ -345,23 +345,24 @@
                             </select>
 
                             <label for="h_nomorIdentitasEntitas{{ $n }}">NPWP</label>
-                            <input type="text" class="form-control" id="h_nomorIdentitasEntitas{{ $n }}" data-h="nomorIdentitasEntitas{{ $n }}" maxlength="50">
+                            <input type="text" class="form-control" id="h_nomorIdentitasEntitas{{ $n }}" data-h="nomorIdentitasEntitas{{ $n }}" maxlength="50" readonly>
 
                             <label for="h_alamatEntitas{{ $n }}">Alamat</label>
                             <div class="bs-full">
                                 <input type="hidden" id="h_namaEntitas{{ $n }}" data-h="namaEntitas{{ $n }}">
-                                <textarea class="form-control" id="h_alamatEntitas{{ $n }}" data-h="alamatEntitas{{ $n }}" rows="2" maxlength="1000"></textarea>
+                                <textarea class="form-control" id="h_alamatEntitas{{ $n }}" data-h="alamatEntitas{{ $n }}" rows="2" maxlength="1000" readonly></textarea>
                             </div>
 
                             @if ($n === 1)
                                 <label for="h_nomorIjinEntitas1" class="bs-wrap">Nomor Izin TPB</label>
-                                <input type="text" class="form-control" id="h_nomorIjinEntitas1" data-h="nomorIjinEntitas1" maxlength="50">
+                                <input type="text" class="form-control" id="h_nomorIjinEntitas1" data-h="nomorIjinEntitas1" maxlength="50" readonly>
 
                                 <label for="h_tanggalIjinEntitas1" class="bs-wrap">Tanggal Izin TPB</label>
-                                <input type="date" class="form-control" id="h_tanggalIjinEntitas1" data-h="tanggalIjinEntitas1">
+                                <input type="date" class="form-control" id="h_tanggalIjinEntitas1" data-h="tanggalIjinEntitas1" readonly>
                             @endif
                         </div>
                     @endforeach
+                    <div class="bc-info mt-2">Ketiga entitas wajib dipilih saat dikirim ke CEISA. Pengusaha TPB juga butuh NIB, Nomor Izin dan Tanggal Izin dari master Entitas. NPWP, alamat dan izin terisi otomatis dari master saat entitas dipilih (hanya tampilan; ubah lewat master Entitas).</div>
                 </div>
 
                 {{-- DOKUMEN --}}
@@ -382,6 +383,7 @@
                             </div>
                         </div>
                     </div>
+                    <div class="bc-info mt-2">Dokumen tidak wajib ada, tetapi baris yang ada harus lengkap (jenis, nomor, tanggal) saat dikirim.</div>
                 </div>
 
                 {{-- PENGANGKUT --}}
@@ -433,7 +435,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bc-info mt-2">Peti kemas disimpan di dokumen tetapi tidak dikirim ke CEISA (sama seperti program lama).</div>
+                    <div class="bc-info mt-2">Kemasan wajib ada saat dikirim ke CEISA (Jenis Kemasan terisi dan Jumlah lebih dari 0). Peti kemas ikut dikirim bila diisi.</div>
                 </div>
 
                 {{-- TRANSAKSI --}}
@@ -457,6 +459,7 @@
                         <label for="h_netto">Netto (Kg)</label>
                         <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" id="h_netto" data-h="netto">
                     </div>
+                    <div class="bc-info mt-2">Saat dikirim, kode valuta DBVALAS diterjemahkan ke kode ISO (mis. RM menjadi MYR, EURO menjadi EUR; daftarnya di config valuta_iso).</div>
                 </div>
 
                 {{-- BARANG + BAHAN BAKU --}}
@@ -567,6 +570,9 @@
                             <label>Kode Barang</label>
                             <input type="text" class="form-control" data-f="kodeBarang" maxlength="20">
 
+                            <label class="bs-wrap">Asal Barang</label>
+                            <select class="form-control" data-f="kodeAsalBarang"></select>
+
                             <label>Uraian</label>
                             <input type="text" class="form-control" data-f="uraian" maxlength="100">
 
@@ -601,11 +607,12 @@
                             <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan bc-tetap" data-f="cif" disabled>
 
                             <label>Nilai CIF</label>
-                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cifRupiah">
+                            <input type="text" inputmode="decimal" class="form-control text-right bc-ribuan" data-f="cifRupiah" oninput="hitungCifBaris(this)">
 
                             <label class="bs-wrap">Negara Asal</label>
                             <select class="form-control" data-f="kodeNegaraAsal"></select>
                         </div>
+                        <div class="bc-info mt-2">CIF = Nilai CIF / NDPBM header (dihitung ulang saat Simpan Dokumen). NDPBM barang mengikuti NDPBM header.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -678,9 +685,6 @@
 
                             <label class="bs-wrap">Tanggal Daftar Dok Asal</label>
                             <input type="date" class="form-control" data-f="tanggalDaftarDokAsal">
-
-                            <label class="bs-wrap">Nomor AJU Dok Asal</label>
-                            <input type="text" class="form-control" data-f="nomorAjuDokAsal" maxlength="100">
 
                             <label class="bs-wrap">Seri Barang Dok Asal</label>
                             <input type="number" step="1" class="form-control text-right" data-f="seriBarangDokAsal">
@@ -927,6 +931,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
+                    <div id="previewMasalah" class="mb-2"></div>
                     <pre id="previewIsi"></pre>
                 </div>
                 <div class="modal-footer">
@@ -957,6 +962,13 @@
         const SATUAN = @json($lookup['satuan']);
         // Master Jenis Dokumen (JENISDOKUMEN): [{kode, nama}]
         const JENIS_DOKUMEN = @json($lookup['jenisDokumen']);
+        // Asal Barang (kodeAsalBarang CEISA): daftar tetap, tanpa master.
+        const ASAL_BARANG = [
+            { kode: '1', nama: 'Sepenuhnya diperoleh dan/atau diproduksi di luar daerah pabean' },
+            { kode: '2', nama: 'Sepenuhnya diperoleh dan/atau diproduksi di tempat lain dalam daerah pabean' },
+            { kode: '3', nama: 'Kawasan Pabean' },
+            { kode: '4', nama: 'Lainnya' },
+        ];
         const KODE = @json($kode);
 
         const AKSES = {
@@ -1453,6 +1465,18 @@
             isiEntitas($(this).data('n'), $(this).val());
         });
 
+        // CIF barang = Nilai CIF (Rupiah) / NDPBM header; kosong bila NDPBM 0. NDPBM barang = NDPBM header.
+        const bulat2 = n => Math.round(n * 100) / 100;
+
+        function cifDariRupiah(nilaiRupiah) {
+            const nd = angka($('#h_ndpbm').val());
+            return nd ? bulat2(angka(nilaiRupiah) / nd) : '';
+        }
+
+        function hitungCifBaris(el) {
+            setRibuan($(el).closest('.modal').find('[data-f="cif"]'), cifDariRupiah($(el).val()));
+        }
+
         function hitungCifRupiah() {
             const nilai = angka($('#h_ndpbm').val()) * angka($('#h_cif').val());
             $('#h_cifRupiah').val(nilai.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
@@ -1584,6 +1608,12 @@
             if (mode === 'detail') {
                 return;
             }
+            // CIF dan NDPBM barang mengikuti NDPBM header saat ini.
+            state.barang.forEach(function(r) {
+                r.cif = cifDariRupiah(r.cifRupiah);
+                r.ndpbm = angka($('#h_ndpbm').val());
+            });
+
             const header = {};
             $('[data-h]').each(function() {
                 header[$(this).data('h')] = $(this).hasClass('bc-ribuan') ? $(this).val().replace(/,/g, '') : $(this).val();
@@ -1795,6 +1825,7 @@
             const row = idx === null ? nilaiAwal(nama) : state[nama][idx];
             opsiMaster(modal.find('[data-f="kodeJenisKemasan"]'), JENIS_KEMASAN, row.kodeJenisKemasan || '');
             if (nama === 'barang') {
+                opsiMaster(modal.find('[data-f="kodeAsalBarang"]'), ASAL_BARANG, row.kodeAsalBarang || '');
                 opsiMaster(modal.find('[data-f="kodeNegaraAsal"]'), NEGARA, row.kodeNegaraAsal || '');
             }
             if (nama === 'barang' || nama === 'bahanbaku') {
@@ -1812,6 +1843,10 @@
             });
             if (nama === 'barang' && idx !== null) {
                 modal.find('[data-f="seriBarang"]').val(idx + 1);
+            }
+            if (nama === 'barang') {
+                // CIF barang selalu mengikuti Nilai CIF dan NDPBM header yang sekarang.
+                setRibuan(modal.find('[data-f="cif"]'), cifDariRupiah(modal.find('[data-f="cifRupiah"]').val()));
             }
             if (nama === 'kontainer') {
                 opsiMaster('#mdlKontainer [data-f="kodeUkuranKontainer"]', UKURAN_KONTAINER, row.kodeUkuranKontainer || '');
@@ -2057,6 +2092,12 @@
                 setLoginBc(null);
             }
             const baris = [res.message || 'Pengiriman gagal.'].concat(Array.isArray(res.details) ? res.details : []);
+            if (err.status === 422 && Array.isArray(res.details) && res.details.length) {
+                // Daftar masalah skema CEISA bisa panjang: tampil sebagai dialog (tetap sampai ditutup), satu masalah per baris.
+                alertify.alert('Dokumen belum bisa dikirim', '<div style="max-height:60vh;overflow:auto">' +
+                    esc(res.message) + '<ul class="mt-2 mb-0 pl-3">' + res.details.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul></div>');
+                return;
+            }
             alertify.error(baris.map(esc).join('<br>'), 15);
         }
 
@@ -2096,10 +2137,16 @@
             $.ajax({
                 url: "{!! url('documentbc261sppreview') !!}",
                 type: "get",
-                dataType: "text",
+                dataType: "json",
                 data: { id },
                 success: function(res) {
-                    $('#previewIsi').text(res);
+                    // Hasil pemeriksaan skema CEISA di atas JSON: hijau bila lolos, merah + daftar masalah bila belum.
+                    const masalah = res.masalah || [];
+                    $('#previewMasalah').html(masalah.length ?
+                        '<div class="alert alert-danger mb-0"><strong>Belum bisa dikirim: ' + masalah.length + ' masalah ditemukan.</strong>' +
+                        '<ul class="mb-0 pl-3 mt-1">' + masalah.map(m => '<li>' + esc(m) + '</li>').join('') + '</ul></div>' :
+                        '<div class="alert alert-success mb-0">Lolos pemeriksaan skema CEISA, siap dikirim.</div>');
+                    $('#previewIsi').text(res.json);
                     $('#mdlPreview').modal('show');
                 },
                 error: function(err) {
