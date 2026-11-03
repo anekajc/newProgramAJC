@@ -95,3 +95,6 @@ Route::get('/__debug_login_sa', function () {
     Auth::loginUsingId(\App\Models\User::where('username', 'SA')->first()->id);
     return 'ok';
 });
+
+
+
