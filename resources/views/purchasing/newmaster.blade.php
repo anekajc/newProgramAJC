@@ -12,7 +12,6 @@
       type="text/css"
     />
 
-
     <link rel="stylesheet" href="{!! URL::asset('public/css/semantic.css') !!}">
     <link rel="stylesheet" href="{!! URL::asset('public/css/select2.min.css') !!}">
     <link rel="stylesheet" href="{!! URL::asset('public/css/datatables.min.css') !!}">
@@ -90,7 +89,7 @@
     padding-top: 20px;
     gap: 15px;
 
-    /* Hidden by default — slid off to the left */
+    /* Hidden by default ï¿½ slid off to the left */
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }

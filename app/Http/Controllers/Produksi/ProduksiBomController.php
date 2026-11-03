@@ -193,7 +193,7 @@ class ProduksiBomController extends Controller
     $length = (int) $req->input('length', 10);
 
     $dataQuery = (clone $query)->select(
-      'KODEBRG', 'NAMABRG', 'KODEGRP',
+      'KODEBRG', 'NAMABRG', 'KODEGRP', 'SAT1',
       DB::raw('ROW_NUMBER() OVER (ORDER BY KODEBRG) as RowNum'),
       DB::raw('COUNT(*) OVER () as TotalCount')
     );
