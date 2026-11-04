@@ -80,9 +80,15 @@ class ProduksiBomController extends Controller
   public function nextKodeBom(Request $req) {
     $kodebrg = $req->kodebrg;
 
+    // NoUrut terbesar dihitung dari kolom KodeBrg DAN dari awalan KodeBOM (<KodeBrg>-NN):
+    // ada baris DBBOM lama yang KodeBrg-nya NULL (mis. 10102011780001-02), kalau cuma
+    // mengandalkan KodeBrg baris itu tidak terhitung -- Kode BOM "baru" yang dihasilkan malah
+    // bentrok dengan BOM yang sudah ada (dan proses miliknya ikut tersaring dari picker Kode
+    // Proses, lihat listKodeProses()).
     $row = DB::connection('SML')->selectOne(
-      'SELECT MAX(CAST(NoUrut AS INT)) as MaxUrut FROM DBBOM WHERE KodeBrg = :kodebrg',
-      ['kodebrg' => $kodebrg]
+      "SELECT MAX(CAST(NoUrut AS INT)) as MaxUrut FROM DBBOM
+       WHERE KodeBrg = ? OR LEFT(KodeBOM, LEN(?) + 1) = ? + '-'",
+      [$kodebrg, $kodebrg, $kodebrg]
     );
     $urut = str_pad(((int) ($row->MaxUrut ?? 0)) + 1, 2, '0', STR_PAD_LEFT);
 
@@ -144,7 +150,11 @@ class ProduksiBomController extends Controller
   // Panel "Daftar Proses" -- proses milik satu BOM.
   public function listProses(Request $req) {
     return DB::connection('SML')->select(
-      'SELECT A.* FROM DBBOMProses A WHERE A.KodeBOM = :kodebom ORDER BY A.KodeBOM',
+      'SELECT A.*, P.Keterangan
+        FROM DBBOMProses A
+        LEFT OUTER JOIN DBPRoses P ON P.KodePrs = A.KodePrs
+        WHERE A.KodeBOM = :kodebom
+        ORDER BY A.Urut',
       ['kodebom' => $req->kodebom]
     );
   }
@@ -157,8 +167,8 @@ class ProduksiBomController extends Controller
   public function listKodeProses(Request $req) {
     if ($req->kodebom) {
       return DB::connection('SML')->select(
-        'SELECT KodePrs, Keterangan FROM DBPRoses
-         WHERE KodePrs NOT IN (SELECT KodePrs FROM DBBOMProses WHERE KodeBOM = :kodebom)
+        'SELECT KodePrs, Keterangan FROM DBPRoses p
+         WHERE NOT EXISTS (SELECT 1 FROM DBBOMProses b WHERE b.KodeBOM = :kodebom AND b.KodePrs = p.KodePrs)
          ORDER BY KodePrs',
         ['kodebom' => $req->kodebom]
       );

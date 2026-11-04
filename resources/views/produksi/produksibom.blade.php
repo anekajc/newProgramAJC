@@ -57,12 +57,12 @@
     font-weight: 600;
     color: #2563eb;
   }
-
+/* 
   {{-- Disamakan gayanya dengan .data-table PO (gray thead, garis tipis per baris, tanpa
        kotak per sel -- lihat purchaseOrder.blade.php's #tabel_add/.data-table), tapi padding
        dibikin lebih rapat (6px/10px, bukan 11-12px) karena 3 panel kanan ini jauh lebih
        sempit dari tabel PO -- bukan sekadar pakai class data-table apa adanya. Dipakai juga
-       di modalProduksiBOM.blade.php (grid Daftar Proses/Detail BOM) supaya satu gaya. --}}
+       di modalProduksiBOM.blade.php (grid Daftar Proses/Detail BOM) supaya satu gaya. --}} */
   .pb-sub-table {
     width: 100%;
     margin: 0;
@@ -107,10 +107,10 @@
     background: #fff3b0 !important;
   }
 
-  {{-- Grid "Daftar Proses" di modal Tambah/Edit BOM (modalProduksiBOM.blade.php) -- baris
+  /* {{-- Grid "Daftar Proses" di modal Tambah/Edit BOM (modalProduksiBOM.blade.php) -- baris
        bisa diklik untuk menentukan KodePrs aktif dipakai Tambah Detail BOM
        (pbModalPilihProses()), styling disorot sama dengan panel kiri/kanan di halaman
-       utama (.pb-row-selected). --}}
+       utama (.pb-row-selected). --}} */
   #tabel_proses_modal tbody tr.pb-modal-pilih-proses {
     cursor: pointer;
   }
@@ -136,6 +136,16 @@
     flex: 1;
     min-height: 0;
     align-items: stretch;
+  }
+
+  /* Bootstrap .row = flex-wrap:wrap. Di container wrap, tinggi "garis" (line) flex ditentukan
+     ISI kolom terpanjang, bukan tinggi container -- jadi kolom kiri berisi 50-100 baris
+     membuat garis (dan kolom kanan yang ikut stretch) memanjang melewati layar, walau
+     .pb-main-row sudah diberi height inline oleh pbAturTinggi(). nowrap = satu garis yang
+     tingginya dipaksa sama dengan tinggi container, kelebihan isi tidak lagi memuaikannya. */
+  .row.pb-main-row {
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   .pb-left-col,
@@ -273,6 +283,67 @@
     min-height: 0;
   }
 
+  /* Tinggi <td> SEMUA tabel di halaman ini disamakan dengan baris Detail BOM (tinggi baris
+     "natural" .pb-sub-table: font 13px + padding 6px atas/bawah = ~32px). Sebelumnya beda-beda:
+     tombol aksi (.btn-action-sm 30px + margin 2px) membuat baris Daftar BOM jadi ~46px, dan
+     #tabel (Kode Barang) ber-padding 12px + tabelnya diregang height:95% sampai ~56px per baris.
+     Tinggi dikunci eksplisit di sini (padding vertikal 0 + height 32px) dan tombol aksi
+     diperkecil supaya muat di dalam 32px itu, jadi semua tabel punya tinggi baris yang sama
+     tanpa tergantung isi selnya. */
+  #tabel tbody td,
+  .pb-sub-table tbody td {
+    height: 32px;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    vertical-align: middle;
+  }
+
+  #tabel tbody td .btn-action-sm,
+  .pb-sub-table tbody td .btn-action-sm {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    font-size: 12px;
+  }
+
+  /* Ukuran 3 panel kanan: Daftar BOM & Daftar Proses setinggi header + --pb-rows-visible baris
+     (3) saja, lebih dari itu discroll vertikal di dalam panelnya (thead dibuat sticky supaya
+     tetap kelihatan saat discroll). Detail BOM (panel ke-3) mengambil SISA tinggi kolom, jadi
+     otomatis jadi tabel paling tinggi. Ubah --pb-rows-visible di bawah untuk mengganti jumlah
+     baris yang terlihat (tinggi baris --pb-row harus sama dengan height td di atas). */
+  .pb-right-col {
+    --pb-th: 30px;
+    --pb-row: 32px;
+    --pb-rows-visible: 3;
+  }
+
+  .pb-right-col .pb-sub-table thead th {
+    height: var(--pb-th);
+    padding-top: 0;
+    padding-bottom: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .pb-right-col .card:nth-child(1),
+  .pb-right-col .card:nth-child(2) {
+    flex: 0 0 auto;
+  }
+
+  .pb-right-col .card:nth-child(1) .pb-card-inner > div[style*="overflow-x"],
+  .pb-right-col .card:nth-child(2) .pb-card-inner > div[style*="overflow-x"] {
+    flex: 0 0 auto;
+    height: calc(var(--pb-th) + var(--pb-rows-visible) * var(--pb-row) + 2px);
+    overflow-y: auto;
+  }
+
+  .pb-right-col .card:nth-child(3) {
+    flex: 1 1 0;
+  }
+
 </style>
 @endsection
 
@@ -290,7 +361,7 @@
 
           @include('master.partials.toolbarMaster')
 
-          <table id="tabel" class="data-table po-aksi-hover" style='height:95% !important;'>
+          <table id="tabel" class="data-table po-aksi-hover">
             <thead>
               <tr>
                 <th style="padding: 4px 12px;" scope="col">Actions</th>
@@ -338,6 +409,7 @@
                 <tr>
                   <th>Urut</th>
                   <th>Kode Proses</th>
+                  <th>Nama Proses</th>
                 </tr>
               </thead>
               <tbody id="tabel_data_proses">
@@ -470,7 +542,9 @@ function loadAll () {
     serverSide: true,
     // Token 'p' (pagination Bootstrap bawaan) dilepas dari dom MasterList - diganti #pbPager
     // custom (pbRenderPager()) yang tombolnya kecil & rapat, lebih cocok untuk 1800+ halaman.
-    dom: "<'po-table-wrap't><'row'<'col-sm-12'i>>",
+    // Baris info ("Showing x to y of z entries", token 'i') juga dilepas -- pbRenderPager() cuma
+    // butuh dt.page.info() (data, bukan elemen DOM-nya).
+    dom: "<'po-table-wrap't>",
     ajax: {
       url: "{!! url('produksibomloadallbarang') !!}",
       type: "GET",
@@ -523,8 +597,18 @@ function pbAturTinggi () {
   // titik putus lain yang belum ketahuan, baris ini tetap jadi jaring pengaman supaya row
   // tidak pernah mengecil sependek isinya saja.
   row.style.height = ''
+  let wrapReset = document.querySelector('#tabel_wrapper .po-table-wrap')
+  if (wrapReset) { wrapReset.style.height = '' }
+  // Batas bawah dibatasi tinggi viewport juga (bukan cuma bawah .content): .content itu
+  // flex:1 + height:0, tapi kalau induknya (.main) tidak punya tinggi pasti, .content ikut
+  // membesar mengikuti isinya -- begitu tabel kiri berisi >10 baris, bawah .content (dan
+  // tinggi row) ikut melorot melewati layar, sementara #content overflow:hidden jadi
+  // isinya terpotong dan tidak bisa di-scroll.
   let kontenEl = document.querySelector('.content')
-  let bawahKonten = kontenEl ? kontenEl.getBoundingClientRect().bottom : window.innerHeight
+  let bawahKonten = window.innerHeight - 20
+  if (kontenEl) {
+    bawahKonten = Math.min(kontenEl.getBoundingClientRect().bottom, bawahKonten)
+  }
   let atas = row.getBoundingClientRect().top
   let tinggiRow = Math.max(300, Math.floor(bawahKonten - atas))
   row.style.height = tinggiRow + 'px'
@@ -541,6 +625,25 @@ function pbAturTinggi () {
     let tinggi = Math.floor(card.getBoundingClientRect().height)
     if (body && tinggi > 0) { body.style.height = tinggi + 'px' }
   })
+
+  // Tinggi area scroll tabel kiri dipatok eksplisit (px) = tinggi .card-body dikurangi anak
+  // lain di dalamnya (toolbar cari/Tampilkan + pager), supaya tinggi tabel TETAP sama berapa
+  // pun jumlah barisnya (10 atau 100) dan kelebihannya discroll di dalam .po-table-wrap
+  // (overflow:auto bawaan), bukan melebar ke bawah layar. Tidak mengandalkan rantai flex
+  // seperti sebelumnya.
+  let bodyKiri = document.querySelector('.pb-left-col .card-body')
+  let wrap = document.querySelector('#tabel_wrapper .po-table-wrap')
+  if (bodyKiri && wrap) {
+    let terpakai = 0
+    Array.from(bodyKiri.children).forEach(function (el) {
+      if (el.id === 'tabel_wrapper') { return }
+      let cs = window.getComputedStyle(el)
+      terpakai += el.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0)
+    })
+    wrap.style.flex = '0 0 auto'
+    wrap.style.overflowY = 'auto'
+    wrap.style.height = Math.max(120, bodyKiri.clientHeight - terpakai) + 'px'
+  }
 
   document.querySelectorAll('.pb-right-col .card').forEach(function (card) {
     let inner = card.querySelector('.pb-card-inner')
@@ -678,6 +781,7 @@ function pbPilihBom (kodebom, tr) {
           <tr class="pb-pilih-proses" onclick="pbPilihProses('${kodebom}', '${item.KodePrs}', this)">
             <td>${item.Urut}</td>
             <td>${item.KodePrs}</td>
+            <td>${item.Keterangan}</td>
           </tr>
         `
       });
@@ -831,6 +935,10 @@ function submitPrint (kodebrg) {
 }
 
 window.onload = function () {
+  // Default "Tampilkan" halaman ini 25 baris (bawaan toolbarMaster = 10) -- dropdown disetel
+  // SEBELUM loadAll() supaya MasterList.opsi() (pageLength: panjangHalaman()) langsung
+  // membaca 25. Cuma saat halaman dibuka; loadAll() yang dipanggil ulang tidak mereset pilihan.
+  $('#tabel_length_visual').val('25')
   loadAll();
   // Diulang sekali lagi setelah layout benar-benar settle (font/baris toolbar dsb) --
   // panggilan di dalam loadAll()/drawCallback kadang berjalan sebelum browser selesai
