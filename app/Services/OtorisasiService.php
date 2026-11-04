@@ -72,7 +72,8 @@ class OtorisasiService
 
     /**
      * @return array{status: string, request: ?object}
-     *                                                 status: created | exists (masih pending) | approved (sudah diotorisasi) | notfound
+     *                                                 status: created | exists (masih pending) | approved (sudah diotorisasi) | noapprover | notfound
+     *                                                 created juga membawa 'approvers' (jumlah approver) dan 'devices' (perangkat approver yang bisa dipush)
      */
     public function createRequest(string $menuPath, string $nobukti, string $username): array
     {
@@ -85,6 +86,13 @@ class OtorisasiService
         $kodemenu = $this->kodeMenu($menuPath);
         if (! $kodemenu || ! $handler->summary($nobukti)) {
             return ['status' => 'notfound', 'request' => null];
+        }
+
+        // Tanpa approver, permintaan tidak akan pernah diproses dan tidak ada yang diberi tahu -
+        // jangan disimpan (kalau disimpan, ia menggantung 'P' sampai ada yang diberi hak).
+        $approvers = array_values(array_diff($this->approvers($menuPath), [$username]));
+        if (! $approvers) {
+            return ['status' => 'noapprover', 'request' => null];
         }
 
         $existing = DB::connection('SML')->select("
@@ -105,7 +113,6 @@ class OtorisasiService
 
         $request = $this->find((int) $inserted[0]->ID);
 
-        $approvers = array_values(array_diff($this->approvers($menuPath), [$username]));
         $this->notify($approvers, [
             'title' => 'Permintaan Otorisasi '.$this->label($menuPath),
             'body' => $username.' meminta otorisasi '.$nobukti,
@@ -113,7 +120,25 @@ class OtorisasiService
             'tag' => 'oto-'.$request->ID,
         ]);
 
-        return ['status' => 'created', 'request' => $request];
+        return [
+            'status' => 'created',
+            'request' => $request,
+            'approvers' => count($approvers),
+            'devices' => $this->countDevices($approvers),
+        ];
+    }
+
+    /** Jumlah perangkat yang sudah berlangganan push milik USERID-USERID ini. */
+    public function countDevices(array $userIds): int
+    {
+        if (! $userIds) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $res = DB::connection('SML')->select("select count(*) n from DBPUSHSUBSCRIPTION where USERID in ($placeholders)", array_values($userIds));
+
+        return (int) $res[0]->n;
     }
 
     /**

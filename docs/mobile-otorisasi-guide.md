@@ -240,7 +240,9 @@ error: function (err) {
 ```
 
 The request endpoint's JSON contract is `{ok: bool, message: string}`; statuses: `200` created or
-already pending, `422` unsupported menu / requester can approve / already approved, `404` not found.
+already pending, `422` unsupported menu / requester can approve / already approved / **no approver exists
+for the menu** (nothing is saved), `404` not found. The `200` message names the approver count, or warns
+when no approver has a push-enabled device.
 Don't change the row-button markup: the key icon on unapproved rows stays visible to everyone —
 the gate in (b) decides what it does.
 
@@ -408,7 +410,31 @@ browser: the §5 checklist (needs an account with `IsOtorisasi1` on Bank — see
 
 ---
 
-## 11. Prompt template for a new session
+## 11. Troubleshooting — "no notification" / "queue is empty"
+
+Work through these in order; the first four are data checks you can run read-only (§7).
+
+| Symptom | Cause | Check / fix |
+|---|---|---|
+| Approver's **"Permintaan saya"** is empty | Wrong tab. It lists requests *that user made*. The approval queue is **"Menunggu saya"**. | Open `/otorisasiinbox` → "Menunggu saya". |
+| Dialog said sent, but **"Menunggu saya" is empty and no push** | The menu has **no approver**: nobody has `DBFLMENUWEB.IsOtorisasi1 = 1` (+ `HASACCESS = 1`) for it. Both the push list and the queue are built from that right. | `select USERID, IsOtorisasi1 from DBFLMENUWEB where L1 = '<KODEMENU>' and HASACCESS = 1`. Grant the right. Since this was found the dialog now refuses with "Belum ada user yang berhak otorisasi" and saves nothing. Rows saved *before* that fix stay `P` (they show in "Menunggu saya" once someone is granted the right, but no push was ever sent for them). |
+| Approver is in the queue but **gets no push** | That user has **no subscribed device**: `select * from DBPUSHSUBSCRIPTION where USERID = '<user>'` is empty. Subscriptions are per user *and* per browser/phone. | On that phone, logged in as that user, open the app and tap the crossed-out bell (iPhone: Add to Home Screen first). The dialog now says when no approver has a device. |
+| Subscribed, server says sent, **phone shows nothing** | Phone side: site notifications blocked/denied, Focus/Do Not Disturb, Android battery saver/“unrestricted” off for Chrome, iOS app not opened from the Home Screen icon. | Send a test push (script below) and watch the phone. |
+| Server errors or no send at all | VPS side. `.env` (gitignored) must have `VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT` **identical to the keys the devices subscribed with** — different keys ⇒ every push is rejected (403). Also: `composer install` run (the `minishlink/web-push` package), PHP extensions `openssl`, `mbstring`, `gmp` or `bcmath`, config cache stale (`php artisan config:clear`), outbound HTTPS from the VPS allowed. | `grep VAPID .env`; `tail storage/logs/laravel.log` for `SendWebPush gagal`; `php -m \| grep -Ei 'gmp\|bcmath\|openssl\|mbstring'`. |
+| `QUEUE_CONNECTION=database` but nothing is sent | Needs a `jobs` table **on the default DB connection** and a running `queue:work`; after every deploy run `php artisan queue:restart` (workers keep old code). With `QUEUE_CONNECTION=sync` neither is needed. | `grep QUEUE_CONNECTION .env`. |
+
+**Test push to one user** (read-only on data; sends a real labelled notification to that user's devices and
+prints each push service's answer — `201` = accepted, `404/410` = subscription dead, `403` = VAPID key mismatch).
+On Windows set `OPENSSL_CONF` in the shell first (§6). Build it from `app/Jobs/SendWebPush.php`: queue a
+`Minishlink\WebPush\Subscription` per row of `DBPUSHSUBSCRIPTION` and loop over `$webPush->flush()`,
+printing `$report->isSuccess()`, `getResponse()->getStatusCode()` and `getReason()`.
+
+If the test prints `201` for every device locally but the real flow fails on the VPS, the difference is
+the VPS environment (the table above), not the code or the subscriptions.
+
+---
+
+## 12. Prompt template for a new session
 
 ```
 Add "Minta Otorisasi" (push to approvers) to the <Page name> page, following
