@@ -34,16 +34,13 @@
 
       @include('master.partials.toolbarMaster')
 
-      {{-- 5 kolom -- di bawah ambang MasterList.kolom() (>5 kolom), jadi header statis
-           seperti #tabel di produksibom.blade.php, bukan report-table.js dinamis. --}}
+      {{-- Header interaktif (geser & sembunyikan kolom, disimpan per user) -- pola sama dengan
+           halaman Master (masterbarang): <thead> diisi MasterList.headHtml() dari loadAll(),
+           kolomnya didefinisikan di SPK_KOLOM. --}}
       <table id="tabel" class="data-table">
-        <thead>
+        <thead id="tabel_header" class="text-center">
           <tr>
             <th style="padding: 4px 12px;" scope="col">Actions</th>
-            <th style="padding: 4px 12px;" scope="col">No. Bukti</th>
-            <th style="padding: 4px 12px;" scope="col">Tanggal</th>
-            <th style="padding: 4px 12px;" scope="col">Kode Mesin</th>
-            <th style="padding: 4px 12px;" scope="col">Mesin</th>
           </tr>
         </thead>
         <tbody id="tabel_data" class="text-left"></tbody>
@@ -84,6 +81,7 @@
                 <tr>
                   <th>Kode Barang</th>
                   <th>Nama Barang</th>
+                  <th>Kode Proses</th>
                   <th>Qty</th>
                   <th>Satuan</th>
                   <th>Isi</th>
@@ -91,14 +89,14 @@
                 </tr>
               </thead>
               <tbody id="tabel_data_spkdetail">
-                <tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>
+                <tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" style="
+        <button type="button" class="btn btn-lg btn-danger" style="
             height: 30px;
             padding: 4px 12px;
             border-radius: 20px;
@@ -131,35 +129,35 @@
       <div class="modal-body">
 
         <div class="container-fluid">
+          {{-- Satu baris: WIP/BJ dan No. Urut lebar tetap (isinya pendek), 4 kolom lain membagi sisa
+               lebar (No. Bukti dan Kode Mesin sedikit lebih lebar karena isinya lebih panjang). --}}
           <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-auto" style="width:105px;">
               <label>WIP/BJ</label>
               <select class="form-control" id="input_spk_tipe" onchange="spkGenerateNoBukti()">
                 <option value="WIP">WIP</option>
                 <option value="BJ">BJ</option>
               </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md" style="flex:1.4 1 0;">
               <label>No. Bukti</label>
               <input type="text" class="form-control" id="input_spk_nobukti" disabled>
             </div>
-            <div class="col-md-2">
-              <label>Nomor Urut</label>
+            <div class="col-md-auto" style="width:100px;">
+              <label>No. Urut</label>
               <input type="text" class="form-control" id="input_spk_nourut" disabled>
             </div>
-            <div class="col-md-3">
+            <div class="col-md">
               <label>Tanggal</label>
               <input type="date" class="form-control" id="input_spk_tanggal">
             </div>
-          </div>
-          <div class="row mt-2">
-            <div class="col-md-3">
+            <div class="col-md" style="flex:1.4 1 0;">
               <label>Kode Mesin</label>
               {{-- <select> biasa (cuma 3 baris di DBMesin), diisi spkIsiMesin() dari
                    produksispklistmesin. Dikirim sebagai @KodeMsn ke sp_SPKJD (spkBJSimpan()). --}}
               <select class="form-control" id="input_spk_kodemesin" onchange="spkPilihMesin()"></select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md">
               <label>Mesin</label>
               <input type="text" class="form-control" id="input_spk_mesin" disabled>
             </div>
@@ -185,25 +183,28 @@
           </table>
         </div>
 
-        {{-- Kode BOM dipilih DULU (browsing SEMUA BOM, bukan difilter per barang) -- Barang
-             Jadi (Kode/Satuan) OTOMATIS ikut dari BOM yang dipilih (query dari senior:
-             DBBOM.KodeBrg join DBBARANG), makanya field Barang Jadi di sini disabled/tanpa
-             tombol cari sendiri -- lihat spkPilihBOMSet() di @section('js' ) bawah. KodeBOM
-             dikirim ke sp_SPKJD (DBSPKJD.kodeBOM) dan dipakai SP untuk mengisi Bahan Baku
-             otomatis dari DBBOMDET -- lihat ProduksiSPKController::spSPKJD(). --}}
+        {{-- Kode Barang (Barang Jadi) dipilih DULU lewat picker (spkPilihBarangJadi()), baru Kode
+             BOM milik barang itu (spkPilihBOM() -- difilter per barang). Satuan ikut dari barang.
+             KodeBOM dikirim ke sp_SPKJD (DBSPKJD.kodeBOM) dan dipakai SP untuk mengisi Bahan Baku
+             otomatis dari DBBOMDET -- lihat ProduksiSPKController::spSPKJD(). Saat Edit baris
+             (spkBJEdit()) kedua tombol cari dimatikan: sp_SPKJD Choice='U' tidak mengubah
+             KodeBOM dan tidak menghitung ulang Bahan Baku. --}}
         <div id="spkBJForm" class="container-fluid mt-3" style="display:none; border:1px solid #e5e7eb; border-radius:8px; padding:12px;">
           <input type="hidden" id="input_spkbj_urut" value="" />
           <div class="row">
             <div class="col-md-3">
-              <label>Kode BOM</label>
+              <label>Kode Barang</label>
               <div class="input-group">
-                <input type="text" class="form-control" id="input_spkbj_kodebom" readonly>
-                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="spkPilihBOM()" title="Cari Kode BOM"><i class="bi bi-search"></i></button></div>
+                <input type="text" class="form-control" id="input_spkbj_kodebrg" readonly placeholder="Pilih Barang Jadi">
+                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" id="btn_spkbj_barang" onclick="spkPilihBarangJadi()" title="Cari Kode Barang"><i class="bi bi-search"></i></button></div>
               </div>
             </div>
             <div class="col-md-3">
-              <label>Barang Jadi</label>
-              <input type="text" class="form-control" id="input_spkbj_kodebrg" disabled placeholder="Otomatis dari Kode BOM">
+              <label>Kode BOM</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_spkbj_kodebom" readonly placeholder="Pilih Kode Barang dulu">
+                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" id="btn_spkbj_bom" onclick="spkPilihBOM()" title="Cari Kode BOM"><i class="bi bi-search"></i></button></div>
+              </div>
             </div>
             <div class="col-md-2">
               <label>Quantity</label>
@@ -233,9 +234,9 @@
         <div class="container-fluid mt-2">
           <table class="pb-sub-table" style="width:100%;">
             <thead>
-              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Qnt</th><th>Sat</th><th>Actions</th></tr>
+              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Kode Proses</th><th>Qnt</th><th>Sat</th><th>Actions</th></tr>
             </thead>
-            <tbody id="tabel_data_spkdet"><tr><td colspan="5" class="text-center text-muted">Belum ada Bahan Baku</td></tr></tbody>
+            <tbody id="tabel_data_spkdet"><tr><td colspan="6" class="text-center text-muted">Belum ada Bahan Baku</td></tr></tbody>
           </table>
         </div>
 
@@ -248,6 +249,12 @@
                 <input type="text" class="form-control" id="input_spkdet_kodebrg" readonly>
                 <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="spkPilihBahanBaku()" title="Cari Kode Barang"><i class="bi bi-search"></i></button></div>
               </div>
+            </div>
+            <div class="col-md-3">
+              <label>Kode Proses</label>
+              {{-- Hanya proses yang terikat ke Kode BOM Barang Jadi di SPK ini -- diisi
+                   spkIsiProses() dari produksispklistproses. --}}
+              <select class="form-control" id="input_spkdet_kodeprs"></select>
             </div>
             <div class="col-md-2">
               <label>Qnt</label>
@@ -266,14 +273,48 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-lg btn-danger" data-dismiss="modal">Tutup</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Picker Kode BOM (produksibomlistbom, endpoint milik ProduksiBomController -- dipakai
-     ulang di sini, bukan ditulis sendiri lagi, karena query/datanya sama persis). -->
+<!-- Picker Kode Barang (Barang Jadi) -- DataTable serverSide:true lewat produksispklistbarangjadi
+     (barang Jadi/WIP aktif yang punya BOM berproses), pola sama dengan picker Bahan Baku. -->
+<div class="modal fade" id="formPilihBarangJadi" tabindex="-1" role="dialog" aria-labelledby="formPilihBarangJadiLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="formPilihBarangJadiLabel">Kode Barang</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid mt-2">
+          <div class="row">
+            <div class="col-12">
+              <input type="text" class="form-control" id="input_cari_barangjadi" placeholder="Ketik Kode/Nama Barang lalu Enter&hellip;">
+            </div>
+          </div>
+        </div>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto; margin-top:-30px;">
+              <table id="tabel_barangjadi" class="data-table">
+                <thead><tr><th style="padding: 4px 12px;" scope="col">Kode</th><th style="padding: 4px 12px;" scope="col">Nama</th><th style="padding: 4px 12px;" scope="col">Sat</th></tr></thead>
+                <tbody id="tabel_data_barangjadi" class="text-left"><tr><td>-</td><td>-</td><td>-</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-lg btn-danger" data-dismiss="modal">Batal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Picker Kode BOM -- BOM berproses milik Kode Barang yang sudah dipilih (produksispklistbombybarang). -->
 <div class="modal fade" id="formPilihBOM" tabindex="-1" role="dialog" aria-labelledby="formPilihBOMLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -294,7 +335,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-lg btn-danger" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -329,7 +370,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-lg btn-danger" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -372,43 +413,49 @@
 
 <script type="text/javascript">
 
+// Kolom tabel daftar SPK -- bisa digeser & disembunyikan (MasterList.kolom(), disimpan per user
+// di DBSIMPANHEADER dengan href 'produksispk'). [field, label, tampil, tipe, total, desimal]
+const SPK_KOLOM = [
+  ['NOBUKTI',  'No. Bukti',  1, 'varchar', 0, 0],
+  ['TANGGAL',  'Tanggal',    1, 'date',    0, 0],
+  ['KodeMsn',  'Kode Mesin', 1, 'varchar', 0, 0],
+  ['Ket',      'Mesin',      1, 'varchar', 0, 0],
+]
+
+// Kolom DataTables disusun ulang dari kolom yang tampil tiap kali kolom digeser/disembunyikan
+// (ReportTable memanggil loadAll lewat onChange). Server (produksispkloadall) tidak memproses
+// urutan kolom, jadi ordering dimatikan -- sama seperti masterbarang.
 function loadAll () {
   if ($.fn.DataTable.isDataTable('#tabel')) {
     $('#tabel').DataTable().destroy();
   }
+  document.getElementById('tabel_data').innerHTML = ''
+
+  let cols = MasterList.kolomTampil()
+  document.getElementById('tabel_header').innerHTML = MasterList.headHtml(cols)
 
   $('#tabel').DataTable(MasterList.opsi({
     processing: true,
     serverSide: true,
+    ordering: false,
+    autoWidth: false,
+    responsive: false,
     ajax: {
       url: "{!! url('produksispkloadall') !!}",
       type: "GET",
     },
-    columns: [
-      {
-        data: null, orderable: false, searchable: false, className: 'text-center',
-        render: function (data, type, row) {
-          return `
-            <div class="action-buttons-wrap">
-              <button title="Detail" class="btn-action-sm btn-action-primary" type="button" onclick="buttonDetail('${row.NOBUKTI}')"><i class="bi bi-eye"></i></button>
-              <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.NOBUKTI}')"><i class="bi bi-pen"></i></button>
-              <button title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.NOBUKTI}')"><i class="bi bi-trash"></i></button>
-            </div>
-          `;
-        }
-      },
-      { data: 'NOBUKTI' },
-      {
-        data: 'TANGGAL',
-        render: function (data) {
-          if (!data) { return '' }
-          let d = new Date(data)
-          return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
-        }
-      },
-      { data: 'KodeMsn', defaultContent: '-' },
-      { data: 'Ket', defaultContent: '-' },
-    ],
+    columns: MasterList.kolomServer(cols, function (data, type, row) {
+      return `
+        <div class="action-buttons-wrap">
+          <button title="Detail" class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${row.NOBUKTI}')"><i class="bi bi-info"></i></button>
+          <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.NOBUKTI}')"><i class="bi bi-pen"></i></button>
+          <button title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.NOBUKTI}')"><i class="bi bi-trash"></i></button>
+        </div>
+      `;
+    }, {
+      KodeMsn: { defaultContent: '-' },
+      Ket: { defaultContent: '-' },
+    }),
   }));
 
   MasterList.selesai('#tabel')
@@ -420,7 +467,7 @@ function buttonDetail (nobukti) {
   document.getElementById('spkDetailTanggal').textContent = '-'
   document.getElementById('spkDetailKodeMesin').textContent = '-'
   document.getElementById('spkDetailMesin').textContent = '-'
-  document.getElementById('tabel_data_spkdetail').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>'
+  document.getElementById('tabel_data_spkdetail').innerHTML = '<tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr>'
   $('#formDetailSPK').modal('show')
 
   $.ajax({
@@ -443,6 +490,7 @@ function buttonDetail (nobukti) {
           <tr>
             <td>${item.KODEBRG ?? ''}</td>
             <td>${item.NamaBrg ?? ''}</td>
+            <td>${item.KodePrs ? item.KodePrs + (item.NamaPrs ? ' - ' + item.NamaPrs : '') : '-'}</td>
             <td>${item.QNT ?? ''}</td>
             <td>${item.SATUAN ?? ''}</td>
             <td>${item.ISI ?? ''}</td>
@@ -451,7 +499,7 @@ function buttonDetail (nobukti) {
         `
       });
       if (!res.length) {
-        rowTable = '<tr><td colspan="6" class="text-center text-muted">Belum ada detail</td></tr>'
+        rowTable = '<tr><td colspan="7" class="text-center text-muted">Belum ada detail</td></tr>'
       }
       document.getElementById('tabel_data_spkdetail').innerHTML = rowTable
     },
@@ -519,7 +567,7 @@ function buttonAdd () {
   document.getElementById('input_spk_tanggal').valueAsDate = new Date()
   document.getElementById('input_spk_mesin').value = ''
   document.getElementById('tabel_data_spkbj').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada Barang Jadi</td></tr>'
-  document.getElementById('tabel_data_spkdet').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada Bahan Baku</td></tr>'
+  document.getElementById('tabel_data_spkdet').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada Bahan Baku</td></tr>'
   $('#spkBJForm').hide()
   $('#spkDetForm').hide()
 
@@ -600,7 +648,7 @@ function buttonEdit (nobukti) {
       document.getElementById('input_spk_tipe').value = String(res.NOBUKTI).endsWith('/BJ') ? 'BJ' : 'WIP'
       document.getElementById('input_spk_tanggal').value = res.TANGGAL ? String(res.TANGGAL).substring(0, 10) : ''
       document.getElementById('tabel_data_spkbj').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>'
-      document.getElementById('tabel_data_spkdet').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Memuat...</td></tr>'
+      document.getElementById('tabel_data_spkdet').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>'
       $('#spkBJForm').hide()
       $('#spkDetForm').hide()
 
@@ -680,10 +728,16 @@ function spkBJTambah () {
   document.getElementById('input_spkbj_kodebrg').value = ''
   document.getElementById('input_spkbj_satuan').value = ''
   document.getElementById('input_spkbj_qnt').value = '0.00'
+  document.getElementById('btn_spkbj_barang').disabled = false
+  document.getElementById('btn_spkbj_bom').disabled = false
   $('#spkBJForm').show()
 }
 
 function spkBJEdit (urut, kodebrg, qnt, satuan, kodebom) {
+  // Barang/BOM dikunci saat Edit -- sp_SPKJD Choice='U' tidak mengubah KodeBOM dan tidak
+  // menghitung ulang Bahan Baku, jadi yang bisa diubah di sini cuma Quantity.
+  document.getElementById('btn_spkbj_barang').disabled = true
+  document.getElementById('btn_spkbj_bom').disabled = true
   document.getElementById('input_spkbj_urut').value = urut
   document.getElementById('input_spkbj_kodebom').value = kodebom || ''
   document.getElementById('input_spkbj_kodebrg').value = kodebrg
@@ -705,6 +759,12 @@ function spkBJSimpan () {
 
   let urut = $('#input_spkbj_urut').val()
   let choice = urut ? 'U' : 'I'
+
+  // Tanpa Kode BOM, sp_SPKJD tidak punya komponen yang bisa diledakkan ke Bahan Baku.
+  if (choice === 'I' && !$('#input_spkbj_kodebom').val()) {
+    alertify.warning('Pilih Kode BOM terlebih dahulu')
+    return
+  }
 
   $.ajax({
     url: "{!! url('produksispkspspkjd') !!}",
@@ -754,18 +814,84 @@ function spkBJHapus (urut, namabrg) {
           alertify.error('Gagal menghapus Barang Jadi')
         }
       });
-    }
+    },
+    function () {}
   );
 }
 
-// Picker Kode BOM -- BUKAN difilter per Barang Jadi (beda dari modul BOM sendiri) --
-// browsing SEMUA BOM yang sudah punya proses (produksispklistbombrowse, query dari senior).
-// Begitu BOM dipilih (spkPilihBOMSet()), Barang Jadi (Kode/Satuan) otomatis ikut lewat
-// produksispklistbarangjadibybom -- user TIDAK pilih Barang Jadi secara terpisah.
+// Picker Kode Barang (Barang Jadi) -- DataTable serverSide:true lewat produksispklistbarangjadi.
+// Dipilih PERTAMA; setelah itu baru Kode BOM milik barang ini (spkPilihBOM()). Mengganti barang
+// mengosongkan Kode BOM yang sudah terpilih (BOM-nya milik barang sebelumnya).
+let tabelBarangJadiDT = null
+
+function spkPilihBarangJadi () {
+  document.getElementById('input_cari_barangjadi').value = ''
+
+  if (!tabelBarangJadiDT) {
+    document.getElementById('tabel_data_barangjadi').innerHTML = ''
+    tabelBarangJadiDT = $('#tabel_barangjadi').DataTable({
+      serverSide: true,
+      processing: true,
+      searching: true,
+      ordering: false,
+      dom: 'ltip',
+      ajax: {
+        url: "{!! url('produksispklistbarangjadi') !!}",
+        type: 'GET',
+      },
+      columns: [
+        { data: 'KodeBrg' },
+        { data: 'NamaBrg' },
+        { data: 'Sat1' },
+      ],
+      lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+      pageLength: 10,
+      language: {
+        lengthMenu: 'Tampilkan _MENU_',
+        emptyTable: 'Tidak ada barang yang punya BOM',
+        zeroRecords: 'Tidak ada data yang cocok dengan pencarian',
+        processing: 'Memuat...'
+      },
+      createdRow: function (row, data) {
+        $(row).addClass('pick-row').on('click', function () {
+          spkPilihBarangJadiSet(data.KodeBrg, data.Sat1)
+        })
+      }
+    })
+  }
+
+  tabelBarangJadiDT.search('').draw()
+  $('#formPilihBarangJadi').modal('show')
+}
+
+$(document).on('keyup', '#input_cari_barangjadi', function (e) {
+  if (e.key === 'Enter' && tabelBarangJadiDT) {
+    tabelBarangJadiDT.search($(this).val()).draw()
+  }
+});
+
+function spkPilihBarangJadiSet (kodebrg, satuan) {
+  if (document.getElementById('input_spkbj_kodebrg').value !== kodebrg) {
+    document.getElementById('input_spkbj_kodebom').value = ''
+  }
+  document.getElementById('input_spkbj_kodebrg').value = kodebrg
+  document.getElementById('input_spkbj_satuan').value = satuan || ''
+  $('#formPilihBarangJadi').modal('hide')
+}
+
+// Picker Kode BOM -- cuma BOM berproses milik Kode Barang yang sudah dipilih
+// (produksispklistbombybarang).
 function spkPilihBOM () {
+  let kodebrg = document.getElementById('input_spkbj_kodebrg').value
+  if (!kodebrg) {
+    alertify.warning('Pilih Kode Barang terlebih dahulu')
+    return
+  }
+
   $.ajax({
-    url: "{!! url('produksispklistbombrowse') !!}",
+    url: "{!! url('produksispklistbombybarang') !!}",
     type: "get",
+    data: { kodebrg },
     success: function (res) {
       let rowTable = ''
       res.forEach((item) => {
@@ -792,25 +918,6 @@ function spkPilihBOM () {
 function spkPilihBOMSet (kodebom) {
   document.getElementById('input_spkbj_kodebom').value = kodebom
   $('#formPilihBOM').modal('hide')
-
-  $.ajax({
-    url: "{!! url('produksispklistbarangjadibybom') !!}",
-    type: "get",
-    data: { kodebom },
-    success: function (res) {
-      if (res.length) {
-        document.getElementById('input_spkbj_kodebrg').value = res[0].KODEBRG ?? ''
-        document.getElementById('input_spkbj_satuan').value = res[0].SAT1 ?? ''
-      } else {
-        document.getElementById('input_spkbj_kodebrg').value = ''
-        document.getElementById('input_spkbj_satuan').value = ''
-        alertify.warning('BOM ini tidak punya Barang Jadi aktif')
-      }
-    },
-    error: function () {
-      alertify.error('Gagal memuat Barang Jadi untuk BOM ini')
-    }
-  });
 }
 
 // ---------- Bahan Baku (dbSPKDet, sp_SPK) ----------
@@ -827,17 +934,18 @@ function spkRefreshDet () {
           <tr>
             <td>${item.KODEBRG ?? ''}</td>
             <td>${item.NamaBrg ?? ''}</td>
+            <td>${item.KodePrs ? item.KodePrs + (item.NamaPrs ? ' - ' + item.NamaPrs : '') : '-'}</td>
             <td>${formatAngka(Number(item.QNT ?? 0).toFixed(2))}</td>
             <td>${item.SATUAN ?? ''}</td>
             <td class="text-center">
-              <button class="btn-action-sm btn-action-success" type="button" onclick="spkDetEdit(${item.URUT}, '${item.KODEBRG}', ${item.QNT ?? 0}, '${item.SATUAN ?? ''}')"><i class="bi bi-pen"></i></button>
+              <button class="btn-action-sm btn-action-success" type="button" onclick="spkDetEdit(${item.URUT}, '${item.KODEBRG}', ${item.QNT ?? 0}, '${item.SATUAN ?? ''}', '${item.KodePrs ?? ''}')"><i class="bi bi-pen"></i></button>
               <button class="btn-action-sm btn-action-danger" type="button" onclick="spkDetHapus(${item.URUT}, ${item.URUTSPK ?? 0}, '${String(item.NamaBrg ?? item.KODEBRG ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
         `
       });
       if (!res.length) {
-        rowTable = '<tr><td colspan="5" class="text-center text-muted">Belum ada Bahan Baku</td></tr>'
+        rowTable = '<tr><td colspan="6" class="text-center text-muted">Belum ada Bahan Baku</td></tr>'
       }
       document.getElementById('tabel_data_spkdet').innerHTML = rowTable
     },
@@ -847,19 +955,52 @@ function spkRefreshDet () {
   });
 }
 
+// Dropdown Kode Proses form Bahan Baku -- hanya proses yang terikat ke Kode BOM Barang Jadi di
+// SPK ini (ProduksiSPKController::listProsesSPK()). terpilih (opsional) -- KodePrs yang langsung
+// dipilih setelah daftar termuat (dipakai spkDetEdit(); kalau proses baris itu sudah tidak ada di
+// daftar, tetap ditambahkan supaya tidak hilang saat disimpan ulang).
+function spkIsiProses (terpilih) {
+  $.ajax({
+    url: "{!! url('produksispklistproses') !!}",
+    type: "get",
+    data: { nobukti: spkNoBuktiAktif },
+    success: function (res) {
+      let opts = '<option value="">-</option>'
+      let ada = false
+      res.forEach((item) => {
+        if (item.KodePrs === terpilih) { ada = true }
+        opts += `<option value="${item.KodePrs}">${item.KodePrs} - ${item.Keterangan ?? ''}</option>`
+      });
+      if (terpilih && !ada) {
+        opts += `<option value="${terpilih}">${terpilih}</option>`
+      }
+      document.getElementById('input_spkdet_kodeprs').innerHTML = opts
+      document.getElementById('input_spkdet_kodeprs').value = terpilih || ''
+      if (!res.length && !terpilih) {
+        alertify.warning('Tambah Barang Jadi (dengan Kode BOM) terlebih dahulu, proses diambil dari BOM-nya')
+      }
+    },
+    error: function () {
+      alertify.error('Gagal memuat Kode Proses')
+    }
+  });
+}
+
 function spkDetTambah () {
   document.getElementById('input_spkdet_urut').value = ''
   document.getElementById('input_spkdet_kodebrg').value = ''
   document.getElementById('input_spkdet_satuan').value = ''
   document.getElementById('input_spkdet_qnt').value = '0.00'
+  spkIsiProses()
   $('#spkDetForm').show()
 }
 
-function spkDetEdit (urut, kodebrg, qnt, satuan) {
+function spkDetEdit (urut, kodebrg, qnt, satuan, kodeprs) {
   document.getElementById('input_spkdet_urut').value = urut
   document.getElementById('input_spkdet_kodebrg').value = kodebrg
   document.getElementById('input_spkdet_satuan').value = satuan || ''
   document.getElementById('input_spkdet_qnt').value = formatAngka(Number(qnt ?? 0).toFixed(2))
+  spkIsiProses(kodeprs || '')
   $('#spkDetForm').show()
 }
 
@@ -874,6 +1015,12 @@ function spkDetSimpan () {
     return
   }
 
+  let kodeprs = $('#input_spkdet_kodeprs').val()
+  if (!kodeprs) {
+    alertify.warning('Pilih Kode Proses terlebih dahulu')
+    return
+  }
+
   let urut = $('#input_spkdet_urut').val()
   let choice = urut ? 'U' : 'I'
 
@@ -885,6 +1032,7 @@ function spkDetSimpan () {
       choice: choice,
       nobukti: spkNoBuktiAktif,
       kodebrg: kodebrg,
+      kodeprs: kodeprs,
       qnt: unformatAngka($('#input_spkdet_qnt').val()),
       isi: 0,
       satuan: $('#input_spkdet_satuan').val(),
@@ -924,7 +1072,8 @@ function spkDetHapus (urut, urutspk, namabrg) {
           alertify.error('Gagal menghapus Bahan Baku')
         }
       });
-    }
+    },
+    function () {}
   );
 }
 
@@ -997,13 +1146,14 @@ $('#formAddSPK').on('hidden.bs.modal', function () {
 // Modal pemilih (Kode BOM/Barang Jadi/Bahan Baku) disamakan persis dengan modal pemilih
 // menu Kas/SO/PO -- pola sama dengan DOMContentLoaded di produksibom.blade.php.
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#formPilihBOM, #formPilihBahanBaku').addClass('picker-kas')
-  jQuery('#formPilihBOM .modal-footer .btn, #formPilihBahanBaku .modal-footer .btn').filter(function () {
+  jQuery('#formPilihBarangJadi, #formPilihBOM, #formPilihBahanBaku').addClass('picker-kas')
+  jQuery('#formPilihBarangJadi .modal-footer .btn, #formPilihBOM .modal-footer .btn, #formPilihBahanBaku .modal-footer .btn').filter(function () {
     return jQuery.trim(jQuery(this).text()) === 'Batal'
   }).addClass('picker-kas-batal')
 })
 
 window.onload = function () {
+  MasterList.kolom({ href: 'produksispk', kolom: SPK_KOLOM, onChange: loadAll })
   loadAll();
 };
 

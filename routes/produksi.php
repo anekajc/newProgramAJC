@@ -24,11 +24,12 @@ Route::get('/produksispkloadall', [ProduksiSPKController::class, 'loadAll'])->mi
 Route::get('/produksispklistdetail', [ProduksiSPKController::class, 'listDetail'])->middleware('auth');
 Route::get('/produksispknextnobukti', [ProduksiSPKController::class, 'nextNoBukti'])->middleware('auth');
 Route::get('/produksispklistmesin', [ProduksiSPKController::class, 'listMesin'])->middleware('auth');
-Route::get('/produksispklistbombrowse', [ProduksiSPKController::class, 'listBomBrowse'])->middleware('auth');
-Route::get('/produksispklistbarangjadibybom', [ProduksiSPKController::class, 'listBarangJadiByBom'])->middleware('auth');
+Route::get('/produksispklistbarangjadi', [ProduksiSPKController::class, 'listBarangJadiBrowse'])->middleware('auth');
+Route::get('/produksispklistbombybarang', [ProduksiSPKController::class, 'listBomByBarang'])->middleware('auth');
 Route::get('/produksispklistbj', [ProduksiSPKController::class, 'listBJ'])->middleware('auth');
 Route::get('/produksispkheader', [ProduksiSPKController::class, 'header'])->middleware('auth');
 Route::post('/produksispkhapus', [ProduksiSPKController::class, 'hapusSPK'])->middleware('auth');
+Route::get('/produksispklistproses', [ProduksiSPKController::class, 'listProsesSPK'])->middleware('auth');
 Route::post('/produksispkspspkjd', [ProduksiSPKController::class, 'spSPKJD'])->middleware('auth');
 Route::post('/produksispkspspk', [ProduksiSPKController::class, 'spSPK'])->middleware('auth');
 
