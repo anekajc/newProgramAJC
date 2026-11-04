@@ -14,30 +14,51 @@ class OtorisasiRequestController extends Controller
 {
     public function __construct(private OtorisasiService $oto) {}
 
-    // POST /otorisasirequest  (menu = DBMENUWEB.href, mis. 'kas'; nobukti)
+    // POST /otorisasirequest  (menu = DBMENUWEB.href, mis. 'kas'; nobukti; tipe = 'O' (default) | 'B' batal otorisasi; alasan wajib untuk 'B')
     public function spRequest(Request $req)
     {
-        $req->validate(['menu' => 'required|string', 'nobukti' => 'required|string']);
+        $req->validate([
+            'menu' => 'required|string',
+            'nobukti' => 'required|string',
+            'tipe' => 'nullable|in:O,B',
+            'alasan' => 'required_if:tipe,B|nullable|string|max:255',
+        ]);
 
         if (! $this->oto->isSupported($req->menu)) {
             return response()->json(['ok' => false, 'message' => 'Menu ini belum mendukung permintaan otorisasi'], 422);
         }
 
         $username = \Auth::user()->username;
-        if ($this->oto->canApprove($username, $req->menu)) {
+        $tipe = $req->input('tipe', OtorisasiService::OTORISASI);
+        $batal = $tipe === OtorisasiService::BATAL;
+
+        if ($batal) {
+            if (! $this->oto->supportsCancel($req->menu)) {
+                return response()->json(['ok' => false, 'message' => 'Menu ini belum mendukung permintaan batal otorisasi'], 422);
+            }
+            if ($this->oto->canCancel($username, $req->menu)) {
+                return response()->json(['ok' => false, 'message' => 'Anda berhak batal otorisasi - lakukan batal otorisasi langsung'], 422);
+            }
+        } elseif ($this->oto->canApprove($username, $req->menu)) {
             return response()->json(['ok' => false, 'message' => 'Anda berhak otorisasi - lakukan otorisasi langsung'], 422);
         }
 
-        $res = $this->oto->createRequest($req->menu, $req->nobukti, $username);
+        $res = $this->oto->createRequest($req->menu, $req->nobukti, $username, $tipe, trim((string) $req->alasan));
+        $jenis = $batal ? 'batal otorisasi' : 'otorisasi';
 
         return match ($res['status']) {
             'created' => response()->json(['ok' => true, 'message' => $res['devices'] > 0
-                ? 'Permintaan otorisasi terkirim ke '.$res['approvers'].' approver'
+                ? 'Permintaan '.$jenis.' terkirim ke '.$res['approvers'].' approver'
                 : 'Permintaan tersimpan, tetapi belum ada approver yang mengaktifkan notifikasi di perangkatnya - mereka melihatnya di menu Notifikasi (Menunggu saya)']),
-            'noapprover' => response()->json(['ok' => false, 'message' => 'Belum ada user yang berhak otorisasi menu ini. Hubungi admin untuk memberi hak otorisasi.'], 422),
-            'exists' => response()->json(['ok' => true, 'message' => 'Permintaan sudah dikirim oleh '.$res['request']->REQUSER
-                .' pada '.date('d-m-Y H:i', strtotime($res['request']->TGLREQ)).', masih menunggu approver']),
+            'noapprover' => response()->json(['ok' => false, 'message' => 'Belum ada user yang berhak '.$jenis.' menu ini. Hubungi admin untuk memberi hak '.$jenis.'.'], 422),
+            'exists' => response()->json(['ok' => true, 'message' => isset($res['rerouted'])
+                ? 'Permintaan sudah ada dan dialihkan ke '.$res['rerouted'].' approver yang sesuai'.($res['devices'] > 0 ? '' : ' (belum ada yang mengaktifkan notifikasi di perangkatnya)')
+                : 'Permintaan sudah dikirim oleh '.$res['request']->REQUSER
+                    .' pada '.date('d-m-Y H:i', strtotime($res['request']->TGLREQ)).', masih menunggu approver']),
             'approved' => response()->json(['ok' => false, 'message' => 'Transaksi sudah diotorisasi'], 422),
+            'notapproved' => response()->json(['ok' => false, 'message' => 'Transaksi belum diotorisasi'], 422),
+            'blocked' => response()->json(['ok' => false, 'message' => $res['message']], 422),
+            'unsupported' => response()->json(['ok' => false, 'message' => 'Menu ini belum mendukung permintaan batal otorisasi'], 422),
             default => response()->json(['ok' => false, 'message' => 'Data tidak ditemukan'], 404),
         };
     }
@@ -51,7 +72,7 @@ class OtorisasiRequestController extends Controller
         }
 
         $username = \Auth::user()->username;
-        $canApprove = $this->oto->canApprove($username, $request->MENUPATH);
+        $canApprove = $this->oto->canAct($username, $request->MENUPATH, $request->TIPE ?? OtorisasiService::OTORISASI, (int) $request->LEVELOTO);
 
         // Selain approver, hanya peminta sendiri yang boleh melihat isinya.
         if (! $canApprove && $request->REQUSER !== $username) {
@@ -108,6 +129,8 @@ class OtorisasiRequestController extends Controller
             'tglact' => $r->TGLACT ? date('d-m-Y H:i', strtotime($r->TGLACT)) : '',
             'catatan' => $r->CATATAN,
             'unread' => $r->STATUS !== 'P' && ! $r->REQREAD,
+            'tipe' => $r->TIPE ?? OtorisasiService::OTORISASI,
+            'alasan' => $r->ALASAN ?? null,
         ];
 
         $res = [

@@ -45,6 +45,7 @@
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter), disamakan dengan resources/views/purchasing/purchaseOrder.blade.php. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -1952,10 +1953,31 @@ function renderTabelPR () {
   prAturTinggiTabel()
 }
 
+// User tanpa hak otorisasi: kirim permintaan ke semua approver (push ke HP mereka).
+// PR_HREF = kunci di config/otorisasi.php dan DBMENUWEB.href.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi PR ' + nobukti + ' ke approver?',
+    function() {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PR_HREF, nobukti },
+        success: function(res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function(){});
+  dlgMinta.elements.root.classList.add('ajs-app-buttons');
+}
+
 function buttonOtorisasi (nobukti, isOtorisasi) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaOtorisasi(nobukti);
     return;
   }
 
@@ -1999,12 +2021,42 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
 }
 
 
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke semua user ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti, isOtorisasi) {
+  if (Number(isOtorisasi) === 0) {
+    alertify.warning('Belum diotorisasi');
+    return;
+  }
+
+  var dlgBatal =  alertify.prompt('Minta Batal Otorisasi',
+   'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi PR ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PR_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatal.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonBatalOtorisasi (nobukti, isOtorisasi) {
 
 console.log( $("#akses_isbatal").val());
 let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access batal');
+    buttonMintaBatalOtorisasi(nobukti, isOtorisasi);
     return;
   }
 
@@ -3106,12 +3158,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -3128,7 +3180,7 @@ function submitPrint (nobukti) {
 
     const now = new Date()
     const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    
+
     css = `<style type="text/css">
       body {
         font-family: sans-serif;
@@ -3600,7 +3652,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>

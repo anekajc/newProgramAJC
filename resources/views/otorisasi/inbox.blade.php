@@ -46,6 +46,7 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
 .oto-status.A { background: #e7f7ed; color: #16a34a; }
 .oto-status.R { background: #fdeaea; color: #dc2626; }
 .oto-status.C { background: #f3f4f6; color: #6b7280; }
+.oto-tag-batal { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 1px 6px; background: #fdeaea; color: #dc2626; }
 .oto-empty { text-align: center; color: #9ca3af; font-size: 13px; padding: 28px 0; }
 </style>
 @endsection
@@ -86,8 +87,12 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
       ? 'Diminta ' + esc(r.tglreq) + (r.actuser ? ' · ' + (r.status === 'R' ? 'ditolak' : 'diproses') + ' oleh ' + esc(r.actuser) + ' ' + esc(r.tglact) : '')
       : 'Dari ' + esc(r.requser) + ' · ' + esc(r.tglreq);
     var note = r.status === 'R' && r.catatan ? '<div class="oto-item-note">Alasan: ' + esc(r.catatan) + '</div>' : '';
+    // Permintaan batal otorisasi (tipe B): tandai di judul dan tampilkan alasan peminta
+    var batal = r.tipe === 'B';
+    var tag = batal ? '<span class="oto-tag-batal">Batal Otorisasi</span> ' : '';
+    if (batal && r.alasan) sub += '<br>Alasan: ' + esc(r.alasan);
     return '<a class="oto-item' + (mine && r.unread ? ' unread' : '') + '" href="' + URLS.show + r.id + '">' +
-      '<div class="oto-item-main"><div class="oto-item-title">' + esc(r.menu) + ' ' + esc(r.nobukti) + '</div>' +
+      '<div class="oto-item-main"><div class="oto-item-title">' + tag + esc(r.menu) + ' ' + esc(r.nobukti) + '</div>' +
       '<div class="oto-item-sub">' + sub + '</div>' + note + '</div>' +
       '<span class="oto-status ' + r.status + '">' + STATUS[r.status] + '</span></a>';
   }

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\PenjagaTransaksi;
+use App\Services\OtorisasiService;
+use App\Otorisasi\PurchaseOrderOtorisasi;
 
 
 // use App\Http\Controllers\NewMenuController;
@@ -976,55 +978,7 @@ class POController extends Controller
         $xso = $d['NOSO'];
       }
       // return ["noso" => $d['NOSO'], "kodebrg" => $d['KodeBrg'] ,"nopo" => $d['NoBukti']];
-    $x = DB::connection('SML')->select("declare @noSO varchaR(30),@KODEBRG VARCHAR(30)
-    select @noSO= :noso ,@KODEBRG= :kodebrg
-
-    SELECT XTABLE.kodebrg ,
-
-    XTABLE.hrgmin hrgminso,XTABLE.HRGMIN + (XTABLE.HRGMIN * 1.00 ) hrgmaxso,
-    XTABLE.xhrgpo
-    , case when XTABLE.xhrgpo > XTABLE.HRGMIN then 'harga lebih besar dari pada harga min SO'
-
-    	when XTABLE.xhrgpo >= (XTABLE.HRGMIN * 1.00 ) then 'harga lebih besar dari pada harga max SO (100%)'
-    else
-    'lanjut' End Ket
-     FROM (
-
-    select
-    AA.kodebrg,AA.PPN * AA.KUrs  PPN ,AA.HrgNetto Hrg,B.tanggal,AA.nosat,
-    (AA.harga * AA.Kurs )harga,
-    (AA.harga * AA.Kurs ) - (AA.DiscTot * AA.kurs) -
-    (case when AA.PPN=2 then  (AA.harga * AA.Kurs ) * 0.1 else 0 end )XHrgPO,
-    AA.DiscTot * AA.kurs DiscTot,B.NOSO ,
-    (
-    select top 1
-    case when AA.NOSAT=1 then
-          case when A.NOSAT=1 then A.HRGNETTO - (case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end)
-                when A.NOSAT=2 then (A.HRGNETTO /C.ISI2)- ((case when a.PPN=2 then (A.HRGNETTO/C.ISI2) * 0.10 else 0 end))
-                when A.NOSAT=3 THEN (A.HRGNETTO /C.ISI3) - ((case when a.PPN=2 then (A.HRGNETTO/C.ISI3) * 0.10 else 0 end)) END * A.KURS
-          when AA.NOSAT=2 then
-           CASE WHEN A.NOSAT=2 THEN A.HRGNETTO - (case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end)
-                WHEN A.NOSAT=1 THEN (A.HRGNETTO * C.ISI2)- ((case when a.PPN=2 then (A.HRGNETTO * C.ISI2) * 0.10 else 0 end))
-                WHEN A.NOSAT=3 THEN (((A.HRGNETTO / C.ISI3)*C.ISI2)- ((case when a.PPN=2 then ((A.HRGNETTO / C.ISI3)*C.ISI2) * 0.10 else 0 end))) END * A.KURS
-
-          when AA.NOSAT=3 then
-           CASE WHEN A.NOSAT=3 THEN A.HRGNETTO - ((case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end))
-                WHEN A.NOSAT=1 THEN (A.HRGNETTO * C.ISI3)- ((case when a.PPN=2 then (A.HRGNETTO * C.ISI3) * 0.10 else 0 end))
-                WHEN A.NOSAT=2 THEN (((A.HRGNETTO/ C.ISI2)*c.ISI3) - ((case when a.PPN=2 then ((A.HRGNETTO / C.ISI2)*c.ISI3) * 0.10 else 0 end))) eND * A.KURS
-
-    END
-    from DBSODET A
-    Left OUter join DBSO b on A.nobukti=B.NOBUKTI
-    Left Outer join DBBARANG C on A.KODEBRG=C.KODEBRG
-    Where A.NOBUKTI=@noSO and A.KODEBRG=@Kodebrg  --and A.kodegdg<>'G06'
-    order by B.TANGGAL Desc
-    ) HRGMIN
-
-    from DbPODET AA
-    left outer join dbPo B on AA.nobukti=B.nobukti
-    where AA.nobukti = :nopo and isnull(B.noso,'') not in ('','-')
-    ) XTABLE where XTABLE.KODEBRG=@KODEBRG
-    ", ["noso" => $xso, "kodebrg" => $d['KodeBrg'] ,"nopo" => $d['NoBukti'] ]);
+    $x = PurchaseOrderOtorisasi::cekHargaBarang($xso, $d['KodeBrg'], $d['NoBukti']);
     if ($x) {
 
       array_push($tempArray, $x);
@@ -1038,7 +992,7 @@ class POController extends Controller
 
 
 
-  public function updateOtorisasi (Request $req) {
+  public function updateOtorisasi (Request $req, OtorisasiService $oto) {
     $username = Auth::user()->username;
     $po = $this->headerDokumen('DBPO', $req->nobukti);
     if (!$po) {
@@ -1047,77 +1001,23 @@ class POController extends Controller
     if ((int) $po->isotorisasi1 === 1 && (int) $po->isotorisasi2 === 1) {
       return $this->tolak('PO ' . $req->nobukti . ' sudah diotorisasi.');
     }
-     $maxOL = DB::connection('SML')->select("select * from dbmenu where href ='purchaseorder'");
-    $cekOto = DB::connection('SML')->select("
-select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
-       case when B.IsOtorisasi1=1 then 1
-	 when B.IsOtorisasi2=1 then 2
-	 when B.IsOtorisasi3=1 then 3
-	 when B.IsOtorisasi4=1 then 4
-	 when B.IsOtorisasi5=1 then 5 end leveloto,e.nnet
-       from dbmenu a
-    join dbflmenu b on a.kodemenu = b.l1
-    join DBFLPASS c on b.USERID=c.USERID
-    join DBJABATAN d on c.KodeJab=d.KODEJAB
-    left outer join (select nobukti,SUM(nnetrp) nnet from DBPODET
-					 where NOBUKTI= :nobukti
-					 group by nobukti
-					 ) E on 1=1
-    where a.href ='purchaseorder' and b.USERID= :username ", ["nobukti" => $req->nobukti , "username" => $username]);
-    if (!$cekOto || !$maxOL) {
-      return $this->tolak('Jabatan/plafon otorisasi PO untuk user ' . $username . ' belum diatur.');
-    }
-    // Level 1 sudah oleh user lain: jalur dept head (> 200 jt) tidak menimpa otorisasi pertama
-    if ((int) $po->isotorisasi1 === 1 && $cekOto[0]->nnet > 200000000 && $cekOto[0]->KodeJab == '03') {
-      return $this->tolak('PO ' . $req->nobukti . ' sudah diotorisasi level 1 oleh ' . $po->otouser1 . ', menunggu otorisasi direktur.');
-    }
-    $tanggal = date('Y-m-d H:i:s');
-
-    // diatas plafon langsung tolak
-    // diatas 200jt depthead 1 oto
-    if($cekOto[0]->nnet > 200000000 && $cekOto[0]->KodeJab == '03') {
-
-      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
-       return 1;
-    }
-    if($cekOto[0]->KodeJab == 'DIR' ) {
-      // $cekOto[0]->nnet > 200000000 &&
-      if ($req->isoto1oto == 0) {
-        return 3;
-      } else {
-        $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
-         return 1;
-      }
-
+    // Endpoint ini dipakai halaman PO Stock dan PO Non Stock; hak otorisasi dicek di menu PO itu sendiri.
+    // User yang hanya punya level 2 (mis. direktur) juga boleh.
+    $menu = (int) ($po->pjasa ?? 0) === 1 ? 'pononstock' : 'purchaseorder';
+    if (!$oto->canAct($username, $menu, OtorisasiService::OTORISASI, 1) && !$oto->canAct($username, $menu, OtorisasiService::OTORISASI, 2)) {
+      return $this->tolak('Anda tidak berhak otorisasi PO');
     }
 
-
-
-
-    if ( $cekOto[0]->nnet > $cekOto[0]->PlafonOtoPO ) {
-      // if($cekOto[0]->leveloto == 1) {
-      //
-      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
-      //
-      // } else {
-      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol, OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      //   $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
-      //    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
-      // }
-      return 2;
-
-    } else {
-      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username , "maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-      $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 1, maxol = :maxol , OtoUser2= :username , TglOto2 = :tanggal where nobukti = :nobukti", ["username" => Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PO',$req->nobukti,'',0,'DBPO');
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
+    // Aturan level/plafon (dept head > 200 jt, direktur level 2, melebihi plafon) ada di handler - satu sumber
+    // dengan approve lewat HP. Kode 2 / 3 adalah jawaban lama yang dibaca JS halaman.
+    $out = $oto->handler('purchaseorder')->approveWithRules($req->nobukti, $username);
+    if ($out['result'] === 'refused') {
+      return $out['code'] ?? $this->tolak($out['message']);
     }
-
-
+    // Otorisasi lengkap (bukan baru level 1): tutup permintaan push yang masih pending + kabari peminta.
+    if ($out['result'] === 'done' && $menu === 'purchaseorder') {
+      $oto->closePending('purchaseorder', $req->nobukti, $username);
+    }
 
     return 1;
   }

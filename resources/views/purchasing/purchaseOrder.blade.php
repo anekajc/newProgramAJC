@@ -44,6 +44,7 @@
        dipindah lewat JS - lihat poPindahBar()), supaya reset ganas
        `.tb-report * { margin:0; padding:0 }` di file aslinya tidak ikut terbawa. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -143,7 +144,7 @@
     line-height: 0;
     vertical-align: middle;
   }
-  
+
   .toolbar {
     display: flex;
     align-items: center;
@@ -689,7 +690,7 @@
   }
   .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
   .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
-  
+
 /* ---------- Perataan kotak centang untuk semua tabel di halaman ini ----------
    Dikumpulkan di satu tempat supaya tabel utama maupun tabel di dalam modal
    berperilaku sama. Dua hal yang dibereskan:
@@ -4280,11 +4281,33 @@ function submitAddPr () {
 
 }
 
+// User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka).
+// PO_HREF = kunci di config/otorisasi.php dan DBMENUWEB.href. PO sampai 200 jt ke approver level 1, di atasnya level 2; yang menyetujui di HP
+// tunduk pada aturan plafon yang sama dengan di halaman ini.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi PO ' + nobukti + ' ke approver?',
+    function() {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PO_HREF, nobukti },
+        success: function(res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function(){});
+  dlgMinta.elements.root.classList.add('ajs-app-buttons');
+}
+
 function buttonOtorisasi (nobukti , isoto1) {
   console.log(nobukti , isoto1)
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaOtorisasi(nobukti);
     return;
   }
   isoto1oto = isoto1
@@ -4297,7 +4320,7 @@ function buttonOtorisasi (nobukti , isoto1) {
   $('#modalOtorisasi').modal('show');
 
   // Fetch detail data
-  let _token = $("#_token").val(); 
+  let _token = $("#_token").val();
 
   $.ajax({
     url: "{!! url('pogetdetail') !!}",
@@ -11344,7 +11367,7 @@ tempPrintStr += `</table>`;
   if(i == arrayDataPrint.length - 1){
 
     tempPrintStr += `
-  
+
 
     <div style="display: flex; font-size:10px; justify-content: flex-end; width: 92%; padding-bottom: 2px;">
       <div style="width: 5%; text-align:left;"> JUMLAH </div>

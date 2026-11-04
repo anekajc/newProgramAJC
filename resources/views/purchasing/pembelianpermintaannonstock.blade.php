@@ -45,6 +45,7 @@
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter), disamakan dengan resources/views/purchasing/pembelianpermintaanagen.blade.php. --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -454,15 +455,15 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg " style="
-        height: 30px; 
-            margin-top: 20px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
+        height: 30px;
+            margin-top: 20px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
         onclick="buttonCloseForm()">Close</button>
     </div>
       <div class="modal-body">
@@ -556,17 +557,17 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                   </td>
               </tr>
               </tbody>
-            </table>          
+            </table>
           </div>
           {{-- <div class="text-right">
             <button type="button" class="btn btn-primary" style="
-            height: 30px; 
-            margin-top: 20px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
+            height: 30px;
+            margin-top: 20px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
             onclick="submitAdd()">Submit</button>
@@ -622,7 +623,7 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
               <div class="col-md-3">
                 <select id="input_add_add_satuan" class="form-control">
                   <option value="" disabled selected>Pilih Satuan</option>
-                </select>                
+                </select>
               </div>
             </div>
             </div>
@@ -662,12 +663,12 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
                 transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddAdd()">Simpan</button>
 
                 <button type="button" id="submitAddEdit" class="btn btn-lg btn-chip-biru" style="
-                height: 30px; 
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                height: 30px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" onclick="submitAddEdit()" style="display: none;">Simpan</button>
               </div>
             </div>
@@ -833,18 +834,18 @@ table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
-            height: 30px; 
-            margin-top: 20px; 
-            padding: 4px 12px; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
+            height: 30px;
+            margin-top: 20px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
             transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
             onclick="buttonCloseForm()">Close</button>
           </div>
-        </div>  
+        </div>
       <div class="modal-body">
         <!-- <h1>Tes Modal</h1> -->
         <div class="container-fluid">
@@ -1601,10 +1602,31 @@ function renderTabelPR () {
   prAturTinggiTabel()
 }
 
+// User tanpa hak otorisasi: kirim permintaan ke semua approver (push ke HP mereka).
+// PR_HREF = kunci di config/otorisasi.php dan DBMENUWEB.href.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi PR ' + nobukti + ' ke approver?',
+    function() {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PR_HREF, nobukti },
+        success: function(res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function(){});
+  dlgMinta.elements.root.classList.add('ajs-app-buttons');
+}
+
 function buttonOtorisasi (nobukti, isOtorisasi) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaOtorisasi(nobukti);
     return;
   }
 
@@ -1640,10 +1662,39 @@ function buttonOtorisasi (nobukti, isOtorisasi) {
   });
 }
 
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke semua user ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti, isOtorisasi) {
+  if (Number(isOtorisasi) === 0) {
+    alertify.warning('Belum diotorisasi');
+    return;
+  }
+
+  alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi PR ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PR_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+}
+
 function buttonBatalOtorisasi (nobukti, isOtorisasi) {
   let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaBatalOtorisasi(nobukti, isOtorisasi);
     return;
   }
 
@@ -1652,7 +1703,7 @@ function buttonBatalOtorisasi (nobukti, isOtorisasi) {
     return;
   }
 
- 
+
 
   alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
@@ -2318,7 +2369,7 @@ function submitAddAdd () {
   let keterangannama = $("#input_add_add_keterangannama").val();
   let keterangan = $("#input_add_add_keterangan").val();
   let kodedepartemen = $("#input_add_kodedepartemen").val();
-  let isjasa = 1; 
+  let isjasa = 1;
 
   let barang = dataAddListItem.find(item => item.KODEBRG === kodebarang);
 
@@ -2507,8 +2558,8 @@ function refreshDataTableAdd (NOBUKTI = "") {
         return
       }
 
-      dataTableAdd = res 
-      dataHeaderAdd = res[0] 
+      dataTableAdd = res
+      dataHeaderAdd = res[0]
 
       let rowTable = ""
       dataTableAdd.forEach((item, i) => {
@@ -2602,12 +2653,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -2624,7 +2675,7 @@ function submitPrint (nobukti) {
 
     const now = new Date()
     const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    
+
     css = `<style type="text/css">
       body {
         font-family: sans-serif;
@@ -3096,7 +3147,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>

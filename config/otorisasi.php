@@ -2,6 +2,10 @@
 
 use App\Otorisasi\BankOtorisasi;
 use App\Otorisasi\KasOtorisasi;
+use App\Otorisasi\PembelianPermintaanAgenOtorisasi;
+use App\Otorisasi\PembelianPermintaanNonAgenOtorisasi;
+use App\Otorisasi\PembelianPermintaanNonStockOtorisasi;
+use App\Otorisasi\PurchaseOrderOtorisasi;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +31,26 @@ return [
     'bank' => [
         'label' => 'Bank',
         'handler' => BankOtorisasi::class,
+    ],
+
+    'pembelianpermintaannonagen' => [
+        'label' => 'PR Stock (Non Keagenan)',
+        'handler' => PembelianPermintaanNonAgenOtorisasi::class,
+    ],
+
+    'pembelianpermintaanagen' => [
+        'label' => 'PR (Keagenan)',
+        'handler' => PembelianPermintaanAgenOtorisasi::class,
+    ],
+
+    'pembelianpermintaannonstock' => [
+        'label' => 'PR Non Stock',
+        'handler' => PembelianPermintaanNonStockOtorisasi::class,
+    ],
+
+    'purchaseorder' => [
+        'label' => 'PO Stock',
+        'handler' => PurchaseOrderOtorisasi::class,
     ],
 
 ];
