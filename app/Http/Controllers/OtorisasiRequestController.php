@@ -31,7 +31,10 @@ class OtorisasiRequestController extends Controller
         $res = $this->oto->createRequest($req->menu, $req->nobukti, $username);
 
         return match ($res['status']) {
-            'created' => response()->json(['ok' => true, 'message' => 'Permintaan otorisasi terkirim ke approver']),
+            'created' => response()->json(['ok' => true, 'message' => $res['devices'] > 0
+                ? 'Permintaan otorisasi terkirim ke '.$res['approvers'].' approver'
+                : 'Permintaan tersimpan, tetapi belum ada approver yang mengaktifkan notifikasi di perangkatnya - mereka melihatnya di menu Notifikasi (Menunggu saya)']),
+            'noapprover' => response()->json(['ok' => false, 'message' => 'Belum ada user yang berhak otorisasi menu ini. Hubungi admin untuk memberi hak otorisasi.'], 422),
             'exists' => response()->json(['ok' => true, 'message' => 'Permintaan sudah dikirim oleh '.$res['request']->REQUSER
                 .' pada '.date('d-m-Y H:i', strtotime($res['request']->TGLREQ)).', masih menunggu approver']),
             'approved' => response()->json(['ok' => false, 'message' => 'Transaksi sudah diotorisasi'], 422),
