@@ -110,6 +110,7 @@ Route::post('/banklisttunai', [BankController::class, 'listTunai']);
 Route::get('/banklisttunaix', [BankController::class, 'listTunaiX']);
 Route::post('/banklistcustsupptunai', [BankController::class, 'listCustSuppTunai']);
 
+Route::post('/banksptemphutpiut', [BankController::class, 'spTempHutPiut']);
 
 Route::get('/banklistcustsuppumb', [BankController::class, 'listCustsuppUMB']);
 
@@ -349,6 +350,7 @@ Route::post('/bonsementaraspnobukti' , [BonSementaraController::class, 'getNoBuk
 Route::post('/bonsementaraspdetail' , [BonSementaraController::class, 'getDetailOutstanding']);
 Route::post('/bonsementaraspadd' , [BonSementaraController::class, 'spAdd']);
 Route::post('/bonsementararesetheader' , [BonSementaraController::class, 'resetHeader']);
+Route::post('/bonsementaradetailCetak' , [BonSementaraController::class, 'getDetailCetak']);
 
 
 });
