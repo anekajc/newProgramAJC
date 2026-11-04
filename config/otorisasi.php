@@ -1,5 +1,6 @@
 <?php
 
+use App\Otorisasi\BankOtorisasi;
 use App\Otorisasi\KasOtorisasi;
 
 /*
@@ -21,6 +22,11 @@ return [
     'kas' => [
         'label' => 'Kas',
         'handler' => KasOtorisasi::class,
+    ],
+
+    'bank' => [
+        'label' => 'Bank',
+        'handler' => BankOtorisasi::class,
     ],
 
 ];

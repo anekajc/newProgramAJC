@@ -498,7 +498,7 @@ where b.Kode='KAS'");
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is null
+                                     end As Bit)=0   --and E.nobukti is null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["tipe" => $req->tipe , "valas" => $req->valas ]);
     return $listData;
@@ -523,7 +523,7 @@ where b.Kode='KAS'");
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is not null
+                                     end As Bit)=0   --and E.nobukti is not null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["valas" => $req->valas ]);
     return $listData;
@@ -548,7 +548,7 @@ where b.Kode='KAS'");
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is not null
+                                     end As Bit)=0   --and E.nobukti is not null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl             " , ["valas" => $req->valas ]);
     return $listData;
@@ -574,7 +574,7 @@ where b.Kode='KAS'");
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is null
+                                     end As Bit)=0 --and E.nobukti is null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["valas" => $req->valas ]);
     return $listData;

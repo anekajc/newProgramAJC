@@ -10,6 +10,7 @@ use App\Model\DBFLMENU;
 use App\Model\NewPeriode;
 use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Services\OtorisasiService;
 
 class BankController extends Controller
 
@@ -977,12 +978,22 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
 
 
 
-  public function spOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
-    $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+  // Sebelumnya tanpa cek hak di server - kini wajib DBFLMENUWEB.IsOtorisasi1 untuk menu 'bank'.
+  // UPDATE-nya pindah ke App\Otorisasi\BankOtorisasi supaya sama dengan yang dipakai halaman
+  // approve mobile (/otorisasi/{id}). Pola yang sama dengan KasController::spOtorisasi.
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, 'bank')) {
+      return response('Anda tidak berhak otorisasi Bank', 403);
+    }
+    $res = $oto->handler('bank')->approve($req->nobukti, $username);
+    $oto->closePending('bank', $req->nobukti, $username);
     return $res;
   }
-  public function spBatalOtorisasi (Request $req) {
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    if (!$oto->canApprove(\Auth::user()->username, 'bank')) {
+      return response('Anda tidak berhak batal otorisasi Bank', 403);
+    }
     $tanggal = date('Y-m-d H:i:s');
     $res = DB::connection('SML')->update("update dbtrans set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
     app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'BANK', $req->nobukti, $req->pket, 0, 'dbtrans');
