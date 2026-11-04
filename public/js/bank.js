@@ -5726,7 +5726,7 @@ function submitOtorisasi () {
     },
     error: function (err) {
       console.log(err)
-      alertify.warning('Terjadi kesalahan silahkan refresh browser')
+      alertify.warning(err.status == 403 ? err.responseText : 'Terjadi kesalahan silahkan refresh browser')
     }
 
   })
@@ -5812,8 +5812,40 @@ function submitOtorisasi () {
 
 
 
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi Bank ' + nobukti + ' ke approver?',
+    function() {
+      $.ajax({
+        url: BANK_ROUTES.otorisasirequest,
+        type: "post",
+        data: {
+          _token: $("#_token").val(),
+          menu: 'bank',
+          nobukti
+        },
+        success: function(res) {
+          alertify.success(res.message)
+        },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function(){});
+  dlgMinta.elements.root.classList.add('ajs-app-buttons');
+}
+
 function buttonDetail (nobukti , tipe = 'detail') {
   console.log('buttonkoreksi' , nobukti )
+
+  // Tanpa hak otorisasi: tidak membuka form otorisasi, tapi kirim permintaan ke semua
+  // approver Bank (push PWA) - lihat app/Services/OtorisasiService.php.
+  if (tipe == 'otorisasi' && !Number($("#akses_isotorisasi1").val())) {
+    buttonMintaOtorisasi(nobukti)
+    return
+  }
 
 
 
@@ -6815,7 +6847,7 @@ function buttonBatalOtorisasi (nobukti) {
           },
           error: function (err) {
             console.log(err)
-            alertify.warning('Terjadi kesalahan silahkan refresh browser')
+            alertify.warning(err.status == 403 ? err.responseText : 'Terjadi kesalahan silahkan refresh browser')
           }
 
         })
