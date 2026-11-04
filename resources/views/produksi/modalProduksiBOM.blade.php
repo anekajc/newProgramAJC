@@ -582,7 +582,7 @@ function buttonDetailBom () {
 // bersangkutan (perlu, kalau dipanggil dari halaman utama modal belum tentu sedang
 // terbuka untuk KodeBOM itu), lalu sub-form Tambah Detail BOM dibuka dalam mode Edit
 // (input_BOM_detUrut terisi -> submitAddDetailBom() kirim Choice='U').
-function buttonEditDetailBom (kodebom, kodeprs, urut, kodebrg, numerator, denominator, lossratio) {
+function buttonEditDetailBom (kodebom, kodeprs, urut, kodebrg, numerator, denominator, lossratio, namabrg) {
   $('.showhide').hide();
 
   document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
@@ -596,7 +596,7 @@ function buttonEditDetailBom (kodebom, kodeprs, urut, kodebrg, numerator, denomi
   document.getElementById('input_BOM_detUrut').value = urut
   document.getElementById('input_BOM_detKodeProses').value = kodeprs
   document.getElementById('input_BOM_detKodeBarang').value = kodebrg
-  document.getElementById('input_BOM_namaBarang').value = namabrg
+  document.getElementById('input_BOM_namaBarang').value = namabrg ?? ''
   document.getElementById('input_BOM_detNumerator').value = formatAngka(Number(numerator ?? 0).toFixed(2))
   document.getElementById('input_BOM_detDenominator').value = formatAngka(Number(denominator ?? 0).toFixed(2))
   document.getElementById('input_BOM_detLossRatio').value = formatAngka(Number(lossratio ?? 0).toFixed(2))
@@ -785,7 +785,7 @@ function pbRefreshTabelDetailBom (kodeprs) {
             <td>${formatAngka(Number(item.Denominator ?? 0).toFixed(2))}</td>
             <td>${formatAngka(Number(item.LossRatio ?? 0).toFixed(2))}</td>
             <td class="text-center">
-              <button cla ss="btn-action-sm btn-action-success" type="button" onclick="buttonEditDetailBom('${kodebom}', '${item.KodePrs}', ${item.Urut}, '${item.KodeBrg}', ${item.Numerator ?? 0}, ${item.Denominator ?? 0}, ${item.LossRatio ?? 0})"><i class="bi bi-pen"></i></button>
+              <button class="btn-action-sm btn-action-success" type="button" onclick="buttonEditDetailBom('${kodebom}', '${item.KodePrs}', ${item.Urut}, '${item.KodeBrg}', ${item.Numerator ?? 0}, ${item.Denominator ?? 0}, ${item.LossRatio ?? 0}, '${String(item.NAMABRG ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><i class="bi bi-pen"></i></button>
               <button class="btn-action-sm btn-action-danger" type="button" onclick="buttonHapusDetailBom('${kodebom}', '${item.KodePrs}', ${item.Urut}, '${String(item.NAMABRG ?? item.KodeBrg ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><i class="bi bi-trash"></i></button>
             </td>
           </tr>

@@ -90,13 +90,15 @@ class ProduksiSPKController extends Controller
   public function listDetail(Request $req) {
     return DB::connection('SML')->select(
       "SELECT B.NOBUKTI, a.TANGGAL, B.URUT, B.URUTSPK, B.KODEBRG, H.NamaBrg, B.QNT, B.SATUAN, B.ISI,
+              B.KodePrs, pr.Keterangan as NamaPrs,
               msn.KodeMsn, msn.Ket, 1 as Tipe, 'Bahan Baku' as KetTipe
        FROM dbSPKDet B
        LEFT OUTER JOIN DBSPK a ON a.NOBUKTI = B.NOBUKTI
        LEFT OUTER JOIN DBMesin msn ON msn.KodeMsn = a.KodeMSN
        LEFT OUTER JOIN DBBARANG H ON H.KODEBRG = B.KODEBRG
+       LEFT OUTER JOIN DBPRoses pr ON pr.KodePrs = B.KodePrs
        WHERE B.NOBUKTI = :nobukti
-       ORDER BY B.URUT",
+       ORDER BY B.URUTSPK, B.KodePrs, B.URUT",
       ['nobukti' => $req->nobukti]
     );
   }
@@ -138,34 +140,72 @@ class ProduksiSPKController extends Controller
     return DB::connection('SML')->select('SELECT KodeMsn, Ket FROM DBMesin ORDER BY KodeMsn');
   }
 
-  // Picker "Kode BOM" (grid Barang Jadi di Tambah SPK) -- query dari senior, BUKAN difilter
-  // per KodeBrg seperti ProduksiBomController::listBom() (dipakai modul BOM sendiri, tidak
-  // disentuh di sini) -- browsing ini daftar SEMUA BOM yang sudah punya proses (DBBOMProses),
-  // KodeBrg Barang Jadi-nya BARU diketahui SETELAH KodeBOM dipilih (lihat
-  // listBarangJadiByBom() di bawah -- Kode BOM dipilih DULU, Barang Jadi otomatis ikut,
-  // BUKAN sebaliknya). @QntJ dari query asli senior di-drop -- dicek lewat
-  // INFORMATION_SCHEMA, kolom itu tidak ada di DBBOM maupun DBBOMProses.
-  public function listBomBrowse() {
-    return DB::connection('SML')->select(
-      "SELECT a.KodeBOM, a.IsDefault
-       FROM DBBOM a
-       WHERE EXISTS (SELECT 1 FROM DBBOMProses b WHERE b.KodeBOM = a.KodeBOM)
-       ORDER BY a.KodeBOM"
+  // Alur grid Barang Jadi di Tambah SPK: Kode Barang dipilih DULU (picker di bawah), baru Kode
+  // BOM milik barang itu (listBomByBarang()). Pencocokan BOM ke barang lewat kolom
+  // DBBOM.KodeBrg ATAU awalan KodeBOM (<KodeBrg>-NN) -- ada baris DBBOM lama yang KodeBrg-nya
+  // NULL (mis. 10102011780001-02), sama alasannya dengan ProduksiBomController::nextKodeBom().
+  // Cuma BOM yang sudah punya proses (DBBOMProses) yang dihitung, sama dengan syarat picker
+  // Kode BOM sebelumnya.
+  private const SQL_BOM_BARANG = "(b.KodeBrg = v.KODEBRG OR LEFT(b.KodeBOM, LEN(v.KODEBRG) + 1) = v.KODEBRG + '-')
+       AND EXISTS (SELECT 1 FROM DBBOMProses p WHERE p.KodeBOM = b.KodeBOM)";
+
+  // Picker "Kode Barang" (Barang Jadi) -- server-side DataTables (ROW_NUMBER()/COUNT() OVER(),
+  // compat level DBSMLNEW tidak dukung OFFSET/FETCH). Daftar barang Jadi/WIP aktif (filter
+  // IsBarang sama dengan panel kiri modul BOM) yang punya minimal satu BOM berproses -- barang
+  // tanpa BOM tidak ditampilkan karena tidak akan punya pilihan Kode BOM.
+  public function listBarangJadiBrowse(Request $req) {
+    $search = $req->input('search.value');
+    $start = (int) $req->input('start', 0);
+    $length = (int) $req->input('length', 10);
+
+    $where = "(v.IsBarang IN (2, 4) OR (v.IsBarang = 3 AND v.IsJasa = 0))
+              AND v.ISAKTIF = 1
+              AND EXISTS (SELECT 1 FROM DBBOM b WHERE " . self::SQL_BOM_BARANG . ")";
+    $bindings = [];
+    if (!empty($search)) {
+      $where .= ' AND (v.KODEBRG LIKE ? OR v.NAMABRG LIKE ?)';
+      $bindings = ["%{$search}%", "%{$search}%"];
+    }
+
+    $range = '';
+    $rangeBindings = [];
+    if ($length >= 0) {
+      $range = 'WHERE RowNum BETWEEN ? AND ?';
+      $rangeBindings = [$start + 1, $start + $length];
+    }
+
+    $data = DB::connection('SML')->select(
+      "SELECT KodeBrg, NamaBrg, Sat1, TotalCount FROM (
+         SELECT v.KODEBRG as KodeBrg, v.NAMABRG as NamaBrg, v.SAT1 as Sat1,
+                ROW_NUMBER() OVER (ORDER BY v.KODEBRG) as RowNum,
+                COUNT(*) OVER () as TotalCount
+         FROM vwBarang v
+         WHERE {$where}
+       ) sub
+       {$range}
+       ORDER BY RowNum",
+      array_merge($bindings, $rangeBindings)
     );
+
+    $total = $data ? (int) $data[0]->TotalCount : 0;
+
+    return response()->json([
+      "draw" => intval($req->input('draw')),
+      "recordsTotal" => $total,
+      "recordsFiltered" => $total,
+      "data" => $data,
+    ]);
   }
 
-  // Barang Jadi utk satu KodeBOM -- query dari senior (QntSaldo/Qnt2Saldo di query aslinya
-  // cuma Isnull(0,0) literal, bukan kolom beneran, jadi tidak diikutkan). Dipanggil begitu
-  // user pilih KodeBOM di spkPilihBOMSet() -- otomatis isi Kode/Nama/Satuan Barang Jadi,
-  // user tidak pilih barang secara terpisah.
-  public function listBarangJadiByBom(Request $req) {
+  // Picker "Kode BOM" -- BOM berproses milik SATU Kode Barang yang sudah dipilih di atas.
+  public function listBomByBarang(Request $req) {
     return DB::connection('SML')->select(
-      "SELECT ISNULL(a.NFix, 0) as NFix, a.ISI2, a.KODEBRG, a.SAT1, a.SAT2, a.NAMABRG
-       FROM DBBOM B
-       LEFT OUTER JOIN DBBARANG a ON b.KodeBrg = a.KODEBRG
-       WHERE a.ISAKTIF = 1 AND b.KodeBOM = :kodebom
-       ORDER BY a.KODEBRG",
-      ['kodebom' => $req->kodebom]
+      "SELECT b.KodeBOM, b.IsDefault
+       FROM DBBOM b
+       JOIN (SELECT ? AS KODEBRG) v ON 1 = 1
+       WHERE " . self::SQL_BOM_BARANG . "
+       ORDER BY b.KodeBOM",
+      [$req->kodebrg]
     );
   }
 
@@ -278,6 +318,22 @@ class ProduksiSPKController extends Controller
     return response()->json(['success' => true]);
   }
 
+  // Dropdown "Kode Proses" di form Bahan Baku -- hanya proses yang terikat ke Kode BOM milik
+  // Barang Jadi di SPK ini (DBBOMProses lewat DBSPKJD.kodeBOM). Kalau SPK punya beberapa Barang
+  // Jadi/BOM, hasilnya gabungan proses dari semuanya (tanpa duplikat). SPK yang belum punya
+  // Barang Jadi -> kosong.
+  public function listProsesSPK(Request $req) {
+    return DB::connection('SML')->select(
+      "SELECT DISTINCT bp.KodePrs, pr.Keterangan
+       FROM DBSPKJD j
+       JOIN DBBOMProses bp ON bp.KodeBOM = j.kodeBOM
+       LEFT OUTER JOIN DBPRoses pr ON pr.KodePrs = bp.KodePrs
+       WHERE j.NOBUKTI = :nobukti
+       ORDER BY bp.KodePrs",
+      ['nobukti' => $req->nobukti]
+    );
+  }
+
   // Simpan/Edit/Hapus Bahan Baku -- sp_SPK Choice='I'/'U'/'D' (body lengkap dicek lewat
   // OBJECT_DEFINITION, sama pola dengan sp_BOM/sp_BOMProses di ProduksiBomController). Header
   // sudah pasti ada duluan (dibuat spSPKJD() saat Barang Jadi pertama ditambah) -- SP cuma
@@ -313,7 +369,7 @@ class ProduksiSPKController extends Controller
         0,
         '',
         0,
-        '',
+        $req->kodeprs ?: '',
         0,
         '',
         '',
@@ -325,6 +381,15 @@ class ProduksiSPKController extends Controller
         0,
       ]
     );
+
+    // sp_SPK Choice='U' tidak menyentuh KodePrs (hanya KodeBrg/Satuan/Isi/Qnt/NoSat), jadi
+    // proses yang diganti saat Koreksi Bahan Baku di-UPDATE langsung di sini.
+    if ($req->choice === 'U' && $req->kodeprs) {
+      DB::connection('SML')->update(
+        'UPDATE DBSPKDET SET KodePrs = :kodeprs WHERE NOBUKTI = :nobukti AND URUT = :urut',
+        ['kodeprs' => $req->kodeprs, 'nobukti' => $req->nobukti, 'urut' => $req->urut]
+      );
+    }
 
     return response()->json(['success' => true]);
   }
