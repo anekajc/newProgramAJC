@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
 use App\Traits\PenjagaTransaksi;
+use App\Services\OtorisasiService;
 
 
 // use App\Http\Controllers\NewMenuController;
@@ -17,6 +18,9 @@ use App\Traits\PenjagaTransaksi;
 class PembelianPermintaanAgenController extends Controller
 {
   use PenjagaTransaksi;
+
+  // DBMENUWEB.href = kunci di config/otorisasi.php (hak otorisasi dicek lewat OtorisasiService).
+  private const HREF = 'pembelianpermintaanagen';
 
 
     public function index(Request $req)
@@ -174,7 +178,11 @@ class PembelianPermintaanAgenController extends Controller
         ];
     }
 
-  public function updateOtorisasi(Request $req) {
+  public function updateOtorisasi(Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi PR');
+    }
     $pr = $this->headerDokumen('DBPPL', $req->nobukti);
     if (!$pr) {
       return $this->tolak('PR ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
@@ -182,20 +190,23 @@ class PembelianPermintaanAgenController extends Controller
     if ((int) $pr->isotorisasi1 === 1) {
       return $this->tolak('PR ' . $req->nobukti . ' sudah diotorisasi oleh ' . $pr->otouser1 . '.');
     }
-    $tanggal = now();
-    $res = DB::connection('SML')->update(
-        "UPDATE DBPPL SET isOtorisasi1 = 1, maxol = 1, OtoUser1 = :username, TglOto1 = :tanggal WHERE NoBukti = :nobukti AND isnull(IsOtorisasi1, 0) = 0",
-        [
-            "username" => \Auth::user()->username,
-            "tanggal" => $tanggal,
-            "nobukti" => $req->nobukti
-        ]
-    );
+    // UPDATE + LoggingData('oto') ada di handler (satu sumber dengan approve lewat HP).
+    $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
+    if ($res === 0) {
+      return $this->tolak('PR ' . $req->nobukti . ' tidak dapat diotorisasi (sudah diproses atau bukan PR Keagenan).');
+    }
+    // Tutup permintaan otorisasi yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
-    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PR',$req->nobukti,'',0,'DBPPL');
     return $res;
 }
-  public function updateBatalOtorisasi(Request $req) {
+  public function updateBatalOtorisasi(Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    // Hak Batal (IsBatal) - sama dengan yang dicek tombolnya (akses_isbatal). Tanpa hak ini user memakai
+    // "Minta Batal Otorisasi" (push ke user ber-hak Batal) dari halaman.
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi PR');
+    }
     $pr = $this->headerDokumen('DBPPL', $req->nobukti);
     if (!$pr) {
       return $this->tolak('PR ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
@@ -203,22 +214,20 @@ class PembelianPermintaanAgenController extends Controller
     if ((int) $pr->isotorisasi1 !== 1) {
       return $this->tolak('PR ' . $req->nobukti . ' belum diotorisasi.');
     }
-    // PR yang sudah dibuat PO tidak boleh dibatalkan: sesudah batal otorisasi itemnya bisa
-    // diedit/dihapus, padahal DBPODET.NoPPL/UrutPPL masih menunjuk item itu.
-    $po = $this->dipakaiOleh('DBPODET', 'NoPPL', $req->nobukti);
-    if ($po) {
-      return $this->tolak('PR ' . $req->nobukti . ' sudah dibuat PO ' . $po . ', otorisasi tidak bisa dibatalkan.');
+    $handler = $oto->handler(self::HREF);
+    // PR yang sudah dibuat PO tidak boleh dibatalkan (alasan lengkap dari handler).
+    $blocker = $handler->cancelBlocker($req->nobukti);
+    if ($blocker) {
+      return $this->tolak($blocker);
     }
-    $res = DB::connection('SML')->update(
-        "UPDATE DBPPL SET isOtorisasi1 = 0, maxol = -1, OtoUser1 = '', TglOto1 = NULL WHERE NoBukti = :nobukti",
-        [
-            "nobukti" => $req->nobukti
-        ]
+    // UPDATE + LoggingData('btloto') ada di handler (satu sumber dengan batal lewat HP).
+    $res = $handler->cancelApproval($req->nobukti, $username, (string) $req->pket);
+    if ($res === 0) {
+      return $this->tolak('PR ' . $req->nobukti . ' tidak dapat dibatalkan otorisasinya (sudah diproses atau bukan PR Keagenan).');
+    }
+    // Tutup permintaan batal otorisasi yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
 
-
-    );
-
-     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PR',$req->nobukti,$req->pket,0,'DBPPL');
     return $res;
 }
   public function cekOtorisasi (Request $req) {

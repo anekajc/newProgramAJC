@@ -43,6 +43,7 @@
   }
 </style>
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -3061,7 +3062,7 @@ function buttonBatalOtorisasi (nobukti) {
     return
   }
 
-  alertify.prompt('Batal Otorisasi', "Masukkan keterangan batal otorisasi nomor  " + nobukti, "",
+  var dlgBatal = alertify.prompt('Batal Otorisasi', "Masukkan keterangan batal otorisasi nomor  " + nobukti, "",
       function(evt, value) {
         let xpket = String(value || '').trim()
 
@@ -3100,9 +3101,7 @@ function buttonBatalOtorisasi (nobukti) {
     ,function(){
       console.log('no')
     });
-
-
-
+    dlgBatal.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }
 
 function onChangeCatatan () {
@@ -4081,7 +4080,7 @@ function LockFreeOfCharge(){
     document.getElementById('input_add_add_discpersen1').disabled = true;
     document.getElementById('input_add_add_discpersen2').disabled = true;
     document.getElementById('input_add_add_discpersen3').disabled = true;
-    
+
     document.getElementById('input_add_add_harga').value = 0,00 ;
     document.getElementById('input_add_add_discrp').value = 0,00 ;
     document.getElementById('input_add_add_discpersen1').value = 0 ;
@@ -4355,15 +4354,15 @@ function onChangeNoPO () {
 }
 
 function showTableStockProyeksi () {
-  if ($("#divhargaterakhir").is(':visible')) 
+  if ($("#divhargaterakhir").is(':visible'))
   {
     $('#divhargaterakhir').hide();
   }
-  
+
   if (!$("#divStockProyeksi").is(':visible'))
   {
     $('#divStockProyeksi').show();
-  } else 
+  } else
   {
     $('#divStockProyeksi').hide();
   }
@@ -8650,7 +8649,7 @@ function submitPrint (nobukti) {
   // document.getElementById('btnLanjutTtd').onclick = () => {
   //   namaTtdCetak = document.getElementById('selectNamaTtd').value
   //   document.body.removeChild(overlay)
-  
+
 
     $.ajax({
       url: "{!! url('purchaseorderprint') !!}",
@@ -8665,12 +8664,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -9163,7 +9162,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>

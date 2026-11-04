@@ -17,7 +17,9 @@ BEGIN
         ACTUSER     varchar(50)  NULL,
         TGLACT      datetime     NULL,
         CATATAN     varchar(255) NULL,              -- alasan tolak
-        REQREAD     bit          NOT NULL DEFAULT 0  -- peminta sudah melihat hasilnya
+        REQREAD     bit          NOT NULL DEFAULT 0, -- peminta sudah melihat hasilnya
+        TIPE        char(1)      NOT NULL CONSTRAINT DF_DBREQOTORISASI_TIPE DEFAULT 'O', -- O=otorisasi, B=batal otorisasi
+        ALASAN      varchar(255) NULL               -- alasan peminta (permintaan batal)
     );
 
     CREATE INDEX IX_DBREQOTORISASI_STATUS ON dbo.DBREQOTORISASI (STATUS, MENUPATH);

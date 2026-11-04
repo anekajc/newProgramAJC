@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#2563eb" />
   <link rel="manifest" href="{!! URL::asset('manifest.webmanifest') !!}" />
   <link rel="apple-touch-icon" href="{!! URL::asset('img/pwa-192.png') !!}" />
-  <title>Otorisasi {{ $label }} {{ $request->NOBUKTI }}</title>
+  <title>{{ ($request->TIPE ?? 'O') === 'B' ? 'Batal ' : '' }}Otorisasi {{ $label }} {{ $request->NOBUKTI }}</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -59,13 +59,17 @@
 </head>
 <body>
   @php
-    $statusText = ['P' => 'Menunggu otorisasi', 'A' => 'Disetujui', 'R' => 'Ditolak', 'C' => 'Dibatalkan'];
+    // TIPE 'B' = permintaan BATAL otorisasi (hak IsBatal); selain itu permintaan otorisasi biasa.
+    $isBatal = ($request->TIPE ?? 'O') === 'B';
+    $statusText = $isBatal
+      ? ['P' => 'Menunggu persetujuan batal otorisasi', 'A' => 'Batal otorisasi disetujui', 'R' => 'Batal otorisasi ditolak', 'C' => 'Dibatalkan']
+      : ['P' => 'Menunggu otorisasi', 'A' => 'Disetujui', 'R' => 'Ditolak', 'C' => 'Dibatalkan'];
     $pending = $request->STATUS === 'P';
   @endphp
 
   <header>
     <a href="{{ url('otorisasiinbox') }}" aria-label="Kembali">&#8592;</a>
-    <h1>Otorisasi {{ $label }}<small>{{ $request->NOBUKTI }}</small></h1>
+    <h1>{{ $isBatal ? 'Batal ' : '' }}Otorisasi {{ $label }}<small>{{ $request->NOBUKTI }}</small></h1>
   </header>
 
   <main>
@@ -85,6 +89,23 @@
 
     <div class="banner" id="msg"></div>
 
+    {{-- Peringatan opsional dari handler (mis. cek harga PO terhadap SO), hanya dibaca - tidak menghalangi Setujui. --}}
+    @if ($summary && ! empty($summary['warnings']) && $pending)
+      <div class="card" style="border-color:#fcd34d;background:#fffbeb;">
+        <h2 style="color:#92400e;">Perhatian</h2>
+        @foreach ($summary['warnings'] as $warning)
+          <div class="line" style="color:#92400e;">{{ $warning }}</div>
+        @endforeach
+      </div>
+    @endif
+
+    @if ($isBatal && ! empty($request->ALASAN))
+      <div class="card">
+        <h2>Alasan batal otorisasi</h2>
+        <div style="word-break: break-word;">{{ $request->ALASAN }}</div>
+      </div>
+    @endif
+
     @if (! $summary)
       <div class="card">Data transaksi {{ $request->NOBUKTI }} tidak ditemukan.</div>
     @else
@@ -99,13 +120,18 @@
         <h2>Rincian ({{ count($summary['lines']) }})</h2>
         @foreach ($summary['lines'] as $line)
           <div class="line">
-            <div class="amt">{{ $line['Jumlah'] }}</div>
-            <div class="muted">{{ $line['Perkiraan'] }}</div>
-            @if ($line['Lawan'])<div class="muted">Lawan: {{ $line['Lawan'] }}</div>@endif
-            @if ($line['Keterangan'])<div class="muted">{{ $line['Keterangan'] }}</div>@endif
+            {{-- Kunci baris: Jumlah (tebal), Uraian atau Perkiraan, Lawan, Keterangan, Info - semuanya opsional. --}}
+            <div class="amt">{{ $line['Jumlah'] ?? '' }}</div>
+            <div class="muted">{{ $line['Uraian'] ?? $line['Perkiraan'] ?? '' }}</div>
+            @if (! empty($line['Lawan']))<div class="muted">Lawan: {{ $line['Lawan'] }}</div>@endif
+            @if (! empty($line['Keterangan']))<div class="muted">{{ $line['Keterangan'] }}</div>@endif
+            @if (! empty($line['Info']))<div class="muted">{{ $line['Info'] }}</div>@endif
           </div>
         @endforeach
-        <div class="total"><span>Total</span><span>Rp {{ number_format($summary['total'], 2, ',', '.') }}</span></div>
+        {{-- Total hanya untuk modul yang punya nilai uang; handler PR mengembalikan total null. --}}
+        @if (isset($summary['total']))
+          <div class="total"><span>Total</span><span>Rp {{ number_format($summary['total'], 2, ',', '.') }}</span></div>
+        @endif
       </div>
     @endif
 
@@ -172,7 +198,7 @@
           btnA.textContent = 'Setujui';
           return;
         }
-        if (confirm(@json('Setujui otorisasi '.$label.' '.$request->NOBUKTI.'?'))) send('approve');
+        if (confirm(@json(($isBatal ? 'Setujui batal otorisasi ' : 'Setujui otorisasi ').$label.' '.$request->NOBUKTI.'?'))) send('approve');
       });
 
       btnR.addEventListener('click', function () {
